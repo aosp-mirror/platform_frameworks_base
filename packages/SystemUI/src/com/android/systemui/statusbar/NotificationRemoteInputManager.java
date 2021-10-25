@@ -21,13 +21,10 @@ import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
-import android.app.RemoteInputHistoryItem;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
-import android.net.Uri;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -73,12 +70,10 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import dagger.Lazy;
 
@@ -111,6 +106,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     protected final FeatureFlags mFeatureFlags;
     private final UserManager mUserManager;
     private final KeyguardManager mKeyguardManager;
+    private final RemoteInputNotificationRebuilder mRebuilder;
     private final StatusBarStateController mStatusBarStateController;
     private final RemoteInputUriController mRemoteInputUriController;
     private final NotificationClickNotifier mClickNotifier;
@@ -288,6 +284,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mRebuilder = new RemoteInputNotificationRebuilder(context);  // TODO: inject?
         if (!featureFlags.isNewNotifPipelineRenderingEnabled()) {
             mRemoteInputListener = createLegacyRemoteInputLifetimeExtender(mainHandler,
                     notificationEntryManager, smartReplyController);
@@ -371,7 +368,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
             // FIXME: Don't forget to implement this in the coordinator!
             mSmartReplyController.setCallback((entry, reply) -> {
-                StatusBarNotification newSbn = rebuildNotificationForSendingSmartReply(entry, reply);
+                StatusBarNotification newSbn = mRebuilder.rebuildForSendingSmartReply(entry, reply);
                 mEntryManager.updateNotification(newSbn, null /* ranking */);
             });
         }
@@ -631,80 +628,6 @@ public class NotificationRemoteInputManager implements Dumpable {
                 && isRemoteInputActive()) {
             closeRemoteInputs();
         }
-    }
-
-    // FIXME: Move to a helper class and test separately
-    public StatusBarNotification rebuildNotificationForSendingSmartReply(NotificationEntry entry,
-            CharSequence reply) {
-        return rebuildNotificationWithRemoteInputInserted(entry, reply,
-                true /* showSpinner */,
-                null /* mimeType */, null /* uri */);
-    }
-
-    // FIXME: Move to a helper class and test separately
-    public StatusBarNotification rebuildNotificationForCanceledSmartReplies(
-            NotificationEntry entry) {
-        return rebuildNotificationWithRemoteInputInserted(entry, null /* remoteInputTest */,
-                false /* showSpinner */, null /* mimeType */, null /* uri */);
-    }
-
-    // FIXME: Move to a helper class and test separately
-    public StatusBarNotification rebuildNotificationForBasicExtension(NotificationEntry entry) {
-        CharSequence remoteInputText = entry.remoteInputText;
-        if (TextUtils.isEmpty(remoteInputText)) {
-            remoteInputText = entry.remoteInputTextWhenReset;
-        }
-        String remoteInputMimeType = entry.remoteInputMimeType;
-        Uri remoteInputUri = entry.remoteInputUri;
-        StatusBarNotification newSbn = rebuildNotificationWithRemoteInputInserted(entry,
-                remoteInputText, false /* showSpinner */, remoteInputMimeType,
-                remoteInputUri);
-        return newSbn;
-    }
-
-    // FIXME: Move to a helper class and test separately
-    @VisibleForTesting
-    StatusBarNotification rebuildNotificationWithRemoteInputInserted(NotificationEntry entry,
-            CharSequence remoteInputText, boolean showSpinner, String mimeType, Uri uri) {
-        StatusBarNotification sbn = entry.getSbn();
-
-        Notification.Builder b = Notification.Builder
-                .recoverBuilder(mContext, sbn.getNotification().clone());
-        if (remoteInputText != null || uri != null) {
-            RemoteInputHistoryItem newItem = uri != null
-                    ? new RemoteInputHistoryItem(mimeType, uri, remoteInputText)
-                    : new RemoteInputHistoryItem(remoteInputText);
-            Parcelable[] oldHistoryItems = sbn.getNotification().extras
-                    .getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
-            RemoteInputHistoryItem[] newHistoryItems = oldHistoryItems != null
-                    ? Stream.concat(
-                                Stream.of(newItem),
-                                Arrays.stream(oldHistoryItems).map(p -> (RemoteInputHistoryItem) p))
-                            .toArray(RemoteInputHistoryItem[]::new)
-                    : new RemoteInputHistoryItem[] { newItem };
-            b.setRemoteInputHistory(newHistoryItems);
-        }
-        b.setShowRemoteInputSpinner(showSpinner);
-        b.setHideSmartReplies(true);
-
-        Notification newNotification = b.build();
-
-        // Undo any compatibility view inflation
-        newNotification.contentView = sbn.getNotification().contentView;
-        newNotification.bigContentView = sbn.getNotification().bigContentView;
-        newNotification.headsUpContentView = sbn.getNotification().headsUpContentView;
-
-        return new StatusBarNotification(
-                sbn.getPackageName(),
-                sbn.getOpPkg(),
-                sbn.getId(),
-                sbn.getTag(),
-                sbn.getUid(),
-                sbn.getInitialPid(),
-                newNotification,
-                sbn.getUser(),
-                sbn.getOverrideGroupKey(),
-                sbn.getPostTime());
     }
 
     @Override
@@ -994,7 +917,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             public void setShouldManageLifetime(NotificationEntry entry,
                     boolean shouldExtend) {
                 if (shouldExtend) {
-                    StatusBarNotification newSbn = rebuildNotificationForBasicExtension(entry);
+                    StatusBarNotification newSbn = mRebuilder.rebuildForRemoteInputReply(entry);
                     entry.onRemoteInputInserted();
 
                     if (newSbn == null) {
@@ -1035,7 +958,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             public void setShouldManageLifetime(NotificationEntry entry,
                     boolean shouldExtend) {
                 if (shouldExtend) {
-                    StatusBarNotification newSbn = rebuildNotificationForCanceledSmartReplies(entry);
+                    StatusBarNotification newSbn = mRebuilder.rebuildForCanceledSmartReplies(entry);
 
                     if (newSbn == null) {
                         return;
