@@ -2117,9 +2117,6 @@ public final class DisplayManagerService extends SystemService {
             pw.println();
             mLogicalDisplayMapper.dumpLocked(pw);
 
-            pw.println();
-            mDisplayModeDirector.dump(pw);
-
             final int callbackCount = mCallbacks.size();
             pw.println();
             pw.println("Callbacks: size=" + callbackCount);
@@ -2142,6 +2139,8 @@ public final class DisplayManagerService extends SystemService {
             pw.println();
             mPersistentDataStore.dump(pw);
         }
+        pw.println();
+        mDisplayModeDirector.dump(pw);
     }
 
     private static float[] getFloatArray(TypedArray array) {
