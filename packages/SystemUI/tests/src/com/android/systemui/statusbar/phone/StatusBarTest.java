@@ -96,7 +96,7 @@ import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.ScreenPinningRequest;
-import com.android.systemui.settings.brightness.BrightnessSlider;
+import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -256,7 +256,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private PhoneStatusBarPolicy mPhoneStatusBarPolicy;
     @Mock private DemoModeController mDemoModeController;
     @Mock private Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
-    @Mock private BrightnessSlider.Factory mBrightnessSliderFactory;
+    @Mock private BrightnessSliderController.Factory mBrightnessSliderFactory;
     @Mock private UnfoldTransitionConfig mUnfoldTransitionConfig;
     @Mock private Lazy<UnfoldLightRevealOverlayAnimation> mUnfoldLightRevealOverlayAnimationLazy;
     @Mock private Lazy<StatusBarMoveFromCenterAnimationController> mMoveFromCenterAnimationLazy;
