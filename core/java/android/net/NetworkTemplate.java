@@ -47,7 +47,6 @@ import android.text.TextUtils;
 import android.util.BackupUtils;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.net.module.util.NetworkIdentityUtils;
 
@@ -149,24 +148,6 @@ public class NetworkTemplate implements Parcelable {
             default:
                 return false;
         }
-    }
-
-    private static boolean sForceAllNetworkTypes = false;
-
-    /**
-     * Results in matching against all mobile network types.
-     *
-     * <p>See {@link #matchesMobile} and {@link matchesMobileWildcard}.
-     */
-    @VisibleForTesting
-    public static void forceAllNetworkTypes() {
-        sForceAllNetworkTypes = true;
-    }
-
-    /** Resets the affect of {@link #forceAllNetworkTypes}. */
-    @VisibleForTesting
-    public static void resetForceAllNetworkTypes() {
-        sForceAllNetworkTypes = false;
     }
 
     /**
@@ -611,7 +592,7 @@ public class NetworkTemplate implements Parcelable {
             // Only metered mobile network would be matched regardless of metered filter.
             // This is used to exclude non-metered APNs, e.g. IMS. See ag/908650.
             // TODO: Respect metered filter and remove mMetered condition.
-            return (sForceAllNetworkTypes || (ident.mType == TYPE_MOBILE && ident.mMetered))
+            return (ident.mType == TYPE_MOBILE && ident.mMetered)
                     && !ArrayUtils.isEmpty(mMatchSubscriberIds)
                     && ArrayUtils.contains(mMatchSubscriberIds, ident.mSubscriberId)
                     && matchesCollapsedRatType(ident);
@@ -726,7 +707,7 @@ public class NetworkTemplate implements Parcelable {
         if (ident.mType == TYPE_WIMAX) {
             return true;
         } else {
-            return (sForceAllNetworkTypes || (ident.mType == TYPE_MOBILE && ident.mMetered))
+            return (ident.mType == TYPE_MOBILE && ident.mMetered)
                     && matchesCollapsedRatType(ident);
         }
     }
