@@ -48,9 +48,11 @@ import android.view.Gravity;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.Surface;
-import android.view.WindowInsets;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.R;
+import com.android.internal.policy.SystemBarUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -198,12 +200,13 @@ public class DisplayLayout {
         recalcInsets(res);
     }
 
-    private void recalcInsets(Resources res) {
+    @VisibleForTesting
+    void recalcInsets(Resources res) {
         computeNonDecorInsets(res, mRotation, mWidth, mHeight, mCutout, mInsetsState, mUiMode,
                 mNonDecorInsets, mHasNavigationBar);
         mStableInsets.set(mNonDecorInsets);
         if (mHasStatusBar) {
-            convertNonDecorInsetsToStableInsets(res, mStableInsets, mWidth, mHeight, mHasStatusBar);
+            convertNonDecorInsetsToStableInsets(res, mStableInsets, mCutout, mHasStatusBar);
         }
         mNavBarFrameHeight = getNavigationBarFrameHeight(res, mWidth > mHeight);
     }
@@ -323,12 +326,12 @@ public class DisplayLayout {
     /**
      * Calculates the stable insets if we already have the non-decor insets.
      */
-    private static void convertNonDecorInsetsToStableInsets(Resources res, Rect inOutInsets,
-            int displayWidth, int displayHeight, boolean hasStatusBar) {
+    private void convertNonDecorInsetsToStableInsets(Resources res, Rect inOutInsets,
+            DisplayCutout cutout, boolean hasStatusBar) {
         if (!hasStatusBar) {
             return;
         }
-        int statusBarHeight = getStatusBarHeight(displayWidth > displayHeight, res);
+        int statusBarHeight = SystemBarUtils.getStatusBarHeight(res, cutout);
         inOutInsets.top = Math.max(inOutInsets.top, statusBarHeight);
     }
 
@@ -375,35 +378,6 @@ public class DisplayLayout {
             outInsets.right += displayCutout.getSafeInsetRight();
             outInsets.bottom += displayCutout.getSafeInsetBottom();
         }
-    }
-
-    /**
-     * Calculates the stable insets without running a layout.
-     *
-     * @param displayRotation the current display rotation
-     * @param displayWidth the current display width
-     * @param displayHeight the current display height
-     * @param displayCutout the current display cutout
-     * @param outInsets the insets to return
-     */
-    static void computeStableInsets(Resources res, int displayRotation, int displayWidth,
-            int displayHeight, DisplayCutout displayCutout, InsetsState insetsState, int uiMode,
-            Rect outInsets, boolean hasNavigationBar, boolean hasStatusBar) {
-        outInsets.setEmpty();
-
-        // Navigation bar and status bar.
-        computeNonDecorInsets(res, displayRotation, displayWidth, displayHeight, displayCutout,
-                insetsState, uiMode, outInsets, hasNavigationBar);
-        convertNonDecorInsetsToStableInsets(res, outInsets, displayWidth, displayHeight,
-                hasStatusBar);
-    }
-
-    /** Retrieve the statusbar height from resources. */
-    static int getStatusBarHeight(boolean landscape, Resources res) {
-        return landscape ? res.getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height_landscape)
-                : res.getDimensionPixelSize(
-                        com.android.internal.R.dimen.status_bar_height_portrait);
     }
 
     /** Calculate the DisplayCutout for a particular display size/rotation. */

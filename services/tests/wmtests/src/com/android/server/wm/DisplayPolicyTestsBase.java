@@ -31,6 +31,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -75,13 +76,12 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
         final TestContextWrapper context = new TestContextWrapper(
                 mDisplayPolicy.getContext(), mDisplayPolicy.getCurrentUserResources());
         final TestableResources resources = context.getResourceMocker();
-        resources.addOverride(R.dimen.status_bar_height_portrait, STATUS_BAR_HEIGHT);
-        resources.addOverride(R.dimen.status_bar_height_landscape, STATUS_BAR_HEIGHT);
         resources.addOverride(R.dimen.navigation_bar_height, NAV_BAR_HEIGHT);
         resources.addOverride(R.dimen.navigation_bar_height_landscape, NAV_BAR_HEIGHT);
         resources.addOverride(R.dimen.navigation_bar_width, NAV_BAR_HEIGHT);
         resources.addOverride(R.dimen.navigation_bar_frame_height_landscape, NAV_BAR_HEIGHT);
         resources.addOverride(R.dimen.navigation_bar_frame_height, NAV_BAR_HEIGHT);
+        doReturn(STATUS_BAR_HEIGHT).when(mDisplayPolicy).getStatusBarHeightForRotation(anyInt());
         doReturn(resources.getResources()).when(mDisplayPolicy).getCurrentUserResources();
         doReturn(true).when(mDisplayPolicy).hasNavigationBar();
         doReturn(true).when(mDisplayPolicy).hasStatusBar();

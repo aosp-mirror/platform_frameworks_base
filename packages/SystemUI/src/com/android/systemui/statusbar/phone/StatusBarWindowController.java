@@ -40,6 +40,7 @@ import android.view.Surface;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -86,8 +87,7 @@ public class StatusBarWindowController {
         mResources = resources;
 
         if (mBarHeight < 0) {
-            mBarHeight = mResources.getDimensionPixelSize(
-                    com.android.internal.R.dimen.status_bar_height);
+            mBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         }
     }
 
@@ -96,12 +96,11 @@ public class StatusBarWindowController {
     }
 
     /**
-     * Rereads the status_bar_height from configuration and reapplys the current state if the height
+     * Rereads the status bar height and reapplys the current state if the height
      * is different.
      */
     public void refreshStatusBarHeight() {
-        int heightFromConfig = mResources.getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height);
+        int heightFromConfig = SystemBarUtils.getStatusBarHeight(mContext);
 
         if (mBarHeight != heightFromConfig) {
             mBarHeight = heightFromConfig;
@@ -139,29 +138,20 @@ public class StatusBarWindowController {
     private WindowManager.LayoutParams getBarLayoutParamsForRotation(int rotation) {
         int height = mBarHeight;
         if (INSETS_LAYOUT_GENERALIZATION) {
-            Rect displayBounds = mWindowManager.getCurrentWindowMetrics().getBounds();
-            int defaultAndUpsideDownHeight;
-            int theOtherHeight;
-            if (displayBounds.width() > displayBounds.height()) {
-                defaultAndUpsideDownHeight = mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.status_bar_height_landscape);
-                theOtherHeight = mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.status_bar_height_portrait);
-            } else {
-                defaultAndUpsideDownHeight = mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.status_bar_height_portrait);
-                theOtherHeight = mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.status_bar_height_landscape);
-            }
             switch (rotation) {
                 case ROTATION_UNDEFINED:
                 case Surface.ROTATION_0:
                 case Surface.ROTATION_180:
-                    height = defaultAndUpsideDownHeight;
+                    height = SystemBarUtils.getStatusBarHeightForRotation(
+                            mContext, Surface.ROTATION_0);
                     break;
                 case Surface.ROTATION_90:
+                    height = SystemBarUtils.getStatusBarHeightForRotation(
+                            mContext, Surface.ROTATION_90);
+                    break;
                 case Surface.ROTATION_270:
-                    height = theOtherHeight;
+                    height = SystemBarUtils.getStatusBarHeightForRotation(
+                            mContext, Surface.ROTATION_270);
                     break;
             }
         }
