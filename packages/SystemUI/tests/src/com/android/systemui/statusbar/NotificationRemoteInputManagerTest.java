@@ -22,14 +22,16 @@ import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.NotificationRemoteInputManager.RemoteInputActiveExtender;
-import com.android.systemui.statusbar.NotificationRemoteInputManager.RemoteInputHistoryExtender;
-import com.android.systemui.statusbar.NotificationRemoteInputManager.SmartReplyHistoryExtender;
+import com.android.systemui.statusbar.NotificationRemoteInputManager.LegacyRemoteInputLifetimeExtender.RemoteInputActiveExtender;
+import com.android.systemui.statusbar.NotificationRemoteInputManager.LegacyRemoteInputLifetimeExtender.RemoteInputHistoryExtender;
+import com.android.systemui.statusbar.NotificationRemoteInputManager.LegacyRemoteInputLifetimeExtender.SmartReplyHistoryExtender;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -76,12 +78,15 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     private RemoteInputHistoryExtender mRemoteInputHistoryExtender;
     private SmartReplyHistoryExtender mSmartReplyHistoryExtender;
     private RemoteInputActiveExtender mRemoteInputActiveExtender;
+    private TestableNotificationRemoteInputManager.FakeLegacyRemoteInputLifetimeExtender
+            mLegacyRemoteInputLifetimeExtender;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         mRemoteInputManager = new TestableNotificationRemoteInputManager(mContext,
+                mock(FeatureFlags.class),
                 mLockscreenUserManager, mSmartReplyController, mEntryManager,
                 () -> Optional.of(mock(StatusBar.class)),
                 mStateController,
@@ -151,18 +156,19 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     public void testNotificationWithRemoteInputActiveIsRemovedOnCollapse() {
         mRemoteInputActiveExtender.setShouldManageLifetime(mEntry, true /* shouldManage */);
 
-        assertEquals(mRemoteInputManager.getEntriesKeptForRemoteInputActive(),
+        assertEquals(mLegacyRemoteInputLifetimeExtender.getEntriesKeptForRemoteInputActive(),
                 Sets.newArraySet(mEntry));
 
         mRemoteInputManager.onPanelCollapsed();
 
-        assertTrue(mRemoteInputManager.getEntriesKeptForRemoteInputActive().isEmpty());
+        assertTrue(
+                mLegacyRemoteInputLifetimeExtender.getEntriesKeptForRemoteInputActive().isEmpty());
     }
 
     @Test
     public void testRebuildWithRemoteInput_noExistingInput_image() {
         Uri uri = mock(Uri.class);
-        String mimeType  = "image/jpeg";
+        String mimeType = "image/jpeg";
         String text = "image inserted";
         StatusBarNotification newSbn =
                 mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
@@ -229,7 +235,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     public void testRebuildWithRemoteInput_withExistingInput_image() {
         // Setup a notification entry with 1 remote input.
         Uri uri = mock(Uri.class);
-        String mimeType  = "image/jpeg";
+        String mimeType = "image/jpeg";
         String text = "image inserted";
         StatusBarNotification newSbn =
                 mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
@@ -266,6 +272,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
 
         TestableNotificationRemoteInputManager(
                 Context context,
+                FeatureFlags featureFlags,
                 NotificationLockscreenUserManager lockscreenUserManager,
                 SmartReplyController smartReplyController,
                 NotificationEntryManager notificationEntryManager,
@@ -278,6 +285,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 DumpManager dumpManager) {
             super(
                     context,
+                    featureFlags,
                     lockscreenUserManager,
                     smartReplyController,
                     notificationEntryManager,
@@ -297,14 +305,28 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
             mRemoteInputController = controller;
         }
 
+        @NonNull
         @Override
-        protected void addLifetimeExtenders() {
-            mRemoteInputActiveExtender = new RemoteInputActiveExtender();
-            mRemoteInputHistoryExtender = new RemoteInputHistoryExtender();
-            mSmartReplyHistoryExtender = new SmartReplyHistoryExtender();
-            mLifetimeExtenders.add(mRemoteInputHistoryExtender);
-            mLifetimeExtenders.add(mSmartReplyHistoryExtender);
-            mLifetimeExtenders.add(mRemoteInputActiveExtender);
+        protected LegacyRemoteInputLifetimeExtender createLegacyRemoteInputLifetimeExtender(
+                Handler mainHandler,
+                NotificationEntryManager notificationEntryManager,
+                SmartReplyController smartReplyController) {
+            mLegacyRemoteInputLifetimeExtender = new FakeLegacyRemoteInputLifetimeExtender();
+            return mLegacyRemoteInputLifetimeExtender;
         }
+
+        class FakeLegacyRemoteInputLifetimeExtender extends LegacyRemoteInputLifetimeExtender {
+
+            @Override
+            protected void addLifetimeExtenders() {
+                mRemoteInputActiveExtender = new RemoteInputActiveExtender();
+                mRemoteInputHistoryExtender = new RemoteInputHistoryExtender();
+                mSmartReplyHistoryExtender = new SmartReplyHistoryExtender();
+                mLifetimeExtenders.add(mRemoteInputHistoryExtender);
+                mLifetimeExtenders.add(mSmartReplyHistoryExtender);
+                mLifetimeExtenders.add(mRemoteInputActiveExtender);
+            }
+        }
+
     }
 }

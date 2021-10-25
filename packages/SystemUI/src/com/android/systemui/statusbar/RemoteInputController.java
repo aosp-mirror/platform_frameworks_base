@@ -299,6 +299,9 @@ public class RemoteInputController {
         default void onRemoteInputSent(NotificationEntry entry) {}
     }
 
+    /**
+     * This is a delegate which implements some view controller pieces of the remote input process
+     */
     public interface Delegate {
         /**
          * Activate remote input if necessary.
