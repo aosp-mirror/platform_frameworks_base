@@ -43,7 +43,7 @@ import java.util.List;
  */
 abstract class BaseMediaParceledListSlice<T> implements Parcelable {
     private static String TAG = "BaseMediaParceledListSlice";
-    private static boolean DEBUG = false;
+    private static final boolean DEBUG = false;
 
     /*
      * TODO get this number from somewhere else. For now set it to a quarter of
