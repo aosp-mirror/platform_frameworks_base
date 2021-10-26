@@ -798,12 +798,9 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         int layer = 0;
         // Place root home tasks to the bottom.
         layer = adjustRootTaskLayer(t, mTmpHomeChildren, layer);
-        adjustRootTaskLayer(t, mTmpNormalChildren, layer);
-
-        // Always on top tasks layer should higher than split divider layer so set it as start.
-        t.setLayer(mSplitScreenDividerAnchor, SPLIT_DIVIDER_LAYER);
-        layer = SPLIT_DIVIDER_LAYER + 1;
+        layer = adjustRootTaskLayer(t, mTmpNormalChildren, layer);
         adjustRootTaskLayer(t, mTmpAlwaysOnTopChildren, layer);
+        t.setLayer(mSplitScreenDividerAnchor, SPLIT_DIVIDER_LAYER);
     }
 
     /**
@@ -818,19 +815,33 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             ArrayList<WindowContainer> children, int startLayer) {
         mTmpNeedsZBoostIndexes.clear();
         final int childCount = children.size();
+        boolean hasAdjacentTask = false;
         for (int i = 0; i < childCount; i++) {
             final WindowContainer child = children.get(i);
             final TaskDisplayArea childTda = child.asTaskDisplayArea();
-
-            boolean childNeedsZBoost = childTda != null
+            final boolean childNeedsZBoost = childTda != null
                     ? childTda.childrenNeedZBoost()
                     : child.needsZBoost();
 
-            if (!childNeedsZBoost) {
-                child.assignLayer(t, startLayer++);
-            } else {
+            if (childNeedsZBoost) {
                 mTmpNeedsZBoostIndexes.add(i);
+                continue;
             }
+
+            final Task childTask = child.asTask();
+            final boolean inAdjacentTask = childTask != null
+                    && child.inMultiWindowMode()
+                    && childTask.getRootTask().getAdjacentTaskFragment() != null;
+
+            if (inAdjacentTask || child.inSplitScreenWindowingMode()) {
+                hasAdjacentTask = true;
+            } else if (hasAdjacentTask && startLayer < SPLIT_DIVIDER_LAYER) {
+                // Task on top of adjacent tasks should be higher than split divider layer so
+                // set it as start.
+                startLayer = SPLIT_DIVIDER_LAYER + 1;
+            }
+
+            child.assignLayer(t, startLayer++);
         }
 
         final int zBoostSize = mTmpNeedsZBoostIndexes.size();
