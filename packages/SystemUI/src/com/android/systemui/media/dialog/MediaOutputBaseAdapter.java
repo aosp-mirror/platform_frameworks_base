@@ -153,9 +153,7 @@ public abstract class MediaOutputBaseAdapter extends
             });
         }
 
-        void onBind(int customizedItem, boolean topMargin, boolean bottomMargin) {
-            // TODO (b/201718621): clean up method after adjustment
-        }
+        abstract void onBind(int customizedItem, boolean topMargin, boolean bottomMargin);
 
         void setSingleLineLayout(CharSequence title, boolean bFocused) {
             mTwoLineLayout.setVisibility(View.GONE);

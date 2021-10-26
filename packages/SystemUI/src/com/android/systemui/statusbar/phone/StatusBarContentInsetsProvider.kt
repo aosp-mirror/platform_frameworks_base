@@ -25,6 +25,7 @@ import android.view.DisplayCutout
 import android.view.View.LAYOUT_DIRECTION_RTL
 import android.view.WindowMetrics
 import androidx.annotation.VisibleForTesting
+import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
@@ -174,7 +175,7 @@ class StatusBarContentInsetsProvider @Inject constructor(
                 targetRotation,
                 dc,
                 context.resources.configuration.windowConfiguration.maxBounds,
-                rotatedResources.getDimensionPixelSize(R.dimen.status_bar_height),
+                SystemBarUtils.getStatusBarHeight(context),
                 minLeft,
                 minRight)
     }

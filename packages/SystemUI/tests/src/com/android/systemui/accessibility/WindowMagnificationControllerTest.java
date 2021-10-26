@@ -278,6 +278,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         when(mContext.getDisplay()).thenReturn(display);
         final Rect windowBounds = new Rect(mWindowManager.getCurrentWindowMetrics().getBounds());
         final float center = Math.min(windowBounds.exactCenterX(), windowBounds.exactCenterY());
+        final float displayWidth = windowBounds.width();
         final PointF magnifiedCenter = new PointF(center, center + 5f);
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnification(Float.NaN, magnifiedCenter.x,
@@ -295,7 +296,8 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
                 ActivityInfo.CONFIG_ORIENTATION));
 
         assertEquals(newRotation, mWindowMagnificationController.mRotation);
-        final PointF expectedCenter = new PointF(magnifiedCenter.y, magnifiedCenter.x);
+        final PointF expectedCenter = new PointF(magnifiedCenter.y,
+                displayWidth - magnifiedCenter.x);
         final PointF actualCenter = new PointF(mWindowMagnificationController.getCenterX(),
                 mWindowMagnificationController.getCenterY());
         assertEquals(expectedCenter, actualCenter);

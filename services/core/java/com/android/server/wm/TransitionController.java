@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
@@ -54,6 +55,11 @@ import java.util.function.LongConsumer;
  */
 class TransitionController {
     private static final String TAG = "TransitionController";
+
+    /** The same as legacy APP_TRANSITION_TIMEOUT_MS. */
+    private static final int DEFAULT_TIMEOUT_MS = 5000;
+    /** Less duration for CHANGE type because it does not involve app startup. */
+    private static final int CHANGE_TIMEOUT_MS = 2000;
 
     // State constants to line-up with legacy app-transition proto expectations.
     private static final int LEGACY_STATE_IDLE = 0;
@@ -121,7 +127,10 @@ class TransitionController {
         if (mCollectingTransition != null) {
             throw new IllegalStateException("Simultaneous transitions not supported yet.");
         }
-        mCollectingTransition = new Transition(type, flags, this, mAtm.mWindowManager.mSyncEngine);
+        // Distinguish change type because the response time is usually expected to be not too long.
+        final long timeoutMs = type == TRANSIT_CHANGE ? CHANGE_TIMEOUT_MS : DEFAULT_TIMEOUT_MS;
+        mCollectingTransition = new Transition(type, flags, timeoutMs, this,
+                mAtm.mWindowManager.mSyncEngine);
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Creating Transition: %s",
                 mCollectingTransition);
         dispatchLegacyAppTransitionPending();

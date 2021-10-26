@@ -5908,10 +5908,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // in WAITING state rather than READY.
         mSyncState = SYNC_STATE_WAITING_FOR_DRAW;
         requestRedrawForSync();
-
-        mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
-        mWmService.mH.sendNewMessageDelayed(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this,
-            BLAST_TIMEOUT_DURATION);
         return true;
     }
 

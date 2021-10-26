@@ -83,6 +83,8 @@ import android.view.WindowManager;
 
 import androidx.test.filters.MediumTest;
 
+import com.android.internal.policy.SystemBarUtils;
+
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
@@ -1121,6 +1123,98 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM})
+    public void testOverrideMinAspectRatioScreenOrientationNotSetThenChangedToPortrait() {
+        // In this test, the activity's orientation isn't fixed to portrait, therefore the override
+        // isn't applied.
+
+        setUpDisplaySizeWithApp(1000, 1200);
+
+        // Create a size compat activity on the same task.
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
+
+        // The per-package override should have no effect
+        assertEquals(1200, activity.getBounds().height());
+        assertEquals(1000, activity.getBounds().width());
+
+        // After changing the orientation to portrait the override should be applied.
+        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        activity.clearSizeCompatMode();
+
+        // The per-package override forces the activity into a 3:2 aspect ratio
+        assertEquals(1200, activity.getBounds().height());
+        assertEquals(1200 / ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE,
+                activity.getBounds().width(), 0.5);
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM})
+    public void testOverrideMinAspectRatioScreenOrientationLandscapeThenChangedToPortrait() {
+        // In this test, the activity's orientation isn't fixed to portrait, therefore the override
+        // isn't applied.
+
+        setUpDisplaySizeWithApp(1000, 1200);
+
+        // Create a size compat activity on the same task.
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
+
+        // The per-package override should have no effect
+        assertEquals(1200, activity.getBounds().height());
+        assertEquals(1000, activity.getBounds().width());
+
+        // After changing the orientation to portrait the override should be applied.
+        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        activity.clearSizeCompatMode();
+
+        // The per-package override forces the activity into a 3:2 aspect ratio
+        assertEquals(1200, activity.getBounds().height());
+        assertEquals(1200 / ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE,
+                activity.getBounds().width(), 0.5);
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM})
+    public void testOverrideMinAspectRatioScreenOrientationPortraitThenChangedToUnspecified() {
+        setUpDisplaySizeWithApp(1000, 1200);
+
+        // Create a size compat activity on the same task.
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
+
+        // The per-package override forces the activity into a 3:2 aspect ratio
+        assertEquals(1200, activity.getBounds().height());
+        assertEquals(1200 / ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE,
+                activity.getBounds().width(), 0.5);
+
+        // After changing the orientation to landscape the override shouldn't be applied.
+        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        activity.clearSizeCompatMode();
+
+        // The per-package override should have no effect
+        assertEquals(1200, activity.getBounds().height());
+        assertEquals(1000, activity.getBounds().width());
+    }
+
+    @Test
     @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM})
     public void testOverrideMinAspectRatioWithoutGlobalOverride() {
         // In this test, only OVERRIDE_MIN_ASPECT_RATIO_1_5 is set, which has no effect without
@@ -2128,8 +2222,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 displayContent.mWmService, mock(Session.class), new TestIWindow(), attrs, token);
         token.addWindow(statusBar);
         statusBar.setRequestedSize(displayContent.mBaseDisplayWidth,
-                displayContent.getDisplayUiContext().getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.status_bar_height));
+                SystemBarUtils.getStatusBarHeight(displayContent.getDisplayUiContext()));
 
         displayPolicy.addWindowLw(statusBar, attrs);
         displayPolicy.layoutWindowLw(statusBar, null, displayContent.mDisplayFrames);

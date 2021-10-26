@@ -212,12 +212,14 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 1);
 
         assertThat(mViewHolder.mAddIcon.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mTitleText.getText().toString()).isEqualTo(
-                mContext.getString(R.string.media_output_dialog_disconnected, TEST_DEVICE_NAME_2));
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTwoLineTitleText.getText().toString()).isEqualTo(
+                TEST_DEVICE_NAME_2);
+        assertThat(mViewHolder.mSubTitleText.getText().toString()).isEqualTo(
+                mContext.getString(R.string.media_output_dialog_disconnected));
     }
 
     @Test

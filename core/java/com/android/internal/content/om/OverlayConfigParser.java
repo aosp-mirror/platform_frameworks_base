@@ -41,6 +41,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -195,13 +196,19 @@ final class OverlayConfigParser {
     @Nullable
     static ArrayList<ParsedConfiguration> getConfigurations(
             @NonNull OverlayPartition partition, @Nullable OverlayScanner scanner,
-            @Nullable Map<String, ParsedOverlayInfo> packageManagerOverlayInfos) {
-        if (partition.getOverlayFolder() == null) {
-            return null;
+            @Nullable Map<String, ParsedOverlayInfo> packageManagerOverlayInfos,
+            @NonNull List<String> activeApexes) {
+        if (scanner != null) {
+            if (partition.getOverlayFolder() != null) {
+                scanner.scanDir(partition.getOverlayFolder());
+            }
+            for (String apex : activeApexes) {
+                scanner.scanDir(new File("/apex/" + apex + "/overlay/"));
+            }
         }
 
-        if (scanner != null) {
-            scanner.scanDir(partition.getOverlayFolder());
+        if (partition.getOverlayFolder() == null) {
+            return null;
         }
 
         final File configFile = new File(partition.getOverlayFolder(), CONFIG_DEFAULT_FILENAME);

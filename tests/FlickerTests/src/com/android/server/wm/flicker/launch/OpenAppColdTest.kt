@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -88,12 +87,12 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
     }
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun appWindowReplacesLauncherAsTopWindow() =
         super.appWindowReplacesLauncherAsTopWindow()

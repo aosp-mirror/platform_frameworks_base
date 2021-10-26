@@ -203,7 +203,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
      * Checks that the screen is locked at the start of the transition ([colorFadComponent])
      * layer is visible
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun screenLockedStart() {
         testSpec.assertLayersStart {
@@ -216,7 +216,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
      * it cannot use the regular assertion (check over time), because on lock screen neither
      * the app not the launcher are visible, and there is no top visible window.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun appWindowReplacesLauncherAsTopWindow() {
         testSpec.assertWm {

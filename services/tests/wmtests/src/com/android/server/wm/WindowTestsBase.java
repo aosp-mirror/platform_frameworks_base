@@ -789,6 +789,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
         };
     }
 
+    BLASTSyncEngine createTestBLASTSyncEngine() {
+        return new BLASTSyncEngine(mWm) {
+            @Override
+            void scheduleTimeout(SyncGroup s, long timeoutMs) {
+                // Disable timeout.
+            }
+        };
+    }
+
     /**
      * Avoids rotating screen disturbed by some conditions. It is usually used for the default
      * display that is not the instance of {@link TestDisplayContent} (it bypasses the conditions).

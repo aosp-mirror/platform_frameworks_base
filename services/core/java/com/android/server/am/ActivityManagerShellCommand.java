@@ -229,6 +229,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runBugReport(pw);
                 case "force-stop":
                     return runForceStop(pw);
+                case "stop-fgs":
+                    return runStopForegroundServices(pw);
                 case "fgs-notification-rate-limit":
                     return runFgsNotificationRateLimit(pw);
                 case "crash":
@@ -1102,6 +1104,22 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }
         mInterface.forceStopPackage(getNextArgRequired(), userId);
+        return 0;
+    }
+
+    int runStopForegroundServices(PrintWriter pw) throws RemoteException {
+        int userId = UserHandle.USER_SYSTEM;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        mInterface.makeServicesNonForeground(getNextArgRequired(), userId);
         return 0;
     }
 

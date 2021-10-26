@@ -174,7 +174,7 @@ public abstract class BatteryConsumer {
     public static final int PROCESS_STATE_BACKGROUND = 2;
     public static final int PROCESS_STATE_FOREGROUND_SERVICE = 3;
 
-    static final int PROCESS_STATE_COUNT = 4;
+    public static final int PROCESS_STATE_COUNT = 4;
 
     private static final String[] sProcessStateNames = new String[PROCESS_STATE_COUNT];
 
