@@ -1874,6 +1874,20 @@ public class CarrierConfigManager {
             "lte_plus_threshold_bandwidth_khz_int";
 
     /**
+     * The combined channel bandwidth threshold (non-inclusive) in KHz required to display the
+     * NR advanced (i.e. 5G+) data icon. It is 0 by default, meaning minimum bandwidth check is
+     * not enabled. Other factors like bands or frequency can also determine whether the NR
+     * advanced data icon is shown or not.
+     *
+     * @see #KEY_ADDITIONAL_NR_ADVANCED_BANDS_INT_ARRAY
+     * @see #KEY_NR_ADVANCED_CAPABLE_PCO_ID_INT
+     *
+     * @hide
+     */
+    public static final String KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT =
+            "nr_advanced_threshold_bandwidth_khz_int";
+
+    /**
      * The string is used to filter redundant string from PLMN Network Name that's supplied by
      * specific carrier.
      *
@@ -3536,6 +3550,17 @@ public class CarrierConfigManager {
      */
     public static final String KEY_NR_ADVANCED_CAPABLE_PCO_ID_INT =
             "nr_advanced_capable_pco_id_int";
+
+    /**
+     * Enabled NR advanced (i.e. 5G+) icon while roaming. The default value is {@code true}, meaming
+     * the same NR advanced logic used for home network will be used for roaming network as well.
+     * Set this to {@code false} will disable NR advanced icon while the device is roaming,
+     * regardless meeting NR advanced criteria or not.
+     *
+     * @hide
+     */
+    public static final String KEY_ENABLE_NR_ADVANCED_WHILE_ROAMING_BOOL =
+            "enable_nr_advanced_for_roaming_bool";
 
     /**
      * This configuration allows the framework to use user data communication to detect Idle state,
@@ -5565,6 +5590,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
+        sDefaults.putInt(KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT, 0);
         sDefaults.putIntArray(KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
                 new int[]{CARRIER_NR_AVAILABILITY_NSA, CARRIER_NR_AVAILABILITY_SA});
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
@@ -5660,6 +5686,7 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
         sDefaults.putIntArray(KEY_ADDITIONAL_NR_ADVANCED_BANDS_INT_ARRAY, new int[0]);
         sDefaults.putInt(KEY_NR_ADVANCED_CAPABLE_PCO_ID_INT, 0);
+        sDefaults.putBoolean(KEY_ENABLE_NR_ADVANCED_WHILE_ROAMING_BOOL, true);
         sDefaults.putBoolean(KEY_LTE_ENDC_USING_USER_DATA_FOR_RRC_DETECTION_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
