@@ -106,7 +106,11 @@ public final class SQLiteConnectionPool implements Closeable {
     @GuardedBy("mLock")
     private IdleConnectionHandler mIdleConnectionHandler;
 
-    private final AtomicLong mTotalExecutionTimeCounter = new AtomicLong(0);
+    // whole execution time for this connection in milliseconds.
+    private final AtomicLong mTotalStatementsTime = new AtomicLong(0);
+
+    // total statements executed by this connection
+    private final AtomicLong mTotalStatementsCount = new AtomicLong(0);
 
     // Describes what should happen to an acquired connection when it is returned to the pool.
     enum AcquiredConnectionStatus {
@@ -536,7 +540,8 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     void onStatementExecuted(long executionTimeMs) {
-        mTotalExecutionTimeCounter.addAndGet(executionTimeMs);
+        mTotalStatementsTime.addAndGet(executionTimeMs);
+        mTotalStatementsCount.incrementAndGet();
     }
 
     // Can't throw.
@@ -1117,11 +1122,20 @@ public final class SQLiteConnectionPool implements Closeable {
             printer.println("Connection pool for " + mConfiguration.path + ":");
             printer.println("  Open: " + mIsOpen);
             printer.println("  Max connections: " + mMaxConnectionPoolSize);
-            printer.println("  Total execution time: " + mTotalExecutionTimeCounter);
+            printer.println("  Total execution time (ms): " + mTotalStatementsTime);
+            printer.println("  Total statements executed: " + mTotalStatementsCount);
+            if (mTotalStatementsCount.get() > 0) {
+                // Avoid division by 0 by filtering out logs where there are no statements executed.
+                printer.println("  Average time per statement (ms): "
+                        + mTotalStatementsTime.get() / mTotalStatementsCount.get());
+            }
             printer.println("  Configuration: openFlags=" + mConfiguration.openFlags
                     + ", isLegacyCompatibilityWalEnabled=" + isCompatibilityWalEnabled
                     + ", journalMode=" + TextUtils.emptyIfNull(mConfiguration.journalMode)
                     + ", syncMode=" + TextUtils.emptyIfNull(mConfiguration.syncMode));
+            boolean isReadOnlyDatabase =
+                    (mConfiguration.openFlags & SQLiteDatabase.OPEN_READONLY) != 0;
+            printer.println("  IsReadOnlyDatabase=" + isReadOnlyDatabase);
 
             if (isCompatibilityWalEnabled) {
                 printer.println("  Compatibility WAL enabled: wal_syncmode="
@@ -1180,6 +1194,14 @@ public final class SQLiteConnectionPool implements Closeable {
                 indentedPrinter.println("<none>");
             }
         }
+    }
+
+    public long getTotalStatementsTime() {
+        return mTotalStatementsTime.get();
+    }
+
+    public long getTotalStatementsCount() {
+        return mTotalStatementsCount.get();
     }
 
     @Override

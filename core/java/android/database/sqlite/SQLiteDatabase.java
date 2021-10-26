@@ -42,11 +42,8 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Printer;
-
 import com.android.internal.util.Preconditions;
-
 import dalvik.system.CloseGuard;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -2309,6 +2306,21 @@ public final class SQLiteDatabase extends SQLiteClosable {
         return databases;
     }
 
+    @UnsupportedAppUsage
+    private static ArrayList<SQLiteConnectionPool> getActiveDatabasePools() {
+        ArrayList<SQLiteConnectionPool> connectionPools = new ArrayList<SQLiteConnectionPool>();
+        synchronized (sActiveDatabases) {
+            for (SQLiteDatabase db : sActiveDatabases.keySet()) {
+                synchronized (db.mLock) {
+                    if (db.mConnectionPoolLocked != null) {
+                        connectionPools.add(db.mConnectionPoolLocked);
+                    }
+                }
+            }
+        }
+        return connectionPools;
+    }
+
     /**
      * Dump detailed information about all open databases in the current process.
      * Used by bug report.
@@ -2317,8 +2329,45 @@ public final class SQLiteDatabase extends SQLiteClosable {
         // Use this ArraySet to collect file paths.
         final ArraySet<String> directories = new ArraySet<>();
 
-        for (SQLiteDatabase db : getActiveDatabases()) {
-            db.dump(printer, verbose, isSystem, directories);
+        // Accounting across all databases
+        long totalStatementsTimeInMs = 0;
+        long totalStatementsCount = 0;
+
+        ArrayList<SQLiteConnectionPool> activeConnectionPools = getActiveDatabasePools();
+
+        activeConnectionPools.sort(
+                (a, b) -> Long.compare(b.getTotalStatementsCount(), a.getTotalStatementsCount()));
+        for (SQLiteConnectionPool dbPool : activeConnectionPools) {
+            dbPool.dump(printer, verbose, directories);
+            totalStatementsTimeInMs += dbPool.getTotalStatementsTime();
+            totalStatementsCount += dbPool.getTotalStatementsCount();
+        }
+
+        if (totalStatementsCount > 0) {
+            // Only print when there is information available
+
+            // Sorted statements per database
+            printer.println("Statements Executed per Database");
+            for (SQLiteConnectionPool dbPool : activeConnectionPools) {
+                printer.println(
+                        "  " + dbPool.getPath() + " :    " + dbPool.getTotalStatementsCount());
+            }
+            printer.println("");
+            printer.println(
+                    "Total Statements Executed for all Active Databases: " + totalStatementsCount);
+
+            // Sorted execution time per database
+            activeConnectionPools.sort(
+                    (a, b) -> Long.compare(b.getTotalStatementsTime(), a.getTotalStatementsTime()));
+            printer.println("");
+            printer.println("");
+            printer.println("Statement Time per Database (ms)");
+            for (SQLiteConnectionPool dbPool : activeConnectionPools) {
+                printer.println(
+                        "  " + dbPool.getPath() + " :    " + dbPool.getTotalStatementsTime());
+            }
+            printer.println("Total Statements Time for all Active Databases (ms): "
+                    + totalStatementsTimeInMs);
         }
 
         // Dump DB files in the directories.
@@ -2327,15 +2376,6 @@ public final class SQLiteDatabase extends SQLiteClosable {
             Arrays.sort(dirs);
             for (String dir : dirs) {
                 dumpDatabaseDirectory(printer, new File(dir), isSystem);
-            }
-        }
-    }
-
-    private void dump(Printer printer, boolean verbose, boolean isSystem, ArraySet directories) {
-        synchronized (mLock) {
-            if (mConnectionPoolLocked != null) {
-                printer.println("");
-                mConnectionPoolLocked.dump(printer, verbose, directories);
             }
         }
     }
