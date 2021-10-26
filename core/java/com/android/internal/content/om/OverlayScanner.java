@@ -47,23 +47,38 @@ public class OverlayScanner {
         public final boolean isStatic;
         public final int priority;
         public final File path;
+        @Nullable public final File preInstalledApexPath;
 
         public ParsedOverlayInfo(String packageName, String targetPackageName,
-                int targetSdkVersion, boolean isStatic, int priority, File path) {
+                int targetSdkVersion, boolean isStatic, int priority, File path,
+                @Nullable File preInstalledApexPath) {
             this.packageName = packageName;
             this.targetPackageName = targetPackageName;
             this.targetSdkVersion = targetSdkVersion;
             this.isStatic = isStatic;
             this.priority = priority;
             this.path = path;
+            this.preInstalledApexPath = preInstalledApexPath;
         }
 
         @Override
         public String toString() {
             return getClass().getSimpleName() + String.format("{packageName=%s"
                             + ", targetPackageName=%s, targetSdkVersion=%s, isStatic=%s"
-                            + ", priority=%s, path=%s}",
-                    packageName, targetPackageName, targetSdkVersion, isStatic, priority, path);
+                            + ", priority=%s, path=%s, preInstalledApexPath=%s}",
+                    packageName, targetPackageName, targetSdkVersion, isStatic,
+                    priority, path, preInstalledApexPath);
+        }
+
+        /**
+         * Retrieves the path of the overlay in its original installation partition.
+         *
+         * An Overlay in an APEX, which is an update of an APEX in a given partition,
+         * is considered as belonging to that partition.
+         */
+        @NonNull
+        public File getOriginalPartitionPath() {
+            return preInstalledApexPath != null ? preInstalledApexPath : path;
         }
     }
 
@@ -138,6 +153,6 @@ public class OverlayScanner {
         return apkLite.getTargetPackageName() == null ? null :
                 new ParsedOverlayInfo(apkLite.getPackageName(), apkLite.getTargetPackageName(),
                         apkLite.getTargetSdkVersion(), apkLite.isOverlayIsStatic(),
-                        apkLite.getOverlayPriority(), new File(apkLite.getPath()));
+                        apkLite.getOverlayPriority(), new File(apkLite.getPath()), null);
     }
 }
