@@ -839,12 +839,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     UPDATE_FOCUS_WILL_PLACE_SURFACES, false /*updateInputWindows*/);
         }
 
-        // Initialize state of exiting tokens.
-        for (int displayNdx = 0; displayNdx < mChildren.size(); ++displayNdx) {
-            final DisplayContent displayContent = mChildren.get(displayNdx);
-            displayContent.setExitingTokensHasVisible(false);
-        }
-
         mHoldScreen = null;
         mScreenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         mUserActivityTimeout = -1;
@@ -949,12 +943,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 win.destroySurfaceUnchecked();
             } while (i > 0);
             mWmService.mDestroySurface.clear();
-        }
-
-        // Time to remove any exiting tokens?
-        for (int displayNdx = mChildren.size() - 1; displayNdx >= 0; --displayNdx) {
-            final DisplayContent displayContent = mChildren.get(displayNdx);
-            displayContent.removeExistingTokensIfPossible();
         }
 
         for (int displayNdx = 0; displayNdx < mChildren.size(); ++displayNdx) {
