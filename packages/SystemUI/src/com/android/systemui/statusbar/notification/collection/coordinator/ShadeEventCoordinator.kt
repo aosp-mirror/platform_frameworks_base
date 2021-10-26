@@ -29,6 +29,7 @@ import javax.inject.Inject
  * A coordinator which provides callbacks to a view surfaces for various events relevant to the
  * shade, such as when the user removes a notification, or when the shade is emptied.
  */
+// TODO(b/204468557): Move to @CoordinatorScope
 @SysUISingleton
 class ShadeEventCoordinator @Inject internal constructor(
     private val mLogger: ShadeEventCoordinatorLogger
