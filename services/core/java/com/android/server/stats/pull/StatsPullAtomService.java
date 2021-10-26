@@ -2061,7 +2061,7 @@ public class StatsPullAtomService extends SystemService {
         if (info == null) {
             return StatsManager.PULL_SKIP;
         }
-        pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, info.getTimeStamp(),
+        pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, info.getTimestampMillis(),
                 info.getBluetoothStackState(), info.getControllerTxTimeMillis(),
                 info.getControllerRxTimeMillis(), info.getControllerIdleTimeMillis(),
                 info.getControllerEnergyUsed()));

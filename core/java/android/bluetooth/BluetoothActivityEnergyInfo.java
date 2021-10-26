@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
@@ -167,7 +168,7 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
     /**
      * @return timestamp (real time elapsed in milliseconds since boot) of record creation
      */
-    public long getTimeStamp() {
+    public @ElapsedRealtimeLong long getTimestampMillis() {
         return mTimestamp;
     }
 
@@ -189,7 +190,7 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
     }
 
     /**
-     * @return true if the record is valid
+     * @return true if the record Tx time, Rx time, and Idle time are more than 0.
      */
     public boolean isValid() {
         return ((mControllerTxTimeMs >= 0) && (mControllerRxTimeMs >= 0)
