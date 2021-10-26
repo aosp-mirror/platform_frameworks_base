@@ -456,4 +456,6 @@ interface IAudioService {
     void registerSpatializerOutputCallback(in ISpatializerOutputCallback cb);
 
     void unregisterSpatializerOutputCallback(in ISpatializerOutputCallback cb);
+
+    boolean isVolumeFixed();
 }
