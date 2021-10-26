@@ -42,6 +42,7 @@ import android.util.IntArray;
 import android.util.Slog;
 import android.util.apk.ApkSignatureVerifier;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageHelper;
 import com.android.server.LocalServices;
 import com.android.server.pm.parsing.PackageParser2;
@@ -78,6 +79,15 @@ final class PackageSessionVerifier {
         mApexManager = apexManager;
         mPackageParserSupplier = packageParserSupplier;
         mHandler = new Handler(looper);
+    }
+
+    @VisibleForTesting
+    PackageSessionVerifier() {
+        mContext = null;
+        mPm = null;
+        mApexManager = null;
+        mPackageParserSupplier = null;
+        mHandler = null;
     }
 
     /**
@@ -181,7 +191,8 @@ final class PackageSessionVerifier {
     /**
      * Stores staged-sessions for checking package overlapping and rollback conflicts.
      */
-    private void storeSession(StagingManager.StagedSession session) {
+    @VisibleForTesting
+    void storeSession(StagingManager.StagedSession session) {
         if (session != null) {
             mStagedSessions.add(session);
         }
@@ -453,7 +464,8 @@ final class PackageSessionVerifier {
     /**
      * Fails this rebootless APEX session if the same package name found in any staged sessions.
      */
-    private void checkRebootlessApex(PackageInstallerSession session)
+    @VisibleForTesting
+    void checkRebootlessApex(PackageInstallerSession session)
             throws PackageManagerException {
         if (session.isStaged() || !session.isApexSession()) {
             return;
@@ -483,13 +495,16 @@ final class PackageSessionVerifier {
      * supports checkpoint.
      */
     private void checkActiveSessions() throws PackageManagerException {
-        final boolean supportsCheckpoint;
         try {
-            supportsCheckpoint = PackageHelper.getStorageManager().supportsCheckpoint();
+            checkActiveSessions(PackageHelper.getStorageManager().supportsCheckpoint());
         } catch (RemoteException e) {
             throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                     "Can't query fs-checkpoint status : " + e);
         }
+    }
+
+    @VisibleForTesting
+    void checkActiveSessions(boolean supportsCheckpoint) throws PackageManagerException {
         int activeSessions = 0;
         for (StagingManager.StagedSession stagedSession : mStagedSessions) {
             if (stagedSession.isDestroyed() || stagedSession.isInTerminalState()) {
@@ -509,7 +524,8 @@ final class PackageSessionVerifier {
      * downgrade of SDK extension which in turn will result in dependency violation of other
      * non-rollback sessions.
      */
-    private void checkRollbacks(StagingManager.StagedSession session)
+    @VisibleForTesting
+    void checkRollbacks(StagingManager.StagedSession session)
             throws PackageManagerException {
         for (StagingManager.StagedSession stagedSession : mStagedSessions) {
             if (stagedSession.isDestroyed() || stagedSession.isInTerminalState()) {
@@ -546,7 +562,8 @@ final class PackageSessionVerifier {
      * @param child The child session whose package name will be checked.
      *              This will equal to {@code parent} for a single-package session.
      */
-    private void checkOverlaps(StagingManager.StagedSession parent,
+    @VisibleForTesting
+    void checkOverlaps(StagingManager.StagedSession parent,
             StagingManager.StagedSession child) throws PackageManagerException {
         final String packageName = child.getPackageName();
         if (packageName == null) {
