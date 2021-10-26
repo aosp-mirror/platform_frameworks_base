@@ -295,6 +295,7 @@ java_defaults {
     srcs: [
         ":framework-non-updatable-sources",
         "core/java/**/*.logtags",
+        ":apex-info-list",
     ],
     aidl: {
         generate_get_transaction_name: true,

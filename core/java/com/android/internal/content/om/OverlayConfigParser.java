@@ -40,6 +40,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Responsible for parsing configurations of Runtime Resource Overlays that control mutability,
@@ -192,13 +193,19 @@ final class OverlayConfigParser {
      */
     @Nullable
     static ArrayList<ParsedConfiguration> getConfigurations(
-            @NonNull OverlayPartition partition, @Nullable OverlayScanner scanner) {
-        if (partition.getOverlayFolder() == null) {
-            return null;
+            @NonNull OverlayPartition partition, @Nullable OverlayScanner scanner,
+            @NonNull List<String> activeApexes) {
+        if (scanner != null) {
+            if (partition.getOverlayFolder() != null) {
+                scanner.scanDir(partition.getOverlayFolder());
+            }
+            for (String apex : activeApexes) {
+                scanner.scanDir(new File("/apex/" + apex + "/overlay/"));
+            }
         }
 
-        if (scanner != null) {
-            scanner.scanDir(partition.getOverlayFolder());
+        if (partition.getOverlayFolder() == null) {
+            return null;
         }
 
         final File configFile = new File(partition.getOverlayFolder(), CONFIG_DEFAULT_FILENAME);
