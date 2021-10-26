@@ -3,11 +3,9 @@ hackbod@google.com
 jsharkey@android.com
 jsharkey@google.com
 narayan@google.com
-patb@google.com
 svetoslavganov@android.com
 svetoslavganov@google.com
-toddke@android.com
-toddke@google.com
+include /PACKAGE_MANAGER_OWNERS
 
 # apex support
 per-file ApexManager.java = dariofreni@google.com, ioffe@google.com, olilan@google.com
