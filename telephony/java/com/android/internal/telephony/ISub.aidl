@@ -304,4 +304,13 @@ interface ISub {
     int setDeviceToDeviceStatusSharing(int sharing, int subId);
 
     int setDeviceToDeviceStatusSharingContacts(String contacts, int subscriptionId);
+
+    String getPhoneNumber(int subId, int source,
+            String callingPackage, String callingFeatureId);
+
+    String getPhoneNumberFromFirstAvailableSource(int subId,
+            String callingPackage, String callingFeatureId);
+
+    void setPhoneNumber(int subId, int source, String number,
+            String callingPackage, String callingFeatureId);
 }
