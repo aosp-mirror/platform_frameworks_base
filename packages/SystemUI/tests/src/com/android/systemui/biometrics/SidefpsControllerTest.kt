@@ -18,6 +18,7 @@ package com.android.systemui.biometrics
 
 import android.graphics.Rect
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_UNKNOWN
 import android.hardware.biometrics.SensorProperties
 import android.hardware.display.DisplayManager
@@ -182,7 +183,16 @@ class SidefpsControllerTest : SysuiTestCase() {
 
     @Test
     fun testIgnoredForKeyguard() {
-        overlayController.show(SENSOR_ID, REASON_AUTH_KEYGUARD)
+        testIgnoredFor(REASON_AUTH_KEYGUARD)
+    }
+
+    @Test
+    fun testIgnoredForSettings() {
+        testIgnoredFor(REASON_AUTH_SETTINGS)
+    }
+
+    private fun testIgnoredFor(reason: Int) {
+        overlayController.show(SENSOR_ID, reason)
         executor.runAllReady()
 
         verify(windowManager, never()).addView(any(), any())
