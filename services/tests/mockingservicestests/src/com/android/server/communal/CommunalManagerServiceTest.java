@@ -18,34 +18,38 @@ package com.android.server.communal;
 
 import static android.content.pm.ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.communal.CommunalManagerService.ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT;
 import static com.android.server.wm.ActivityInterceptorCallback.COMMUNAL_MODE_ORDERED_ID;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
 
+import android.Manifest;
 import android.app.KeyguardManager;
 import android.app.communal.ICommunalManager;
-import android.content.ContentResolver;
-import android.content.Context;
+import android.app.compat.CompatChanges;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
+import android.test.mock.MockContentResolver;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.wm.ActivityInterceptorCallback;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -83,32 +87,35 @@ public class CommunalManagerServiceTest {
     private ActivityTaskManagerInternal mAtmInternal;
     @Mock
     private KeyguardManager mKeyguardManager;
-    @Mock
-    private Context mMockContext;
-    @Mock
-    private ContentResolver mContentResolver;
 
     private ActivityInterceptorCallback mActivityInterceptorCallback;
     private ActivityInfo mAInfo;
     private ICommunalManager mBinder;
+    private ContextWrapper mContextSpy;
 
     @Before
     public final void setUp() {
         mMockingSession = mockitoSession()
                 .initMocks(this)
-                .mockStatic(LocalServices.class)
-                .mockStatic(ServiceManager.class)
-                .mockStatic(Settings.Secure.class)
+                .mockStatic(CompatChanges.class)
                 .mockStatic(KeyguardManager.class)
                 .strictness(Strictness.WARN)
                 .startMocking();
 
-        when(mMockContext.getContentResolver()).thenReturn(mContentResolver);
-        when(mMockContext.getSystemService(KeyguardManager.class)).thenReturn(mKeyguardManager);
-        doReturn(mAtmInternal).when(() -> LocalServices.getService(
-                ActivityTaskManagerInternal.class));
+        mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
+        MockContentResolver cr = new MockContentResolver(mContextSpy);
+        cr.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
+        when(mContextSpy.getContentResolver()).thenReturn(cr);
 
-        mService = new CommunalManagerService(mMockContext);
+        when(mContextSpy.getSystemService(KeyguardManager.class)).thenReturn(mKeyguardManager);
+        addLocalServiceMock(ActivityTaskManagerInternal.class, mAtmInternal);
+
+        doNothing().when(mContextSpy).enforceCallingPermission(
+                eq(Manifest.permission.WRITE_COMMUNAL_STATE), anyString());
+
+        mService = new CommunalManagerService(mContextSpy);
+        spyOn(mService);
+        doNothing().when(mService).publishBinderServices();
         mService.onStart();
 
         ArgumentCaptor<ActivityInterceptorCallback> activityInterceptorCaptor =
@@ -117,11 +124,7 @@ public class CommunalManagerServiceTest {
                 activityInterceptorCaptor.capture());
         mActivityInterceptorCallback = activityInterceptorCaptor.getValue();
 
-        ArgumentCaptor<IBinder> binderCaptor = ArgumentCaptor.forClass(IBinder.class);
-        verify(() -> ServiceManager.addService(eq(Context.COMMUNAL_MANAGER_SERVICE),
-                binderCaptor.capture(),
-                anyBoolean(), anyInt()));
-        mBinder = ICommunalManager.Stub.asInterface(binderCaptor.getValue());
+        mBinder = mService.getBinderServiceInstance();
 
         mAInfo = new ActivityInfo();
         mAInfo.applicationInfo = new ApplicationInfo();
@@ -130,9 +133,18 @@ public class CommunalManagerServiceTest {
 
     @After
     public void tearDown() {
+        FakeSettingsProvider.clearSettingsProvider();
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
+    }
+
+    /**
+     * Creates a mock and registers it to {@link LocalServices}.
+     */
+    private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {
+        LocalServices.removeServiceForTest(clazz);
+        LocalServices.addService(clazz, mock);
     }
 
     private ActivityInterceptorCallback.ActivityInterceptorInfo buildActivityInfo(Intent intent) {
@@ -152,9 +164,8 @@ public class CommunalManagerServiceTest {
     }
 
     private void allowPackages(String packages) {
-        doReturn(packages).when(
-                () -> Settings.Secure.getStringForUser(mContentResolver,
-                        Settings.Secure.COMMUNAL_MODE_PACKAGES, UserHandle.USER_SYSTEM));
+        Settings.Secure.putStringForUser(mContextSpy.getContentResolver(),
+                Settings.Secure.COMMUNAL_MODE_PACKAGES, packages, UserHandle.USER_SYSTEM);
         mService.updateSelectedApps();
     }
 
@@ -185,51 +196,73 @@ public class CommunalManagerServiceTest {
     }
 
     @Test
-    public void testIntercept_locked_communalOn_appNotEnabled_showWhenLockedOff()
+    public void testIntercept_locked_communalOn_appNotEnabled_showWhenLockedOff_allowlistEnabled()
             throws RemoteException {
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         mBinder.setCommunalViewShowing(true);
         when(mKeyguardManager.isKeyguardLocked()).thenReturn(true);
+        when(CompatChanges.isChangeEnabled(ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT, TEST_PACKAGE_NAME,
+                UserHandle.SYSTEM)).thenReturn(true);
         mAInfo.flags = 0;
-        // TODO(b/191994709): Fix this assertion once we properly intercept activities.
-        assertThat(mActivityInterceptorCallback.intercept(buildActivityInfo(intent))).isNull();
+        assertThat(mActivityInterceptorCallback.intercept(buildActivityInfo(intent))).isNotNull();
     }
 
     @Test
-    public void testIntercept_locked_communalOn_appNotEnabled_showWhenLockedOn()
+    public void testIntercept_locked_communalOn_appNotEnabled_showWhenLockedOn_allowlistEnabled()
             throws RemoteException {
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         mBinder.setCommunalViewShowing(true);
         when(mKeyguardManager.isKeyguardLocked()).thenReturn(true);
+        when(CompatChanges.isChangeEnabled(ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT, TEST_PACKAGE_NAME,
+                UserHandle.SYSTEM)).thenReturn(true);
         mAInfo.flags = FLAG_SHOW_WHEN_LOCKED;
 
         allowPackages("package1,package2");
-        // TODO(b/191994709): Fix this assertion once we properly intercept activities.
-        assertThat(mActivityInterceptorCallback.intercept(buildActivityInfo(intent))).isNull();
+        assertThat(mActivityInterceptorCallback.intercept(buildActivityInfo(intent))).isNotNull();
     }
 
     @Test
-    public void testIntercept_locked_communalOn_appEnabled_showWhenLockedOff()
+    public void testIntercept_locked_communalOn_appEnabled_showWhenLockedOff_allowlistEnabled()
             throws RemoteException {
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         mBinder.setCommunalViewShowing(true);
         when(mKeyguardManager.isKeyguardLocked()).thenReturn(true);
+        when(CompatChanges.isChangeEnabled(ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT, TEST_PACKAGE_NAME,
+                UserHandle.SYSTEM)).thenReturn(true);
         mAInfo.flags = 0;
 
         allowPackages(TEST_PACKAGE_NAME);
-        // TODO(b/191994709): Fix this assertion once we properly intercept activities.
+        // TODO(b/191994709): Fix this assertion once we start checking showWhenLocked
         assertThat(mActivityInterceptorCallback.intercept(buildActivityInfo(intent))).isNull();
     }
 
     @Test
-    public void testIntercept_locked_communalOn_appEnabled_showWhenLockedOn()
+    public void testIntercept_locked_communalOn_appEnabled_showWhenLockedOn_allowlistEnabled()
             throws RemoteException {
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         mBinder.setCommunalViewShowing(true);
         when(mKeyguardManager.isKeyguardLocked()).thenReturn(true);
+        when(CompatChanges.isChangeEnabled(ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT, TEST_PACKAGE_NAME,
+                UserHandle.SYSTEM)).thenReturn(true);
+
         mAInfo.flags = FLAG_SHOW_WHEN_LOCKED;
 
         allowPackages(TEST_PACKAGE_NAME);
         assertThat(mActivityInterceptorCallback.intercept(buildActivityInfo(intent))).isNull();
+    }
+
+    @Test
+    public void testIntercept_locked_communalOn_appEnabled_showWhenLockedOn_allowlistDisabled()
+            throws RemoteException {
+        final Intent intent = new Intent(Intent.ACTION_MAIN);
+        mBinder.setCommunalViewShowing(true);
+        when(mKeyguardManager.isKeyguardLocked()).thenReturn(true);
+        when(CompatChanges.isChangeEnabled(ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT, TEST_PACKAGE_NAME,
+                UserHandle.SYSTEM)).thenReturn(false);
+
+        mAInfo.flags = FLAG_SHOW_WHEN_LOCKED;
+
+        allowPackages(TEST_PACKAGE_NAME);
+        assertThat(mActivityInterceptorCallback.intercept(buildActivityInfo(intent))).isNotNull();
     }
 }

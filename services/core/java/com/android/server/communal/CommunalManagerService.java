@@ -23,14 +23,20 @@ import static com.android.server.wm.ActivityInterceptorCallback.COMMUNAL_MODE_OR
 import android.Manifest;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.TestApi;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.communal.ICommunalManager;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.Overridable;
 import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
@@ -38,6 +44,8 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LaunchAfterAuthenticationActivity;
@@ -55,6 +63,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * System service for handling Communal Mode state.
  */
 public final class CommunalManagerService extends SystemService {
+    private static final String TAG = CommunalManagerService.class.getSimpleName();
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final String DELIMITER = ",";
     private final Context mContext;
     private final ActivityTaskManagerInternal mAtmInternal;
@@ -63,13 +73,37 @@ public final class CommunalManagerService extends SystemService {
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Set<String> mEnabledApps = new HashSet<>();
     private final SettingsObserver mSettingsObserver;
+    private final BinderService mBinderService;
+
+    /**
+     * This change id is used to annotate packages which are allowed to run in communal mode.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT = 200324021L;
+
+    /**
+     * This change id is used to annotate packages which can run in communal mode by default,
+     * without requiring user opt-in.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long ALLOW_COMMUNAL_MODE_BY_DEFAULT = 203673428L;
 
     private final ActivityInterceptorCallback mActivityInterceptorCallback =
             new ActivityInterceptorCallback() {
                 @Nullable
                 @Override
                 public Intent intercept(ActivityInterceptorInfo info) {
-                    if (isActivityAllowed(info.aInfo)) {
+                    if (!shouldIntercept(info.aInfo)) {
                         return null;
                     }
 
@@ -99,14 +133,24 @@ public final class CommunalManagerService extends SystemService {
         mSettingsObserver = new SettingsObserver();
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
+        mBinderService = new BinderService();
+    }
+
+    @VisibleForTesting
+    BinderService getBinderServiceInstance() {
+        return mBinderService;
+    }
+
+    @VisibleForTesting
+    void publishBinderServices() {
+        publishBinderService(Context.COMMUNAL_MANAGER_SERVICE, mBinderService);
     }
 
     @Override
     public void onStart() {
-        publishBinderService(Context.COMMUNAL_MANAGER_SERVICE, new BinderService());
+        publishBinderServices();
         mAtmInternal.registerActivityStartInterceptor(COMMUNAL_MODE_ORDERED_ID,
                 mActivityInterceptorCallback);
-
 
         updateSelectedApps();
         mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
@@ -128,20 +172,31 @@ public final class CommunalManagerService extends SystemService {
         }
     }
 
-    private boolean isActivityAllowed(ActivityInfo activityInfo) {
-        return true;
-        // TODO(b/191994709): Uncomment the lines below once Dreams and Assistant have been fixed.
-//        if (!mCommunalViewIsShowing.get() || !mKeyguardManager.isKeyguardLocked()) return true;
-//
-//        // If the activity doesn't have showWhenLocked enabled, disallow the activity.
-//        final boolean showWhenLocked =
-//                (activityInfo.flags & ActivityInfo.FLAG_SHOW_WHEN_LOCKED) != 0;
-//        if (!showWhenLocked) {
-//            return false;
-//        }
-//
-//        // Check the cached user preferences to see if the user has allowed this app.
-//        return mEnabledApps.contains(activityInfo.applicationInfo.packageName);
+    private boolean isAppAllowed(ApplicationInfo appInfo) {
+        if (isChangeEnabled(ALLOW_COMMUNAL_MODE_BY_DEFAULT, appInfo)) {
+            return true;
+        }
+
+        if (appInfo.isSystemApp() || appInfo.isUpdatedSystemApp()) {
+            if (DEBUG) Slog.d(TAG, "Allowlisted as system app: " + appInfo.packageName);
+            return isAppEnabledByUser(appInfo);
+        }
+
+        return isChangeEnabled(ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT, appInfo)
+                && isAppEnabledByUser(appInfo);
+    }
+
+    private boolean isAppEnabledByUser(ApplicationInfo appInfo) {
+        return mEnabledApps.contains(appInfo.packageName);
+    }
+
+    private boolean isChangeEnabled(long changeId, ApplicationInfo appInfo) {
+        return CompatChanges.isChangeEnabled(changeId, appInfo.packageName, UserHandle.SYSTEM);
+    }
+
+    private boolean shouldIntercept(ActivityInfo activityInfo) {
+        if (!mCommunalViewIsShowing.get() || !mKeyguardManager.isKeyguardLocked()) return false;
+        return !isAppAllowed(activityInfo.applicationInfo);
     }
 
     private final class SettingsObserver extends ContentObserver {
