@@ -4109,15 +4109,36 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         conditions a) above.
      *         Multi-windowing mode will be exited if {@code true} is returned.
      */
-    boolean canShowWhenLocked() {
-        if (!inPinnedWindowingMode() && (mShowWhenLocked || containsShowWhenLockedWindow())) {
+    private static boolean canShowWhenLocked(ActivityRecord r) {
+        if (r == null || r.getTaskFragment() == null) {
+            return false;
+        }
+        if (!r.inPinnedWindowingMode() && (r.mShowWhenLocked || r.containsShowWhenLockedWindow())) {
             return true;
-        } else if (mInheritShownWhenLocked) {
-            final ActivityRecord r = task.getActivityBelow(this);
-            return r != null && !r.inPinnedWindowingMode() && (r.mShowWhenLocked
-                    || r.containsShowWhenLockedWindow());
+        } else if (r.mInheritShownWhenLocked) {
+            final ActivityRecord activity = r.getTaskFragment().getActivityBelow(r);
+            return activity != null && !activity.inPinnedWindowingMode()
+                    && (activity.mShowWhenLocked || activity.containsShowWhenLockedWindow());
         } else {
             return false;
+        }
+    }
+
+    /**
+     *  Determines if the activity can show while lock-screen is displayed. System displays
+     *  activities while lock-screen is displayed only if all activities
+     *  {@link #canShowWhenLocked(ActivityRecord)}.
+     *  @see #canShowWhenLocked(ActivityRecord)
+     */
+    boolean canShowWhenLocked() {
+        final TaskFragment taskFragment = getTaskFragment();
+        if (taskFragment != null && taskFragment.getAdjacentTaskFragment() != null
+                && taskFragment.isEmbedded()) {
+            final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
+            final ActivityRecord r = adjacentTaskFragment.getTopNonFinishingActivity();
+            return canShowWhenLocked(this) && canShowWhenLocked(r);
+        } else {
+            return canShowWhenLocked(this);
         }
     }
 
