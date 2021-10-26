@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.LoadedApk;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -554,7 +555,7 @@ public class AppWidgetHostView extends FrameLayout {
             }
             // Prepare a local reference to the remote Context so we're ready to
             // inflate any requested LayoutParams.
-            mRemoteContext = getRemoteContext();
+            mRemoteContext = getRemoteContextEnsuringCorrectCachedApkPath();
 
             int layoutId = rvToApply.getLayoutId();
             if (rvToApply.canRecycleView(mView)) {
@@ -616,7 +617,7 @@ public class AppWidgetHostView extends FrameLayout {
     private void inflateAsync(@NonNull RemoteViews remoteViews) {
         // Prepare a local reference to the remote Context so we're ready to
         // inflate any requested LayoutParams.
-        mRemoteContext = getRemoteContext();
+        mRemoteContext = getRemoteContextEnsuringCorrectCachedApkPath();
         int layoutId = remoteViews.getLayoutId();
 
         if (mLastExecutionSignal != null) {
@@ -718,8 +719,10 @@ public class AppWidgetHostView extends FrameLayout {
      * purposes of reading remote resources.
      * @hide
      */
-    protected Context getRemoteContext() {
+    protected Context getRemoteContextEnsuringCorrectCachedApkPath() {
         try {
+            ApplicationInfo expectedAppInfo = mInfo.providerInfo.applicationInfo;
+            LoadedApk.checkAndUpdateApkPaths(expectedAppInfo);
             // Return if cloned successfully, otherwise default
             Context newContext = mContext.createApplicationContext(
                     mInfo.providerInfo.applicationInfo,
@@ -765,7 +768,7 @@ public class AppWidgetHostView extends FrameLayout {
 
         try {
             if (mInfo != null) {
-                Context theirContext = getRemoteContext();
+                Context theirContext = getRemoteContextEnsuringCorrectCachedApkPath();
                 mRemoteContext = theirContext;
                 LayoutInflater inflater = (LayoutInflater)
                         theirContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

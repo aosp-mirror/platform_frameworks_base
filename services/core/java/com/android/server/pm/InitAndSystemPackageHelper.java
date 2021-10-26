@@ -172,9 +172,16 @@ final class InitAndSystemPackageHelper {
         scanSystemDirs(packageParser, executorService);
         // Parse overlay configuration files to set default enable state, mutability, and
         // priority of system overlays.
+        final ArrayMap<String, File> apkInApexPreInstalledPaths = new ArrayMap<>();
+        for (ApexManager.ActiveApexInfo apexInfo : mPm.mApexManager.getActiveApexInfos()) {
+            for (String packageName : mPm.mApexManager.getApksInApex(apexInfo.apexModuleName)) {
+                apkInApexPreInstalledPaths.put(packageName, apexInfo.preInstalledApexPath);
+            }
+        }
         OverlayConfig overlayConfig = OverlayConfig.initializeSystemInstance(
                 consumer -> mPm.forEachPackage(
-                        pkg -> consumer.accept(pkg, pkg.isSystem())));
+                        pkg -> consumer.accept(pkg, pkg.isSystem(),
+                          apkInApexPreInstalledPaths.get(pkg.getPackageName()))));
         cleanupSystemPackagesAndInstallStubs(packageParser, executorService, packageSettings,
                 startTime, userIds);
         packageParser.close();

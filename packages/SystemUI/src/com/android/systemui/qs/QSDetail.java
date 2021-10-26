@@ -40,6 +40,7 @@ import android.widget.TextView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
+import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
@@ -164,8 +165,7 @@ public class QSDetail extends LinearLayout {
     public void updateResources() {
         updateDetailText();
         MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
-        lp.topMargin = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.quick_qs_offset_height);
+        lp.topMargin = SystemBarUtils.getQuickQsOffsetHeight(mContext);
         setLayoutParams(lp);
     }
 

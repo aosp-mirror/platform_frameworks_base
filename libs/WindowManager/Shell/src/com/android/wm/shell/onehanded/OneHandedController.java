@@ -689,6 +689,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         pw.println(mUserId);
         pw.print(innerPrefix + "isShortcutEnabled=");
         pw.println(isShortcutEnabled());
+        pw.print(innerPrefix + "mIsSwipeToNotificationEnabled=");
+        pw.println(mIsSwipeToNotificationEnabled);
 
         if (mBackgroundPanelOrganizer != null) {
             mBackgroundPanelOrganizer.dump(pw);

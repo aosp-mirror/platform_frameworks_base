@@ -565,6 +565,8 @@ std::unique_ptr<Value> BinaryResourceParser::ParseMapEntry(const ResourceNameRef
                                                            const ResTable_map_entry* map) {
   switch (name.type) {
     case ResourceType::kStyle:
+      // fallthrough
+    case ResourceType::kConfigVarying:  // legacy thing used in tests
       return ParseStyle(name, config, map);
     case ResourceType::kAttrPrivate:
       // fallthrough

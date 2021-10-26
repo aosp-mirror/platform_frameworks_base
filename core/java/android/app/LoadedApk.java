@@ -2134,4 +2134,38 @@ public final class LoadedApk {
             final IBinder mService;
         }
     }
+
+    /**
+     * Check if the Apk paths in the cache are correct, and update them if they are not.
+     * @hide
+     */
+    public static void checkAndUpdateApkPaths(ApplicationInfo expectedAppInfo) {
+        // Get the LoadedApk from the cache
+        ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread == null) {
+            Log.e(TAG, "Cannot find activity thread");
+            return;
+        }
+        checkAndUpdateApkPaths(activityThread, expectedAppInfo, /* cacheWithCode */ true);
+        checkAndUpdateApkPaths(activityThread, expectedAppInfo, /* cacheWithCode */ false);
+    }
+
+    private static void checkAndUpdateApkPaths(ActivityThread activityThread,
+            ApplicationInfo expectedAppInfo, boolean cacheWithCode) {
+        String expectedCodePath = expectedAppInfo.getCodePath();
+        LoadedApk loadedApk = activityThread.peekPackageInfo(
+                expectedAppInfo.packageName, /* includeCode= */ cacheWithCode);
+        // If there is load apk cached, or if the cache is valid, don't do anything.
+        if (loadedApk == null || loadedApk.getApplicationInfo() == null
+                || loadedApk.getApplicationInfo().getCodePath().equals(expectedCodePath)) {
+            return;
+        }
+        // Duplicate framework logic
+        List<String> oldPaths = new ArrayList<>();
+        LoadedApk.makePaths(activityThread, expectedAppInfo, oldPaths);
+
+        // Force update the LoadedApk instance, which should update the reference in the cache
+        loadedApk.updateApplicationInfo(expectedAppInfo, oldPaths);
+    }
+
 }

@@ -65,8 +65,9 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         final boolean[] supportedStandardBuckets =
                 new boolean[MeasuredEnergyStats.NUMBER_STANDARD_POWER_BUCKETS];
         Arrays.fill(supportedStandardBuckets, true);
-        mGlobalMeasuredEnergyStats =
-                new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
+        mMeasuredEnergyStatsConfig = new MeasuredEnergyStats.Config(supportedStandardBuckets,
+                customBucketNames, new int[0], new String[]{""});
+        mGlobalMeasuredEnergyStats = new MeasuredEnergyStats(mMeasuredEnergyStatsConfig);
     }
 
     public TimeBase getOnBatteryTimeBase() {
