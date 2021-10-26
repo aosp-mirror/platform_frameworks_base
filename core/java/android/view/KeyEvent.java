@@ -832,13 +832,45 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * consuming content. May be consumed by system to set account globally.
      */
     public static final int KEYCODE_PROFILE_SWITCH = 288;
+    /** Key code constant: Video Application key #1. */
+    public static final int KEYCODE_VIDEO_APP_1 = 289;
+    /** Key code constant: Video Application key #2. */
+    public static final int KEYCODE_VIDEO_APP_2 = 290;
+    /** Key code constant: Video Application key #3. */
+    public static final int KEYCODE_VIDEO_APP_3 = 291;
+    /** Key code constant: Video Application key #4. */
+    public static final int KEYCODE_VIDEO_APP_4 = 292;
+    /** Key code constant: Video Application key #5. */
+    public static final int KEYCODE_VIDEO_APP_5 = 293;
+    /** Key code constant: Video Application key #6. */
+    public static final int KEYCODE_VIDEO_APP_6 = 294;
+    /** Key code constant: Video Application key #7. */
+    public static final int KEYCODE_VIDEO_APP_7 = 295;
+    /** Key code constant: Video Application key #8. */
+    public static final int KEYCODE_VIDEO_APP_8 = 296;
+    /** Key code constant: Featured Application key #1. */
+    public static final int KEYCODE_FEATURED_APP_1 = 297;
+    /** Key code constant: Featured Application key #2. */
+    public static final int KEYCODE_FEATURED_APP_2 = 298;
+    /** Key code constant: Featured Application key #3. */
+    public static final int KEYCODE_FEATURED_APP_3 = 299;
+    /** Key code constant: Featured Application key #4. */
+    public static final int KEYCODE_FEATURED_APP_4 = 300;
+    /** Key code constant: Demo Application key #1. */
+    public static final int KEYCODE_DEMO_APP_1 = 301;
+    /** Key code constant: Demo Application key #2. */
+    public static final int KEYCODE_DEMO_APP_2 = 302;
+    /** Key code constant: Demo Application key #3. */
+    public static final int KEYCODE_DEMO_APP_3 = 303;
+    /** Key code constant: Demo Application key #4. */
+    public static final int KEYCODE_DEMO_APP_4 = 304;
 
-    /**
+   /**
      * Integer value of the last KEYCODE. Increases as new keycodes are added to KeyEvent.
      * @hide
      */
     @TestApi
-    public static final int LAST_KEYCODE = KEYCODE_PROFILE_SWITCH;
+    public static final int LAST_KEYCODE = KEYCODE_DEMO_APP_4;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
