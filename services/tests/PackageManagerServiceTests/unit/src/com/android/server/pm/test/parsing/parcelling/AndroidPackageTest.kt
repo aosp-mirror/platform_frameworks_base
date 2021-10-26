@@ -24,17 +24,7 @@ import android.content.pm.FeatureInfo
 import android.content.pm.PackageManager
 import android.content.pm.SigningDetails
 import android.content.pm.parsing.ParsingPackage
-import android.content.pm.parsing.component.ParsedActivityImpl
-import android.content.pm.parsing.component.ParsedAttributionImpl
-import android.content.pm.parsing.component.ParsedComponentImpl
-import android.content.pm.parsing.component.ParsedInstrumentationImpl
-import android.content.pm.parsing.component.ParsedIntentInfoImpl
-import android.content.pm.parsing.component.ParsedPermissionGroupImpl
-import android.content.pm.parsing.component.ParsedPermissionImpl
-import android.content.pm.parsing.component.ParsedProcessImpl
-import android.content.pm.parsing.component.ParsedProviderImpl
-import android.content.pm.parsing.component.ParsedServiceImpl
-import android.content.pm.parsing.component.ParsedUsesPermissionImpl
+import android.content.pm.parsing.component.*
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
@@ -358,6 +348,13 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             "TestActivityName",
             transformGet = { it.singleOrNull()?.name.orEmpty() },
             transformSet = { ParsedActivityImpl().apply { name = it }.withMimeGroups() }
+        ),
+        getSetByValue(
+            AndroidPackage::getApexSystemServices,
+            PackageImpl::addApexSystemService,
+            "TestApexSystemServiceName",
+            transformGet = { it.singleOrNull()?.name.orEmpty() },
+            transformSet = { ParsedApexSystemServiceImpl().apply { name = it } }
         ),
         getSetByValue(
             AndroidPackage::getReceivers,

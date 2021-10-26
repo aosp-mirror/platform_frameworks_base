@@ -46,6 +46,7 @@ import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedActivityImpl;
+import android.content.pm.parsing.component.ParsedApexSystemService;
 import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedInstrumentationImpl;
@@ -519,6 +520,23 @@ public class PackageParserTest {
                 } else {
                     fail("Found unknown service; name = " + service.getName());
                 }
+            }
+        } finally {
+            testFile.delete();
+        }
+    }
+
+    @Test
+    public void testParseApexSystemService() throws Exception {
+        final File testFile = extractFile(TEST_APP4_APK);
+        try {
+            final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
+            final List<ParsedApexSystemService> systemServices = pkg.getApexSystemServices();
+            for (ParsedApexSystemService systemService: systemServices) {
+                assertEquals(PACKAGE_NAME + ".SystemService", systemService.getName());
+                assertEquals("service-test.jar", systemService.getJarPath());
+                assertEquals("30", systemService.getMinSdkVersion());
+                assertEquals("31", systemService.getMaxSdkVersion());
             }
         } finally {
             testFile.delete();
