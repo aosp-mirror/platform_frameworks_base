@@ -22582,7 +22582,7 @@ package android.media {
     field public static final String KEY_MAX_FPS_TO_ENCODER = "max-fps-to-encoder";
     field public static final String KEY_MAX_HEIGHT = "max-height";
     field public static final String KEY_MAX_INPUT_SIZE = "max-input-size";
-    field public static final String KEY_MAX_OUTPUT_CHANNEL_COUNT = "max-output-channel_count";
+    field public static final String KEY_MAX_OUTPUT_CHANNEL_COUNT = "max-output-channel-count";
     field public static final String KEY_MAX_PTS_GAP_TO_ENCODER = "max-pts-gap-to-encoder";
     field public static final String KEY_MAX_WIDTH = "max-width";
     field public static final String KEY_MIME = "mime";

@@ -4967,20 +4967,27 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private boolean applyImeWindowsIfNeeded(ToBooleanFunction<WindowState> callback,
             boolean traverseTopToBottom) {
-        // If this window is the current IME target, so we need to process the IME windows
-        // directly above it. The exception is if we are in split screen
-        // in which case we process the IME at the DisplayContent level to
-        // ensure it is above the docked divider.
-        // (i.e. Like {@link DisplayContent.ImeContainer#skipImeWindowsDuringTraversal}, the IME
-        // window will be ignored to traverse when the IME target is still in split-screen mode).
-        if (isImeLayeringTarget()
-                && (!mDisplayContent.getDefaultTaskDisplayArea().isSplitScreenModeActivated()
-                         || getTask() == null)) {
-            if (mDisplayContent.forAllImeWindows(callback, traverseTopToBottom)) {
-                return true;
-            }
+        // No need to apply to IME window if the window is not the current IME layering target.
+        if (!isImeLayeringTarget()) {
+            return false;
         }
-        return false;
+        // If we are in split screen which case we process the IME at the DisplayContent level to
+        // ensure it is above the docked divider.
+        // i.e. Like {@link DisplayContent.ImeContainer#skipImeWindowsDuringTraversal}, the IME
+        // window will be ignored to traverse when the IME target is still in split-screen mode.
+        if (mDisplayContent.getDefaultTaskDisplayArea().isSplitScreenModeActivated()
+                && getTask() != null) {
+            return false;
+        }
+        // Note that we don't process IME window if the IME input target is not on the screen.
+        // In case some unexpected IME visibility cases happen like starting the remote
+        // animation on the keyguard but seeing the IME window that originally on the app
+        // which behinds the keyguard.
+        final WindowState imeInputTarget = getImeInputTarget();
+        if (imeInputTarget != null && !(imeInputTarget.isDrawn() || imeInputTarget.isVisible())) {
+            return false;
+        }
+        return mDisplayContent.forAllImeWindows(callback, traverseTopToBottom);
     }
 
     private boolean applyInOrderWithImeWindows(ToBooleanFunction<WindowState> callback,
