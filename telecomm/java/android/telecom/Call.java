@@ -2661,7 +2661,9 @@ public final class Call {
         // remove ourselves from the Phone. Note that we do this after completing all state updates
         // so a client can cleanly transition all their UI to the state appropriate for a
         // DISCONNECTED Call while still relying on the existence of that Call in the Phone's list.
-        if (mState == STATE_DISCONNECTED) {
+        // Check if the original state is already disconnected, otherwise onCallRemoved will be
+        // triggered before onCallAdded.
+        if (mState == STATE_DISCONNECTED && stateChanged) {
             fireCallDestroyed();
         }
     }
