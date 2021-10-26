@@ -112,6 +112,7 @@ stubs_defaults {
 }
 
 // Defaults module for doc-stubs targets that use module source code as input.
+// This is the default/normal.
 stubs_defaults {
     name: "framework-doc-stubs-sources-default",
     defaults: ["framework-doc-stubs-default"],
@@ -147,6 +148,12 @@ droidstubs {
 }
 
 droidstubs {
+    name: "framework-doc-stubs",
+    defaults: ["framework-doc-stubs-sources-default"],
+    args: metalava_framework_docs_args,
+}
+
+droidstubs {
     name: "framework-doc-system-stubs",
     defaults: ["framework-doc-stubs-sources-default"],
     args: metalava_framework_docs_args +
@@ -154,8 +161,11 @@ droidstubs {
     api_levels_sdk_type: "system",
 }
 
+// Experimental target building doc stubs with module stub source code as input.
+// This is intended to eventually replace framework-doc-stubs, once all diffs
+// have been eliminated.
 droidstubs {
-    name: "framework-doc-stubs",
+    name: "framework-doc-stubs-module-stubs",
     defaults: ["framework-doc-stubs-default"],
     args: metalava_framework_docs_args,
     srcs: [
