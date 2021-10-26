@@ -15875,4 +15875,31 @@ public class TelephonyManager {
             ex.rethrowAsRuntimeException();
         }
     }
+
+    /**
+     * Get last known cell identity.
+     * Require {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and
+     * com.android.phone.permission.ACCESS_LAST_KNOWN_CELL_ID, otherwise throws SecurityException.
+     * If there is current registered network this value will be same as the registered cell
+     * identity. If the device goes out of service the previous cell identity is cached and
+     * will be returned. If the cache age of the Cell identity is more than 24 hours
+     * it will be cleared and null will be returned.
+     * @return last known cell identity {@CellIdentity}.
+     * @hide
+     */
+    @RequiresPermission(allOf = {Manifest.permission.ACCESS_FINE_LOCATION,
+            "com.android.phone.permission.ACCESS_LAST_KNOWN_CELL_ID"})
+    public @Nullable CellIdentity getLastKnownCellIdentity() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                throw new IllegalStateException("telephony service is null.");
+            }
+            return telephony.getLastKnownCellIdentity(getSubId(), getOpPackageName(),
+                    getAttributionTag());
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
+        return null;
+    }
 }
