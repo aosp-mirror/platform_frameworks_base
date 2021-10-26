@@ -1947,7 +1947,7 @@ package android.bluetooth {
     method public long getControllerIdleTimeMillis();
     method public long getControllerRxTimeMillis();
     method public long getControllerTxTimeMillis();
-    method public long getTimeStamp();
+    method public long getTimestampMillis();
     method @NonNull public java.util.List<android.bluetooth.UidTraffic> getUidTraffic();
     method public boolean isValid();
     field public static final int BT_STACK_STATE_INVALID = 0; // 0x0
