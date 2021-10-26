@@ -44,6 +44,7 @@ import com.android.wm.shell.pip.tv.TvPipController;
 import com.android.wm.shell.pip.tv.TvPipMenuController;
 import com.android.wm.shell.pip.tv.TvPipNotificationController;
 import com.android.wm.shell.pip.tv.TvPipTransition;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -161,13 +162,14 @@ public abstract class TvPipModule {
             PipTransitionController pipTransitionController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<LegacySplitScreenController> splitScreenOptional,
+            Optional<SplitScreenController> newSplitScreenOptional,
             DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskOrganizer(context,
                 syncTransactionQueue, pipTransitionState, pipBoundsState, pipBoundsAlgorithm,
                 tvPipMenuController, pipAnimationController, pipSurfaceTransactionHelper,
-                pipTransitionController, splitScreenOptional, displayController, pipUiEventLogger,
-                shellTaskOrganizer, mainExecutor);
+                pipTransitionController, splitScreenOptional, newSplitScreenOptional,
+                displayController, pipUiEventLogger, shellTaskOrganizer, mainExecutor);
     }
 }

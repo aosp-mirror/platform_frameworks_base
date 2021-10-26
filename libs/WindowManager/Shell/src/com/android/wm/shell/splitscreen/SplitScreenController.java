@@ -160,9 +160,23 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return moveToSideStage(task, sideStagePosition);
     }
 
+    public boolean moveToSideStage(int taskId, @SplitPosition int sideStagePosition,
+            WindowContainerTransaction wct) {
+        final ActivityManager.RunningTaskInfo task = mTaskOrganizer.getRunningTaskInfo(taskId);
+        if (task == null) {
+            throw new IllegalArgumentException("Unknown taskId" + taskId);
+        }
+        return moveToSideStage(task, sideStagePosition, wct);
+    }
+
     public boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
             @SplitPosition int sideStagePosition) {
         return mStageCoordinator.moveToSideStage(task, sideStagePosition);
+    }
+
+    public boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
+            @SplitPosition int sideStagePosition, WindowContainerTransaction wct) {
+        return mStageCoordinator.moveToSideStage(task, sideStagePosition, wct);
     }
 
     public boolean removeFromSideStage(int taskId) {
@@ -180,6 +194,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     public void enterSplitScreen(int taskId, boolean leftOrTop) {
         moveToSideStage(taskId,
                 leftOrTop ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT);
+    }
+
+    public void enterSplitScreen(int taskId, boolean leftOrTop, WindowContainerTransaction wct) {
+        moveToSideStage(taskId,
+                leftOrTop ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
     }
 
     public void exitSplitScreen(int toTopTaskId, int exitReason) {
