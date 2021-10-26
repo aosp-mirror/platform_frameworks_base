@@ -7672,9 +7672,16 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Parse overlay configuration files to set default enable state, mutability, and
             // priority of system overlays.
+            final ArrayMap<String, File> apkInApexPreInstalledPaths = new ArrayMap<>();
+            for (ApexManager.ActiveApexInfo apexInfo : mApexManager.getActiveApexInfos()) {
+                for (String packageName : mApexManager.getApksInApex(apexInfo.apexModuleName)) {
+                    apkInApexPreInstalledPaths.put(packageName, apexInfo.preInstalledApexPath);
+                }
+            }
             mOverlayConfig = OverlayConfig.initializeSystemInstance(
                     consumer -> mPmInternal.forEachPackage(
-                            pkg -> consumer.accept(pkg, pkg.isSystem())));
+                            pkg -> consumer.accept(pkg, pkg.isSystem(),
+                              apkInApexPreInstalledPaths.get(pkg.getPackageName()))));
 
             // Prune any system packages that no longer exist.
             final List<String> possiblyDeletedUpdatedSystemApps = new ArrayList<>();
