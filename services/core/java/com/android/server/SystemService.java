@@ -301,17 +301,20 @@ public abstract class SystemService {
     protected void dumpSupportedUsers(@NonNull PrintWriter pw, @NonNull String prefix) {
         final List<UserInfo> allUsers = UserManager.get(mContext).getUsers();
         final List<Integer> supportedUsers = new ArrayList<>(allUsers.size());
-        for (UserInfo user : allUsers) {
-            supportedUsers.add(user.id);
+        for (int i = 0; i < allUsers.size(); i++) {
+            final UserInfo user = allUsers.get(i);
+            if (isUserSupported(new TargetUser(user))) {
+                supportedUsers.add(user.id);
+            }
         }
-        if (allUsers.isEmpty()) {
+        if (supportedUsers.isEmpty()) {
             pw.print(prefix); pw.println("No supported users");
-        } else {
-            final int size = supportedUsers.size();
-            pw.print(prefix); pw.print(size); pw.print(" supported user");
-            if (size > 1) pw.print("s");
-            pw.print(": "); pw.println(supportedUsers);
+            return;
         }
+        final int size = supportedUsers.size();
+        pw.print(prefix); pw.print(size); pw.print(" supported user");
+        if (size > 1) pw.print("s");
+        pw.print(": "); pw.println(supportedUsers);
     }
 
     /**
