@@ -68,7 +68,7 @@ public class CsipDeviceManager {
             }
 
             for (Map.Entry<Integer, ParcelUuid> entry: groupIdMap.entrySet()) {
-                if (entry.getValue().equals(BluetoothUuid.BASE_UUID)) {
+                if (entry.getValue().equals(BluetoothUuid.CAP)) {
                     return entry.getKey();
                 }
             }
