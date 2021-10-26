@@ -220,8 +220,10 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         String networkId = null;
         boolean roaming = !snapshot.getNetworkCapabilities().hasCapability(
                 NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING);
-        boolean metered = !snapshot.getNetworkCapabilities().hasCapability(
-                NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+        boolean metered = !(snapshot.getNetworkCapabilities().hasCapability(
+                NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+                || snapshot.getNetworkCapabilities().hasCapability(
+                NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED));
 
         final int oemManaged = getOemBitfield(snapshot.getNetworkCapabilities());
 
