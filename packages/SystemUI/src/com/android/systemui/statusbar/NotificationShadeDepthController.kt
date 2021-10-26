@@ -37,7 +37,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
-import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.PanelExpansionListener
 import com.android.systemui.statusbar.phone.ScrimController
@@ -73,6 +72,10 @@ class NotificationShadeDepthController @Inject constructor(
         private const val TAG = "DepthController"
     }
 
+    /**
+     * Is did we already unblur while dozing?
+     */
+    private var alreadyUnblurredWhileDozing = false
     lateinit var root: View
     private var blurRoot: View? = null
     private var keyguardAnimator: Animator? = null
@@ -237,9 +240,11 @@ class NotificationShadeDepthController @Inject constructor(
     private val keyguardStateCallback = object : KeyguardStateController.Callback {
         override fun onKeyguardFadingAwayChanged() {
             if (!keyguardStateController.isKeyguardFadingAway ||
-                    biometricUnlockController.mode != MODE_WAKE_AND_UNLOCK) {
+                    !biometricUnlockController.isWakeAndUnlock) {
                 return
             }
+            // When wakeAndUnlocking the screen remains dozing, so we have to manually trigger
+            // the unblur earlier
 
             keyguardAnimator?.cancel()
             keyguardAnimator = ValueAnimator.ofFloat(1f, 0f).apply {
@@ -261,6 +266,7 @@ class NotificationShadeDepthController @Inject constructor(
                 })
                 start()
             }
+            alreadyUnblurredWhileDozing = statusBarStateController.dozeAmount != 0.0f
         }
 
         override fun onKeyguardShowingChanged() {
@@ -282,10 +288,24 @@ class NotificationShadeDepthController @Inject constructor(
             if (isDozing) {
                 shadeAnimation.finishIfRunning()
                 brightnessMirrorSpring.finishIfRunning()
+
+                // unset this for safety, to be ready for the next wakeup
+                alreadyUnblurredWhileDozing = false
             }
         }
 
         override fun onDozeAmountChanged(linear: Float, eased: Float) {
+            if (alreadyUnblurredWhileDozing) {
+                if (linear == 0.0f) {
+                    // We finished waking up, let's reset
+                    alreadyUnblurredWhileDozing = false
+                } else {
+                    // We've already handled the unbluring from the keyguardAnimator above.
+                    // if we would continue, we'd play another unzoom / blur animation from the
+                    // dozing changing.
+                    return
+                }
+            }
             wakeAndUnlockBlurRadius = blurUtils.blurRadiusOfRatio(eased)
             scheduleUpdate()
         }
@@ -443,6 +463,7 @@ class NotificationShadeDepthController @Inject constructor(
             it.println("blursDisabledForAppLaunch: $blursDisabledForAppLaunch")
             it.println("qsPanelExpansion: $qsPanelExpansion")
             it.println("transitionToFullShadeProgress: $transitionToFullShadeProgress")
+            it.println("alreadyUnblurredWhileDozing: $alreadyUnblurredWhileDozing")
             it.println("lastAppliedBlur: $lastAppliedBlur")
         }
     }
