@@ -754,7 +754,7 @@ public final class MediaFormat {
      * <p>This key is only used during decoding.
      */
     public static final String KEY_MAX_OUTPUT_CHANNEL_COUNT =
-            "max-output-channel_count";
+            "max-output-channel-count";
 
     /**
      * A key describing the number of frames to trim from the start of the decoded audio stream.
