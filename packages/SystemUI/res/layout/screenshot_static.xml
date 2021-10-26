@@ -94,7 +94,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:elevation="@dimen/screenshot_preview_elevation"
-        android:contentDescription="@string/screenshot_edit_label"
+        android:contentDescription="@string/screenshot_edit_description"
         android:scaleType="fitEnd"
         android:background="@drawable/screenshot_preview_background"
         android:adjustViewBounds="true"
