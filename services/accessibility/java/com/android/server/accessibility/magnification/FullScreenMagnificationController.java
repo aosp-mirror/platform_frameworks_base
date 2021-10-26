@@ -28,10 +28,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.MathUtils;
 import android.util.Slog;
@@ -59,7 +57,8 @@ import java.util.Locale;
  * holding the current state of magnification and animation, and it handles
  * communication between the accessibility manager and window manager.
  *
- * Magnification is limited to the range [MIN_SCALE, MAX_SCALE], and can only occur inside the
+ * Magnification is limited to the range controlled by
+ * {@link MagnificationScaleProvider#constrainScale(float)}, and can only occur inside the
  * magnification region. If a value is out of bounds, it will be adjusted to guarantee these
  * constraints.
  */
@@ -69,12 +68,8 @@ public class FullScreenMagnificationController {
 
     private static final MagnificationAnimationCallback STUB_ANIMATION_CALLBACK = success -> {
     };
-    public static final float MIN_SCALE = 1.0f;
-    public static final float MAX_SCALE = 8.0f;
 
     private static final boolean DEBUG_SET_MAGNIFICATION_SPEC = false;
-
-    private static final float DEFAULT_MAGNIFICATION_SCALE = 2.0f;
 
     private final Object mLock;
 
@@ -84,7 +79,7 @@ public class FullScreenMagnificationController {
 
     private final MagnificationInfoChangedCallback mMagnificationInfoChangedCallback;
 
-    private int mUserId;
+    private final MagnificationScaleProvider mScaleProvider;
 
     private final long mMainThreadId;
 
@@ -489,7 +484,7 @@ public class FullScreenMagnificationController {
                 return false;
             }
             // Constrain scale immediately for use in the pivot calculations.
-            scale = MathUtils.constrain(scale, MIN_SCALE, MAX_SCALE);
+            scale = MagnificationScaleProvider.constrainScale(scale);
 
             final Rect viewport = mTempRect;
             mMagnificationRegion.getBounds(viewport);
@@ -557,7 +552,7 @@ public class FullScreenMagnificationController {
             // Compute changes.
             boolean changed = false;
 
-            final float normScale = MathUtils.constrain(scale, MIN_SCALE, MAX_SCALE);
+            final float normScale = MagnificationScaleProvider.constrainScale(scale);
             if (Float.compare(mCurrentMagnificationSpec.scale, normScale) != 0) {
                 mCurrentMagnificationSpec.scale = normScale;
                 changed = true;
@@ -658,12 +653,13 @@ public class FullScreenMagnificationController {
      */
     public FullScreenMagnificationController(@NonNull Context context,
             @NonNull AccessibilityManagerService ams, @NonNull Object lock,
-            @NonNull MagnificationInfoChangedCallback magnificationInfoChangedCallback) {
+            @NonNull MagnificationInfoChangedCallback magnificationInfoChangedCallback,
+            @NonNull MagnificationScaleProvider scaleProvider) {
         this(new ControllerContext(context, ams,
                 LocalServices.getService(WindowManagerInternal.class),
                 new Handler(context.getMainLooper()),
                 context.getResources().getInteger(R.integer.config_longAnimTime)), lock,
-                magnificationInfoChangedCallback);
+                magnificationInfoChangedCallback, scaleProvider);
     }
 
     /**
@@ -672,12 +668,14 @@ public class FullScreenMagnificationController {
     @VisibleForTesting
     public FullScreenMagnificationController(@NonNull ControllerContext ctx,
             @NonNull Object lock,
-            @NonNull MagnificationInfoChangedCallback magnificationInfoChangedCallback) {
+            @NonNull MagnificationInfoChangedCallback magnificationInfoChangedCallback,
+            @NonNull MagnificationScaleProvider scaleProvider) {
         mControllerCtx = ctx;
         mLock = lock;
         mMainThreadId = mControllerCtx.getContext().getMainLooper().getThread().getId();
         mScreenStateObserver = new ScreenStateObserver(mControllerCtx.getContext(), this);
         mMagnificationInfoChangedCallback = magnificationInfoChangedCallback;
+        mScaleProvider = scaleProvider;
     }
 
     /**
@@ -1096,18 +1094,9 @@ public class FullScreenMagnificationController {
     /**
      * Persists the default display magnification scale to the current user's settings.
      */
-    public void persistScale() {
-        // TODO: b/123047354, Need support multi-display?
+    public void persistScale(int displayId) {
         final float scale = getScale(Display.DEFAULT_DISPLAY);
-        final int userId = mUserId;
-
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                mControllerCtx.putMagnificationScale(scale, userId);
-                return null;
-            }
-        }.execute();
+        mScaleProvider.putScale(scale, displayId);
     }
 
     /**
@@ -1117,21 +1106,8 @@ public class FullScreenMagnificationController {
      * @return the previously persisted magnification scale, or the default
      *         scale if none is available
      */
-    public float getPersistedScale() {
-        return mControllerCtx.getMagnificationScale(mUserId);
-    }
-
-    /**
-     * Sets the currently active user ID.
-     *
-     * @param userId the currently active user ID
-     */
-    public void setUserId(int userId) {
-        if (mUserId == userId) {
-            return;
-        }
-        mUserId = userId;
-        resetAllIfNeeded(false);
+    public float getPersistedScale(int displayId) {
+        return mScaleProvider.getScale(displayId);
     }
 
     /**
@@ -1225,7 +1201,11 @@ public class FullScreenMagnificationController {
         mControllerCtx.getHandler().sendMessage(m);
     }
 
-    private void resetAllIfNeeded(boolean animate) {
+    /**
+     * Resets magnification on all displays.
+     * @param animate reset the magnification with animation
+     */
+    void resetAllIfNeeded(boolean animate) {
         synchronized (mLock) {
             for (int i = 0; i < mDisplays.size(); i++) {
                 resetIfNeeded(mDisplays.keyAt(i), animate);
@@ -1288,8 +1268,8 @@ public class FullScreenMagnificationController {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("MagnificationController[");
-        builder.append("mUserId=").append(mUserId);
         builder.append(", mDisplays=").append(mDisplays);
+        builder.append(", mScaleProvider=").append(mScaleProvider);
         builder.append("]");
         return builder.toString();
     }
@@ -1567,23 +1547,6 @@ public class FullScreenMagnificationController {
         @NonNull
         public ValueAnimator newValueAnimator() {
             return new ValueAnimator();
-        }
-
-        /**
-         * Write Settings of magnification scale.
-         */
-        public void putMagnificationScale(float value, int userId) {
-            Settings.Secure.putFloatForUser(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, value, userId);
-        }
-
-        /**
-         * Get Settings of magnification scale.
-         */
-        public float getMagnificationScale(int userId) {
-            return Settings.Secure.getFloatForUser(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
-                    DEFAULT_MAGNIFICATION_SCALE, userId);
         }
 
         /**
