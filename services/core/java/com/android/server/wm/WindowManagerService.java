@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.INPUT_CONSUMER;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
@@ -266,6 +267,7 @@ import android.view.ScrollCaptureResponse;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+import android.view.TaskTransitionSpec;
 import android.view.View;
 import android.view.WindowContentFrameStats;
 import android.view.WindowInsets;
@@ -754,6 +756,11 @@ public class WindowManagerService extends IWindowManager.Stub
      * not as critical.
      */
     final Handler mAnimationHandler = new Handler(AnimationThread.getHandler().getLooper());
+
+    /**
+     * Used during task transitions to allow SysUI and launcher to customize task transitions.
+     */
+    TaskTransitionSpec mTaskTransitionSpec;
 
     boolean mHardKeyboardAvailable;
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
@@ -1775,6 +1782,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             win.mToken.addWindow(win);
             displayPolicy.addWindowLw(win, attrs);
+            displayPolicy.setDropInputModePolicy(win, win.mAttrs);
             if (type == TYPE_APPLICATION_STARTING && activity != null) {
                 activity.attachStartingWindow(win);
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "addWindow: %s startingWindow=%s",
@@ -8775,5 +8783,23 @@ public class WindowManagerService extends IWindowManager.Stub
             return dc.getImePolicy() == DISPLAY_IME_POLICY_LOCAL ? dc.getDisplayId()
                     : DEFAULT_DISPLAY;
         }
+    }
+
+    @Override
+    public void setTaskTransitionSpec(TaskTransitionSpec spec) {
+        if (!checkCallingPermission(MANAGE_ACTIVITY_TASKS, "setTaskTransitionSpec()")) {
+            throw new SecurityException("Requires MANAGE_ACTIVITY_TASKS permission");
+        }
+
+        mTaskTransitionSpec = spec;
+    }
+
+    @Override
+    public void clearTaskTransitionSpec() {
+        if (!checkCallingPermission(MANAGE_ACTIVITY_TASKS, "clearTaskTransitionSpec()")) {
+            throw new SecurityException("Requires MANAGE_ACTIVITY_TASKS permission");
+        }
+
+        mTaskTransitionSpec = null;
     }
 }

@@ -122,6 +122,7 @@ import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.gui.DropInputMode;
 import android.hardware.power.Boost;
 import android.os.Handler;
 import android.os.IBinder;
@@ -948,6 +949,20 @@ public class DisplayPolicy {
         }
         if (mExtraNavBarAlt == win) {
             mExtraNavBarAltPosition = getAltBarPosition(attrs);
+        }
+    }
+
+    /**
+     * Add additional policy if needed to ensure the window or its children should not receive any
+     * input.
+     */
+    public void setDropInputModePolicy(WindowState win, LayoutParams attrs) {
+        if (attrs.type == TYPE_TOAST
+                && (attrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) == 0) {
+            // Toasts should not receive input. These windows should not have any children, so
+            // force this hierarchy of windows to drop all input.
+            mService.mTransactionFactory.get()
+                    .setDropInputMode(win.getSurfaceControl(), DropInputMode.ALL).apply();
         }
     }
 

@@ -4140,6 +4140,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 target.mActivityRecord.mImeInsetsFrozenUntilStartInput = false;
             }
             setImeInputTarget(target);
+            mInsetsStateController.updateAboveInsetsState(mInputMethodWindow, mInsetsStateController
+                    .getRawInsetsState().getSourceOrDefaultVisibility(ITYPE_IME));
             updateImeControlTarget();
         }
     }
