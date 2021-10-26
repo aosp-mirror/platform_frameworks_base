@@ -314,7 +314,7 @@ public class SplashscreenIconDrawableFactory {
 
         @Override
         public void stopAnimation() {
-            if (mIconAnimator != null) {
+            if (mIconAnimator != null && mIconAnimator.isRunning()) {
                 mIconAnimator.end();
             }
         }
