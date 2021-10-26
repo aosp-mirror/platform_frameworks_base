@@ -2397,6 +2397,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mBatteryStatsService.publish();
         mAppOpsService.publish();
+        mProcessStats.publish();
         Slog.d("AppOps", "AppOpsService published");
         LocalServices.addService(ActivityManagerInternal.class, mInternal);
         LocalManagerRegistry.addManager(ActivityManagerLocal.class,
