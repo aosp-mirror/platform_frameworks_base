@@ -290,8 +290,11 @@ public final class SQLiteConnectionPool implements Closeable {
         synchronized (mLock) {
             throwIfClosedLocked();
 
-            boolean walModeChanged = ((configuration.openFlags ^ mConfiguration.openFlags)
-                    & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0;
+            boolean isWalCurrentMode = mConfiguration.resolveJournalMode().equalsIgnoreCase(
+                    SQLiteDatabase.JOURNAL_MODE_WAL);
+            boolean isWalNewMode = configuration.resolveJournalMode().equalsIgnoreCase(
+                    SQLiteDatabase.JOURNAL_MODE_WAL);
+            boolean walModeChanged = isWalCurrentMode ^ isWalNewMode;
             if (walModeChanged) {
                 // WAL mode can only be changed if there are no acquired connections
                 // because we need to close all but the primary connection first.
@@ -1042,8 +1045,7 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     private void setMaxConnectionPoolSizeLocked() {
-        if (!mConfiguration.isInMemoryDb()
-                && (mConfiguration.openFlags & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0) {
+        if (mConfiguration.resolveJournalMode().equalsIgnoreCase(SQLiteDatabase.JOURNAL_MODE_WAL)) {
             mMaxConnectionPoolSize = SQLiteGlobal.getWALConnectionPoolSize();
         } else {
             // We don't actually need to always restrict the connection pool size to 1
@@ -1131,11 +1133,9 @@ public final class SQLiteConnectionPool implements Closeable {
             }
             printer.println("  Configuration: openFlags=" + mConfiguration.openFlags
                     + ", isLegacyCompatibilityWalEnabled=" + isCompatibilityWalEnabled
-                    + ", journalMode=" + TextUtils.emptyIfNull(mConfiguration.journalMode)
-                    + ", syncMode=" + TextUtils.emptyIfNull(mConfiguration.syncMode));
-            boolean isReadOnlyDatabase =
-                    (mConfiguration.openFlags & SQLiteDatabase.OPEN_READONLY) != 0;
-            printer.println("  IsReadOnlyDatabase=" + isReadOnlyDatabase);
+                    + ", journalMode=" + TextUtils.emptyIfNull(mConfiguration.resolveJournalMode())
+                    + ", syncMode=" + TextUtils.emptyIfNull(mConfiguration.resolveSyncMode()));
+            printer.println("  IsReadOnlyDatabase=" + mConfiguration.isReadOnlyDatabase());
 
             if (isCompatibilityWalEnabled) {
                 printer.println("  Compatibility WAL enabled: wal_syncmode="
