@@ -142,7 +142,6 @@ import android.content.pm.dex.IArtManager;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedActivity;
-import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
@@ -10006,7 +10005,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (ps == null) {
                 return null;
             }
-            return ps.getIncrementalStatesInfo();
+            return new IncrementalStatesInfo(ps.isPackageLoading(), ps.getLoadingProgress());
         }
 
         @Override
