@@ -19,6 +19,13 @@ package android.content.pm;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_IGNORED;
+import static android.content.pm.Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256;
+import static android.content.pm.Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512;
+import static android.content.pm.Checksum.TYPE_WHOLE_MD5;
+import static android.content.pm.Checksum.TYPE_WHOLE_MERKLE_ROOT_4K_SHA256;
+import static android.content.pm.Checksum.TYPE_WHOLE_SHA1;
+import static android.content.pm.Checksum.TYPE_WHOLE_SHA256;
+import static android.content.pm.Checksum.TYPE_WHOLE_SHA512;
 
 import android.Manifest;
 import android.annotation.CurrentTimeMillisLong;
@@ -62,12 +69,16 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.Closeable;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.MessageDigest;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -405,6 +416,13 @@ public class PackageInstaller {
             LOCATION_MEDIA_DATA})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FileLocation{}
+
+    /** Default set of checksums - includes all available checksums.
+     * @see Session#requestChecksums  */
+    private static final int DEFAULT_CHECKSUMS =
+            TYPE_WHOLE_MERKLE_ROOT_4K_SHA256 | TYPE_WHOLE_MD5 | TYPE_WHOLE_SHA1 | TYPE_WHOLE_SHA256
+                    | TYPE_WHOLE_SHA512 | TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256
+                    | TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512;
 
     private final IPackageInstaller mInstaller;
     private final int mUserId;
@@ -1256,7 +1274,7 @@ public class PackageInstaller {
          * @param name      previously written as part of this session.
          *                  {@link #openWrite}
          * @param checksums installer intends to make available via
-         *                  {@link PackageManager#requestChecksums}.
+         *                  {@link PackageManager#requestChecksums} or {@link #requestChecksums}.
          * @param signature DER PKCS#7 detached signature bytes over binary serialized checksums
          *                  to enable integrity checking for the checksums or null for no integrity
          *                  checking. {@link PackageManager#requestChecksums} will return
@@ -1288,6 +1306,89 @@ public class PackageInstaller {
             } catch (RuntimeException e) {
                 ExceptionUtils.maybeUnwrapIOException(e);
                 throw e;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        private static List<byte[]> encodeCertificates(List<Certificate> certs) throws
+                CertificateEncodingException {
+            if (certs == null) {
+                return null;
+            }
+            List<byte[]> result = new ArrayList<>(certs.size());
+            for (Certificate cert : certs) {
+                if (!(cert instanceof X509Certificate)) {
+                    throw new CertificateEncodingException("Only X509 certificates supported.");
+                }
+                result.add(cert.getEncoded());
+            }
+            return result;
+        }
+
+        /**
+         * Requests checksums for the APK file in session.
+         * <p>
+         * A possible use case is replying to {@link Intent#ACTION_PACKAGE_NEEDS_VERIFICATION}
+         * broadcast.
+         * The checksums will be returned asynchronously via onChecksumsReadyListener.
+         * <p>
+         * By default returns all readily available checksums:
+         * <ul>
+         * <li>enforced by platform,
+         * <li>enforced by the installer.
+         * </ul>
+         * If the caller needs a specific checksum type, they can specify it as required.
+         * <p>
+         * <b>Caution: Android can not verify installer-provided checksums. Make sure you specify
+         * trusted installers.</b>
+         * <p>
+         * @param name      previously written as part of this session.
+         *                  {@link #openWrite}
+         * @param required to explicitly request the checksum types. Will incur significant
+         *                 CPU/memory/disk usage.
+         * @param trustedInstallers for checksums enforced by installer, which installers are to be
+         *                          trusted.
+         *                          {@link PackageManager#TRUST_ALL} will return checksums from any
+         *                          installer,
+         *                          {@link PackageManager#TRUST_NONE} disables optimized
+         *                          installer-enforced checksums, otherwise the list has to be
+         *                          a non-empty list of certificates.
+         * @param onChecksumsReadyListener called once when the results are available.
+         * @throws CertificateEncodingException if an encoding error occurs for trustedInstallers.
+         * @throws FileNotFoundException if the file does not exist.
+         * @throws IllegalArgumentException if the list of trusted installer certificates is empty.
+         */
+        public void requestChecksums(@NonNull String name, @Checksum.TypeMask int required,
+                @NonNull List<Certificate> trustedInstallers,
+                @NonNull PackageManager.OnChecksumsReadyListener onChecksumsReadyListener)
+                throws CertificateEncodingException, FileNotFoundException {
+            Objects.requireNonNull(name);
+            Objects.requireNonNull(onChecksumsReadyListener);
+            Objects.requireNonNull(trustedInstallers);
+            if (trustedInstallers == PackageManager.TRUST_ALL) {
+                trustedInstallers = null;
+            } else if (trustedInstallers == PackageManager.TRUST_NONE) {
+                trustedInstallers = Collections.emptyList();
+            } else if (trustedInstallers.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "trustedInstallers has to be one of TRUST_ALL/TRUST_NONE or a non-empty "
+                                + "list of certificates.");
+            }
+            try {
+                IOnChecksumsReadyListener onChecksumsReadyListenerDelegate =
+                        new IOnChecksumsReadyListener.Stub() {
+                            @Override
+                            public void onChecksumsReady(List<ApkChecksum> checksums)
+                                    throws RemoteException {
+                                onChecksumsReadyListener.onChecksumsReady(checksums);
+                            }
+                        };
+                mSession.requestChecksums(name, DEFAULT_CHECKSUMS, required,
+                        encodeCertificates(trustedInstallers), onChecksumsReadyListenerDelegate);
+            } catch (ParcelableException e) {
+                e.maybeRethrow(FileNotFoundException.class);
+                throw new RuntimeException(e);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

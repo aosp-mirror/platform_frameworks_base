@@ -123,6 +123,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     private static final String TAG = "PackageInstaller";
     private static final boolean LOGD = false;
 
+    private static final boolean DEBUG = Build.IS_DEBUGGABLE;
+
     // TODO: remove outstanding sessions when installer package goes away
     // TODO: notify listeners in other users when package has been installed there
     // TODO: purge expired sessions periodically in addition to at reboot
@@ -409,13 +411,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
         removeStagingDirs(unclaimedStagingDirsOnVolume);
-    }
-
-    public static boolean isStageName(String name) {
-        final boolean isFile = name.startsWith("vmdl") && name.endsWith(".tmp");
-        final boolean isContainer = name.startsWith("smdl") && name.endsWith(".tmp");
-        final boolean isLegacyContainer = name.startsWith("smdl2tmp");
-        return isFile || isContainer || isLegacyContainer;
     }
 
     @Deprecated
@@ -935,6 +930,23 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         throw new IllegalStateException("Failed to allocate session ID");
     }
 
+    static boolean isStageName(String name) {
+        final boolean isFile = name.startsWith("vmdl") && name.endsWith(".tmp");
+        final boolean isContainer = name.startsWith("smdl") && name.endsWith(".tmp");
+        final boolean isLegacyContainer = name.startsWith("smdl2tmp");
+        return isFile || isContainer || isLegacyContainer;
+    }
+
+    static int tryParseSessionId(@NonNull String tmpSessionDir)
+            throws IllegalArgumentException {
+        if (!tmpSessionDir.startsWith("vmdl") || !tmpSessionDir.endsWith(".tmp")) {
+            throw new IllegalArgumentException("Not a temporary session directory");
+        }
+        String sessionId = tmpSessionDir.substring("vmdl".length(),
+                tmpSessionDir.length() - ".tmp".length());
+        return Integer.parseInt(sessionId);
+    }
+
     private File getTmpSessionDir(String volumeUuid) {
         return Environment.getDataAppDirectory(volumeUuid);
     }
@@ -949,7 +961,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             final File sessionStagingDir = Environment.getDataStagingDirectory(params.volumeUuid);
             return new File(sessionStagingDir, "session_" + sessionId);
         }
-        return buildTmpSessionDir(sessionId, params.volumeUuid);
+        final File result = buildTmpSessionDir(sessionId, params.volumeUuid);
+        if (DEBUG && !Objects.equals(tryParseSessionId(result.getName()), sessionId)) {
+            throw new RuntimeException(
+                    "session folder format is off: " + result.getName() + " (" + sessionId + ")");
+        }
+        return result;
     }
 
     static void prepareStageDir(File stageDir) throws IOException {

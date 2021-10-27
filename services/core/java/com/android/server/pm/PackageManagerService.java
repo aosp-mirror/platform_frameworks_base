@@ -262,6 +262,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -554,6 +555,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final int REASON_LAST = REASON_SHARED;
 
     static final String RANDOM_DIR_PREFIX = "~~";
+    static final char RANDOM_CODEPATH_PREFIX = '-';
 
     final Handler mHandler;
 
@@ -1261,13 +1263,48 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public void requestChecksums(@NonNull String packageName, boolean includeSplits,
-            @Checksum.TypeMask int optional,
-            @Checksum.TypeMask int required, @Nullable List trustedInstallers,
+    public void requestPackageChecksums(@NonNull String packageName, boolean includeSplits,
+            @Checksum.TypeMask int optional, @Checksum.TypeMask int required,
+            @Nullable List trustedInstallers,
             @NonNull IOnChecksumsReadyListener onChecksumsReadyListener, int userId) {
         requestChecksumsInternal(packageName, includeSplits, optional, required, trustedInstallers,
                 onChecksumsReadyListener, userId, mInjector.getBackgroundExecutor(),
                 mInjector.getBackgroundHandler());
+    }
+
+    /**
+     * Requests checksums for the APK file.
+     * See {@link PackageInstaller.Session#requestChecksums} for details.
+     */
+    public void requestFileChecksums(@NonNull File file,
+            @NonNull String installerPackageName, @Checksum.TypeMask int optional,
+            @Checksum.TypeMask int required, @Nullable List trustedInstallers,
+            @NonNull IOnChecksumsReadyListener onChecksumsReadyListener)
+            throws FileNotFoundException {
+        if (!file.exists()) {
+            throw new FileNotFoundException(file.getAbsolutePath());
+        }
+        if (TextUtils.isEmpty(installerPackageName)) {
+            throw new FileNotFoundException(file.getAbsolutePath());
+        }
+
+        final Executor executor = mInjector.getBackgroundExecutor();
+        final Handler handler = mInjector.getBackgroundHandler();
+        final Certificate[] trustedCerts = (trustedInstallers != null) ? decodeCertificates(
+                trustedInstallers) : null;
+
+        final List<Pair<String, File>> filesToChecksum = new ArrayList<>(1);
+        filesToChecksum.add(Pair.create(null, file));
+
+        executor.execute(() -> {
+            ApkChecksums.Injector injector = new ApkChecksums.Injector(
+                    () -> mContext,
+                    () -> handler,
+                    () -> mInjector.getIncrementalManager(),
+                    () -> mPmInternal);
+            ApkChecksums.getChecksums(filesToChecksum, optional, required, installerPackageName,
+                    trustedCerts, onChecksumsReadyListener, injector);
+        });
     }
 
     private void requestChecksumsInternal(@NonNull String packageName, boolean includeSplits,
