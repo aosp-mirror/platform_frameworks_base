@@ -16,8 +16,6 @@
 
 package com.android.server.tare;
 
-import static android.text.format.DateUtils.HOUR_IN_MILLIS;
-
 import static com.android.server.tare.EconomicPolicy.REGULATION_BASIC_INCOME;
 import static com.android.server.tare.EconomicPolicy.REGULATION_BIRTHRIGHT;
 import static com.android.server.tare.EconomicPolicy.REGULATION_WEALTH_RECLAMATION;
@@ -68,12 +66,6 @@ class Agent {
     private static final String TAG = "TARE-" + Agent.class.getSimpleName();
     private static final boolean DEBUG = InternalResourceService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
-
-    /**
-     * The minimum amount of time an app must not have been used by the user before we start
-     * regularly reclaiming ARCs from it.
-     */
-    private static final long MIN_UNUSED_TIME_MS = 3 * 24 * HOUR_IN_MILLIS;
 
     private static final String ALARM_TAG_AFFORDABILITY_CHECK = "*tare.affordability_check*";
 
@@ -550,41 +542,62 @@ class Agent {
 
     /**
      * Reclaim a percentage of unused ARCs from every app that hasn't been used recently. The
-     * reclamation will not reduce an app's balance below its minimum balance as dictated by the
-     * EconomicPolicy.
+     * reclamation will not reduce an app's balance below its minimum balance as dictated by
+     * {@code scaleMinBalance}.
      *
-     * @param percentage A value between 0 and 1 to indicate how much of the unused balance should
-     *                   be reclaimed.
+     * @param percentage      A value between 0 and 1 to indicate how much of the unused balance
+     *                        should be reclaimed.
+     * @param minUnusedTimeMs The minimum amount of time (in milliseconds) that must have
+     *                        transpired since the last user usage event before we will consider
+     *                        reclaiming ARCs from the app.
+     * @param scaleMinBalance Whether or not to used the scaled minimum app balance. If false,
+     *                        this will use the constant min balance floor given by
+     *                        {@link EconomicPolicy#getMinSatiatedBalance(int, String)}. If true,
+     *                        this will use the scaled balance given by
+     *                        {@link InternalResourceService#getMinBalanceLocked(int, String)}.
      */
     @GuardedBy("mLock")
-    void reclaimUnusedAssetsLocked(double percentage) {
+    void reclaimUnusedAssetsLocked(double percentage, long minUnusedTimeMs,
+            boolean scaleMinBalance) {
         final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
-        final List<PackageInfo> pkgs = mIrs.getInstalledPackages();
+        final SparseArrayMap<String, Ledger> ledgers = mScribe.getLedgersLocked();
         final long now = getCurrentTimeMillis();
-        for (int i = 0; i < pkgs.size(); ++i) {
-            final int userId = UserHandle.getUserId(pkgs.get(i).applicationInfo.uid);
-            final String pkgName = pkgs.get(i).packageName;
-            final Ledger ledger = mScribe.getLedgerLocked(userId, pkgName);
-            // AppStandby only counts elapsed time for things like this
-            // TODO: should we use clock time instead?
-            final long timeSinceLastUsedMs =
-                    mAppStandbyInternal.getTimeSinceLastUsedByUser(pkgName, userId);
-            if (timeSinceLastUsedMs >= MIN_UNUSED_TIME_MS) {
-                // Use a constant floor instead of the scaled floor from the IRS.
-                final long minBalance = economicPolicy.getMinSatiatedBalance(userId, pkgName);
+        for (int u = 0; u < ledgers.numMaps(); ++u) {
+            final int userId = ledgers.keyAt(u);
+            for (int p = 0; p < ledgers.numElementsForKey(userId); ++p) {
+                final Ledger ledger = ledgers.valueAt(u, p);
                 final long curBalance = ledger.getCurrentBalance();
-                long toReclaim = (long) (curBalance * percentage);
-                if (curBalance - toReclaim < minBalance) {
-                    toReclaim = curBalance - minBalance;
+                if (curBalance <= 0) {
+                    continue;
                 }
-                if (toReclaim > 0) {
-                    Slog.i(TAG, "Reclaiming unused wealth! Taking " + toReclaim
-                            + " from " + appToString(userId, pkgName));
+                final String pkgName = ledgers.keyAt(u, p);
+                // AppStandby only counts elapsed time for things like this
+                // TODO: should we use clock time instead?
+                final long timeSinceLastUsedMs =
+                        mAppStandbyInternal.getTimeSinceLastUsedByUser(pkgName, userId);
+                if (timeSinceLastUsedMs >= minUnusedTimeMs) {
+                    final long minBalance;
+                    if (!scaleMinBalance) {
+                        // Use a constant floor instead of the scaled floor from the IRS.
+                        minBalance = economicPolicy.getMinSatiatedBalance(userId, pkgName);
+                    } else {
+                        minBalance = mIrs.getMinBalanceLocked(userId, pkgName);
+                    }
+                    long toReclaim = (long) (curBalance * percentage);
+                    if (curBalance - toReclaim < minBalance) {
+                        toReclaim = curBalance - minBalance;
+                    }
+                    if (toReclaim > 0) {
+                        if (DEBUG) {
+                            Slog.i(TAG, "Reclaiming unused wealth! Taking " + toReclaim
+                                    + " from " + appToString(userId, pkgName));
+                        }
 
-                    recordTransactionLocked(userId, pkgName, ledger,
-                            new Ledger.Transaction(
-                                    now, now, REGULATION_WEALTH_RECLAMATION, null, -toReclaim),
-                            true);
+                        recordTransactionLocked(userId, pkgName, ledger,
+                                new Ledger.Transaction(
+                                        now, now, REGULATION_WEALTH_RECLAMATION, null, -toReclaim),
+                                true);
+                    }
                 }
             }
         }

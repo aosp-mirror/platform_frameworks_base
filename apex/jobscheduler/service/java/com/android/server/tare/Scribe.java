@@ -147,6 +147,12 @@ public class Scribe {
         return ledger;
     }
 
+    @GuardedBy("mIrs.getLock()")
+    @NonNull
+    SparseArrayMap<String, Ledger> getLedgersLocked() {
+        return mLedgers;
+    }
+
     /** Returns the total amount of narcs currently allocated to apps. */
     @GuardedBy("mIrs.getLock()")
     long getNarcsInCirculationLocked() {
