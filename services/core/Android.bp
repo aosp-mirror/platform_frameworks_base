@@ -88,12 +88,21 @@ genrule {
     out: ["com/android/internal/art/ArtStatsLog.java"],
 }
 
+genrule {
+    name: "statslog-contexthub-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module contexthub" +
+        " --javaPackage com.android.server.location.contexthub --javaClass ContextHubStatsLog",
+    out: ["com/android/server/location/contexthub/ContextHubStatsLog.java"],
+}
+
 java_library_static {
     name: "services.core.unboosted",
     defaults: ["platform_service_defaults"],
     srcs: [
         ":android.hardware.biometrics.face-V1-java-source",
         ":statslog-art-java-gen",
+        ":statslog-contexthub-java-gen",
         ":services.core-sources",
         ":services.core.protologsrc",
         ":dumpstate_aidl",
