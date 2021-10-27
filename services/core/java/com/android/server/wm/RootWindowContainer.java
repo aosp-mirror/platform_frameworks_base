@@ -2639,6 +2639,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             token = new SleepToken(tag, displayId);
             mSleepTokens.put(tokenKey, token);
             display.mAllSleepTokens.add(token);
+            ProtoLog.d(WM_DEBUG_STATES, "Create sleep token: tag=%s, displayId=%d", tag, displayId);
         } else {
             throw new RuntimeException("Create the same sleep token twice: " + token);
         }
@@ -2657,6 +2658,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return;
         }
 
+        ProtoLog.d(WM_DEBUG_STATES, "Remove sleep token: tag=%s, displayId=%d", token.mTag,
+                token.mDisplayId);
         display.mAllSleepTokens.remove(token);
         if (display.mAllSleepTokens.isEmpty()) {
             mService.updateSleepIfNeededLocked();
@@ -3663,6 +3666,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         public String toString() {
             return "{\"" + mTag + "\", display " + mDisplayId
                     + ", acquire at " + TimeUtils.formatUptime(mAcquireTime) + "}";
+        }
+
+        void writeTagToProto(ProtoOutputStream proto, long fieldId) {
+            proto.write(fieldId, mTag);
         }
     }
 
