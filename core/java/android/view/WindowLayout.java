@@ -19,29 +19,44 @@ package android.view;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 
+import android.app.WindowConfiguration;
+import android.app.WindowConfiguration.WindowingMode;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.util.Log;
 
 /**
  * Computes window frames.
  * @hide
  */
 public class WindowLayout {
+    private static final String TAG = WindowLayout.class.getSimpleName();
+    private static final boolean DEBUG = false;
+
+    public static final int UNSPECIFIED_LENGTH = -1;
+
     private final Rect mTempDisplayCutoutSafeExceptMaybeBarsRect = new Rect();
     private final Rect mTempRect = new Rect();
 
     public boolean computeWindowFrames(WindowManager.LayoutParams attrs, InsetsState state,
-            Rect displayCutoutSafe, Rect windowBounds, InsetsVisibilities requestedVisibilities,
-            Rect attachedWindowFrame, Rect outDisplayFrame, Rect outParentFrame) {
+            Rect displayCutoutSafe, Rect windowBounds, @WindowingMode int windowingMode,
+            int requestedWidth, int requestedHeight, InsetsVisibilities requestedVisibilities,
+            Rect attachedWindowFrame, float compatScale, Rect outDisplayFrame, Rect outParentFrame,
+            Rect outFrame) {
         final int type = attrs.type;
         final int fl = attrs.flags;
         final int pfl = attrs.privateFlags;
@@ -72,18 +87,14 @@ public class WindowLayout {
         }
 
         // Compute bounds restricted by display cutout
+        final int cutoutMode = attrs.layoutInDisplayCutoutMode;
         final DisplayCutout cutout = state.getDisplayCutout();
-        if (cutout.isEmpty()) {
-            return false;
-        }
-        boolean clippedByDisplayCutout = false;
         final Rect displayCutoutSafeExceptMaybeBars = mTempDisplayCutoutSafeExceptMaybeBarsRect;
         displayCutoutSafeExceptMaybeBars.set(displayCutoutSafe);
-
-        // Ensure that windows with a non-ALWAYS display cutout mode are laid out in
-        // the cutout safe zone.
-        final int cutoutMode = attrs.layoutInDisplayCutoutMode;
-        if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
+        boolean clippedByDisplayCutout = false;
+        if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS && !cutout.isEmpty()) {
+            // Ensure that windows with a non-ALWAYS display cutout mode are laid out in
+            // the cutout safe zone.
             final Rect displayFrame = state.getDisplayFrame();
             final InsetsSource statusBarSource = state.peekSource(ITYPE_STATUS_BAR);
             if (statusBarSource != null && displayCutoutSafe.top > displayFrame.top) {
@@ -147,6 +158,118 @@ public class WindowLayout {
             }
             outDisplayFrame.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
         }
+
+        final boolean noLimits = (attrs.flags & FLAG_LAYOUT_NO_LIMITS) != 0;
+        final boolean inMultiWindowMode = WindowConfiguration.inMultiWindowMode(windowingMode);
+
+        // TYPE_SYSTEM_ERROR is above the NavigationBar so it can't be allowed to extend over it.
+        // Also, we don't allow windows in multi-window mode to extend out of the screen.
+        if (noLimits && type != TYPE_SYSTEM_ERROR && !inMultiWindowMode) {
+            outDisplayFrame.left = outDisplayFrame.top = -10000;
+            outDisplayFrame.right = outDisplayFrame.bottom = 10000;
+        }
+
+        final boolean hasCompatScale = compatScale != 1f;
+        final int pw = outParentFrame.width();
+        final int ph = outParentFrame.height();
+        int rw = requestedWidth;
+        int rh = requestedHeight;
+        float x, y;
+        int w, h;
+
+        // If the view hierarchy hasn't been measured, the requested width and height would be
+        // UNSPECIFIED_LENGTH. This can happen in the first layout of a window or in the simulated
+        // layout.
+        if (rw == UNSPECIFIED_LENGTH) {
+            rw = attrs.width >= 0 ? attrs.width : pw;
+        }
+        if (rh == UNSPECIFIED_LENGTH) {
+            rh = attrs.height >= 0 ? attrs.height : ph;
+        }
+
+        if ((attrs.flags & FLAG_SCALED) != 0) {
+            if (attrs.width < 0) {
+                w = pw;
+            } else if (hasCompatScale) {
+                w = (int) (attrs.width * compatScale + .5f);
+            } else {
+                w = attrs.width;
+            }
+            if (attrs.height < 0) {
+                h = ph;
+            } else if (hasCompatScale) {
+                h = (int) (attrs.height * compatScale + .5f);
+            } else {
+                h = attrs.height;
+            }
+        } else {
+            if (attrs.width == MATCH_PARENT) {
+                w = pw;
+            } else if (hasCompatScale) {
+                w = (int) (rw * compatScale + .5f);
+            } else {
+                w = rw;
+            }
+            if (attrs.height == MATCH_PARENT) {
+                h = ph;
+            } else if (hasCompatScale) {
+                h = (int) (rh * compatScale + .5f);
+            } else {
+                h = rh;
+            }
+        }
+
+        if (hasCompatScale) {
+            x = attrs.x * compatScale;
+            y = attrs.y * compatScale;
+        } else {
+            x = attrs.x;
+            y = attrs.y;
+        }
+
+        if (inMultiWindowMode
+                && (attrs.privateFlags & PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME) == 0) {
+            // Make sure window fits in parent frame since it is in a non-fullscreen task as
+            // required by {@link Gravity#apply} call.
+            w = Math.min(w, pw);
+            h = Math.min(h, ph);
+        }
+
+        // We need to fit it to the display if either
+        // a) The window is in a fullscreen container, or we don't have a task (we assume fullscreen
+        // for the taskless windows)
+        // b) If it's a secondary app window, we also need to fit it to the display unless
+        // FLAG_LAYOUT_NO_LIMITS is set. This is so we place Popups, dialogs, and similar windows on
+        // screen, but SurfaceViews want to be always at a specific location so we don't fit it to
+        // the display.
+        final boolean fitToDisplay = !inMultiWindowMode
+                || ((attrs.type != TYPE_BASE_APPLICATION) && !noLimits);
+
+        // Set mFrame
+        Gravity.apply(attrs.gravity, w, h, outParentFrame,
+                (int) (x + attrs.horizontalMargin * pw),
+                (int) (y + attrs.verticalMargin * ph), outFrame);
+        // Now make sure the window fits in the overall display frame.
+        if (fitToDisplay) {
+            Gravity.applyDisplay(attrs.gravity, outDisplayFrame, outFrame);
+        }
+
+        if (DEBUG) Log.d(TAG, "computeWindowFrames " + attrs.getTitle()
+                + " outFrame=" + outFrame.toShortString()
+                + " outParentFrame=" + outParentFrame.toShortString()
+                + " outDisplayFrame=" + outDisplayFrame.toShortString()
+                + " attachedWindowFrame=" + (attachedWindowFrame != null
+                        ? attachedWindowFrame.toShortString()
+                        : "null")
+                + " requestedWidth=" + requestedWidth
+                + " requestedHeight=" + requestedHeight
+                + " compatScale=" + compatScale
+                + " windowingMode=" + WindowConfiguration.windowingModeToString(windowingMode)
+                + " displayCutoutSafe=" + displayCutoutSafe
+                + " attrs=" + attrs
+                + " state=" + state
+                + " requestedVisibilities=" + requestedVisibilities);
+
         return clippedByDisplayCutout;
     }
 }
