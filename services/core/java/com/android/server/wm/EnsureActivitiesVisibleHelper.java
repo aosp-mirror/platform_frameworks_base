@@ -119,8 +119,12 @@ class EnsureActivitiesVisibleHelper {
 
                 if (adjacentTaskFragments != null && adjacentTaskFragments.contains(
                         childTaskFragment)) {
-                    // Everything behind two adjacent TaskFragments are occluded.
-                    mBehindFullyOccludedContainer = true;
+                    if (!childTaskFragment.isTranslucent(starting)
+                            && !childTaskFragment.getAdjacentTaskFragment().isTranslucent(
+                                    starting)) {
+                        // Everything behind two adjacent TaskFragments are occluded.
+                        mBehindFullyOccludedContainer = true;
+                    }
                     continue;
                 }
 
