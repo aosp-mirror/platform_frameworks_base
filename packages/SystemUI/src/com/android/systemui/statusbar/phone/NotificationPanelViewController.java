@@ -2522,7 +2522,7 @@ public class NotificationPanelViewController extends PanelViewController {
                     // qsTranslation should only be positive during pulse expansion because it's
                     // already translating in from the top
                     qsTranslation = Math.max(0, (top - mQs.getHeader().getHeight()) / 2.0f);
-                } else {
+                } else if (!mShouldUseSplitNotificationShade) {
                     qsTranslation = (top - mQs.getHeader().getHeight()) * QS_PARALLAX_AMOUNT;
                 }
             }
