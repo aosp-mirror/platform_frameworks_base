@@ -156,18 +156,21 @@ class StatusBarContentInsetsProvider @Inject constructor(
         val isRtl = rotatedResources.configuration.layoutDirection == LAYOUT_DIRECTION_RTL
         val roundedCornerPadding = rotatedResources
                 .getDimensionPixelSize(R.dimen.rounded_corner_content_padding)
-        val minDotWidth = if (isPrivacyDotEnabled)
+        val minDotPadding = if (isPrivacyDotEnabled)
                 rotatedResources.getDimensionPixelSize(R.dimen.ongoing_appops_dot_min_padding)
+            else 0
+        val dotWidth = if (isPrivacyDotEnabled)
+                rotatedResources.getDimensionPixelSize(R.dimen.ongoing_appops_dot_diameter)
             else 0
 
         val minLeft: Int
         val minRight: Int
         if (isRtl) {
-            minLeft = max(minDotWidth, roundedCornerPadding)
+            minLeft = max(minDotPadding, roundedCornerPadding)
             minRight = roundedCornerPadding
         } else {
             minLeft = roundedCornerPadding
-            minRight = max(minDotWidth, roundedCornerPadding)
+            minRight = max(minDotPadding, roundedCornerPadding)
         }
 
         return calculateInsetsForRotationWithRotatedResources(
@@ -177,7 +180,9 @@ class StatusBarContentInsetsProvider @Inject constructor(
                 context.resources.configuration.windowConfiguration.maxBounds,
                 SystemBarUtils.getStatusBarHeight(context),
                 minLeft,
-                minRight)
+                minRight,
+                isRtl,
+                dotWidth)
     }
 
     fun getStatusBarPaddingTop(@Rotation rotation: Int? = null): Int {
@@ -246,10 +251,13 @@ fun getPrivacyChipBoundingRectForInsets(
  *
  * @param currentRotation current device rotation
  * @param targetRotation rotation for which to calculate the status bar content rect
- * @param displayCutout [DisplayCutout] for the curren display. possibly null
+ * @param displayCutout [DisplayCutout] for the current display. possibly null
  * @param windowMetrics [WindowMetrics] for the current window
  * @param statusBarHeight height of the status bar for the target rotation
- * @param roundedCornerPadding from rounded_corner_content_padding
+ * @param minLeft the minimum padding to enforce on the left
+ * @param minRight the minimum padding to enforce on the right
+ * @param isRtl current layout direction is Right-To-Left or not
+ * @param dotWidth privacy dot image width (0 if privacy dot is disabled)
  *
  * @see [RotationUtils#getResourcesForRotation]
  */
@@ -260,7 +268,9 @@ fun calculateInsetsForRotationWithRotatedResources(
     maxBounds: Rect,
     statusBarHeight: Int,
     minLeft: Int,
-    minRight: Int
+    minRight: Int,
+    isRtl: Boolean,
+    dotWidth: Int
 ): Rect {
     /*
     TODO: Check if this is ever used for devices with no rounded corners
@@ -279,6 +289,8 @@ fun calculateInsetsForRotationWithRotatedResources(
             maxBounds.height(),
             minLeft,
             minRight,
+            isRtl,
+            dotWidth,
             targetRotation,
             currentRotation)
 
@@ -296,6 +308,8 @@ fun calculateInsetsForRotationWithRotatedResources(
  * @param cHeight display height in our current rotation
  * @param minLeft the minimum padding to enforce on the left
  * @param minRight the minimum padding to enforce on the right
+ * @param isRtl current layout direction is Right-To-Left or not
+ * @param dotWidth privacy dot image width (0 if privacy dot is disabled)
  * @param targetRotation the rotation for which to calculate margins
  * @param currentRotation the rotation from which the display cutout was generated
  *
@@ -311,6 +325,8 @@ private fun getStatusBarLeftRight(
     cHeight: Int,
     minLeft: Int,
     minRight: Int,
+    isRtl: Boolean,
+    dotWidth: Int,
     @Rotation targetRotation: Int,
     @Rotation currentRotation: Int
 ): Rect {
@@ -345,13 +361,16 @@ private fun getStatusBarLeftRight(
         }
 
         if (cutoutRect.touchesLeftEdge(relativeRotation, cWidth, cHeight)) {
-
-            val l = max(minLeft, cutoutRect.logicalWidth(relativeRotation))
-            leftMargin = max(l, leftMargin)
+            var logicalWidth = cutoutRect.logicalWidth(relativeRotation)
+            if (isRtl) logicalWidth += dotWidth
+            leftMargin = max(logicalWidth, leftMargin)
         } else if (cutoutRect.touchesRightEdge(relativeRotation, cWidth, cHeight)) {
-            val logicalWidth = cutoutRect.logicalWidth(relativeRotation)
-            rightMargin = max(minRight, logicalWidth)
+            var logicalWidth = cutoutRect.logicalWidth(relativeRotation)
+            if (!isRtl) logicalWidth += dotWidth
+            rightMargin = max(rightMargin, logicalWidth)
         }
+        // TODO(b/203626889): Fix the scenario when config_mainBuiltInDisplayCutoutRectApproximation
+        //                    is very close to but not directly touch edges.
     }
 
     return Rect(leftMargin, 0, logicalDisplayWidth - rightMargin, sbHeight)

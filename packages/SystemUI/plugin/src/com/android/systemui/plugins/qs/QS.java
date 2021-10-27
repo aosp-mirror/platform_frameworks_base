@@ -55,13 +55,14 @@ public interface QS extends FragmentBase {
 
     /**
      * Asks QS to update its presentation, according to {@code NotificationPanelViewController}.
-     *
      * @param qsExpansionFraction How much each UI element in QS should be expanded (QQS to QS.)
      * @param panelExpansionFraction Whats the expansion of the whole shade.
      * @param headerTranslation How much we should vertically translate QS.
+     * @param squishinessFraction Fraction that affects tile height. 0 when collapsed,
+     *                            1 when expanded.
      */
     void setQsExpansion(float qsExpansionFraction, float panelExpansionFraction,
-            float headerTranslation);
+            float headerTranslation, float squishinessFraction);
     void setHeaderListening(boolean listening);
     void notifyCustomizeChanged();
     void setContainerController(QSContainerController controller);

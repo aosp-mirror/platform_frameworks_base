@@ -112,20 +112,9 @@ class DeviceControlsTile @Inject constructor(
         }
 
         mUiHandler.post {
-            if (keyguardStateController.isUnlocked) {
-                mActivityStarter.startActivity(
-                        intent, true /* dismissShade */, animationController)
-            } else {
-                if (state.state == Tile.STATE_ACTIVE) {
-                    mHost.collapsePanels()
-                    // With an active tile, don't use ActivityStarter so that the activity is
-                    // started without prompting keyguard unlock.
-                    mContext.startActivity(intent)
-                } else {
-                    mActivityStarter.postStartActivityDismissingKeyguard(
-                            intent, 0 /* delay */, animationController)
-                }
-            }
+            val showOverLockscreenWhenLocked = state.state == Tile.STATE_ACTIVE
+            mActivityStarter.startActivity(
+                intent, true /* dismissShade */, animationController, showOverLockscreenWhenLocked)
         }
     }
 

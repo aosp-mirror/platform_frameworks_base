@@ -22,6 +22,7 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.hardware.biometrics.BiometricOverlayConstants
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
 import android.hardware.display.DisplayManager
 import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
@@ -181,6 +182,7 @@ class SidefpsController @Inject constructor(
 @BiometricOverlayConstants.ShowReason
 private fun Int.isReasonToShow(): Boolean = when (this) {
     REASON_AUTH_KEYGUARD -> false
+    REASON_AUTH_SETTINGS -> false
     else -> true
 }
 
