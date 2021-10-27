@@ -166,6 +166,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         updateListening();
     }
 
+    @Override
+    public void setSquishinessFraction(float squishinessFraction) {
+        // No-op, paged layouts are not squishy.
+    }
+
     private void updateListening() {
         for (TileLayout tilePage : mPages) {
             tilePage.setListening(tilePage.getParent() != null && mListening);

@@ -736,6 +736,11 @@ public class QSPanel extends LinearLayout implements Tunable {
         void setListening(boolean listening, UiEventLogger uiEventLogger);
 
         /**
+         * Sets a size modifier for the tile. Where 0 means collapsed, and 1 expanded.
+         */
+        void setSquishinessFraction(float squishinessFraction);
+
+        /**
          * Sets the minimum number of rows to show
          *
          * @param minRows the minimum.

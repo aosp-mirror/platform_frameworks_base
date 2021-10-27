@@ -82,6 +82,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     private QSAnimator mQSAnimator;
     private HeightListener mPanelView;
+    private QSSquishinessController mQSSquishinessController;
     protected QuickStatusBarHeader mHeader;
     protected NonInterceptingScrollView mQSPanelScrollView;
     private QSDetail mQSDetail;
@@ -91,6 +92,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private QSFooter mFooter;
     private float mLastQSExpansion = -1;
     private float mLastPanelFraction;
+    private float mSquishinessFraction = 1;
     private boolean mQsDisabled;
     private ImageView mQsDragHandler;
 
@@ -211,6 +213,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
         mQSDetail.setQsPanel(mQSPanelController, mHeader, mFooter, mFalsingManager);
         mQSAnimator = qsFragmentComponent.getQSAnimator();
+        mQSSquishinessController = qsFragmentComponent.getQSSquishinessController();
 
         mQSCustomizerController = qsFragmentComponent.getQSCustomizerController();
         mQSCustomizerController.init();
@@ -232,7 +235,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                     boolean sizeChanged = (oldTop - oldBottom) != (top - bottom);
                     if (sizeChanged) {
                         setQsExpansion(mLastQSExpansion, mLastPanelFraction,
-                                mLastHeaderTranslation);
+                                mLastHeaderTranslation, mSquishinessFraction);
                     }
                 });
         mQSPanelController.setUsingHorizontalLayoutChangeListener(
@@ -414,7 +417,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 mQSAnimator.setShowCollapsedOnKeyguard(showCollapsed);
             }
             if (!showCollapsed && isKeyguardState()) {
-                setQsExpansion(mLastQSExpansion, mLastPanelFraction, 0);
+                setQsExpansion(mLastQSExpansion, mLastPanelFraction, 0,
+                        mSquishinessFraction);
             }
         }
     }
@@ -495,12 +499,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             updateShowCollapsedOnKeyguard();
         }
         mFullShadeProgress = progress;
-        setQsExpansion(mLastQSExpansion, mLastPanelFraction, mLastHeaderTranslation);
+        setQsExpansion(mLastQSExpansion, mLastPanelFraction, mLastHeaderTranslation,
+                isTransitioningToFullShade ? progress : mSquishinessFraction);
     }
 
     @Override
     public void setQsExpansion(float expansion, float panelExpansionFraction,
-            float proposedTranslation) {
+            float proposedTranslation, float squishinessFraction) {
         float headerTranslation = mTransitioningToFullShade ? 0 : proposedTranslation;
         float progress = mTransitioningToFullShade ? mFullShadeProgress : panelExpansionFraction;
         setAlphaAnimationProgress(mInSplitShade ? progress : 1);
@@ -518,11 +523,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (expansion == mLastQSExpansion
                 && mLastKeyguardAndExpanded == onKeyguardAndExpanded
                 && mLastViewHeight == currentHeight
-                && mLastHeaderTranslation == headerTranslation) {
+                && mLastHeaderTranslation == headerTranslation
+                && mSquishinessFraction == squishinessFraction) {
             return;
         }
         mLastHeaderTranslation = headerTranslation;
         mLastPanelFraction = panelExpansionFraction;
+        mSquishinessFraction = squishinessFraction;
         mLastQSExpansion = expansion;
         mLastKeyguardAndExpanded = onKeyguardAndExpanded;
         mLastViewHeight = currentHeight;
@@ -558,6 +565,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
         updateQsBounds();
 
+        if (mQSSquishinessController != null) {
+            mQSSquishinessController.setSquishiness(mSquishinessFraction);
+        }
         if (mQSAnimator != null) {
             mQSAnimator.setPosition(expansion);
         }

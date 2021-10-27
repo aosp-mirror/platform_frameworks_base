@@ -110,6 +110,15 @@ public class StackScrollAlgorithm {
         getNotificationChildrenStates(algorithmState, ambientState);
     }
 
+    /**
+     * How expanded or collapsed notifications are when pulling down the shade.
+     * @param ambientState Current ambient state.
+     * @return 0 when fully collapsed, 1 when expanded.
+     */
+    public float getNotificationSquishinessFraction(AmbientState ambientState) {
+        return getExpansionFractionWithoutShelf(mTempAlgorithmState, ambientState);
+    }
+
     private void resetChildViewStates() {
         int numChildren = mHostView.getChildCount();
         for (int i = 0; i < numChildren; i++) {
@@ -364,7 +373,6 @@ public class StackScrollAlgorithm {
 
         final float stackHeight = ambientState.getStackHeight()  - shelfHeight - scrimPadding;
         final float stackEndHeight = ambientState.getStackEndHeight() - shelfHeight - scrimPadding;
-
         return stackHeight / stackEndHeight;
     }
 
