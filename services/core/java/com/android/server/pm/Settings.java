@@ -73,7 +73,6 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.service.pm.PackageServiceDumpProto;
@@ -1087,9 +1086,6 @@ public final class Settings implements Watchable, Snappable {
                 pkgSetting.setLegacyNativeLibraryPath(legacyNativeLibraryPath);
             }
             pkgSetting.setPath(codePath);
-            if (IncrementalManager.isIncrementalPath(codePath.getAbsolutePath())) {
-                pkgSetting.setIncrementalStates(new IncrementalStates());
-            }
         }
         // If what we are scanning is a system (and possibly privileged) package,
         // then make it so, regardless of whether it was previously installed only
@@ -2708,8 +2704,7 @@ public final class Settings implements Watchable, Snappable {
         } else {
             serializer.attributeInt(null, "sharedUserId", pkg.getAppId());
         }
-        serializer.attributeFloat(null, "loadingProgress",
-                pkg.getIncrementalStates().getIncrementalStatesInfo().getProgress());
+        serializer.attributeFloat(null, "loadingProgress", pkg.getLoadingProgress());
 
         writeUsesStaticLibLPw(serializer, pkg.usesStaticLibraries, pkg.usesStaticLibrariesVersions);
 
@@ -2784,8 +2779,7 @@ public final class Settings implements Watchable, Snappable {
         if (pkg.isPackageLoading()) {
             serializer.attributeBoolean(null, "isLoading", true);
         }
-        serializer.attributeFloat(null, "loadingProgress",
-                pkg.getIncrementalStates().getIncrementalStatesInfo().getProgress());
+        serializer.attributeFloat(null, "loadingProgress", pkg.getLoadingProgress());
 
         serializer.attribute(null, "domainSetId", pkg.getDomainSetId().toString());
 
@@ -3531,7 +3525,6 @@ public final class Settings implements Watchable, Snappable {
         PackageSetting packageSetting = null;
         long versionCode = 0;
         boolean installedForceQueryable = false;
-        boolean isLoading = false;
         float loadingProgress = 0;
         UUID domainSetId;
         try {
@@ -3549,7 +3542,6 @@ public final class Settings implements Watchable, Snappable {
             cpuAbiOverrideString = parser.getAttributeValue(null, "cpuAbiOverride");
             updateAvailable = parser.getAttributeBoolean(null, "updateAvailable", false);
             installedForceQueryable = parser.getAttributeBoolean(null, "forceQueryable", false);
-            isLoading = parser.getAttributeBoolean(null, "isLoading", false);
             loadingProgress = parser.getAttributeFloat(null, "loadingProgress", 0);
 
             if (primaryCpuAbiString == null && legacyCpuAbiString != null) {
@@ -3706,7 +3698,7 @@ public final class Settings implements Watchable, Snappable {
                     .setSecondaryCpuAbi(secondaryCpuAbiString)
                     .setUpdateAvailable(updateAvailable)
                     .setForceQueryableOverride(installedForceQueryable)
-                    .setIncrementalStates(new IncrementalStates(isLoading, loadingProgress));
+                    .setLoadingProgress(loadingProgress);
             // Handle legacy string here for single-user mode
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
@@ -4681,8 +4673,7 @@ public final class Settings implements Watchable, Snappable {
         }
         if (ps.isPackageLoading()) {
             pw.print(prefix); pw.println("  loadingProgress=" +
-                    (int) (ps.getIncrementalStates().getIncrementalStatesInfo().getProgress()
-                            * 100) + "%");
+                    (int) (ps.getLoadingProgress() * 100) + "%");
         }
         if (ps.getVolumeUuid() != null) {
             pw.print(prefix); pw.print("  volumeUuid=");
