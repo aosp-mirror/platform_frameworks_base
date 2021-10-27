@@ -181,10 +181,15 @@ public final class MediaCodecInfo {
         public String mName;
         public int mValue;
         public boolean mDefault;
+        public boolean mInternal;
         public Feature(String name, int value, boolean def) {
+            this(name, value, def, false /* internal */);
+        }
+        public Feature(String name, int value, boolean def, boolean internal) {
             mName = name;
             mValue = value;
             mDefault = def;
+            mInternal = internal;
         }
     }
 
@@ -571,6 +576,11 @@ public final class MediaCodecInfo {
         public static final String FEATURE_LowLatency = "low-latency";
 
         /**
+         * Do not include in REGULAR_CODECS list in MediaCodecList.
+         */
+        private static final String FEATURE_SpecialCodec = "special-codec";
+
+        /**
          * <b>video encoder only</b>: codec supports quantization parameter bounds.
          * @see MediaFormat#KEY_VIDEO_QP_MAX
          * @see MediaFormat#KEY_VIDEO_QP_MIN
@@ -608,6 +618,8 @@ public final class MediaCodecInfo {
             new Feature(FEATURE_MultipleFrames,   (1 << 5), false),
             new Feature(FEATURE_DynamicTimestamp, (1 << 6), false),
             new Feature(FEATURE_LowLatency,       (1 << 7), true),
+            // feature to exclude codec from REGULAR codec list
+            new Feature(FEATURE_SpecialCodec,     (1 << 30), false, true),
         };
 
         private static final Feature[] encoderFeatures = {
@@ -615,6 +627,8 @@ public final class MediaCodecInfo {
             new Feature(FEATURE_MultipleFrames, (1 << 1), false),
             new Feature(FEATURE_DynamicTimestamp, (1 << 2), false),
             new Feature(FEATURE_QpBounds, (1 << 3), false),
+            // feature to exclude codec from REGULAR codec list
+            new Feature(FEATURE_SpecialCodec,     (1 << 30), false, true),
         };
 
         /** @hide */
@@ -622,7 +636,9 @@ public final class MediaCodecInfo {
             Feature[] features = getValidFeatures();
             String[] res = new String[features.length];
             for (int i = 0; i < res.length; i++) {
-                res[i] = features[i].mName;
+                if (!features[i].mInternal) {
+                    res[i] = features[i].mName;
+                }
             }
             return res;
         }
@@ -770,6 +786,10 @@ public final class MediaCodecInfo {
 
             // check feature support
             for (Feature feat: getValidFeatures()) {
+                if (feat.mInternal) {
+                    continue;
+                }
+
                 Integer yesNo = (Integer)map.get(MediaFormat.KEY_FEATURE_ + feat.mName);
                 if (yesNo == null) {
                     continue;
@@ -1083,7 +1103,9 @@ public final class MediaCodecInfo {
                     mFlagsRequired |= feat.mValue;
                 }
                 mFlagsSupported |= feat.mValue;
-                mDefaultFormat.setInteger(key, 1);
+                if (!feat.mInternal) {
+                    mDefaultFormat.setInteger(key, 1);
+                }
                 // TODO restrict features by mFlagsVerified once all codecs reliably verify them
             }
         }
