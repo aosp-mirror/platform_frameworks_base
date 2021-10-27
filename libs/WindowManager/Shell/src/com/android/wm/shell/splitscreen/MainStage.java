@@ -19,11 +19,13 @@ package com.android.wm.shell.splitscreen;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import android.annotation.Nullable;
+import android.content.Context;
 import android.graphics.Rect;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
@@ -37,11 +39,11 @@ class MainStage extends StageTaskListener {
 
     private boolean mIsActive = false;
 
-    MainStage(ShellTaskOrganizer taskOrganizer, int displayId,
+    MainStage(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession,
+            SurfaceSession surfaceSession, IconProvider iconProvider,
             @Nullable StageTaskUnfoldController stageTaskUnfoldController) {
-        super(taskOrganizer, displayId, callbacks, syncQueue, surfaceSession,
+        super(context, taskOrganizer, displayId, callbacks, syncQueue, surfaceSession, iconProvider,
                 stageTaskUnfoldController);
     }
 
