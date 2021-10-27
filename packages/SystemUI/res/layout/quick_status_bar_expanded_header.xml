@@ -63,7 +63,7 @@
                 android:id="@+id/qqs_footer_actions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/qqs_layout_margin_top"
                 android:layout_marginStart="@dimen/qs_footer_margin"
                 android:layout_marginEnd="@dimen/qs_footer_margin"
                 />
