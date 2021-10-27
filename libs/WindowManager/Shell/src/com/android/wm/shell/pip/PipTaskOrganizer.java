@@ -1292,13 +1292,17 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
         Rect baseBounds = direction == TRANSITION_DIRECTION_SNAP_AFTER_RESIZE
                 ? mPipBoundsState.getBounds() : currentBounds;
+        final boolean existingAnimatorRunning = mPipAnimationController.getCurrentAnimator() != null
+                && mPipAnimationController.getCurrentAnimator().isRunning();
         final PipAnimationController.PipTransitionAnimator<?> animator = mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, baseBounds, currentBounds, destinationBounds,
                         sourceHintRect, direction, startingAngle, rotationDelta);
         animator.setTransitionDirection(direction)
-                .setPipAnimationCallback(mPipAnimationCallback)
                 .setPipTransactionHandler(mPipTransactionHandler)
                 .setDuration(durationMs);
+        if (!existingAnimatorRunning) {
+            animator.setPipAnimationCallback(mPipAnimationCallback);
+        }
         if (isInPipDirection(direction)) {
             // Similar to auto-enter-pip transition, we use content overlay when there is no
             // source rect hint to enter PiP use bounds animation.

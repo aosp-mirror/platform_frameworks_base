@@ -116,6 +116,12 @@ public class PipTransition extends PipTransitionController {
         if (mExitTransition == transition || info.getType() == TRANSIT_EXIT_PIP) {
             mExitTransition = null;
             if (info.getChanges().size() == 1) {
+                if (mFinishCallback != null) {
+                    mFinishCallback.onTransitionFinished(null, null);
+                    mFinishCallback = null;
+                    throw new RuntimeException("Previous callback not called, aborting exit PIP.");
+                }
+
                 final TransitionInfo.Change change = info.getChanges().get(0);
                 mFinishCallback = finishCallback;
                 startTransaction.apply();
@@ -129,6 +135,12 @@ public class PipTransition extends PipTransitionController {
         }
 
         if (info.getType() == TRANSIT_REMOVE_PIP) {
+            if (mFinishCallback != null) {
+                mFinishCallback.onTransitionFinished(null /* wct */, null /* callback */);
+                mFinishCallback = null;
+                throw new RuntimeException("Previous callback not called, aborting remove PIP.");
+            }
+
             startTransaction.apply();
             finishTransaction.setWindowCrop(info.getChanges().get(0).getLeash(),
                     mPipBoundsState.getDisplayBounds());
@@ -157,6 +169,12 @@ public class PipTransition extends PipTransitionController {
         }
         if (enterPip == null) {
             return false;
+        }
+
+        if (mFinishCallback != null) {
+            mFinishCallback.onTransitionFinished(null /* wct */, null /* callback */);
+            mFinishCallback = null;
+            throw new RuntimeException("Previous callback not called, aborting entering PIP.");
         }
 
         // Show the wallpaper if there is a wallpaper change.
@@ -231,7 +249,7 @@ public class PipTransition extends PipTransitionController {
             if (tx != null) {
                 wct.setBoundsChangeTransaction(taskInfo.token, tx);
             }
-            mFinishCallback.onTransitionFinished(wct, null /* wctCallback */);
+            mFinishCallback.onTransitionFinished(wct, null /* callback */);
             mFinishCallback = null;
         }
         finishResizeForMenu(destinationBounds);
@@ -240,7 +258,7 @@ public class PipTransition extends PipTransitionController {
     @Override
     public void forceFinishTransition() {
         if (mFinishCallback == null) return;
-        mFinishCallback.onTransitionFinished(null /* wct */, null /* wctCallback */);
+        mFinishCallback.onTransitionFinished(null /* wct */, null /* callback */);
         mFinishCallback = null;
     }
 
@@ -286,7 +304,6 @@ public class PipTransition extends PipTransitionController {
             mPipBoundsState.setBounds(destinationBounds);
             onFinishResize(taskInfo, destinationBounds, TRANSITION_DIRECTION_TO_PIP, null /* tx */);
             sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
-            mFinishCallback = null;
             mPipTransitionState.setInSwipePipToHomeTransition(false);
             return true;
         }
