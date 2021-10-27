@@ -1,6 +1,3 @@
-# Default reviewers for this and subdirectories.
-takaoka@google.com
-yukawa@google.com
-wilsonwu@google.com
+# Bug component: 34867
 
-# Emergency approvers in case the above are not available
+include platform/frameworks/base:/services/core/java/com/android/server/inputmethod/OWNERS
