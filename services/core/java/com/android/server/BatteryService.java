@@ -81,8 +81,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -1435,11 +1433,7 @@ public final class BatteryService extends SystemService {
      */
     public static final class HealthServiceWrapper {
         private static final String TAG = "HealthServiceWrapper";
-        public static final String INSTANCE_HEALTHD = "backup";
         public static final String INSTANCE_VENDOR = "default";
-        // All interesting instances, sorted by priority high -> low.
-        private static final List<String> sAllInstances =
-                Arrays.asList(INSTANCE_VENDOR, INSTANCE_HEALTHD);
 
         private final IServiceNotification mNotification = new Notification();
         private final HandlerThread mHandlerThread = new HandlerThread("HealthServiceHwbinder");
@@ -1471,8 +1465,8 @@ public final class BatteryService extends SystemService {
         }
 
         /**
-         * Start monitoring registration of new IHealth services. Only instances that are in
-         * {@code sAllInstances} and in device / framework manifest are used. This function should
+         * Start monitoring registration of new IHealth services. Only instance
+         * {@link #INSTANCE_VENDOR} and in device / framework manifest are used. This function should
          * only be called once.
          *
          * mCallback.onRegistration() is called synchronously (aka in init thread) before
@@ -1481,7 +1475,7 @@ public final class BatteryService extends SystemService {
          * @throws RemoteException transaction error when talking to IServiceManager
          * @throws NoSuchElementException if one of the following cases:
          *         - No service manager;
-         *         - none of {@code sAllInstances} are in manifests (i.e. not
+         *         - {@link #INSTANCE_VENDOR} is not in manifests (i.e. not
          *           available on this device), or none of these instances are available to current
          *           process.
          * @throws NullPointerException when supplier is null
@@ -1499,26 +1493,23 @@ public final class BatteryService extends SystemService {
 
             // Initialize mLastService and call callback for the first time (in init thread)
             IHealth newService = null;
-            for (String name : sAllInstances) {
-                traceBegin("HealthInitGetService_" + name);
-                try {
-                    newService = healthSupplier.get(name);
-                } catch (NoSuchElementException ex) {
-                    /* ignored, handled below */
-                } finally {
-                    traceEnd();
-                }
-                if (newService != null) {
-                    mInstanceName = name;
-                    mLastService.set(newService);
-                    break;
-                }
+            traceBegin("HealthInitGetService_" + INSTANCE_VENDOR);
+            try {
+                newService = healthSupplier.get(INSTANCE_VENDOR);
+            } catch (NoSuchElementException ex) {
+                /* ignored, handled below */
+            } finally {
+                traceEnd();
+            }
+            if (newService != null) {
+                mInstanceName = INSTANCE_VENDOR;
+                mLastService.set(newService);
             }
 
             if (mInstanceName == null || newService == null) {
                 throw new NoSuchElementException(String.format(
-                        "No IHealth service instance among %s is available. Perhaps no permission?",
-                        sAllInstances.toString()));
+                        "IHealth service instance %s isn't available. Perhaps no permission?",
+                        INSTANCE_VENDOR));
             }
 
             if (callback != null) {
