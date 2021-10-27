@@ -5013,9 +5013,19 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    /** @see AudioManager#playSoundEffect(int) */
-    public void playSoundEffect(int effectType) {
-        playSoundEffectVolume(effectType, -1.0f);
+    /** @see AudioManager#playSoundEffect(int, int) */
+    public void playSoundEffect(int effectType, int userId) {
+        if (querySoundEffectsEnabled(userId)) {
+            playSoundEffectVolume(effectType, -1.0f);
+        }
+    }
+
+    /**
+     * Settings has an in memory cache, so this is fast.
+     */
+    private boolean querySoundEffectsEnabled(int user) {
+        return Settings.System.getIntForUser(getContentResolver(),
+                Settings.System.SOUND_EFFECTS_ENABLED, 0, user) != 0;
     }
 
     /** @see AudioManager#playSoundEffect(int, float) */

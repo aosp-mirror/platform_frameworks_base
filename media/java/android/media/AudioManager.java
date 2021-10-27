@@ -55,12 +55,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -3508,20 +3506,7 @@ public class AudioManager {
      * whether sounds are heard or not.
      */
     public void playSoundEffect(@SystemSoundEffect int effectType) {
-        if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {
-            return;
-        }
-
-        if (!querySoundEffectsEnabled(Process.myUserHandle().getIdentifier())) {
-            return;
-        }
-
-        final IAudioService service = getService();
-        try {
-            service.playSoundEffect(effectType);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        playSoundEffect(effectType, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -3537,13 +3522,9 @@ public class AudioManager {
             return;
         }
 
-        if (!querySoundEffectsEnabled(userId)) {
-            return;
-        }
-
         final IAudioService service = getService();
         try {
-            service.playSoundEffect(effectType);
+            service.playSoundEffect(effectType, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3569,14 +3550,6 @@ public class AudioManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Settings has an in memory cache, so this is fast.
-     */
-    private boolean querySoundEffectsEnabled(int user) {
-        return Settings.System.getIntForUser(getContext().getContentResolver(),
-                Settings.System.SOUND_EFFECTS_ENABLED, 0, user) != 0;
     }
 
     /**
