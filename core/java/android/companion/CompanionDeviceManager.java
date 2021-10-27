@@ -319,13 +319,13 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Gets all package-device {@link Association}s for the current user.
+     * Gets all package-device {@link AssociationInfo}s for the current user.
      *
      * @return the associations list
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
-    public @NonNull List<Association> getAllAssociations() {
+    public @NonNull List<AssociationInfo> getAllAssociations() {
         if (!checkFeaturePresent()) {
             return Collections.emptyList();
         }

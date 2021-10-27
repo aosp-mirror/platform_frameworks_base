@@ -56,7 +56,7 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
-import android.companion.Association;
+import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.DeviceId;
 import android.companion.DeviceNotAssociatedException;
@@ -182,7 +182,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
     /** Maps a {@link UserIdInt} to a set of associations for the user. */
     @GuardedBy("mLock")
-    private final SparseArray<Set<Association>> mCachedAssociations = new SparseArray<>();
+    private final SparseArray<Set<AssociationInfo>> mCachedAssociations = new SparseArray<>();
     /**
      * A structure that consist of two nested maps, and effectively maps (userId + packageName) to
      * a list of IDs that have been previously assigned to associations for that package.
@@ -270,7 +270,7 @@ public class CompanionDeviceManagerService extends SystemService {
     @Override
     public void onUserUnlocking(@NonNull TargetUser user) {
         int userHandle = user.getUserIdentifier();
-        Set<Association> associations = getAllAssociations(userHandle);
+        Set<AssociationInfo> associations = getAllAssociations(userHandle);
         if (associations == null || associations.isEmpty()) {
             return;
         }
@@ -293,11 +293,11 @@ public class CompanionDeviceManagerService extends SystemService {
             }
 
             try {
-                Set<Association> associations = getAllAssociations(userId);
+                Set<AssociationInfo> associations = getAllAssociations(userId);
                 if (associations == null) {
                     continue;
                 }
-                for (Association a : associations) {
+                for (AssociationInfo a : associations) {
                     try {
                         int uid = pm.getPackageUidAsUser(a.getPackageName(), userId);
                         exemptFromAutoRevoke(a.getPackageName(), uid);
@@ -355,7 +355,7 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        public List<Association> getAssociationsForUser(int userId) {
+        public List<AssociationInfo> getAssociationsForUser(int userId) {
             if (!callerCanManageCompanionDevices()) {
                 throw new SecurityException("Caller must hold "
                         + android.Manifest.permission.MANAGE_COMPANION_DEVICES);
@@ -467,7 +467,7 @@ public class CompanionDeviceManagerService extends SystemService {
             checkCallerIsSystemOr(packageName);
 
             int userId = getCallingUserId();
-            Set<Association> deviceAssociations = filter(
+            Set<AssociationInfo> deviceAssociations = filter(
                     getAllAssociations(userId, packageName),
                     association -> deviceAddress.equals(association.getDeviceMacAddress()));
 
@@ -619,7 +619,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
     void createAssociationInternal(
             int userId, String deviceMacAddress, String packageName, String deviceProfile) {
-        final Association association = new Association(
+        final AssociationInfo association = new AssociationInfo(
                 getNewAssociationIdForPackage(userId, packageName),
                 userId,
                 packageName,
@@ -648,7 +648,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
             // First: collect all IDs currently in use for this user's Associations.
             final SparseBooleanArray usedIds = new SparseBooleanArray();
-            for (Association it : getAllAssociations(userId)) {
+            for (AssociationInfo it : getAllAssociations(userId)) {
                 usedIds.put(it.getAssociationId(), true);
             }
 
@@ -698,7 +698,7 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    void onAssociationPreRemove(Association association) {
+    void onAssociationPreRemove(AssociationInfo association) {
         if (association.isNotifyOnDeviceNearby()) {
             mCompanionDevicePresenceController.unbindDevicePresenceListener(
                     association.getPackageName(), association.getUserId());
@@ -706,7 +706,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
         String deviceProfile = association.getDeviceProfile();
         if (deviceProfile != null) {
-            Association otherAssociationWithDeviceProfile = find(
+            AssociationInfo otherAssociationWithDeviceProfile = find(
                     getAllAssociations(association.getUserId()),
                     a -> !a.equals(association) && deviceProfile.equals(a.getDeviceProfile()));
             if (otherAssociationWithDeviceProfile != null) {
@@ -737,7 +737,7 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    private void updateSpecialAccessPermissionForAssociatedPackage(Association association) {
+    private void updateSpecialAccessPermissionForAssociatedPackage(AssociationInfo association) {
         PackageInfo packageInfo = getPackageInfo(
                 association.getPackageName(),
                 association.getUserId());
@@ -751,7 +751,7 @@ public class CompanionDeviceManagerService extends SystemService {
     }
 
     private void updateSpecialAccessPermissionAsSystem(
-            Association association, PackageInfo packageInfo) {
+            AssociationInfo association, PackageInfo packageInfo) {
         if (containsEither(packageInfo.requestedPermissions,
                 android.Manifest.permission.RUN_IN_BACKGROUND,
                 android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND)) {
@@ -816,20 +816,20 @@ public class CompanionDeviceManagerService extends SystemService {
         }, getContext(), packageName, userId).recycleOnUse());
     }
 
-    private void recordAssociation(Association association, int userId) {
+    private void recordAssociation(AssociationInfo association, int userId) {
         Slog.i(LOG_TAG, "recordAssociation(" + association + ")");
         updateAssociations(associations -> add(associations, association), userId);
     }
 
-    private void updateAssociations(Function<Set<Association>, Set<Association>> update,
+    private void updateAssociations(Function<Set<AssociationInfo>, Set<AssociationInfo>> update,
             int userId) {
         synchronized (mLock) {
             if (DEBUG) Slog.d(LOG_TAG, "Updating Associations set...");
 
-            final Set<Association> prevAssociations = getAllAssociations(userId);
+            final Set<AssociationInfo> prevAssociations = getAllAssociations(userId);
             if (DEBUG) Slog.d(LOG_TAG, "  > Before : " + prevAssociations + "...");
 
-            final Set<Association> updatedAssociations = update.apply(
+            final Set<AssociationInfo> updatedAssociations = update.apply(
                     new ArraySet<>(prevAssociations));
             if (DEBUG) Slog.d(LOG_TAG, "  > After: " + updatedAssociations);
 
@@ -846,9 +846,9 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    private void updateAtm(int userId, Set<Association> associations) {
+    private void updateAtm(int userId, Set<AssociationInfo> associations) {
         final Set<Integer> companionAppUids = new ArraySet<>();
-        for (Association association : associations) {
+        for (AssociationInfo association : associations) {
             final int uid = mPackageManagerInternal.getPackageUid(association.getPackageName(),
                     0, userId);
             if (uid >= 0) {
@@ -864,7 +864,7 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    @NonNull Set<Association> getAllAssociations(int userId) {
+    @NonNull Set<AssociationInfo> getAllAssociations(int userId) {
         synchronized (mLock) {
             readPersistedStateForUserIfNeededLocked(userId);
             // This returns non-null, because the readAssociationsInfoForUserIfNeededLocked() method
@@ -879,7 +879,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
         Slog.i(LOG_TAG, "Reading state for user " + userId + "  from the disk");
 
-        final Set<Association> associations = new ArraySet<>();
+        final Set<AssociationInfo> associations = new ArraySet<>();
         final Map<String, Set<Integer>> previouslyUsedIds = new ArrayMap<>();
         mPersistentDataStore.readStateForUser(userId, associations, previouslyUsedIds);
 
@@ -901,17 +901,17 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    Set<Association> getAllAssociations(int userId, @Nullable String packageFilter) {
+    Set<AssociationInfo> getAllAssociations(int userId, @Nullable String packageFilter) {
         return filter(
                 getAllAssociations(userId),
                 // Null filter == get all associations
                 a -> packageFilter == null || Objects.equals(packageFilter, a.getPackageName()));
     }
 
-    private Set<Association> getAllAssociations() {
+    private Set<AssociationInfo> getAllAssociations() {
         final long identity = Binder.clearCallingIdentity();
         try {
-            ArraySet<Association> result = new ArraySet<>();
+            ArraySet<AssociationInfo> result = new ArraySet<>();
             for (UserInfo user : mUserManager.getAliveUsers()) {
                 result.addAll(getAllAssociations(user.id));
             }
@@ -921,7 +921,7 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    private Set<Association> getAllAssociations(
+    private Set<AssociationInfo> getAllAssociations(
             int userId, @Nullable String packageFilter, @Nullable String addressFilter) {
         return filter(
                 getAllAssociations(userId),
@@ -937,7 +937,7 @@ public class CompanionDeviceManagerService extends SystemService {
         mCurrentlyConnectedDevices.add(address);
 
         for (UserInfo user : getAllUsers()) {
-            for (Association association : getAllAssociations(user.id)) {
+            for (AssociationInfo association : getAllAssociations(user.id)) {
                 if (Objects.equals(address, association.getDeviceMacAddress())) {
                     if (association.getDeviceProfile() != null) {
                         Slog.i(LOG_TAG, "Granting role " + association.getDeviceProfile()
@@ -952,7 +952,7 @@ public class CompanionDeviceManagerService extends SystemService {
         onDeviceNearby(address);
     }
 
-    private void grantDeviceProfile(Association association) {
+    private void grantDeviceProfile(AssociationInfo association) {
         Slog.i(LOG_TAG, "grantDeviceProfile(association = " + association + ")");
 
         if (association.getDeviceProfile() != null) {
@@ -1059,7 +1059,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 Date lastNearby = mDevicesLastNearby.valueAt(i);
 
                 if (isDeviceDisappeared(lastNearby)) {
-                    for (Association association : getAllAssociations(address)) {
+                    for (AssociationInfo association : getAllAssociations(address)) {
                         if (association.isNotifyOnDeviceNearby()) {
                             mCompanionDevicePresenceController.unbindDevicePresenceListener(
                                     association.getPackageName(), association.getUserId());
@@ -1101,12 +1101,12 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    private Set<Association> getAllAssociations(String deviceAddress) {
+    private Set<AssociationInfo> getAllAssociations(String deviceAddress) {
         List<UserInfo> aliveUsers = mUserManager.getAliveUsers();
-        Set<Association> result = new ArraySet<>();
+        Set<AssociationInfo> result = new ArraySet<>();
         for (int i = 0, size = aliveUsers.size(); i < size; i++) {
             UserInfo user = aliveUsers.get(i);
-            for (Association association : getAllAssociations(user.id)) {
+            for (AssociationInfo association : getAllAssociations(user.id)) {
                 if (Objects.equals(association.getDeviceMacAddress(), deviceAddress)) {
                     result.add(association);
                 }
@@ -1130,7 +1130,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 || timestamp.getTime() - oldTimestamp.getTime() >= DEVICE_DISAPPEARED_TIMEOUT_MS;
         if (justAppeared) {
             Slog.i(LOG_TAG, "onDeviceNearby(justAppeared, address = " + address + ")");
-            for (Association association : getAllAssociations(address)) {
+            for (AssociationInfo association : getAllAssociations(address)) {
                 if (association.isNotifyOnDeviceNearby()) {
                     mCompanionDevicePresenceController.onDeviceNotifyAppeared(association,
                             getContext(), mMainHandler);
@@ -1143,7 +1143,7 @@ public class CompanionDeviceManagerService extends SystemService {
         Slog.i(LOG_TAG, "onDeviceDisappeared(address = " + address + ")");
 
         boolean hasDeviceListeners = false;
-        for (Association association : getAllAssociations(address)) {
+        for (AssociationInfo association : getAllAssociations(address)) {
             if (association.isNotifyOnDeviceNearby()) {
                 mCompanionDevicePresenceController.onDeviceNotifyDisappeared(
                         association, getContext(), mMainHandler);
@@ -1212,7 +1212,7 @@ public class CompanionDeviceManagerService extends SystemService {
     private List<ScanFilter> getBleScanFilters() {
         ArrayList<ScanFilter> result = new ArrayList<>();
         ArraySet<String> addressesSeen = new ArraySet<>();
-        for (Association association : getAllAssociations()) {
+        for (AssociationInfo association : getAllAssociations()) {
             String address = association.getDeviceMacAddress();
             if (addressesSeen.contains(address)) {
                 continue;
