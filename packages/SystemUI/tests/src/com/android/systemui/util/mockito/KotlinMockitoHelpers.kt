@@ -58,3 +58,24 @@ fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
  */
 inline fun <reified T : Any> argumentCaptor(): ArgumentCaptor<T> =
         ArgumentCaptor.forClass(T::class.java)
+
+/**
+ * Helper function for creating new mocks, without the need to pass in a [Class] instance.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ */
+inline fun <reified T : Any> mock(): T = Mockito.mock(T::class.java)
+
+/**
+ * Helper function for creating and using a single-use ArgumentCaptor in kotlin.
+ *
+ *    val captor = argumentCaptor<Foo>()
+ *    verify(...).someMethod(captor.capture())
+ *    val captured = captor.value
+ *
+ * becomes:
+ *
+ *    val captured = withArgCaptor<Foo> { verify(...).someMethod(capture()) }
+ */
+inline fun <reified T : Any> withArgCaptor(block: ArgumentCaptor<T>.() -> Unit): T =
+        argumentCaptor<T>().apply { block() }.value
