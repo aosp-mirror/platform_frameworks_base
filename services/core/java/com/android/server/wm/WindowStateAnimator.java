@@ -118,9 +118,6 @@ class WindowStateAnimator {
      * window is first added or shown, cleared when the callback has been made. */
     boolean mEnteringAnimation;
 
-    /** The pixel format of the underlying SurfaceControl */
-    int mSurfaceFormat;
-
     /** This is set when there is no Surface */
     static final int NO_SURFACE = 0;
     /** This is set after the Surface has been created but before the window has been drawn. During
@@ -346,8 +343,6 @@ class WindowStateAnimator {
                     height, format, flags, this, windowType);
             mSurfaceController.setColorSpaceAgnostic((attrs.privateFlags
                     & WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
-
-            mSurfaceFormat = format;
 
             w.setHasSurface(true);
             // The surface instance is changed. Make sure the input info can be applied to the
@@ -582,27 +577,6 @@ class WindowStateAnimator {
                 ProtoLog.v(WM_DEBUG_ORIENTATION, "Orientation change complete in %s", w);
             }
         }
-    }
-
-    /**
-     * Try to change the pixel format without recreating the surface. This
-     * will be common in the case of changing from PixelFormat.OPAQUE to
-     * PixelFormat.TRANSLUCENT in the hardware-accelerated case as both
-     * requested formats resolve to the same underlying SurfaceControl format
-     * @return True if format was succesfully changed, false otherwise
-     */
-    boolean tryChangeFormatInPlaceLocked() {
-        if (mSurfaceController == null) {
-            return false;
-        }
-        final LayoutParams attrs = mWin.getAttrs();
-        final boolean isHwAccelerated = (attrs.flags & FLAG_HARDWARE_ACCELERATED) != 0;
-        final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
-        if (format == mSurfaceFormat) {
-            setOpaqueLocked(!PixelFormat.formatHasAlpha(attrs.format));
-            return true;
-        }
-        return false;
     }
 
     void setOpaqueLocked(boolean isOpaque) {

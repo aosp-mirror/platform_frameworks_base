@@ -365,11 +365,6 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newParentConfig) {
-        super.onConfigurationChanged(newParentConfig);
-    }
-
-    @Override
     void assignLayer(SurfaceControl.Transaction t, int layer) {
         if (windowType == TYPE_DOCK_DIVIDER) {
             // See {@link DisplayContent#mSplitScreenDividerAnchor}
