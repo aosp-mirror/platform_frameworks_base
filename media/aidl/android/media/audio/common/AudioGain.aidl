@@ -43,4 +43,6 @@ parcelable AudioGain {
     int minRampMs;
     /** Maximum ramp duration in milliseconds. */
     int maxRampMs;
+    /** Indicates whether it is allowed to use this stage for volume control. */
+    boolean useForVolume;
 }

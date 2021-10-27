@@ -21,10 +21,10 @@ import static com.android.server.testutils.TestUtils.strictMock;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.RemoteException;
+import android.testing.TestableContext;
 import android.util.DebugUtils;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -39,6 +39,7 @@ import com.android.server.accessibility.utils.TouchEventGenerator;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -67,7 +68,10 @@ public class WindowMagnificationGestureHandlerTest {
     public static final float DEFAULT_TAP_Y = 299;
     private static final int DISPLAY_0 = MockWindowMagnificationConnection.TEST_DISPLAY;
 
-    private Context mContext;
+    @Rule
+    public final TestableContext mContext = new TestableContext(
+            InstrumentationRegistry.getInstrumentation().getContext());
+
     private WindowMagnificationManager mWindowMagnificationManager;
     private MockWindowMagnificationConnection mMockConnection;
     private WindowMagnificationGestureHandler mWindowMagnificationGestureHandler;
@@ -79,9 +83,9 @@ public class WindowMagnificationGestureHandlerTest {
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
-        mContext = InstrumentationRegistry.getInstrumentation().getContext();
         mWindowMagnificationManager = new WindowMagnificationManager(mContext, 0,
-                mock(WindowMagnificationManager.Callback.class), mMockTrace);
+                mock(WindowMagnificationManager.Callback.class), mMockTrace,
+                new MagnificationScaleProvider(mContext));
         mMockConnection = new MockWindowMagnificationConnection();
         mWindowMagnificationGestureHandler = new WindowMagnificationGestureHandler(
                 mContext, mWindowMagnificationManager, mMockTrace, mMockCallback,

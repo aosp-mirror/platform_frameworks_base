@@ -37,4 +37,7 @@ package android.media.audio.common;
 parcelable AudioPortMixExt {
   int handle;
   android.media.audio.common.AudioPortMixExtUseCase usecase;
+  int maxOpenStreamCount;
+  int maxActiveStreamCount;
+  int recommendedMuteDurationMs;
 }

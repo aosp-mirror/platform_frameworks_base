@@ -43,4 +43,5 @@ parcelable AudioGain {
   int stepValue;
   int minRampMs;
   int maxRampMs;
+  boolean useForVolume;
 }
