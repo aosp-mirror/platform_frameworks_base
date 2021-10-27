@@ -45,10 +45,12 @@ import com.android.systemui.statusbar.notification.NotificationEntryManagerLogge
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
+import com.android.systemui.statusbar.notification.collection.coordinator.ShadeEventCoordinator;
 import com.android.systemui.statusbar.notification.collection.coordinator.VisualStabilityCoordinator;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.OnUserInteractionCallbackImpl;
+import com.android.systemui.statusbar.notification.collection.legacy.LegacyNotificationPresenterExtensions;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.OnUserInteractionCallbackImplLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -59,6 +61,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl;
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager;
+import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerImpl;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerStub;
@@ -90,7 +93,7 @@ import dagger.Provides;
 /**
  * Dagger Module for classes found within the com.android.systemui.statusbar.notification package.
  */
-@Module(includes = { NotificationSectionHeadersModule.class })
+@Module(includes = {NotificationSectionHeadersModule.class})
 public interface NotificationsModule {
     @Binds
     StackScrollAlgorithm.SectionProvider bindSectionProvider(
@@ -268,6 +271,20 @@ public interface NotificationsModule {
             Lazy<NotifPipeline> pipeline,
             NotificationEntryManager entryManager) {
         return featureFlags.isNewNotifPipelineRenderingEnabled() ? pipeline.get() : entryManager;
+    }
+
+    /**
+     * Provide the active implementation for presenting notifications.
+     */
+    @Provides
+    @SysUISingleton
+    static NotifShadeEventSource provideNotifShadeEventSource(
+            FeatureFlags featureFlags,
+            Lazy<ShadeEventCoordinator> shadeEventCoordinatorLazy,
+            Lazy<LegacyNotificationPresenterExtensions> legacyNotificationPresenterExtensionsLazy) {
+        return featureFlags.isNewNotifPipelineRenderingEnabled()
+                ? shadeEventCoordinatorLazy.get()
+                : legacyNotificationPresenterExtensionsLazy.get();
     }
 
     /**
