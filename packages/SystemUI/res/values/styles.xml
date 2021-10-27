@@ -16,30 +16,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- NOTE: Adding the androidprv: namespace to this file will break the studio build. -->
-    <style name="ClearAllButtonDefaultMargins">
-        <item name="android:layout_marginStart">0dp</item>
-        <item name="android:layout_marginTop">0dp</item>
-        <item name="android:layout_marginEnd">0dp</item>
-        <item name="android:layout_marginBottom">0dp</item>
-    </style>
-
-    <style name="PipPhoneOverlayControlTheme" parent="@android:style/Theme.Material">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:colorBackgroundCacheHint">@null</item>
-        <item name="android:statusBarColor">@*android:color/transparent</item>
-        <item name="android:windowAnimationStyle">@style/Animation.PipPhoneOverlayControl</item>
-    </style>
-
-    <style name="Animation.PipPhoneOverlayControl" parent="@android:style/Animation">
-        <item name="android:activityOpenEnterAnimation">@anim/forced_resizable_enter</item>
-
-        <!-- If the target stack doesn't have focus, we do a task to front animation. -->
-        <item name="android:taskToFrontEnterAnimation">@anim/forced_resizable_enter</item>
-        <item name="android:activityCloseExitAnimation">@anim/forced_resizable_exit</item>
-    </style>
 
     <!-- HybridNotification themes and styles -->
 
@@ -64,17 +40,6 @@
         <item name="android:paddingEnd">4dp</item>
     </style>
 
-
-    <style name="TextAppearance.StatusBar.HeadsUp"
-        parent="@*android:style/TextAppearance.StatusBar">
-    </style>
-
-    <style name="TextAppearance.StatusBar.SystemPanel"
-        parent="@*android:style/TextAppearance.StatusBar">
-        <item name="android:textAppearance">?android:attr/textAppearance</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#FF808080</item>
-    </style>
 
     <style name="TextAppearance.StatusBar.Clock" parent="@*android:style/TextAppearance.StatusBar.Icon">
         <item name="android:textSize">@dimen/status_bar_clock_size</item>
@@ -172,11 +137,6 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="TextAppearance.QS.Subhead">
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/qs_subhead</item>
-    </style>
-
     <style name="TextAppearance.QS.SegmentedButton">
         <item name="android:textSize">16sp</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
@@ -211,16 +171,7 @@
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="TextAppearance.QS.UserSwitcher.Activated">
-        <item name="android:fontWeight">700</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
     <!-- This is hard coded to be sans-serif-condensed to match the icons -->
-    <style name="TextAppearance.RATBadge" parent="@style/TextAppearance.QS.TileLabel.Secondary">
-        <item name="android:fontFamily">sans-serif-condensed</item>
-        <item name="android:textSize">@dimen/celltile_rat_type_size</item>
-    </style>
 
     <style name="TextAppearance.QS.Status">
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
@@ -245,10 +196,6 @@
     <style name="TextAppearance.QS.Status.Build">
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
-    </style>
-
-    <style name="TextAppearance.DeviceManagementDialog">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.DeviceManagementDialog.Title" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle"/>
@@ -318,11 +265,6 @@
 
     <style name="Animation" />
 
-    <style name="Animation.ShirtPocketPanel">
-        <item name="android:windowEnterAnimation">@*android:anim/grow_fade_in_from_bottom</item>
-        <item name="android:windowExitAnimation">@*android:anim/shrink_fade_out_from_bottom</item>
-    </style>
-
     <style name="Animation.NavigationBarFadeIn">
         <item name="android:windowEnterAnimation">@anim/navbar_fade_in</item>
         <item name="android:windowExitAnimation">@null</item>
@@ -335,8 +277,6 @@
     </style>
 
     <!-- Standard animations for hiding and showing the status bar. -->
-    <style name="Animation.StatusBar">
-    </style>
 
     <style name="Theme.SystemUI" parent="@*android:style/Theme.DeviceDefault.SystemUI">
         <item name="lightIconTheme">@style/DualToneLightTheme</item>
@@ -444,11 +384,6 @@
         <item name="android:gravity">center</item>
     </style>
 
-    <style name="SearchPanelCircle">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">match_parent</item>
-    </style>
-
     <style name="UserDetailView">
         <item name="numColumns">3</item>
     </style>
@@ -509,11 +444,6 @@
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="TextAppearance.Volume.Header.Secondary">
-        <item name="android:textSize">12sp</item>
-        <item name="android:textColor">?android:attr/textColorTertiary</item>
-    </style>
-
     <style name="VolumeButtons" parent="@android:style/Widget.Material.Button.Borderless">
         <item name="android:background">@drawable/btn_borderless_rect</item>
     </style>
@@ -533,15 +463,6 @@
 
     <style name="TextAppearance.NotificationInfo">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-    </style>
-
-    <style name="TextAppearance.NotificationInfo.Secondary">
-        <item name="android:textSize">14sp</item>
-        <item name="android:alpha">0.62</item>
-    </style>
-
-    <style name="TextAppearance.NotificationInfo.Title">
-        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="TextAppearance.NotificationInfo.Button">
