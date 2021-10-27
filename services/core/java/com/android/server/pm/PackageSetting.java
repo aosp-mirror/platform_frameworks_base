@@ -66,8 +66,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 /**
  * Settings data for a particular package we know about.
@@ -708,6 +708,7 @@ public class PackageSetting extends SettingBase implements PackageState {
 
     void setInstalled(boolean inst, int userId) {
         modifyUserState(userId).setInstalled(inst);
+        onChanged();
     }
 
     boolean getInstalled(int userId) {
@@ -720,6 +721,7 @@ public class PackageSetting extends SettingBase implements PackageState {
 
     void setInstallReason(int installReason, int userId) {
         modifyUserState(userId).setInstallReason(installReason);
+        onChanged();
     }
 
     int getUninstallReason(int userId) {
@@ -728,10 +730,15 @@ public class PackageSetting extends SettingBase implements PackageState {
 
     void setUninstallReason(@PackageManager.UninstallReason int uninstallReason, int userId) {
         modifyUserState(userId).setUninstallReason(uninstallReason);
+        onChanged();
     }
 
     boolean setOverlayPaths(OverlayPaths overlayPaths, int userId) {
-        return modifyUserState(userId).setOverlayPaths(overlayPaths);
+        boolean changed = modifyUserState(userId).setOverlayPaths(overlayPaths);
+        if (changed) {
+            onChanged();
+        }
+        return changed;
     }
 
     @NonNull
@@ -740,7 +747,10 @@ public class PackageSetting extends SettingBase implements PackageState {
     }
 
     boolean setOverlayPathsForLibrary(String libName, OverlayPaths overlayPaths, int userId) {
-        return modifyUserState(userId).setSharedLibraryOverlayPaths(libName, overlayPaths);
+        boolean changed = modifyUserState(userId)
+                .setSharedLibraryOverlayPaths(libName, overlayPaths);
+        onChanged();
+        return changed;
     }
 
     @NonNull
@@ -787,6 +797,7 @@ public class PackageSetting extends SettingBase implements PackageState {
 
     void setCeDataInode(long ceDataInode, int userId) {
         modifyUserState(userId).setCeDataInode(ceDataInode);
+        onChanged();
     }
 
     boolean getStopped(int userId) {
@@ -795,6 +806,7 @@ public class PackageSetting extends SettingBase implements PackageState {
 
     void setStopped(boolean stop, int userId) {
         modifyUserState(userId).setStopped(stop);
+        onChanged();
     }
 
     boolean getNotLaunched(int userId) {
@@ -803,6 +815,7 @@ public class PackageSetting extends SettingBase implements PackageState {
 
     void setNotLaunched(boolean stop, int userId) {
         modifyUserState(userId).setNotLaunched(stop);
+        onChanged();
     }
 
     boolean getHidden(int userId) {
@@ -811,6 +824,7 @@ public class PackageSetting extends SettingBase implements PackageState {
 
     void setHidden(boolean hidden, int userId) {
         modifyUserState(userId).setHidden(hidden);
+        onChanged();
     }
 
     int getDistractionFlags(int userId) {
@@ -819,6 +833,7 @@ public class PackageSetting extends SettingBase implements PackageState {
 
     void setDistractionFlags(int distractionFlags, int userId) {
         modifyUserState(userId).setDistractionFlags(distractionFlags);
+        onChanged();
     }
 
     boolean getSuspended(int userId) {
@@ -886,6 +901,7 @@ public class PackageSetting extends SettingBase implements PackageState {
 
     void setInstantApp(boolean instantApp, int userId) {
         modifyUserState(userId).setInstantApp(instantApp);
+        onChanged();
     }
 
     boolean getVirtualPreload(int userId) {
@@ -894,6 +910,7 @@ public class PackageSetting extends SettingBase implements PackageState {
 
     void setVirtualPreload(boolean virtualPreload, int userId) {
         modifyUserState(userId).setVirtualPreload(virtualPreload);
+        onChanged();
     }
 
     void setUserState(int userId, long ceDataInode, int enabled, boolean installed, boolean stopped,
@@ -948,20 +965,24 @@ public class PackageSetting extends SettingBase implements PackageState {
 
     void setEnabledComponents(ArraySet<String> components, int userId) {
         modifyUserState(userId).setEnabledComponents(components);
+        onChanged();
     }
 
     void setDisabledComponents(ArraySet<String> components, int userId) {
         modifyUserState(userId).setDisabledComponents(components);
+        onChanged();
     }
 
     void setEnabledComponentsCopy(ArraySet<String> components, int userId) {
         modifyUserState(userId).setEnabledComponents(components != null
                 ? new ArraySet<String>(components) : null);
+        onChanged();
     }
 
     void setDisabledComponentsCopy(ArraySet<String> components, int userId) {
         modifyUserState(userId).setDisabledComponents(components != null
                 ? new ArraySet<String>(components) : null);
+        onChanged();
     }
 
     PackageUserStateInternalImpl modifyUserStateComponents(int userId, boolean disabled,
@@ -985,11 +1006,13 @@ public class PackageSetting extends SettingBase implements PackageState {
     void addDisabledComponent(String componentClassName, int userId) {
         modifyUserStateComponents(userId, true, false)
                 .getDisabledComponentsNoCopy().add(componentClassName);
+        onChanged();
     }
 
     void addEnabledComponent(String componentClassName, int userId) {
         modifyUserStateComponents(userId, false, true)
                 .getEnabledComponentsNoCopy().add(componentClassName);
+        onChanged();
     }
 
     boolean enableComponentLPw(String componentClassName, int userId) {
@@ -997,6 +1020,9 @@ public class PackageSetting extends SettingBase implements PackageState {
         boolean changed = state.getDisabledComponentsNoCopy() != null
                 ? state.getDisabledComponentsNoCopy().remove(componentClassName) : false;
         changed |= state.getEnabledComponentsNoCopy().add(componentClassName);
+        if (changed) {
+            onChanged();
+        }
         return changed;
     }
 
@@ -1005,6 +1031,9 @@ public class PackageSetting extends SettingBase implements PackageState {
         boolean changed = state.getEnabledComponentsNoCopy() != null
                 ? state.getEnabledComponentsNoCopy().remove(componentClassName) : false;
         changed |= state.getDisabledComponentsNoCopy().add(componentClassName);
+        if (changed) {
+            onChanged();
+        }
         return changed;
     }
 
@@ -1014,6 +1043,9 @@ public class PackageSetting extends SettingBase implements PackageState {
                 ? state.getDisabledComponentsNoCopy().remove(componentClassName) : false;
         changed |= state.getEnabledComponentsNoCopy() != null
                 ? state.getEnabledComponentsNoCopy().remove(componentClassName) : false;
+        if (changed) {
+            onChanged();
+        }
         return changed;
     }
 
@@ -1131,6 +1163,7 @@ public class PackageSetting extends SettingBase implements PackageState {
     PackageSetting setPath(@NonNull File path) {
         this.mPath = path;
         this.mPathString = path.toString();
+        onChanged();
         return this;
     }
 
@@ -1147,7 +1180,9 @@ public class PackageSetting extends SettingBase implements PackageState {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public boolean overrideNonLocalizedLabelAndIcon(@NonNull ComponentName component,
             @Nullable String label, @Nullable Integer icon, @UserIdInt int userId) {
-        return modifyUserState(userId).overrideLabelAndIcon(component, label, icon);
+        boolean changed = modifyUserState(userId).overrideLabelAndIcon(component, label, icon);
+        onChanged();
+        return changed;
     }
 
     /**
@@ -1157,6 +1192,7 @@ public class PackageSetting extends SettingBase implements PackageState {
      */
     public void resetOverrideComponentLabelIcon(@UserIdInt int userId) {
         modifyUserState(userId).resetOverrideComponentLabelIcon();
+        onChanged();
     }
 
     /**
@@ -1202,6 +1238,7 @@ public class PackageSetting extends SettingBase implements PackageState {
      */
     public void setStatesOnCommit() {
         incrementalStates.onCommit(IncrementalManager.isIncrementalPath(getPathString()));
+        onChanged();
     }
 
     /**
@@ -1209,6 +1246,7 @@ public class PackageSetting extends SettingBase implements PackageState {
      */
     public void setIncrementalStatesCallback(IncrementalStates.Callback callback) {
         incrementalStates.setCallback(callback);
+        onChanged();
     }
 
     /**
@@ -1217,6 +1255,7 @@ public class PackageSetting extends SettingBase implements PackageState {
      */
     public void setLoadingProgress(float progress) {
         incrementalStates.setProgress(progress);
+        onChanged();
     }
 
     @NonNull

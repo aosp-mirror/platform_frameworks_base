@@ -16,7 +16,7 @@
 
 package android.media.audio.common;
 
-import android.media.audio.common.AudioDevice;
+import android.media.audio.common.AudioPortDeviceExt;
 import android.media.audio.common.AudioPortMixExt;
 
 /**
@@ -30,9 +30,9 @@ import android.media.audio.common.AudioPortMixExt;
 union AudioPortExt {
     /** Represents an empty union. Value is ignored. */
     boolean unspecified;
-    /** Audio device specification. */
-    AudioDevice device;
-    /** Mix specific info. */
+    /** Information specific to device ports. */
+    AudioPortDeviceExt device;
+    /** Information specific to mix ports. */
     AudioPortMixExt mix;
     /** Audio session identifier. */
     int session;

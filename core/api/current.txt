@@ -22672,7 +22672,7 @@ package android.media {
     field public static final String KEY_MAX_FPS_TO_ENCODER = "max-fps-to-encoder";
     field public static final String KEY_MAX_HEIGHT = "max-height";
     field public static final String KEY_MAX_INPUT_SIZE = "max-input-size";
-    field public static final String KEY_MAX_OUTPUT_CHANNEL_COUNT = "max-output-channel_count";
+    field public static final String KEY_MAX_OUTPUT_CHANNEL_COUNT = "max-output-channel-count";
     field public static final String KEY_MAX_PTS_GAP_TO_ENCODER = "max-pts-gap-to-encoder";
     field public static final String KEY_MAX_WIDTH = "max-width";
     field public static final String KEY_MIME = "mime";
@@ -47696,6 +47696,10 @@ package android.view {
     field public static final int KEYCODE_CUT = 277; // 0x115
     field public static final int KEYCODE_D = 32; // 0x20
     field public static final int KEYCODE_DEL = 67; // 0x43
+    field public static final int KEYCODE_DEMO_APP_1 = 301; // 0x12d
+    field public static final int KEYCODE_DEMO_APP_2 = 302; // 0x12e
+    field public static final int KEYCODE_DEMO_APP_3 = 303; // 0x12f
+    field public static final int KEYCODE_DEMO_APP_4 = 304; // 0x130
     field public static final int KEYCODE_DPAD_CENTER = 23; // 0x17
     field public static final int KEYCODE_DPAD_DOWN = 20; // 0x14
     field public static final int KEYCODE_DPAD_DOWN_LEFT = 269; // 0x10d
@@ -47727,6 +47731,10 @@ package android.view {
     field public static final int KEYCODE_F7 = 137; // 0x89
     field public static final int KEYCODE_F8 = 138; // 0x8a
     field public static final int KEYCODE_F9 = 139; // 0x8b
+    field public static final int KEYCODE_FEATURED_APP_1 = 297; // 0x129
+    field public static final int KEYCODE_FEATURED_APP_2 = 298; // 0x12a
+    field public static final int KEYCODE_FEATURED_APP_3 = 299; // 0x12b
+    field public static final int KEYCODE_FEATURED_APP_4 = 300; // 0x12c
     field public static final int KEYCODE_FOCUS = 80; // 0x50
     field public static final int KEYCODE_FORWARD = 125; // 0x7d
     field public static final int KEYCODE_FORWARD_DEL = 112; // 0x70
@@ -47892,6 +47900,14 @@ package android.view {
     field public static final int KEYCODE_U = 49; // 0x31
     field public static final int KEYCODE_UNKNOWN = 0; // 0x0
     field public static final int KEYCODE_V = 50; // 0x32
+    field public static final int KEYCODE_VIDEO_APP_1 = 289; // 0x121
+    field public static final int KEYCODE_VIDEO_APP_2 = 290; // 0x122
+    field public static final int KEYCODE_VIDEO_APP_3 = 291; // 0x123
+    field public static final int KEYCODE_VIDEO_APP_4 = 292; // 0x124
+    field public static final int KEYCODE_VIDEO_APP_5 = 293; // 0x125
+    field public static final int KEYCODE_VIDEO_APP_6 = 294; // 0x126
+    field public static final int KEYCODE_VIDEO_APP_7 = 295; // 0x127
+    field public static final int KEYCODE_VIDEO_APP_8 = 296; // 0x128
     field public static final int KEYCODE_VOICE_ASSIST = 231; // 0xe7
     field public static final int KEYCODE_VOLUME_DOWN = 25; // 0x19
     field public static final int KEYCODE_VOLUME_MUTE = 164; // 0xa4

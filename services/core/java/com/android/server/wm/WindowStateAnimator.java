@@ -514,8 +514,6 @@ class WindowStateAnimator {
             return;
         }
 
-        boolean displayed = false;
-
         computeShownFrameLocked();
 
         setSurfaceBoundariesLocked(t);
@@ -535,7 +533,6 @@ class WindowStateAnimator {
             }
         } else if (mLastAlpha != mShownAlpha
                 || mLastHidden) {
-            displayed = true;
             mLastAlpha = mShownAlpha;
             ProtoLog.i(WM_SHOW_TRANSACTIONS,
                     "SURFACE controller=%s alpha=%f HScale=%f, VScale=%f: %s",
@@ -566,14 +563,10 @@ class WindowStateAnimator {
                     }
                 }
             }
-            if (hasSurface()) {
-                w.mToken.hasVisible = true;
-            }
         } else {
             if (DEBUG_ANIM && mWin.isAnimating(TRANSITION | PARENTS)) {
                 Slog.v(TAG, "prepareSurface: No changes in animation for " + this);
             }
-            displayed = true;
         }
 
         if (w.getOrientationChanging()) {
@@ -588,10 +581,6 @@ class WindowStateAnimator {
                 w.setOrientationChanging(false);
                 ProtoLog.v(WM_DEBUG_ORIENTATION, "Orientation change complete in %s", w);
             }
-        }
-
-        if (displayed) {
-            w.mToken.hasVisible = true;
         }
     }
 

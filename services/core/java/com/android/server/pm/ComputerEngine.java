@@ -798,7 +798,8 @@ public class ComputerEngine implements Computer {
         for (int n = 0; n < count; n++) {
             ResolveInfo info = candidates.get(n);
             if (blockInstant && (info.isInstantAppAvailable
-                    || isInstantApp(info.activityInfo.packageName, userId))) {
+                    || isInstantAppInternal(info.activityInfo.packageName, userId,
+                            Process.SYSTEM_UID))) {
                 continue;
             }
 
@@ -1075,7 +1076,8 @@ public class ComputerEngine implements Computer {
                     resolveInfos.remove(i);
                     continue;
                 }
-                if (blockInstant && isInstantApp(info.activityInfo.packageName, userId)) {
+                if (blockInstant && isInstantAppInternal(
+                        info.activityInfo.packageName, userId, Process.SYSTEM_UID)) {
                     resolveInfos.remove(i);
                     continue;
                 }

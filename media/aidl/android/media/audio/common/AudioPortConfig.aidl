@@ -19,6 +19,7 @@ package android.media.audio.common;
 import android.media.audio.common.AudioChannelLayout;
 import android.media.audio.common.AudioFormatDescription;
 import android.media.audio.common.AudioGainConfig;
+import android.media.audio.common.AudioIoFlags;
 import android.media.audio.common.AudioPortExt;
 import android.media.audio.common.Int;
 
@@ -44,6 +45,8 @@ parcelable AudioPortConfig {
     @nullable AudioFormatDescription format;
     /** Gain to apply. Can be left unspecified. */
     @nullable AudioGainConfig gain;
+    /** I/O feature flags. Can be left unspecified. */
+    @nullable AudioIoFlags flags;
     /** Extra parameters depending on the port role. */
     AudioPortExt ext;
 }

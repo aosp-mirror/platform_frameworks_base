@@ -49,7 +49,7 @@ import dagger.Lazy;
 
 public class KeyguardDisplayManager {
     protected static final String TAG = "KeyguardDisplayManager";
-    private static boolean DEBUG = KeyguardConstants.DEBUG;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
 
     private MediaRouter mMediaRouter = null;
     private final DisplayManager mDisplayService;

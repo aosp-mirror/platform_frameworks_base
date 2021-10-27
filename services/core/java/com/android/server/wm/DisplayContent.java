@@ -467,9 +467,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @VisibleForTesting
     boolean isDefaultDisplay;
 
-    /** Window tokens that are in the process of exiting, but still on screen for animations. */
-    final ArrayList<WindowToken> mExitingTokens = new ArrayList<>();
-
     /** Detect user tapping outside of current focused task bounds .*/
     @VisibleForTesting
     final TaskTapPointerEventListener mTapDetector;
@@ -3359,17 +3356,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         });
 
         pw.println();
-        if (!mExitingTokens.isEmpty()) {
-            pw.println();
-            pw.println("  Exiting tokens:");
-            for (int i = mExitingTokens.size() - 1; i >= 0; i--) {
-                final WindowToken token = mExitingTokens.get(i);
-                pw.print("  Exiting #"); pw.print(i);
-                pw.print(' '); pw.print(token);
-                pw.println(':');
-                token.dump(pw, "    ", dumpAll);
-            }
-        }
 
         final ScreenRotationAnimation rotationAnimation = getRotationAnimation();
         if (rotationAnimation != null) {
@@ -4115,6 +4101,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 target.mActivityRecord.mImeInsetsFrozenUntilStartInput = false;
             }
             setImeInputTarget(target);
+            mInsetsStateController.updateAboveInsetsState(mInputMethodWindow, mInsetsStateController
+                    .getRawInsetsState().getSourceOrDefaultVisibility(ITYPE_IME));
             updateImeControlTarget();
         }
     }
@@ -4619,21 +4607,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             bitmap.recycle();
         }
         return ret;
-    }
-
-    void setExitingTokensHasVisible(boolean hasVisible) {
-        for (int i = mExitingTokens.size() - 1; i >= 0; i--) {
-            mExitingTokens.get(i).hasVisible = hasVisible;
-        }
-    }
-
-    void removeExistingTokensIfPossible() {
-        for (int i = mExitingTokens.size() - 1; i >= 0; i--) {
-            final WindowToken token = mExitingTokens.get(i);
-            if (!token.hasVisible) {
-                mExitingTokens.remove(i);
-            }
-        }
     }
 
     @Override

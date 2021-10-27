@@ -69,7 +69,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
 
     //Ensure the range has consistency with FullScreenMagnificationGestureHandler.
     private static final float MIN_SCALE = 2.0f;
-    private static final float MAX_SCALE = WindowMagnificationManager.MAX_SCALE;
+    private static final float MAX_SCALE = MagnificationScaleProvider.MAX_SCALE;
 
     private final WindowMagnificationManager mWindowMagnificationMgr;
     @VisibleForTesting
@@ -177,8 +177,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         }
 
         final float scale = MathUtils.constrain(
-                mWindowMagnificationMgr.getPersistedScale(),
-                MIN_SCALE, MAX_SCALE);
+                mWindowMagnificationMgr.getPersistedScale(mDisplayId), MIN_SCALE, MAX_SCALE);
         mWindowMagnificationMgr.enableWindowMagnification(mDisplayId, scale, centerX, centerY);
     }
 
