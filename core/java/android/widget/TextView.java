@@ -8751,6 +8751,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mEditor != null && mEditor.mInputType != EditorInfo.TYPE_NULL;
     }
 
+    private boolean hasEditorInFocusSearchDirection(@FocusRealDirection int direction) {
+        final View nextView = focusSearch(direction);
+        return nextView != null && nextView.onCheckIsTextEditor();
+    }
+
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         if (onCheckIsTextEditor() && isEnabled()) {
@@ -8767,10 +8772,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.imeOptions = EditorInfo.IME_NULL;
                 outAttrs.hintLocales = null;
             }
-            if (focusSearch(FOCUS_DOWN) != null) {
+            if (hasEditorInFocusSearchDirection(FOCUS_DOWN)) {
                 outAttrs.imeOptions |= EditorInfo.IME_FLAG_NAVIGATE_NEXT;
             }
-            if (focusSearch(FOCUS_UP) != null) {
+            if (hasEditorInFocusSearchDirection(FOCUS_UP)) {
                 outAttrs.imeOptions |= EditorInfo.IME_FLAG_NAVIGATE_PREVIOUS;
             }
             if ((outAttrs.imeOptions & EditorInfo.IME_MASK_ACTION)
