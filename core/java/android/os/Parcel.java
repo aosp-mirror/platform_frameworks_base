@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.AppOpsManager;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -3094,14 +3095,24 @@ public final class Parcel {
      * Parcelables.
      */
     @Nullable
-    public final ArrayList readArrayList(@Nullable ClassLoader loader) {
-        int N = readInt();
-        if (N < 0) {
-            return null;
-        }
-        ArrayList l = new ArrayList(N);
-        readListInternal(l, N, loader, /* clazz */ null);
-        return l;
+    public ArrayList readArrayList(@Nullable ClassLoader loader) {
+        return readArrayListInternal(loader, /* clazz */ null);
+    }
+
+    /**
+     * Same as {@link #readArrayList(ClassLoader)} but accepts {@code clazz} parameter as
+     * the type required for each item.
+     *
+     * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
+     * is not an instance of that class or any of its children classes or there was an error
+     * trying to instantiate an element.
+     */
+    @SuppressLint({"ConcreteCollection", "NullableCollection"})
+    @Nullable
+    public <T> ArrayList<T> readArrayList(@Nullable ClassLoader loader,
+            @NonNull Class<? extends T> clazz) {
+        Objects.requireNonNull(clazz);
+        return readArrayListInternal(loader, clazz);
     }
 
     /**
@@ -3111,14 +3122,23 @@ public final class Parcel {
      * Parcelables.
      */
     @Nullable
-    public final Object[] readArray(@Nullable ClassLoader loader) {
-        int N = readInt();
-        if (N < 0) {
-            return null;
-        }
-        Object[] l = new Object[N];
-        readArrayInternal(l, N, loader);
-        return l;
+    public Object[] readArray(@Nullable ClassLoader loader) {
+        return readArrayInternal(loader, /* clazz */ null);
+    }
+
+    /**
+     * Same as {@link #readArray(ClassLoader)} but accepts {@code clazz} parameter as
+     * the type required for each item.
+     *
+     * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
+     * is not an instance of that class or any of its children classes or there was an error
+     * trying to instantiate an element.
+     */
+    @SuppressLint({"ArrayReturn", "NullableCollection"})
+    @Nullable
+    public <T> T[] readArray(@Nullable ClassLoader loader, @NonNull Class<T> clazz) {
+        Objects.requireNonNull(clazz);
+        return readArrayInternal(loader, clazz);
     }
 
     /**
@@ -3128,14 +3148,23 @@ public final class Parcel {
      * Parcelables.
      */
     @Nullable
-    public final <T> SparseArray<T> readSparseArray(@Nullable ClassLoader loader) {
-        int N = readInt();
-        if (N < 0) {
-            return null;
-        }
-        SparseArray sa = new SparseArray(N);
-        readSparseArrayInternal(sa, N, loader);
-        return sa;
+    public <T> SparseArray<T> readSparseArray(@Nullable ClassLoader loader) {
+        return readSparseArrayInternal(loader, /* clazz */ null);
+    }
+
+    /**
+     * Same as {@link #readSparseArray(ClassLoader)} but accepts {@code clazz} parameter as
+     * the type required for each item.
+     *
+     * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
+     * is not an instance of that class or any of its children classes or there was an error
+     * trying to instantiate an element.
+     */
+    @Nullable
+    public <T> SparseArray<T> readSparseArray(@Nullable ClassLoader loader,
+            @NonNull Class<? extends T> clazz) {
+        Objects.requireNonNull(clazz);
+        return readSparseArrayInternal(loader, clazz);
     }
 
     /**
@@ -3851,7 +3880,7 @@ public final class Parcel {
                     "Parcel " + this + ": Unmarshalling unknown type code " + type
                             + " at offset " + off);
         }
-        if (clazz != null && !clazz.isInstance(object)) {
+        if (object != null && clazz != null && !clazz.isInstance(object)) {
             throw new BadParcelableException("Unparcelled object " + object
                     + " is not an instance of required class " + clazz.getName()
                     + " provided in the parameter");
@@ -3910,7 +3939,6 @@ public final class Parcel {
     }
 
     /**
-     *
      * @param clazz The type of the parcelable expected or {@code null} for performing no checks.
      */
     @SuppressWarnings("unchecked")
@@ -3969,7 +3997,7 @@ public final class Parcel {
      * as the required type.
      *
      * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
-     * is not an instance of that class or any of its children class or there there was an error
+     * is not an instance of that class or any of its children classes or there there was an error
      * trying to read the {@link Parcelable.Creator}.
      */
     @Nullable
@@ -4092,17 +4120,25 @@ public final class Parcel {
         return p;
     }
 
-    /** @hide */
+    /**
+     * Same as {@link #readParcelableArray(ClassLoader)}  but accepts {@code clazz} parameter as
+     * the type required for each item.
+     *
+     * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
+     * is not an instance of that class or any of its children classes or there was an error
+     * trying to instantiate an element.
+     */
+    @SuppressLint({"ArrayReturn", "NullableCollection"})
+    @SuppressWarnings("unchecked")
     @Nullable
-    public final <T extends Parcelable> T[] readParcelableArray(@Nullable ClassLoader loader,
-            @NonNull Class<T> clazz) {
-        int N = readInt();
-        if (N < 0) {
+    public <T> T[] readParcelableArray(@Nullable ClassLoader loader, @NonNull Class<T> clazz) {
+        int n = readInt();
+        if (n < 0) {
             return null;
         }
-        T[] p = (T[]) Array.newInstance(clazz, N);
-        for (int i = 0; i < N; i++) {
-            p[i] = readParcelable(loader);
+        T[] p = (T[]) Array.newInstance(clazz, n);
+        for (int i = 0; i < n; i++) {
+            p[i] = readParcelableInternal(loader, clazz);
         }
         return p;
     }
@@ -4320,9 +4356,12 @@ public final class Parcel {
         return result;
     }
 
-    private void readListInternal(@NonNull List outVal, int n,
-            @Nullable ClassLoader loader) {
-        readListInternal(outVal, n, loader, null);
+    /**
+     * The method is replaced by {@link #readListInternal(List, int, ClassLoader, Class)}, however
+     * we are keeping this unused method here to allow unsupported app usages.
+     */
+    private void readListInternal(@NonNull List outVal, int n, @Nullable ClassLoader loader) {
+        readListInternal(outVal, n, loader,  /* clazz */ null);
     }
 
     /**
@@ -4338,24 +4377,86 @@ public final class Parcel {
         }
     }
 
+    /**
+     * @param clazz The type of the object expected or {@code null} for performing no checks.
+     */
+    @SuppressLint({"ConcreteCollection", "NullableCollection"})
+    @Nullable
+    private <T> ArrayList<T> readArrayListInternal(@Nullable ClassLoader loader,
+            @Nullable Class<? extends T> clazz) {
+        int n = readInt();
+        if (n < 0) {
+            return null;
+        }
+        ArrayList<T> l = new ArrayList<>(n);
+        readListInternal(l, n, loader, clazz);
+        return l;
+    }
+
+    /**
+     * The method is replaced by {@link #readArrayInternal(ClassLoader, Class)}, however
+     * we are keeping this unused method here to allow unsupported app usages.
+     */
     private void readArrayInternal(@NonNull Object[] outVal, int N,
             @Nullable ClassLoader loader) {
         for (int i = 0; i < N; i++) {
-            Object value = readValue(loader);
-            //Log.d(TAG, "Unmarshalling value=" + value);
+            Object value = readValue(loader, /* clazz */ null);
             outVal[i] = value;
         }
     }
 
+    /**
+     * @param clazz The type of the object expected or {@code null} for performing no checks.
+     */
+    @SuppressWarnings("unchecked")
+    @Nullable
+    private <T> T[] readArrayInternal(@Nullable ClassLoader loader, @Nullable Class<T> clazz) {
+        int n = readInt();
+        if (n < 0) {
+            return null;
+        }
+        T[] outVal = (T[]) ((clazz == null) ? new Object[n] : Array.newInstance(clazz, n));
+
+        for (int i = 0; i < n; i++) {
+            T value = readValue(loader, clazz);
+            outVal[i] = value;
+        }
+        return outVal;
+    }
+
+    /**
+     * The method is replaced by {@link #readSparseArray(ClassLoader, Class)}, however
+     * we are keeping this unused method here to allow unsupported app usages.
+     */
     private void readSparseArrayInternal(@NonNull SparseArray outVal, int N,
             @Nullable ClassLoader loader) {
         while (N > 0) {
             int key = readInt();
             Object value = readValue(loader);
-            //Log.i(TAG, "Unmarshalling key=" + key + " value=" + value);
             outVal.append(key, value);
             N--;
         }
+    }
+
+    /**
+     * @param clazz The type of the object expected or {@code null} for performing no checks.
+     */
+    @Nullable
+    private <T> SparseArray<T> readSparseArrayInternal(@Nullable ClassLoader loader,
+            @Nullable Class<? extends T> clazz) {
+        int n = readInt();
+        if (n < 0) {
+            return null;
+        }
+        SparseArray<T> outVal = new SparseArray<>(n);
+
+        while (n > 0) {
+            int key = readInt();
+            T value = readValue(loader, clazz);
+            outVal.append(key, value);
+            n--;
+        }
+        return outVal;
     }
 
 

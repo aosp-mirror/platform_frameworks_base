@@ -31433,7 +31433,9 @@ package android.os {
     method @NonNull public static android.os.Parcel obtain();
     method @NonNull public static android.os.Parcel obtain(@NonNull android.os.IBinder);
     method @Nullable public Object[] readArray(@Nullable ClassLoader);
+    method @Nullable public <T> T[] readArray(@Nullable ClassLoader, @NonNull Class<T>);
     method @Nullable public java.util.ArrayList readArrayList(@Nullable ClassLoader);
+    method @Nullable public <T> java.util.ArrayList<T> readArrayList(@Nullable ClassLoader, @NonNull Class<? extends T>);
     method public void readBinderArray(@NonNull android.os.IBinder[]);
     method public void readBinderList(@NonNull java.util.List<android.os.IBinder>);
     method public boolean readBoolean();
@@ -31461,6 +31463,7 @@ package android.os {
     method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader);
     method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader, @NonNull Class<T>);
     method @Nullable public android.os.Parcelable[] readParcelableArray(@Nullable ClassLoader);
+    method @Nullable public <T> T[] readParcelableArray(@Nullable ClassLoader, @NonNull Class<T>);
     method @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
     method @Nullable public <T> android.os.Parcelable.Creator<T> readParcelableCreator(@Nullable ClassLoader, @NonNull Class<T>);
     method @NonNull public <T extends android.os.Parcelable> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader);
@@ -31470,6 +31473,7 @@ package android.os {
     method @NonNull public android.util.Size readSize();
     method @NonNull public android.util.SizeF readSizeF();
     method @Nullable public <T> android.util.SparseArray<T> readSparseArray(@Nullable ClassLoader);
+    method @Nullable public <T> android.util.SparseArray<T> readSparseArray(@Nullable ClassLoader, @NonNull Class<? extends T>);
     method @Nullable public android.util.SparseBooleanArray readSparseBooleanArray();
     method @Nullable public String readString();
     method public void readStringArray(@NonNull String[]);
