@@ -5075,6 +5075,11 @@
          to 0, the seconds hand will be disabled. -->
     <integer name="config_defaultAnalogClockSecondsHandFps">1</integer>
 
+    <!-- List of shared library packages that should be loaded by the classloader after the
+         code and resources provided by applications. This value will be set by the manufacturer  -->
+    <string-array name="config_sharedLibrariesLoadedAfterApp" translatable="false">
+    </string-array>
+
     <!-- the number of the max cached processes in the system. -->
     <integer name="config_customizedMaxCachedProcesses">32</integer>
 </resources>
