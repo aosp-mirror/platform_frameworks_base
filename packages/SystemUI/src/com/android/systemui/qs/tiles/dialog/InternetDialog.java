@@ -80,7 +80,6 @@ public class InternetDialog extends SystemUIDialog implements
 
     private final Handler mHandler;
     private final Executor mBackgroundExecutor;
-    private final LinearLayoutManager mLayoutManager;
 
     @VisibleForTesting
     protected InternetAdapter mAdapter;
@@ -161,12 +160,6 @@ public class InternetDialog extends SystemUIDialog implements
         mCanConfigMobileData = canConfigMobileData;
         mCanConfigWifi = canConfigWifi;
 
-        mLayoutManager = new LinearLayoutManager(mContext) {
-            @Override
-            public boolean canScrollVertically() {
-                return false;
-            }
-        };
         mUiEventLogger = uiEventLogger;
         mAdapter = new InternetAdapter(mInternetDialogController);
         if (!aboveStatusBar) {
@@ -218,7 +211,7 @@ public class InternetDialog extends SystemUIDialog implements
 
         setOnClickListener();
         mTurnWifiOnLayout.setBackground(null);
-        mWifiRecyclerView.setLayoutManager(mLayoutManager);
+        mWifiRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mWifiRecyclerView.setAdapter(mAdapter);
     }
 
@@ -469,10 +462,6 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     private void setProgressBarVisible(boolean visible) {
-        if (mWifiManager.isWifiEnabled() && mAdapter.mHolderView != null
-                && mAdapter.mHolderView.isAttachedToWindow()) {
-            mIsProgressBarVisible = true;
-        }
         mIsProgressBarVisible = visible;
         mProgressBar.setVisibility(mIsProgressBarVisible ? View.VISIBLE : View.GONE);
         mDivider.setVisibility(mIsProgressBarVisible ? View.GONE : View.VISIBLE);
