@@ -221,6 +221,7 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationRunner;
+import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
@@ -455,6 +456,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     VrController mVrController;
     KeyguardController mKeyguardController;
     private final ClientLifecycleManager mLifecycleManager;
+
+    @Nullable
+    private final BackGestureController mBackGestureController;
+
     private TaskChangeNotificationController mTaskChangeNotificationController;
     /** The controller for all operations related to locktask. */
     private LockTaskController mLockTaskController;
@@ -814,6 +819,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mSystemThread = ActivityThread.currentActivityThread();
         mUiContext = mSystemThread.getSystemUiContext();
         mLifecycleManager = new ClientLifecycleManager();
+        mBackGestureController = BackGestureController.isEnabled() ? new BackGestureController()
+                : null;
         mVisibleActivityProcessTracker = new VisibleActivityProcessTracker(this);
         mInternal = new LocalService();
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version", GL_ES_VERSION_UNDEFINED);
@@ -1745,6 +1752,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    @Override
+    public void startBackPreview(IRemoteAnimationRunner runner) {
+        if (mBackGestureController == null) {
+            return;
+        }
+        mBackGestureController.startBackPreview();
     }
 
     /**
