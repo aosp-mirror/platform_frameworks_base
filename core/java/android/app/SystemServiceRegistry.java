@@ -1925,39 +1925,6 @@ public final class SystemServiceRegistry {
         public abstract T createService() throws ServiceNotFoundException;
     }
 
-    /**
-     * Like StaticServiceFetcher, creates only one instance of the service per application, but when
-     * creating the service for the first time, passes it the application context of the creating
-     * application.
-     *
-     * TODO: Delete this once its only user (ConnectivityManager) is known to work well in the
-     * case where multiple application components each have their own ConnectivityManager object.
-     */
-    static abstract class StaticApplicationContextServiceFetcher<T> implements ServiceFetcher<T> {
-        private T mCachedInstance;
-
-        @Override
-        public final T getService(ContextImpl ctx) {
-            synchronized (StaticApplicationContextServiceFetcher.this) {
-                if (mCachedInstance == null) {
-                    Context appContext = ctx.getApplicationContext();
-                    // If the application context is null, we're either in the system process or
-                    // it's the application context very early in app initialization. In both these
-                    // cases, the passed-in ContextImpl will not be freed, so it's safe to pass it
-                    // to the service. http://b/27532714 .
-                    try {
-                        mCachedInstance = createService(appContext != null ? appContext : ctx);
-                    } catch (ServiceNotFoundException e) {
-                        onServiceNotFound(e);
-                    }
-                }
-                return mCachedInstance;
-            }
-        }
-
-        public abstract T createService(Context applicationContext) throws ServiceNotFoundException;
-    }
-
     /** @hide */
     public static void onServiceNotFound(ServiceNotFoundException e) {
         // We're mostly interested in tracking down long-lived core system
