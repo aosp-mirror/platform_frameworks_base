@@ -75,9 +75,6 @@
     </style>
 
     <!-- Built-in clock widget stuff -->
-    <style name="widget_label">
-        <item name="android:textSize">@dimen/widget_label_font_size</item>
-    </style>
     <style name="widget_big">
         <item name="android:textSize">@dimen/widget_big_font_size</item>
         <item name="android:paddingBottom">@dimen/bottom_text_spacing_digital</item>
@@ -87,15 +84,7 @@
         <item name="android:shadowColor">@color/keyguard_shadow_color</item>
         <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
-    <style name="widget_title_bold">
-        <item name="android:textStyle">bold</item>
-        <item name="android:textSize">@dimen/widget_title_font_size</item>
-        <item name="android:paddingBottom">@dimen/widget_vertical_padding_clock</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:ellipsize">none</item>
-        <item name="android:shadowColor">@color/keyguard_shadow_color</item>
-        <item name="android:shadowRadius">?attr/shadowRadius</item>
-    </style>
+
     <style name="widget_small_bold">
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">@dimen/widget_small_font_size</item>
