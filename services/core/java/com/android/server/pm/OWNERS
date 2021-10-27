@@ -12,16 +12,16 @@ per-file ApexManager.java = dariofreni@google.com, ioffe@google.com, olilan@goog
 per-file StagingManager.java = dariofreni@google.com, ioffe@google.com, olilan@google.com
 
 # dex
-per-file AbstractStatsBase.java = calin@google.com, ngeoffray@google.com
-per-file BackgroundDexOptService.java = calin@google.com, ngeoffray@google.com
-per-file CompilerStats.java = calin@google.com, ngeoffray@google.com
-per-file DynamicCodeLoggingService.java = alanstokes@google.com, calin@google.com, ngeoffray@google.com
-per-file InstructionSets.java = calin@google.com, ngeoffray@google.com
-per-file OtaDexoptService.java = calin@google.com, ngeoffray@google.com
-per-file OtaDexoptShellCommand.java = calin@google.com, ngeoffray@google.com
-per-file PackageDexOptimizer.java = calin@google.com, ngeoffray@google.com
-per-file PackageManagerServiceCompilerMapping.java = calin@google.com, ngeoffray@google.com
-per-file PackageUsage.java = calin@google.com, ngeoffray@google.com
+per-file AbstractStatsBase.java = file:dex/OWNERS
+per-file BackgroundDexOptService.java = file:dex/OWNERS
+per-file CompilerStats.java = file:dex/OWNERS
+per-file DynamicCodeLoggingService.java = file:dex/OWNERS
+per-file InstructionSets.java = file:dex/OWNERS
+per-file OtaDexoptService.java = file:dex/OWNERS
+per-file OtaDexoptShellCommand.java = file:dex/OWNERS
+per-file PackageDexOptimizer.java = file:dex/OWNERS
+per-file PackageManagerServiceCompilerMapping.java = file:dex/OWNERS
+per-file PackageUsage.java = file:dex/OWNERS
 
 # multi user / cross profile
 per-file CrossProfileAppsServiceImpl.java = omakoto@google.com, yamasani@google.com
