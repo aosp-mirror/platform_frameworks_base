@@ -611,21 +611,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".egg.MLandActivity"
-                  android:theme="@android:style/Theme.Material.NoActionBar"
-                  android:exported="true"
-                  android:icon="@drawable/icon"
-                  android:label="@string/mland"
-                  android:launchMode="singleInstance"
-                  android:screenOrientation="locked"
-                  android:process=":sweetsweetdesserts"
-                  android:excludeFromRecents="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
         <!-- People Space UI Screen -->
         <activity android:name=".people.PeopleSpaceActivity"
             android:label="@string/people_tile_title"

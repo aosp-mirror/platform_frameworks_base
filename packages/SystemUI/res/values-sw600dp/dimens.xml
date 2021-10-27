@@ -16,26 +16,6 @@
 */
 -->
 <resources>
-
-    <!-- Diameter of outer shape drawable shown in navbar search-->
-    <dimen name="navbar_search_outerring_diameter">430dip</dimen>
-
-    <!-- Diameter of outer shape drawable shown in navbar search. Should be 1/2 of above value. -->
-    <dimen name="navbar_search_outerring_radius">215dip</dimen>
-
-    <!-- Height of search panel including navigation bar height -->
-    <dimen name="navbar_search_panel_height">280dip</dimen>
-
-    <!-- The width of the view containing the menu/ime navigation bar icons -->
-    <dimen name="navigation_extra_key_width">48dip</dimen>
-
-    <!-- Minimum fraction of the screen that should be taken up by the notification panel. -->
-    <item type="dimen" name="notification_panel_min_height_frac">40%</item>
-
-    <!-- How far to slide the panel out when you touch it -->
-    <!-- On tablets this is just the close_handle_height -->
-    <dimen name="peek_height">@dimen/close_handle_height</dimen>
-
     <!-- Height of the status bar header bar when on Keyguard -->
     <dimen name="status_bar_header_height_keyguard">60dp</dimen>
 
@@ -45,13 +25,7 @@
     <dimen name="kg_framed_avatar_size">48dp</dimen>
 
     <!-- The width of user avatar when on Keyguard -->
-    <dimen name="multi_user_switch_width_keyguard">48dp</dimen>
-
-    <!-- The width of user avatar when on Keyguard -->
     <dimen name="multi_user_avatar_keyguard_size">30dp</dimen>
-
-    <!-- end margin for multi user switch in collapsed quick settings -->
-    <dimen name="multi_user_switch_keyguard_margin">6dp</dimen>
 
     <!-- Margin on the left side of the carrier text on Keyguard -->
     <dimen name="keyguard_carrier_text_margin">24dp</dimen>
@@ -59,13 +33,6 @@
     <!-- The width/height of the phone/camera/unlock icon on keyguard. -->
     <dimen name="keyguard_affordance_height">80dp</dimen>
     <dimen name="keyguard_affordance_width">120dp</dimen>
-
-    <!-- The width of the region on the left/right edge of the screen for performing the camera/
-     phone hints. -->
-    <dimen name="edge_tap_area_width">80dp</dimen>
-
-    <!-- Margin on the right side of the system icon group on Keyguard. -->
-    <dimen name="system_icons_keyguard_padding_end">2dp</dimen>
 
     <!-- Screen pinning request width -->
     <dimen name="screen_pinning_request_width">400dp</dimen>
@@ -78,8 +45,6 @@
          (screen_pinning_request_width - 3 * screen_pinning_request_button_width) / 2 -->
     <dimen name="screen_pinning_request_side_width">8dp</dimen>
 
-    <dimen name="fab_margin">24dp</dimen>
-
     <dimen name="navigation_key_width">128dp</dimen>
 
     <!-- Keyboard shortcuts helper -->
@@ -88,8 +53,6 @@
     <!-- Text size for user name in user switcher -->
     <dimen name="kg_user_switcher_text_size">18sp</dimen>
 
-    <!-- TODO(himanshujaju) - add comments -->
-    <dimen name="global_actions_wallet_top_margin">5dp</dimen>
     <dimen name="controls_header_bottom_margin">12dp</dimen>
     <dimen name="controls_top_margin">24dp</dimen>
 
