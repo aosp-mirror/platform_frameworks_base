@@ -251,6 +251,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.print.PrintManagerService";
     private static final String COMPANION_DEVICE_MANAGER_SERVICE_CLASS =
             "com.android.server.companion.CompanionDeviceManagerService";
+    private static final String VIRTUAL_DEVICE_MANAGER_SERVICE_CLASS =
+            "com.android.server.companion.virtual.VirtualDeviceManagerService";
     private static final String STATS_COMPANION_APEX_PATH =
             "/apex/com.android.os.statsd/javalib/service-statsd.jar";
     private static final String SCHEDULING_APEX_PATH =
@@ -2321,6 +2323,11 @@ public final class SystemServer implements Dumpable {
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_COMPANION_DEVICE_SETUP)) {
                 t.traceBegin("StartCompanionDeviceManager");
                 mSystemServiceManager.startService(COMPANION_DEVICE_MANAGER_SERVICE_CLASS);
+                t.traceEnd();
+
+                // VirtualDeviceManager depends on CDM to control the associations.
+                t.traceBegin("StartVirtualDeviceManager");
+                mSystemServiceManager.startService(VIRTUAL_DEVICE_MANAGER_SERVICE_CLASS);
                 t.traceEnd();
             }
 

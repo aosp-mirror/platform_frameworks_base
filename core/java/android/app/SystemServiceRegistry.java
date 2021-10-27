@@ -54,6 +54,8 @@ import android.appwidget.AppWidgetManager;
 import android.bluetooth.BluetoothManager;
 import android.companion.CompanionDeviceManager;
 import android.companion.ICompanionDeviceManager;
+import android.companion.virtual.IVirtualDeviceManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.ClipboardManager;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
@@ -873,6 +875,16 @@ public final class SystemServiceRegistry {
                             ServiceManager.getServiceOrThrow(Context.COMPANION_DEVICE_SERVICE));
                 }
                 return new CompanionDeviceManager(service, ctx.getOuterContext());
+            }});
+
+        registerService(Context.VIRTUAL_DEVICE_SERVICE, VirtualDeviceManager.class,
+                new CachedServiceFetcher<VirtualDeviceManager>() {
+            @Override
+            public VirtualDeviceManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                IVirtualDeviceManager service = IVirtualDeviceManager.Stub.asInterface(
+                        ServiceManager.getServiceOrThrow(Context.VIRTUAL_DEVICE_SERVICE));
+                return new VirtualDeviceManager(service, ctx.getOuterContext());
             }});
 
         registerService(Context.CONSUMER_IR_SERVICE, ConsumerIrManager.class,

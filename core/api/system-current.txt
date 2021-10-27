@@ -95,6 +95,7 @@ package android {
     field public static final String CONTROL_OEM_PAID_NETWORK_PREFERENCE = "android.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE";
     field public static final String CONTROL_VPN = "android.permission.CONTROL_VPN";
     field public static final String CREATE_USERS = "android.permission.CREATE_USERS";
+    field public static final String CREATE_VIRTUAL_DEVICE = "android.permission.CREATE_VIRTUAL_DEVICE";
     field public static final String CRYPT_KEEPER = "android.permission.CRYPT_KEEPER";
     field public static final String DEVICE_POWER = "android.permission.DEVICE_POWER";
     field public static final String DISABLE_SYSTEM_SOUND_EFFECTS = "android.permission.DISABLE_SYSTEM_SOUND_EFFECTS";
@@ -2329,6 +2330,17 @@ package android.companion {
     method @RequiresPermission(android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES) public void associate(@NonNull String, @NonNull android.net.MacAddress, @NonNull byte[]);
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean canPairWithoutPrompt(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean isDeviceAssociatedForWifiConnection(@NonNull String, @NonNull android.net.MacAddress, @NonNull android.os.UserHandle);
+  }
+
+}
+
+package android.companion.virtual {
+
+  public final class VirtualDeviceManager {
+  }
+
+  public static class VirtualDeviceManager.VirtualDevice implements java.lang.AutoCloseable {
+    method public void close();
   }
 
 }
