@@ -159,7 +159,8 @@ class WallpaperController {
         boolean needsShowWhenLockedWallpaper = false;
         if ((w.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
                 && mService.mPolicy.isKeyguardLocked()
-                && mService.mPolicy.isKeyguardOccluded()) {
+                && (mService.mPolicy.isKeyguardOccluded()
+                || mService.mPolicy.isKeyguardUnoccluding())) {
             // The lowest show when locked window decides whether we need to put the wallpaper
             // behind.
             needsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
