@@ -208,6 +208,12 @@ abstract class HdmiCecLocalDevice {
     void init() {
         assertRunOnServiceThread();
         mPreferredAddress = getPreferredAddress();
+        if (mHandler.hasMessages(MSG_DISABLE_DEVICE_TIMEOUT)) {
+            // Remove and trigger the queued message for clearing all actions when going to standby.
+            // This is necessary because the device may wake up before the message is triggered.
+            mHandler.removeMessages(MSG_DISABLE_DEVICE_TIMEOUT);
+            handleDisableDeviceTimeout();
+        }
         mPendingActionClearedCallback = null;
     }
 
