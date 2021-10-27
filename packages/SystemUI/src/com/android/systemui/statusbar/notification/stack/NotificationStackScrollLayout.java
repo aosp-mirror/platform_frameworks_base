@@ -653,6 +653,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return 0f;
     }
 
+    public float getNotificationSquishinessFraction() {
+        return mStackScrollAlgorithm.getNotificationSquishinessFraction(mAmbientState);
+    }
+
     void reinflateViews() {
         inflateFooterView();
         inflateEmptyShadeView();
