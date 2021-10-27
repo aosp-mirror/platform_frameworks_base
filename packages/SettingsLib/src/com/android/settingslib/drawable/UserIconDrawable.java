@@ -40,6 +40,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.settingslib.R;
 
 /**
@@ -465,5 +467,25 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
     @Override
     public void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what) {
         unscheduleSelf(what);
+    }
+
+    @VisibleForTesting
+    public Drawable getUserDrawable() {
+        return mUserDrawable;
+    }
+
+    @VisibleForTesting
+    public Bitmap getUserIcon() {
+        return mUserIcon;
+    }
+
+    @VisibleForTesting
+    public boolean isInvalidated() {
+        return mInvalidated;
+    }
+
+    @VisibleForTesting
+    public Drawable getBadge() {
+        return mBadge;
     }
 }
