@@ -41,6 +41,8 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     private int mMinRows = 1;
     private int mMaxColumns = NO_MAX_COLUMNS;
     protected int mResourceColumns;
+    private float mSquishinessFraction = 1f;
+    private int mLastTileBottom;
 
     public TileLayout(Context context) {
         this(context, null);
@@ -210,10 +212,11 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         return mMaxCellHeight;
     }
 
-    protected void layoutTileRecords(int numRecords) {
+    private void layoutTileRecords(int numRecords) {
         final boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
         int row = 0;
         int column = 0;
+        mLastTileBottom = 0;
 
         // Layout each QS tile.
         final int tilesToLayout = Math.min(numRecords, mRows * mColumns);
@@ -228,7 +231,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             final int top = getRowTop(row);
             final int left = getColumnStart(isRtl ? mColumns - column - 1 : column);
             final int right = left + mCellWidth;
-            record.tileView.layout(left, top, right, top + record.tileView.getMeasuredHeight());
+            final int bottom = top + record.tileView.getMeasuredHeight();
+            record.tileView.layout(left, top, right, bottom);
+            mLastTileBottom = bottom;
         }
     }
 
@@ -238,7 +243,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     }
 
     protected int getRowTop(int row) {
-        return row * (mCellHeight + mCellMarginVertical);
+        return (int) (row * (mCellHeight * mSquishinessFraction + mCellMarginVertical));
     }
 
     protected int getColumnStart(int column) {
@@ -263,5 +268,18 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         // show even 1 or there are no tiles, it probably means we are in the middle of setting
         // up.
         return Math.max(mColumns * mRows, 1);
+    }
+
+    public int getTilesHeight() {
+        return mLastTileBottom + getPaddingBottom();
+    }
+
+    @Override
+    public void setSquishinessFraction(float squishinessFraction) {
+        if (Float.compare(mSquishinessFraction, squishinessFraction) == 0) {
+            return;
+        }
+        mSquishinessFraction = squishinessFraction;
+        layoutTileRecords(mRecords.size());
     }
 }

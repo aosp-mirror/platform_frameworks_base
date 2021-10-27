@@ -438,7 +438,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private boolean mPulsing;
     private boolean mUserSetupComplete;
-    private int mQsNotificationTopPadding;
     private boolean mHideIconsDuringLaunchAnimation = true;
     private int mStackScrollerMeasuringPass;
     private ArrayList<Consumer<ExpandableNotificationRow>>
@@ -2218,7 +2217,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updateQsExpansion() {
         if (mQs == null) return;
         float qsExpansionFraction = computeQsExpansionFraction();
-        mQs.setQsExpansion(qsExpansionFraction, getExpandedFraction(), getHeaderTranslation());
+        mQs.setQsExpansion(qsExpansionFraction, getExpandedFraction(), getHeaderTranslation(),
+                mNotificationStackScrollLayoutController.getNotificationSquishinessFraction());
         mMediaHierarchyManager.setQsExpansion(qsExpansionFraction);
         int qsPanelBottomY = calculateQsBottomPosition(qsExpansionFraction);
         mScrimController.setQsPosition(qsExpansionFraction, qsPanelBottomY);
