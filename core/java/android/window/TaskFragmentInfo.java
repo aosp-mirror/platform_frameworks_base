@@ -213,6 +213,7 @@ public final class TaskFragmentInfo implements Parcelable {
                 + " isEmpty=" + mIsEmpty
                 + " runningActivityCount=" + mRunningActivityCount
                 + " isVisible=" + mIsVisible
+                + " activities=" + mActivities
                 + " positionInParent=" + mPositionInParent
                 + " isTaskClearedForReuse=" + mIsTaskClearedForReuse
                 + "}";
