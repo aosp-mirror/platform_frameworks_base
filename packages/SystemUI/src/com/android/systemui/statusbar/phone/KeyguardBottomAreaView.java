@@ -1078,10 +1078,14 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK)
                 .putExtra(ControlsUiController.EXTRA_ANIMATE, true);
 
+        ActivityLaunchAnimator.Controller controller =
+                v != null ? ActivityLaunchAnimator.Controller.fromView(v, null /* cujType */)
+                        : null;
         if (mControlsComponent.getVisibility() == AVAILABLE) {
-            mContext.startActivity(intent);
+            mActivityStarter.startActivity(intent, true /* dismissShade */, controller,
+                    true /* showOverLockscreenWhenLocked */);
         } else {
-            mActivityStarter.postStartActivityDismissingKeyguard(intent, 0 /* delay */);
+            mActivityStarter.postStartActivityDismissingKeyguard(intent, 0 /* delay */, controller);
         }
     }
 
