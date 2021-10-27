@@ -565,11 +565,11 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             mDismissingDimValue = 0;
 
             int totalDismissingDistance = 0;
-            if (position <= mDividerSnapAlgorithm.getFirstSplitTarget().position) {
+            if (position < mDividerSnapAlgorithm.getFirstSplitTarget().position) {
                 mDismissingSide = isLandscape ? DOCKED_LEFT : DOCKED_TOP;
                 totalDismissingDistance = mDividerSnapAlgorithm.getDismissStartTarget().position
                         - mDividerSnapAlgorithm.getFirstSplitTarget().position;
-            } else if (position >= mDividerSnapAlgorithm.getLastSplitTarget().position) {
+            } else if (position > mDividerSnapAlgorithm.getLastSplitTarget().position) {
                 mDismissingSide = isLandscape ? DOCKED_RIGHT : DOCKED_BOTTOM;
                 totalDismissingDistance = mDividerSnapAlgorithm.getLastSplitTarget().position
                         - mDividerSnapAlgorithm.getDismissEndTarget().position;
