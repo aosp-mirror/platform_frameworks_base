@@ -16,11 +16,11 @@
 
 package android.bluetooth.le;
 
-import android.os.BytesMatcher;
 import android.os.ParcelUuid;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.internal.util.HexDump;
+import com.android.modules.utils.BytesMatcher;
 
 import junit.framework.TestCase;
 
