@@ -16,10 +16,12 @@
 
 package android.media.tv.interactive;
 
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -27,6 +29,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Surface;
 
 import com.android.internal.os.SomeArgs;
 
@@ -94,10 +97,49 @@ public abstract class TvIAppService extends Service {
         // @GuardedBy("mLock")
         private final List<Runnable> mPendingActions = new ArrayList<>();
 
+        private final Context mContext;
+        private final Handler mHandler;
+        private Surface mSurface;
+
+        /**
+         * Creates a new Session.
+         *
+         * @param context The context of the application
+         */
+        public Session(Context context) {
+            mContext = context;
+            mHandler = new Handler(context.getMainLooper());
+        }
+
         /**
          * Starts TvIAppService session.
          */
         public void onStartIApp() {
+        }
+
+        /**
+         * Called when the application sets the surface.
+         *
+         * <p>The TV IApp service should render interactive app UI onto the given surface. When
+         * called with {@code null}, the input service should immediately free any references to the
+         * currently set surface and stop using it.
+         *
+         * @param surface The surface to be used for interactive app UI rendering. Can be
+         *                {@code null}.
+         * @return {@code true} if the surface was set successfully, {@code false} otherwise.
+         */
+        public abstract boolean onSetSurface(@Nullable Surface surface);
+
+        /**
+         * Called after any structural changes (format or size) have been made to the surface passed
+         * in {@link #onSetSurface}. This method is always called at least once, after
+         * {@link #onSetSurface} is called with non-null surface.
+         *
+         * @param format The new PixelFormat of the surface.
+         * @param width The new width of the surface.
+         * @param height The new height of the surface.
+         */
+        public void onSurfaceChanged(int format, int width, int height) {
         }
 
         /**
@@ -106,11 +148,49 @@ public abstract class TvIAppService extends Service {
         public void onRelease() {
         }
 
+        /**
+         * Assigns a size and position to the surface passed in {@link #onSetSurface}. The position
+         * is relative to the overlay view that sits on top of this surface.
+         *
+         * @param left Left position in pixels, relative to the overlay view.
+         * @param top Top position in pixels, relative to the overlay view.
+         * @param right Right position in pixels, relative to the overlay view.
+         * @param bottom Bottom position in pixels, relative to the overlay view.
+         */
+        public void layoutSurface(final int left, final int top, final int right,
+                final int bottom) {
+            if (left > right || top > bottom) {
+                throw new IllegalArgumentException("Invalid parameter");
+            }
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "layoutSurface (l=" + left + ", t=" + top
+                                    + ", r=" + right + ", b=" + bottom + ",)");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onLayoutSurface(left, top, right, bottom);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in layoutSurface", e);
+                    }
+                }
+            });
+        }
+
         void startIApp() {
             onStartIApp();
         }
+
         void release() {
             onRelease();
+            if (mSurface != null) {
+                mSurface.release();
+                mSurface = null;
+            }
         }
 
         private void initialize(ITvIAppSessionCallback callback) {
@@ -120,6 +200,45 @@ public abstract class TvIAppService extends Service {
                     runnable.run();
                 }
                 mPendingActions.clear();
+            }
+        }
+
+        /**
+         * Calls {@link #onSetSurface}.
+         */
+        void setSurface(Surface surface) {
+            onSetSurface(surface);
+            if (mSurface != null) {
+                mSurface.release();
+            }
+            mSurface = surface;
+            // TODO: Handle failure.
+        }
+
+        /**
+         * Calls {@link #onSurfaceChanged}.
+         */
+        void dispatchSurfaceChanged(int format, int width, int height) {
+            if (DEBUG) {
+                Log.d(TAG, "dispatchSurfaceChanged(format=" + format + ", width=" + width
+                        + ", height=" + height + ")");
+            }
+            onSurfaceChanged(format, width, height);
+        }
+
+        private void executeOrPostRunnableOnMainThread(Runnable action) {
+            synchronized (mLock) {
+                if (mSessionCallback == null) {
+                    // The session is not initialized yet.
+                    mPendingActions.add(action);
+                } else {
+                    if (mHandler.getLooper().isCurrentThread()) {
+                        action.run();
+                    } else {
+                        // Posts the runnable if this is not called from the main thread
+                        mHandler.post(action);
+                    }
+                }
             }
         }
     }
@@ -142,6 +261,16 @@ public abstract class TvIAppService extends Service {
         @Override
         public void release() {
             mSessionImpl.release();
+        }
+
+        @Override
+        public void setSurface(Surface surface) {
+            mSessionImpl.setSurface(surface);
+        }
+
+        @Override
+        public void dispatchSurfaceChanged(int format, int width, int height) {
+            mSessionImpl.dispatchSurfaceChanged(format, width, height);
         }
     }
 

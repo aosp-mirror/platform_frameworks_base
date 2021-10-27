@@ -17,6 +17,7 @@
 package android.media.tv.interactive;
 
 import android.media.tv.interactive.ITvIAppClient;
+import android.view.Surface;
 
 /**
  * Interface to the TV interactive app service.
@@ -27,4 +28,7 @@ interface ITvIAppManager {
     void createSession(
             in ITvIAppClient client, in String iAppServiceId, int type, int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
+    void setSurface(in IBinder sessionToken, in Surface surface, int userId);
+    void dispatchSurfaceChanged(in IBinder sessionToken, int format, int width, int height,
+            int userId);
 }

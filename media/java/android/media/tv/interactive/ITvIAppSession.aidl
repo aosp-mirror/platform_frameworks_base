@@ -16,6 +16,8 @@
 
 package android.media.tv.interactive;
 
+import android.view.Surface;
+
 /**
  * Sub-interface of ITvIAppService.aidl which is created per session and has its own context.
  * @hide
@@ -23,4 +25,6 @@ package android.media.tv.interactive;
 oneway interface ITvIAppSession {
     void startIApp();
     void release();
+    void setSurface(in Surface surface);
+    void dispatchSurfaceChanged(int format, int width, int height);
 }
