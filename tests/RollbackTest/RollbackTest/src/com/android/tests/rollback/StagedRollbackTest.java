@@ -256,10 +256,7 @@ public class StagedRollbackTest {
 
         // verify rollback
         assertThat(InstallUtils.getInstalledVersion(packageName)).isEqualTo(2);
-        RollbackManager rm = RollbackUtils.getRollbackManager();
-        RollbackInfo rollback = getUniqueRollbackInfoForPackage(
-                rm.getAvailableRollbacks(), packageName);
-        assertThat(rollback).isNotNull();
+        RollbackInfo rollback = RollbackUtils.waitForAvailableRollback(packageName);
         assertThat(rollback).packagesContainsExactly(Rollback.from(apex2).to(apex1));
         assertThat(rollback).isNotStaged();
 
