@@ -123,18 +123,18 @@ public interface BcSmartspaceDataPlugin extends Plugin {
 
     /** Interface for launching Intents, which can differ on the lockscreen */
     interface IntentStarter {
-        default void startFromAction(SmartspaceAction action, View v) {
+        default void startFromAction(SmartspaceAction action, View v, boolean showOnLockscreen) {
             if (action.getIntent() != null) {
-                startIntent(v, action.getIntent());
+                startIntent(v, action.getIntent(), showOnLockscreen);
             } else if (action.getPendingIntent() != null) {
-                startPendingIntent(action.getPendingIntent());
+                startPendingIntent(action.getPendingIntent(), showOnLockscreen);
             }
         }
 
         /** Start the intent */
-        void startIntent(View v, Intent i);
+        void startIntent(View v, Intent i, boolean showOnLockscreen);
 
         /** Start the PendingIntent */
-        void startPendingIntent(PendingIntent pi);
+        void startPendingIntent(PendingIntent pi, boolean showOnLockscreen);
     }
 }

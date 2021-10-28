@@ -1298,7 +1298,7 @@ package android {
     field public static final int shortcutLongLabel = 16844074; // 0x101052a
     field public static final int shortcutShortLabel = 16844073; // 0x1010529
     field public static final int shouldDisableView = 16843246; // 0x10101ee
-    field public static final int shouldUseDefaultUnfoldTransition;
+    field public static final int shouldUseDefaultUnfoldTransition = 16844364; // 0x101064c
     field public static final int showAsAction = 16843481; // 0x10102d9
     field public static final int showDefault = 16843258; // 0x10101fa
     field public static final int showDividers = 16843561; // 0x1010329
@@ -2014,9 +2014,9 @@ package android {
   public static final class R.id {
     ctor public R.id();
     field public static final int accessibilityActionContextClick = 16908348; // 0x102003c
-    field public static final int accessibilityActionDragCancel;
-    field public static final int accessibilityActionDragDrop;
-    field public static final int accessibilityActionDragStart;
+    field public static final int accessibilityActionDragCancel = 16908375; // 0x1020057
+    field public static final int accessibilityActionDragDrop = 16908374; // 0x1020056
+    field public static final int accessibilityActionDragStart = 16908373; // 0x1020055
     field public static final int accessibilityActionHideTooltip = 16908357; // 0x1020045
     field public static final int accessibilityActionImeEnter = 16908372; // 0x1020054
     field public static final int accessibilityActionMoveWindow = 16908354; // 0x1020042
@@ -30857,6 +30857,7 @@ package android.os {
     field public static final int Q = 29; // 0x1d
     field public static final int R = 30; // 0x1e
     field public static final int S = 31; // 0x1f
+    field public static final int S_V2 = 32; // 0x20
   }
 
   public final class Bundle extends android.os.BaseBundle implements java.lang.Cloneable android.os.Parcelable {

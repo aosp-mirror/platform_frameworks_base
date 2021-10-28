@@ -41,15 +41,28 @@ class SplitShadeHeaderController @Inject constructor(
     private val iconManager: StatusBarIconController.IconManager
     private val qsCarrierGroupController: QSCarrierGroupController
     private var visible = false
+        set(value) {
+            if (field == value) {
+                return
+            }
+            field = value
+            updateListeners()
+        }
 
     var shadeExpanded = false
         set(value) {
+            if (field == value) {
+                return
+            }
             field = value
             updateVisibility()
         }
 
     var splitShadeMode = false
         set(value) {
+            if (field == value) {
+                return
+            }
             field = value
             updateVisibility()
         }
@@ -78,15 +91,20 @@ class SplitShadeHeaderController @Inject constructor(
     }
 
     private fun updateVisibility() {
-        val shouldBeVisible = shadeExpanded && splitShadeMode
-        if (visible != shouldBeVisible) {
-            visible = shouldBeVisible
-            statusBar.visibility = if (shouldBeVisible) View.VISIBLE else View.GONE
-            updateListeners(shouldBeVisible)
+        val visibility = if (!splitShadeMode) {
+            View.GONE
+        } else if (shadeExpanded) {
+            View.VISIBLE
+        } else {
+            View.INVISIBLE
+        }
+        if (statusBar.visibility != visibility) {
+            statusBar.visibility = visibility
+            visible = visibility == View.VISIBLE
         }
     }
 
-    private fun updateListeners(visible: Boolean) {
+    private fun updateListeners() {
         qsCarrierGroupController.setListening(visible)
         if (visible) {
             statusBarIconController.addIconGroup(iconManager)

@@ -34,6 +34,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.android.settingslib.Utils
 import com.android.systemui.R
+import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -188,13 +189,28 @@ class LockscreenSmartspaceController @Inject constructor(
 
         val ssView = plugin.getView(parent)
         ssView.registerDataProvider(plugin)
+
+        val animationController = ActivityLaunchAnimator.Controller.fromView(
+            ssView as View,
+            null /* cujType */
+        )
+
         ssView.setIntentStarter(object : BcSmartspaceDataPlugin.IntentStarter {
-            override fun startIntent(v: View?, i: Intent?) {
-                activityStarter.startActivity(i, true /* dismissShade */)
+            override fun startIntent(v: View?, i: Intent?, showOnLockscreen: Boolean) {
+                activityStarter.startActivity(
+                    i,
+                    true, /* dismissShade */
+                    animationController,
+                    showOnLockscreen
+                )
             }
 
-            override fun startPendingIntent(pi: PendingIntent?) {
-                activityStarter.startPendingIntentDismissingKeyguard(pi)
+            override fun startPendingIntent(pi: PendingIntent?, showOnLockscreen: Boolean) {
+                if (showOnLockscreen) {
+                    pi?.send()
+                } else {
+                    activityStarter.startPendingIntentDismissingKeyguard(pi)
+                }
             }
         })
         ssView.setFalsingManager(falsingManager)
