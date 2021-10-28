@@ -128,6 +128,11 @@ public class ApkLite {
      */
     private final int mRollbackDataPolicy;
 
+    /**
+     * Indicates if this app contains a {@link android.app.admin.DeviceAdminReceiver}.
+     */
+    private final boolean mHasDeviceAdminReceiver;
+
     public ApkLite(String path, String packageName, String splitName, boolean isFeatureSplit,
             String configForSplit, String usesSplitName, boolean isSplitRequired, int versionCode,
             int versionCodeMajor, int revisionCode, int installLocation,
@@ -137,7 +142,8 @@ public class ApkLite {
             String targetPackageName, boolean overlayIsStatic, int overlayPriority,
             String requiredSystemPropertyName, String requiredSystemPropertyValue,
             int minSdkVersion, int targetSdkVersion, int rollbackDataPolicy,
-            Set<String> requiredSplitTypes, Set<String> splitTypes) {
+            Set<String> requiredSplitTypes, Set<String> splitTypes,
+            boolean hasDeviceAdminReceiver) {
         mPath = path;
         mPackageName = packageName;
         mSplitName = splitName;
@@ -169,6 +175,7 @@ public class ApkLite {
         mMinSdkVersion = minSdkVersion;
         mTargetSdkVersion = targetSdkVersion;
         mRollbackDataPolicy = rollbackDataPolicy;
+        mHasDeviceAdminReceiver = hasDeviceAdminReceiver;
     }
 
     /**
@@ -461,11 +468,16 @@ public class ApkLite {
         return mRollbackDataPolicy;
     }
 
+    @DataClass.Generated.Member
+    public boolean isHasDeviceAdminReceiver() {
+        return mHasDeviceAdminReceiver;
+    }
+
     @DataClass.Generated(
-            time = 1631763761543L,
+            time = 1635266936769L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/ApkLite.java",
-            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.lang.String mPath\nprivate final @android.annotation.Nullable java.lang.String mSplitName\nprivate final @android.annotation.Nullable java.lang.String mUsesSplitName\nprivate final @android.annotation.Nullable java.lang.String mConfigForSplit\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mSplitTypes\nprivate final  int mVersionCodeMajor\nprivate final  int mVersionCode\nprivate final  int mRevisionCode\nprivate final  int mInstallLocation\nprivate final  int mMinSdkVersion\nprivate final  int mTargetSdkVersion\nprivate final @android.annotation.NonNull android.content.pm.VerifierInfo[] mVerifiers\nprivate final @android.annotation.NonNull android.content.pm.SigningDetails mSigningDetails\nprivate final  boolean mFeatureSplit\nprivate final  boolean mIsolatedSplits\nprivate final  boolean mSplitRequired\nprivate final  boolean mCoreApp\nprivate final  boolean mDebuggable\nprivate final  boolean mProfileableByShell\nprivate final  boolean mMultiArch\nprivate final  boolean mUse32bitAbi\nprivate final  boolean mExtractNativeLibs\nprivate final  boolean mUseEmbeddedDex\nprivate final @android.annotation.Nullable java.lang.String mTargetPackageName\nprivate final  boolean mOverlayIsStatic\nprivate final  int mOverlayPriority\nprivate final @android.annotation.Nullable java.lang.String mRequiredSystemPropertyName\nprivate final @android.annotation.Nullable java.lang.String mRequiredSystemPropertyValue\nprivate final  int mRollbackDataPolicy\npublic  long getLongVersionCode()\nprivate  boolean hasAnyRequiredSplitTypes()\nclass ApkLite extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genConstDefs=false)")
+            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.lang.String mPath\nprivate final @android.annotation.Nullable java.lang.String mSplitName\nprivate final @android.annotation.Nullable java.lang.String mUsesSplitName\nprivate final @android.annotation.Nullable java.lang.String mConfigForSplit\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mSplitTypes\nprivate final  int mVersionCodeMajor\nprivate final  int mVersionCode\nprivate final  int mRevisionCode\nprivate final  int mInstallLocation\nprivate final  int mMinSdkVersion\nprivate final  int mTargetSdkVersion\nprivate final @android.annotation.NonNull android.content.pm.VerifierInfo[] mVerifiers\nprivate final @android.annotation.NonNull android.content.pm.SigningDetails mSigningDetails\nprivate final  boolean mFeatureSplit\nprivate final  boolean mIsolatedSplits\nprivate final  boolean mSplitRequired\nprivate final  boolean mCoreApp\nprivate final  boolean mDebuggable\nprivate final  boolean mProfileableByShell\nprivate final  boolean mMultiArch\nprivate final  boolean mUse32bitAbi\nprivate final  boolean mExtractNativeLibs\nprivate final  boolean mUseEmbeddedDex\nprivate final @android.annotation.Nullable java.lang.String mTargetPackageName\nprivate final  boolean mOverlayIsStatic\nprivate final  int mOverlayPriority\nprivate final @android.annotation.Nullable java.lang.String mRequiredSystemPropertyName\nprivate final @android.annotation.Nullable java.lang.String mRequiredSystemPropertyValue\nprivate final  int mRollbackDataPolicy\nprivate final  boolean mHasDeviceAdminReceiver\npublic  long getLongVersionCode()\nprivate  boolean hasAnyRequiredSplitTypes()\nclass ApkLite extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genConstDefs=false)")
     @Deprecated
     private void __metadata() {}
 

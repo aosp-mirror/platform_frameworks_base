@@ -52,7 +52,6 @@ import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ComponentMutateUtils;
 import android.content.pm.parsing.component.ComponentParseUtils;
 import android.content.pm.parsing.component.ParsedActivity;
-import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedActivityUtils;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedAttributionUtils;
@@ -191,6 +190,7 @@ public class ParsingPackageUtils {
     public static final String TAG_USES_SDK = "uses-sdk";
     public static final String TAG_USES_SPLIT = "uses-split";
     public static final String TAG_PROFILEABLE = "profileable";
+    public static final String TAG_RECEIVER = "receiver";
 
     public static final String METADATA_MAX_ASPECT_RATIO = "android.max_aspect";
     public static final String METADATA_SUPPORTS_SIZE_CHANGES = "android.supports_size_changes";
