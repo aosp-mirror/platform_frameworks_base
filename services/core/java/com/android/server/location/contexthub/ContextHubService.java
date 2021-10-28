@@ -49,6 +49,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -184,6 +185,7 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     public ContextHubService(Context context) {
+        long startTimeNs = SystemClock.elapsedRealtimeNanos();
         mContext = context;
 
         mContextHubWrapper = getContextHubWrapper();
@@ -205,6 +207,9 @@ public class ContextHubService extends IContextHubService.Stub {
             Log.e(TAG, "RemoteException while getting Context Hub info", e);
             hubInfo = new Pair(Collections.emptyList(), Collections.emptyList());
         }
+        long bootTimeNs = SystemClock.elapsedRealtimeNanos() - startTimeNs;
+        int numContextHubs = hubInfo.first.size();
+        ContextHubStatsLog.write(ContextHubStatsLog.CONTEXT_HUB_BOOTED, bootTimeNs, numContextHubs);
 
         mContextHubIdToInfoMap = Collections.unmodifiableMap(
                 ContextHubServiceUtil.createContextHubInfoMap(hubInfo.first));
