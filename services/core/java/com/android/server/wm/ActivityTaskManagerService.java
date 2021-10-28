@@ -501,9 +501,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     private Configuration mTempConfig = new Configuration();
 
-    /** Temporary to avoid allocations. */
-    final StringBuilder mStringBuilder = new StringBuilder(256);
-
     /**
      * Whether normal application switches are allowed; a call to {@link #stopAppSwitches()
      * disables this.
@@ -3096,11 +3093,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         throw new SecurityException(msg);
     }
 
-    @VisibleForTesting
-    int checkGetTasksPermission(String permission, int pid, int uid) {
-        return checkPermission(permission, pid, uid);
-    }
-
     static int checkPermission(String permission, int pid, int uid) {
         if (permission == null) {
             return PackageManager.PERMISSION_DENIED;
@@ -3120,10 +3112,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return true;
         }
 
-        boolean allowed = checkGetTasksPermission(android.Manifest.permission.REAL_GET_TASKS,
+        boolean allowed = checkPermission(android.Manifest.permission.REAL_GET_TASKS,
                 callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
         if (!allowed) {
-            if (checkGetTasksPermission(android.Manifest.permission.GET_TASKS,
+            if (checkPermission(android.Manifest.permission.GET_TASKS,
                     callingPid, callingUid) == PackageManager.PERMISSION_GRANTED) {
                 // Temporary compatibility: some existing apps on the system image may
                 // still be requesting the old permission and not switched to the new

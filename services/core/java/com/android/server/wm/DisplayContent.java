@@ -555,9 +555,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** Windows removed since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
     final ArrayList<WindowState> mWinRemovedSinceNullFocus = new ArrayList<>();
 
-    /** Windows whose client's insets states are not up-to-date. */
-    final ArrayList<WindowState> mWinInsetsChanged = new ArrayList<>();
-
     private ScreenRotationAnimation mScreenRotationAnimation;
 
     /**
@@ -636,9 +633,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** The surface parent of the IME container. */
     private SurfaceControl mInputMethodSurfaceParent;
-
-    /** If {@code true} hold off on modifying the animation layer of {@link #mImeLayeringTarget} */
-    boolean mImeLayeringTargetWaitingAnim;
 
     /** The screenshot IME surface to place on the task while transitioning to the next task. */
     SurfaceControl mImeScreenshot;
@@ -4974,12 +4968,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-    }
-
-    void assignRootTaskOrdering() {
-        forAllTaskDisplayAreas(taskDisplayArea -> {
-            taskDisplayArea.assignRootTaskOrdering(getPendingTransaction());
-        });
     }
 
     /**
