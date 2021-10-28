@@ -1231,6 +1231,9 @@ class Task extends TaskFragment {
         adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());
 
         mRootWindowContainer.updateUIDsPresentOnDisplay();
+
+        // Ensure all animations are finished at same time in split-screen mode.
+        forAllActivities(ActivityRecord::updateAnimatingActivityRegistry);
     }
 
     @Override
