@@ -5196,6 +5196,16 @@ public class CarrierConfigManager {
     public static final String KEY_VONR_SETTING_VISIBILITY_BOOL = "vonr_setting_visibility_bool";
 
     /**
+     * Flag specifying whether VoNR should be enabled for carrier.
+     * If true, VoNr will be enabled. If false, hard disabled.
+     *
+     * Disabled by default.
+     *
+     * @hide
+     */
+    public static final String KEY_VONR_ENABLED_BOOL = "vonr_enabled_bool";
+
+    /**
      * Determine whether unthrottle data retry when tracking area code (TAC/LAC) from cell changes
      *
      * @hide
@@ -5812,6 +5822,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DISPLAY_NO_DATA_NOTIFICATION_ON_PERMANENT_FAILURE_BOOL, false);
         sDefaults.putBoolean(KEY_UNTHROTTLE_DATA_RETRY_WHEN_TAC_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_VONR_SETTING_VISIBILITY_BOOL, false);
+        sDefaults.putBoolean(KEY_VONR_ENABLED_BOOL, false);
     }
 
     /**
