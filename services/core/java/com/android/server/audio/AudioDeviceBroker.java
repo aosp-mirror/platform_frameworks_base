@@ -1774,19 +1774,36 @@ import java.util.concurrent.atomic.AtomicBoolean;
         MESSAGES_MUTE_MUSIC.add(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION);
         MESSAGES_MUTE_MUSIC.add(MSG_L_LE_AUDIO_DEVICE_OUT_CONNECTION_CHANGE_EXT);
         MESSAGES_MUTE_MUSIC.add(MSG_IIL_SET_FORCE_BT_A2DP_USE);
-        MESSAGES_MUTE_MUSIC.add(MSG_REPORT_NEW_ROUTES_A2DP);
     }
 
     private AtomicBoolean mMusicMuted = new AtomicBoolean(false);
 
+    boolean messageMutesMusic(int message) {
+        if (message == 0) {
+            return false;
+        }
+        // Do not mute if we are disconnecting an A2DP device and music is playing
+        // on a wired headset.
+        if ((message == MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED
+                || message == MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION)
+                && AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)
+                && mDeviceInventory.DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.contains(
+                        mAudioService.getDevicesForStream(AudioSystem.STREAM_MUSIC))) {
+            return false;
+        }
+        return true;
+    }
+
     /** Mutes or unmutes music according to pending A2DP messages */
     private void checkMessagesMuteMusic(int message) {
-        boolean mute = message != 0;
+        boolean mute = messageMutesMusic(message);
         if (!mute) {
             for (int msg : MESSAGES_MUTE_MUSIC) {
                 if (mBrokerHandler.hasMessages(msg)) {
-                    mute = true;
-                    break;
+                    if (messageMutesMusic(msg)) {
+                        mute = true;
+                        break;
+                    }
                 }
             }
         }
