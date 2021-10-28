@@ -51,6 +51,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.NetworkController.AccessPointController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.toast.SystemUIToast;
 import com.android.systemui.toast.ToastFactory;
 import com.android.systemui.util.CarrierConfigTracker;
@@ -135,6 +136,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private Animator mAnimator;
     @Mock
     private CarrierConfigTracker mCarrierConfigTracker;
+    @Mock
+    private LocationController mLocationController;
 
     private TestableResources mTestableResources;
     private MockInternetDialogController mInternetDialogController;
@@ -170,7 +173,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
                 mSubscriptionManager, mTelephonyManager, mWifiManager,
                 mock(ConnectivityManager.class), mHandler, mExecutor, mBroadcastDispatcher,
                 mock(KeyguardUpdateMonitor.class), mGlobalSettings, mKeyguardStateController,
-                mWindowManager, mToastFactory, mWorkerHandler, mCarrierConfigTracker);
+                mWindowManager, mToastFactory, mWorkerHandler, mCarrierConfigTracker,
+                mLocationController);
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDialogController.mOnSubscriptionsChangedListener);
         mInternetDialogController.onStart(mInternetDialogCallback, true);
@@ -602,6 +606,30 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         verify(mMergedCarrierEntry).setEnabled(false);
     }
 
+    @Test
+    public void isWifiScanEnabled_locationOff_returnFalse() {
+        when(mLocationController.isLocationEnabled()).thenReturn(false);
+        when(mWifiManager.isScanAlwaysAvailable()).thenReturn(false);
+
+        assertThat(mInternetDialogController.isWifiScanEnabled()).isFalse();
+
+        when(mWifiManager.isScanAlwaysAvailable()).thenReturn(true);
+
+        assertThat(mInternetDialogController.isWifiScanEnabled()).isFalse();
+    }
+
+    @Test
+    public void isWifiScanEnabled_locationOn_returnIsScanAlwaysAvailable() {
+        when(mLocationController.isLocationEnabled()).thenReturn(true);
+        when(mWifiManager.isScanAlwaysAvailable()).thenReturn(false);
+
+        assertThat(mInternetDialogController.isWifiScanEnabled()).isFalse();
+
+        when(mWifiManager.isScanAlwaysAvailable()).thenReturn(true);
+
+        assertThat(mInternetDialogController.isWifiScanEnabled()).isTrue();
+    }
+
     private String getResourcesString(String name) {
         return mContext.getResources().getString(getResourcesId(name));
     }
@@ -625,12 +653,13 @@ public class InternetDialogControllerTest extends SysuiTestCase {
                 KeyguardUpdateMonitor keyguardUpdateMonitor, GlobalSettings globalSettings,
                 KeyguardStateController keyguardStateController, WindowManager windowManager,
                 ToastFactory toastFactory, Handler workerHandler,
-                CarrierConfigTracker carrierConfigTracker) {
+                CarrierConfigTracker carrierConfigTracker,
+                LocationController locationController) {
             super(context, uiEventLogger, starter, accessPointController, subscriptionManager,
                     telephonyManager, wifiManager, connectivityManager, handler, mainExecutor,
                     broadcastDispatcher, keyguardUpdateMonitor, globalSettings,
                     keyguardStateController, windowManager, toastFactory, workerHandler,
-                    carrierConfigTracker);
+                    carrierConfigTracker, locationController);
             mGlobalSettings = globalSettings;
         }
 

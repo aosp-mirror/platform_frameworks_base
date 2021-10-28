@@ -392,7 +392,7 @@ class TaskSnapshotController {
         final WindowState imeWindow = task.getDisplayContent().mInputMethodWindow;
         SurfaceControl.ScreenshotHardwareBuffer imeBuffer = null;
         if (imeWindow != null && imeWindow.isWinVisibleLw()) {
-            final Rect bounds = imeWindow.getContainingFrame();
+            final Rect bounds = imeWindow.getParentFrame();
             bounds.offsetTo(0, 0);
             imeBuffer = SurfaceControl.captureLayersExcluding(imeWindow.getSurfaceControl(),
                     bounds, 1.0f, pixelFormat, null);

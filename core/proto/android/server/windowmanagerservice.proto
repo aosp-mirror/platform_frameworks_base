@@ -202,7 +202,6 @@ message DisplayContentProto {
     optional .com.android.server.wm.IdentifierProto resumed_activity = 24;
     repeated TaskProto tasks = 25 [deprecated=true];
     optional bool display_ready = 26;
-
     optional WindowStateProto input_method_target = 27;
     optional WindowStateProto input_method_input_target = 28;
     optional WindowStateProto input_method_control_target = 29;
@@ -214,6 +213,9 @@ message DisplayContentProto {
     optional int32 ime_policy = 34;
 
     repeated InsetsSourceProviderProto insets_source_providers = 35;
+    optional bool is_sleeping = 36;
+    repeated string sleep_tokens = 37;
+
 }
 
 /* represents DisplayArea object */
@@ -527,7 +529,7 @@ message ConfigurationContainerProto {
 message WindowFramesProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional .android.graphics.RectProto containing_frame = 1;
+    optional .android.graphics.RectProto containing_frame = 1 [deprecated=true];
     optional .android.graphics.RectProto content_frame = 2 [deprecated=true];
     optional .android.graphics.RectProto decor_frame = 3 [deprecated=true];
     optional .android.graphics.RectProto display_frame = 4;

@@ -18,6 +18,7 @@ package com.android.server.tare;
 
 import static android.provider.Settings.Global.TARE_ALARM_MANAGER_CONSTANTS;
 import static android.provider.Settings.Global.TARE_JOB_SCHEDULER_CONSTANTS;
+import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
@@ -85,6 +86,11 @@ public class InternalResourceService extends SystemService {
     static final long UNUSED_RECLAMATION_PERIOD_MS = 24 * HOUR_IN_MILLIS;
     /** How much of an app's unused wealth should be reclaimed periodically. */
     private static final float DEFAULT_UNUSED_RECLAMATION_PERCENTAGE = .1f;
+    /**
+     * The minimum amount of time an app must not have been used by the user before we start
+     * periodically reclaiming ARCs from it.
+     */
+    private static final long MIN_UNUSED_TIME_MS = 3 * DAY_IN_MILLIS;
     /** The amount of time to delay reclamation by after boot. */
     private static final long RECLAMATION_STARTUP_DELAY_MS = 30_000L;
     private static final int PACKAGE_QUERY_FLAGS =
@@ -106,6 +112,44 @@ public class InternalResourceService extends SystemService {
 
     @GuardedBy("mLock")
     private CompleteEconomicPolicy mCompleteEconomicPolicy;
+
+    private static final class ReclamationConfig {
+        /**
+         * ARC circulation threshold (% circulating vs scaled maximum) above which this config
+         * should come into play.
+         */
+        public final double circulationPercentageThreshold;
+        /** @see Agent#reclaimUnusedAssetsLocked(double, long, boolean) */
+        public final double reclamationPercentage;
+        /** @see Agent#reclaimUnusedAssetsLocked(double, long, boolean) */
+        public final long minUsedTimeMs;
+        /** @see Agent#reclaimUnusedAssetsLocked(double, long, boolean) */
+        public final boolean scaleMinBalance;
+
+        ReclamationConfig(double circulationPercentageThreshold, double reclamationPercentage,
+                long minUsedTimeMs, boolean scaleMinBalance) {
+            this.circulationPercentageThreshold = circulationPercentageThreshold;
+            this.reclamationPercentage = reclamationPercentage;
+            this.minUsedTimeMs = minUsedTimeMs;
+            this.scaleMinBalance = scaleMinBalance;
+        }
+    }
+
+    /**
+     * Sorted list of reclamation configs used to determine how many credits to force reclaim when
+     * the circulation percentage is too high. The list should *always* be sorted in descending
+     * order of {@link ReclamationConfig#circulationPercentageThreshold}.
+     */
+    @GuardedBy("mLock")
+    private final List<ReclamationConfig> mReclamationConfigs = List.of(
+            new ReclamationConfig(2, .75, 12 * HOUR_IN_MILLIS, true),
+            new ReclamationConfig(1.6, .5, DAY_IN_MILLIS, true),
+            new ReclamationConfig(1.4, .25, DAY_IN_MILLIS, true),
+            new ReclamationConfig(1.2, .25, 2 * DAY_IN_MILLIS, true),
+            new ReclamationConfig(1, .25, MIN_UNUSED_TIME_MS, false),
+            new ReclamationConfig(
+                    .9, DEFAULT_UNUSED_RECLAMATION_PERCENTAGE, MIN_UNUSED_TIME_MS, false)
+    );
 
     @NonNull
     @GuardedBy("mLock")
@@ -190,7 +234,8 @@ public class InternalResourceService extends SystemService {
                 @Override
                 public void onAlarm() {
                     synchronized (mLock) {
-                        mAgent.reclaimUnusedAssetsLocked(DEFAULT_UNUSED_RECLAMATION_PERCENTAGE);
+                        mAgent.reclaimUnusedAssetsLocked(
+                                DEFAULT_UNUSED_RECLAMATION_PERCENTAGE, MIN_UNUSED_TIME_MS, false);
                         mScribe.setLastReclamationTimeLocked(getCurrentTimeMillis());
                         scheduleUnusedWealthReclamationLocked();
                     }
@@ -200,6 +245,7 @@ public class InternalResourceService extends SystemService {
     private static final int MSG_NOTIFY_AFFORDABILITY_CHANGE_LISTENER = 0;
     private static final int MSG_SCHEDULE_UNUSED_WEALTH_RECLAMATION_EVENT = 1;
     private static final int MSG_PROCESS_USAGE_EVENT = 2;
+    private static final int MSG_MAYBE_FOCE_RECLAIM = 3;
     private static final String ALARM_TAG_WEALTH_RECLAMATION = "*tare.reclamation*";
     private static final String KEY_PKG = "pkg";
 
@@ -317,6 +363,8 @@ public class InternalResourceService extends SystemService {
             final int newBatteryLevel = getCurrentBatteryLevel();
             if (newBatteryLevel > mCurrentBatteryLevel) {
                 mAgent.distributeBasicIncomeLocked(newBatteryLevel);
+            } else if (newBatteryLevel < mCurrentBatteryLevel) {
+                mHandler.obtainMessage(MSG_MAYBE_FOCE_RECLAIM).sendToTarget();
             }
             mCurrentBatteryLevel = newBatteryLevel;
         }
@@ -511,6 +559,48 @@ public class InternalResourceService extends SystemService {
         }
     }
 
+    /**
+     * Reclaim unused ARCs above apps' minimum balances if there are too many credits currently
+     * in circulation.
+     */
+    @GuardedBy("mLock")
+    private void maybeForceReclaimLocked() {
+        final long maxCirculation = getMaxCirculationLocked();
+        if (maxCirculation == 0) {
+            Slog.wtf(TAG, "Max scaled circulation is 0...");
+            mAgent.reclaimUnusedAssetsLocked(1, HOUR_IN_MILLIS, true);
+            mScribe.setLastReclamationTimeLocked(getCurrentTimeMillis());
+            scheduleUnusedWealthReclamationLocked();
+            return;
+        }
+        final long curCirculation = mScribe.getNarcsInCirculationLocked();
+        final double circulationPerc = 1.0 * curCirculation / maxCirculation;
+        if (DEBUG) {
+            Slog.d(TAG, "Circulation %: " + circulationPerc);
+        }
+        final int numConfigs = mReclamationConfigs.size();
+        if (numConfigs == 0) {
+            return;
+        }
+        // The configs are sorted in descending order of circulationPercentageThreshold, so we can
+        // short-circuit if the current circulation is lower than the lowest threshold.
+        if (circulationPerc
+                < mReclamationConfigs.get(numConfigs - 1).circulationPercentageThreshold) {
+            return;
+        }
+        // TODO: maybe exclude apps we think will be launched in the next few hours
+        for (int i = 0; i < numConfigs; ++i) {
+            final ReclamationConfig config = mReclamationConfigs.get(i);
+            if (circulationPerc >= config.circulationPercentageThreshold) {
+                mAgent.reclaimUnusedAssetsLocked(
+                        config.reclamationPercentage, config.minUsedTimeMs, config.scaleMinBalance);
+                mScribe.setLastReclamationTimeLocked(getCurrentTimeMillis());
+                scheduleUnusedWealthReclamationLocked();
+                break;
+            }
+        }
+    }
+
     private void registerListeners() {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_LEVEL_CHANGED);
@@ -594,6 +684,14 @@ public class InternalResourceService extends SystemService {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case MSG_MAYBE_FOCE_RECLAIM: {
+                    removeMessages(MSG_MAYBE_FOCE_RECLAIM);
+                    synchronized (mLock) {
+                        maybeForceReclaimLocked();
+                    }
+                }
+                break;
+
                 case MSG_NOTIFY_AFFORDABILITY_CHANGE_LISTENER: {
                     Bundle data = msg.getData();
                     final int userId = msg.arg1;

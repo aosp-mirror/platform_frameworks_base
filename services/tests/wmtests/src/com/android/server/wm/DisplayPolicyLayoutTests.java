@@ -50,7 +50,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
@@ -107,9 +106,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Before
     public void setUp() throws Exception {
         mWindow = spy(createWindow(null, TYPE_APPLICATION, "window"));
-        // We only test window frames set by DisplayPolicy, so here prevents computeFrameLw from
-        // changing those frames.
-        doNothing().when(mWindow).computeFrame(any());
 
         spyOn(mStatusBarWindow);
         spyOn(mNavBarWindow);

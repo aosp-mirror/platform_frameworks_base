@@ -285,8 +285,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 mStatusBarWindow.mAttrs.gravity = Gravity.TOP;
                 mStatusBarWindow.mAttrs.layoutInDisplayCutoutMode =
                         LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-                mStatusBarWindow.setRequestedSize(WindowManager.LayoutParams.MATCH_PARENT,
-                        STATUS_BAR_HEIGHT);
             }
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_NOTIFICATION_SHADE)) {

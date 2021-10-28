@@ -1078,6 +1078,10 @@ public class NotificationStackScrollLayoutController {
         mView.setOnStackYChanged(onStackYChanged);
     }
 
+    public float getNotificationSquishinessFraction() {
+        return mView.getNotificationSquishinessFraction();
+    }
+
     public float calculateAppearFractionBypass() {
         return mView.calculateAppearFractionBypass();
     }

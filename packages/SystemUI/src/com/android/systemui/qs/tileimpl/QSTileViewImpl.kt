@@ -68,6 +68,18 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     override var heightOverride: Int = HeightOverrideable.NO_OVERRIDE
+        set(value) {
+            if (field == value) return
+            field = value
+            updateHeight()
+        }
+
+    override var squishinessFraction: Float = 1f
+        set(value) {
+            if (field == value) return
+            field = value
+            updateHeight()
+        }
 
     private val colorActive = Utils.getColorAttrDefaultColor(context,
             com.android.internal.R.attr.colorAccentPrimary)
@@ -148,6 +160,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
         updateResources()
     }
 
+    override fun resetOverride() {
+        heightOverride = HeightOverrideable.NO_OVERRIDE
+        updateHeight()
+    }
+
     fun updateResources() {
         FontSizeUtils.updateFontSize(label, R.dimen.qs_tile_text_size)
         FontSizeUtils.updateFontSize(secondaryLabel, R.dimen.qs_tile_text_size)
@@ -218,9 +235,17 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
-        if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
-            bottom = top + heightOverride
-        }
+        updateHeight()
+    }
+
+    private fun updateHeight() {
+        val actualHeight = (if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
+            heightOverride
+        } else {
+            measuredHeight
+        } * squishinessFraction).toInt()
+        bottom = top + actualHeight
+        scrollY = (actualHeight - height) / 2
     }
 
     override fun updateAccessibilityOrder(previousView: View?): View {
