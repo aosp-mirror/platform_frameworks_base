@@ -3166,7 +3166,7 @@ public class HdmiControlService extends SystemService {
                 Slog.v(TAG, "On standby-action cleared:" + device.mDeviceType);
                 devices.remove(device);
                 if (devices.isEmpty()) {
-                    onStandbyCompleted(standbyAction);
+                    onPendingActionsCleared(standbyAction);
                     // We will not clear local devices here, since some OEM/SOC will keep passing
                     // the received packets until the application processor enters to the sleep
                     // actually.
@@ -3227,10 +3227,17 @@ public class HdmiControlService extends SystemService {
         mHdmiCecNetwork.clearLocalDevices();
     }
 
+    /**
+     * Normally called after all devices have cleared their pending actions, to execute the final
+     * phase of the standby flow.
+     *
+     * This can also be called during wakeup, when pending actions are cleared after failing to be
+     * cleared during standby. In this case, it does not execute the standby flow.
+     */
     @ServiceThreadOnly
-    private void onStandbyCompleted(int standbyAction) {
+    private void onPendingActionsCleared(int standbyAction) {
         assertRunOnServiceThread();
-        Slog.v(TAG, "onStandbyCompleted");
+        Slog.v(TAG, "onPendingActionsCleared");
 
         if (!mPowerStatusController.isPowerStatusTransientToStandby()) {
             return;

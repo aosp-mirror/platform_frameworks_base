@@ -54,6 +54,8 @@ import android.appwidget.AppWidgetManager;
 import android.bluetooth.BluetoothManager;
 import android.companion.CompanionDeviceManager;
 import android.companion.ICompanionDeviceManager;
+import android.companion.virtual.IVirtualDeviceManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.ClipboardManager;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
@@ -873,6 +875,16 @@ public final class SystemServiceRegistry {
                             ServiceManager.getServiceOrThrow(Context.COMPANION_DEVICE_SERVICE));
                 }
                 return new CompanionDeviceManager(service, ctx.getOuterContext());
+            }});
+
+        registerService(Context.VIRTUAL_DEVICE_SERVICE, VirtualDeviceManager.class,
+                new CachedServiceFetcher<VirtualDeviceManager>() {
+            @Override
+            public VirtualDeviceManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                IVirtualDeviceManager service = IVirtualDeviceManager.Stub.asInterface(
+                        ServiceManager.getServiceOrThrow(Context.VIRTUAL_DEVICE_SERVICE));
+                return new VirtualDeviceManager(service, ctx.getOuterContext());
             }});
 
         registerService(Context.CONSUMER_IR_SERVICE, ConsumerIrManager.class,
@@ -1923,39 +1935,6 @@ public final class SystemServiceRegistry {
         }
 
         public abstract T createService() throws ServiceNotFoundException;
-    }
-
-    /**
-     * Like StaticServiceFetcher, creates only one instance of the service per application, but when
-     * creating the service for the first time, passes it the application context of the creating
-     * application.
-     *
-     * TODO: Delete this once its only user (ConnectivityManager) is known to work well in the
-     * case where multiple application components each have their own ConnectivityManager object.
-     */
-    static abstract class StaticApplicationContextServiceFetcher<T> implements ServiceFetcher<T> {
-        private T mCachedInstance;
-
-        @Override
-        public final T getService(ContextImpl ctx) {
-            synchronized (StaticApplicationContextServiceFetcher.this) {
-                if (mCachedInstance == null) {
-                    Context appContext = ctx.getApplicationContext();
-                    // If the application context is null, we're either in the system process or
-                    // it's the application context very early in app initialization. In both these
-                    // cases, the passed-in ContextImpl will not be freed, so it's safe to pass it
-                    // to the service. http://b/27532714 .
-                    try {
-                        mCachedInstance = createService(appContext != null ? appContext : ctx);
-                    } catch (ServiceNotFoundException e) {
-                        onServiceNotFound(e);
-                    }
-                }
-                return mCachedInstance;
-            }
-        }
-
-        public abstract T createService(Context applicationContext) throws ServiceNotFoundException;
     }
 
     /** @hide */

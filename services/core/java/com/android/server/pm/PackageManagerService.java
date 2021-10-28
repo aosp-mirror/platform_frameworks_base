@@ -8916,7 +8916,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * return {@code true} if any one application belongs to the shared user ID meets the criteria.
      */
     boolean canQueryPackage(int callingUid, @Nullable String targetPackageName) {
-        if (targetPackageName == null) {
+        // Since getSettingLPr returns null for ROOT_UID, add an extra check for it here.
+        if (callingUid == Process.ROOT_UID || targetPackageName == null) {
             return true;
         }
         synchronized (mLock) {

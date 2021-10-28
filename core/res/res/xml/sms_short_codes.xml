@@ -105,6 +105,9 @@
          http://www.tja.ee/public/documents/Elektrooniline_side/Oigusaktid/ENG/Estonian_Numbering_Plan_annex_06_09_2010.mht -->
     <shortcode country="ee" pattern="1\\d{2,4}" premium="90\\d{5}|15330|1701[0-3]" free="116\\d{3}|95034" />
 
+    <!-- Egypt: 4 digits, known codes listed -->
+    <shortcode country="eg" pattern="\\d{4}" free="1499" />
+
     <!-- Spain: 5-6 digits: 25xxx, 27xxx, 280xx, 35xxx, 37xxx, 795xxx, 797xxx, 995xxx, 997xxx, plus EU.
          http://www.legallink.es/?q=en/content/which-current-regulatory-status-premium-rate-services-spain -->
     <shortcode country="es" premium="[23][57]\\d{3}|280\\d{2}|[79]9[57]\\d{3}" free="116\\d{3}|22791|222145|22189" />
@@ -196,7 +199,7 @@
     <shortcode country="nl" pattern="\\d{4}" premium="4466|5040" free="116\\d{3}|2223|6225|2223|1662" />
 
     <!-- Nigeria -->
-    <shortcode country="ng" pattern="\\d{1,5}" free="2441|55019" />
+    <shortcode country="ng" pattern="\\d{1,5}" free="2441|55020" />
 
     <!-- Norway: 4-5 digits (not confirmed), known premium codes listed -->
     <shortcode country="no" pattern="\\d{4,5}" premium="2201|222[67]" free="2171" />

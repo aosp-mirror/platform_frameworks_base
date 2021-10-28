@@ -751,8 +751,13 @@ public class Tuner implements AutoCloseable  {
      */
     @Result
     public int tune(@NonNull FrontendSettings settings) {
-        Log.d(TAG, "Tune to " + settings.getFrequency());
-        mFrontendType = settings.getType();
+        final int type = settings.getType();
+        if (mFrontendHandle != null && type != mFrontendType) {
+            Log.e(TAG, "Frontend was opened with type " + mFrontendType + ", new type is " + type);
+            return RESULT_INVALID_STATE;
+        }
+        Log.d(TAG, "Tune to " + settings.getFrequencyLong());
+        mFrontendType = type;
         if (mFrontendType == FrontendSettings.TYPE_DTMB) {
             if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
                     TunerVersionChecker.TUNER_VERSION_1_1, "Tuner with DTMB Frontend")) {
