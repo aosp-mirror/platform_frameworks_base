@@ -2743,7 +2743,7 @@ class ContextImpl extends Context {
      */
     private static Resources createWindowContextResources(@NonNull ContextImpl windowContextBase) {
         final LoadedApk packageInfo = windowContextBase.mPackageInfo;
-        final ClassLoader classLoader = windowContextBase.mClassLoader;
+        final ClassLoader classLoader = windowContextBase.getClassLoader();
         final IBinder token = windowContextBase.getWindowContextToken();
 
         final String resDir = packageInfo.getResDir();
