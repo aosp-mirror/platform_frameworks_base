@@ -882,7 +882,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mSplitLayout == null) {
             mSplitLayout = new SplitLayout(TAG + "SplitDivider", mContext,
                     mDisplayAreaInfo.configuration, this, mParentContainerCallbacks,
-                    mDisplayImeController, mTaskOrganizer);
+                    mDisplayImeController, mTaskOrganizer, true /* applyDismissingParallax */);
             mDisplayInsetsController.addInsetsChangedListener(mDisplayId, mSplitLayout);
 
             if (mMainUnfoldController != null && mSideUnfoldController != null) {

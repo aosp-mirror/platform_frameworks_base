@@ -367,6 +367,10 @@ public class AppTransition implements Dump {
         setAppTransitionState(APP_STATE_IDLE);
     }
 
+    boolean isIdle() {
+        return mAppTransitionState == APP_STATE_IDLE;
+    }
+
     boolean isTimeout() {
         return mAppTransitionState == APP_STATE_TIMEOUT;
     }

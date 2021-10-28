@@ -659,7 +659,7 @@ public class DozeSensors {
         @Override
         @AnyThread
         public void onTrigger(TriggerEvent event) {
-            final Sensor sensor = mSensors[mDevicePosture];
+            final Sensor sensor = mSensors[mPosture];
             mDozeLog.traceSensor(mPulseReason);
             mHandler.post(mWakeLock.wrap(() -> {
                 if (DEBUG) Log.d(TAG, "onTrigger: " + triggerEventToString(event));

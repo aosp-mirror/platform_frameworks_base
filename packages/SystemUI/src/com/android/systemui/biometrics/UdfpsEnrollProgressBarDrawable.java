@@ -40,7 +40,7 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
 
     @Nullable private UdfpsEnrollHelper mEnrollHelper;
     @NonNull private List<UdfpsEnrollProgressBarSegment> mSegments = new ArrayList<>();
-    private int mTotalSteps = 1;
+    private int mTotalSteps = 0;
     private int mProgressSteps = 0;
     private boolean mIsShowingHelp = false;
 
@@ -67,20 +67,17 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
 
     void onEnrollmentProgress(int remaining, int totalSteps) {
         mTotalSteps = totalSteps;
-        updateState(getProgressSteps(remaining, totalSteps), false /* isShowingHelp */);
+
+        // Show some progress for the initial touch.
+        updateState(Math.max(1, totalSteps - remaining), false /* isShowingHelp */);
     }
 
     void onEnrollmentHelp(int remaining, int totalSteps) {
-        updateState(getProgressSteps(remaining, totalSteps), true /* isShowingHelp */);
+        updateState(Math.max(0, totalSteps - remaining), true /* isShowingHelp */);
     }
 
     void onLastStepAcquired() {
         updateState(mTotalSteps, false /* isShowingHelp */);
-    }
-
-    private static int getProgressSteps(int remaining, int totalSteps) {
-        // Show some progress for the initial touch.
-        return Math.max(1, totalSteps - remaining);
     }
 
     private void updateState(int progressSteps, boolean isShowingHelp) {

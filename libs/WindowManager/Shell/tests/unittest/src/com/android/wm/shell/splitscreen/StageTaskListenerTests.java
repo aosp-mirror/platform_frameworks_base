@@ -35,10 +35,13 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.WindowContainerTransaction;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
@@ -57,7 +60,7 @@ import org.mockito.MockitoAnnotations;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public final class StageTaskListenerTests {
+public final class StageTaskListenerTests extends ShellTestCase {
     private static final boolean ENABLE_SHELL_TRANSITIONS =
             SystemProperties.getBoolean("persist.debug.shell_transit", false);
 
@@ -68,6 +71,8 @@ public final class StageTaskListenerTests {
     @Mock
     private SyncTransactionQueue mSyncQueue;
     @Mock
+    private IconProvider mIconProvider;
+    @Mock
     private StageTaskUnfoldController mStageTaskUnfoldController;
     @Captor
     private ArgumentCaptor<SyncTransactionQueue.TransactionRunnable> mRunnableCaptor;
@@ -77,14 +82,17 @@ public final class StageTaskListenerTests {
     private StageTaskListener mStageTaskListener;
 
     @Before
+    @UiThreadTest
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mStageTaskListener = new StageTaskListener(
+                mContext,
                 mTaskOrganizer,
                 DEFAULT_DISPLAY,
                 mCallbacks,
                 mSyncQueue,
                 mSurfaceSession,
+                mIconProvider,
                 mStageTaskUnfoldController);
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mRootTask.parentTaskId = INVALID_TASK_ID;
