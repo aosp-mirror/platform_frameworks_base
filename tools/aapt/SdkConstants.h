@@ -47,6 +47,7 @@ enum {
     SDK_Q = 29,
     SDK_R = 30,
     SDK_S = 31,
+    SDK_S_V2 = 32,
     SDK_CUR_DEVELOPMENT = 10000,
 };
 
