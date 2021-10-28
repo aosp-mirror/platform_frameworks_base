@@ -2500,9 +2500,11 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             win.mInRelayout = false;
 
-            if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE) {
+            if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE
+                    && win.mNextRelayoutUseSync) {
                 win.prepareDrawHandlers();
                 win.markRedrawForSyncReported();
+                win.mNextRelayoutUseSync = false;
                 result |= RELAYOUT_RES_BLAST_SYNC;
             }
 
