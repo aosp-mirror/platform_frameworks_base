@@ -512,7 +512,10 @@ public class DisplayModeDirector {
      */
     public void setShouldAlwaysRespectAppRequestedMode(boolean enabled) {
         synchronized (mLock) {
-            mAlwaysRespectAppRequest = enabled;
+            if (mAlwaysRespectAppRequest != enabled) {
+                mAlwaysRespectAppRequest = enabled;
+                notifyDesiredDisplayModeSpecsChangedLocked();
+            }
         }
     }
 
