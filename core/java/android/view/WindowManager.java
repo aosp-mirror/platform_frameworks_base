@@ -3364,6 +3364,22 @@ public interface WindowManager extends ViewManager {
         public static final int INPUT_FEATURE_SPY = 0x00000020;
 
         /**
+         * When used with the window flag {@link #FLAG_NOT_TOUCHABLE}, this window will continue
+         * to receive events from a stylus device within its touchable region. All other pointer
+         * events, such as from a mouse or touchscreen, will be dispatched to the windows behind it.
+         *
+         * This input feature has no effect when the window flag {@link #FLAG_NOT_TOUCHABLE} is
+         * not set.
+         *
+         * The window must be a trusted overlay to use this input feature.
+         *
+         * @see #FLAG_NOT_TOUCHABLE
+         *
+         * @hide
+         */
+        public static final int INPUT_FEATURE_INTERCEPTS_STYLUS = 0x00000040;
+
+        /**
          * An internal annotation for flags that can be specified to {@link #inputFeatures}.
          *
          * @hide
@@ -3373,6 +3389,7 @@ public interface WindowManager extends ViewManager {
             INPUT_FEATURE_DISABLE_POINTER_GESTURES,
             INPUT_FEATURE_NO_INPUT_CHANNEL,
             INPUT_FEATURE_DISABLE_USER_ACTIVITY,
+            INPUT_FEATURE_INTERCEPTS_STYLUS,
         })
         public @interface InputFeatureFlags {}
 
@@ -3382,6 +3399,7 @@ public interface WindowManager extends ViewManager {
          * @see #INPUT_FEATURE_DISABLE_POINTER_GESTURES
          * @see #INPUT_FEATURE_NO_INPUT_CHANNEL
          * @see #INPUT_FEATURE_DISABLE_USER_ACTIVITY
+         * @see #INPUT_FEATURE_INTERCEPTS_STYLUS
          * @hide
          */
         @InputFeatureFlags
