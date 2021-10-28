@@ -1996,6 +1996,11 @@ public class LocationProviderManager extends
                         + TimeUtils.formatDuration(delayMs));
             }
 
+            if (mDelayedRegister != null) {
+                mAlarmHelper.cancel(mDelayedRegister);
+                mDelayedRegister = null;
+            }
+
             mDelayedRegister = new OnAlarmListener() {
                 @Override
                 public void onAlarm() {
