@@ -2272,6 +2272,66 @@ public final class BluetoothAdapter {
         return false;
     }
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            BluetoothStatusCodes.SUCCESS,
+            BluetoothStatusCodes.ERROR_UNKNOWN,
+            BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED,
+            BluetoothStatusCodes.ERROR_FEATURE_NOT_SUPPORTED,
+    })
+    public @interface LeFeatureReturnValues {}
+
+    /**
+     * Returns {@link BluetoothStatusCodes#SUCCESS} if LE Connected Isochronous Stream Central
+     * feature is supported, returns {@link BluetoothStatusCodes#ERROR_FEATURE_NOT_SUPPORTED} if
+     * the feature is not supported or an error code.
+     *
+     * @return whether the chipset supports the LE Connected Isochronous Stream Central feature
+     */
+    @RequiresNoPermission
+    public @LeFeatureReturnValues int isCisCentralSupported() {
+        if (!getLeAccess()) {
+            return BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED;
+        }
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                return mService.isCisCentralSupported();
+            }
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return BluetoothStatusCodes.ERROR_UNKNOWN;
+    }
+
+    /**
+     * Returns {@link BluetoothStatusCodes#SUCCESS} if LE Periodic Advertising Sync Transfer Sender
+     * feature is supported, returns {@link BluetoothStatusCodes#ERROR_FEATURE_NOT_SUPPORTED} if the
+     * feature is not supported or an error code
+     *
+     * @return whether the chipset supports the LE Periodic Advertising Sync Transfer Sender feature
+     */
+    @RequiresNoPermission
+    public @LeFeatureReturnValues int isLePeriodicAdvertisingSyncTransferSenderSupported() {
+        if (!getLeAccess()) {
+            return BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED;
+        }
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                return mService.isLePeriodicAdvertisingSyncTransferSenderSupported();
+            }
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return BluetoothStatusCodes.ERROR_UNKNOWN;
+    }
+
     /**
      * Return the maximum LE advertising data length in bytes,
      * if LE Extended Advertising feature is supported, 0 otherwise.
