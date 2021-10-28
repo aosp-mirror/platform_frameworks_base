@@ -55,6 +55,8 @@ class TileServiceRequestController constructor(
         internal const val DISMISSED = StatusBarManager.TILE_ADD_REQUEST_RESULT_DIALOG_DISMISSED
     }
 
+    private var dialogCanceller: ((String) -> Unit)? = null
+
     private val commandQueueCallback = object : CommandQueue.Callbacks {
         override fun requestAddTile(
             componentName: ComponentName,
@@ -66,6 +68,10 @@ class TileServiceRequestController constructor(
             requestTileAdd(componentName, appName, label, icon) {
                 callback.onTileRequest(it)
             }
+        }
+
+        override fun cancelRequestAddTile(packageName: String) {
+            dialogCanceller?.invoke(packageName)
         }
     }
 
@@ -95,16 +101,21 @@ class TileServiceRequestController constructor(
             callback.accept(TILE_ALREADY_ADDED)
             return
         }
-        val dialogResponse = object : Consumer<Int> {
-            override fun accept(response: Int) {
-                if (response == ADD_TILE) {
-                    addTile(componentName)
-                }
-                callback.accept(response)
+        val dialogResponse = Consumer<Int> { response ->
+            if (response == ADD_TILE) {
+                addTile(componentName)
             }
+            callback.accept(response)
         }
         val tileData = TileRequestDialog.TileData(appName, label, icon)
-        createDialog(tileData, dialogResponse).show()
+        createDialog(tileData, dialogResponse).also { dialog ->
+            dialogCanceller = {
+                if (componentName.packageName == it) {
+                    dialog.cancel()
+                }
+                dialogCanceller = null
+            }
+        }.show()
     }
 
     private fun createDialog(

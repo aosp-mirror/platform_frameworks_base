@@ -669,6 +669,21 @@ public class StatusBarManager {
         }
     }
 
+    /**
+     * @hide
+     * @param packageName
+     */
+    @TestApi
+    public void cancelRequestAddTile(@NonNull String packageName) {
+        Objects.requireNonNull(packageName);
+        IStatusBarService svc = getService();
+        try {
+            svc.cancelRequestAddTile(packageName);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
     /** @hide */
     public static String windowStateToString(int state) {
         if (state == WINDOW_STATE_HIDING) return "WINDOW_STATE_HIDING";
