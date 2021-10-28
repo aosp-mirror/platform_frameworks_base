@@ -35,6 +35,7 @@ import android.view.WindowManager.LayoutParams;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.DialogListener;
+import com.android.systemui.animation.DialogListener.DismissReason;
 import com.android.systemui.animation.ListenableDialog;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -62,6 +63,10 @@ public class SystemUIDialog extends AlertDialog implements ListenableDialog {
     }
 
     public SystemUIDialog(Context context, int theme) {
+        this(context, theme, true /* dismissOnDeviceLock */);
+    }
+
+    public SystemUIDialog(Context context, int theme, boolean dismissOnDeviceLock) {
         super(context, theme);
         mContext = context;
 
@@ -70,7 +75,7 @@ public class SystemUIDialog extends AlertDialog implements ListenableDialog {
         attrs.setTitle(getClass().getSimpleName());
         getWindow().setAttributes(attrs);
 
-        mDismissReceiver = new DismissReceiver(this);
+        mDismissReceiver = dismissOnDeviceLock ? new DismissReceiver(this) : null;
     }
 
     @Override
@@ -111,13 +116,19 @@ public class SystemUIDialog extends AlertDialog implements ListenableDialog {
     @Override
     protected void onStart() {
         super.onStart();
-        mDismissReceiver.register();
+
+        if (mDismissReceiver != null) {
+            mDismissReceiver.register();
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mDismissReceiver.unregister();
+
+        if (mDismissReceiver != null) {
+            mDismissReceiver.unregister();
+        }
     }
 
     @Override
@@ -132,10 +143,14 @@ public class SystemUIDialog extends AlertDialog implements ListenableDialog {
 
     @Override
     public void dismiss() {
+        dismiss(DismissReason.UNKNOWN);
+    }
+
+    private void dismiss(DismissReason reason) {
         super.dismiss();
 
         for (DialogListener listener : new LinkedHashSet<>(mDialogListeners)) {
-            listener.onDismiss();
+            listener.onDismiss(reason);
         }
     }
 
@@ -251,7 +266,11 @@ public class SystemUIDialog extends AlertDialog implements ListenableDialog {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            mDialog.dismiss();
+            if (mDialog instanceof SystemUIDialog) {
+                ((SystemUIDialog) mDialog).dismiss(DismissReason.DEVICE_LOCKED);
+            } else {
+                mDialog.dismiss();
+            }
         }
     }
 }
