@@ -23844,6 +23844,7 @@ package android.media {
     method public static android.net.Uri getValidRingtoneUri(android.content.Context);
     method public boolean hasHapticChannels(int);
     method public static boolean hasHapticChannels(@NonNull android.net.Uri);
+    method public static boolean hasHapticChannels(@NonNull android.content.Context, @NonNull android.net.Uri);
     method public int inferStreamType();
     method public static boolean isDefault(android.net.Uri);
     method @Nullable public static android.content.res.AssetFileDescriptor openDefaultRingtoneUri(@NonNull android.content.Context, @NonNull android.net.Uri) throws java.io.FileNotFoundException;

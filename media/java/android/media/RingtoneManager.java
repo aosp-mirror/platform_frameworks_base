@@ -1090,13 +1090,25 @@ public class RingtoneManager {
      * haptic channels or not. As this function doesn't has a context
      * to resolve the uri, the result may be wrong if the uri cannot be
      * resolved correctly.
-     * Use {@link #hasHapticChannels(int)} instead when possible.
+     * Use {@link #hasHapticChannels(int)} or {@link #hasHapticChannels(Context, Uri)}
+     * instead when possible.
      *
      * @param ringtoneUri The {@link Uri} of a sound or ringtone.
      * @return true if the ringtone contains haptic channels.
      */
     public static boolean hasHapticChannels(@NonNull Uri ringtoneUri) {
         return AudioManager.hasHapticChannels(null, ringtoneUri);
+    }
+
+    /**
+     * Returns if the {@link Ringtone} from a given sound URI contains haptics channels or not.
+     *
+     * @param context the {@link android.content.Context} to use when resolving the Uri.
+     * @param ringtoneUri the {@link Uri} of a sound or ringtone.
+     * @return true if the ringtone contains haptic channels.
+     */
+    public static boolean hasHapticChannels(@NonNull Context context, @NonNull Uri ringtoneUri) {
+        return AudioManager.hasHapticChannels(context, ringtoneUri);
     }
 
     /**
