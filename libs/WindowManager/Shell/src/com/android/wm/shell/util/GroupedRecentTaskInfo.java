@@ -30,25 +30,34 @@ import androidx.annotation.Nullable;
 public class GroupedRecentTaskInfo implements Parcelable {
     public @NonNull ActivityManager.RecentTaskInfo mTaskInfo1;
     public @Nullable ActivityManager.RecentTaskInfo mTaskInfo2;
+    public @Nullable StagedSplitBounds mStagedSplitBounds;
 
     public GroupedRecentTaskInfo(@NonNull ActivityManager.RecentTaskInfo task1) {
-        this(task1, null);
+        this(task1, null, null);
     }
 
     public GroupedRecentTaskInfo(@NonNull ActivityManager.RecentTaskInfo task1,
-            @Nullable ActivityManager.RecentTaskInfo task2) {
+            @Nullable ActivityManager.RecentTaskInfo task2,
+            @Nullable StagedSplitBounds stagedSplitBounds) {
         mTaskInfo1 = task1;
         mTaskInfo2 = task2;
+        mStagedSplitBounds = stagedSplitBounds;
     }
 
     GroupedRecentTaskInfo(Parcel parcel) {
         mTaskInfo1 = parcel.readTypedObject(ActivityManager.RecentTaskInfo.CREATOR);
         mTaskInfo2 = parcel.readTypedObject(ActivityManager.RecentTaskInfo.CREATOR);
+        mStagedSplitBounds = parcel.readTypedObject(StagedSplitBounds.CREATOR);
     }
 
     @Override
     public String toString() {
-        return "Task1: " + getTaskInfo(mTaskInfo1) + ", Task2: " + getTaskInfo(mTaskInfo2);
+        String taskString = "Task1: " + getTaskInfo(mTaskInfo1)
+                + ", Task2: " + getTaskInfo(mTaskInfo2);
+        if (mStagedSplitBounds != null) {
+            taskString += ", SplitBounds: " + mStagedSplitBounds.toString();
+        }
+        return taskString;
     }
 
     private String getTaskInfo(ActivityManager.RecentTaskInfo taskInfo) {
@@ -67,6 +76,7 @@ public class GroupedRecentTaskInfo implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeTypedObject(mTaskInfo1, flags);
         parcel.writeTypedObject(mTaskInfo2, flags);
+        parcel.writeTypedObject(mStagedSplitBounds, flags);
     }
 
     @Override
