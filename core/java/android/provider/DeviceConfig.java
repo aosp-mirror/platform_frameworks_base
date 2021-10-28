@@ -181,6 +181,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_CONNECTIVITY = "connectivity";
 
     /**
+     * Namespace for CaptivePortalLogin module.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_CAPTIVEPORTALLOGIN = "captive_portal_login";
+
+    /**
      * Namespace for content capture feature used by on-device machine intelligence
      * to provide suggestions in a privacy-safe manner.
      *
