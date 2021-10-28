@@ -96,8 +96,6 @@ public class AudioManager {
     private Context mOriginalContext;
     private Context mApplicationContext;
     private long mVolumeKeyUpTime;
-    private boolean mUseFixedVolumeInitialized;
-    private boolean mUseFixedVolume;
     private static final String TAG = "AudioManager";
     private static final boolean DEBUG = false;
     private static final AudioPortEventHandler sAudioPortEventHandler = new AudioPortEventHandler();
@@ -893,19 +891,13 @@ public class AudioManager {
      * </ul>
      */
     public boolean isVolumeFixed() {
-        synchronized (this) {
-            try {
-                if (!mUseFixedVolumeInitialized) {
-                    mUseFixedVolume = getContext().getResources().getBoolean(
-                            com.android.internal.R.bool.config_useFixedVolume);
-                }
-            } catch (Exception e) {
-            } finally {
-                // only ever try once, so always consider initialized even if query failed
-                mUseFixedVolumeInitialized = true;
-            }
+        boolean res = false;
+        try {
+            res = getService().isVolumeFixed();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error querying isVolumeFixed", e);
         }
-        return mUseFixedVolume;
+        return res;
     }
 
     /**
