@@ -228,7 +228,7 @@ import java.util.function.Consumer;
  * <ul>
  * <li>{@link AccessibilityServiceInfo#FEEDBACK_AUDIBLE}</li>
  * <li>{@link AccessibilityServiceInfo#FEEDBACK_HAPTIC}</li>
- * <li>{@link AccessibilityServiceInfo#FEEDBACK_AUDIBLE}</li>
+ * <li>{@link AccessibilityServiceInfo#FEEDBACK_SPOKEN}</li>
  * <li>{@link AccessibilityServiceInfo#FEEDBACK_VISUAL}</li>
  * <li>{@link AccessibilityServiceInfo#FEEDBACK_GENERIC}</li>
  * <li>{@link AccessibilityServiceInfo#FEEDBACK_BRAILLE}</li>
