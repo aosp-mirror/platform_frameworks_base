@@ -1270,6 +1270,9 @@ public class Vpn {
             capsBuilder.addCapability(NET_CAPABILITY_NOT_METERED);
         }
 
+        capsBuilder.setUnderlyingNetworks((mConfig.underlyingNetworks != null)
+                ? Arrays.asList(mConfig.underlyingNetworks) : null);
+
         mNetworkCapabilities = capsBuilder.build();
         mNetworkAgent = new NetworkAgent(mContext, mLooper, NETWORKTYPE /* logtag */,
                 mNetworkCapabilities, lp,
@@ -1290,8 +1293,6 @@ public class Vpn {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-        mNetworkAgent.setUnderlyingNetworks((mConfig.underlyingNetworks != null)
-                ? Arrays.asList(mConfig.underlyingNetworks) : null);
         updateState(DetailedState.CONNECTED, "agentConnect");
     }
 
