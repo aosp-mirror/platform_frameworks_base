@@ -153,9 +153,18 @@ public class HapticFeedbackConstants {
 
     /**
      * Invocation of the voice assistant via hardware button.
+     * This is a private constant.  Feel free to renumber as desired.
      * @hide
      */
     public static final int ASSISTANT_BUTTON = 10002;
+
+    /**
+     * The user has performed a long press on the power button hardware that is resulting
+     * in an action being performed.
+     * This is a private constant.  Feel free to renumber as desired.
+     * @hide
+     */
+    public static final int LONG_PRESS_POWER_BUTTON = 10003;
 
     /**
      * Flag for {@link View#performHapticFeedback(int, int)

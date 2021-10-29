@@ -4522,6 +4522,25 @@ public final class Settings {
                 "haptic_feedback_intensity";
 
         /**
+         * The intensity of haptic feedback vibrations for interaction with hardware components from
+         * the device, like buttons and sensors, if configurable.
+         *
+         * Not all devices are capable of changing their feedback intensity; on these devices
+         * there will likely be no difference between the various vibration intensities except for
+         * intensity 0 (off) and the rest.
+         *
+         * <b>Values:</b><br/>
+         * 0 - Vibration is disabled<br/>
+         * 1 - Weak vibrations<br/>
+         * 2 - Medium vibrations<br/>
+         * 3 - Strong vibrations
+         * @hide
+         */
+        @Readable
+        public static final String HARDWARE_HAPTIC_FEEDBACK_INTENSITY =
+                "hardware_haptic_feedback_intensity";
+
+        /**
          * Ringer volume. This is used internally, changing this value will not
          * change the volume. See AudioManager.
          *
