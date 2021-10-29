@@ -160,6 +160,64 @@ public final class DeviceStateProviderImplTest {
     }
 
     @Test
+    public void create_stateWithCancelStickyRequestFlag() {
+        String configString = "<device-state-config>\n"
+                + "    <device-state>\n"
+                + "        <identifier>1</identifier>\n"
+                + "        <flags>\n"
+                + "            <flag>FLAG_CANCEL_STICKY_REQUESTS</flag>\n"
+                + "        </flags>\n"
+                + "        <conditions/>\n"
+                + "    </device-state>\n"
+                + "    <device-state>\n"
+                + "        <identifier>2</identifier>\n"
+                + "        <conditions/>\n"
+                + "    </device-state>\n"
+                + "</device-state-config>\n";
+        DeviceStateProviderImpl.ReadableConfig config = new TestReadableConfig(configString);
+        DeviceStateProviderImpl provider = DeviceStateProviderImpl.createFromConfig(mContext,
+                config);
+
+        DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
+        provider.setListener(listener);
+
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
+        final DeviceState[] expectedStates = new DeviceState[]{
+                new DeviceState(1, "", DeviceState.FLAG_CANCEL_STICKY_REQUESTS),
+                new DeviceState(2, "", 0 /* flags */) };
+        assertArrayEquals(expectedStates, mDeviceStateArrayCaptor.getValue());
+    }
+
+    @Test
+    public void create_stateWithInvalidFlag() {
+        String configString = "<device-state-config>\n"
+                + "    <device-state>\n"
+                + "        <identifier>1</identifier>\n"
+                + "        <flags>\n"
+                + "            <flag>INVALID_FLAG</flag>\n"
+                + "        </flags>\n"
+                + "        <conditions/>\n"
+                + "    </device-state>\n"
+                + "    <device-state>\n"
+                + "        <identifier>2</identifier>\n"
+                + "        <conditions/>\n"
+                + "    </device-state>\n"
+                + "</device-state-config>\n";
+        DeviceStateProviderImpl.ReadableConfig config = new TestReadableConfig(configString);
+        DeviceStateProviderImpl provider = DeviceStateProviderImpl.createFromConfig(mContext,
+                config);
+
+        DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
+        provider.setListener(listener);
+
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
+        final DeviceState[] expectedStates = new DeviceState[]{
+                new DeviceState(1, "", 0 /* flags */),
+                new DeviceState(2, "", 0 /* flags */) };
+        assertArrayEquals(expectedStates, mDeviceStateArrayCaptor.getValue());
+    }
+
+    @Test
     public void create_lidSwitch() {
         String configString = "<device-state-config>\n"
                 + "    <device-state>\n"
