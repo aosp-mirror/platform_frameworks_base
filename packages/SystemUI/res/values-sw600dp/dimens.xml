@@ -105,5 +105,5 @@
     <dimen name="qs_detail_margin_top">0dp</dimen>
 
     <!-- The width of large/content heavy dialogs (e.g. Internet, Media output, etc) -->
-    <dimen name="large_dialog_width">624dp</dimen>
+    <dimen name="large_dialog_width">504dp</dimen>
 </resources>

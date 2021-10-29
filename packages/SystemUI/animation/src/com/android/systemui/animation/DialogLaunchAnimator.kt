@@ -21,11 +21,16 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Looper
 import android.util.Log
+import android.view.GhostView
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
+import android.view.ViewTreeObserver.OnPreDrawListener
+import android.view.WindowInsets
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
+import android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+import android.view.WindowManagerPolicyConstants
 import android.widget.FrameLayout
 
 private const val TAG = "DialogLaunchAnimator"
@@ -221,9 +226,11 @@ private class DialogLaunchAnimation(
     private var isDismissing = false
 
     private var dismissRequested = false
-    private var drawHostDialog = false
     var ignoreNextCallToHide = false
     var exitAnimationDisabled = false
+
+    private var isTouchSurfaceGhostDrawn = false
+    private var isOriginalDialogViewLaidOut = false
 
     fun start() {
         // Show the host (fullscreen) dialog, to which we will add the stolen dialog view.
@@ -252,19 +259,76 @@ private class DialogLaunchAnimation(
             WindowManager.LayoutParams.MATCH_PARENT
         )
 
-        // Prevent the host dialog from drawing until the animation starts.
-        hostDialogRoot.viewTreeObserver.addOnPreDrawListener(
-            object : ViewTreeObserver.OnPreDrawListener {
-                override fun onPreDraw(): Boolean {
-                    if (drawHostDialog) {
-                        hostDialogRoot.viewTreeObserver.removeOnPreDrawListener(this)
-                        return true
-                    }
+        // If we are using gesture navigation, then we can overlay the navigation/task bars with
+        // the host dialog.
+        val navigationMode = context.resources.getInteger(
+            com.android.internal.R.integer.config_navBarInteractionMode)
+        if (navigationMode == WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL) {
+            window.attributes.fitInsetsTypes = window.attributes.fitInsetsTypes and
+                WindowInsets.Type.navigationBars().inv()
+            window.addFlags(FLAG_LAYOUT_IN_SCREEN or FLAG_LAYOUT_INSET_DECOR)
+            window.setDecorFitsSystemWindows(false)
+        }
 
-                    return false
-                }
+        // Disable the dim. We will enable it once we start the animation.
+        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+
+        // Add a temporary touch surface ghost as soon as the window is ready to draw. This
+        // temporary ghost will be drawn together with the touch surface, but in the host dialog
+        // window. Once it is drawn, we will make the touch surface invisible, and then start the
+        // animation. We do all this synchronization to avoid flicker that would occur if we made
+        // the touch surface invisible too early (before its ghost is drawn), leading to one or more
+        // frames with a hole instead of the touch surface (or its ghost).
+        hostDialogRoot.viewTreeObserver.addOnPreDrawListener(object : OnPreDrawListener {
+            override fun onPreDraw(): Boolean {
+                hostDialogRoot.viewTreeObserver.removeOnPreDrawListener(this)
+                addTemporaryTouchSurfaceGhost()
+                return true
             }
-        )
+        })
+        hostDialogRoot.invalidate()
+    }
+
+    private fun addTemporaryTouchSurfaceGhost() {
+        // Create a ghost of the touch surface (which will make the touch surface invisible) and add
+        // it to the host dialog. We will wait for this ghost to be drawn before starting the
+        // animation.
+        val ghost = GhostView.addGhost(touchSurface, hostDialogRoot)
+
+        // The ghost of the touch surface was just created, so the touch surface was made invisible.
+        // We make it visible again until the ghost is actually drawn.
+        touchSurface.visibility = View.VISIBLE
+
+        // Wait for the ghost to be drawn before continuing.
+        ghost.viewTreeObserver.addOnPreDrawListener(object : OnPreDrawListener {
+            override fun onPreDraw(): Boolean {
+                ghost.viewTreeObserver.removeOnPreDrawListener(this)
+                onTouchSurfaceGhostDrawn()
+                return true
+            }
+        })
+        ghost.invalidate()
+    }
+
+    private fun onTouchSurfaceGhostDrawn() {
+        // Make the touch surface invisible and make sure that it stays invisible as long as the
+        // dialog is shown or animating.
+        touchSurface.visibility = View.INVISIBLE
+        if (touchSurface is LaunchableView) {
+            touchSurface.setShouldBlockVisibilityChanges(true)
+        }
+
+        // Add a pre draw listener to (maybe) start the animation once the touch surface is
+        // actually invisible.
+        touchSurface.viewTreeObserver.addOnPreDrawListener(object : OnPreDrawListener {
+            override fun onPreDraw(): Boolean {
+                touchSurface.viewTreeObserver.removeOnPreDrawListener(this)
+                isTouchSurfaceGhostDrawn = true
+                maybeStartLaunchAnimation()
+                return true
+            }
+        })
+        touchSurface.invalidate()
     }
 
     /** Get the content view of [originalDialog] and pass it to [then]. */
@@ -276,7 +340,7 @@ private class DialogLaunchAnimation(
             ?: throw IllegalStateException("Dialog does not have any android.R.id.content view")
 
         androidContent.viewTreeObserver.addOnPreDrawListener(
-            object : ViewTreeObserver.OnPreDrawListener {
+            object : OnPreDrawListener {
                 override fun onPreDraw(): Boolean {
                     if (androidContent.childCount == 1) {
                         androidContent.viewTreeObserver.removeOnPreDrawListener(this)
@@ -354,30 +418,45 @@ private class DialogLaunchAnimation(
                 oldBottom: Int
             ) {
                 dialogView.removeOnLayoutChangeListener(this)
-                startAnimation(
-                    isLaunching = true,
-                    onLaunchAnimationStart = { drawHostDialog = true },
-                    onLaunchAnimationEnd = {
-                        touchSurface.setTag(R.id.launch_animation_running, null)
 
-                        // We hide the touch surface when the dialog is showing. We will make this
-                        // view visible again when dismissing the dialog.
-                        // TODO(b/193634619): Provide an easy way for views to check if they should
-                        // be hidden because of a dialog launch so that they don't override this
-                        // visibility when updating/refreshing itself.
-                        touchSurface.visibility = View.INVISIBLE
-
-                        isLaunching = false
-
-                        // dismiss was called during the animation, dismiss again now to actually
-                        // dismiss.
-                        if (dismissRequested) {
-                            hostDialog.dismiss()
-                        }
-                    }
-                )
+                isOriginalDialogViewLaidOut = true
+                maybeStartLaunchAnimation()
             }
         })
+    }
+
+    private fun maybeStartLaunchAnimation() {
+        if (!isTouchSurfaceGhostDrawn || !isOriginalDialogViewLaidOut) {
+            return
+        }
+
+        // Show the background dim.
+        hostDialog.window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+
+        startAnimation(
+            isLaunching = true,
+            onLaunchAnimationStart = {
+                // Remove the temporary ghost. Another ghost (that ghosts only the touch surface
+                // content, and not its background) will be added right after this and will be
+                // animated.
+                GhostView.removeGhost(touchSurface)
+            },
+            onLaunchAnimationEnd = {
+                touchSurface.setTag(R.id.launch_animation_running, null)
+
+                // We hide the touch surface when the dialog is showing. We will make this
+                // view visible again when dismissing the dialog.
+                touchSurface.visibility = View.INVISIBLE
+
+                isLaunching = false
+
+                // dismiss was called during the animation, dismiss again now to actually
+                // dismiss.
+                if (dismissRequested) {
+                    hostDialog.dismiss()
+                }
+            }
+        )
     }
 
     private fun onHostDialogDismissed(actualDismiss: () -> Unit) {
@@ -417,6 +496,11 @@ private class DialogLaunchAnimation(
         if (!shouldAnimateDialogIntoView()) {
             Log.i(TAG, "Skipping animation of dialog into the touch surface")
 
+            // Make sure we allow the touch surface to change its visibility again.
+            if (touchSurface is LaunchableView) {
+                touchSurface.setShouldBlockVisibilityChanges(false)
+            }
+
             // If the view is invisible it's probably because of us, so we make it visible again.
             if (touchSurface.visibility == View.INVISIBLE) {
                 touchSurface.visibility = View.VISIBLE
@@ -434,10 +518,33 @@ private class DialogLaunchAnimation(
                 hostDialog.window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             },
             onLaunchAnimationEnd = {
+                // Make sure we allow the touch surface to change its visibility again.
+                if (touchSurface is LaunchableView) {
+                    touchSurface.setShouldBlockVisibilityChanges(false)
+                }
+
                 touchSurface.visibility = View.VISIBLE
                 originalDialogView!!.visibility = View.INVISIBLE
-                dismissDialogs(true /* instantDismiss */)
-                onDialogDismissed(this@DialogLaunchAnimation)
+
+                // The animated ghost was just removed. We create a temporary ghost that will be
+                // removed only once we draw the touch surface, to avoid flickering that would
+                // happen when removing the ghost too early (before the touch surface is drawn).
+                GhostView.addGhost(touchSurface, hostDialogRoot)
+
+                touchSurface.viewTreeObserver.addOnPreDrawListener(object : OnPreDrawListener {
+                    override fun onPreDraw(): Boolean {
+                        touchSurface.viewTreeObserver.removeOnPreDrawListener(this)
+
+                        // Now that the touch surface was drawn, we can remove the temporary ghost
+                        // and instantly dismiss the dialog.
+                        GhostView.removeGhost(touchSurface)
+                        dismissDialogs(true /* instantDismiss */)
+                        onDialogDismissed(this@DialogLaunchAnimation)
+
+                        return true
+                    }
+                })
+                touchSurface.invalidate()
             }
         )
     }
@@ -472,10 +579,13 @@ private class DialogLaunchAnimation(
             }
 
             override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
+                // During launch, onLaunchAnimationStart will be used to remove the temporary touch
+                // surface ghost so it is important to call this before calling
+                // onLaunchAnimationStart on the controller (which will create its own ghost).
+                onLaunchAnimationStart()
+
                 startViewController.onLaunchAnimationStart(isExpandingFullyAbove)
                 endViewController.onLaunchAnimationStart(isExpandingFullyAbove)
-
-                onLaunchAnimationStart()
             }
 
             override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {

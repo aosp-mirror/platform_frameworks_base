@@ -956,10 +956,6 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="Theme.SystemUI.Dialog.Internet">
-        <item name="android:windowBackground">@drawable/internet_dialog_background</item>
-    </style>
-
     <style name="MainSwitch.Settingslib" parent="@android:style/Theme.DeviceDefault">
         <item name="android:switchMinWidth">@dimen/settingslib_min_switch_width</item>
     </style>
