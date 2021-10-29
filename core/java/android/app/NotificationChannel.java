@@ -440,15 +440,13 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Allows users to block notifications sent through this channel, if this channel belongs to
-     * a package that is signed with the system signature.
+     * a package that otherwise would have notifications "fixed" as enabled.
      *
-     * If the channel does not belong to a package that is signed with the system signature, this
+     * If the channel does not belong to a package that has a fixed notification permission, this
      * method does nothing, since such channels are blockable by default and cannot be set to be
      * unblockable.
      * @param blockable if {@code true}, allows users to block notifications on this channel.
-     * @hide
      */
-    @SystemApi
     public void setBlockable(boolean blockable) {
         mBlockableSystem = blockable;
     }
@@ -842,9 +840,9 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * @hide
+     * Returns whether this channel is always blockable, even if the app is 'fixed' as
+     * non-blockable.
      */
-    @TestApi
     public boolean isBlockable() {
         return mBlockableSystem;
     }

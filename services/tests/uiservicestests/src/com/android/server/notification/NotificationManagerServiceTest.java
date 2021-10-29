@@ -8347,6 +8347,36 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testPostNotification_channelLockedFixed() throws Exception {
+        mTestNotificationChannel.setImportanceLockedByOEM(true);
+
+        NotificationRecord temp = generateNotificationRecord(mTestNotificationChannel);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testPostNotification_appPermissionFixed", 0,
+                temp.getNotification(), 0);
+        waitForIdle();
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(1);
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(PKG);
+        assertThat(mService.getNotificationRecord(notifs[0].getKey()).isImportanceFixed()).isTrue();
+
+        mBinderService.cancelAllNotifications(PKG, 0);
+        waitForIdle();
+
+        mTestNotificationChannel.setImportanceLockedByOEM(false);
+        mTestNotificationChannel.setImportanceLockedByCriticalDeviceFunction(true);
+
+        temp = generateNotificationRecord(mTestNotificationChannel);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testPostNotification_appPermissionFixed", 0,
+                temp.getNotification(), 0);
+        waitForIdle();
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(1);
+        notifs = mBinderService.getActiveNotifications(PKG);
+        assertThat(mService.getNotificationRecord(notifs[0].getKey()).isImportanceFixed()).isTrue();
+    }
+
+    @Test
     public void testGetNotificationChannelsBypassingDnd_blocked() throws RemoteException {
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mPreferencesHelper.getImportance(PKG, mUid)).thenReturn(IMPORTANCE_NONE);

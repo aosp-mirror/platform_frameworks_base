@@ -1017,38 +1017,14 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testIgnoreImportanceAdjustmentsForOemLockedChannels() {
+    public void testIgnoreImportanceAdjustmentsForFixedRecords() {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
-        channel.setImportanceLockedByOEM(true);
 
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, groupId /* group */);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
-
-        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
-
-        Bundle bundle = new Bundle();
-        bundle.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
-        Adjustment adjustment = new Adjustment(
-                PKG_O, record.getKey(), bundle, "", record.getUserId());
-
-        record.addAdjustment(adjustment);
-        record.applyAdjustments();
-        record.calculateImportance();
-
-        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
-    }
-
-    @Test
-    public void testIgnoreImportanceAdjustmentsForDefaultAppLockedChannels() {
-        NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
-        channel.setImportanceLockedByCriticalDeviceFunction(true);
-
-        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
-                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
-                false /* lights */, false /* defaultLights */, groupId /* group */);
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.setImportanceFixed(true);
 
         assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
 
