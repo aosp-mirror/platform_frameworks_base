@@ -16,10 +16,10 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator
 
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.render.NodeController
@@ -34,7 +34,7 @@ import javax.inject.Inject
  * - Elevates important conversation notifications
  * - Puts conversations into its own people section. @see [NotifCoordinators] for section ordering.
  */
-@SysUISingleton
+@CoordinatorScope
 class ConversationCoordinator @Inject constructor(
     private val peopleNotificationIdentifier: PeopleNotificationIdentifier,
     @PeopleHeader peopleHeaderController: NodeController

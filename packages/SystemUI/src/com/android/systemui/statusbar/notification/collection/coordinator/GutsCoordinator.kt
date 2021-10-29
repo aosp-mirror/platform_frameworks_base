@@ -17,17 +17,17 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.util.ArraySet
 import com.android.systemui.Dumpable
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender.OnEndLifetimeExtensionCallback
-import com.android.systemui.statusbar.notification.row.NotificationGuts
-import com.android.systemui.statusbar.notification.row.NotificationGutsManager
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewListener
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager
+import com.android.systemui.statusbar.notification.row.NotificationGuts
+import com.android.systemui.statusbar.notification.row.NotificationGutsManager
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -38,7 +38,7 @@ private const val TAG = "GutsCoordinator"
  * Coordinates the guts displayed by the [NotificationGutsManager] with the pipeline.
  * Specifically, this just adds the lifetime extension necessary to keep guts from disappearing.
  */
-@SysUISingleton
+@CoordinatorScope
 class GutsCoordinator @Inject constructor(
     private val notifGutsViewManager: NotifGutsViewManager,
     private val logger: GutsCoordinatorLogger,

@@ -23,6 +23,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 
 import javax.inject.Inject;
@@ -31,6 +32,7 @@ import javax.inject.Inject;
  * {@link CommunalCoordinator} prevents notifications from showing on the keyguard when the communal
  * view is present.
  */
+@CoordinatorScope
 public class CommunalCoordinator implements Coordinator {
     final CommunalStateController mCommunalStateController;
     final NotificationEntryManager mNotificationEntryManager;

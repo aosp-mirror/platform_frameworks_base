@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.ShadeListBuilderLogger;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
@@ -847,11 +848,13 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         NotifPromoter idPromoter = new IdPromoter(4);
         NotifSectioner section = new PackageSectioner(PACKAGE_1);
         NotifComparator hypeComparator = new HypeComparator(PACKAGE_2);
+        Invalidator preRenderInvalidator = new Invalidator("PreRenderInvalidator") {};
 
         mListBuilder.addPreGroupFilter(packageFilter);
         mListBuilder.addPromoter(idPromoter);
         mListBuilder.setSectioners(singletonList(section));
         mListBuilder.setComparators(singletonList(hypeComparator));
+        mListBuilder.addPreRenderInvalidator(preRenderInvalidator);
 
         // GIVEN a set of random notifs
         addNotif(0, PACKAGE_1);
@@ -875,6 +878,10 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         clearInvocations(mOnRenderListListener);
         hypeComparator.invalidateList();
+        verify(mOnRenderListListener).onRenderList(anyList());
+
+        clearInvocations(mOnRenderListListener);
+        preRenderInvalidator.invalidateList();
         verify(mOnRenderListListener).onRenderList(anyList());
     }
 
