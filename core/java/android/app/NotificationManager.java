@@ -2579,9 +2579,6 @@ public class NotificationManager {
      * for more information.
      * </p>
      * <p>
-     * Callers of this method must have notification listener access or permission to read contacts.
-     * </p>
-     * <p>
      * NOTE: This method calls into Contacts, which may take some time, and should not be called
      * on the main thread.
      * </p>
