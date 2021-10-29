@@ -2368,7 +2368,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                             message.animate()
                                     .alpha(0f)
                                     .setDuration(TOAST_FADE_TIME)
-                                    .setStartDelay(visibleTime);
+                                    .setStartDelay(visibleTime)
+                                    .setListener(null);
                         }
                     });
         }

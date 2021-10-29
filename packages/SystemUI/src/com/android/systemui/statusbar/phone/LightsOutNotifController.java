@@ -124,6 +124,9 @@ public class LightsOutNotifController {
                         public void onAnimationEnd(Animator a) {
                             mLightsOutNotifView.setAlpha(showDot ? 1 : 0);
                             mLightsOutNotifView.setVisibility(showDot ? View.VISIBLE : View.GONE);
+                            // Unset the listener, otherwise this may persist for
+                            // another view property animation
+                            mLightsOutNotifView.animate().setListener(null);
                         }
                     })
                     .start();

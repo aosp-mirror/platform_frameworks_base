@@ -745,6 +745,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         public void onAnimationEnd(Animator animation) {
             mHeaderAnimating = false;
             updateQsState();
+            // Unset the listener, otherwise this may persist for another view property animation
+            getView().animate().setListener(null);
         }
     };
 

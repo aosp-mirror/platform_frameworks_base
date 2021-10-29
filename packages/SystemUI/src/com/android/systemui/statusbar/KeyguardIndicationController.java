@@ -716,6 +716,9 @@ public class KeyguardIndicationController {
                                         textView.setTranslationY(BOUNCE_ANIMATION_FINAL_Y);
                                         ViewClippingUtil.setClippingDeactivated(textView, false,
                                                 mClippingParams);
+                                        // Unset the listener, otherwise this may persist for
+                                        // another view property animation
+                                        textView.animate().setListener(null);
                                     }
                                 });
                     }
