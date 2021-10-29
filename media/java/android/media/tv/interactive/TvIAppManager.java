@@ -19,6 +19,7 @@ package android.media.tv.interactive;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -30,10 +31,10 @@ import com.android.internal.util.Preconditions;
 /**
  * Central system API to the overall TV interactive application framework (TIAF) architecture, which
  * arbitrates interaction between applications and interactive apps.
- * @hide
  */
-@SystemService("tv_interactive_app")
+@SystemService(Context.TV_IAPP_SERVICE)
 public final class TvIAppManager {
+    // TODO: cleanup and unhide public APIs
     private static final String TAG = "TvIAppManager";
 
     private final ITvIAppManager mService;
@@ -49,6 +50,7 @@ public final class TvIAppManager {
 
     private final ITvIAppClient mClient;
 
+    /** @hide */
     public TvIAppManager(ITvIAppManager service, int userId) {
         mService = service;
         mUserId = userId;
@@ -125,6 +127,7 @@ public final class TvIAppManager {
 
     /**
      * The Session provides the per-session functionality of interactive app.
+     * @hide
      */
     public static final class Session {
         private final ITvIAppManager mService;
