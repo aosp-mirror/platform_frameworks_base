@@ -123,7 +123,7 @@ import java.util.zip.GZIPInputStream;
 public class PackageManagerServiceUtils {
     private static final long MAX_CRITICAL_INFO_DUMP_SIZE = 3 * 1000 * 1000; // 3MB
 
-    public final static Predicate<PackageSetting> REMOVE_IF_NULL_PKG =
+    public final static Predicate<PackageStateInternal> REMOVE_IF_NULL_PKG =
             pkgSetting -> pkgSetting.getPkg() == null;
 
     /**

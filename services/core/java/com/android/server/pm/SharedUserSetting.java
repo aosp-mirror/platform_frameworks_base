@@ -94,6 +94,7 @@ public final class SharedUserSetting extends SettingBase {
     private SharedUserSetting(SharedUserSetting orig) {
         super(orig);
         name = orig.name;
+        userId = orig.userId;
         uidFlags = orig.uidFlags;
         uidPrivateFlags = orig.uidPrivateFlags;
         packages = new ArraySet<>(orig.packages);

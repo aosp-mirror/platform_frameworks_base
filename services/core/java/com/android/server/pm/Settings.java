@@ -666,7 +666,7 @@ public final class Settings implements Watchable, Snappable {
         mKernelMappingSnapshot = new SnapshotCache.Sealed<>();
         mInstallerPackages = r.mInstallerPackagesSnapshot.snapshot();
         mInstallerPackagesSnapshot = new SnapshotCache.Sealed<>();
-        mKeySetManagerService = new KeySetManagerService(mPackages);
+        mKeySetManagerService = new KeySetManagerService(r.mKeySetManagerService, mPackages);
 
         // The following assignments satisfy Java requirements but are not
         // needed by the read-only methods.  Note especially that the lock
@@ -2779,7 +2779,7 @@ public final class Settings implements Watchable, Snappable {
         if (pkg.isForceQueryableOverride()) {
             serializer.attributeBoolean(null, "forceQueryable", true);
         }
-        if (pkg.isPackageLoading()) {
+        if (pkg.isLoading()) {
             serializer.attributeBoolean(null, "isLoading", true);
         }
         serializer.attributeFloat(null, "loadingProgress", pkg.getLoadingProgress());
@@ -4197,14 +4197,6 @@ public final class Settings implements Watchable, Snappable {
         return pkg.getCurrentEnabledStateLPr(classNameStr, userId);
     }
 
-    boolean wasPackageEverLaunchedLPr(String packageName, int userId) {
-        final PackageSetting pkgSetting = mPackages.get(packageName);
-        if (pkgSetting == null) {
-            throw new IllegalArgumentException("Unknown package: " + packageName);
-        }
-        return !pkgSetting.getNotLaunched(userId);
-    }
-
     boolean setPackageStoppedStateLPw(PackageManagerService pm, String packageName,
             boolean stopped, int userId) {
         final PackageSetting pkgSetting = mPackages.get(packageName);
@@ -4673,7 +4665,7 @@ public final class Settings implements Watchable, Snappable {
             pw.print(prefix); pw.print("  installerAttributionTag=");
             pw.println(ps.getInstallSource().installerAttributionTag);
         }
-        if (ps.isPackageLoading()) {
+        if (ps.isLoading()) {
             pw.print(prefix); pw.println("  loadingProgress=" +
                     (int) (ps.getLoadingProgress() * 100) + "%");
         }
