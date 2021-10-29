@@ -137,7 +137,7 @@ final class AccessibilityController {
             new SparseArray<>();
     private SparseArray<IBinder> mFocusedWindow = new SparseArray<>();
     private int mFocusedDisplay = -1;
-
+    private boolean mIsImeVisible = false;
     // Set to true if initializing window population complete.
     private boolean mAllObserversInitialized = true;
 
@@ -490,15 +490,19 @@ final class AccessibilityController {
         }
     }
 
-    void onImeSurfaceShownChanged(WindowState windowState, boolean shown) {
+    void updateImeVisibilityIfNeeded(int displayId, boolean shown) {
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
-            mAccessibilityTracing.logTrace(TAG + ".onImeSurfaceShownChanged",
-                    FLAGS_MAGNIFICATION_CALLBACK, "windowState=" + windowState + ";shown=" + shown);
+            mAccessibilityTracing.logTrace(TAG + ".updateImeVisibilityIfNeeded",
+                    FLAGS_MAGNIFICATION_CALLBACK, "displayId=" + displayId + ";shown=" + shown);
         }
-        final int displayId = windowState.getDisplayId();
+        if (mIsImeVisible == shown) {
+            return;
+        }
+
+        mIsImeVisible = shown;
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
-            displayMagnifier.onImeSurfaceShownChanged(shown);
+            displayMagnifier.notifyImeWindowVisibilityChanged(shown);
         }
     }
 
@@ -767,9 +771,9 @@ final class AccessibilityController {
             }
         }
 
-        void onImeSurfaceShownChanged(boolean shown) {
+        void notifyImeWindowVisibilityChanged(boolean shown) {
             if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
-                mAccessibilityTracing.logTrace(LOG_TAG + ".onImeSurfaceShownChanged",
+                mAccessibilityTracing.logTrace(LOG_TAG + ".notifyImeWindowVisibilityChanged",
                         FLAGS_MAGNIFICATION_CALLBACK, "shown=" + shown);
             }
             mHandler.obtainMessage(MyHandler.MESSAGE_NOTIFY_IME_WINDOW_VISIBILITY_CHANGED,
