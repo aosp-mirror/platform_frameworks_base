@@ -817,7 +817,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public Bundle getCurrentAgEvents(BluetoothDevice device) {
-        if (DBG) log("getCurrentCalls()");
+        if (DBG) log("getCurrentAgEvents()");
         final IBluetoothHeadsetClient service =
                 getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
