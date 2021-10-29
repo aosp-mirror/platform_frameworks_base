@@ -18,7 +18,7 @@ package com.android.systemui.qs
 
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.settings.brightness.BrightnessController
-import com.android.systemui.settings.brightness.BrightnessSlider
+import com.android.systemui.settings.brightness.BrightnessSliderController
 import com.android.systemui.settings.brightness.MirroredBrightnessController
 import com.android.systemui.statusbar.policy.BrightnessMirrorController
 import javax.inject.Inject
@@ -33,10 +33,11 @@ class QuickQSBrightnessController @VisibleForTesting constructor(
 
     @Inject constructor(
         brightnessControllerFactory: BrightnessController.Factory,
-        brightnessSliderFactory: BrightnessSlider.Factory,
+        brightnessSliderControllerFactory: BrightnessSliderController.Factory,
         quickQSPanel: QuickQSPanel
     ) : this(brightnessControllerFactory = {
-            val slider = brightnessSliderFactory.create(quickQSPanel.context, quickQSPanel)
+            val slider = brightnessSliderControllerFactory.create(quickQSPanel.context,
+                    quickQSPanel)
             slider.init()
             quickQSPanel.setBrightnessView(slider.rootView)
             brightnessControllerFactory.create(slider)
