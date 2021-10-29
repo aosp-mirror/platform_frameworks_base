@@ -445,6 +445,7 @@ public class Tuner implements AutoCloseable  {
      *                 and the API would only process nice value setting in that case.
      * @param niceValue the nice value.
      */
+    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
     public void updateResourcePriority(int priority, int niceValue) {
         mTunerResourceManager.updateClientPriority(mClientId, priority, niceValue);
     }
@@ -455,6 +456,7 @@ public class Tuner implements AutoCloseable  {
      * @param frontendType {@link android.media.tv.tuner.frontend.FrontendSettings.Type} for the
      * query to be done for.
      */
+    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
     public boolean hasUnusedFrontend(int frontendType) {
         return mTunerResourceManager.hasUnusedFrontend(frontendType);
     }
