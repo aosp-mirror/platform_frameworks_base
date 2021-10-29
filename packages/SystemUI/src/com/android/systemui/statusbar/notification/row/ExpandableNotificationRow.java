@@ -107,6 +107,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
+import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.wmshell.BubblesManager;
 
 import java.io.FileDescriptor;
@@ -3311,40 +3312,45 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        super.dump(fd, pw, args);
-        pw.println("  Notification: " + mEntry.getKey());
-        pw.print("    visibility: " + getVisibility());
-        pw.print(", alpha: " + getAlpha());
-        pw.print(", translation: " + getTranslation());
-        pw.print(", removed: " + isRemoved());
-        pw.print(", expandAnimationRunning: " + mExpandAnimationRunning);
-        NotificationContentView showingLayout = getShowingLayout();
-        pw.print(", privateShowing: " + (showingLayout == mPrivateLayout));
-        pw.println();
-        showingLayout.dump(fd, pw, args);
-        pw.print("    ");
-        if (getViewState() != null) {
-            getViewState().dump(fd, pw, args);
-        } else {
-            pw.print("no viewState!!!");
-        }
-        pw.println();
-        pw.println();
-        if (mIsSummaryWithChildren) {
-            pw.print("  ChildrenContainer");
-            pw.print(" visibility: " + mChildrenContainer.getVisibility());
-            pw.print(", alpha: " + mChildrenContainer.getAlpha());
-            pw.print(", translationY: " + mChildrenContainer.getTranslationY());
-            pw.println();
-            List<ExpandableNotificationRow> notificationChildren = getAttachedChildren();
-            pw.println("  Children: " + notificationChildren.size());
-            pw.println("  {");
-            for(ExpandableNotificationRow child : notificationChildren) {
-                child.dump(fd, pw, args);
+        // Skip super call; dump viewState ourselves
+        pw.println("Notification: " + mEntry.getKey());
+        DumpUtilsKt.withIndenting(pw, ipw -> {
+            ipw.print("visibility: " + getVisibility());
+            ipw.print(", alpha: " + getAlpha());
+            ipw.print(", translation: " + getTranslation());
+            ipw.print(", removed: " + isRemoved());
+            ipw.print(", expandAnimationRunning: " + mExpandAnimationRunning);
+            NotificationContentView showingLayout = getShowingLayout();
+            ipw.print(", privateShowing: " + (showingLayout == mPrivateLayout));
+            ipw.println();
+            showingLayout.dump(fd, ipw, args);
+
+            if (getViewState() != null) {
+                getViewState().dump(fd, ipw, args);
+                ipw.println();
+            } else {
+                ipw.println("no viewState!!!");
             }
-            pw.println("  }");
-            pw.println();
-        }
+
+            if (mIsSummaryWithChildren) {
+                ipw.println();
+                ipw.print("ChildrenContainer");
+                ipw.print(" visibility: " + mChildrenContainer.getVisibility());
+                ipw.print(", alpha: " + mChildrenContainer.getAlpha());
+                ipw.print(", translationY: " + mChildrenContainer.getTranslationY());
+                ipw.println();
+                List<ExpandableNotificationRow> notificationChildren = getAttachedChildren();
+                ipw.println("Children: " + notificationChildren.size());
+                ipw.print("{");
+                ipw.increaseIndent();
+                for (ExpandableNotificationRow child : notificationChildren) {
+                    ipw.println();
+                    child.dump(fd, ipw, args);
+                }
+                ipw.decreaseIndent();
+                ipw.println("}");
+            }
+        });
     }
 
     /**
