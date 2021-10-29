@@ -749,6 +749,12 @@ public class Tuner implements AutoCloseable  {
      * supported in Tuner 1.1 or higher version. Unsupported version will cause no-op. Use {@link
      * TunerVersionChecker#getTunerVersion()} to get the version information.
      *
+     * <p>Tuning with {@link
+     * android.media.tv.tuner.frontend.IsdbtFrontendSettings.PartialReceptionFlag} or {@link
+     * android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings} is only supported
+     * in Tuner 2.0 or higher version. Unsupported version will cause no-op. Use {@link
+     * TunerVersionChecker#getTunerVersion()} to get the version information.
+     *
      * @param settings Signal delivery information the frontend uses to
      *                 search and lock the signal.
      * @return result status of tune operation.
@@ -801,6 +807,12 @@ public class Tuner implements AutoCloseable  {
      *
      * <p>Scanning with {@link android.media.tv.tuner.frontend.DtmbFrontendSettings} is only
      * supported in Tuner 1.1 or higher version. Unsupported version will cause no-op. Use {@link
+     * TunerVersionChecker#getTunerVersion()} to get the version information.
+     *
+     * * <p>Scanning with {@link
+     * android.media.tv.tuner.frontend.IsdbtFrontendSettings.PartialReceptionFlag} or {@link
+     * android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings} is only supported
+     * in Tuner 2.0 or higher version. Unsupported version will cause no-op. Use {@link
      * TunerVersionChecker#getTunerVersion()} to get the version information.
      *
      * @param settings A {@link FrontendSettings} to configure the frontend.
