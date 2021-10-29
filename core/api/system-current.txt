@@ -6117,7 +6117,7 @@ package android.media.tv.tuner {
     method @Nullable public android.media.tv.tuner.DemuxCapabilities getDemuxCapabilities();
     method @Nullable public android.media.tv.tuner.frontend.FrontendInfo getFrontendInfo();
     method @Nullable public android.media.tv.tuner.frontend.FrontendStatus getFrontendStatus(@NonNull int[]);
-    method public boolean hasUnusedFrontend(int);
+    method @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public boolean hasUnusedFrontend(int);
     method public boolean isLowestPriority(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER) public android.media.tv.tuner.Descrambler openDescrambler();
     method @Nullable public android.media.tv.tuner.dvr.DvrPlayback openDvrPlayback(long, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.dvr.OnPlaybackStatusChangedListener);
@@ -6132,7 +6132,7 @@ package android.media.tv.tuner {
     method public void setResourceLostListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.Tuner.OnResourceLostListener);
     method public void shareFrontendFromTuner(@NonNull android.media.tv.tuner.Tuner);
     method public int tune(@NonNull android.media.tv.tuner.frontend.FrontendSettings);
-    method public void updateResourcePriority(int, int);
+    method @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public void updateResourcePriority(int, int);
     field public static final int INVALID_AV_SYNC_ID = -1; // 0xffffffff
     field public static final int INVALID_FILTER_ID = -1; // 0xffffffff
     field public static final long INVALID_FILTER_ID_LONG = -1L; // 0xffffffffffffffffL
