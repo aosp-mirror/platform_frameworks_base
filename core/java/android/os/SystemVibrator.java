@@ -20,7 +20,6 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.media.AudioAttributes;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
@@ -180,14 +179,13 @@ public class SystemVibrator extends Vibrator {
 
     @Override
     public boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId, VibrationEffect effect,
-            AudioAttributes attributes) {
+            VibrationAttributes attrs) {
         if (mVibratorManager == null) {
             Log.w(TAG, "Failed to set always-on effect; no vibrator manager.");
             return false;
         }
-        VibrationAttributes attr = new VibrationAttributes.Builder(attributes, effect).build();
         CombinedVibration combinedEffect = CombinedVibration.createParallel(effect);
-        return mVibratorManager.setAlwaysOnEffect(uid, opPkg, alwaysOnId, combinedEffect, attr);
+        return mVibratorManager.setAlwaysOnEffect(uid, opPkg, alwaysOnId, combinedEffect, attrs);
     }
 
     @Override
@@ -198,6 +196,9 @@ public class SystemVibrator extends Vibrator {
             return;
         }
         CombinedVibration combinedEffect = CombinedVibration.createParallel(effect);
+        // TODO(b/185351540): move this into VibratorManagerService once the touch vibration
+        // heuristics is fixed and works for CombinedVibration. Make sure it's always applied.
+        attributes = new VibrationAttributes.Builder(attributes, effect).build();
         mVibratorManager.vibrate(uid, opPkg, combinedEffect, reason, attributes);
     }
 

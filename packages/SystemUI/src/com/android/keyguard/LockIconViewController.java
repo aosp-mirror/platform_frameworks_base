@@ -33,8 +33,8 @@ import android.graphics.drawable.AnimatedStateListDrawable;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
-import android.media.AudioAttributes;
 import android.os.Process;
+import android.os.VibrationAttributes;
 import android.os.Vibrator;
 import android.util.DisplayMetrics;
 import android.util.MathUtils;
@@ -86,11 +86,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private static final float sDefaultDensity =
             (float) DisplayMetrics.DENSITY_DEVICE_STABLE / (float) DisplayMetrics.DENSITY_DEFAULT;
     private static final int sLockIconRadiusPx = (int) (sDefaultDensity * 36);
-    private static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
-            new AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-                .build();
+    private static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH);
 
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final KeyguardViewController mKeyguardViewController;
@@ -587,7 +584,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                                 getContext().getOpPackageName(),
                                 UdfpsController.EFFECT_CLICK,
                                 "lockIcon-onDown",
-                                VIBRATION_SONIFICATION_ATTRIBUTES);
+                                TOUCH_VIBRATION_ATTRIBUTES);
                     }
 
                     mDownDetected = true;
@@ -606,7 +603,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                                 getContext().getOpPackageName(),
                                 UdfpsController.EFFECT_CLICK,
                                 "lockIcon-onLongPress",
-                                VIBRATION_SONIFICATION_ATTRIBUTES);
+                                TOUCH_VIBRATION_ATTRIBUTES);
                     }
                 }
 

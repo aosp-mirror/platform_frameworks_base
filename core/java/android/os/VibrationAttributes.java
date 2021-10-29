@@ -145,6 +145,11 @@ public final class VibrationAttributes implements Parcelable {
     // If a vibration is playing for longer than 5s, it's probably not haptic feedback
     private static final long MAX_HAPTIC_FEEDBACK_DURATION = 5000;
 
+    /** Creates a new {@link VibrationAttributes} instance with given usage. */
+    public static @NonNull VibrationAttributes createForUsage(int usage) {
+        return new VibrationAttributes.Builder().setUsage(usage).build();
+    }
+
     private final int mUsage;
     private final int mFlags;
     private final int mOriginalAudioUsage;
@@ -326,12 +331,29 @@ public final class VibrationAttributes implements Parcelable {
 
         /**
          * Constructs a new Builder from AudioAttributes.
+         */
+        public Builder(@NonNull AudioAttributes audio) {
+            setUsage(audio);
+            setFlags(audio);
+        }
+
+        /**
+         * Constructs a new Builder from AudioAttributes and a VibrationEffect to infer usage.
          * @hide
          */
         @TestApi
-        public Builder(@NonNull AudioAttributes audio, @Nullable VibrationEffect effect) {
-            setUsage(audio);
-            setFlags(audio);
+        public Builder(@NonNull AudioAttributes audio, @NonNull VibrationEffect effect) {
+            this(audio);
+            applyHapticFeedbackHeuristics(effect);
+        }
+
+        /**
+         * Constructs a new Builder from VibrationAttributes and a VibrationEffect to infer usage.
+         * @hide
+         */
+        @TestApi
+        public Builder(@NonNull VibrationAttributes vib, @NonNull VibrationEffect effect) {
+            this(vib);
             applyHapticFeedbackHeuristics(effect);
         }
 
