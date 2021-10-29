@@ -290,11 +290,13 @@ class TaskSnapshotController {
         final WindowState mainWindow = result.second;
         final Rect contentInsets = getSystemBarInsets(task.getBounds(),
                 mainWindow.getInsetsStateWithVisibilityOverride());
-        InsetUtils.addInsets(contentInsets, activity.getLetterboxInsets());
+        final Rect letterboxInsets = activity.getLetterboxInsets();
+        InsetUtils.addInsets(contentInsets, letterboxInsets);
 
         builder.setIsRealSnapshot(true);
         builder.setId(System.currentTimeMillis());
         builder.setContentInsets(contentInsets);
+        builder.setLetterboxInsets(letterboxInsets);
 
         final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
         final boolean isShowWallpaper = mainWindow.hasWallpaper();
@@ -575,7 +577,8 @@ class TaskSnapshotController {
             return null;
         }
         final Rect contentInsets = new Rect(systemBarInsets);
-        InsetUtils.addInsets(contentInsets, topChild.getLetterboxInsets());
+        final Rect letterboxInsets = topChild.getLetterboxInsets();
+        InsetUtils.addInsets(contentInsets, letterboxInsets);
 
         // Note, the app theme snapshot is never translucent because we enforce a non-translucent
         // color above
@@ -584,9 +587,9 @@ class TaskSnapshotController {
                 topChild.mActivityComponent, hwBitmap.getHardwareBuffer(),
                 hwBitmap.getColorSpace(), mainWindow.getConfiguration().orientation,
                 mainWindow.getWindowConfiguration().getRotation(), new Point(taskWidth, taskHeight),
-                contentInsets, false /* isLowResolution */, false /* isRealSnapshot */,
-                task.getWindowingMode(), getAppearance(task), false /* isTranslucent */,
-                false /* hasImeSurface */);
+                contentInsets, letterboxInsets, false /* isLowResolution */,
+                false /* isRealSnapshot */, task.getWindowingMode(),
+                getAppearance(task), false /* isTranslucent */, false /* hasImeSurface */);
     }
 
     /**
