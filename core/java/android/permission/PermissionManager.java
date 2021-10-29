@@ -180,8 +180,6 @@ public final class PermissionManager {
         mPermissionManager = IPermissionManager.Stub.asInterface(ServiceManager.getServiceOrThrow(
                 "permissionmgr"));
         mLegacyPermissionManager = context.getSystemService(LegacyPermissionManager.class);
-        //TODO ntmyren: there should be a way to only enable the watcher when requested
-        mUsageHelper = new PermissionUsageHelper(context);
     }
 
     /**
@@ -956,6 +954,29 @@ public final class PermissionManager {
     }
 
     /**
+     * Initialize the PermissionUsageHelper, which will register active app op listeners
+     *
+     * @hide
+     */
+    public void initializeUsageHelper() {
+        if (mUsageHelper == null) {
+            mUsageHelper = new PermissionUsageHelper(mContext);
+        }
+    }
+
+    /**
+     * Teardown the PermissionUsageHelper, removing listeners
+     *
+     * @hide
+     */
+    public void tearDownUsageHelper() {
+        if (mUsageHelper != null) {
+            mUsageHelper.tearDown();
+            mUsageHelper = null;
+        }
+    }
+
+    /**
      * @return A list of permission groups currently or recently used by all apps by all users in
      * the current profile group.
      *
@@ -965,7 +986,7 @@ public final class PermissionManager {
     @NonNull
     @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
     public List<PermGroupUsage> getIndicatorAppOpUsageData() {
-        return mUsageHelper.getOpUsageData(new AudioManager().isMicrophoneMute());
+        return getIndicatorAppOpUsageData(new AudioManager().isMicrophoneMute());
     }
 
     /**
@@ -980,9 +1001,7 @@ public final class PermissionManager {
     @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
     public List<PermGroupUsage> getIndicatorAppOpUsageData(boolean micMuted) {
         // Lazily initialize the usage helper
-        if (mUsageHelper == null) {
-            mUsageHelper = new PermissionUsageHelper(mContext);
-        }
+        initializeUsageHelper();
         return mUsageHelper.getOpUsageData(micMuted);
     }
 
