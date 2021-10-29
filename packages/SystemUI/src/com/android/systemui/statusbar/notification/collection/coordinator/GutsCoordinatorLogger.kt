@@ -15,7 +15,7 @@ class GutsCoordinatorLogger @Inject constructor(
     fun logGutsOpened(key: String, guts: NotificationGuts) {
         buffer.log(TAG, LogLevel.DEBUG, {
             str1 = key
-            str2 = guts::class.simpleName
+            str2 = guts.gutsContent::class.simpleName
             bool1 = guts.isLeavebehind
         }, {
             "Guts of type $str2 (leave behind: $bool1) opened for class $str1"

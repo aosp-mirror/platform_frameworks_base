@@ -26,7 +26,10 @@ import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.Service;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -58,6 +61,8 @@ import com.android.internal.util.DumpUtils.Dump;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
+import java.util.function.Consumer;
 
 /**
  * Extend this class to implement a custom dream (available to the user as a "Daydream").
@@ -170,6 +175,13 @@ public class DreamService extends Service implements Window.Callback {
             "android.service.dreams.DreamService";
 
     /**
+     * The name of the extra where the dream overlay component is stored.
+     * @hide
+     */
+    public static final String EXTRA_DREAM_OVERLAY_COMPONENT =
+            "android.service.dream.DreamService.dream_overlay_component";
+
+    /**
      * Name under which a Dream publishes information about itself.
      * This meta-data must reference an XML resource containing
      * a <code>&lt;{@link android.R.styleable#Dream dream}&gt;</code>
@@ -191,6 +203,7 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mCanDoze;
     private boolean mDozing;
     private boolean mWindowless;
+    private boolean mOverlayServiceBound;
     private int mDozeScreenState = Display.STATE_UNKNOWN;
     private int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
@@ -199,8 +212,62 @@ public class DreamService extends Service implements Window.Callback {
     private DreamServiceWrapper mDreamServiceWrapper;
     private Runnable mDispatchAfterOnAttachedToWindow;
 
+    private OverlayConnection mOverlayConnection;
+
+    private static class OverlayConnection implements ServiceConnection {
+        // Overlay set during onBind.
+        private IDreamOverlay mOverlay;
+        // A Queue of pending requests to execute on the overlay.
+        private ArrayDeque<Consumer<IDreamOverlay>> mRequests;
+
+        OverlayConnection() {
+            mRequests = new ArrayDeque<>();
+        }
+
+        public void request(Consumer<IDreamOverlay> request) {
+            mRequests.push(request);
+            evaluate();
+        }
+
+        private void evaluate() {
+            if (mOverlay == null) {
+                return;
+            }
+
+            // Any new requests that arrive during this loop will be processed synchronously after
+            // the loop exits.
+            while (!mRequests.isEmpty()) {
+                final Consumer<IDreamOverlay> request = mRequests.pop();
+                request.accept(mOverlay);
+            }
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // Store Overlay and execute pending requests.
+            mOverlay = IDreamOverlay.Stub.asInterface(service);
+            evaluate();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // Clear Overlay binder to prevent further request processing.
+            mOverlay = null;
+        }
+    }
+
+    private IDreamOverlayCallback mOverlayCallback = new IDreamOverlayCallback.Stub() {
+        @Override
+        public void onExitRequested() {
+            // Simply finish dream when exit is requested.
+            finish();
+        }
+    };
+
+
     public DreamService() {
         mDreamManager = IDreamManager.Stub.asInterface(ServiceManager.getService(DREAM_SERVICE));
+        mOverlayConnection = new OverlayConnection();
     }
 
     /**
@@ -861,6 +928,18 @@ public class DreamService extends Service implements Window.Callback {
     public final IBinder onBind(Intent intent) {
         if (mDebug) Slog.v(TAG, "onBind() intent = " + intent);
         mDreamServiceWrapper = new DreamServiceWrapper();
+
+        // Connect to the overlay service if present.
+        final ComponentName overlayComponent =
+                intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT);
+        if (overlayComponent != null && !mWindowless) {
+            final Intent overlayIntent = new Intent();
+            overlayIntent.setComponent(overlayComponent);
+
+            mOverlayServiceBound = getApplicationContext().bindService(overlayIntent,
+                    mOverlayConnection, Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE);
+        }
+
         return mDreamServiceWrapper;
     }
 
@@ -892,6 +971,11 @@ public class DreamService extends Service implements Window.Callback {
             Slog.w(TAG, "Finish was called before the dream was attached.");
             stopSelf();
             return;
+        }
+
+        if (!mWindowless && mOverlayServiceBound) {
+            unbindService(mOverlayConnection);
+            mOverlayServiceBound = false;
         }
 
         try {
@@ -1101,6 +1185,16 @@ public class DreamService extends Service implements Window.Callback {
                         }
                     }
                 });
+
+        // Request the DreamOverlay be told to dream with dream's window parameters once the service
+        // has connected.
+        mOverlayConnection.request(overlay -> {
+            try {
+                overlay.startDream(mWindow.getAttributes(), mOverlayCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG, "could not send window attributes:" + e);
+            }
+        });
     }
 
     private boolean getWindowFlagValue(int flag, boolean defaultValue) {

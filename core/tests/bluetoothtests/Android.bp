@@ -15,7 +15,10 @@ android_test {
         "android.test.runner",
         "android.test.base",
     ],
-    static_libs: ["junit"],
+    static_libs: [
+        "junit",
+        "modules-utils-bytesmatcher",
+    ],
     platform_apis: true,
     certificate: "platform",
 }

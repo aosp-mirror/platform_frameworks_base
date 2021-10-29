@@ -103,8 +103,6 @@ public final class ShellCommandHandlerImpl {
                 return runMoveToSideStage(args, pw);
             case "removeFromSideStage":
                 return runRemoveFromSideStage(args, pw);
-            case "setSideStageOutline":
-                return runSetSideStageOutline(args, pw);
             case "setSideStagePosition":
                 return runSetSideStagePosition(args, pw);
             case "setSideStageVisibility":
@@ -160,18 +158,6 @@ public final class ShellCommandHandlerImpl {
         }
         final int taskId = new Integer(args[2]);
         mSplitScreenOptional.ifPresent(split -> split.removeFromSideStage(taskId));
-        return true;
-    }
-
-    private boolean runSetSideStageOutline(String[] args, PrintWriter pw) {
-        if (args.length < 3) {
-            // First arguments are "WMShell" and command name.
-            pw.println("Error: whether to enable or disable side stage outline border should be"
-                    + " provided as arguments");
-            return false;
-        }
-        final boolean enable = new Boolean(args[2]);
-        mSplitScreenOptional.ifPresent(split -> split.setSideStageOutline(enable));
         return true;
     }
 

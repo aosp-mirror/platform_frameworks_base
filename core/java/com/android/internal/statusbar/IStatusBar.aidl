@@ -290,4 +290,5 @@ oneway interface IStatusBar
     void runGcForTest();
 
     void requestAddTile(in ComponentName componentName, in CharSequence appName, in CharSequence label, in Icon icon, in IAddTileResultCallback callback);
+    void cancelRequestAddTile(in String packageName);
 }

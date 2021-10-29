@@ -37,7 +37,20 @@ final class IncrementalProgressListener extends IPackageLoadingProgressCallback.
             if (ps == null) {
                 return;
             }
-            ps.setLoadingProgress(progress);
+
+            boolean wasLoading = ps.isPackageLoading();
+            // Due to asynchronous progress reporting, incomplete progress might be received
+            // after the app is migrated off incremental. Ignore such progress updates.
+            if (wasLoading) {
+                ps.setLoadingProgress(progress);
+                // Only report the state change when loading state changes from loading to not
+                if (!ps.isPackageLoading()) {
+                    // Unregister progress listener
+                    mPm.mIncrementalManager.unregisterLoadingProgressCallbacks(ps.getPathString());
+                    // Make sure the information is preserved
+                    mPm.scheduleWriteSettingsLocked();
+                }
+            }
         }
     }
 }

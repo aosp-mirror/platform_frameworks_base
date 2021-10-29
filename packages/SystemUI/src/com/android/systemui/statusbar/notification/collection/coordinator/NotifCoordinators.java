@@ -61,7 +61,9 @@ public class NotifCoordinators implements Dumpable {
             ConversationCoordinator conversationCoordinator,
             PreparationCoordinator preparationCoordinator,
             MediaCoordinator mediaCoordinator,
+            ShadeEventCoordinator shadeEventCoordinator,
             SmartspaceDedupingCoordinator smartspaceDedupingCoordinator,
+            ViewConfigCoordinator viewConfigCoordinator,
             VisualStabilityCoordinator visualStabilityCoordinator,
             CommunalCoordinator communalCoordinator) {
         dumpManager.registerDumpable(TAG, this);
@@ -75,6 +77,8 @@ public class NotifCoordinators implements Dumpable {
         mCoordinators.add(bubbleCoordinator);
         mCoordinators.add(conversationCoordinator);
         mCoordinators.add(mediaCoordinator);
+        mCoordinators.add(shadeEventCoordinator);
+        mCoordinators.add(viewConfigCoordinator);
         mCoordinators.add(visualStabilityCoordinator);
         mCoordinators.add(communalCoordinator);
 

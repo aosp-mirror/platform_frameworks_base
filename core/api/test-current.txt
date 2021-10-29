@@ -337,6 +337,7 @@ package android.app {
   }
 
   public class StatusBarManager {
+    method public void cancelRequestAddTile(@NonNull String);
     method public void clickNotification(@Nullable String, int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void collapsePanels();
     method public void expandNotificationsPanel();

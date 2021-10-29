@@ -68,7 +68,8 @@ public class SplitLayoutTests extends ShellTestCase {
                 mSplitLayoutHandler,
                 mCallbacks,
                 mDisplayImeController,
-                mTaskOrganizer));
+                mTaskOrganizer,
+                false /* applyDismissingParallax */));
     }
 
     @Test

@@ -59,6 +59,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.incremental.IncrementalManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -455,7 +456,10 @@ final class InstallPackageHelper {
         if (pkgSetting.getInstantApp(userId)) {
             mPm.mInstantAppRegistry.addInstantAppLPw(userId, pkgSetting.getAppId());
         }
-        pkgSetting.setStatesOnCommit();
+
+        if (!IncrementalManager.isIncrementalPath(pkgSetting.getPathString())) {
+            pkgSetting.setLoadingProgress(1f);
+        }
 
         return pkg;
     }

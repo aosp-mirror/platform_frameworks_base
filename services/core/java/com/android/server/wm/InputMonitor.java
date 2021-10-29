@@ -54,14 +54,12 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
 import android.view.InputChannel;
-import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 
@@ -111,44 +109,6 @@ final class InputMonitor {
      */
     private WeakReference<ActivityRecord> mActiveRecentsActivity = null;
     private WeakReference<ActivityRecord> mActiveRecentsLayerRef = null;
-
-    /**
-     * Representation of a input consumer that the policy has added to the window manager to consume
-     * input events going to windows below it.
-     */
-    static final class EventReceiverInputConsumer extends InputConsumerImpl {
-        private InputMonitor mInputMonitor;
-        private final InputEventReceiver mInputEventReceiver;
-
-        EventReceiverInputConsumer(WindowManagerService service, InputMonitor monitor,
-                                   Looper looper, String name,
-                                   InputEventReceiver.Factory inputEventReceiverFactory,
-                                   int clientPid, UserHandle clientUser, int displayId) {
-            super(service, null /* token */, name, null /* inputChannel */, clientPid, clientUser,
-                    displayId);
-            mInputMonitor = monitor;
-            mInputEventReceiver = inputEventReceiverFactory.createInputEventReceiver(
-                    mClientChannel, looper);
-        }
-
-        /** Removes the input consumer from the window manager. */
-        void dismiss() {
-            synchronized (mService.mGlobalLock) {
-                mInputMonitor.mInputConsumers.remove(mName);
-                hide(mInputMonitor.mInputTransaction);
-                mInputMonitor.updateInputWindowsLw(true /* force */);
-            }
-        }
-
-        /** Disposes the input consumer and input receiver from the associated thread. */
-        void dispose() {
-            synchronized (mService.mGlobalLock) {
-                disposeChannelsLw(mInputMonitor.mInputTransaction);
-                mInputEventReceiver.dispose();
-                mInputMonitor.updateInputWindowsLw(true /* force */);
-            }
-        }
-    }
 
     private class UpdateInputWindows implements Runnable {
         @Override

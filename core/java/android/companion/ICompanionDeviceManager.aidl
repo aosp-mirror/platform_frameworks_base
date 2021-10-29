@@ -18,7 +18,7 @@ package android.companion;
 
 import android.app.PendingIntent;
 import android.companion.IFindDeviceCallback;
-import android.companion.Association;
+import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.content.ComponentName;
 
@@ -36,7 +36,7 @@ interface ICompanionDeviceManager {
         in String callingPackage);
 
     List<String> getAssociations(String callingPackage, int userId);
-    List<Association> getAssociationsForUser(int userId);
+    List<AssociationInfo> getAssociationsForUser(int userId);
 
     void disassociate(String deviceMacAddress, String callingPackage);
 

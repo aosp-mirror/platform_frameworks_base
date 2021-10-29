@@ -97,12 +97,6 @@ class WallpaperController {
     // Time we wait after a timeout before trying to wait again.
     private static final long WALLPAPER_TIMEOUT_RECOVERY = 10000;
 
-    // Set to the wallpaper window we would like to hide once the transition animations are done.
-    // This is useful in cases where we don't want the wallpaper to be hidden when the close app
-    // is a wallpaper target and is done animating out, but the opening app isn't a wallpaper
-    // target and isn't done animating in.
-    WindowState mDeferredHideWallpaper = null;
-
     // We give a wallpaper up to 500ms to finish drawing before playing app transitions.
     private static final long WALLPAPER_DRAW_PENDING_TIMEOUT_DURATION = 500;
     private static final int WALLPAPER_DRAW_NORMAL = 0;

@@ -34,7 +34,7 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.companion.Association;
+import android.companion.AssociationInfo;
 import android.companion.DeviceId;
 import android.os.Environment;
 import android.util.AtomicFile;
@@ -179,11 +179,11 @@ final class PersistentDataStore {
      * Reads previously persisted data for the given user "into" the provided containers.
      *
      * @param userId Android UserID
-     * @param associationsOut a container to read the {@link Association}s "into".
+     * @param associationsOut a container to read the {@link AssociationInfo}s "into".
      * @param previouslyUsedIdsPerPackageOut a container to read the used IDs "into".
      */
     void readStateForUser(@UserIdInt int userId,
-            @NonNull Set<Association> associationsOut,
+            @NonNull Set<AssociationInfo> associationsOut,
             @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackageOut) {
         Slog.i(LOG_TAG, "Reading associations for user " + userId + " from disk");
         final AtomicFile file = getStorageFileForUser(userId);
@@ -244,7 +244,7 @@ final class PersistentDataStore {
      * @param associations a set of user's associations.
      * @param previouslyUsedIdsPerPackage a set previously used Association IDs for the user.
      */
-    void persistStateForUser(@UserIdInt int userId, @NonNull Set<Association> associations,
+    void persistStateForUser(@UserIdInt int userId, @NonNull Set<AssociationInfo> associations,
             @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackage) {
         Slog.i(LOG_TAG, "Writing associations for user " + userId + " to disk");
         if (DEBUG) Slog.d(LOG_TAG, "  > " + associations);
@@ -257,7 +257,7 @@ final class PersistentDataStore {
     }
 
     private int readStateFromFileLocked(@UserIdInt int userId, @NonNull AtomicFile file,
-            @NonNull String rootTag, @Nullable Set<Association> associationsOut,
+            @NonNull String rootTag, @Nullable Set<AssociationInfo> associationsOut,
             @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackageOut) {
         try (FileInputStream in = file.openRead()) {
             final TypedXmlPullParser parser = Xml.resolvePullParser(in);
@@ -289,7 +289,7 @@ final class PersistentDataStore {
     }
 
     private void persistStateToFileLocked(@NonNull AtomicFile file,
-            @Nullable Set<Association> associations,
+            @Nullable Set<AssociationInfo> associations,
             @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackage) {
         file.write(out -> {
             try {
@@ -328,7 +328,7 @@ final class PersistentDataStore {
     }
 
     private static void readAssociationsV0(@NonNull TypedXmlPullParser parser,
-            @UserIdInt int userId, @NonNull Set<Association> out)
+            @UserIdInt int userId, @NonNull Set<AssociationInfo> out)
             throws XmlPullParserException, IOException {
         requireStartOfTag(parser, XML_TAG_ASSOCIATIONS);
 
@@ -349,7 +349,7 @@ final class PersistentDataStore {
     }
 
     private static void readAssociationV0(@NonNull TypedXmlPullParser parser, @UserIdInt int userId,
-            int associationId, @NonNull Set<Association> out) throws XmlPullParserException {
+            int associationId, @NonNull Set<AssociationInfo> out) throws XmlPullParserException {
         requireStartOfTag(parser, XML_TAG_ASSOCIATION);
 
         final String appPackage = readStringAttribute(parser, XML_ATTR_PACKAGE);
@@ -366,12 +366,12 @@ final class PersistentDataStore {
         // "Convert" MAC address into a DeviceId.
         final List<DeviceId> deviceIds = Arrays.asList(
                 new DeviceId(TYPE_MAC_ADDRESS, deviceAddress));
-        out.add(new Association(associationId, userId, appPackage, deviceIds, profile,
+        out.add(new AssociationInfo(associationId, userId, appPackage, deviceIds, profile,
                 /* managedByCompanionApp */false, notify, timeApproved));
     }
 
     private static void readAssociationsV1(@NonNull TypedXmlPullParser parser,
-            @UserIdInt int userId, @NonNull Set<Association> out)
+            @UserIdInt int userId, @NonNull Set<AssociationInfo> out)
             throws XmlPullParserException, IOException {
         requireStartOfTag(parser, XML_TAG_ASSOCIATIONS);
 
@@ -385,7 +385,7 @@ final class PersistentDataStore {
     }
 
     private static void readAssociationV1(@NonNull TypedXmlPullParser parser, @UserIdInt int userId,
-            @NonNull Set<Association> out) throws XmlPullParserException, IOException {
+            @NonNull Set<AssociationInfo> out) throws XmlPullParserException, IOException {
         requireStartOfTag(parser, XML_TAG_ASSOCIATION);
 
         final int associationId = readIntAttribute(parser, XML_ATTR_ID);
@@ -406,8 +406,8 @@ final class PersistentDataStore {
             deviceIds.add(new DeviceId(type, value));
         }
 
-        out.add(new Association(associationId, userId, appPackage, deviceIds, profile, managedByApp,
-                notify, timeApproved));
+        out.add(new AssociationInfo(associationId, userId, appPackage, deviceIds, profile,
+                managedByApp, notify, timeApproved));
     }
 
     private static void readPreviouslyUsedIdsV1(@NonNull TypedXmlPullParser parser,
@@ -437,13 +437,13 @@ final class PersistentDataStore {
     }
 
     private static void writeAssociations(@NonNull XmlSerializer parent,
-            @Nullable Set<Association> associations) throws IOException {
+            @Nullable Set<AssociationInfo> associations) throws IOException {
         final XmlSerializer serializer = parent.startTag(null, XML_TAG_ASSOCIATIONS);
         forEach(associations, it -> writeAssociation(serializer, it));
         serializer.endTag(null, XML_TAG_ASSOCIATIONS);
     }
 
-    private static void writeAssociation(@NonNull XmlSerializer parent, @NonNull Association a)
+    private static void writeAssociation(@NonNull XmlSerializer parent, @NonNull AssociationInfo a)
             throws IOException {
         final XmlSerializer serializer = parent.startTag(null, XML_TAG_ASSOCIATION);
 
