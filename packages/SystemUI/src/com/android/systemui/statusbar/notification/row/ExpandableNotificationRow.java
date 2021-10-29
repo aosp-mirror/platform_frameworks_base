@@ -1249,6 +1249,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
         if (mMenuRow != null && mMenuRow.getMenuView() != null) {
             mMenuRow.onConfigurationChanged();
         }
@@ -3198,13 +3199,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mAboveShelf = aboveShelf;
         if (isAboveShelf() != wasAboveShelf) {
             mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
-        }
-    }
-
-    /** Sets whether dismiss gestures are right-to-left (instead of left-to-right). */
-    public void setDismissRtl(boolean dismissRtl) {
-        if (mMenuRow != null) {
-            mMenuRow.setDismissRtl(dismissRtl);
         }
     }
 

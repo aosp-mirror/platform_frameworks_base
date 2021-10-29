@@ -19,7 +19,8 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY;
 import static com.android.systemui.statusbar.notification.interruption.HeadsUpController.alertAgain;
 
-import android.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -34,6 +35,7 @@ import com.android.systemui.statusbar.notification.collection.render.NodeControl
 import com.android.systemui.statusbar.notification.dagger.IncomingHeader;
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
+import com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
@@ -163,17 +165,17 @@ public class HeadsUpCoordinator implements Coordinator {
 
     private final NotifLifetimeExtender mLifetimeExtender = new NotifLifetimeExtender() {
         @Override
-        public String getName() {
+        public @NonNull String getName() {
             return TAG;
         }
 
         @Override
-        public void setCallback(OnEndLifetimeExtensionCallback callback) {
+        public void setCallback(@NonNull OnEndLifetimeExtensionCallback callback) {
             mEndLifetimeExtension = callback;
         }
 
         @Override
-        public boolean shouldExtendLifetime(NotificationEntry entry, int reason) {
+        public boolean shouldExtendLifetime(@NonNull NotificationEntry entry, int reason) {
             boolean isShowingHun = isCurrentlyShowingHun(entry);
             if (isShowingHun) {
                 mNotifExtendingLifetime = entry;
@@ -182,7 +184,7 @@ public class HeadsUpCoordinator implements Coordinator {
         }
 
         @Override
-        public void cancelLifetimeExtension(NotificationEntry entry) {
+        public void cancelLifetimeExtension(@NonNull NotificationEntry entry) {
             if (Objects.equals(mNotifExtendingLifetime, entry)) {
                 mNotifExtendingLifetime = null;
             }
@@ -196,7 +198,8 @@ public class HeadsUpCoordinator implements Coordinator {
         }
     };
 
-    private final NotifSectioner mNotifSectioner = new NotifSectioner("HeadsUp") {
+    private final NotifSectioner mNotifSectioner = new NotifSectioner("HeadsUp",
+            NotificationPriorityBucketKt.BUCKET_HEADS_UP) {
         @Override
         public boolean isInSection(ListEntry entry) {
             return isCurrentlyShowingHun(entry);
@@ -205,7 +208,11 @@ public class HeadsUpCoordinator implements Coordinator {
         @Nullable
         @Override
         public NodeController getHeaderNodeController() {
-            return mIncomingHeaderController;
+            // TODO: remove SHOW_ALL_SECTIONS, this redundant method, and mIncomingHeaderController
+            if (RankingCoordinator.SHOW_ALL_SECTIONS) {
+                return mIncomingHeaderController;
+            }
+            return null;
         }
     };
 

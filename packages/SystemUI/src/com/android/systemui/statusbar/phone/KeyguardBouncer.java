@@ -45,6 +45,7 @@ import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.ListenerSet;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -84,11 +85,11 @@ public class KeyguardBouncer {
     private final Runnable mRemoveViewRunnable = this::removeView;
     private final KeyguardBypassController mKeyguardBypassController;
     private KeyguardHostViewController mKeyguardViewController;
-    private final List<KeyguardResetCallback> mResetCallbacks = new ArrayList<>();
+    private final ListenerSet<KeyguardResetCallback> mResetCallbacks = new ListenerSet<>();
     private final Runnable mResetRunnable = ()-> {
         if (mKeyguardViewController != null) {
             mKeyguardViewController.resetSecurityContainer();
-            for (KeyguardResetCallback callback : new ArrayList<>(mResetCallbacks)) {
+            for (KeyguardResetCallback callback : mResetCallbacks) {
                 callback.onKeyguardReset();
             }
         }
@@ -602,7 +603,7 @@ public class KeyguardBouncer {
     }
 
     public void addKeyguardResetCallback(KeyguardResetCallback callback) {
-        mResetCallbacks.add(callback);
+        mResetCallbacks.addIfAbsent(callback);
     }
 
     public void removeKeyguardResetCallback(KeyguardResetCallback callback) {

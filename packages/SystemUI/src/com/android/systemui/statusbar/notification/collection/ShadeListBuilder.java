@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
+import com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
 
@@ -78,6 +79,8 @@ public class ShadeListBuilder implements Dumpable {
     private final SystemClock mSystemClock;
     private final ShadeListBuilderLogger mLogger;
     private final NotificationInteractionTracker mInteractionTracker;
+    // used exclusivly by ShadeListBuilder#notifySectionEntriesUpdated
+    private final ArrayList<ListEntry> mTempSectionMembers = new ArrayList<>();
 
     private List<ListEntry> mNotifList = new ArrayList<>();
     private List<ListEntry> mNewNotifList = new ArrayList<>();
@@ -356,7 +359,7 @@ public class ShadeListBuilder implements Dumpable {
         // section by our list of custom comparators
         dispatchOnBeforeSort(mReadOnlyNotifList);
         mPipelineState.incrementTo(STATE_SORTING);
-        sortList();
+        sortListAndNotifySections();
 
         // Step 7: Lock in our group structure and log anything that's changed since the last run
         mPipelineState.incrementTo(STATE_FINALIZING);
@@ -380,6 +383,22 @@ public class ShadeListBuilder implements Dumpable {
         }
         mPipelineState.setState(STATE_IDLE);
         mIterationCount++;
+    }
+
+    private void notifySectionEntriesUpdated() {
+        NotifSection currentSection = null;
+        mTempSectionMembers.clear();
+        for (int i = 0; i < mNotifList.size(); i++) {
+            ListEntry currentEntry = mNotifList.get(i);
+            if (currentSection != currentEntry.getSection()) {
+                if (currentSection != null) {
+                    currentSection.getSectioner().onEntriesUpdated(mTempSectionMembers);
+                    mTempSectionMembers.clear();
+                }
+                currentSection = currentEntry.getSection();
+            }
+            mTempSectionMembers.add(currentEntry);
+        }
     }
 
     /**
@@ -713,14 +732,14 @@ public class ShadeListBuilder implements Dumpable {
         }
     }
 
-    private void sortList() {
+    private void sortListAndNotifySections() {
         // Assign sections to top-level elements and sort their children
         for (ListEntry entry : mNotifList) {
             NotifSection section = applySections(entry);
             if (entry instanceof GroupEntry) {
                 GroupEntry parent = (GroupEntry) entry;
                 for (NotificationEntry child : parent.getChildren()) {
-                    child.getAttachState().setSection(section);
+                    setEntrySection(child, section);
                 }
                 parent.sortChildren(sChildComparator);
             }
@@ -728,6 +747,9 @@ public class ShadeListBuilder implements Dumpable {
 
         // Finally, sort all top-level elements
         mNotifList.sort(mTopLevelComparator);
+
+        // notify sections since the list is sorted now
+        notifySectionEntriesUpdated();
     }
 
     private void freeEmptyGroups() {
@@ -936,9 +958,16 @@ public class ShadeListBuilder implements Dumpable {
             }
         }
 
-        entry.getAttachState().setSection(finalSection);
-
+        setEntrySection(entry, finalSection);
         return finalSection;
+    }
+
+    private void setEntrySection(ListEntry entry, NotifSection finalSection) {
+        entry.getAttachState().setSection(finalSection);
+        NotificationEntry representativeEntry = entry.getRepresentativeEntry();
+        if (representativeEntry != null && finalSection != null) {
+            representativeEntry.setBucket(finalSection.getBucket());
+        }
     }
 
     @NonNull
@@ -1019,13 +1048,13 @@ public class ShadeListBuilder implements Dumpable {
         void onRenderList(@NonNull List<ListEntry> entries);
     }
 
-    private static final NotifSectioner DEFAULT_SECTIONER =
-            new NotifSectioner("UnknownSection") {
-                @Override
-                public boolean isInSection(ListEntry entry) {
-                    return true;
-                }
-            };
+    private static final NotifSectioner DEFAULT_SECTIONER = new NotifSectioner("UnknownSection",
+            NotificationPriorityBucketKt.BUCKET_UNKNOWN) {
+        @Override
+        public boolean isInSection(ListEntry entry) {
+            return true;
+        }
+    };
 
     private static final int MIN_CHILDREN_FOR_GROUP = 2;
 
