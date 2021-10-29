@@ -68,6 +68,7 @@ import android.os.StrictMode;
 import android.os.WorkSource;
 import android.service.voice.IVoiceInteractionSession;
 import android.view.IRecentsAnimationRunner;
+import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationAdapter;
 import android.window.IWindowOrganizerController;
@@ -344,4 +345,9 @@ interface IActivityTaskManager {
      * @param caller is the IApplicationThread representing the calling process.
      */
     void setRunningRemoteTransitionDelegate(in IApplicationThread caller);
+
+    /**
+     * Prepare the back preview in the server
+     */
+    void startBackPreview(IRemoteAnimationRunner runner);
 }

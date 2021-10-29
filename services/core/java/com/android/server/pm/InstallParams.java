@@ -1781,9 +1781,6 @@ final class InstallParams extends HandlerParams {
                 final String codePath = ps.getPathString();
                 if (IncrementalManager.isIncrementalPath(codePath)
                         && mPm.mIncrementalManager != null) {
-                    final IncrementalStatesCallback incrementalStatesCallback =
-                            new IncrementalStatesCallback(ps.getPackageName(), mPm);
-                    ps.setIncrementalStatesCallback(incrementalStatesCallback);
                     mPm.mIncrementalManager.registerLoadingProgressCallback(codePath,
                             new IncrementalProgressListener(ps.getPackageName(), mPm));
                 }

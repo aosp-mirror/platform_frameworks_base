@@ -32,7 +32,7 @@ import static java.util.Collections.unmodifiableMap;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.companion.Association;
+import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
 import android.companion.ICompanionDeviceDiscoveryService;
@@ -226,7 +226,7 @@ class AssociationRequestsProcessor {
 
         // Throttle frequent associations
         long now = System.currentTimeMillis();
-        Set<Association> recentAssociations = filter(
+        Set<AssociationInfo> recentAssociations = filter(
                 mService.getAllAssociations(userId, packageName),
                 a -> now - a.getTimeApprovedMs() < ASSOCIATE_WITHOUT_PROMPT_WINDOW_MS);
 

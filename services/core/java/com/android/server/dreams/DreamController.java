@@ -117,7 +117,8 @@ final class DreamController {
     }
 
     public void startDream(Binder token, ComponentName name,
-            boolean isTest, boolean canDoze, int userId, PowerManager.WakeLock wakeLock) {
+            boolean isTest, boolean canDoze, int userId, PowerManager.WakeLock wakeLock,
+            ComponentName overlayComponentName) {
         stopDream(true /*immediate*/, "starting new dream");
 
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "startDream");
@@ -138,6 +139,7 @@ final class DreamController {
             Intent intent = new Intent(DreamService.SERVICE_INTERFACE);
             intent.setComponent(name);
             intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            intent.putExtra(DreamService.EXTRA_DREAM_OVERLAY_COMPONENT, overlayComponentName);
             try {
                 if (!mContext.bindServiceAsUser(intent, mCurrentDream,
                         Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,

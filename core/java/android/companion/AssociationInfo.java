@@ -39,7 +39,7 @@ import java.util.Set;
  * TODO(b/1979395): un-hide and rename to AssociationInfo when implementing public APIs that use
  *                  this class.
  */
-public final class Association implements Parcelable {
+public final class AssociationInfo implements Parcelable {
     /**
      * A unique ID of this Association record.
      * Disclosed to the clients (ie. companion applications) for referring to this record (eg. in
@@ -63,7 +63,7 @@ public final class Association implements Parcelable {
      *
      * @hide
      */
-    public Association(int associationId, @UserIdInt int userId, @NonNull String packageName,
+    public AssociationInfo(int associationId, @UserIdInt int userId, @NonNull String packageName,
             @NonNull List<DeviceId> deviceIds, @Nullable String deviceProfile,
             boolean managedByCompanionApp, boolean notifyOnDeviceNearby, long timeApprovedMs) {
         if (associationId <= 0) {
@@ -178,8 +178,8 @@ public final class Association implements Parcelable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Association)) return false;
-        final Association that = (Association) o;
+        if (!(o instanceof AssociationInfo)) return false;
+        final AssociationInfo that = (AssociationInfo) o;
         return mAssociationId == that.mAssociationId
                 && mUserId == that.mUserId
                 && mManagedByCompanionApp == that.mManagedByCompanionApp
@@ -216,7 +216,7 @@ public final class Association implements Parcelable {
         dest.writeLong(mTimeApprovedMs);
     }
 
-    private Association(@NonNull Parcel in) {
+    private AssociationInfo(@NonNull Parcel in) {
         mAssociationId = in.readInt();
 
         mUserId = in.readInt();
@@ -230,16 +230,16 @@ public final class Association implements Parcelable {
         mTimeApprovedMs = in.readLong();
     }
 
-    public static final Parcelable.Creator<Association> CREATOR =
-            new Parcelable.Creator<Association>() {
+    public static final Parcelable.Creator<AssociationInfo> CREATOR =
+            new Parcelable.Creator<AssociationInfo>() {
         @Override
-        public Association[] newArray(int size) {
-            return new Association[size];
+        public AssociationInfo[] newArray(int size) {
+            return new AssociationInfo[size];
         }
 
         @Override
-        public Association createFromParcel(@NonNull Parcel in) {
-            return new Association(in);
+        public AssociationInfo createFromParcel(@NonNull Parcel in) {
+            return new AssociationInfo(in);
         }
     };
 

@@ -22,7 +22,7 @@ import static android.content.Context.BIND_IMPORTANT;
 import static com.android.internal.util.CollectionUtils.filter;
 
 import android.annotation.NonNull;
-import android.companion.Association;
+import android.companion.AssociationInfo;
 import android.companion.CompanionDeviceService;
 import android.companion.ICompanionDeviceService;
 import android.content.ComponentName;
@@ -60,7 +60,7 @@ public class CompanionDevicePresenceController {
         };
     }
 
-    void onDeviceNotifyAppeared(Association association, Context context, Handler handler) {
+    void onDeviceNotifyAppeared(AssociationInfo association, Context context, Handler handler) {
         ServiceConnector<ICompanionDeviceService> primaryConnector =
                 getPrimaryServiceConnector(association, context, handler);
         if (primaryConnector != null) {
@@ -71,7 +71,7 @@ public class CompanionDevicePresenceController {
         }
     }
 
-    void onDeviceNotifyDisappeared(Association association, Context context, Handler handler) {
+    void onDeviceNotifyDisappeared(AssociationInfo association, Context context, Handler handler) {
         ServiceConnector<ICompanionDeviceService> primaryConnector =
                 getPrimaryServiceConnector(association, context, handler);
         if (primaryConnector != null) {
@@ -94,7 +94,7 @@ public class CompanionDevicePresenceController {
     }
 
     private ServiceConnector<ICompanionDeviceService> getPrimaryServiceConnector(
-            Association association, Context context, Handler handler) {
+            AssociationInfo association, Context context, Handler handler) {
         for (BoundService boundService: getDeviceListenerServiceConnector(association, context,
                 handler)) {
             if (boundService.mIsPrimary) {
@@ -104,15 +104,15 @@ public class CompanionDevicePresenceController {
         return null;
     }
 
-    private List<BoundService> getDeviceListenerServiceConnector(Association a, Context context,
+    private List<BoundService> getDeviceListenerServiceConnector(AssociationInfo a, Context context,
             Handler handler) {
         return mBoundServices.forUser(a.getUserId()).computeIfAbsent(
                 a.getPackageName(),
                 pkg -> createDeviceListenerServiceConnector(a, context, handler));
     }
 
-    private List<BoundService> createDeviceListenerServiceConnector(Association a, Context context,
-            Handler handler) {
+    private List<BoundService> createDeviceListenerServiceConnector(AssociationInfo a,
+            Context context, Handler handler) {
         List<ResolveInfo> resolveInfos = context
                 .getPackageManager()
                 .queryIntentServicesAsUser(new Intent(CompanionDeviceService.SERVICE_INTERFACE),
@@ -161,7 +161,7 @@ public class CompanionDevicePresenceController {
     }
 
     private boolean validatePackageInfo(List<ResolveInfo> packageResolveInfos,
-            Association association) {
+            AssociationInfo association) {
         if (packageResolveInfos.size() == 0 || packageResolveInfos.size() > 5) {
             Slog.e(LOG_TAG, "Device presence listener package must have at least one and not "
                     + "more than five CompanionDeviceService(s) declared. But "

@@ -164,7 +164,6 @@ import com.android.server.policy.WindowManagerPolicy.ScreenOnListener;
 import com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wallpaper.WallpaperManagerInternal;
-import com.android.server.wm.InputMonitor.EventReceiverInputConsumer;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -395,7 +394,6 @@ public class DisplayPolicy {
 
     // -------- PolicyHandler --------
     private static final int MSG_REQUEST_TRANSIENT_BARS = 2;
-    private static final int MSG_DISPOSE_INPUT_CONSUMER = 3;
     private static final int MSG_ENABLE_POINTER_LOCATION = 4;
     private static final int MSG_DISABLE_POINTER_LOCATION = 5;
 
@@ -423,9 +421,6 @@ public class DisplayPolicy {
                             requestTransientBars(targetBar);
                         }
                     }
-                    break;
-                case MSG_DISPOSE_INPUT_CONSUMER:
-                    disposeInputConsumer((EventReceiverInputConsumer) msg.obj);
                     break;
                 case MSG_ENABLE_POINTER_LOCATION:
                     enablePointerLocation();
@@ -2571,12 +2566,6 @@ public class DisplayPolicy {
             }
         }
         mImmersiveModeConfirmation.confirmCurrentPrompt();
-    }
-
-    private void disposeInputConsumer(EventReceiverInputConsumer inputConsumer) {
-        if (inputConsumer != null) {
-            inputConsumer.dispose();
-        }
     }
 
     boolean isKeyguardShowing() {

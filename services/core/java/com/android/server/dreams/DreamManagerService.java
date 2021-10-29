@@ -95,6 +95,8 @@ public final class DreamManagerService extends SystemService {
     private int mCurrentDreamDozeScreenState = Display.STATE_UNKNOWN;
     private int mCurrentDreamDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
+    private ComponentName mDreamOverlayServiceName;
+
     private AmbientDisplayConfiguration mDozeConfig;
 
     @VisibleForTesting
@@ -421,7 +423,8 @@ public final class DreamManagerService extends SystemService {
             if (!mCurrentDreamName.equals(mAmbientDisplayComponent)) {
                 mUiEventLogger.log(DreamManagerEvent.DREAM_START);
             }
-            mController.startDream(newToken, name, isTest, canDoze, userId, wakeLock);
+            mController.startDream(newToken, name, isTest, canDoze, userId, wakeLock,
+                    mDreamOverlayServiceName);
         }));
     }
 
@@ -589,6 +592,15 @@ public final class DreamManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+
+        @Override // Binder call
+        public void registerDreamOverlayService(ComponentName overlayComponent) {
+            checkPermission(android.Manifest.permission.WRITE_DREAM_STATE);
+
+            // Store the overlay service component so that it can be passed to the dream when it is
+            // invoked.
+            mDreamOverlayServiceName = overlayComponent;
         }
 
         @Override // Binder call

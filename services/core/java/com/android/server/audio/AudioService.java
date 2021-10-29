@@ -6214,9 +6214,15 @@ public class AudioService extends IAudioService.Stub
      */
     public @AudioManager.DeviceVolumeBehavior
     int getDeviceVolumeBehavior(@NonNull AudioDeviceAttributes device) {
+        Objects.requireNonNull(device);
         // verify permissions
         enforceQueryStateOrModifyRoutingPermission();
 
+        return getDeviceVolumeBehaviorInt(device);
+    }
+
+    private @AudioManager.DeviceVolumeBehavior
+            int getDeviceVolumeBehaviorInt(@NonNull AudioDeviceAttributes device) {
         // translate Java device type to native device type (for the devices masks for full / fixed)
         final int audioSystemDeviceOut = AudioDeviceInfo.convertDeviceTypeToInternalDevice(
                 device.getType());
@@ -6242,6 +6248,29 @@ public class AudioService extends IAudioService.Stub
             return AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE;
         }
         return AudioManager.DEVICE_VOLUME_BEHAVIOR_VARIABLE;
+    }
+
+    /**
+     * @see AudioManager#isVolumeFixed()
+     * Note there are no permission checks on this operation, as this is part of API 21
+     * @return true if the current device's volume behavior for media is
+     *         DEVICE_VOLUME_BEHAVIOR_FIXED
+     */
+    public boolean isVolumeFixed() {
+        if (mUseFixedVolume) {
+            return true;
+        }
+        final AudioAttributes attributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .build();
+        // calling getDevice*Int to bypass permission check
+        final List<AudioDeviceAttributes> devices = getDevicesForAttributesInt(attributes);
+        for (AudioDeviceAttributes device : devices) {
+            if (getDeviceVolumeBehaviorInt(device) == AudioManager.DEVICE_VOLUME_BEHAVIOR_FIXED) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /*package*/ static final int CONNECTION_STATE_DISCONNECTED = 0;

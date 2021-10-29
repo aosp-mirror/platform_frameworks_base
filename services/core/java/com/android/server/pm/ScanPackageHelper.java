@@ -1018,9 +1018,6 @@ final class ScanPackageHelper {
         if (mPm.mIncrementalManager != null && isIncrementalPath(parsedPackage.getPath())) {
             if (pkgSetting != null && pkgSetting.isPackageLoading()) {
                 // Continue monitoring loading progress of active incremental packages
-                final IncrementalStatesCallback incrementalStatesCallback =
-                        new IncrementalStatesCallback(parsedPackage.getPackageName(), mPm);
-                pkgSetting.setIncrementalStatesCallback(incrementalStatesCallback);
                 mPm.mIncrementalManager.registerLoadingProgressCallback(parsedPackage.getPath(),
                         new IncrementalProgressListener(parsedPackage.getPackageName(), mPm));
             }

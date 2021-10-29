@@ -463,13 +463,13 @@ public abstract class WMShellBaseModule {
             @ShellMainThread ShellExecutor mainExecutor,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController, Transitions transitions,
-            TransactionPool transactionPool,
+            TransactionPool transactionPool, IconProvider iconProvider,
             Provider<Optional<StageTaskUnfoldController>> stageTaskUnfoldControllerProvider) {
         if (ActivityTaskManager.supportsSplitScreenMultiWindow(context)) {
             return Optional.of(new SplitScreenController(shellTaskOrganizer, syncQueue, context,
                     rootTaskDisplayAreaOrganizer, mainExecutor, displayImeController,
-                    displayInsetsController, transitions,
-                    transactionPool, stageTaskUnfoldControllerProvider));
+                    displayInsetsController, transitions, transactionPool, iconProvider,
+                    stageTaskUnfoldControllerProvider));
         } else {
             return Optional.empty();
         }
