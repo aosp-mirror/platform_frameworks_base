@@ -39,6 +39,8 @@ import androidx.annotation.Keep;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 
+import androidx.annotation.Keep;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 
