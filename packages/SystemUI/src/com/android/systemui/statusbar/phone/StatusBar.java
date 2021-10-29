@@ -174,7 +174,7 @@ import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.scrim.ScrimView;
-import com.android.systemui.settings.brightness.BrightnessSlider;
+import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
@@ -541,7 +541,7 @@ public class StatusBar extends SystemUI implements
     private final NotificationViewHierarchyManager mViewHierarchyManager;
     private final KeyguardViewMediator mKeyguardViewMediator;
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
-    private final BrightnessSlider.Factory mBrightnessSliderFactory;
+    private final BrightnessSliderController.Factory mBrightnessSliderFactory;
     private final FeatureFlags mFeatureFlags;
     private final UnfoldTransitionConfig mUnfoldTransitionConfig;
     private final Lazy<UnfoldLightRevealOverlayAnimation> mUnfoldLightRevealOverlayAnimation;
@@ -781,7 +781,7 @@ public class StatusBar extends SystemUI implements
             Lazy<NotificationShadeDepthController> notificationShadeDepthControllerLazy,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             NotificationIconAreaController notificationIconAreaController,
-            BrightnessSlider.Factory brightnessSliderFactory,
+            BrightnessSliderController.Factory brightnessSliderFactory,
             UnfoldTransitionConfig unfoldTransitionConfig,
             Lazy<UnfoldLightRevealOverlayAnimation> unfoldLightRevealOverlayAnimation,
             Lazy<UnfoldTransitionWallpaperController> unfoldTransitionWallpaperController,
