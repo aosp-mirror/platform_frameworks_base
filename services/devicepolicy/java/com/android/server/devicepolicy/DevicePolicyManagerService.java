@@ -3836,9 +3836,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private boolean notSupportedOnAutomotive(String method) {
+        if (mIsAutomotive) {
+            Slogf.i(LOG_TAG, "%s is not supported on automotive builds", method);
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public void setPasswordQuality(ComponentName who, int quality, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || notSupportedOnAutomotive("setPasswordQuality")) {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
@@ -4073,7 +4081,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setPasswordMinimumLength(ComponentName who, int length, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || notSupportedOnAutomotive("setPasswordMinimumLength")) {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
@@ -4355,7 +4363,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setPasswordMinimumUpperCase(ComponentName who, int length, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || notSupportedOnAutomotive("setPasswordMinimumUpperCase")) {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
@@ -4388,6 +4396,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setPasswordMinimumLowerCase(ComponentName who, int length, boolean parent) {
+        if (notSupportedOnAutomotive("setPasswordMinimumLowerCase")) {
+            return;
+        }
         Objects.requireNonNull(who, "ComponentName is null");
         final int userId = mInjector.userHandleGetCallingUserId();
         synchronized (getLockObject()) {
@@ -4418,7 +4429,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setPasswordMinimumLetters(ComponentName who, int length, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || notSupportedOnAutomotive("setPasswordMinimumLetters")) {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
@@ -4450,7 +4461,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setPasswordMinimumNumeric(ComponentName who, int length, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || notSupportedOnAutomotive("setPasswordMinimumNumeric")) {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
@@ -4482,7 +4493,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setPasswordMinimumSymbols(ComponentName who, int length, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || notSupportedOnAutomotive("setPasswordMinimumSymbols")) {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
@@ -4514,7 +4525,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setPasswordMinimumNonLetter(ComponentName who, int length, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || notSupportedOnAutomotive("setPasswordMinimumNonLetter")) {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
