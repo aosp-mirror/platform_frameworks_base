@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.onehanded;
 
-import static android.os.UserHandle.USER_CURRENT;
 import static android.os.UserHandle.myUserId;
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -30,12 +29,10 @@ import android.annotation.BinderThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.om.IOverlayManager;
-import android.content.om.OverlayInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
@@ -71,9 +68,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
 
     private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
             "persist.debug.one_handed_offset_percentage";
-    private static final String ONE_HANDED_MODE_GESTURAL_OVERLAY =
-            "com.android.internal.systemui.onehanded.gestural";
-    private static final int OVERLAY_ENABLED_DELAY_MS = 250;
     private static final int DISPLAY_AREA_READY_RETRY_MS = 10;
 
     static final String SUPPORT_ONE_HANDED_MODE = "ro.support_one_handed_mode";
@@ -289,7 +283,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         setupCallback();
         registerSettingObservers(mUserId);
         setupTimeoutListener();
-        setupGesturalOverlay();
         updateSettings();
 
         mAccessibilityManager = AccessibilityManager.getInstance(context);
@@ -524,11 +517,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
                 : OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_ENABLED_OFF);
 
         setOneHandedEnabled(enabled);
-
-        // Also checks swipe to notification settings since they all need gesture overlay.
-        setEnabledGesturalOverlay(
-                enabled || mOneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
-                        mContext.getContentResolver(), mUserId), true /* DelayExecute */);
     }
 
     @VisibleForTesting
@@ -609,40 +597,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         }
     }
 
-    private void setupGesturalOverlay() {
-        if (!mOneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
-                mContext.getContentResolver(), mUserId)) {
-            return;
-        }
-
-        OverlayInfo info = null;
-        try {
-            mOverlayManager.setHighestPriority(ONE_HANDED_MODE_GESTURAL_OVERLAY, USER_CURRENT);
-            info = mOverlayManager.getOverlayInfo(ONE_HANDED_MODE_GESTURAL_OVERLAY, USER_CURRENT);
-        } catch (RemoteException e) { /* Do nothing */ }
-
-        if (info != null && !info.isEnabled()) {
-            // Enable the default gestural one handed overlay.
-            setEnabledGesturalOverlay(true /* enabled */, false /* delayExecute */);
-        }
-    }
-
-    @VisibleForTesting
-    private void setEnabledGesturalOverlay(boolean enabled, boolean delayExecute) {
-        if (mState.isTransitioning() || delayExecute) {
-            // Enabled overlay package may affect the current animation(e.g:Settings switch),
-            // so we delay 250ms to enabled overlay after switch animation finish, only delay once.
-            mMainExecutor.executeDelayed(() -> setEnabledGesturalOverlay(enabled, false),
-                    OVERLAY_ENABLED_DELAY_MS);
-            return;
-        }
-        try {
-            mOverlayManager.setEnabled(ONE_HANDED_MODE_GESTURAL_OVERLAY, enabled, USER_CURRENT);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
     @VisibleForTesting
     void setLockedDisabled(boolean locked, boolean enabled) {
         final boolean isFeatureEnabled = mIsOneHandedEnabled || mIsSwipeToNotificationEnabled;
@@ -719,19 +673,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         }
 
         mOneHandedSettingsUtil.dump(pw, innerPrefix, mContext.getContentResolver(), mUserId);
-
-        if (mOverlayManager != null) {
-            OverlayInfo info = null;
-            try {
-                info = mOverlayManager.getOverlayInfo(ONE_HANDED_MODE_GESTURAL_OVERLAY,
-                        USER_CURRENT);
-            } catch (RemoteException e) { /* Do nothing */ }
-
-            if (info != null && !info.isEnabled()) {
-                pw.print(innerPrefix + "OverlayInfo=");
-                pw.println(info);
-            }
-        }
     }
 
     /**
