@@ -31,7 +31,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
-import android.os.IBinder;
 import android.view.IWindow;
 import android.view.InsetsState;
 import android.view.LayoutInflater;
@@ -41,6 +40,7 @@ import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.R;
@@ -71,9 +71,10 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         mWindowName = windowName;
     }
 
-    @Override
-    public void setTouchRegion(IBinder window, Region region) {
-        super.setTouchRegion(window, region);
+    void setTouchRegion(@NonNull Rect region) {
+        if (mViewHost != null) {
+            setTouchRegion(mViewHost.getWindowToken().asBinder(), new Region(region));
+        }
     }
 
     @Override
@@ -122,7 +123,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         lp.setTitle(mWindowName);
         lp.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION | PRIVATE_FLAG_TRUSTED_OVERLAY;
         mViewHost.setView(mDividerView, lp);
-        mDividerView.setup(splitLayout, mViewHost, insetsState);
+        mDividerView.setup(splitLayout, this, mViewHost, insetsState);
     }
 
     /**
