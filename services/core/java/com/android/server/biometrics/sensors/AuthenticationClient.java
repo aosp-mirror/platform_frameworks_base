@@ -168,6 +168,10 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         return Utils.isKeyguard(getContext(), getOwnerString());
     }
 
+    private boolean isSettings() {
+        return Utils.isSettings(getContext(), getOwnerString());
+    }
+
     @Override
     protected boolean isCryptoOperation() {
         return mOperationId != 0;
@@ -499,6 +503,8 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     protected int getShowOverlayReason() {
         if (isKeyguard()) {
             return BiometricOverlayConstants.REASON_AUTH_KEYGUARD;
+        } else if (isSettings()) {
+            return BiometricOverlayConstants.REASON_AUTH_SETTINGS;
         } else if (isBiometricPrompt()) {
             return BiometricOverlayConstants.REASON_AUTH_BP;
         } else {
