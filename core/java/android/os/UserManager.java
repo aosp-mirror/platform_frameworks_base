@@ -288,6 +288,24 @@ public class UserManager {
     public static final String DISALLOW_CHANGE_WIFI_STATE = "no_change_wifi_state";
 
     /**
+     * Specifies if a user is disallowed from using Wi-Fi tethering.
+     *
+     * <p>This restriction can only be set by a device owner,
+     * a profile owner of an organization-owned managed profile on the parent profile.
+     * When it is set by any of these owners, it prevents all users from using
+     * Wi-Fi tethering. Other forms of tethering are not affected.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_WIFI_TETHERING = "no_wifi_tethering";
+
+    /**
      * Specifies if a user is disallowed from changing the device
      * language. The default value is <code>false</code>.
      *
