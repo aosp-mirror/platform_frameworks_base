@@ -268,11 +268,14 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
             @SplitPosition int sideStagePosition) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         setSideStagePosition(sideStagePosition, wct);
-        mMainStage.activate(getMainStageBounds(), wct, true /* reparent */);
-        mSideStage.addTask(task, getSideStageBounds(), wct);
-        mSyncQueue.queue(wct);
-        mSyncQueue.runInSync(t -> updateSurfaceBounds(null /* layout */, t));
+        mSideStage.evictAllChildren(evictWct);
+        mSideStage.addTask(task, wct);
+        if (!evictWct.isEmpty()) {
+            wct.merge(evictWct, true /* transfer */);
+        }
+        mTaskOrganizer.applyTransaction(wct);
         return true;
     }
 
@@ -759,7 +762,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Make sure the main stage is active.
             mMainStage.activate(getMainStageBounds(), wct, true /* reparent */);
             mSideStage.moveToTop(getSideStageBounds(), wct);
-            mTaskOrganizer.applyTransaction(wct);
+            mSyncQueue.queue(wct);
+            mSyncQueue.runInSync(t -> updateSurfaceBounds(mSplitLayout, t));
         }
         if (!mLogger.hasStartedSession() && mMainStageListener.mHasChildren
                 && mSideStageListener.mHasChildren) {
