@@ -184,16 +184,14 @@ public class CpuPowerCalculator extends PowerCalculator {
                 continue;
             }
 
-            // TODO(b/191921016): use per-state CPU active time
-            final long cpuActiveTime = 0;
             // TODO(b/191921016): use per-state CPU cluster times
             final long[] cpuClusterTimes = null;
 
             final long[] cpuFreqTimes = u.getCpuFreqTimes(BatteryStats.STATS_SINCE_CHARGED,
                     uidProcState);
-            if (cpuActiveTime != 0 || cpuClusterTimes != null || cpuFreqTimes != null) {
+            if (cpuClusterTimes != null || cpuFreqTimes != null) {
                 result.perProcStatePowerMah[procState] += calculateUidModeledPowerMah(u,
-                        cpuActiveTime, cpuClusterTimes, cpuFreqTimes);
+                        0, cpuClusterTimes, cpuFreqTimes);
             }
         }
 
@@ -202,8 +200,12 @@ public class CpuPowerCalculator extends PowerCalculator {
                 continue;
             }
 
-            app.setConsumedPower(key, result.perProcStatePowerMah[key.processState],
-                    BatteryConsumer.POWER_MODEL_POWER_PROFILE);
+            final long cpuActiveTime = u.getCpuActiveTime(key.processState);
+
+            double powerMah = result.perProcStatePowerMah[key.processState];
+            powerMah += mCpuActivePowerEstimator.calculatePower(cpuActiveTime);
+            app.setConsumedPower(key, powerMah, BatteryConsumer.POWER_MODEL_POWER_PROFILE)
+                    .setUsageDurationMillis(key, cpuActiveTime);
         }
     }
 
