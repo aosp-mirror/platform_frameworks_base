@@ -161,6 +161,8 @@ class UnlockedScreenOffAnimationController @Inject constructor(
 
                         // Done going to sleep, reset this flag.
                         decidedToAnimateGoingToSleep = null
+                        // We need to unset the listener. These are persistent for future animators
+                        keyguardView.animate().setListener(null)
                     }
                 })
                 .start()
