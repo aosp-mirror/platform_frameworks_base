@@ -90,6 +90,7 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.media.KeyguardMediaController;
@@ -303,6 +304,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private DumpManager mDumpManager;
     @Mock
     private NotificationsQSContainerController mNotificationsQSContainerController;
+    @Mock
+    private FeatureFlags mFeatureFlags;
 
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -447,7 +450,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mLockscreenGestureLogger,
                 new PanelExpansionStateManager(),
                 mNotificationRemoteInputManager,
-                mControlsComponent);
+                mControlsComponent,
+                mFeatureFlags);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 () -> {},
