@@ -906,7 +906,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * container.
      */
     boolean canCustomizeAppTransition() {
-        return !WindowManagerService.sDisableCustomTaskAnimationProperty;
+        return false;
     }
 
     /**
