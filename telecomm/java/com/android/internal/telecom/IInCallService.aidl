@@ -19,9 +19,12 @@ package com.android.internal.telecom;
 import android.app.PendingIntent;
 import android.os.Bundle;
 import android.telecom.CallAudioState;
+import android.telecom.CallEndpoint;
 import android.telecom.ParcelableCall;
 
 import com.android.internal.telecom.IInCallAdapter;
+import com.android.internal.telecom.ICallEndpointCallback;
+import com.android.internal.telecom.ICallEndpointSession;
 
 /**
  * Internal remote interface for in-call services.
@@ -30,8 +33,11 @@ import com.android.internal.telecom.IInCallAdapter;
  *
  * {@hide}
  */
-oneway interface IInCallService {
+interface IInCallService {
     void setInCallAdapter(in IInCallAdapter inCallAdapter);
+
+    ICallEndpointCallback requestCallEndpointActivation(in CallEndpoint callEndpoint,
+        in ICallEndpointSession callEndpointSession);
 
     void addCall(in ParcelableCall call);
 
@@ -58,4 +64,10 @@ oneway interface IInCallService {
     void onHandoverFailed(String callId, int error);
 
     void onHandoverComplete(String callId);
+
+    void onCallPullFailed(String callId, int reason);
+
+    void onCallPushFailed(String callId, in CallEndpoint endpoint, int reason);
+
+    void onAnswerFailed(String callId, in CallEndpoint endpoint, int reason);
 }
