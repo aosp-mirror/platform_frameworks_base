@@ -626,7 +626,7 @@ public class AppWidgetHostView extends FrameLayout {
 
         // If our stale view has been prepared to match active, and the new
         // layout matches, try recycling it
-        if (layoutId == mLayoutId && mView != null) {
+        if (remoteViews.canRecycleView(mView)) {
             try {
                 mLastExecutionSignal = remoteViews.reapplyAsync(mContext,
                         mView,

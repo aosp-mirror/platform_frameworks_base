@@ -5795,7 +5795,7 @@ public class RemoteViews implements Parcelable, Filter {
         // across orientation change, and has the RemoteViews re-applied in the new orientation,
         // we throw an exception, since the layouts may be completely unrelated.
         if (hasMultipleLayouts()) {
-            if ((Integer) v.getTag(R.id.widget_frame) != rvToApply.getLayoutId()) {
+            if (!rvToApply.canRecycleView(v)) {
                 throw new RuntimeException("Attempting to re-apply RemoteViews to a view that" +
                         " that does not share the same root layout id.");
             }

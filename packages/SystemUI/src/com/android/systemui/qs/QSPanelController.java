@@ -41,7 +41,7 @@ import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.brightness.BrightnessController;
 import com.android.systemui.settings.brightness.BrightnessMirrorHandler;
-import com.android.systemui.settings.brightness.BrightnessSlider;
+import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.tuner.TunerService;
@@ -63,7 +63,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     private final FalsingManager mFalsingManager;
     private final CommandQueue mCommandQueue;
     private final BrightnessController mBrightnessController;
-    private final BrightnessSlider mBrightnessSlider;
+    private final BrightnessSliderController mBrightnessSliderController;
     private final BrightnessMirrorHandler mBrightnessMirrorHandler;
 
     private boolean mGridContentVisible = true;
@@ -99,8 +99,8 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             QSTileRevealController.Factory qsTileRevealControllerFactory,
             DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             QSLogger qsLogger, BrightnessController.Factory brightnessControllerFactory,
-            BrightnessSlider.Factory brightnessSliderFactory, FalsingManager falsingManager,
-            CommandQueue commandQueue) {
+            BrightnessSliderController.Factory brightnessSliderFactory,
+            FalsingManager falsingManager, CommandQueue commandQueue) {
         super(view, qstileHost, qsCustomizerController, usingMediaPlayer, mediaHost,
                 metricsLogger, uiEventLogger, qsLogger, dumpManager);
         mQsSecurityFooter = qsSecurityFooter;
@@ -111,10 +111,10 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         mCommandQueue = commandQueue;
         mQsSecurityFooter.setHostEnvironment(qstileHost);
 
-        mBrightnessSlider = brightnessSliderFactory.create(getContext(), mView);
-        mView.setBrightnessView(mBrightnessSlider.getRootView());
+        mBrightnessSliderController = brightnessSliderFactory.create(getContext(), mView);
+        mView.setBrightnessView(mBrightnessSliderController.getRootView());
 
-        mBrightnessController = brightnessControllerFactory.create(mBrightnessSlider);
+        mBrightnessController = brightnessControllerFactory.create(mBrightnessSliderController);
         mBrightnessMirrorHandler = new BrightnessMirrorHandler(mBrightnessController);
     }
 
@@ -125,7 +125,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         mMediaHost.setShowsOnlyActiveMedia(false);
         mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
         mQsCustomizerController.init();
-        mBrightnessSlider.init();
+        mBrightnessSliderController.init();
     }
 
     @Override

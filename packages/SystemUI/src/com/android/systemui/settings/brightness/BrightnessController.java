@@ -51,8 +51,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 
-import java.util.ArrayList;
-
 import javax.inject.Inject;
 
 public class BrightnessController implements ToggleSlider.Listener, MirroredBrightnessController {
@@ -92,12 +90,8 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
         @Override
         public void onDisplayChanged(int displayId) {
             mBackgroundHandler.post(mUpdateSliderRunnable);
-            notifyCallbacks();
         }
     };
-
-    private ArrayList<BrightnessStateChangeCallback> mChangeCallbacks =
-            new ArrayList<BrightnessStateChangeCallback>();
 
     private volatile boolean mAutomatic;  // Brightness adjusted automatically using ambient light.
     private volatile boolean mIsVrModeEnabled;
@@ -112,11 +106,6 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
     @Override
     public void setMirror(BrightnessMirrorController controller) {
         mControl.setMirrorControllerAndMirror(controller);
-    }
-
-    public interface BrightnessStateChangeCallback {
-        /** Indicates that some of the brightness settings have changed */
-        void onBrightnessLevelChanged();
     }
 
     /** ContentObserver to watch brightness */
@@ -139,7 +128,6 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
                 mBackgroundHandler.post(mUpdateModeRunnable);
                 mBackgroundHandler.post(mUpdateSliderRunnable);
             }
-            notifyCallbacks();
         }
 
         public void startObserving() {
@@ -317,14 +305,6 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
                 Context.VR_SERVICE));
     }
 
-    public void addStateChangedCallback(BrightnessStateChangeCallback cb) {
-        mChangeCallbacks.add(cb);
-    }
-
-    public boolean removeStateChangedCallback(BrightnessStateChangeCallback cb) {
-        return mChangeCallbacks.remove(cb);
-    }
-
     public void registerCallbacks() {
         mBackgroundHandler.post(mStartListeningRunnable);
     }
@@ -374,10 +354,6 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
                         mDisplayManager.setBrightness(mDisplayId, valFloat);
                     }
                 });
-        }
-
-        for (BrightnessStateChangeCallback cb : mChangeCallbacks) {
-            cb.onBrightnessLevelChanged();
         }
     }
 
@@ -435,8 +411,12 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
     }
 
     private void animateSliderTo(int target) {
-        if (!mControlValueInitialized) {
+        if (!mControlValueInitialized || !mControl.isVisible()) {
             // Don't animate the first value since its default state isn't meaningful to users.
+            // We also don't want to animate slider if it's not visible - especially important when
+            // two sliders are active at the same time in split shade (one in QS and one in QQS),
+            // as this negatively affects transition between them and they share mirror slider -
+            // animating it from two different sources causes janky motion
             mControl.setValue(target);
             mControlValueInitialized = true;
         }
@@ -453,13 +433,6 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
                 mControl.getValue() - target) / GAMMA_SPACE_MAX;
         mSliderAnimator.setDuration(animationDuration);
         mSliderAnimator.start();
-    }
-
-    private void notifyCallbacks() {
-        final int size = mChangeCallbacks.size();
-        for (int i = 0; i < size; i++) {
-            mChangeCallbacks.get(i).onBrightnessLevelChanged();
-        }
     }
 
     /** Factory for creating a {@link BrightnessController}. */
