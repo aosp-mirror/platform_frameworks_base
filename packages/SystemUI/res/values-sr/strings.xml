@@ -1161,7 +1161,7 @@
     <string name="person_available" msgid="2318599327472755472">"Доступно"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Проблем са очитавањем мерача батерије"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Додирните за више информација"</string>
-    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Аларм није подешен"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Није подешен"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Сензор за отисак прста"</string>
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Сензор за отисак прста је онемогућен"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"потврдите идентитет"</string>
