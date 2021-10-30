@@ -1173,6 +1173,16 @@ public class DreamService extends Service implements Window.Callback {
                     @Override
                     public void onViewAttachedToWindow(View v) {
                         mDispatchAfterOnAttachedToWindow.run();
+
+                        // Request the DreamOverlay be told to dream with dream's window parameters
+                        // once the window has been attached.
+                        mOverlayConnection.request(overlay -> {
+                            try {
+                                overlay.startDream(mWindow.getAttributes(), mOverlayCallback);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "could not send window attributes:" + e);
+                            }
+                        });
                     }
 
                     @Override
@@ -1185,16 +1195,6 @@ public class DreamService extends Service implements Window.Callback {
                         }
                     }
                 });
-
-        // Request the DreamOverlay be told to dream with dream's window parameters once the service
-        // has connected.
-        mOverlayConnection.request(overlay -> {
-            try {
-                overlay.startDream(mWindow.getAttributes(), mOverlayCallback);
-            } catch (RemoteException e) {
-                Log.e(TAG, "could not send window attributes:" + e);
-            }
-        });
     }
 
     private boolean getWindowFlagValue(int flag, boolean defaultValue) {
