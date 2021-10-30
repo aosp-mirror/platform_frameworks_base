@@ -23,6 +23,8 @@ import com.android.systemui.statusbar.notification.collection.ShadeListBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
 import com.android.systemui.statusbar.notification.collection.render.NodeSpec;
 
+import java.util.List;
+
 /**
  * Pluggable for participating in notif sectioning. See {@link ShadeListBuilder#setSections}.
  */
@@ -46,4 +48,10 @@ public abstract class NotifSectioner extends Pluggable<NotifSectioner> {
     public @Nullable NodeController getHeaderNodeController() {
         return null;
     }
+
+    /**
+     * Notify of children of this section being updated
+     * @param entries of this section that are borrowed (must clone to store)
+     */
+    public void onEntriesUpdated(List<ListEntry> entries) {}
 }

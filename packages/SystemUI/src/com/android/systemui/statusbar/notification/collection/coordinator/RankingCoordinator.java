@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import com.android.systemui.dagger.SysUISingleton;
@@ -27,8 +28,11 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
+import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.dagger.AlertingHeader;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -44,7 +48,8 @@ public class RankingCoordinator implements Coordinator {
     public static final boolean SHOW_ALL_SECTIONS = false;
     private final StatusBarStateController mStatusBarStateController;
     private final HighPriorityProvider mHighPriorityProvider;
-    private final NodeController mSilentHeaderController;
+    private final NodeController mSilentNodeController;
+    private final SectionHeaderController mSilentHeaderController;
     private final NodeController mAlertingHeaderController;
 
     @Inject
@@ -52,10 +57,12 @@ public class RankingCoordinator implements Coordinator {
             StatusBarStateController statusBarStateController,
             HighPriorityProvider highPriorityProvider,
             @AlertingHeader NodeController alertingHeaderController,
-            @SilentHeader NodeController silentHeaderController) {
+            @SilentHeader SectionHeaderController silentHeaderController,
+            @SilentHeader NodeController silentNodeController) {
         mStatusBarStateController = statusBarStateController;
         mHighPriorityProvider = highPriorityProvider;
         mAlertingHeaderController = alertingHeaderController;
+        mSilentNodeController = silentNodeController;
         mSilentHeaderController = silentHeaderController;
     }
 
@@ -101,7 +108,19 @@ public class RankingCoordinator implements Coordinator {
         @Nullable
         @Override
         public NodeController getHeaderNodeController() {
-            return mSilentHeaderController;
+            return mSilentNodeController;
+        }
+
+        @Nullable
+        @Override
+        public void onEntriesUpdated(@NonNull List<ListEntry> entries) {
+            for (int i = 0; i < entries.size(); i++) {
+                if (entries.get(i).getRepresentativeEntry().getSbn().isClearable()) {
+                    mSilentHeaderController.setClearSectionEnabled(true);
+                    return;
+                }
+            }
+            mSilentHeaderController.setClearSectionEnabled(false);
         }
     };
 
