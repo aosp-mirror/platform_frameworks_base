@@ -28,7 +28,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.os.SystemProperties;
-import android.os.Trace;
 import android.text.format.DateFormat;
 import android.util.FloatProperty;
 import android.util.Log;
@@ -182,7 +181,6 @@ public class StatusBarStateControllerImpl implements
         }
 
         synchronized (mListeners) {
-            Trace.beginSection(TAG + "#setState(" + StatusBarState.toShortString(state) + ")");
             String tag = getClass().getSimpleName() + "#setState(" + state + ")";
             DejankUtils.startDetectingBlockingIpcs(tag);
             for (RankedListener rl : new ArrayList<>(mListeners)) {
@@ -200,7 +198,6 @@ public class StatusBarStateControllerImpl implements
                 rl.mListener.onStatePostChange();
             }
             DejankUtils.stopDetectingBlockingIpcs(tag);
-            Trace.endSection();
         }
 
         return true;
@@ -265,14 +262,12 @@ public class StatusBarStateControllerImpl implements
         mIsDozing = isDozing;
 
         synchronized (mListeners) {
-            Trace.beginSection(TAG + "#setDozing(" + isDozing + ")");
             String tag = getClass().getSimpleName() + "#setIsDozing";
             DejankUtils.startDetectingBlockingIpcs(tag);
             for (RankedListener rl : new ArrayList<>(mListeners)) {
                 rl.mListener.onDozingChanged(isDozing);
             }
             DejankUtils.stopDetectingBlockingIpcs(tag);
-            Trace.endSection();
         }
 
         return true;
@@ -338,14 +333,12 @@ public class StatusBarStateControllerImpl implements
         mDozeAmount = dozeAmount;
         float interpolatedAmount = mDozeInterpolator.getInterpolation(dozeAmount);
         synchronized (mListeners) {
-            Trace.beginSection(TAG + "#setDozeAmount");
             String tag = getClass().getSimpleName() + "#setDozeAmount";
             DejankUtils.startDetectingBlockingIpcs(tag);
             for (RankedListener rl : new ArrayList<>(mListeners)) {
                 rl.mListener.onDozeAmountChanged(mDozeAmount, interpolatedAmount);
             }
             DejankUtils.stopDetectingBlockingIpcs(tag);
-            Trace.endSection();
         }
     }
 
@@ -476,13 +469,11 @@ public class StatusBarStateControllerImpl implements
     public void setPulsing(boolean pulsing) {
         if (mPulsing != pulsing) {
             mPulsing = pulsing;
-            Trace.beginSection(TAG + "#setPulsing(" + pulsing + ")");
             synchronized (mListeners) {
                 for (RankedListener rl : new ArrayList<>(mListeners)) {
                     rl.mListener.onPulsingChanged(pulsing);
                 }
             }
-            Trace.endSection();
         }
     }
 

@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.notifcollection;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -26,14 +28,14 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
  */
 public interface NotifLifetimeExtender {
     /** Name to associate with this extender (for the purposes of debugging) */
-    String getName();
+    @NonNull String getName();
 
     /**
      * Called on the extender immediately after it has been registered. The extender should hang on
      * to this callback and execute it whenever it no longer needs to extend the lifetime of a
      * notification.
      */
-    void setCallback(OnEndLifetimeExtensionCallback callback);
+    void setCallback(@NonNull OnEndLifetimeExtensionCallback callback);
 
     /**
      * Called by the NotifCollection whenever a notification has been retracted (by the app) or
@@ -43,7 +45,7 @@ public interface NotifLifetimeExtender {
      * called on all lifetime extenders even if earlier ones return true (in other words, multiple
      * lifetime extenders can be extending a notification at the same time).
      */
-    boolean shouldExtendLifetime(NotificationEntry entry, @CancellationReason int reason);
+    boolean shouldExtendLifetime(@NonNull NotificationEntry entry, @CancellationReason int reason);
 
     /**
      * Called by the NotifCollection to inform a lifetime extender that its extension of a notif
@@ -51,7 +53,7 @@ public interface NotifLifetimeExtender {
      * lifetime extension). The extender should clean up any references it has to the notif in
      * question.
      */
-    void cancelLifetimeExtension(NotificationEntry entry);
+    void cancelLifetimeExtension(@NonNull NotificationEntry entry);
 
     /** Callback for notifying the NotifCollection that a lifetime extension has expired.*/
     interface OnEndLifetimeExtensionCallback {
@@ -59,6 +61,8 @@ public interface NotifLifetimeExtender {
          * Stop extending the lifetime of `entry` with `extender` and then immediately re-evaluates
          * whether to continue lifetime extending this notification or to remove it.
          */
-        void onEndLifetimeExtension(NotifLifetimeExtender extender, NotificationEntry entry);
+        void onEndLifetimeExtension(
+                @NonNull NotifLifetimeExtender extender,
+                @NonNull NotificationEntry entry);
     }
 }

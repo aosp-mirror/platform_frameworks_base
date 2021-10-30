@@ -183,12 +183,6 @@ public interface NotificationMenuRowPlugin extends Plugin {
     public boolean canBeDismissed();
 
     /**
-     * Informs the menu whether dismiss gestures are left-to-right or right-to-left.
-     */
-    default void setDismissRtl(boolean dismissRtl) {
-    }
-
-    /**
      * Determines whether the menu should remain open given its current state, or snap closed.
      * @return true if the menu should remain open, false otherwise.
      */
