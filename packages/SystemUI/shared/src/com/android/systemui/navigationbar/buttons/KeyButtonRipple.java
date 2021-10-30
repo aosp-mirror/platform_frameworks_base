@@ -33,11 +33,11 @@ import android.view.RenderNodeAnimator;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 
 import androidx.annotation.Keep;
 
-import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
+import com.android.systemui.shared.R;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -49,6 +49,8 @@ public class KeyButtonRipple extends Drawable {
     private static final float GLOW_MAX_ALPHA_DARK = 0.1f;
     private static final int ANIMATION_DURATION_SCALE = 350;
     private static final int ANIMATION_DURATION_FADE = 450;
+    private static final Interpolator ALPHA_OUT_INTERPOLATOR =
+            new PathInterpolator(0f, 0f, 0.8f, 1f);
 
     private Paint mRipplePaint;
     private CanvasProperty<Float> mLeftProp;
@@ -336,7 +338,7 @@ public class KeyButtonRipple extends Drawable {
 
     private void exitSoftware() {
         ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(this, "glowAlpha", mGlowAlpha, 0f);
-        alphaAnimator.setInterpolator(Interpolators.ALPHA_OUT);
+        alphaAnimator.setInterpolator(ALPHA_OUT_INTERPOLATOR);
         alphaAnimator.setDuration(ANIMATION_DURATION_FADE);
         alphaAnimator.addListener(mAnimatorListener);
         alphaAnimator.start();
@@ -459,7 +461,7 @@ public class KeyButtonRipple extends Drawable {
         final RenderNodeAnimator opacityAnim = new RenderNodeAnimator(mPaintProp,
                 RenderNodeAnimator.PAINT_ALPHA, 0);
         opacityAnim.setDuration(ANIMATION_DURATION_FADE);
-        opacityAnim.setInterpolator(Interpolators.ALPHA_OUT);
+        opacityAnim.setInterpolator(ALPHA_OUT_INTERPOLATOR);
         opacityAnim.addListener(mAnimatorListener);
         opacityAnim.addListener(mExitHwTraceAnimator);
         opacityAnim.setTarget(mTargetView);

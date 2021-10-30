@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState;
 import com.android.systemui.statusbar.notification.collection.listbuilder.ShadeListBuilderLogger;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
@@ -174,6 +175,13 @@ public class ShadeListBuilder implements Dumpable {
         mOnBeforeRenderListListeners.add(listener);
     }
 
+    void addPreRenderInvalidator(Invalidator invalidator) {
+        Assert.isMainThread();
+
+        mPipelineState.requireState(STATE_IDLE);
+        invalidator.setInvalidationListener(this::onPreRenderInvalidated);
+    }
+
     void addPreGroupFilter(NotifFilter filter) {
         Assert.isMainThread();
         mPipelineState.requireState(STATE_IDLE);
@@ -255,6 +263,14 @@ public class ShadeListBuilder implements Dumpable {
                     buildList();
                 }
             };
+
+    private void onPreRenderInvalidated(Invalidator invalidator) {
+        Assert.isMainThread();
+
+        mLogger.logPreRenderInvalidated(invalidator.getName(), mPipelineState.getState());
+
+        rebuildListIfBefore(STATE_FINALIZING);
+    }
 
     private void onPreGroupFilterInvalidated(NotifFilter filter) {
         Assert.isMainThread();

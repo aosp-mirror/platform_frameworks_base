@@ -56,11 +56,6 @@
     <!-- The amount by which the arrow is shifted to avoid the finger-->
     <dimen name="navigation_edge_finger_offset">48dp</dimen>
 
-    <dimen name="floating_rotation_button_diameter">40dp</dimen>
-    <dimen name="floating_rotation_button_min_margin">20dp</dimen>
-    <dimen name="floating_rotation_button_taskbar_left_margin">20dp</dimen>
-    <dimen name="floating_rotation_button_taskbar_bottom_margin">10dp</dimen>
-
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
 
@@ -357,8 +352,6 @@
 
     <!-- The width/height of the icon of a navigation button -->
     <dimen name="navigation_icon_size">32dp</dimen>
-
-    <dimen name="navigation_key_padding">0dp</dimen>
 
     <!-- The width of the view containing the menu/ime navigation bar icons -->
     <dimen name="navigation_extra_key_width">36dp</dimen>
@@ -971,9 +964,6 @@
 
     <dimen name="signal_indicator_to_icon_frame_spacing">3dp</dimen>
 
-    <!-- The maximum width of the navigation bar ripples. -->
-    <dimen name="key_button_ripple_max_width">95dp</dimen>
-
     <!-- Inset shadow for FakeShadowDrawable. It is used to avoid gaps between the card
          and the shadow. -->
     <dimen name="fake_shadow_inset">1dp</dimen>
@@ -1163,7 +1153,6 @@
 
     <!-- The absolute side margins of quick settings -->
     <dimen name="quick_settings_bottom_margin_media">8dp</dimen>
-    <dimen name="rounded_corner_content_padding">0dp</dimen>
     <dimen name="nav_content_padding">0dp</dimen>
     <dimen name="nav_quick_scrub_track_edge_padding">24dp</dimen>
     <dimen name="nav_quick_scrub_track_thickness">10dp</dimen>
@@ -1599,7 +1588,6 @@
 
     <!-- Internet panel related dimensions -->
     <dimen name="internet_dialog_list_margin">12dp</dimen>
-    <dimen name="internet_dialog_list_max_height">662dp</dimen>
 
     <!-- The width of large/content heavy dialogs (e.g. Internet, Media output, etc) -->
     <dimen name="large_dialog_width">@dimen/match_parent</dimen>

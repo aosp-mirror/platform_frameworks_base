@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
@@ -72,6 +73,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
     // Dependencies:
     private final DynamicChildBindController mDynamicChildBindController;
+    private final FeatureFlags mFeatureFlags;
     protected final NotificationLockscreenUserManager mLockscreenUserManager;
     protected final NotificationGroupManagerLegacy mGroupManager;
     protected final VisualStabilityManager mVisualStabilityManager;
@@ -107,6 +109,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     public NotificationViewHierarchyManager(
             Context context,
             @Main Handler mainHandler,
+            FeatureFlags featureFlags,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationGroupManagerLegacy groupManager,
             VisualStabilityManager visualStabilityManager,
@@ -121,6 +124,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             AssistantFeedbackController assistantFeedbackController) {
         mContext = context;
         mHandler = mainHandler;
+        mFeatureFlags = featureFlags;
         mLockscreenUserManager = notificationLockscreenUserManager;
         mBypassController = bypassController;
         mGroupManager = groupManager;
@@ -151,6 +155,10 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     //TODO: Rewrite this to focus on Entries, or some other data object instead of views
     public void updateNotificationViews() {
         Assert.isMainThread();
+        if (!mFeatureFlags.checkLegacyPipelineEnabled()) {
+            return;
+        }
+
         beginUpdate();
 
         List<NotificationEntry> activeNotifications = mEntryManager.getVisibleNotifications();
@@ -425,6 +433,10 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
      */
     public void updateRowStates() {
         Assert.isMainThread();
+        if (!mFeatureFlags.checkLegacyPipelineEnabled()) {
+            return;
+        }
+
         beginUpdate();
         updateRowStatesInternal();
         endUpdate();
@@ -510,6 +522,9 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
     @Override
     public void onDynamicPrivacyChanged() {
+        if (!mFeatureFlags.checkLegacyPipelineEnabled()) {
+            return;
+        }
         if (mPerformingUpdate) {
             Log.w(TAG, "onDynamicPrivacyChanged made a re-entrant call");
         }

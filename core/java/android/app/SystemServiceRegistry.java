@@ -126,6 +126,8 @@ import android.media.projection.MediaProjectionManager;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
+import android.media.tv.interactive.ITvIAppManager;
+import android.media.tv.interactive.TvIAppManager;
 import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.net.ConnectivityFrameworkInitializer;
@@ -956,6 +958,15 @@ public final class SystemServiceRegistry {
                         return new BiometricManager(ctx.getOuterContext(), service);
                     }
                 });
+
+        registerService(Context.TV_IAPP_SERVICE, TvIAppManager.class,
+                new CachedServiceFetcher<TvIAppManager>() {
+            @Override
+            public TvIAppManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                IBinder iBinder = ServiceManager.getServiceOrThrow(Context.TV_IAPP_SERVICE);
+                ITvIAppManager service = ITvIAppManager.Stub.asInterface(iBinder);
+                return new TvIAppManager(service, ctx.getUserId());
+            }});
 
         registerService(Context.TV_INPUT_SERVICE, TvInputManager.class,
                 new CachedServiceFetcher<TvInputManager>() {

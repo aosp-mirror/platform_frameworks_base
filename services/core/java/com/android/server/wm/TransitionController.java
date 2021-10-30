@@ -35,7 +35,6 @@ import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.WindowManager;
-import android.window.IRemoteTransition;
 import android.window.ITransitionMetricsReporter;
 import android.window.ITransitionPlayer;
 import android.window.RemoteTransition;
@@ -226,7 +225,7 @@ class TransitionController {
     }
 
     /**
-     * @see #requestTransitionIfNeeded(int, int, WindowContainer, IRemoteTransition)
+     * @see #requestTransitionIfNeeded(int, int, WindowContainer, WindowContainer, RemoteTransition)
      */
     @Nullable
     Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
@@ -235,7 +234,7 @@ class TransitionController {
     }
 
     /**
-     * @see #requestTransitionIfNeeded(int, int, WindowContainer, IRemoteTransition)
+     * @see #requestTransitionIfNeeded(int, int, WindowContainer, WindowContainer, RemoteTransition)
      */
     @Nullable
     Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
@@ -304,6 +303,22 @@ class TransitionController {
             transition.start();
         }
         return transition;
+    }
+
+    /** Requests transition for a window container which will be removed or invisible. */
+    void requestCloseTransitionIfNeeded(@NonNull WindowContainer<?> wc) {
+        if (mTransitionPlayer == null) return;
+        if (wc.isVisibleRequested()) {
+            if (!isCollecting()) {
+                requestStartTransition(createTransition(TRANSIT_CLOSE, 0 /* flags */),
+                        wc.asTask(), null /* remoteTransition */);
+            }
+            collectExistenceChange(wc);
+        } else {
+            // Removing a non-visible window doesn't require a transition, but if there is one
+            // collecting, this should be a member just in case.
+            collect(wc);
+        }
     }
 
     /** @see Transition#collect */

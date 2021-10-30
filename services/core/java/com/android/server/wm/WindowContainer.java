@@ -32,10 +32,6 @@ import static android.os.UserHandle.USER_NULL;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.TRANSIT_CHANGE;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_BACK;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_FRONT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
@@ -43,6 +39,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.AppTransition.MAX_APP_TRANSITION_DURATION;
+import static com.android.server.wm.AppTransition.isTaskTransitOld;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
@@ -70,7 +67,6 @@ import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityThread;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -91,6 +87,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceSession;
+import android.view.TaskTransitionSpec;
 import android.view.WindowManager;
 import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
@@ -2809,33 +2806,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 mSurfaceAnimationSources.addAll(sources);
             }
 
-            TaskDisplayArea taskDisplayArea = getTaskDisplayArea();
-            boolean isSettingBackgroundColor = taskDisplayArea != null
-                    && isTransitionWithBackgroundColor(transit);
+            AnimationRunnerBuilder animationRunnerBuilder = new AnimationRunnerBuilder();
 
-            if (isSettingBackgroundColor) {
-                Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
-                @ColorInt int backgroundColor = uiContext.getColor(R.color.overview_background);
-
-                taskDisplayArea.setBackgroundColor(backgroundColor);
+            if (isTaskTransitOld(transit)) {
+                animationRunnerBuilder.setTaskBackgroundColor(getTaskAnimationBackgroundColor());
             }
 
-            // Atomic counter to make sure the clearColor callback is only called one.
-            // It will be called twice in the case we cancel the animation without restart
-            // (in that case it will run as the cancel and finished callbacks).
-            final AtomicInteger callbackCounter = new AtomicInteger(0);
-            final Runnable clearBackgroundColorHandler = () -> {
-                if (callbackCounter.getAndIncrement() == 0) {
-                    taskDisplayArea.clearBackgroundColor();
-                }
-            };
-
-            final Runnable cleanUpCallback = isSettingBackgroundColor
-                    ? clearBackgroundColorHandler : () -> {};
-
-            startAnimation(getPendingTransaction(), adapter, !isVisible(),
-                    ANIMATION_TYPE_APP_TRANSITION, (type, anim) -> cleanUpCallback.run(),
-                    cleanUpCallback, thumbnailAdapter);
+            animationRunnerBuilder.build()
+                    .startAnimation(getPendingTransaction(), adapter, !isVisible(),
+                            ANIMATION_TYPE_APP_TRANSITION, thumbnailAdapter);
 
             if (adapter.getShowWallpaper()) {
                 getDisplayContent().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
@@ -2843,11 +2822,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    private boolean isTransitionWithBackgroundColor(@TransitionOldType int transit) {
-        return transit == TRANSIT_OLD_TASK_OPEN
-                || transit == TRANSIT_OLD_TASK_CLOSE
-                || transit == TRANSIT_OLD_TASK_TO_FRONT
-                || transit == TRANSIT_OLD_TASK_TO_BACK;
+    private @ColorInt int getTaskAnimationBackgroundColor() {
+        Context uiContext = mDisplayContent.getDisplayPolicy().getSystemUiContext();
+        TaskTransitionSpec customSpec = mWmService.mTaskTransitionSpec;
+        @ColorInt int defaultFallbackColor = uiContext.getColor(R.color.overview_background);
+
+        if (customSpec != null && customSpec.backgroundColor != 0) {
+            return customSpec.backgroundColor;
+        }
+
+        return defaultFallbackColor;
     }
 
     final SurfaceAnimationRunner getSurfaceAnimationRunner() {
@@ -3534,5 +3518,54 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
         getPendingTransaction().setSecure(mSurfaceControl, !canScreenshot);
         return true;
+    }
+
+    private class AnimationRunnerBuilder {
+        /**
+         * Runs when the surface stops animating
+         */
+        private final List<Runnable> mOnAnimationFinished = new LinkedList<>();
+        /**
+         * Runs when the animation is cancelled but the surface is still animating
+         */
+        private final List<Runnable> mOnAnimationCancelled = new LinkedList<>();
+
+        private void setTaskBackgroundColor(@ColorInt int backgroundColor) {
+            TaskDisplayArea taskDisplayArea = getTaskDisplayArea();
+
+            if (taskDisplayArea != null) {
+                taskDisplayArea.setBackgroundColor(backgroundColor);
+
+                // Atomic counter to make sure the clearColor callback is only called one.
+                // It will be called twice in the case we cancel the animation without restart
+                // (in that case it will run as the cancel and finished callbacks).
+                final AtomicInteger callbackCounter = new AtomicInteger(0);
+                final Runnable clearBackgroundColorHandler = () -> {
+                    if (callbackCounter.getAndIncrement() == 0) {
+                        taskDisplayArea.clearBackgroundColor();
+                    }
+                };
+
+                // We want to make sure this is called both when the surface stops animating and
+                // also when an animation is cancelled (i.e. animation is replaced by another
+                // animation but and so the surface is still animating)
+                mOnAnimationFinished.add(clearBackgroundColorHandler);
+                mOnAnimationCancelled.add(clearBackgroundColorHandler);
+            }
+        }
+
+        private IAnimationStarter build() {
+            return (Transaction t, AnimationAdapter adapter, boolean hidden,
+                    @AnimationType int type, @Nullable AnimationAdapter snapshotAnim) -> {
+                startAnimation(getPendingTransaction(), adapter, !isVisible(), type,
+                        (animType, anim) -> mOnAnimationFinished.forEach(Runnable::run),
+                        () -> mOnAnimationCancelled.forEach(Runnable::run), snapshotAnim);
+            };
+        }
+    }
+
+    private interface IAnimationStarter {
+        void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
+                @AnimationType int type, @Nullable AnimationAdapter snapshotAnim);
     }
 }

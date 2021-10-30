@@ -1667,11 +1667,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testShellTransitRotation() {
         DisplayContent dc = createNewDisplay();
 
-        // Set-up mock shell transitions
-        final TestTransitionPlayer testPlayer = new TestTransitionPlayer(
-                mAtm.getTransitionController(), mAtm.mWindowOrganizerController);
-        mAtm.getTransitionController().registerTransitionPlayer(testPlayer);
-
+        final TestTransitionPlayer testPlayer = registerTestTransitionPlayer();
         final DisplayRotation dr = dc.getDisplayRotation();
         doCallRealMethod().when(dr).updateRotationUnchecked(anyBoolean());
         // Rotate 180 degree so the display doesn't have configuration change. This condition is

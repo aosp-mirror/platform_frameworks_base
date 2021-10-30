@@ -796,6 +796,14 @@ class WindowTestsBase extends SystemServiceTestsBase {
         };
     }
 
+    /** Sets up a simple implementation of transition player for shell transitions. */
+    TestTransitionPlayer registerTestTransitionPlayer() {
+        final TestTransitionPlayer testPlayer = new TestTransitionPlayer(
+                mAtm.getTransitionController(), mAtm.mWindowOrganizerController);
+        testPlayer.mController.registerTransitionPlayer(testPlayer);
+        return testPlayer;
+    }
+
     /**
      * Avoids rotating screen disturbed by some conditions. It is usually used for the default
      * display that is not the instance of {@link TestDisplayContent} (it bypasses the conditions).
@@ -1604,7 +1612,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
     }
 
-    class TestTransitionPlayer extends ITransitionPlayer.Stub {
+    static class TestTransitionPlayer extends ITransitionPlayer.Stub {
         final TransitionController mController;
         final WindowOrganizerController mOrganizer;
         Transition mLastTransit = null;

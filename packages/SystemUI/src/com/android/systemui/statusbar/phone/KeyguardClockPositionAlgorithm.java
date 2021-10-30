@@ -195,10 +195,19 @@ public class KeyguardClockPositionAlgorithm {
                 1.0f /* panelExpansion */, 1.0f /* darkAmount */);
         result.clockAlpha = getClockAlpha(y);
         result.stackScrollerPadding = getStackScrollerPadding(y);
-        result.stackScrollerPaddingExpanded = mBypassEnabled ? mUnlockedStackScrollerPadding
-                : getClockY(1.0f, mDarkAmount) + mKeyguardStatusHeight;
+        result.stackScrollerPaddingExpanded = getStackScrollerPaddingExpanded();
         result.clockX = (int) interpolate(0, burnInPreventionOffsetX(), mDarkAmount);
         result.clockScale = interpolate(getBurnInScale(), 1.0f, 1.0f - mDarkAmount);
+    }
+
+    private int getStackScrollerPaddingExpanded() {
+        if (mBypassEnabled) {
+            return mUnlockedStackScrollerPadding;
+        } else if (mIsSplitShade) {
+            return getClockY(1.0f, mDarkAmount);
+        } else {
+            return getClockY(1.0f, mDarkAmount) + mKeyguardStatusHeight;
+        }
     }
 
     private int getStackScrollerPadding(int clockYPosition) {
@@ -212,8 +221,13 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     public float getMinStackScrollerPadding() {
-        return mBypassEnabled ? mUnlockedStackScrollerPadding
-                : mMinTopMargin + mKeyguardStatusHeight;
+        if (mBypassEnabled) {
+            return mUnlockedStackScrollerPadding;
+        } else if (mIsSplitShade) {
+            return mMinTopMargin;
+        } else {
+            return mMinTopMargin + mKeyguardStatusHeight;
+        }
     }
 
     private int getExpandedPreferredClockY() {

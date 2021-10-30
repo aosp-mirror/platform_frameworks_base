@@ -45,7 +45,7 @@ import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-class BrightnessSliderTest : SysuiTestCase() {
+class BrightnessSliderControllerTest : SysuiTestCase() {
 
     @Mock
     private lateinit var brightnessSliderView: BrightnessSliderView
@@ -66,7 +66,7 @@ class BrightnessSliderTest : SysuiTestCase() {
     private lateinit var seekBar: SeekBar
     private var mFalsingManager: FalsingManagerFake = FalsingManagerFake()
 
-    private lateinit var mController: BrightnessSlider
+    private lateinit var mController: BrightnessSliderController
 
     @Before
     fun setUp() {
@@ -75,7 +75,7 @@ class BrightnessSliderTest : SysuiTestCase() {
         whenever(mirrorController.toggleSlider).thenReturn(mirror)
         whenever(motionEvent.copy()).thenReturn(motionEvent)
 
-        mController = BrightnessSlider(brightnessSliderView, mFalsingManager)
+        mController = BrightnessSliderController(brightnessSliderView, mFalsingManager)
         mController.init()
         mController.setOnChangedListener(listener)
     }

@@ -81,7 +81,6 @@
     <dimen name="fab_margin">24dp</dimen>
 
     <dimen name="navigation_key_width">128dp</dimen>
-    <dimen name="navigation_key_padding">25dp</dimen>
 
     <!-- Keyboard shortcuts helper -->
     <dimen name="ksh_layout_width">488dp</dimen>
@@ -105,5 +104,5 @@
     <dimen name="qs_detail_margin_top">0dp</dimen>
 
     <!-- The width of large/content heavy dialogs (e.g. Internet, Media output, etc) -->
-    <dimen name="large_dialog_width">624dp</dimen>
+    <dimen name="large_dialog_width">504dp</dimen>
 </resources>

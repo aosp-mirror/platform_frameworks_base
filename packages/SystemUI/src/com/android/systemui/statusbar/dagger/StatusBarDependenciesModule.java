@@ -184,6 +184,7 @@ public interface StatusBarDependenciesModule {
     static NotificationViewHierarchyManager provideNotificationViewHierarchyManager(
             Context context,
             @Main Handler mainHandler,
+            FeatureFlags featureFlags,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationGroupManagerLegacy groupManager,
             VisualStabilityManager visualStabilityManager,
@@ -199,6 +200,7 @@ public interface StatusBarDependenciesModule {
         return new NotificationViewHierarchyManager(
                 context,
                 mainHandler,
+                featureFlags,
                 notificationLockscreenUserManager,
                 groupManager,
                 visualStabilityManager,

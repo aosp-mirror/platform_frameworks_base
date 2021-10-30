@@ -460,8 +460,8 @@ bool ResourceParser::ParseResources(xml::XmlPullParser* parser) {
     ParsedResource parsed_resource;
     parsed_resource.config = config_;
     parsed_resource.source = source_.WithLine(parser->line_number());
-    // NOLINTNEXTLINE(bugprone-use-after-move) move+reset comment
     parsed_resource.comment = std::move(comment);
+    comment.clear();
     if (options_.visibility) {
       parsed_resource.visibility_level = options_.visibility.value();
     }
@@ -1040,6 +1040,7 @@ bool static ParseGroupImpl(xml::XmlPullParser* parser, ParsedResource* out_resou
           .source = item_source,
           .comment = std::move(comment),
       });
+      comment.clear();
 
       // Execute group specific code.
       func(entry_res, next_id);
@@ -1788,8 +1789,8 @@ bool ResourceParser::ParseDeclareStyleable(xml::XmlPullParser* parser,
       ParsedResource child_resource;
       child_resource.name = child_ref.name.value();
       child_resource.source = item_source;
-      // NOLINTNEXTLINE(bugprone-use-after-move) move+reset comment
       child_resource.comment = std::move(comment);
+      comment.clear();
       if (options_.visibility) {
         child_resource.visibility_level = options_.visibility.value();
       }

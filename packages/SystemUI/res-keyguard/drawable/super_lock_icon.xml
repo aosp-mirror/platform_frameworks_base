@@ -37,7 +37,7 @@
         android:id="@+id/locked_fp"
         android:state_middle="true"
         android:state_single="false"
-        android:drawable="@drawable/ic_fingerprint" />
+        android:drawable="@drawable/ic_kg_fingerprint" />
 
     <item
         android:id="@+id/unlocked"
