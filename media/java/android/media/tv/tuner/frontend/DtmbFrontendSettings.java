@@ -269,7 +269,7 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     /**
      * Gets Code Rate.
      */
-    @Modulation
+    @CodeRate
     public int getCodeRate() {
         return mCodeRate;
     }
@@ -277,7 +277,7 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     /**
      * Gets Transmission Mode.
      */
-    @Modulation
+    @TransmissionMode
     public int getTransmissionMode() {
         return mTransmissionMode;
     }
@@ -285,7 +285,7 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     /**
      * Gets Bandwidth.
      */
-    @Modulation
+    @Bandwidth
     public int getBandwidth() {
         return mBandwidth;
     }
@@ -293,16 +293,15 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     /**
      * Gets Time Interleave Mode.
      */
-    @Modulation
+    @TimeInterleaveMode
     public int getTimeInterleaveMode() {
         return mTimeInterleaveMode;
     }
 
-
     /**
      * Gets Guard Interval.
      */
-    @Modulation
+    @GuardInterval
     public int getGuardInterval() {
         return mGuardInterval;
     }
