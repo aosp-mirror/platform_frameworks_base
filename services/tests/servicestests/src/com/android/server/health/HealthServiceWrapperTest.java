@@ -16,17 +16,23 @@
 
 package com.android.server.health;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.fail;
 
 import static org.mockito.Mockito.*;
 
 import android.hardware.health.V2_0.IHealth;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.hidl.manager.V1_0.IServiceNotification;
-import android.test.AndroidTestCase;
+import android.os.RemoteException;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -36,36 +42,39 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
-public class HealthServiceWrapperTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class HealthServiceWrapperTest {
 
     @Mock IServiceManager mMockedManager;
     @Mock IHealth mMockedHal;
     @Mock IHealth mMockedHal2;
 
-    @Mock BatteryService.HealthServiceWrapper.Callback mCallback;
-    @Mock BatteryService.HealthServiceWrapper.IServiceManagerSupplier mManagerSupplier;
-    @Mock BatteryService.HealthServiceWrapper.IHealthSupplier mHealthServiceSupplier;
-    BatteryService.HealthServiceWrapper mWrapper;
+    @Mock HealthServiceWrapperHidl.Callback mCallback;
+    @Mock HealthServiceWrapperHidl.IServiceManagerSupplier mManagerSupplier;
+    @Mock HealthServiceWrapperHidl.IHealthSupplier mHealthServiceSupplier;
+    HealthServiceWrapper mWrapper;
 
-    private static final String VENDOR = BatteryService.HealthServiceWrapper.INSTANCE_VENDOR;
+    private static final String VENDOR = HealthServiceWrapperHidl.INSTANCE_VENDOR;
 
-    @Override
+    @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Override
+    @After
     public void tearDown() {
-        if (mWrapper != null)
-            mWrapper.getHandlerThread().quitSafely();
+        if (mWrapper != null) mWrapper.getHandlerThread().quitSafely();
     }
 
     public static <T> ArgumentMatcher<T> isOneOf(Collection<T> collection) {
         return new ArgumentMatcher<T>() {
-            @Override public boolean matches(T e) {
+            @Override
+            public boolean matches(T e) {
                 return collection.contains(e);
             }
-            @Override public String toString() {
+
+            @Override
+            public String toString() {
                 return collection.toString();
             }
         };
@@ -73,27 +82,29 @@ public class HealthServiceWrapperTest extends AndroidTestCase {
 
     private void initForInstances(String... instanceNamesArr) throws Exception {
         final Collection<String> instanceNames = Arrays.asList(instanceNamesArr);
-        doAnswer((invocation) -> {
-                // technically, preexisting is ignored by
-                // BatteryService.HealthServiceWrapper.Notification, but still call it correctly.
-                sendNotification(invocation, true);
-                sendNotification(invocation, true);
-                sendNotification(invocation, false);
-                return null;
-            }).when(mMockedManager).registerForNotifications(
-                eq(IHealth.kInterfaceName),
-                argThat(isOneOf(instanceNames)),
-                any(IServiceNotification.class));
+        doAnswer(
+                (invocation) -> {
+                    // technically, preexisting is ignored by
+                    // HealthServiceWrapperHidl.Notification, but still call it correctly.
+                    sendNotification(invocation, true);
+                    sendNotification(invocation, true);
+                    sendNotification(invocation, false);
+                    return null;
+                })
+                .when(mMockedManager)
+                .registerForNotifications(
+                        eq(IHealth.kInterfaceName),
+                        argThat(isOneOf(instanceNames)),
+                        any(IServiceNotification.class));
 
         doReturn(mMockedManager).when(mManagerSupplier).get();
-        doReturn(mMockedHal)        // init calls this
-            .doReturn(mMockedHal)   // notification 1
-            .doReturn(mMockedHal)   // notification 2
-            .doReturn(mMockedHal2)  // notification 3
-            .doThrow(new RuntimeException("Should not call getService for more than 4 times"))
-            .when(mHealthServiceSupplier).get(argThat(isOneOf(instanceNames)));
-
-        mWrapper = new BatteryService.HealthServiceWrapper();
+        doReturn(mMockedHal) // init calls this
+                .doReturn(mMockedHal) // notification 1
+                .doReturn(mMockedHal) // notification 2
+                .doReturn(mMockedHal2) // notification 3
+                .doThrow(new RuntimeException("Should not call getService for more than 4 times"))
+                .when(mHealthServiceSupplier)
+                .get(argThat(isOneOf(instanceNames)));
     }
 
     private void waitHandlerThreadFinish() throws Exception {
@@ -108,16 +119,20 @@ public class HealthServiceWrapperTest extends AndroidTestCase {
 
     private static void sendNotification(InvocationOnMock invocation, boolean preexisting)
             throws Exception {
-        ((IServiceNotification)invocation.getArguments()[2]).onRegistration(
-                IHealth.kInterfaceName,
-                (String)invocation.getArguments()[1],
-                preexisting);
+        ((IServiceNotification) invocation.getArguments()[2])
+                .onRegistration(
+                        IHealth.kInterfaceName, (String) invocation.getArguments()[1], preexisting);
+    }
+
+    private void createWrapper() throws RemoteException {
+        mWrapper = HealthServiceWrapper.create(mCallback, mManagerSupplier, mHealthServiceSupplier);
     }
 
     @SmallTest
+    @Test
     public void testWrapPreferVendor() throws Exception {
         initForInstances(VENDOR);
-        mWrapper.init(mCallback, mManagerSupplier, mHealthServiceSupplier);
+        createWrapper();
         waitHandlerThreadFinish();
         verify(mCallback, times(1)).onRegistration(same(null), same(mMockedHal), eq(VENDOR));
         verify(mCallback, never()).onRegistration(same(mMockedHal), same(mMockedHal), anyString());
@@ -125,10 +140,11 @@ public class HealthServiceWrapperTest extends AndroidTestCase {
     }
 
     @SmallTest
+    @Test
     public void testNoService() throws Exception {
         initForInstances("unrelated");
         try {
-            mWrapper.init(mCallback, mManagerSupplier, mHealthServiceSupplier);
+            createWrapper();
             fail("Expect NoSuchElementException");
         } catch (NoSuchElementException ex) {
             // expected
