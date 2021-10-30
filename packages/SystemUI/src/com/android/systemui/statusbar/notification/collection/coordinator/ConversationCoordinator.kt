@@ -48,7 +48,9 @@ class ConversationCoordinator @Inject constructor(
     val sectioner = object : NotifSectioner("People") {
         override fun isInSection(entry: ListEntry): Boolean =
                 isConversation(entry.representativeEntry!!)
-        override fun getHeaderNodeController() = peopleHeaderController
+        override fun getHeaderNodeController() =
+                // TODO: remove SHOW_ALL_SECTIONS, this redundant method, and peopleHeaderController
+                if (RankingCoordinator.SHOW_ALL_SECTIONS) peopleHeaderController else null
     }
 
     override fun attach(pipeline: NotifPipeline) {
