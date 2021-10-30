@@ -523,7 +523,9 @@ public class NotifCollection implements Dumpable {
         }
     }
 
-    private void onEndLifetimeExtension(NotifLifetimeExtender extender, NotificationEntry entry) {
+    private void onEndLifetimeExtension(
+            @NonNull NotifLifetimeExtender extender,
+            @NonNull NotificationEntry entry) {
         Assert.isMainThread();
         if (!mAttached) {
             return;

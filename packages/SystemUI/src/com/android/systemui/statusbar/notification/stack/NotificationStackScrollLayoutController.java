@@ -783,9 +783,6 @@ public class NotificationStackScrollLayoutController {
         mTunerService.addTunable(
                 (key, newValue) -> {
                     switch (key) {
-                        case Settings.Secure.NOTIFICATION_DISMISS_RTL:
-                            mView.updateDismissRtlSetting("1".equals(newValue));
-                            break;
                         case Settings.Secure.NOTIFICATION_HISTORY_ENABLED:
                             updateFooter();
                             break;
@@ -795,7 +792,6 @@ public class NotificationStackScrollLayoutController {
                     }
                 },
                 HIGH_PRIORITY,
-                Settings.Secure.NOTIFICATION_DISMISS_RTL,
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED);
 
         mKeyguardMediaController.setVisibilityChangedListener(visible -> {
@@ -810,14 +806,15 @@ public class NotificationStackScrollLayoutController {
             return Unit.INSTANCE;
         });
 
-        // callback is invoked synchronously, updating mView immediately
+        // attach callback, and then call it to update mView immediately
         mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
+        mDeviceProvisionedListener.onDeviceProvisionedChanged();
 
         if (mView.isAttachedToWindow()) {
             mOnAttachStateChangeListener.onViewAttachedToWindow(mView);
         }
         mView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
-        mSilentHeaderController.setOnClearAllClickListener(v -> clearSilentNotifications());
+        mSilentHeaderController.setOnClearSectionClickListener(v -> clearSilentNotifications());
     }
 
     private boolean isInVisibleLocation(NotificationEntry entry) {
@@ -1304,6 +1301,9 @@ public class NotificationStackScrollLayoutController {
     }
 
     public void updateSectionBoundaries(String reason) {
+        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            return;
+        }
         mView.updateSectionBoundaries(reason);
     }
 
