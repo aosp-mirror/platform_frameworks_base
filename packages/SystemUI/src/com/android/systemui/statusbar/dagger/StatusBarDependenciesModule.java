@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
+import com.android.systemui.statusbar.RemoteInputNotificationRebuilder;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -100,7 +101,7 @@ public interface StatusBarDependenciesModule {
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationEntryManager notificationEntryManager,
-            NotifPipeline notifPipeline,
+            RemoteInputNotificationRebuilder rebuilder,
             Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             StatusBarStateController statusBarStateController,
             Handler mainHandler,
@@ -114,7 +115,7 @@ public interface StatusBarDependenciesModule {
                 lockscreenUserManager,
                 smartReplyController,
                 notificationEntryManager,
-                notifPipeline,
+                rebuilder,
                 statusBarOptionalLazy,
                 statusBarStateController,
                 mainHandler,
