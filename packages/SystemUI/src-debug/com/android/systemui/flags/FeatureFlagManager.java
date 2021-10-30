@@ -23,11 +23,18 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +50,7 @@ import javax.inject.Inject;
  * To restore a flag back to its default, leave the `--ez value <0|1>` off of the command.
  */
 @SysUISingleton
-public class FeatureFlagManager implements FlagReader, FlagWriter {
+public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
     private static final String TAG = "SysUIFlags";
 
     private static final String SYSPROP_PREFIX = "persist.systemui.flag_";
@@ -58,11 +65,13 @@ public class FeatureFlagManager implements FlagReader, FlagWriter {
     private final Map<Integer, Boolean> mBooleanFlagCache = new HashMap<>();
 
     @Inject
-    public FeatureFlagManager(SystemPropertiesHelper systemPropertiesHelper, Context context) {
+    public FeatureFlagManager(SystemPropertiesHelper systemPropertiesHelper, Context context,
+            DumpManager dumpManager) {
         mSystemPropertiesHelper = systemPropertiesHelper;
 
         IntentFilter filter = new IntentFilter(ACTION_SET_FLAG);
         context.registerReceiver(mReceiver, filter, FLAGS_PERMISSION, null);
+        dumpManager.registerDumpable(TAG, this);
     }
 
     /** Return a {@link BooleanFlag}'s value. */
@@ -186,4 +195,16 @@ public class FeatureFlagManager implements FlagReader, FlagWriter {
             }
         }
     };
+
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        ArrayList<String> flagStrings = new ArrayList<>(mBooleanFlagCache.size());
+        for (Map.Entry<Integer, Boolean> entry : mBooleanFlagCache.entrySet()) {
+            flagStrings.add("  sysui_flag_" + entry.getKey() + ": " + entry.getValue());
+        }
+        flagStrings.sort(String.CASE_INSENSITIVE_ORDER);
+        for (String flagString : flagStrings) {
+            pw.println(flagString);
+        }
+    }
 }

@@ -16,23 +16,48 @@
 
 package com.android.systemui.flags;
 
+import android.util.SparseBooleanArray;
+
+import androidx.annotation.NonNull;
+
+import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 import javax.inject.Inject;
 
 /**
  * Default implementation of the a Flag manager that returns default values for release builds
+ *
+ * There's a version of this file in src-debug which allows overriding, and has documentation about
+ * how to set flags.
  */
 @SysUISingleton
-public class FeatureFlagManager implements FlagReader, FlagWriter {
+public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
+    SparseBooleanArray mAccessedFlags = new SparseBooleanArray();
     @Inject
-    public FeatureFlagManager() {}
+    public FeatureFlagManager(DumpManager dumpManager) {
+        dumpManager.registerDumpable("SysUIFlags", this);
+    }
     public boolean isEnabled(String key, boolean defaultValue) {
         return defaultValue;
     }
     public boolean isEnabled(int key, boolean defaultValue) {
+        mAccessedFlags.append(key, defaultValue);
         return defaultValue;
     }
     public void setEnabled(String key, boolean value) {}
     public void setEnabled(int key, boolean value) {}
+
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        int size = mAccessedFlags.size();
+        for (int i = 0; i < size; i++) {
+            pw.println("  sysui_flag_" + mAccessedFlags.keyAt(i)
+                    + ": " + mAccessedFlags.valueAt(i));
+        }
+    }
 }
