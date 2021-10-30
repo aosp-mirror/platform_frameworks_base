@@ -226,9 +226,9 @@
     <string name="reboot_to_update_title" msgid="2125818841916373708">"Android ਸਿਸਟਮ ਅੱਪਡੇਟ"</string>
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"ਅੱਪਡੇਟ ਦੀ ਤਿਆਰੀ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"ਅੱਪਡੇਟ ਪੈਕੇਜ ਦੀ ਕਾਰਵਾਈ ਕਰ ਰਿਹਾ ਹੈ..."</string>
-    <string name="reboot_to_update_reboot" msgid="4474726009984452312">"ਰੀਸਟਾਰਟ ਹੋ ਰਿਹਾ ਹੈ…"</string>
+    <string name="reboot_to_update_reboot" msgid="4474726009984452312">"ਮੁੜ-ਸ਼ੁਰੂ ਹੋ ਰਿਹਾ ਹੈ…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ"</string>
-    <string name="reboot_to_reset_message" msgid="3347690497972074356">"ਰੀਸਟਾਰਟ ਹੋ ਰਿਹਾ ਹੈ…"</string>
+    <string name="reboot_to_reset_message" msgid="3347690497972074356">"ਮੁੜ-ਸ਼ੁਰੂ ਹੋ ਰਿਹਾ ਹੈ…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"ਬੰਦ ਹੋ ਰਿਹਾ ਹੈ…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"ਤੁਹਾਡਾ ਟੈਬਲੈੱਟ ਬੰਦ ਕੀਤਾ ਜਾਵੇਗਾ।"</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"ਤੁਹਾਡਾ Android TV ਡੀਵਾਈਸ ਜਲਦ ਬੰਦ ਕੀਤਾ ਜਾਵੇਗਾ।"</string>
