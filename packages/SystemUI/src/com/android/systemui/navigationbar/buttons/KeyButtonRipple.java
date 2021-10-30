@@ -37,6 +37,8 @@ import android.view.animation.Interpolator;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 
+import androidx.annotation.Keep;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -184,19 +186,27 @@ public class KeyButtonRipple extends Drawable {
         }
     }
 
+    /** Gets the glow alpha, used by {@link android.animation.ObjectAnimator} via reflection. */
+    @Keep
     public float getGlowAlpha() {
         return mGlowAlpha;
     }
 
+    /** Sets the glow alpha, used by {@link android.animation.ObjectAnimator} via reflection. */
+    @Keep
     public void setGlowAlpha(float x) {
         mGlowAlpha = x;
         invalidateSelf();
     }
 
+    /** Gets the glow scale, used by {@link android.animation.ObjectAnimator} via reflection. */
+    @Keep
     public float getGlowScale() {
         return mGlowScale;
     }
 
+    /** Sets the glow scale, used by {@link android.animation.ObjectAnimator} via reflection. */
+    @Keep
     public void setGlowScale(float x) {
         mGlowScale = x;
         invalidateSelf();

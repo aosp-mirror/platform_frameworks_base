@@ -71,10 +71,6 @@ class UserDialog(
             setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL)
             attributes.fitInsetsTypes = attributes.fitInsetsTypes or WindowInsets.Type.statusBars()
             attributes.receiveInsetsIgnoringZOrder = true
-            setLayout(
-                    context.resources.getDimensionPixelSize(R.dimen.notification_panel_width),
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            )
             setGravity(Gravity.CENTER)
         }
         setContentView(R.layout.qs_user_dialog_content)

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
@@ -96,6 +97,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     private KeyguardBouncer mBouncer;
     @Mock
     private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    @Mock
+    private StatusBarKeyguardViewManager.AlternateAuthInterceptor mAlternateAuthInterceptor;
     @Mock
     private KeyguardMessageArea mKeyguardMessageArea;
     @Mock
@@ -284,6 +287,24 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mStatusBarKeyguardViewManager.hide(0, 30);
         verify(action).onDismiss();
         verify(cancelAction, never()).run();
+    }
+
+    @Test
+    public void testShowing_whenAlternateAuthShowing() {
+        mStatusBarKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
+        when(mBouncer.isShowing()).thenReturn(false);
+        when(mAlternateAuthInterceptor.isShowingAlternateAuthBouncer()).thenReturn(true);
+        assertTrue("Is showing not accurate when alternative auth showing",
+                mStatusBarKeyguardViewManager.isShowing());
+    }
+
+    @Test
+    public void testWillBeShowing_whenAlternateAuthShowing() {
+        mStatusBarKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
+        when(mBouncer.isShowing()).thenReturn(false);
+        when(mAlternateAuthInterceptor.isShowingAlternateAuthBouncer()).thenReturn(true);
+        assertTrue("Is or will be showing not accurate when alternative auth showing",
+                mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing());
     }
 
     @Test

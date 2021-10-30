@@ -58,7 +58,6 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private KeyguardClockPositionAlgorithm.Result mClockPosition;
 
     private MockitoSession mStaticMockSession;
-    private int mNotificationStackHeight;
 
     private float mPanelExpansion;
     private int mKeyguardStatusBarHeaderHeight;
@@ -261,6 +260,30 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         positionClock();
         // THEN the notif padding DOESN'T adjust for keyguard status height.
         assertThat(mClockPosition.stackScrollerPadding).isEqualTo(0);
+    }
+
+    @Test
+    public void notifPaddingExpandedAlignedWithClockInSplitShadeMode() {
+        givenLockScreen();
+        mIsSplitShade = true;
+        mKeyguardStatusHeight = 200;
+        // WHEN the position algorithm is run
+        positionClock();
+        // THEN the padding DOESN'T adjust for keyguard status height.
+        assertThat(mClockPosition.stackScrollerPaddingExpanded)
+                .isEqualTo(mClockPosition.clockYFullyDozing);
+    }
+
+    @Test
+    public void notifMinPaddingAlignedWithClockInSplitShadeMode() {
+        givenLockScreen();
+        mIsSplitShade = true;
+        mKeyguardStatusHeight = 200;
+        // WHEN the position algorithm is run
+        positionClock();
+        // THEN the padding DOESN'T adjust for keyguard status height.
+        assertThat(mClockPositionAlgorithm.getMinStackScrollerPadding())
+                .isEqualTo(mKeyguardStatusBarHeaderHeight);
     }
 
     @Test

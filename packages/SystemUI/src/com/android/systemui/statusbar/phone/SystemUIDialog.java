@@ -22,7 +22,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
+import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.util.TypedValue;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowInsets.Type;
 import android.view.WindowManager;
@@ -45,6 +49,10 @@ import java.util.Set;
  * and dismisses itself when it receives the broadcast.
  */
 public class SystemUIDialog extends AlertDialog implements ListenableDialog {
+    // TODO(b/203389579): Remove this once the dialog width on large screens has been agreed on.
+    private static final String FLAG_TABLET_DIALOG_WIDTH =
+            "persist.systemui.flag_tablet_dialog_width";
+
     private final Context mContext;
     private final DismissReceiver mDismissReceiver;
     private final Set<DialogListener> mDialogListeners = new LinkedHashSet<>();
@@ -63,6 +71,41 @@ public class SystemUIDialog extends AlertDialog implements ListenableDialog {
         getWindow().setAttributes(attrs);
 
         mDismissReceiver = new DismissReceiver(this);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Set the dialog window size.
+        getWindow().setLayout(getDialogWidth(), ViewGroup.LayoutParams.WRAP_CONTENT);
+    }
+
+    private int getDialogWidth() {
+        boolean isOnTablet =
+                mContext.getResources().getConfiguration().smallestScreenWidthDp >= 600;
+        if (!isOnTablet) {
+            return ViewGroup.LayoutParams.MATCH_PARENT;
+        }
+
+        int flagValue = SystemProperties.getInt(FLAG_TABLET_DIALOG_WIDTH, 0);
+        if (flagValue == -1) {
+            // The width of bottom sheets (624dp).
+            return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 624,
+                    mContext.getResources().getDisplayMetrics()));
+        } else if (flagValue == -2) {
+            // The suggested small width for all dialogs (348dp)
+            return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 348,
+                    mContext.getResources().getDisplayMetrics()));
+        } else if (flagValue > 0) {
+            // Any given width.
+            return Math.round(
+                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, flagValue,
+                            mContext.getResources().getDisplayMetrics()));
+        } else {
+            // By default we use the same width as the notification shade in portrait mode (504dp).
+            return mContext.getResources().getDimensionPixelSize(R.dimen.large_dialog_width);
+        }
     }
 
     @Override
