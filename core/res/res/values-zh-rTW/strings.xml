@@ -543,10 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"允許應用程式向附近的藍牙裝置廣播"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"判斷附近超寬頻裝置間的相對位置"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"允許應用程式判斷附近超寬頻裝置間的相對位置"</string>
-    <!-- no translation found for permlab_nearby_wifi_devices (392774237063608500) -->
-    <skip />
-    <!-- no translation found for permdesc_nearby_wifi_devices (3054307728646332906) -->
-    <skip />
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"與鄰近的 Wi-Fi 裝置互動"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"允許應用程式向鄰近的 Wi-Fi 裝置廣播、與這些裝置連線，並能判斷這些裝置的相對位置"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"首選 NFC 付費服務資訊"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允許應用程式取得首選 NFC 付費服務資訊，例如已註冊的輔助工具和路線目的地。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距離無線通訊"</string>
@@ -990,7 +988,7 @@
     <string name="factorytest_reboot" msgid="2050147445567257365">"重新開機"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"「<xliff:g id="TITLE">%s</xliff:g>」網頁指出："</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
-    <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"確認瀏覽"</string>
+    <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"確認離開網頁"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"離開這一頁"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"停留在這一頁"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\n你確定要前往其他網頁瀏覽嗎？"</string>

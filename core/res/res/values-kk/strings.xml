@@ -543,10 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Қолданба жарнаманы маңайдағы Bluetooth құрылғыларына бере алады."</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"маңайдағы кең жолақты құрылғылардың бір-біріне қатысты орнын анықтау"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Қолданбаға маңайдағы кең жолақты құрылғылардың бір-біріне қатысты орнын анықтауға мүмкіндік береді."</string>
-    <!-- no translation found for permlab_nearby_wifi_devices (392774237063608500) -->
-    <skip />
-    <!-- no translation found for permdesc_nearby_wifi_devices (3054307728646332906) -->
-    <skip />
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"маңайдағы Wi-Fi құрылғыларымен байланысу"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Қолданба маңайдағы Wi‑Fi құрылғыларына жарнама беріп, оларға қосылып, шамамен орналасқан жерін анықтай алады."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Таңдаулы NFC төлеу қызметі туралы ақпарат"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Қолданба тіркелген көмектер және баратын жер маршруты сияқты таңдаулы NFC төлеу қызметі туралы ақпаратты ала алатын болады."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC функциясын басқару"</string>
