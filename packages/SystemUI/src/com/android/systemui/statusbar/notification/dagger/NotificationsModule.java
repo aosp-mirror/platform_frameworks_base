@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.coordinator.ShadeEventCoordinator;
 import com.android.systemui.statusbar.notification.collection.coordinator.VisualStabilityCoordinator;
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorsModule;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.OnUserInteractionCallbackImpl;
@@ -93,7 +94,10 @@ import dagger.Provides;
 /**
  * Dagger Module for classes found within the com.android.systemui.statusbar.notification package.
  */
-@Module(includes = {NotificationSectionHeadersModule.class})
+@Module(includes = {
+        NotificationSectionHeadersModule.class,
+        CoordinatorsModule.class
+})
 public interface NotificationsModule {
     @Binds
     StackScrollAlgorithm.SectionProvider bindSectionProvider(

@@ -106,6 +106,7 @@ class PlayerViewHolder private constructor(itemView: View) {
          */
         @JvmStatic fun create(inflater: LayoutInflater, parent: ViewGroup): PlayerViewHolder {
             val mediaView = inflater.inflate(R.layout.media_view, parent, false)
+            mediaView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
             // Because this media view (a TransitionLayout) is used to measure and layout the views
             // in various states before being attached to its parent, we can't depend on the default
             // LAYOUT_DIRECTION_INHERIT to correctly resolve the ltr direction.

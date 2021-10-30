@@ -19,11 +19,11 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import com.android.internal.widget.MessagingGroup
 import com.android.internal.widget.MessagingMessage
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import javax.inject.Inject
@@ -33,7 +33,7 @@ import javax.inject.Inject
  * for the current uiMode and screen properties; additionally deferring those changes when a user
  * change is in progress until that process has completed.
  */
-@SysUISingleton
+@CoordinatorScope
 class ViewConfigCoordinator @Inject internal constructor(
     configurationController: ConfigurationController,
     lockscreenUserManager: NotificationLockscreenUserManagerImpl,

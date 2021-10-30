@@ -482,6 +482,7 @@
 
     <!-- Permissions required for CTS test - CtsContactsProviderTestCases -->
     <uses-permission android:name="android.contacts.permission.MANAGE_SIM_ACCOUNTS" />
+    <uses-permission android:name="android.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS" />
 
     <!-- Permissions required for CTS test - CarrierMessagingServiceWrapprTest -->
     <uses-permission android:name="android.permission.BIND_CARRIER_SERVICES" />

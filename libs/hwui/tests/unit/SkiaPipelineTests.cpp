@@ -221,7 +221,7 @@ public:
     sk_sp<SkSurface> onNewSurface(const SkImageInfo&) override { return nullptr; }
     sk_sp<SkImage> onNewImageSnapshot(const SkIRect* bounds) override { return nullptr; }
     T* canvas() { return static_cast<T*>(getCanvas()); }
-    void onCopyOnWrite(ContentChangeMode) override {}
+    bool onCopyOnWrite(ContentChangeMode) override { return true; }
     void onWritePixels(const SkPixmap&, int x, int y) override {}
 };
 }

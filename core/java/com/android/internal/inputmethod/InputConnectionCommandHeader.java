@@ -25,7 +25,19 @@ import android.os.Parcelable;
  * {@link android.inputmethodservice.RemoteInputConnection}.
  */
 public final class InputConnectionCommandHeader implements Parcelable {
-    public InputConnectionCommandHeader() {
+    /**
+     * An identifier that is to be used when multiplexing multiple sessions into a single
+     * {@link com.android.internal.view.IInputContext}.
+     *
+     * <p>This ID is considered to belong to an implicit namespace defined for each
+     * {@link com.android.internal.view.IInputContext} instance.  Uniqueness of the session ID
+     * across multiple instances of {@link com.android.internal.view.IInputContext} is not
+     * guaranteed unless explicitly noted in a higher layer.</p>
+     */
+    public final int mSessionId;
+
+    public InputConnectionCommandHeader(int sessionId) {
+        mSessionId = sessionId;
     }
 
     @Override
@@ -38,7 +50,8 @@ public final class InputConnectionCommandHeader implements Parcelable {
             new Parcelable.Creator<InputConnectionCommandHeader>() {
                 @NonNull
                 public InputConnectionCommandHeader createFromParcel(Parcel in) {
-                    return new InputConnectionCommandHeader();
+                    final int sessionId = in.readInt();
+                    return new InputConnectionCommandHeader(sessionId);
                 }
 
                 @NonNull
@@ -49,5 +62,6 @@ public final class InputConnectionCommandHeader implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeInt(mSessionId);
     }
 }

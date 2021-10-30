@@ -44,7 +44,8 @@ import javax.inject.Inject;
  *
  * @see BrightnessMirrorController
  */
-public class BrightnessSlider extends ViewController<BrightnessSliderView> implements ToggleSlider {
+public class BrightnessSliderController extends ViewController<BrightnessSliderView> implements
+        ToggleSlider {
 
     private Listener mListener;
     private ToggleSlider mMirror;
@@ -69,7 +70,7 @@ public class BrightnessSlider extends ViewController<BrightnessSliderView> imple
         }
     };
 
-    BrightnessSlider(
+    BrightnessSliderController(
             BrightnessSliderView brightnessSliderView,
             FalsingManager falsingManager) {
         super(brightnessSliderView);
@@ -184,6 +185,15 @@ public class BrightnessSlider extends ViewController<BrightnessSliderView> imple
         mView.setVisibility(View.VISIBLE);
     }
 
+    @Override
+    public boolean isVisible() {
+        // this should be called rarely - once or twice per slider's value change, but not for
+        // every value change when user slides finger - only the final one.
+        // If view is not visible this call is quick (around 50 µs) as it sees parent is not visible
+        // otherwise it's slightly longer (70 µs) because there are more checks to be done
+        return mView.isVisibleToUser();
+    }
+
     private final SeekBar.OnSeekBarChangeListener mSeekListener =
             new SeekBar.OnSeekBarChangeListener() {
         @Override
@@ -222,7 +232,7 @@ public class BrightnessSlider extends ViewController<BrightnessSliderView> imple
     };
 
     /**
-     * Creates a {@link BrightnessSlider} with its associated view.
+     * Creates a {@link BrightnessSliderController} with its associated view.
      */
     public static class Factory {
 
@@ -240,11 +250,11 @@ public class BrightnessSlider extends ViewController<BrightnessSliderView> imple
          * @param viewRoot the {@link ViewGroup} that will contain the hierarchy. The inflated
          *                 hierarchy will not be attached
          */
-        public BrightnessSlider create(Context context, @Nullable ViewGroup viewRoot) {
+        public BrightnessSliderController create(Context context, @Nullable ViewGroup viewRoot) {
             int layout = getLayout();
             BrightnessSliderView root = (BrightnessSliderView) LayoutInflater.from(context)
                     .inflate(layout, viewRoot, false);
-            return new BrightnessSlider(root, mFalsingManager);
+            return new BrightnessSliderController(root, mFalsingManager);
         }
 
         /** Get the layout to inflate based on what slider to use */

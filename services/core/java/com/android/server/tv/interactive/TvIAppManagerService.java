@@ -86,8 +86,7 @@ public class TvIAppManagerService extends SystemService {
         if (DEBUG) {
             Slogf.d(TAG, "onStart");
         }
-        // TODO: make service name a constant in Context
-        publishBinderService("tv_interactive_app", new BinderService());
+        publishBinderService(Context.TV_IAPP_SERVICE, new BinderService());
     }
 
     private SessionState getSessionState(IBinder sessionToken) {

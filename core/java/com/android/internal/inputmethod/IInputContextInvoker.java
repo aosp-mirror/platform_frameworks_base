@@ -59,7 +59,8 @@ public final class IInputContextInvoker {
 
     @NonNull
     InputConnectionCommandHeader createHeader() {
-        return new InputConnectionCommandHeader();
+        // TODO(b/203086369): Propagate session ID for interruption
+        return new InputConnectionCommandHeader(0 /* sessionId */);
     }
 
     /**

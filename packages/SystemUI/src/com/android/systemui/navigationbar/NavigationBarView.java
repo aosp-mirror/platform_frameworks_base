@@ -67,7 +67,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.navigationbar.RotationButton.RotationButtonUpdatesCallback;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
 import com.android.systemui.navigationbar.buttons.ContextualButton;
 import com.android.systemui.navigationbar.buttons.ContextualButtonGroup;
@@ -76,9 +75,11 @@ import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
 import com.android.systemui.navigationbar.buttons.NearestTouchFrame;
 import com.android.systemui.navigationbar.buttons.RotationContextButton;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
-import com.android.systemui.navigationbar.gestural.FloatingRotationButton;
+import com.android.systemui.shared.rotation.FloatingRotationButton;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.shared.rotation.RotationButton.RotationButtonUpdatesCallback;
+import com.android.systemui.shared.rotation.RotationButtonController;
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -322,9 +323,15 @@ public class NavigationBarView extends FrameLayout implements
         mContextualButtonGroup.addButton(accessibilityButton);
         mRotationContextButton = new RotationContextButton(R.id.rotate_suggestion,
                 mLightContext, R.drawable.ic_sysbar_rotate_button_ccw_start_0);
-        mFloatingRotationButton = new FloatingRotationButton(context);
-        mRotationButtonController = new RotationButtonController(mLightContext,
-                mLightIconColor, mDarkIconColor);
+        mFloatingRotationButton = new FloatingRotationButton(context,
+                R.string.accessibility_rotate_button);
+        mRotationButtonController = new RotationButtonController(mLightContext, mLightIconColor,
+                mDarkIconColor, R.drawable.ic_sysbar_rotate_button_ccw_start_0,
+                R.drawable.ic_sysbar_rotate_button_ccw_start_90,
+                R.drawable.ic_sysbar_rotate_button_cw_start_0,
+                R.drawable.ic_sysbar_rotate_button_cw_start_90,
+                () -> getDisplay().getRotation());
+
         updateRotationButton();
 
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
@@ -661,7 +668,7 @@ public class NavigationBarView extends FrameLayout implements
     }
 
     public void setBehavior(@Behavior int behavior) {
-        mRotationButtonController.onBehaviorChanged(behavior);
+        mRotationButtonController.onBehaviorChanged(Display.DEFAULT_DISPLAY, behavior);
     }
 
     @Override
@@ -1277,6 +1284,7 @@ public class NavigationBarView extends FrameLayout implements
             mButtonDispatchers.valueAt(i).onDestroy();
         }
         if (mRotationButtonController != null) {
+            mFloatingRotationButton.hide();
             mRotationButtonController.unregisterListeners();
         }
 

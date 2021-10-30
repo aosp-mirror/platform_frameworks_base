@@ -42,7 +42,7 @@ import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.brightness.BrightnessController;
-import com.android.systemui.settings.brightness.BrightnessSlider;
+import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.settings.brightness.ToggleSlider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.tuner.TunerService;
@@ -88,9 +88,9 @@ public class QSPanelControllerTest extends SysuiTestCase {
     @Mock
     private BrightnessController mBrightnessController;
     @Mock
-    private BrightnessSlider.Factory mToggleSliderViewControllerFactory;
+    private BrightnessSliderController.Factory mToggleSliderViewControllerFactory;
     @Mock
-    private BrightnessSlider mBrightnessSlider;
+    private BrightnessSliderController mBrightnessSliderController;
     @Mock
     QSTileImpl mQSTile;
     @Mock
@@ -120,7 +120,7 @@ public class QSPanelControllerTest extends SysuiTestCase {
         when(mQSTileHost.getTiles()).thenReturn(Collections.singleton(mQSTile));
         when(mQSTileHost.createTileView(any(), eq(mQSTile), anyBoolean())).thenReturn(mQSTileView);
         when(mToggleSliderViewControllerFactory.create(any(), any()))
-                .thenReturn(mBrightnessSlider);
+                .thenReturn(mBrightnessSliderController);
         when(mBrightnessControllerFactory.create(any(ToggleSlider.class)))
                 .thenReturn(mBrightnessController);
         when(mQSTileRevealControllerFactory.create(any(), any()))
