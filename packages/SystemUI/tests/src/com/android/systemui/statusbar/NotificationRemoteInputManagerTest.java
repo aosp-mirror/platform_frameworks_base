@@ -99,7 +99,10 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
 
         mRemoteInputManager = new TestableNotificationRemoteInputManager(mContext,
                 mock(FeatureFlags.class),
-                mLockscreenUserManager, mSmartReplyController, mEntryManager,
+                mLockscreenUserManager,
+                mSmartReplyController,
+                mEntryManager,
+                mock(RemoteInputNotificationRebuilder.class),
                 () -> Optional.of(mock(StatusBar.class)),
                 mStateController,
                 Handler.createAsync(Looper.myLooper()),
@@ -137,6 +140,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     public void testShouldExtendLifetime_remoteInputActive() {
         when(mController.isRemoteInputActive(mEntry)).thenReturn(true);
 
+        assertTrue(mRemoteInputManager.isRemoteInputActive(mEntry));
         assertTrue(mRemoteInputActiveExtender.shouldExtendLifetime(mEntry));
     }
 
@@ -145,6 +149,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY = true;
         when(mController.isSpinning(mEntry.getKey())).thenReturn(true);
 
+        assertTrue(mRemoteInputManager.shouldKeepForRemoteInputHistory(mEntry));
         assertTrue(mRemoteInputHistoryExtender.shouldExtendLifetime(mEntry));
     }
 
@@ -153,6 +158,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY = true;
         mEntry.lastRemoteInputSent = SystemClock.elapsedRealtime();
 
+        assertTrue(mRemoteInputManager.shouldKeepForRemoteInputHistory(mEntry));
         assertTrue(mRemoteInputHistoryExtender.shouldExtendLifetime(mEntry));
     }
 
@@ -161,6 +167,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY = true;
         when(mSmartReplyController.isSendingSmartReply(mEntry.getKey())).thenReturn(true);
 
+        assertTrue(mRemoteInputManager.shouldKeepForSmartReplyHistory(mEntry));
         assertTrue(mSmartReplyHistoryExtender.shouldExtendLifetime(mEntry));
     }
 
@@ -185,6 +192,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 NotificationLockscreenUserManager lockscreenUserManager,
                 SmartReplyController smartReplyController,
                 NotificationEntryManager notificationEntryManager,
+                RemoteInputNotificationRebuilder rebuilder,
                 Lazy<Optional<StatusBar>> statusBarOptionalLazy,
                 StatusBarStateController statusBarStateController,
                 Handler mainHandler,
@@ -198,6 +206,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                     lockscreenUserManager,
                     smartReplyController,
                     notificationEntryManager,
+                    rebuilder,
                     statusBarOptionalLazy,
                     statusBarStateController,
                     mainHandler,
