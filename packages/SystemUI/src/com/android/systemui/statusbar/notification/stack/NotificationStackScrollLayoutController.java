@@ -811,8 +811,9 @@ public class NotificationStackScrollLayoutController {
             return Unit.INSTANCE;
         });
 
-        // callback is invoked synchronously, updating mView immediately
+        // attach callback, and then call it to update mView immediately
         mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
+        mDeviceProvisionedListener.onDeviceProvisionedChanged();
 
         if (mView.isAttachedToWindow()) {
             mOnAttachStateChangeListener.onViewAttachedToWindow(mView);
