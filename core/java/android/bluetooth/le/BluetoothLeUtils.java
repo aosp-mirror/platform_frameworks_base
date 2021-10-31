@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Helper class for Bluetooth LE utils.
@@ -137,4 +138,21 @@ public class BluetoothLeUtils {
         }
     }
 
+    /**
+     * Compares two UUIDs with a UUID mask.
+     *
+     * @param data first {@link #UUID} to compare.
+     * @param uuid second {@link #UUID} to compare.
+     * @param mask mask {@link #UUID}.
+     * @return true if both UUIDs are equals when masked, false otherwise.
+     */
+    static boolean maskedEquals(UUID data, UUID uuid, UUID mask) {
+        if (mask == null) {
+            return Objects.equals(data, uuid);
+        }
+        return (data.getLeastSignificantBits() & mask.getLeastSignificantBits())
+                == (uuid.getLeastSignificantBits() & mask.getLeastSignificantBits())
+                && (data.getMostSignificantBits() & mask.getMostSignificantBits())
+                == (uuid.getMostSignificantBits() & mask.getMostSignificantBits());
+    }
 }
