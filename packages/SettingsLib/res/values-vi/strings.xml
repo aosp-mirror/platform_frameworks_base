@@ -582,7 +582,7 @@
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Đảm bảo người dùng có mặt để tự thiết lập không gian của mình trên thiết bị"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Thiết lập tiểu sử ngay bây giờ?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Thiết lập ngay"</string>
-    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Không phải bây giờ"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Để sau"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"Thêm"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Người dùng mới"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Tiểu sử mới"</string>
