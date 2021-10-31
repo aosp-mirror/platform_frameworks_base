@@ -765,6 +765,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
             // send a sticky broadcast containing USB accessory handshake information
             Intent intent = new Intent(UsbManager.ACTION_USB_ACCESSORY_HANDSHAKE)
+                    .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
+                        | Intent.FLAG_RECEIVER_FOREGROUND)
                     .putExtra(UsbManager.EXTRA_ACCESSORY_UEVENT_TIME,
                             mAccessoryConnectionStartTime)
                     .putExtra(UsbManager.EXTRA_ACCESSORY_STRING_COUNT,

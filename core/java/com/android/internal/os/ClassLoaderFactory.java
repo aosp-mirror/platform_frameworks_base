@@ -80,15 +80,20 @@ public class ClassLoaderFactory {
      */
     public static ClassLoader createClassLoader(String dexPath,
             String librarySearchPath, ClassLoader parent, String classloaderName,
-            List<ClassLoader> sharedLibraries) {
+            List<ClassLoader> sharedLibraries, List<ClassLoader> sharedLibrariesLoadedAfter) {
         ClassLoader[] arrayOfSharedLibraries = (sharedLibraries == null)
                 ? null
                 : sharedLibraries.toArray(new ClassLoader[sharedLibraries.size()]);
+        ClassLoader[] arrayOfSharedLibrariesLoadedAfterApp = (sharedLibrariesLoadedAfter == null)
+                ? null
+                : sharedLibrariesLoadedAfter.toArray(
+                        new ClassLoader[sharedLibrariesLoadedAfter.size()]);
         if (isPathClassLoaderName(classloaderName)) {
-            return new PathClassLoader(dexPath, librarySearchPath, parent, arrayOfSharedLibraries);
+            return new PathClassLoader(dexPath, librarySearchPath, parent, arrayOfSharedLibraries,
+                    arrayOfSharedLibrariesLoadedAfterApp);
         } else if (isDelegateLastClassLoaderName(classloaderName)) {
             return new DelegateLastClassLoader(dexPath, librarySearchPath, parent,
-                    arrayOfSharedLibraries);
+                    arrayOfSharedLibraries, arrayOfSharedLibrariesLoadedAfterApp);
         }
 
         throw new AssertionError("Invalid classLoaderName: " + classloaderName);
@@ -102,9 +107,8 @@ public class ClassLoaderFactory {
             String librarySearchPath, String libraryPermittedPath, ClassLoader parent,
             int targetSdkVersion, boolean isNamespaceShared, String classLoaderName) {
         return createClassLoader(dexPath, librarySearchPath, libraryPermittedPath,
-            parent, targetSdkVersion, isNamespaceShared, classLoaderName, null, null);
+            parent, targetSdkVersion, isNamespaceShared, classLoaderName, null, null, null);
     }
-
 
     /**
      * Create a ClassLoader and initialize a linker-namespace for it.
@@ -112,10 +116,11 @@ public class ClassLoaderFactory {
     public static ClassLoader createClassLoader(String dexPath,
             String librarySearchPath, String libraryPermittedPath, ClassLoader parent,
             int targetSdkVersion, boolean isNamespaceShared, String classLoaderName,
-            List<ClassLoader> sharedLibraries, List<String> nativeSharedLibraries) {
+            List<ClassLoader> sharedLibraries, List<String> nativeSharedLibraries,
+            List<ClassLoader> sharedLibrariesAfter) {
 
         final ClassLoader classLoader = createClassLoader(dexPath, librarySearchPath, parent,
-                classLoaderName, sharedLibraries);
+                classLoaderName, sharedLibraries, sharedLibrariesAfter);
 
         String sonameList = "";
         if (nativeSharedLibraries != null) {
