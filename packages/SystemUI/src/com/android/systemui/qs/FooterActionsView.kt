@@ -107,7 +107,6 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
     }
 
     fun disable(
-        buttonsVisible: Boolean,
         state2: Int,
         isTunerEnabled: Boolean,
         multiUserEnabled: Boolean
@@ -115,16 +114,15 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
         val disabled = state2 and StatusBarManager.DISABLE2_QUICK_SETTINGS != 0
         if (disabled == qsDisabled) return
         qsDisabled = disabled
-        updateEverything(buttonsVisible, isTunerEnabled, multiUserEnabled)
+        updateEverything(isTunerEnabled, multiUserEnabled)
     }
 
     fun updateEverything(
-        buttonsVisible: Boolean,
         isTunerEnabled: Boolean,
         multiUserEnabled: Boolean
     ) {
         post {
-            updateVisibilities(buttonsVisible, isTunerEnabled, multiUserEnabled)
+            updateVisibilities(isTunerEnabled, multiUserEnabled)
             updateClickabilities()
             isClickable = false
         }
@@ -137,15 +135,14 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
     }
 
     private fun updateVisibilities(
-        buttonsVisible: Boolean,
         isTunerEnabled: Boolean,
         multiUserEnabled: Boolean
     ) {
         settingsContainer.visibility = if (qsDisabled) GONE else VISIBLE
         tunerIcon.visibility = if (isTunerEnabled) VISIBLE else INVISIBLE
-        multiUserSwitch.visibility = if (buttonsVisible && multiUserEnabled) VISIBLE else GONE
+        multiUserSwitch.visibility = if (multiUserEnabled) VISIBLE else GONE
         val isDemo = UserManager.isDeviceInDemoMode(context)
-        settingsButton.visibility = if (isDemo || !buttonsVisible) INVISIBLE else VISIBLE
+        settingsButton.visibility = if (isDemo) INVISIBLE else VISIBLE
     }
 
     fun onUserInfoChanged(picture: Drawable?, isGuestUser: Boolean) {
