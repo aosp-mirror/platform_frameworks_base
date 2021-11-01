@@ -298,6 +298,7 @@ public class ZOrderingTests extends WindowTestsBase {
         final WindowState appAboveImeTarget = createWindow("appAboveImeTarget");
 
         mDisplayContent.setImeLayeringTarget(imeAppTarget);
+        mDisplayContent.setImeControlTarget(imeAppTarget);
         mDisplayContent.assignChildLayers(mTransaction);
 
         // Ime should be above all app windows except for non-fullscreen app window above it and
@@ -344,6 +345,7 @@ public class ZOrderingTests extends WindowTestsBase {
     @Test
     public void testAssignWindowLayers_ForStatusBarImeTarget() {
         mDisplayContent.setImeLayeringTarget(mStatusBarWindow);
+        mDisplayContent.setImeControlTarget(mStatusBarWindow);
         mDisplayContent.assignChildLayers(mTransaction);
 
         assertWindowHigher(mImeWindow, mChildAppWindowAbove);
@@ -409,6 +411,7 @@ public class ZOrderingTests extends WindowTestsBase {
                 mAppWindow.mActivityRecord, "imeAppTarget");
         mDisplayContent.setImeInputTarget(imeAppTarget);
         mDisplayContent.setImeLayeringTarget(imeAppTarget);
+        mDisplayContent.setImeControlTarget(imeAppTarget);
         mDisplayContent.updateImeParent();
 
         // Simulate the ime layering target task is animating with recents animation.
