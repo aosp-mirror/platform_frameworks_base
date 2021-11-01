@@ -314,9 +314,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             mShadeController.addPostCollapseAction(() -> updateNotificationViews(reason));
             return;
         }
-
         mViewHierarchyManager.updateNotificationViews();
-
         mNotificationPanel.updateNotificationViews(reason);
     }
 

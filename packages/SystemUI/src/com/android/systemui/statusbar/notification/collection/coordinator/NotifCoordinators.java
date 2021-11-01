@@ -64,7 +64,8 @@ public class NotifCoordinators implements Dumpable {
             ShadeEventCoordinator shadeEventCoordinator,
             SmartspaceDedupingCoordinator smartspaceDedupingCoordinator,
             ViewConfigCoordinator viewConfigCoordinator,
-            VisualStabilityCoordinator visualStabilityCoordinator) {
+            VisualStabilityCoordinator visualStabilityCoordinator,
+            SensitiveContentCoordinator sensitiveContentCoordinator) {
         dumpManager.registerDumpable(TAG, this);
 
         mCoordinators.add(new HideLocallyDismissedNotifsCoordinator());
@@ -79,6 +80,7 @@ public class NotifCoordinators implements Dumpable {
         mCoordinators.add(shadeEventCoordinator);
         mCoordinators.add(viewConfigCoordinator);
         mCoordinators.add(visualStabilityCoordinator);
+        mCoordinators.add(sensitiveContentCoordinator);
 
         if (featureFlags.isSmartspaceDedupingEnabled()) {
             mCoordinators.add(smartspaceDedupingCoordinator);
