@@ -1540,10 +1540,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                         NetworkCapabilities.NET_CAPABILITY_IMS) && !ident.isMetered()) {
 
                     // Copy the identify from IMS one but mark it as metered.
-                    NetworkIdentity vtIdent = new NetworkIdentity(ident.getType(),
-                            ident.getRatType(), ident.getSubscriberId(), ident.getWifiNetworkKey(),
-                            ident.isRoaming(), true /* metered */,
-                            true /* onDefaultNetwork */, ident.getOemManaged());
+                    NetworkIdentity vtIdent = new NetworkIdentity.Builder()
+                            .setType(ident.getType())
+                            .setRatType(ident.getRatType())
+                            .setSubscriberId(ident.getSubscriberId())
+                            .setWifiNetworkKey(ident.getWifiNetworkKey())
+                            .setRoaming(ident.isRoaming()).setMetered(true)
+                            .setDefaultNetwork(true)
+                            .setOemManaged(ident.getOemManaged())
+                            .setSubId(ident.getSubId()).build();
                     final String ifaceVt = IFACE_VT + getSubIdForMobile(snapshot);
                     findOrCreateNetworkIdentitySet(mActiveIfaces, ifaceVt).add(vtIdent);
                     findOrCreateNetworkIdentitySet(mActiveUidIfaces, ifaceVt).add(vtIdent);
