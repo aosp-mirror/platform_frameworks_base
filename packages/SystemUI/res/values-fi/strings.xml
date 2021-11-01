@@ -1046,7 +1046,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Siirrä reunaan ja piilota"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Siirrä pois reunasta ja näytä"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"vaihda"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Laitteiden hallinta"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Laitehallinta"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Valitse sovellus lisätäksesi säätimiä"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> säädintä lisätty</item>
@@ -1111,7 +1111,7 @@
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Ryhmä"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 laite valittu"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> laitetta valittu"</string>
-    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (yhteys katkaistu)"</string>
+    <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(yhteys katkaistu)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Ei yhteyttä. Yritä uudelleen."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Muodosta uusi laitepari"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Koontiversion numero"</string>

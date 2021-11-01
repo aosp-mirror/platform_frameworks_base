@@ -345,7 +345,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Kuuldeaparaadid"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Sisselülitamine …"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Heledus"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automaatne pööramine"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Autom. pööramine"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Kuva automaatne pööramine"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"Režiim <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Pööramine on lukustatud"</string>
@@ -1111,7 +1111,7 @@
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupp"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 seade on valitud"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> seadet on valitud"</string>
-    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (pole ühendatud)"</string>
+    <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ühendus on katkestatud)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Ühenduse loomine ebaõnnestus. Proovige uuesti."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Uue seadme sidumine"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Järgunumber"</string>
