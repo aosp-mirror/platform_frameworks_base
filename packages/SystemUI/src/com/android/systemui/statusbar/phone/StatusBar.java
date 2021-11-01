@@ -341,6 +341,12 @@ public class StatusBar extends SystemUI implements
     void setWindowState(int state) {
         mStatusBarWindowState =  state;
         mStatusBarWindowHidden = state == WINDOW_STATE_HIDDEN;
+        mStatusBarHideIconsForBouncerManager.setStatusBarWindowHidden(mStatusBarWindowHidden);
+        if (getStatusBarView() != null) {
+            // Should #updateHideIconsForBouncer always be called, regardless of whether we have a
+            //   status bar view? If so, we can make #updateHideIconsForBouncer private.
+            mStatusBarHideIconsForBouncerManager.updateHideIconsForBouncer(/* animate= */ false);
+        }
     }
 
     void acquireGestureWakeLock(long time) {
@@ -358,14 +364,6 @@ public class StatusBar extends SystemUI implements
 
     int getBarMode() {
         return mStatusBarMode;
-    }
-
-    boolean getWereIconsJustHidden() {
-        return mWereIconsJustHidden;
-    }
-
-    void setWereIconsJustHidden(boolean justHidden) {
-        mWereIconsJustHidden = justHidden;
     }
 
     void resendMessage(int msg) {
@@ -510,6 +508,7 @@ public class StatusBar extends SystemUI implements
     private final SystemStatusAnimationScheduler mAnimationScheduler;
     private final StatusBarLocationPublisher mStatusBarLocationPublisher;
     private final StatusBarIconController mStatusBarIconController;
+    private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
 
     // expanded notifications
     // the sliding/resizing panel within the notification window
@@ -642,10 +641,7 @@ public class StatusBar extends SystemUI implements
     private int mLastLoggedStateFingerprint;
     private boolean mTopHidesStatusBar;
     private boolean mStatusBarWindowHidden;
-    private boolean mHideIconsForBouncer;
     private boolean mIsOccluded;
-    private boolean mWereIconsJustHidden;
-    private boolean mBouncerWasShowingWhenHidden;
     private boolean mIsLaunchingActivityOverLockscreen;
 
     private final UserSwitcherController mUserSwitcherController;
@@ -778,6 +774,7 @@ public class StatusBar extends SystemUI implements
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
             StatusBarIconController statusBarIconController,
+            StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             FeatureFlags featureFlags,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
@@ -874,6 +871,7 @@ public class StatusBar extends SystemUI implements
         mAnimationScheduler = animationScheduler;
         mStatusBarLocationPublisher = locationPublisher;
         mStatusBarIconController = statusBarIconController;
+        mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mFeatureFlags = featureFlags;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mMainHandler = mainHandler;
@@ -939,6 +937,7 @@ public class StatusBar extends SystemUI implements
         mDisplay = mContext.getDisplay();
         mDisplayId = mDisplay.getDisplayId();
         updateDisplaySize();
+        mStatusBarHideIconsForBouncerManager.setDisplayId(mDisplayId);
 
         // start old BaseStatusBar.start().
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
@@ -1200,6 +1199,7 @@ public class StatusBar extends SystemUI implements
                                 mFeatureFlags,
                                 () -> Optional.of(this),
                                 mStatusBarIconController,
+                                mStatusBarHideIconsForBouncerManager,
                                 mKeyguardStateController,
                                 mNetworkController,
                                 mStatusBarStateController,
@@ -1874,7 +1874,7 @@ public class StatusBar extends SystemUI implements
             mNotificationLogger.onPanelExpandedChanged(isExpanded);
         }
         mPanelExpanded = isExpanded;
-        updateHideIconsForBouncer(false /* animate */);
+        mStatusBarHideIconsForBouncerManager.setPanelExpandedAndTriggerUpdate(isExpanded);
         mNotificationShadeWindowController.setPanelExpanded(isExpanded);
         mStatusBarStateController.setPanelExpanded(isExpanded);
         if (isExpanded && mStatusBarStateController.getState() != StatusBarState.KEYGUARD) {
@@ -1918,46 +1918,8 @@ public class StatusBar extends SystemUI implements
 
     public void setOccluded(boolean occluded) {
         mIsOccluded = occluded;
+        mStatusBarHideIconsForBouncerManager.setIsOccludedAndTriggerUpdate(occluded);
         mScrimController.setKeyguardOccluded(occluded);
-        updateHideIconsForBouncer(false /* animate */);
-    }
-
-    public boolean hideStatusBarIconsForBouncer() {
-        return mHideIconsForBouncer || mWereIconsJustHidden;
-    }
-
-    /**
-     * Decides if the status bar (clock + notifications + signal cluster) should be visible
-     * or not when showing the bouncer.
-     *
-     * We want to hide it when:
-     * • User swipes up on the keyguard
-     * • Locked activity that doesn't show a status bar requests the bouncer
-     *
-     * @param animate should the change of the icons be animated.
-     */
-    void updateHideIconsForBouncer(boolean animate) {
-        boolean hideBecauseApp = mTopHidesStatusBar && mIsOccluded
-                && (mStatusBarWindowHidden || mBouncerShowing);
-        boolean hideBecauseKeyguard = !mPanelExpanded && !mIsOccluded && mBouncerShowing;
-        boolean shouldHideIconsForBouncer = hideBecauseApp || hideBecauseKeyguard;
-        if (mHideIconsForBouncer != shouldHideIconsForBouncer) {
-            mHideIconsForBouncer = shouldHideIconsForBouncer;
-            if (!shouldHideIconsForBouncer && mBouncerWasShowingWhenHidden) {
-                // We're delaying the showing, since most of the time the fullscreen app will
-                // hide the icons again and we don't want them to fade in and out immediately again.
-                mWereIconsJustHidden = true;
-                mMainExecutor.executeDelayed(() -> {
-                    mWereIconsJustHidden = false;
-                    mCommandQueue.recomputeDisableFlags(mDisplayId, true);
-                }, 500);
-            } else {
-                mCommandQueue.recomputeDisableFlags(mDisplayId, animate);
-            }
-        }
-        if (shouldHideIconsForBouncer) {
-            mBouncerWasShowingWhenHidden = mBouncerShowing;
-        }
     }
 
     public boolean headsUpShouldBeVisible() {
@@ -3514,7 +3476,7 @@ public class StatusBar extends SystemUI implements
         mKeyguardBypassController.setBouncerShowing(bouncerShowing);
         mPulseExpansionHandler.setBouncerShowing(bouncerShowing);
         setBouncerShowingForStatusBarComponents(bouncerShowing);
-        updateHideIconsForBouncer(true /* animate */);
+        mStatusBarHideIconsForBouncerManager.setBouncerShowingAndTriggerUpdate(bouncerShowing);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
         updateScrimController();
         if (!mBouncerShowing) {

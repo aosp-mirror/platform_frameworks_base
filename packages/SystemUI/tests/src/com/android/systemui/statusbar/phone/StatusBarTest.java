@@ -279,6 +279,7 @@ public class StatusBarTest extends SysuiTestCase {
     private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
     private FakeExecutor mUiBgExecutor = new FakeExecutor(mFakeSystemClock);
     private InitController mInitController = new InitController();
+    private final DumpManager mDumpManager = new DumpManager();
 
     @Before
     public void setup() throws Exception {
@@ -332,7 +333,7 @@ public class StatusBarTest extends SysuiTestCase {
         }).when(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any());
 
         WakefulnessLifecycle wakefulnessLifecycle =
-                new WakefulnessLifecycle(mContext, mIWallpaperManager, mock(DumpManager.class));
+                new WakefulnessLifecycle(mContext, mIWallpaperManager, mDumpManager);
         wakefulnessLifecycle.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         wakefulnessLifecycle.dispatchFinishedWakingUp();
 
@@ -390,7 +391,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mNetworkController,
                 mBatteryController,
                 mColorExtractor,
-                new ScreenLifecycle(mock(DumpManager.class)),
+                new ScreenLifecycle(mDumpManager),
                 wakefulnessLifecycle,
                 mStatusBarStateController,
                 Optional.of(mBubblesManager),
@@ -440,6 +441,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mAnimationScheduler,
                 mLocationPublisher,
                 mIconController,
+                new StatusBarHideIconsForBouncerManager(mCommandQueue, mMainExecutor, mDumpManager),
                 mLockscreenTransitionController,
                 mFeatureFlags,
                 mKeyguardUnlockAnimationController,
@@ -450,7 +452,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController,
                 Optional.of(mStartingSurface),
                 mTunerService,
-                mock(DumpManager.class),
+                mDumpManager,
                 mActivityLaunchAnimator);
         when(mKeyguardViewMediator.registerStatusBar(
                 any(StatusBar.class),
