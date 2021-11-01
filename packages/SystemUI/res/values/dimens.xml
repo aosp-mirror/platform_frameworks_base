@@ -295,8 +295,6 @@
     <!-- The width/height of the icon of a navigation button -->
     <dimen name="navigation_icon_size">32dp</dimen>
 
-    <dimen name="navigation_key_padding">0dp</dimen>
-
     <!-- The padding on the side of the navigation bar. Must be greater than or equal to
          navigation_extra_key_width -->
     <dimen name="navigation_side_padding">36dp</dimen>
@@ -718,9 +716,6 @@
     <dimen name="wide_type_icon_start_padding_qs">3dp</dimen>
 
     <dimen name="signal_indicator_to_icon_frame_spacing">3dp</dimen>
-
-    <!-- The maximum width of the navigation bar ripples. -->
-    <dimen name="key_button_ripple_max_width">95dp</dimen>
 
     <!-- Starting margin before the signal cluster -->
 
