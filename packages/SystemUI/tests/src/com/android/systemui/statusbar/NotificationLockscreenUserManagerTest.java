@@ -57,11 +57,13 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.KeyguardNotificationSuppressor;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -84,6 +86,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
     // Dependency mocks:
     @Mock
+    private NotificationVisibilityProvider mVisibilityProvider;
+    @Mock
     private NotificationEntryManager mEntryManager;
     @Mock
     private DevicePolicyManager mDevicePolicyManager;
@@ -95,6 +99,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private DeviceProvisionedController mDeviceProvisionedController;
     @Mock
     private StatusBarStateController mStatusBarStateController;
+    @Mock
+    private FeatureFlags mFeatureFlags;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
@@ -416,9 +422,11 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         public TestNotificationLockscreenUserManager(Context context) {
             super(
                     context,
+                    mFeatureFlags,
                     mBroadcastDispatcher,
                     mDevicePolicyManager,
                     mUserManager,
+                    (() -> mVisibilityProvider),
                     mClickNotifier,
                     NotificationLockscreenUserManagerTest.this.mKeyguardManager,
                     mStatusBarStateController,

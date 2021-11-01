@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
@@ -204,7 +205,9 @@ public abstract class SystemUIModule {
             NotificationShadeWindowController notificationShadeWindowController,
             StatusBarStateController statusBarStateController, ShadeController shadeController,
             ConfigurationController configurationController,
-            @Nullable IStatusBarService statusBarService, INotificationManager notificationManager,
+            @Nullable IStatusBarService statusBarService,
+            INotificationManager notificationManager,
+            NotificationVisibilityProvider visibilityProvider,
             NotificationInterruptStateProvider interruptionStateProvider,
             ZenModeController zenModeController, NotificationLockscreenUserManager notifUserManager,
             NotificationGroupManagerLegacy groupManager, NotificationEntryManager entryManager,
@@ -213,6 +216,7 @@ public abstract class SystemUIModule {
         return Optional.ofNullable(BubblesManager.create(context, bubblesOptional,
                 notificationShadeWindowController, statusBarStateController, shadeController,
                 configurationController, statusBarService, notificationManager,
+                visibilityProvider,
                 interruptionStateProvider, zenModeController, notifUserManager,
                 groupManager, entryManager, notifPipeline, sysUiState, featureFlags, dumpManager,
                 sysuiMainExecutor));

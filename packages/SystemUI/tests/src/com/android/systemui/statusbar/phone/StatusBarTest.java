@@ -121,6 +121,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
@@ -272,6 +273,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private StatusBarIconController mIconController;
     @Mock private LockscreenShadeTransitionController mLockscreenTransitionController;
     @Mock private FeatureFlags mFeatureFlags;
+    @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private WallpaperManager mWallpaperManager;
     @Mock private IWallpaperManager mIWallpaperManager;
     @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
@@ -309,9 +311,16 @@ public class StatusBarTest extends SysuiTestCase {
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
 
         mMetricsLogger = new FakeMetricsLogger();
-        NotificationLogger notificationLogger = new NotificationLogger(mNotificationListener,
-                mUiBgExecutor, mock(NotificationEntryManager.class), mStatusBarStateController,
-                mExpansionStateLogger, new NotificationPanelLoggerFake());
+        NotificationLogger notificationLogger = new NotificationLogger(
+                mNotificationListener,
+                mUiBgExecutor,
+                mFeatureFlags,
+                mVisibilityProvider,
+                mock(NotificationEntryManager.class),
+                mStatusBarStateController,
+                mExpansionStateLogger,
+                new NotificationPanelLoggerFake()
+        );
         notificationLogger.setVisibilityReporter(mock(Runnable.class));
 
         when(mCommandQueue.asBinder()).thenReturn(new Binder());

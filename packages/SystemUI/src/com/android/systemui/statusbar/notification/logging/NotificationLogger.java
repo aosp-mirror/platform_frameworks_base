@@ -33,6 +33,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.NotificationListener;
@@ -40,6 +41,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -70,6 +72,8 @@ public class NotificationLogger implements StateListener {
     // Dependencies:
     private final NotificationListenerService mNotificationListener;
     private final Executor mUiBgExecutor;
+    private final FeatureFlags mFeatureFlags;
+    private final NotificationVisibilityProvider mVisibilityProvider;
     private final NotificationEntryManager mEntryManager;
     private final NotificationPanelLogger mNotificationPanelLogger;
     private final ExpansionStateLogger mExpansionStateLogger;
@@ -127,6 +131,8 @@ public class NotificationLogger implements StateListener {
             //    notifications.
             // 3. Report newly visible and no-longer visible notifications.
             // 4. Keep currently visible notifications for next report.
+            // TODO(b/204764064): support new pipeline
+            mFeatureFlags.checkLegacyPipelineEnabled();
             List<NotificationEntry> activeNotifications = mEntryManager.getVisibleNotifications();
             int N = activeNotifications.size();
             for (int i = 0; i < N; i++) {
@@ -202,12 +208,16 @@ public class NotificationLogger implements StateListener {
      */
     public NotificationLogger(NotificationListener notificationListener,
             @UiBackground Executor uiBgExecutor,
+            FeatureFlags featureFlags,
+            NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager entryManager,
             StatusBarStateController statusBarStateController,
             ExpansionStateLogger expansionStateLogger,
             NotificationPanelLogger notificationPanelLogger) {
         mNotificationListener = notificationListener;
         mUiBgExecutor = uiBgExecutor;
+        mFeatureFlags = featureFlags;
+        mVisibilityProvider = visibilityProvider;
         mEntryManager = entryManager;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -407,6 +417,8 @@ public class NotificationLogger implements StateListener {
         // Once we know panelExpanded and Dozing, turn logging on & off when appropriate
         boolean lockscreen = mLockscreen == null ? false : mLockscreen;
         if (mPanelExpanded && !mDozing) {
+            // TODO(b/204764064): support new pipeline
+            mFeatureFlags.checkLegacyPipelineEnabled();
             mNotificationPanelLogger.logPanelShown(lockscreen,
                     mEntryManager.getVisibleNotifications());
             if (DEBUG) {
@@ -440,8 +452,7 @@ public class NotificationLogger implements StateListener {
      * Called when the notification is expanded / collapsed.
      */
     public void onExpansionChanged(String key, boolean isUserAction, boolean isExpanded) {
-        NotificationVisibility.NotificationLocation location =
-                getNotificationLocation(mEntryManager.getActiveNotificationUnfiltered(key));
+        NotificationVisibility.NotificationLocation location = mVisibilityProvider.getLocation(key);
         mExpansionStateLogger.onExpansionChanged(key, isUserAction, isExpanded, location);
     }
 

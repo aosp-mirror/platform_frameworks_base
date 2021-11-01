@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.notification.collection.inflation.NotifInf
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.OnUserInteractionCallbackImpl;
 import com.android.systemui.statusbar.notification.collection.legacy.LegacyNotificationPresenterExtensions;
+import com.android.systemui.statusbar.notification.collection.legacy.LegacyNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.OnUserInteractionCallbackImplLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -63,6 +64,8 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl;
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProviderImpl;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerImpl;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerStub;
@@ -208,6 +211,8 @@ public interface NotificationsModule {
     static NotificationLogger provideNotificationLogger(
             NotificationListener notificationListener,
             @UiBackground Executor uiBgExecutor,
+            FeatureFlags featureFlags,
+            NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager entryManager,
             StatusBarStateController statusBarStateController,
             NotificationLogger.ExpansionStateLogger expansionStateLogger,
@@ -215,6 +220,8 @@ public interface NotificationsModule {
         return new NotificationLogger(
                 notificationListener,
                 uiBgExecutor,
+                featureFlags,
+                visibilityProvider,
                 entryManager,
                 statusBarStateController,
                 expansionStateLogger,
@@ -278,6 +285,20 @@ public interface NotificationsModule {
     }
 
     /**
+     * Provide the object which can be used to obtain NotificationVisibility objects.
+     */
+    @Provides
+    @SysUISingleton
+    static NotificationVisibilityProvider provideNotificationVisibilityProvider(
+            FeatureFlags featureFlags,
+            Lazy<NotificationVisibilityProviderImpl> newProvider,
+            Lazy<LegacyNotificationVisibilityProvider> legacyProvider) {
+        return featureFlags.isNewNotifPipelineRenderingEnabled()
+                ? newProvider.get()
+                : legacyProvider.get();
+    }
+
+    /**
      * Provide the active implementation for presenting notifications.
      */
     @Provides
@@ -301,15 +322,15 @@ public interface NotificationsModule {
             FeatureFlags featureFlags,
             HeadsUpManager headsUpManager,
             StatusBarStateController statusBarStateController,
-            Lazy<NotifPipeline> pipeline,
             Lazy<NotifCollection> notifCollection,
+            Lazy<NotificationVisibilityProvider> visibilityProvider,
             Lazy<VisualStabilityCoordinator> visualStabilityCoordinator,
             NotificationEntryManager entryManager,
             VisualStabilityManager visualStabilityManager,
             Lazy<GroupMembershipManager> groupMembershipManagerLazy) {
         return featureFlags.isNewNotifPipelineRenderingEnabled()
                 ? new OnUserInteractionCallbackImpl(
-                        pipeline.get(),
+                        visibilityProvider.get(),
                         notifCollection.get(),
                         headsUpManager,
                         statusBarStateController,
@@ -317,6 +338,7 @@ public interface NotificationsModule {
                         groupMembershipManagerLazy.get())
                 : new OnUserInteractionCallbackImplLegacy(
                         entryManager,
+                        visibilityProvider.get(),
                         headsUpManager,
                         statusBarStateController,
                         visualStabilityManager,

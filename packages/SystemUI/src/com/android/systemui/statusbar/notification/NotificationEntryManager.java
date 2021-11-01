@@ -808,11 +808,11 @@ public class NotificationEntryManager implements
      * notification doesn't exist.
      */
     public NotificationEntry getPendingOrActiveNotif(String key) {
-        if (mPendingNotifications.containsKey(key)) {
-            return mPendingNotifications.get(key);
-        } else {
-            return mActiveNotifications.get(key);
+        NotificationEntry entry = mPendingNotifications.get(key);
+        if (entry != null) {
+            return entry;
         }
+        return mActiveNotifications.get(key);
     }
 
     private void extendLifetime(NotificationEntry entry, NotificationLifetimeExtender extender) {
@@ -944,6 +944,12 @@ public class NotificationEntryManager implements
     @Override
     public Collection<NotificationEntry> getAllNotifs() {
         return mReadOnlyAllNotifications;
+    }
+
+    @Nullable
+    @Override
+    public NotificationEntry getEntry(String key) {
+        return getPendingOrActiveNotif(key);
     }
 
     /** @return A count of the active notifications */

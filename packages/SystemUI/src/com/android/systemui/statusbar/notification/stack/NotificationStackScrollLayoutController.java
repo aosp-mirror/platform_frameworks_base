@@ -58,7 +58,6 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
@@ -99,6 +98,7 @@ import com.android.systemui.statusbar.notification.collection.legacy.VisualStabi
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -145,6 +145,7 @@ public class NotificationStackScrollLayoutController {
 
     private final boolean mAllowLongPress;
     private final NotificationGutsManager mNotificationGutsManager;
+    private final NotificationVisibilityProvider mVisibilityProvider;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
     private final TunerService mTunerService;
@@ -618,6 +619,7 @@ public class NotificationStackScrollLayoutController {
     public NotificationStackScrollLayoutController(
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             NotificationGutsManager notificationGutsManager,
+            NotificationVisibilityProvider visibilityProvider,
             HeadsUpManagerPhone headsUpManager,
             NotificationRoundnessManager notificationRoundnessManager,
             TunerService tunerService,
@@ -655,6 +657,7 @@ public class NotificationStackScrollLayoutController {
             ShadeController shadeController) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
+        mVisibilityProvider = visibilityProvider;
         mHeadsUpManager = headsUpManager;
         mNotificationRoundnessManager = notificationRoundnessManager;
         mTunerService = tunerService;
@@ -1384,19 +1387,11 @@ public class NotificationStackScrollLayoutController {
         mView.resetCheckSnoozeLeavebehind();
     }
 
-    private DismissedByUserStats getDismissedByUserStats(
-            NotificationEntry entry,
-            int numVisibleEntries
-    ) {
+    private DismissedByUserStats getDismissedByUserStats(NotificationEntry entry) {
         return new DismissedByUserStats(
                 DISMISSAL_SHADE,
                 DISMISS_SENTIMENT_NEUTRAL,
-                NotificationVisibility.obtain(
-                        entry.getKey(),
-                        entry.getRanking().getRank(),
-                        numVisibleEntries,
-                        true,
-                        NotificationLogger.getNotificationLocation(entry)));
+                mVisibilityProvider.obtain(entry, true));
     }
 
     /**
@@ -1447,13 +1442,10 @@ public class NotificationStackScrollLayoutController {
             } else {
                 final List<Pair<NotificationEntry, DismissedByUserStats>>
                         entriesWithRowsDismissedFromShade = new ArrayList<>();
-                final int numVisibleEntries = mNotifPipeline.getShadeListCount();
                 for (ExpandableNotificationRow row : viewsToRemove) {
                     final NotificationEntry entry = row.getEntry();
                     entriesWithRowsDismissedFromShade.add(
-                            new Pair<>(
-                                    entry,
-                                    getDismissedByUserStats(entry, numVisibleEntries)));
+                            new Pair<>(entry, getDismissedByUserStats(entry)));
                 }
                 mNotifCollection.dismissNotifications(entriesWithRowsDismissedFromShade);
             }
@@ -1462,9 +1454,7 @@ public class NotificationStackScrollLayoutController {
                 if (canChildBeDismissed(rowToRemove)) {
                     mNotificationEntryManager.performRemoveNotification(
                             rowToRemove.getEntry().getSbn(),
-                            getDismissedByUserStats(
-                                    rowToRemove.getEntry(),
-                                    mNotificationEntryManager.getActiveNotificationsCount()),
+                            getDismissedByUserStats(rowToRemove.getEntry()),
                             NotificationListenerService.REASON_CANCEL_ALL);
                 } else {
                     rowToRemove.resetTranslation();

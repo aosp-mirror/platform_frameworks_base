@@ -41,6 +41,7 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
@@ -48,6 +49,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.logging.nano.Notifications;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -81,6 +83,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Mock private NotificationLogger.ExpansionStateLogger mExpansionStateLogger;
 
     // Dependency mocks:
+    @Mock private FeatureFlags mFeatureFlags;
+    @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotificationListener mListener;
     @Captor private ArgumentCaptor<NotificationEntryListener> mEntryListenerCaptor;
@@ -108,9 +112,16 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 .build();
         mEntry.setRow(mRow);
 
-        mLogger = new TestableNotificationLogger(mListener, mUiBgExecutor,
-                mEntryManager, mock(StatusBarStateControllerImpl.class), mBarService,
-                mExpansionStateLogger);
+        mLogger = new TestableNotificationLogger(
+                mListener,
+                mUiBgExecutor,
+                mFeatureFlags,
+                mVisibilityProvider,
+                mEntryManager,
+                mock(StatusBarStateControllerImpl.class),
+                mBarService,
+                mExpansionStateLogger
+        );
         mLogger.setUpWithContainer(mListContainer);
         verify(mEntryManager).addNotificationEntryListener(mEntryListenerCaptor.capture());
     }
@@ -244,12 +255,22 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
         TestableNotificationLogger(NotificationListener notificationListener,
                 Executor uiBgExecutor,
+                FeatureFlags featureFlags,
+                NotificationVisibilityProvider visibilityProvider,
                 NotificationEntryManager entryManager,
                 StatusBarStateControllerImpl statusBarStateController,
                 IStatusBarService barService,
                 ExpansionStateLogger expansionStateLogger) {
-            super(notificationListener, uiBgExecutor, entryManager, statusBarStateController,
-                    expansionStateLogger, mNotificationPanelLoggerFake);
+            super(
+                    notificationListener,
+                    uiBgExecutor,
+                    featureFlags,
+                    visibilityProvider,
+                    entryManager,
+                    statusBarStateController,
+                    expansionStateLogger,
+                    mNotificationPanelLoggerFake
+            );
             mBarService = barService;
             // Make this on the current thread so we can wait for it during tests.
             mHandler = Handler.createAsync(Looper.myLooper());

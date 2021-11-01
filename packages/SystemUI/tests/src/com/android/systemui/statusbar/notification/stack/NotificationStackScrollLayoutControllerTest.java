@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
@@ -97,6 +98,7 @@ import org.mockito.MockitoAnnotations;
 public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
     @Mock private NotificationGutsManager mNotificationGutsManager;
+    @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     @Mock private TunerService mTunerService;
@@ -151,6 +153,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         mController = new NotificationStackScrollLayoutController(
                 true,
                 mNotificationGutsManager,
+                mVisibilityProvider,
                 mHeadsUpManager,
                 mNotificationRoundnessManager,
                 mTunerService,

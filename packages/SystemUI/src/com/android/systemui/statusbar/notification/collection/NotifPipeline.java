@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
-import android.os.Handler;
-
 import androidx.annotation.Nullable;
 
 import com.android.systemui.dagger.SysUISingleton;
@@ -108,6 +106,7 @@ public class NotifPipeline implements CommonNotifCollection {
     /**
      * Returns the NotificationEntry associated with [key].
      */
+    @Override
     @Nullable
     public NotificationEntry getEntry(String key) {
         return mNotifCollection.getEntry(key);
