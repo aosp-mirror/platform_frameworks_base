@@ -45,6 +45,11 @@ class SideStage extends StageTaskListener {
                 stageTaskUnfoldController);
     }
 
+    void moveToTop(Rect rootBounds, WindowContainerTransaction wct) {
+        final WindowContainerToken rootToken = mRootTaskInfo.token;
+        wct.setBounds(rootToken, rootBounds).reorder(rootToken, true /* onTop */);
+    }
+
     void addTask(ActivityManager.RunningTaskInfo task, Rect rootBounds,
             WindowContainerTransaction wct) {
         final WindowContainerToken rootToken = mRootTaskInfo.token;
