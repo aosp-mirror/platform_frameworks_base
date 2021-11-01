@@ -146,7 +146,9 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             NotificationListContainer listContainer) {
         mPresenter = presenter;
         mListContainer = listContainer;
-        mDynamicPrivacyController.addListener(this);
+        if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            mDynamicPrivacyController.addListener(this);
+        }
     }
 
     /**
@@ -522,9 +524,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
     @Override
     public void onDynamicPrivacyChanged() {
-        if (!mFeatureFlags.checkLegacyPipelineEnabled()) {
-            return;
-        }
+        mFeatureFlags.assertLegacyPipelineEnabled();
         if (mPerformingUpdate) {
             Log.w(TAG, "onDynamicPrivacyChanged made a re-entrant call");
         }
