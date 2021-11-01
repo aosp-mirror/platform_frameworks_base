@@ -345,6 +345,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private VelocityTracker mQsVelocityTracker;
     private boolean mQsTracking;
 
+    private IdleHostView mIdleHostView;
     private CommunalHostView mCommunalView;
 
     /**
@@ -891,6 +892,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private void onFinishInflate() {
         loadDimens();
         mKeyguardStatusBar = mView.findViewById(R.id.keyguard_header);
+        mIdleHostView = mView.findViewById(R.id.idle_host_view);
         mCommunalView = mView.findViewById(R.id.communal_host);
 
         FrameLayout userAvatarContainer = null;
@@ -913,10 +915,11 @@ public class NotificationPanelViewController extends PanelViewController {
                         .getKeyguardStatusBarViewController();
         mKeyguardStatusBarViewController.init();
 
-        IdleViewComponent idleViewComponent = mIdleViewComponentFactory
-                .build(mView.findViewById(R.id.idle_host_view));
-        mIdleHostViewController = idleViewComponent.getIdleHostViewController();
-        mIdleHostViewController.init();
+        if (mIdleHostView != null) {
+            IdleViewComponent idleViewComponent = mIdleViewComponentFactory.build(mIdleHostView);
+            mIdleHostViewController = idleViewComponent.getIdleHostViewController();
+            mIdleHostViewController.init();
+        }
 
         if (mCommunalView != null) {
             CommunalViewComponent communalViewComponent =
@@ -931,7 +934,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 mView.findViewById(R.id.keyguard_status_view),
                 userAvatarContainer,
                 keyguardUserSwitcherView,
-                mView.findViewById(R.id.idle_host_view),
+                mIdleHostView,
                 mCommunalView);
         mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
         NotificationStackScrollLayout stackScrollLayout = mView.findViewById(
@@ -1029,9 +1032,12 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardStatusViewController = statusViewComponent.getKeyguardStatusViewController();
         mKeyguardStatusViewController.init();
 
-        IdleViewComponent idleViewComponent = mIdleViewComponentFactory.build(idleHostView);
-        mIdleHostViewController = idleViewComponent.getIdleHostViewController();
-        mIdleHostViewController.init();
+        if (idleHostView != null && idleHostView != mIdleHostView) {
+            mIdleHostView = idleHostView;
+            IdleViewComponent idleViewComponent = mIdleViewComponentFactory.build(idleHostView);
+            mIdleHostViewController = idleViewComponent.getIdleHostViewController();
+            mIdleHostViewController.init();
+        }
 
         if (mKeyguardUserSwitcherController != null) {
             // Try to close the switcher so that callbacks are triggered if necessary.
