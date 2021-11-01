@@ -45,7 +45,9 @@ android_library {
         ":wm_shell-aidls",
         ":wm_shell_util-sources",
     ],
-
+    resource_dirs: [
+        "res",
+    ],
     static_libs: [
         "PluginCoreLib",
         "androidx.dynamicanimation_dynamicanimation",

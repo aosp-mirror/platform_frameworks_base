@@ -131,6 +131,8 @@ import com.android.systemui.navigationbar.gestural.QuickswitchOrientedNavHandle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.shared.rotation.RotationButton;
+import com.android.systemui.shared.rotation.RotationButtonController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -944,7 +946,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         // not valid.  Just ignore the rotation in this case.
         if (!mNavigationBarView.isAttachedToWindow()) return;
 
-        final int winRotation = mNavigationBarView.getDisplay().getRotation();
         final boolean rotateSuggestionsDisabled = RotationButtonController
                 .hasDisable2RotateSuggestionFlag(mDisabledFlags2);
         final RotationButtonController rotationButtonController =
@@ -953,7 +954,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
         if (RotationContextButton.DEBUG_ROTATION) {
             Log.v(TAG, "onRotationProposal proposedRotation=" + Surface.rotationToString(rotation)
-                    + ", winRotation=" + Surface.rotationToString(winRotation)
                     + ", isValid=" + isValid + ", mNavBarWindowState="
                     + StatusBarManager.windowStateToString(mNavigationBarWindowState)
                     + ", rotateSuggestionsDisabled=" + rotateSuggestionsDisabled
@@ -963,7 +963,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         // Respect the disabled flag, no need for action as flag change callback will handle hiding
         if (rotateSuggestionsDisabled) return;
 
-        rotationButtonController.onRotationProposal(rotation, winRotation, isValid);
+        rotationButtonController.onRotationProposal(rotation, isValid);
     }
 
     @Override
