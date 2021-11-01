@@ -888,23 +888,6 @@ static void nativeSetFrameRate(JNIEnv* env, jclass clazz, jlong transactionObj, 
                               static_cast<int8_t>(changeFrameRateStrategy));
 }
 
-static jlong nativeAcquireFrameRateFlexibilityToken(JNIEnv* env, jclass clazz) {
-    sp<ISurfaceComposer> composer = ComposerService::getComposerService();
-    sp<IBinder> token;
-    status_t result = composer->acquireFrameRateFlexibilityToken(&token);
-    if (result < 0) {
-        ALOGE("Failed acquiring frame rate flexibility token: %s (%d)", strerror(-result), result);
-        return 0;
-    }
-    token->incStrong((void*)nativeAcquireFrameRateFlexibilityToken);
-    return reinterpret_cast<jlong>(token.get());
-}
-
-static void nativeReleaseFrameRateFlexibilityToken(JNIEnv* env, jclass clazz, jlong tokenLong) {
-    sp<IBinder> token(reinterpret_cast<IBinder*>(tokenLong));
-    token->decStrong((void*)nativeAcquireFrameRateFlexibilityToken);
-}
-
 static void nativeSetFixedTransformHint(JNIEnv* env, jclass clazz, jlong transactionObj,
                                         jlong nativeObject, jint transformHint) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -1956,10 +1939,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetShadowRadius },
     {"nativeSetFrameRate", "(JJFII)V",
             (void*)nativeSetFrameRate },
-    {"nativeAcquireFrameRateFlexibilityToken", "()J",
-            (void*)nativeAcquireFrameRateFlexibilityToken },
-    {"nativeReleaseFrameRateFlexibilityToken", "(J)V",
-            (void*)nativeReleaseFrameRateFlexibilityToken },
     {"nativeGetPhysicalDisplayIds", "()[J",
             (void*)nativeGetPhysicalDisplayIds },
     {"nativeGetPrimaryPhysicalDisplayId", "()J",
