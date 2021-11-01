@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Trace;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -336,12 +337,14 @@ public class NotificationIconAreaController implements
     }
 
     private void updateNotificationIcons() {
+        Trace.beginSection("NotificationIconAreaController.updateNotificationIcons");
         updateStatusBarIcons();
         updateShelfIcons();
         updateCenterIcon();
         updateAodNotificationIcons();
 
         applyNotificationIconsTint();
+        Trace.endSection();
     }
 
     private void updateShelfIcons() {

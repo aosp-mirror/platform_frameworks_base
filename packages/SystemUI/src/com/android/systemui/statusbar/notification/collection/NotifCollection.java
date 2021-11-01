@@ -48,6 +48,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Notification;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -512,6 +513,7 @@ public class NotifCollection implements Dumpable {
     }
 
     private void dispatchEventsAndRebuildList() {
+        Trace.beginSection("NotifCollection.dispatchEventsAndRebuildList");
         mAmDispatchingToOtherCode = true;
         while (!mEventQueue.isEmpty()) {
             mEventQueue.remove().dispatchTo(mNotifCollectionListeners);
@@ -521,6 +523,7 @@ public class NotifCollection implements Dumpable {
         if (mBuildListener != null) {
             mBuildListener.onBuildList(mReadOnlyNotificationSet);
         }
+        Trace.endSection();
     }
 
     private void onEndLifetimeExtension(
