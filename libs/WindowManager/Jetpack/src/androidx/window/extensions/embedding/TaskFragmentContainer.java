@@ -109,6 +109,10 @@ class TaskFragmentContainer {
         return allActivities;
     }
 
+    ActivityStack toActivityStack() {
+        return new ActivityStack(collectActivities(), mInfo.getRunningActivityCount() == 0);
+    }
+
     void addPendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
         mPendingAppearedActivities.add(pendingAppearedActivity);
     }
