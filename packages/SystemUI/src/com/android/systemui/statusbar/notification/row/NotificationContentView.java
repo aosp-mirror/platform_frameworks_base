@@ -1938,7 +1938,6 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.print("    ");
         pw.print("contentView visibility: " + getVisibility());
         pw.print(", alpha: " + getAlpha());
         pw.print(", clipBounds: " + getClipBounds());
