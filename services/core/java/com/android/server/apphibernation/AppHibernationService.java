@@ -200,14 +200,6 @@ public final class AppHibernationService extends SystemService {
     }
 
     /**
-     * Whether global hibernation should delete ART ahead-of-time compilation artifacts and prevent
-     * package manager from re-optimizing the APK.
-     */
-    private boolean isOatArtifactDeletionEnabled() {
-        return mOatArtifactDeletionEnabled;
-    }
-
-    /**
      * Whether a package is hibernating for a given user.
      *
      * @param packageName the package to check
@@ -737,11 +729,6 @@ public final class AppHibernationService extends SystemService {
         @Override
         public boolean isHibernatingGlobally(String packageName) {
             return mService.isHibernatingGlobally(packageName);
-        }
-
-        @Override
-        public boolean isOatArtifactDeletionEnabled() {
-            return mService.isOatArtifactDeletionEnabled();
         }
     }
 

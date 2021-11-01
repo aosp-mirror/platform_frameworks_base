@@ -64,10 +64,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.LocalServices;
-import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.ArtStatsLogUtils;
@@ -137,24 +134,16 @@ public class PackageDexOptimizer {
     private volatile boolean mSystemReady;
 
     private final ArtStatsLogger mArtStatsLogger = new ArtStatsLogger();
-    private final Injector mInjector;
-
 
     private static final Random sRandom = new Random();
 
     PackageDexOptimizer(Installer installer, Object installLock, Context context,
             String wakeLockTag) {
-        this(new Injector() {
-            @Override
-            public AppHibernationManagerInternal getAppHibernationManagerInternal() {
-                return LocalServices.getService(AppHibernationManagerInternal.class);
-            }
+        this.mInstaller = installer;
+        this.mInstallLock = installLock;
 
-            @Override
-            public PowerManager getPowerManager(Context context) {
-                return context.getSystemService(PowerManager.class);
-            }
-        }, installer, installLock, context, wakeLockTag);
+        PowerManager powerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        mDexoptWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, wakeLockTag);
     }
 
     protected PackageDexOptimizer(PackageDexOptimizer from) {
@@ -162,32 +151,13 @@ public class PackageDexOptimizer {
         this.mInstallLock = from.mInstallLock;
         this.mDexoptWakeLock = from.mDexoptWakeLock;
         this.mSystemReady = from.mSystemReady;
-        this.mInjector = from.mInjector;
     }
 
-    @VisibleForTesting
-    PackageDexOptimizer(@NonNull Injector injector, Installer installer, Object installLock,
-            Context context, String wakeLockTag) {
-        this.mInstaller = installer;
-        this.mInstallLock = installLock;
-
-        PowerManager powerManager = injector.getPowerManager(context);
-        mDexoptWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, wakeLockTag);
-        mInjector = injector;
-    }
-
-    boolean canOptimizePackage(AndroidPackage pkg) {
+    static boolean canOptimizePackage(AndroidPackage pkg) {
         // We do not dexopt a package with no code.
         // Note that the system package is marked as having no code, however we can
         // still optimize it via dexoptSystemServerPath.
         if (!PLATFORM_PACKAGE_NAME.equals(pkg.getPackageName()) && !pkg.isHasCode()) {
-            return false;
-        }
-
-        // We do not dexopt unused packages.
-        AppHibernationManagerInternal ahm = mInjector.getAppHibernationManagerInternal();
-        if (ahm.isHibernatingGlobally(pkg.getPackageName())
-                && ahm.isOatArtifactDeletionEnabled()) {
             return false;
         }
 
@@ -1029,14 +999,5 @@ public class PackageDexOptimizer {
      */
     private Installer getInstallerWithoutLock() {
         return mInstaller;
-    }
-
-    /**
-     * Injector for {@link PackageDexOptimizer} dependencies
-     */
-    interface Injector {
-        AppHibernationManagerInternal getAppHibernationManagerInternal();
-
-        PowerManager getPowerManager(Context context);
     }
 }
