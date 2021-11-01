@@ -136,7 +136,7 @@ public final class StorageEventHelper extends StorageEventListener {
 
         final Settings.VersionInfo ver;
         final List<PackageSetting> packages;
-        final ScanPackageHelper scanPackageHelper = new ScanPackageHelper(mPm);
+        final InstallPackageHelper installPackageHelper = new InstallPackageHelper(mPm);
         synchronized (mPm.mLock) {
             ver = mPm.mSettings.findOrCreateVersion(volumeUuid);
             packages = mPm.mSettings.getVolumePackagesLPr(volumeUuid);
@@ -147,7 +147,7 @@ public final class StorageEventHelper extends StorageEventListener {
             synchronized (mPm.mInstallLock) {
                 final AndroidPackage pkg;
                 try {
-                    pkg = scanPackageHelper.scanPackageTracedLI(
+                    pkg = installPackageHelper.scanSystemPackageTracedLI(
                             ps.getPath(), parseFlags, SCAN_INITIAL, 0, null);
                     loaded.add(pkg);
 
