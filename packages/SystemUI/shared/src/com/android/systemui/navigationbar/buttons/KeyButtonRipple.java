@@ -35,9 +35,8 @@ import android.view.ViewConfiguration;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
+import androidx.annotation.DimenRes;
 import androidx.annotation.Keep;
-
-import com.android.systemui.shared.R;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -90,8 +89,8 @@ public class KeyButtonRipple extends Drawable {
 
     private Type mType = Type.ROUNDED_RECT;
 
-    public KeyButtonRipple(Context ctx, View targetView) {
-        mMaxWidth =  ctx.getResources().getDimensionPixelSize(R.dimen.key_button_ripple_max_width);
+    public KeyButtonRipple(Context ctx, View targetView, @DimenRes int maxWidthResource) {
+        mMaxWidth = ctx.getResources().getDimensionPixelSize(maxWidthResource);
         mTargetView = targetView;
     }
 

@@ -168,7 +168,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         setClickable(true);
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
-        mRipple = new KeyButtonRipple(context, this);
+        mRipple = new KeyButtonRipple(context, this, R.dimen.key_button_ripple_max_width);
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
         mInputManager = manager;
         setBackground(mRipple);

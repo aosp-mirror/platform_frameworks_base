@@ -522,6 +522,19 @@
     <!-- Size of the icon inside each item in the ringer selector drawer. -->
     <dimen name="volume_ringer_drawer_icon_size">24dp</dimen>
 
+    <!-- The maximum width of the navigation bar ripples. -->
+    <dimen name="key_button_ripple_max_width">95dp</dimen>
+
+    <dimen name="rounded_corner_content_padding">0dp</dimen>
+
+    <dimen name="navigation_key_padding">0dp</dimen>
+
+    <!-- Floating rotation button -->
+    <dimen name="floating_rotation_button_diameter">40dp</dimen>
+    <dimen name="floating_rotation_button_min_margin">20dp</dimen>
+    <dimen name="floating_rotation_button_taskbar_left_margin">20dp</dimen>
+    <dimen name="floating_rotation_button_taskbar_bottom_margin">10dp</dimen>
+
     <!-- Gravity for the notification panel -->
     <integer name="notification_panel_layout_gravity">0x31</integer><!-- center_horizontal|top -->
 
