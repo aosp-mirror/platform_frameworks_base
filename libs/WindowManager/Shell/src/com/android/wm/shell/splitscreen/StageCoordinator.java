@@ -758,7 +758,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             // Make sure the main stage is active.
             mMainStage.activate(getMainStageBounds(), wct, true /* reparent */);
-            mSideStage.setBounds(getSideStageBounds(), wct);
+            mSideStage.moveToTop(getSideStageBounds(), wct);
             mTaskOrganizer.applyTransaction(wct);
         }
         if (!mLogger.hasStartedSession() && mMainStageListener.mHasChildren
