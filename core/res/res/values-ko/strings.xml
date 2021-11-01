@@ -981,7 +981,7 @@
     <string name="js_dialog_title" msgid="7464775045615023241">"\'<xliff:g id="TITLE">%s</xliff:g>\' 페이지 내용:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"자바스크립트"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"탐색 확인"</string>
-    <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"이 페이지 닫기"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"이 페이지 나가기"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"이 페이지에 머무르기"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\n다른 페이지로 이동하시겠습니까?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"확인"</string>
