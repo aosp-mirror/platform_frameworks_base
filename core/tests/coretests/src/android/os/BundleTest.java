@@ -273,16 +273,21 @@ public class BundleTest {
         Parcelable p1 = new CustomParcelable(13, "Tiramisu");
         Parcelable p2 = new CustomParcelable(13, "Tiramisu");
         Bundle a = new Bundle();
-        a.putParcelable("key", p1);
+        a.putParcelable("key1", p1);
         a.readFromParcel(getParcelledBundle(a));
         a.setClassLoader(getClass().getClassLoader());
         Bundle b = new Bundle();
-        b.putParcelable("key", p2);
+        // Adding extra element so that the position of the elements of interest in their respective
+        // source parcels are different so we can cover that case of Parcel.compareData(). We'll
+        // remove the element later so the map is equal.
+        b.putString("key0", "string");
+        b.putParcelable("key1", p2);
         b.readFromParcel(getParcelledBundle(b));
         b.setClassLoader(getClass().getClassLoader());
-        // 2 lazy values with identical parcels inside
         a.isEmpty();
         b.isEmpty();
+        b.remove("key0");
+        // 2 lazy values with identical parcels inside
 
         assertTrue(Bundle.kindofEquals(a, b));
     }
