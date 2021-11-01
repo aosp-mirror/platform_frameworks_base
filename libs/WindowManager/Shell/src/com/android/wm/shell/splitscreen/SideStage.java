@@ -50,14 +50,8 @@ class SideStage extends StageTaskListener {
         wct.setBounds(rootToken, rootBounds).reorder(rootToken, true /* onTop */);
     }
 
-    void addTask(ActivityManager.RunningTaskInfo task, Rect rootBounds,
-            WindowContainerTransaction wct) {
-        final WindowContainerToken rootToken = mRootTaskInfo.token;
-        wct.setBounds(rootToken, rootBounds)
-                .reparent(task.token, rootToken, true /* onTop*/)
-                // Moving the root task to top after the child tasks were reparented , or the root
-                // task cannot be visible and focused.
-                .reorder(rootToken, true /* onTop */);
+    void addTask(ActivityManager.RunningTaskInfo task, WindowContainerTransaction wct) {
+        wct.reparent(task.token, mRootTaskInfo.token, true /* onTop*/);
     }
 
     boolean removeAllTasks(WindowContainerTransaction wct, boolean toTop) {
