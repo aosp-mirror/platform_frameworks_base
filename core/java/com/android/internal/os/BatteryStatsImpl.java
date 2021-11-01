@@ -588,6 +588,10 @@ public class BatteryStatsImpl extends BatteryStats {
                     procState = u.mProcessState;
                 }
 
+                if (procState == ActivityManager.PROCESS_STATE_NONEXISTENT) {
+                    continue;
+                }
+
                 final long timestampMs = mClock.elapsedRealtime();
                 final LongArrayMultiStateCounter onBatteryCounter =
                         u.getProcStateTimeCounter().getCounter();
@@ -8599,6 +8603,23 @@ public class BatteryStatsImpl extends BatteryStats {
             return mUidMeasuredEnergyStats.getAccumulatedStandardBucketCharge(bucket);
         }
 
+        /**
+         * Returns the battery consumption (in microcoulombs) of this uid for a standard power
+         * bucket and a process state, such as Uid.PROCESS_STATE_TOP.
+         */
+        @GuardedBy("mBsi")
+        public long getMeasuredBatteryConsumptionUC(@StandardPowerBucket int bucket,
+                int processState) {
+            if (mBsi.mGlobalMeasuredEnergyStats == null
+                    || !mBsi.mGlobalMeasuredEnergyStats.isStandardBucketSupported(bucket)) {
+                return POWER_DATA_UNAVAILABLE;
+            }
+            if (mUidMeasuredEnergyStats == null) {
+                return 0L; // It is supported, but was never filled, so it must be 0
+            }
+            return mUidMeasuredEnergyStats.getAccumulatedStandardBucketCharge(bucket, processState);
+        }
+
         @GuardedBy("mBsi")
         @Override
         public long[] getCustomConsumerMeasuredBatteryConsumptionUC() {
@@ -8625,6 +8646,13 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @GuardedBy("mBsi")
+        @Override
+        public long getCpuMeasuredBatteryConsumptionUC(
+                @BatteryConsumer.ProcessState int processState) {
+            return getMeasuredBatteryConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_CPU,
+                    processState);
+        }
+
         @Override
         public long getGnssMeasuredBatteryConsumptionUC() {
             return getMeasuredBatteryConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_GNSS);

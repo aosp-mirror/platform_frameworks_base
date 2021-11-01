@@ -660,6 +660,7 @@ public abstract class BatteryStats implements Parcelable {
             mapUidProcessStateToBatteryConsumerProcessState(int processState) {
         switch (processState) {
             case BatteryStats.Uid.PROCESS_STATE_TOP:
+            case BatteryStats.Uid.PROCESS_STATE_FOREGROUND:
                 return BatteryConsumer.PROCESS_STATE_FOREGROUND;
             case BatteryStats.Uid.PROCESS_STATE_BACKGROUND:
             case BatteryStats.Uid.PROCESS_STATE_TOP_SLEEPING:
@@ -1026,6 +1027,16 @@ public abstract class BatteryStats implements Parcelable {
          * {@hide}
          */
         public abstract long getCpuMeasuredBatteryConsumptionUC();
+
+        /**
+         * Returns the battery consumption (in microcoulombs) of the uid's cpu usage when in the
+         * specified process state.
+         * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+         *
+         * {@hide}
+         */
+        public abstract long getCpuMeasuredBatteryConsumptionUC(
+                @BatteryConsumer.ProcessState int processState);
 
         /**
          * Returns the battery consumption (in microcoulombs) of the uid's GNSS usage, derived from
