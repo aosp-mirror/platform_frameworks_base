@@ -42,8 +42,6 @@ import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBL
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ROOT_TASK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
-import static java.lang.Integer.MIN_VALUE;
-
 import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
@@ -907,15 +905,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         float r = ((color >> 16) & 0xff) / 255.0f;
         float g = ((color >>  8) & 0xff) / 255.0f;
         float b = ((color >>  0) & 0xff) / 255.0f;
-        float a = ((color >> 24) & 0xff) / 255.0f;
 
         mColorLayerCounter++;
 
-        getPendingTransaction().setLayer(mColorBackgroundLayer, MIN_VALUE)
+        getPendingTransaction()
                 .setColor(mColorBackgroundLayer, new float[]{r, g, b})
-                .setAlpha(mColorBackgroundLayer, a)
-                .setWindowCrop(mColorBackgroundLayer, getSurfaceWidth(), getSurfaceHeight())
-                .setPosition(mColorBackgroundLayer, 0, 0)
                 .show(mColorBackgroundLayer);
 
         scheduleAnimation();
