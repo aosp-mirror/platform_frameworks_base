@@ -1111,7 +1111,7 @@
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Група"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Избран е 1 уред"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Избрани се <xliff:g id="COUNT">%1$d</xliff:g> уреди"</string>
-    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (исклучен)"</string>
+    <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(врската е прекината)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Не може да се поврзе. Обидете се повторно."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Спарете нов уред"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Број на верзија"</string>

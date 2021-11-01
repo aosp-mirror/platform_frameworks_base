@@ -235,7 +235,7 @@
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"বেটাৰী চাৰ্জ হৈ আছে, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> শতাংশ।"</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"ছিষ্টেমৰ ছেটিং৷"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"জাননীসমূহ।"</string>
-    <string name="accessibility_overflow_action" msgid="8555835828182509104">"সকলো জাননীবোৰ চাওক"</string>
+    <string name="accessibility_overflow_action" msgid="8555835828182509104">"আটাইবোৰ জাননী চাওক"</string>
     <string name="accessibility_remove_notification" msgid="1641455251495815527">"জাননী মচক৷"</string>
     <string name="accessibility_gps_enabled" msgid="4061313248217660858">"জিপিএছ সক্ষম হ\'ল৷"</string>
     <string name="accessibility_gps_acquiring" msgid="896207402196024040">"জিপিএছ বিচাৰি থকা হৈছে।"</string>
@@ -311,7 +311,7 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"জিপিএছএ অৱস্থান ছেট কৰিছে"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"অৱস্থানৰ অনুৰোধ সক্ৰিয় হৈ আছে"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"ছেন্সৰ অফ সক্ৰিয় কৰা আছে"</string>
-    <string name="accessibility_clear_all" msgid="970525598287244592">"সকলো জাননী মচক৷"</string>
+    <string name="accessibility_clear_all" msgid="970525598287244592">"আটাইবোৰ জাননী মচক৷"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
       <item quantity="one"> ভিতৰত আৰু <xliff:g id="NUMBER_1">%s</xliff:g>টা জাননী আছে।</item>
@@ -448,8 +448,8 @@
     <string name="zen_priority_introduction" msgid="3159291973383796646">"আপুনি নিৰ্দিষ্ট কৰা এলাৰ্ম, ৰিমাইণ্ডাৰ, ইভেন্ট আৰু কল কৰোঁতাৰ বাহিৰে আন কোনো শব্দৰ পৰা আপুনি অসুবিধা নাপাব। কিন্তু, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি আপুনি প্লে কৰিব খোজা যিকোনো বস্তু তথাপি শুনিব পাৰিব।"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"আপুনি নিৰ্দিষ্ট কৰা এলাৰ্মৰ বাহিৰে আন কোনো ধ্বনি আৰু কম্পনৰ পৰা আপুনি অসুবিধা নাপাব। কিন্তু, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি আপুনি প্লে কৰিব খোজা যিকোনো বস্তু তথাপি শুনিব পাৰিব।"</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"নিজৰ উপযোগিতা অনুসৰি"</string>
-    <string name="zen_silence_introduction_voice" msgid="853573681302712348">"এই কার্যই এলার্ম, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি সকলোৰে বাবে ধ্বনি আৰু কম্পন অৱৰোধ কৰিব। আপুনি ফ\'ন কল তথাপি কৰিবলৈ সক্ষম হ\'ব।"</string>
-    <string name="zen_silence_introduction" msgid="6117517737057344014">"এই কার্যই এলার্ম, মিউজিক, ভিডিঅ\' আৰু গেইমকে ধৰি সকলোৰে ধ্বনি আৰু কম্পন অৱৰোধ কৰে।"</string>
+    <string name="zen_silence_introduction_voice" msgid="853573681302712348">"এই কার্যই এলার্ম, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি আটাইবোৰৰ বাবে ধ্বনি আৰু কম্পন অৱৰোধ কৰিব। আপুনি ফ\'ন কল তথাপি কৰিবলৈ সক্ষম হ\'ব।"</string>
+    <string name="zen_silence_introduction" msgid="6117517737057344014">"এই কার্যই এলার্ম, মিউজিক, ভিডিঅ\' আৰু গেইমকে ধৰি আটাইবোৰৰ ধ্বনি আৰু কম্পন অৱৰোধ কৰে।"</string>
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"কম জৰুৰী জাননীসমূহ তলত"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"খুলিবলৈ পুনৰাই টিপক"</string>
@@ -482,7 +482,7 @@
     <string name="user_add_user" msgid="4336657383006913022">"ব্যৱহাৰকাৰী যোগ কৰক"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"নতুন ব্যৱহাৰকাৰী"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"অতিথি আঁতৰাবনে?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই ছেশ্বনৰ সকলো এপ্ আৰু ডেটা মচা হ\'ব।"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই ছেশ্বনৰ আটাইবোৰ এপ্ আৰু ডেটা মচা হ\'ব।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"আঁতৰাওক"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"অতিথি, আপোনাক পুনৰ স্বাগতম!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"আপুনি আপোনাৰ ছেশ্বন অব্যাহত ৰাখিব বিচাৰেনে?"</string>
@@ -502,24 +502,24 @@
       <item quantity="other">আপুনি <xliff:g id="COUNT">%d</xliff:g> জনলৈকে ব্যৱহাৰকাৰী যোগ কৰিব পাৰে।</item>
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"ব্যৱহাৰকাৰীক আঁতৰাবনে?"</string>
-    <string name="user_remove_user_message" msgid="6702834122128031833">"এই ব্যৱহাৰকাৰীৰ সকলো এপ্ আৰু ডেটা মচা হ\'ব।"</string>
+    <string name="user_remove_user_message" msgid="6702834122128031833">"এই ব্যৱহাৰকাৰীৰ আটাইবোৰ এপ্ আৰু ডেটা মচা হ\'ব।"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"আঁতৰাওক"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"বেটাৰী সঞ্চয়কাৰী অন হৈ আছে"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"কাৰ্যদক্ষতা আৰু নেপথ্য ডেটা হ্ৰাস কৰে"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"বেটাৰী সঞ্চয়কাৰী অফ কৰক"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>এ আপোনাৰ স্ক্ৰীনত দৃশ্যমান হোৱা অথবা ৰেকর্ডিং অথবা কাষ্টিঙৰ সময়ত আপোনাৰ ডিভাইচত প্লে\' কৰা সকলো তথ্যলৈ এক্সেছ পাব। এইটোত পাছৱর্ড, পৰিশোধৰ সবিশেষ, ফট\', বার্তাসমূহ আৰু আপুনি প্লে\' কৰা অডিঅ\'ৰ দৰে তথ্য অন্তর্ভুক্ত হয়।"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"এই সুবিধাটো প্ৰদান কৰা সেৱাটোৱে আপোনাৰ স্ক্ৰীনত দৃশ্যমান হোৱা অথবা ৰেকর্ডিং অথবা কাষ্টিংৰ সময়ত আপোনাৰ ডিভাইচত প্লে\' কৰা সকলো তথ্যলৈ এক্সেছ পাব। এইটোত পাছৱর্ড, পৰিশোধৰ সবিশেষ, ফট\', বার্তাসমূহ আৰু আপুনি প্লে\' কৰা অডিঅ\'ৰ দৰে তথ্য অন্তর্ভুক্ত হয়।"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>এ আপোনাৰ স্ক্ৰীনত দৃশ্যমান হোৱা অথবা ৰেকর্ডিং অথবা কাষ্টিঙৰ সময়ত আপোনাৰ ডিভাইচত প্লে\' কৰা আটাইবোৰ তথ্যলৈ এক্সেছ পাব। এইটোত পাছৱর্ড, পৰিশোধৰ সবিশেষ, ফট\', বার্তাসমূহ আৰু আপুনি প্লে\' কৰা অডিঅ\'ৰ দৰে তথ্য অন্তর্ভুক্ত হয়।"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"এই সুবিধাটো প্ৰদান কৰা সেৱাটোৱে আপোনাৰ স্ক্ৰীনত দৃশ্যমান হোৱা অথবা ৰেকর্ডিং অথবা কাষ্টিঙৰ সময়ত আপোনাৰ ডিভাইচত প্লে\' কৰা আটাইবোৰ তথ্যলৈ এক্সেছ পাব। এইটোত পাছৱর্ড, পৰিশোধৰ সবিশেষ, ফট\', বার্তাসমূহ আৰু আপুনি প্লে\' কৰা অডিঅ\'ৰ দৰে তথ্য অন্তর্ভুক্ত হয়।"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ৰেকর্ডিং অথবা কাষ্টিং আৰম্ভ কৰিবনে?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ৰ জৰিয়তে ৰেকর্ডিং অথবা কাষ্টিং আৰম্ভ কৰিবনে ?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"পুনৰাই নেদেখুৱাব"</string>
-    <string name="clear_all_notifications_text" msgid="348312370303046130">"সকলো মচক"</string>
+    <string name="clear_all_notifications_text" msgid="348312370303046130">"আটাইবোৰ মচক"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"পৰিচালনা"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ইতিহাস"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"নতুন"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"নীৰৱ"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"জাননীসমূহ"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"বাৰ্তালাপ"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"সকলো নীৰৱ জাননী মচক"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"আটাইবোৰ নীৰৱ জাননী মচক"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"অসুবিধা নিদিব-ই জাননী পজ কৰিছে"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"এতিয়াই আৰম্ভ কৰক"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"কোনো জাননী নাই"</string>
@@ -704,7 +704,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"আপোনাৰ টেবলেটত আপোনাৰ কীব\'ৰ্ড সংযোগ কৰিবলৈ আপুনি প্ৰথমে ব্লুটুথ অন কৰিব লাগিব।"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"অন কৰক"</string>
     <string name="show_silently" msgid="5629369640872236299">"জাননীসমূহ নীৰৱে দেখুৱাওক"</string>
-    <string name="block" msgid="188483833983476566">"সকলো জাননী অৱৰোধ কৰক"</string>
+    <string name="block" msgid="188483833983476566">"আটাইবোৰ জাননী অৱৰোধ কৰক"</string>
     <string name="do_not_silence" msgid="4982217934250511227">"নীৰৱ নকৰিব"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"নীৰৱ অথবা অৱৰোধ নকৰিব"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"জাননী নিয়ন্ত্ৰণৰ অধিক কৰ্তৃত্ব"</string>
@@ -754,7 +754,7 @@
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"এই জাননীসমূহ সংশোধন কৰিব নোৱাৰি।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"এই ধৰণৰ জাননীবোৰ ইয়াত কনফিগাৰ কৰিব পৰা নাযায়"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"প্ৰক্সি হিচাপে পঠিওৱা জাননী"</string>
-    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ সকলো জাননী"</string>
+    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ আটাইবোৰ জাননী"</string>
     <string name="see_more_title" msgid="7409317011708185729">"অধিক চাওক"</string>
     <string name="appops_camera" msgid="5215967620896725715">"এই এপে কেমেৰা ব্য়ৱহাৰ কৰি আছে।"</string>
     <string name="appops_microphone" msgid="8805468338613070149">"এই এপে মাইক্ৰ\'ফ\'ন ব্য়ৱহাৰ কৰি আছে।"</string>
@@ -1062,7 +1062,7 @@
     <string name="controls_favorite_default_title" msgid="967742178688938137">"নিয়ন্ত্ৰণসমূহ"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"ক্ষিপ্ৰ ছেটিঙৰ পৰা এক্সেছ কৰিবলৈ নিয়ন্ত্ৰণসমূহ বাছনি কৰক"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"নিয়ন্ত্ৰণসমূহ পুনৰ সজাবলৈ ধৰি ৰাখক আৰু টানি আনি এৰক"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"সকলো নিয়ন্ত্ৰণ আঁতৰোৱা হৈছে"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"আটাইবোৰ নিয়ন্ত্ৰণ আঁতৰোৱা হৈছে"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"সালসলনিসমূহ ছেভ নহ’ল"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"অন্য এপ্‌সমূহ চাওক"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"নিয়ন্ত্ৰণসমূহ ল’ড কৰিবপৰা নগ’ল। এপ্‌টোৰ ছেটিং সলনি কৰা হোৱা নাই বুলি নিশ্চিত কৰিবলৈ <xliff:g id="APP">%s</xliff:g> এপ্‌টো পৰীক্ষা কৰক।"</string>
@@ -1111,7 +1111,7 @@
     <string name="media_output_dialog_group" msgid="5571251347877452212">"গোট"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"১ টা ডিভাইচ বাছনি কৰা হৈছে"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> টা ডিভাইচ বাছনি কৰা হৈছে"</string>
-    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (সংযোগ বিচ্ছিন্ন হৈছে)"</string>
+    <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(সংযোগ বিচ্ছিন্ন কৰা হৈছে)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"সংযোগ কৰিব পৰা নগ’ল। পুনৰ চেষ্টা কৰক।"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"নতুন ডিভাইচ পেয়াৰ কৰক"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"বিল্ডৰ নম্বৰ"</string>
