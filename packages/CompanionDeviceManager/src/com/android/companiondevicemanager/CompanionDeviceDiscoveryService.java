@@ -116,6 +116,11 @@ public class CompanionDeviceDiscoveryService extends Service {
                     CompanionDeviceDiscoveryService::startDiscovery,
                     CompanionDeviceDiscoveryService.this, request));
         }
+
+        @Override
+        public void onAssociationCreated() {
+            Handler.getMain().post(CompanionDeviceDiscoveryService.this::onAssociationCreated);
+        }
     };
 
     private ScanCallback mBLEScanCallback;
@@ -219,6 +224,11 @@ public class CompanionDeviceDiscoveryService extends Service {
         Handler.getMain().sendMessageDelayed(
                 obtainMessage(CompanionDeviceDiscoveryService::stopScan, this),
                 SCAN_TIMEOUT);
+    }
+
+    @MainThread
+    private void onAssociationCreated() {
+        mActivity.setResultAndFinish();
     }
 
     private boolean shouldScan(List<? extends DeviceFilter> mediumSpecificFilters) {
