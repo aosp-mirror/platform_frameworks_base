@@ -276,4 +276,22 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         assertEquals(1, uiEventLogger.numLogs())
         assertEquals(QSUserSwitcherEvent.QS_USER_GUEST_CONTINUE.id, uiEventLogger.eventId(0))
     }
+
+    @Test
+    fun test_getCurrentUserName_shouldReturnNameOfTheCurrentUser() {
+        fun addUser(id: Int, name: String, isCurrent: Boolean) {
+            userSwitcherController.users.add(UserSwitcherController.UserRecord(
+                    UserInfo(id, name, 0),
+                    null, false, isCurrent, false,
+                    false, false
+            ))
+        }
+        val bgUserName = "background_user"
+        val fgUserName = "foreground_user"
+
+        addUser(1, bgUserName, false)
+        addUser(2, fgUserName, true)
+
+        assertEquals(fgUserName, userSwitcherController.currentUserName)
+    }
 }
