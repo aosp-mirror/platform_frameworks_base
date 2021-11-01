@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.fullscreen;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.util.MathUtils.lerp;
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -163,7 +164,10 @@ public final class FullscreenUnfoldController implements UnfoldListener,
     public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
         AnimationContext animationContext = mAnimationContextByTaskId.get(taskInfo.taskId);
         if (animationContext != null) {
-            resetSurface(animationContext);
+            // PiP task has its own cleanup path, ignore surface reset to avoid conflict.
+            if (taskInfo.getWindowingMode() != WINDOWING_MODE_PINNED) {
+                resetSurface(animationContext);
+            }
             mAnimationContextByTaskId.remove(taskInfo.taskId);
         }
 
