@@ -77,23 +77,37 @@ class ControlActionCoordinatorImpl @Inject constructor(
 
     override fun toggle(cvh: ControlViewHolder, templateId: String, isChecked: Boolean) {
         controlsMetricsLogger.touch(cvh, isLocked)
-        bouncerOrRun(createAction(cvh.cws.ci.controlId, {
-            cvh.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-            cvh.action(BooleanAction(templateId, !isChecked))
-        }, true /* blockable */))
+        bouncerOrRun(
+            createAction(
+                cvh.cws.ci.controlId,
+                {
+                    cvh.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+                    cvh.action(BooleanAction(templateId, !isChecked))
+                },
+                true /* blockable */
+            ),
+            isAuthRequired(cvh)
+        )
     }
 
     override fun touch(cvh: ControlViewHolder, templateId: String, control: Control) {
         controlsMetricsLogger.touch(cvh, isLocked)
         val blockable = cvh.usePanel()
-        bouncerOrRun(createAction(cvh.cws.ci.controlId, {
-            cvh.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-            if (cvh.usePanel()) {
-                showDetail(cvh, control.getAppIntent())
-            } else {
-                cvh.action(CommandAction(templateId))
-            }
-        }, blockable))
+        bouncerOrRun(
+            createAction(
+                cvh.cws.ci.controlId,
+                {
+                    cvh.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+                    if (cvh.usePanel()) {
+                        showDetail(cvh, control.getAppIntent())
+                    } else {
+                        cvh.action(CommandAction(templateId))
+                    }
+                },
+                blockable
+            ),
+            isAuthRequired(cvh)
+        )
     }
 
     override fun drag(isEdge: Boolean) {
@@ -106,20 +120,33 @@ class ControlActionCoordinatorImpl @Inject constructor(
 
     override fun setValue(cvh: ControlViewHolder, templateId: String, newValue: Float) {
         controlsMetricsLogger.drag(cvh, isLocked)
-        bouncerOrRun(createAction(cvh.cws.ci.controlId, {
-            cvh.action(FloatAction(templateId, newValue))
-        }, false /* blockable */))
+        bouncerOrRun(
+            createAction(
+                cvh.cws.ci.controlId,
+                { cvh.action(FloatAction(templateId, newValue)) },
+                false /* blockable */
+            ),
+            isAuthRequired(cvh)
+        )
     }
 
     override fun longPress(cvh: ControlViewHolder) {
         controlsMetricsLogger.longPress(cvh, isLocked)
-        bouncerOrRun(createAction(cvh.cws.ci.controlId, {
-            // Long press snould only be called when there is valid control state, otherwise ignore
-            cvh.cws.control?.let {
-                cvh.layout.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                showDetail(cvh, it.getAppIntent())
-            }
-        }, false /* blockable */))
+        bouncerOrRun(
+            createAction(
+                cvh.cws.ci.controlId,
+                {
+                    // Long press snould only be called when there is valid control state,
+                    // otherwise ignore
+                    cvh.cws.control?.let {
+                        cvh.layout.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                        showDetail(cvh, it.getAppIntent())
+                    }
+                },
+                false /* blockable */
+            ),
+            isAuthRequired(cvh)
+        )
     }
 
     override fun runPendingAction(controlId: String) {
@@ -135,6 +162,8 @@ class ControlActionCoordinatorImpl @Inject constructor(
         actionsInProgress.remove(controlId)
     }
 
+    private fun isAuthRequired(cvh: ControlViewHolder) = cvh.cws.control?.isAuthRequired() ?: true
+
     private fun shouldRunAction(controlId: String) =
         if (actionsInProgress.add(controlId)) {
             uiExecutor.executeDelayed({
@@ -146,8 +175,8 @@ class ControlActionCoordinatorImpl @Inject constructor(
         }
 
     @VisibleForTesting
-    fun bouncerOrRun(action: Action) {
-        if (keyguardStateController.isShowing()) {
+    fun bouncerOrRun(action: Action, authRequired: Boolean) {
+        if (keyguardStateController.isShowing() && authRequired) {
             if (isLocked) {
                 context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
 

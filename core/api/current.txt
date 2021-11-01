@@ -38383,6 +38383,7 @@ package android.service.controls {
     method @NonNull public CharSequence getSubtitle();
     method @NonNull public CharSequence getTitle();
     method @Nullable public CharSequence getZone();
+    method public boolean isAuthRequired();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.controls.Control> CREATOR;
     field public static final int STATUS_DISABLED = 4; // 0x4
@@ -38397,6 +38398,7 @@ package android.service.controls {
     ctor public Control.StatefulBuilder(@NonNull android.service.controls.Control);
     method @NonNull public android.service.controls.Control build();
     method @NonNull public android.service.controls.Control.StatefulBuilder setAppIntent(@NonNull android.app.PendingIntent);
+    method @NonNull public android.service.controls.Control.StatefulBuilder setAuthRequired(boolean);
     method @NonNull public android.service.controls.Control.StatefulBuilder setControlId(@NonNull String);
     method @NonNull public android.service.controls.Control.StatefulBuilder setControlTemplate(@NonNull android.service.controls.templates.ControlTemplate);
     method @NonNull public android.service.controls.Control.StatefulBuilder setCustomColor(@Nullable android.content.res.ColorStateList);
