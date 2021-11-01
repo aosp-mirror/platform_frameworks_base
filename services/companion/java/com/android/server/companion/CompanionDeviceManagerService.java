@@ -775,12 +775,14 @@ public class CompanionDeviceManagerService extends SystemService {
 
         exemptFromAutoRevoke(packageInfo.packageName, packageInfo.applicationInfo.uid);
 
-        if (mCurrentlyConnectedDevices.contains(association.getDeviceMacAddress())) {
-            grantDeviceProfile(association);
-        }
+        if (!association.isManagedByCompanionApp()) {
+            if (mCurrentlyConnectedDevices.contains(association.getDeviceMacAddress())) {
+                grantDeviceProfile(association);
+            }
 
-        if (association.isNotifyOnDeviceNearby()) {
-            restartBleScan();
+            if (association.isNotifyOnDeviceNearby()) {
+                restartBleScan();
+            }
         }
     }
 
@@ -1213,6 +1215,9 @@ public class CompanionDeviceManagerService extends SystemService {
         ArrayList<ScanFilter> result = new ArrayList<>();
         ArraySet<String> addressesSeen = new ArraySet<>();
         for (AssociationInfo association : getAllAssociations()) {
+            if (association.isManagedByCompanionApp()) {
+                continue;
+            }
             String address = association.getDeviceMacAddress();
             if (addressesSeen.contains(address)) {
                 continue;
