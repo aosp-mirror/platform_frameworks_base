@@ -52153,6 +52153,7 @@ package android.view.inputmethod {
     method public boolean setComposingText(CharSequence, int);
     method public default boolean setImeConsumesInput(boolean);
     method public boolean setSelection(int, int);
+    method @Nullable public default android.view.inputmethod.TextSnapshot takeSnapshot();
     field public static final int CURSOR_UPDATE_IMMEDIATE = 1; // 0x1
     field public static final int CURSOR_UPDATE_MONITOR = 2; // 0x2
     field public static final int GET_EXTRACTED_TEXT_MONITOR = 1; // 0x1
@@ -52363,6 +52364,16 @@ package android.view.inputmethod {
     method @NonNull public CharSequence getText();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.SurroundingText> CREATOR;
+  }
+
+  public final class TextSnapshot {
+    ctor public TextSnapshot(@NonNull android.view.inputmethod.SurroundingText, @IntRange(from=0xffffffff) int, @IntRange(from=0xffffffff) int, int);
+    method @IntRange(from=0xffffffff) public int getCompositionEnd();
+    method @IntRange(from=0xffffffff) public int getCompositionStart();
+    method public int getCursorCapsMode();
+    method @IntRange(from=0xffffffff) public int getSelectionEnd();
+    method @IntRange(from=0xffffffff) public int getSelectionStart();
+    method @NonNull public android.view.inputmethod.SurroundingText getSurroundingText();
   }
 
 }
