@@ -728,10 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"\'ശല്യപ്പെടുത്തരുത്\' കോൺഫിഗറേഷൻ വായിക്കുന്നതിനും എഴുതുന്നതിനും ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"അനുമതി ഉപയോഗം കാണാൻ ആരംഭിക്കുക"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ഒരു ആപ്പിനുള്ള അനുമതി ഉപയോഗം ആരംഭിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ ആപ്പുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <!-- no translation found for permlab_startViewAppFeatures (7955084203185903001) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewAppFeatures (7207240860165206107) -->
-    <skip />
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ആപ്പ് ഫീച്ചറുകൾ കാണാൻ ആരംഭിക്കുക"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ആപ്പിനുള്ള ഫീച്ചറുകളുടെ വിവരങ്ങൾ കാണാൻ ആരംഭിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ഉയർന്ന സാം‍പ്ലിംഗ് റേറ്റിൽ സെൻസർ ഡാറ്റ ആക്സസ് ചെയ്യുക"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz-നേക്കാൾ ഉയർന്ന റേറ്റിൽ സെൻസർ ഡാറ്റ സാമ്പിൾ ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"പാസ്‌വേഡ് നിയമങ്ങൾ സജ്ജീകരിക്കുക"</string>

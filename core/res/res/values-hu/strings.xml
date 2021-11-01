@@ -728,10 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Az alkalmazás olvashatja és szerkesztheti a „Ne zavarjanak” funkció beállításait."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"engedélyhasználat megtekintésének elindítása"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Lehetővé teszi a felhasználó számára, hogy elindítsa az alkalmazás engedélyhasználatát. A normál alkalmazásoknak erre soha nincs szükségük."</string>
-    <!-- no translation found for permlab_startViewAppFeatures (7955084203185903001) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewAppFeatures (7207240860165206107) -->
-    <skip />
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"alkalmazásfunkciók megtekintésének megkezdése"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Engedélyezi az alkalmazás számára, hogy megkezdje az alkalmazások funkcióira vonatkozó adatok megtekintését."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"hozzáférés a szenzoradatokhoz nagy mintavételezési gyakorisággal"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Lehetővé teszi az alkalmazás számára, hogy 200 Hz-nél magasabb gyakorisággal vegyen mintát a szenzoradatokból"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Jelszavakkal kapcsolatos szabályok beállítása"</string>

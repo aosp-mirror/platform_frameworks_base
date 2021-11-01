@@ -728,10 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Ger appen läs- och skrivbehörighet till konfigurationen för Stör ej."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"börja visa behörighetsanvändningen"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Gör att innehavaren kan öppna behörighetsanvändning för en app. Ska inte behövas för vanliga appar."</string>
-    <!-- no translation found for permlab_startViewAppFeatures (7955084203185903001) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewAppFeatures (7207240860165206107) -->
-    <skip />
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"börja visa appfunktioner"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Tillåter att innehavaren börjar visa information om funktioner för en app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"åtkomst till sensordata med en hög samplingsfrekvens"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Tillåter att appen får åtkomst till sensordata med en högre samplingsfrekvens än 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Ange lösenordsregler"</string>
