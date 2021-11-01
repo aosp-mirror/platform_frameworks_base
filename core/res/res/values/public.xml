@@ -3315,7 +3315,9 @@
   <staging-public-group type="style" first-id="0x0dfd0000">
   </staging-public-group>
 
-  <staging-public-group type="string" first-id="0x0dfc0000">
+  <staging-public-group type="string" first-id="0x01dc0000">
+    <!-- @hide @SystemApi -->
+    <public name="config_systemSupervision" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01db0000">
