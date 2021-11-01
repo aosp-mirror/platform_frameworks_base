@@ -877,8 +877,8 @@ public class CommandQueue extends IStatusBar.Stub implements
             args.arg5 = requireConfirmation;
             args.argi1 = userId;
             args.arg6 = opPackageName;
-            args.arg7 = operationId;
-            args.arg8 = requestId;
+            args.argl1 = operationId;
+            args.argl2 = requestId;
             args.argi2 = multiSensorConfig;
             mHandler.obtainMessage(MSG_BIOMETRIC_SHOW, args)
                     .sendToTarget();
@@ -1359,9 +1359,9 @@ public class CommandQueue extends IStatusBar.Stub implements
                                 (boolean) someArgs.arg4 /* credentialAllowed */,
                                 (boolean) someArgs.arg5 /* requireConfirmation */,
                                 someArgs.argi1 /* userId */,
-                                (long) someArgs.arg7 /* operationId */,
+                                someArgs.argl1 /* operationId */,
                                 (String) someArgs.arg6 /* opPackageName */,
-                                (long) someArgs.arg8 /* requestId */,
+                                someArgs.argl2 /* requestId */,
                                 someArgs.argi2 /* multiSensorConfig */);
                     }
                     someArgs.recycle();
