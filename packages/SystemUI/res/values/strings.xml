@@ -20,24 +20,6 @@
     <!-- Name of the status bar as seen in the applications info settings page. [CHAR LIMIT=12] -->
     <string name="app_label">System UI</string>
 
-    <!-- The text for the button in the notification window-shade that clears
-         all of the currently visible notifications. [CHAR LIMIT=10]-->
-    <string name="status_bar_clear_all_button">Clear</string>
-
-    <!-- The label in the bar at the top of the status bar when there are no notifications
-         showing.  [CHAR LIMIT=40]-->
-    <string name="status_bar_no_notifications_title">No notifications</string>
-
-    <!-- The label for the group of notifications for ongoing events in the opened version of
-         the status bar.  An ongoing call is the prime example of this.  The MP3 music player
-         might be another example.   [CHAR LIMIT=40] -->
-    <string name="status_bar_ongoing_events_title">Ongoing</string>
-
-    <!-- The label for the group of notifications for recent events in the opened version of
-         the status bar.  Recently received text messsages (SMS), emails, calendar alerts, etc.
-         [CHAR LIMIT=40] -->
-    <string name="status_bar_latest_events_title">Notifications</string>
-
     <!-- When the battery is low, this is displayed to the user in a dialog.  The title of the low battery alert.  [CHAR LIMIT=NONE]-->
     <string name="battery_low_title">Battery may run out soon</string>
 
@@ -49,32 +31,24 @@
     <!-- A message that appears when the battery remaining estimate is low in a dialog.  This is
     appended to the subtitle of the low battery alert.  "percentage" is the percentage of battery
     remaining. "time" is the amount of time remaining before the phone runs out of battery [CHAR LIMIT=none]-->
-    <string name="battery_low_percent_format_hybrid"><xliff:g id="percentage">%1$s</xliff:g> remaining, about <xliff:g id="time">%2$s</xliff:g> left based on your usage</string>
 
     <!-- A message that appears when the battery remaining estimate is low in a dialog and insufficient
     data was present to say it is customized to the user. This is appended to the subtitle of the
     low battery alert.  "percentage" is the percentage of battery remaining. "time" is the amount
      of time remaining before the phone runs out of battery [CHAR LIMIT=none]-->
-    <string name="battery_low_percent_format_hybrid_short"><xliff:g id="percentage">%1$s</xliff:g> remaining, about <xliff:g id="time">%2$s</xliff:g> left</string>
 
     <!-- Same as battery_low_percent_format, with a notice about battery saver if on. [CHAR LIMIT=none]-->
-    <string name="battery_low_percent_format_saver_started"><xliff:g id="percentage">%s</xliff:g> remaining. Battery Saver is on.</string>
 
     <!-- A message that appears when a USB charger is plugged in and the device does not
     support charging on it.  That is, a charger that fits into the USB port and goes into
     a wall socket, not into a computer. (This happens because some devices require more
     current than the USB spec allows.  [CHAR LIMIT=NONE] -->
-    <string name="invalid_charger">Can\'t charge via USB. Use the charger that came with your device.</string>
 
     <!-- First line of invalid_charger, used in the notification form.  [CHAR LIMIT=NONE]-->
     <string name="invalid_charger_title">Can\'t charge via USB</string>
 
     <!-- Second line of invalid_charger, used in the notification form.  [CHAR LIMIT=NONE]-->
     <string name="invalid_charger_text">Use the charger that came with your device</string>
-
-    <!-- When the battery is low, this is the label of the button to go to the
-         power usage activity to find out what drained the battery.  [CHAR LIMIT=30] -->
-    <string name="battery_low_why">Settings</string>
 
     <!-- Battery saver confirmation dialog title [CHAR LIMIT=NONE]-->
     <string name="battery_saver_confirmation_title">Turn on Battery Saver?</string>
@@ -89,33 +63,14 @@
     <string name="battery_saver_start_action">Turn on Battery Saver</string>
 
     <!-- Name of the button that links to the Settings app. [CHAR LIMIT=NONE] -->
-    <string name="status_bar_settings_settings_button">Settings</string>
 
     <!-- Name of the button that links to the Wifi settings screen. [CHAR LIMIT=NONE] -->
-    <string name="status_bar_settings_wifi_button">Wi-Fi</string>
 
     <!-- Label in system panel saying the device will use the orientation sensor to rotate [CHAR LIMIT=30] -->
     <string name="status_bar_settings_auto_rotation">Auto-rotate screen</string>
 
-    <!-- Abbreviation / label for mute brightness mode button. Should be all caps. [CHAR LIMIT=6] -->
-    <string name="status_bar_settings_mute_label">MUTE</string>
-
-    <!-- Abbreviation / label for automatic brightness mode button. Should be all caps. [CHAR LIMIT=6] -->
-    <string name="status_bar_settings_auto_brightness_label">AUTO</string>
-
-    <!-- Label in system panel saying the device will show notifications [CHAR LIMIT=30] -->
-    <string name="status_bar_settings_notifications">Notifications</string>
-
     <!-- Separator for PLMN and SPN in network name. -->
     <string name="status_bar_network_name_separator" translatable="false"> - </string>
-
-    <!-- Network connection string for Bluetooth Reverse Tethering -->
-    <string name="bluetooth_tethered">Bluetooth tethered</string>
-    <!-- Title of a button to open the settings for input methods [CHAR LIMIT=30] -->
-    <string name="status_bar_input_method_settings_configure_input_methods">Set up input methods</string>
-
-    <!-- Label of a toggle switch to disable use of the physical keyboard in favor of the IME. [CHAR LIMIT=25] -->
-    <string name="status_bar_use_physical_keyboard">Physical keyboard</string>
 
     <!-- Prompt for the USB device permission dialog [CHAR LIMIT=80] -->
     <string name="usb_device_permission_prompt">Allow <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> to access <xliff:g id="usb_device" example="USB Headphones">%2$s</xliff:g>?</string>
@@ -201,14 +156,6 @@
     <!-- Button text to disable contaminant detection [CHAR LIMIT=NONE] -->
     <string name="learn_more">Learn more</string>
 
-    <!-- Checkbox label for application compatibility mode ON (zooming app to look like it's running
-         on a phone).  [CHAR LIMIT=25] -->
-    <string name="compat_mode_on">Zoom to fill screen</string>
-
-    <!-- Checkbox label for application compatibility mode OFF (normal mode on tablets).
-         [CHAR LIMIT=25] -->
-    <string name="compat_mode_off">Stretch to fill screen</string>
-
     <!-- Power menu item for taking a screenshot [CHAR LIMIT=20]-->
     <string name="global_action_screenshot">Screenshot</string>
     <!-- Message shown in power menu when smart lock has been disabled [CHAR_LIMIT=NONE] -->
@@ -218,14 +165,10 @@
          [CHAR LIMIT=50] -->
     <string name="remote_input_image_insertion_text">sent an image</string>
 
-    <!-- Notification ticker displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=30] -->
-    <string name="screenshot_saving_ticker">Saving screenshot\u2026</string>
     <!-- Informs the user that a screenshot is being saved. [CHAR LIMIT=50] -->
     <string name="screenshot_saving_title">Saving screenshot\u2026</string>
     <!-- Notification title displayed when a screenshot is saved to the Gallery. [CHAR LIMIT=50] -->
     <string name="screenshot_saved_title">Screenshot saved</string>
-    <!-- Notification text displayed when a screenshot is saved to the Gallery. [CHAR LIMIT=100] -->
-    <string name="screenshot_saved_text">Tap to view your screenshot</string>
     <!-- Notification title displayed when we fail to take a screenshot. [CHAR LIMIT=50] -->
     <string name="screenshot_failed_title">Couldn\'t save screenshot</string>
     <!-- Notification text displayed when we fail to save a screenshot due to locked storage. [CHAR LIMIT=100] -->
@@ -240,7 +183,6 @@
     <!-- Label for UI element which allows editing the screenshot [CHAR LIMIT=30] -->
     <string name="screenshot_edit_label">Edit</string>
     <!-- Content description indicating that tapping the element will allow editing the screenshot [CHAR LIMIT=NONE] -->
-    <string name="screenshot_edit_description">Edit screenshot</string>
     <!-- Label for UI element which allows the user to capture additional off-screen content in a screenshot. [CHAR LIMIT=30] -->
     <string name="screenshot_scroll_label">Capture more</string>
     <!-- Content description indicating that tapping a button will dismiss the screenshots UI [CHAR LIMIT=NONE] -->
@@ -285,19 +227,11 @@
     <!-- Label for the checkbox to enable showing location of touches during screen recording [CHAR LIMIT=NONE]-->
     <string name="screenrecord_taps_label">Show touches on screen</string>
     <!-- Label for notification that the user can tap to stop and save the screen recording [CHAR LIMIT=NONE] -->
-    <string name="screenrecord_stop_text">Tap to stop</string>
     <!-- Label for notification action to stop and save the screen recording [CHAR LIMIT=35] -->
     <string name="screenrecord_stop_label">Stop</string>
-    <!-- Label for notification action to pause screen recording [CHAR LIMIT=35] -->
-    <string name="screenrecord_pause_label">Pause</string>
-    <!-- Label for notification action to resume screen recording [CHAR LIMIT=35] -->
-    <string name="screenrecord_resume_label">Resume</string>
-    <!-- Label for notification action to cancel and discard screen recording [CHAR LIMIT=35] -->
-    <string name="screenrecord_cancel_label">Cancel</string>
     <!-- Label for notification action to share screen recording [CHAR LIMIT=35] -->
     <string name="screenrecord_share_label">Share</string>
     <!-- A toast message shown after successfully canceling a screen recording [CHAR LIMIT=NONE] -->
-    <string name="screenrecord_cancel_success">Screen recording canceled</string>
     <!-- Notification text shown after saving a screen recording [CHAR LIMIT=100] -->
     <string name="screenrecord_save_title">Screen recording saved</string>
     <!-- Subtext for a notification shown after saving a screen recording to prompt the user to view it [CHAR_LIMIT=100] -->
@@ -305,18 +239,8 @@
     <!-- A toast message shown when there is an error deleting a screen recording [CHAR LIMIT=NONE] -->
     <string name="screenrecord_delete_error">Error deleting screen recording</string>
     <!-- A toast message shown when the screen recording cannot be started due to insufficient permissions [CHAR LIMIT=NONE] -->
-    <string name="screenrecord_permission_error">Failed to get permissions</string>
     <!-- A toast message shown when the screen recording cannot be started due to a generic error [CHAR LIMIT=NONE] -->
     <string name="screenrecord_start_error">Error starting screen recording</string>
-
-    <!-- Title for the USB function chooser in UsbPreferenceActivity. [CHAR LIMIT=30] -->
-    <string name="usb_preference_title">USB file transfer options</string>
-    <!-- Label for the MTP USB function in UsbPreferenceActivity. [CHAR LIMIT=50] -->
-    <string name="use_mtp_button_title">Mount as a media player (MTP)</string>
-    <!-- Label for the PTP USB function in UsbPreferenceActivity. [CHAR LIMIT=50] -->
-    <string name="use_ptp_button_title">Mount as a camera (PTP)</string>
-    <!-- Label for the installer CD image option in UsbPreferenceActivity. [CHAR LIMIT=50] -->
-    <string name="installer_cd_button_title">Install Android File Transfer app for Mac</string>
 
     <!-- Content description of the back button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_back">Back</string>
@@ -331,7 +255,6 @@
     <!-- Content description of the recents button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_recent">Overview</string>
     <!-- Content description of the search button for accessibility. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_search_light">Search</string>
     <!-- Content description of the camera button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_camera_button">Camera</string>
     <!-- Content description of the phone button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -345,15 +268,12 @@
     <!-- Content description of the lock icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_lock_icon">Device locked</string>
     <!-- Content description hint of the unlock button when fingerprint is on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_waiting_for_fingerprint">Waiting for fingerprint</string>
     <!-- Accessibility action of the unlock button when fingerpint is on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_unlock_without_fingerprint">Unlock without using your fingerprint</string>
     <!-- Content description of the Trusted Face icon for accessibility. [CHAR LIMIT=NONE] -->
     <string name="accessibility_scanning_face">Scanning face</string>
     <!-- Click action label for accessibility for the smart reply buttons (not shown on-screen).". [CHAR LIMIT=NONE] -->
     <string name="accessibility_send_smart_reply">Send</string>
     <!-- Content description of the manage notification button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_manage_notification">Manage notifications</string>
     <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
     <string name="phone_label">open phone</string>
     <!-- Click action label for accessibility for the voice assist button. This is not shown on-screen and is an accessibility label for the icon which launches the voice assist from the lock screen.[CHAR LIMIT=NONE] -->
@@ -399,7 +319,6 @@
 
     <!-- Error string shown when the user enters an incorrect PIN/pattern/password and it counts towards the max attempts before the data on the device is wiped. [CHAR LIMIT=NONE]-->
     <string name="biometric_dialog_credential_attempts_before_wipe">Try again. Attempt <xliff:g id="attempts" example="1">%1$d</xliff:g> of <xliff:g id="max_attempts" example="3">%2$d</xliff:g>.</string>
-
     <!-- Title of a dialog shown when the user only has one attempt left to provide the correct PIN/pattern/password before the device, one of its users, or a work profile is wiped. [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title">Your data will be deleted</string>
     <!-- Content of a dialog shown when the user only has one attempt left to provide the correct lock pattern before the device is wiped. [CHAR LIMIT=NONE] -->
@@ -436,44 +355,15 @@
     <string name="accessibility_fingerprint_dialog_fingerprint_icon">Fingerprint icon</string>
     <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
     <string name="fingerprint_dialog_use_fingerprint_instead">Can\u2019t recognize face. Use fingerprint instead.</string>
-    <!-- Message shown to ask the user to use fingerprint to continue.[CHAR LIMIT=50] -->
-    <string name="fingerprint_dialog_use_fingerprint">Use your fingerprint to continue</string>
-    <!-- Message shown to ask the user to use screenlock to continue.[CHAR LIMIT=NONE] -->
-    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock">Can\u2019t recognize fingerprint. Use screen lock instead.</string>
     <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
     <string name="keyguard_face_failed_use_fp">@string/fingerprint_dialog_use_fingerprint_instead</string>
-
-    <!-- Message shown when the system-provided face dialog is shown, asking for authentication [CHAR LIMIT=30] -->
-    <string name="face_dialog_looking_for_face">Looking for you\u2026</string>
-    <!-- Content description of the face icon when the system-provided face dialog is showing, for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_face_dialog_face_icon">Face icon</string>
-
-    <!-- Content description of the compatibility zoom button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_compatibility_zoom_button">Compatibility zoom button.</string>
-
-    <!-- Content description of picture of the compatibility zoom example for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_compatibility_zoom_example">Zoom smaller to larger screen.</string>
 
     <!-- Content description of the bluetooth icon when connected for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_bluetooth_connected">Bluetooth connected.</string>
     <!-- Content description of the bluetooth icon when connecting for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_bluetooth_disconnected">Bluetooth disconnected.</string>
 
-    <!-- Content description of the battery when no battery for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_no_battery">No battery.</string>
-    <!-- Content description of the battery when it is one bar for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_battery_one_bar">Battery one bar.</string>
-    <!-- Content description of the battery when it is two bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_battery_two_bars">Battery two bars.</string>
-     <!-- Content description of the battery when it is three bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_battery_three_bars">Battery three bars.</string>
-    <!-- Content description of the battery when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_battery_full">Battery full.</string>
     <!-- Content description of the battery when battery state is unknown for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_battery_unknown">Battery percentage unknown.</string>
-
-    <!-- Content description of the wifi label showing what we are connected to. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_wifi_name">Connected to <xliff:g id="wifi" example="Home Network">%s</xliff:g>.</string>
 
     <!-- Content description of the bluetooth label showing what we are connected to. [CHAR LIMIT=NONE] -->
     <string name="accessibility_bluetooth_name">Connected to <xliff:g id="bluetooth" example="Car Audio">%s</xliff:g>.</string>
@@ -481,81 +371,19 @@
     <!-- Content description of the cast label showing what we are connected to. [CHAR LIMIT=NONE] -->
     <string name="accessibility_cast_name">Connected to <xliff:g id="cast" example="TV">%s</xliff:g>.</string>
 
-
-    <!-- Content description of the WiMAX signal when no signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_no_wimax">No WiMAX.</string>
-    <!-- Content description of the WiMAX signal when it is one bar for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_wimax_one_bar">WiMAX one bar.</string>
-    <!-- Content description of the WiMAX signal when it is two bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_wimax_two_bars">WiMAX two bars.</string>
-    <!-- Content description of the WiMAX signal when it is three bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_wimax_three_bars">WiMAX three bars.</string>
-    <!-- Content description of the WiMAX signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_wimax_signal_full">WiMAX signal full.</string>
-
-    <!-- Content description of an item with no signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_no_signal">No signal.</string>
     <!-- Content description of an item with no signal and no connection for accessibility (not shown on the screen) [CHAR LIMIT=NONE] -->
     <string name="accessibility_not_connected">Not connected.</string>
-    <!-- Content description of an item with zero signal bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_zero_bars">Zero bars.</string>
-    <!-- Content description of an item with one signal bar for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_one_bar">One bar.</string>
-    <!-- Content description of an item with two signal bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_two_bars">Two bars.</string>
-    <!-- Content description of an item with three signal bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_three_bars">Three bars.</string>
-    <!-- Content description of an item with full signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_signal_full">Signal full.</string>
-
-    <!-- Content description of an item that is turned on for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_desc_on">On.</string>
-    <!-- Content description of an item that is turned off for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_desc_off">Off.</string>
-    <!-- Content description of an item that is connected for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_desc_connected">Connected.</string>
-    <!-- Content description of an item that is connecting for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_desc_connecting">Connecting.</string>
-
-    <!-- Content description of the data connection type HSPA and its variants. [CHAR LIMIT=NONE] -->
-    <string name="data_connection_hspa">HSPA</string>
-
-    <!-- Content description of the data connection type 5Ge. [CHAR LIMIT=NONE] -->
-    <string name="data_connection_5ge" translatable="false">5Ge</string>
-
-
     <!-- Content description of the roaming data connection type. [CHAR LIMIT=NONE] -->
     <string name="data_connection_roaming">Roaming</string>
 
-    <!-- Content description of the data connection type WiFi for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_data_connection_wifi">Wi-Fi</string>
-
-    <!-- Content description of the data connection with no SIM for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_no_sim">No SIM.</string>
-
-    <!-- Content description of the cell data. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_cell_data">Mobile Data</string>
-
-    <!-- Content description of the cell data being enabled. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_cell_data_on">Mobile Data On</string>
-
     <!-- Content description of the cell data being disabled but shortened. [CHAR LIMIT=20] -->
     <string name="cell_data_off">Off</string>
-
-    <!-- Content description of the bluetooth tethering icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_bluetooth_tether">Bluetooth tethering.</string>
 
     <!-- Content description of the airplane mode icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_airplane_mode">Airplane mode.</string>
 
     <!-- Content description of the VPN icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_vpn_on">VPN on.</string>
-
-    <!-- Content description of the no sim icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_no_sims">No SIM card.</string>
-
-    <!-- Content description of button to open battery details icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_battery_details">Open battery details</string>
 
     <!-- Content description of the battery level icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_battery_level">Battery <xliff:g id="number">%d</xliff:g> percent.</string>
@@ -566,23 +394,8 @@
     <!-- Content description of the battery level icon for accessibility while the device is charging (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_battery_level_charging">Battery charging, <xliff:g id="battery_percentage">%d</xliff:g> percent.</string>
 
-    <!-- Content description of the button for showing a settings panel in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_settings_button">System settings.</string>
-
-    <!-- Content description of the button for showing a notifications panel in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_notifications_button">Notifications.</string>
-
     <!-- Content description of overflow icon container of the notifications for accessibility (not shown on the screen)[CHAR LIMIT=NONE] -->
     <string name="accessibility_overflow_action">See all notifications</string>
-
-    <!-- Content description of the button for removing a notification in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_remove_notification">Clear notification.</string>
-
-    <!-- Content description of the enabled GPS icon in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_gps_enabled">GPS enabled.</string>
-
-    <!-- Content description of the acquiring GPS icon in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_gps_acquiring">GPS acquiring.</string>
 
     <!-- Content description of the TeleTypewriter(TTY) enabled icon in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_tty_enabled">TeleTypewriter enabled.</string>
@@ -596,41 +409,21 @@
     <!-- Content description of the cast icon in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_casting">@string/quick_settings_casting</string>
 
-    <!-- Content description of the work mode icon in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_work_mode">@string/quick_settings_work_mode_label</string>
-
-    <!-- Content description to tell the user a notification has been removed from the notification shade -->
-    <string name="accessibility_notification_dismissed">Notification dismissed.</string>
-
     <!-- Content description for the notification shade panel (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_notification_shade">Notification shade.</string>
     <!-- Content description for the quick settings panel (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_quick_settings">Quick settings.</string>
     <!-- Content description for the lock screen (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_lock_screen">Lock screen.</string>
-    <!-- Content description for the settings button in the status bar header. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_desc_settings">Settings</string>
-    <!-- Content description for the recent apps panel (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_desc_recent_apps">Overview.</string>
     <!-- Content description for the work profile lock screen. This prevents work profile apps from being used, but personal apps can be used as normal (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_work_lock">Work lock screen</string>
     <!-- Content description for the close button in the zen mode panel introduction message. [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_close">Close</string>
 
-    <!-- Content description of the wifi tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_wifi"><xliff:g id="signal" example="Three bars">%1$s</xliff:g>.</string>
     <!-- Announcement made when the wifi is turned off (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_wifi_changed_off">Wifi turned off.</string>
     <!-- Announcement made when the wifi is turned on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_wifi_changed_on">Wifi turned on.</string>
-    <!-- Content description of the mobile data tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_mobile">Mobile <xliff:g id="signal" example="Three bars">%1$s</xliff:g>. <xliff:g id="type" example="4G">%2$s</xliff:g>. <xliff:g id="network" example="T-Mobile">%3$s</xliff:g>.</string>
-    <!-- Content description of the battery tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_battery">Battery <xliff:g id="state" example="50% charging">%s</xliff:g>.</string>
-    <!-- Content description of the airplane mode tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_airplane_off">Airplane mode off.</string>
-    <!-- Content description of the airplane mode tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_airplane_on">Airplane mode on.</string>
     <!-- Announcement made when the airplane mode changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_airplane_changed_off">Airplane mode turned off.</string>
     <!-- Announcement made when the airplane mode changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -647,40 +440,22 @@
     <string name="accessibility_quick_settings_dnd_changed_on">Do Not Disturb turned on.</string>
     <!-- Content description of the bluetooth tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_bluetooth">Bluetooth.</string>
-    <!-- Content description of the bluetooth tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_bluetooth_off">Bluetooth off.</string>
     <!-- Content description of the bluetooth tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_bluetooth_on">Bluetooth on.</string>
-    <!-- Content description of the bluetooth tile in quick settings when connecting (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_bluetooth_connecting">Bluetooth connecting.</string>
-    <!-- Content description of the bluetooth tile in quick settings when connected (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_bluetooth_connected">Bluetooth connected.</string>
     <!-- Announcement made when the bluetooth is turned off (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_bluetooth_changed_off">Bluetooth turned off.</string>
     <!-- Announcement made when the bluetooth is turned on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_bluetooth_changed_on">Bluetooth turned on.</string>
-    <!-- Content description of the location tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_location_off">Location reporting off.</string>
-    <!-- Content description of the location tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_location_on">Location reporting on.</string>
     <!-- Announcement made when the location tile changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_location_changed_off">Location reporting turned off.</string>
     <!-- Announcement made when the location tile changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_location_changed_on">Location reporting turned on.</string>
     <!-- Content description of the alarm tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_alarm">Alarm set for <xliff:g id="time" example="Wed 3:30 PM">%s</xliff:g>.</string>
-    <!-- Content description of quick settings detail panel close button (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_close">Close panel.</string>
     <!-- Content description of zen mode time condition plus button (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_more_time">More time.</string>
     <!-- Content description of zen mode time condition minus button (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_less_time">Less time.</string>
-    <!-- Content description of the flashlight tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_flashlight_off">Flashlight off.</string>
-    <!-- Content description of the flashlight tile in quick settings when unavailable (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_flashlight_unavailable">Flashlight unavailable.</string>
-    <!-- Content description of the flashlight tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_flashlight_on">Flashlight on.</string>
     <!-- Announcement made when the flashlight state changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_flashlight_changed_off">Flashlight turned off.</string>
     <!-- Announcement made when the flashlight state changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -696,28 +471,19 @@
     <!-- Announcement made when the screen stopped casting (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_casting_turned_off">Screen casting stopped.</string>
     <!-- Announcement made when the work mode changes to off (not shown on the screen). Paused is used as a verb. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_work_mode_changed_off">Work mode paused.</string>
     <!-- Announcement made when the work mode changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_work_mode_changed_on">Work mode turned on.</string>
     <!-- Announcement made when the Data Saver changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_data_saver_changed_off">Data Saver turned off.</string>
     <!-- Announcement made when the Data Saver changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_data_saver_changed_on">Data Saver turned on.</string>
     <!-- Announcement made when the Sensor Privacy changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_sensor_privacy_changed_off">Sensor Privacy turned off.</string>
     <!-- Announcement made when the Sensor Privacy changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_sensor_privacy_changed_on">Sensor Privacy turned on.</string>
 
     <!-- Content description of the display brightness slider (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_brightness">Display brightness</string>
 
     <!-- Content description of the charging indicator on Ambient Display (lower-power version of the lock screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_ambient_display_charging">Charging</string>
 
-    <!-- Title of dialog shown when 2G-3G data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
-    <string name="data_usage_disabled_dialog_3g_title">2G-3G data is paused</string>
-    <!-- Title of dialog shown when 4G data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
-    <string name="data_usage_disabled_dialog_4g_title">4G data is paused</string>
     <!-- Title of dialog shown when mobile data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
     <string name="data_usage_disabled_dialog_mobile_title">Mobile data is paused</string>
     <!-- Title of dialog shown when data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
@@ -726,12 +492,6 @@
     <string name="data_usage_disabled_dialog">The data limit you set has been reached. You are no longer using mobile data.\n\nIf you resume, charges may apply for data usage.</string>
     <!-- Dialog button indicating that data connection should be re-enabled. [CHAR LIMIT=28] -->
     <string name="data_usage_disabled_dialog_enable">Resume</string>
-
-    <!-- Notification text: when GPS is getting a fix [CHAR LIMIT=50] -->
-    <string name="gps_notification_searching_text">Searching for GPS</string>
-
-    <!-- Notification text: when GPS has found a fix [CHAR LIMIT=50] -->
-    <string name="gps_notification_found_text">Location set by GPS</string>
 
     <!-- Accessibility text describing the presence of active location requests by one or more apps -->
     <string name="accessibility_location_active">Location requests active</string>
@@ -752,18 +512,14 @@
     </plurals>
 
     <!-- Format to use to summarize a message from a contact in a single line of text. For example: "Julia: How's it going?". [CHAR LIMIT=NONE] -->
-    <string name="notification_summary_message_format"><xliff:g id="contact_name" example="Julia">%1$s</xliff:g>: <xliff:g id="message_content" example="How is it going?">%2$s</xliff:g></string>
 
     <!-- Content description of button in notification inspector for system settings relating to
          notifications from this application [CHAR LIMIT=NONE] -->
-    <string name="status_bar_notification_inspect_item_title">Notification settings</string>
 
     <!-- Content description of button in notification inspetor for application-provided settings
          for its own notifications [CHAR LIMIT=NONE] -->
-    <string name="status_bar_notification_app_settings_title"><xliff:g id="app_name" example="Calendar">%s</xliff:g> settings</string>
 
     <!-- Description of the button in the phone-style notification panel that controls auto-rotation, when auto-rotation is on. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_rotation_lock_off">Screen will rotate automatically.</string>
 
     <!-- Description of the button in the phone-style notification panel that controls auto-rotation, when auto-rotation is off. [CHAR LIMIT=NONE] -->
     <string name="accessibility_rotation_lock_on_landscape">Screen is locked in landscape orientation.</string>
@@ -772,13 +528,10 @@
     <string name="accessibility_rotation_lock_on_portrait">Screen is locked in portrait orientation.</string>
 
     <!-- Announcement made when the screen is rotating automatically again (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_rotation_lock_off_changed">Screen will now rotate automatically.</string>
 
     <!-- Announcement made when the rotation lock state changes to landscape only (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_rotation_lock_on_landscape_changed">Screen is now locked in landscape orientation.</string>
 
     <!-- Announcement made when the rotation lock state changes to portrait only (not shown on the screen).  [CHAR LIMIT=NONE] -->
-    <string name="accessibility_rotation_lock_on_portrait_changed">Screen is now locked in portrait orientation.</string>
 
     <!-- Name of the K-release easter egg: a display case for all our tastiest desserts. [CHAR LIMIT=30] -->
     <string name="dessert_case">Dessert Case</string>
@@ -790,21 +543,15 @@
     <string name="ethernet_label">Ethernet</string>
 
     <!-- QuickSettings: Onboarding text that introduces users to long press on an option in order to view the option's menu in Settings [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_header_onboarding_text">Touch &amp; hold icons for more options</string>
     <!-- QuickSettings: Do not disturb [CHAR LIMIT=NONE] -->
     <string name="quick_settings_dnd_label">Do Not Disturb</string>
     <!-- QuickSettings: Do not disturb - Priority only [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_dnd_priority_label">Priority only</string>
     <!-- QuickSettings: Do not disturb - Alarms only [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_dnd_alarms_label">Alarms only</string>
     <!-- QuickSettings: Do not disturb - Total silence [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_dnd_none_label">Total silence</string>
     <!-- QuickSettings: Bluetooth [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_label">Bluetooth</string>
     <!-- QuickSettings: Bluetooth (Multiple) [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_bluetooth_multiple_devices_label">Bluetooth (<xliff:g id="number">%d</xliff:g> Devices)</string>
     <!-- QuickSettings: Bluetooth (Off) [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_bluetooth_off_label">Bluetooth Off</string>
     <!-- QuickSettings: Bluetooth detail panel, text when there are no items [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_detail_empty_text">No paired devices available</string>
     <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
@@ -820,25 +567,18 @@
     <!-- QuickSettings: Bluetooth secondary label shown when bluetooth is being enabled [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_secondary_label_transient">Turning on&#8230;</string>
     <!-- QuickSettings: Brightness [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_brightness_label">Brightness</string>
     <!-- QuickSettings: Rotation Unlocked [CHAR LIMIT=NONE] -->
     <string name="quick_settings_rotation_unlocked_label">Auto-rotate</string>
     <!-- Accessibility label for Auto-ratate QuickSettings tile [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_rotation">Auto-rotate screen</string>
     <!-- Accessibility label for value of Auto-ratate QuickSettings tile [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_rotation_value"><xliff:g name="rotation" example="Portrait">%s</xliff:g> mode</string>
     <!-- QuickSettings: Rotation Locked [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_rotation_locked_label">Rotation locked</string>
     <!-- QuickSettings: Locked to Portrait [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_rotation_locked_portrait_label">Portrait</string>
     <!-- QuickSettings: Locked to Landscape [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_rotation_locked_landscape_label">Landscape</string>
     <!-- QuickSettings: IME [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_ime_label">Input Method</string>
     <!-- QuickSettings: Location [CHAR LIMIT=NONE] -->
     <string name="quick_settings_location_label">Location</string>
     <!-- QuickSettings: Location (Off) [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_location_off_label">Location Off</string>
     <!-- QuickSettings: Camera [CHAR LIMIT=NONE] -->
     <string name="quick_settings_camera_label">Camera access</string>
     <!-- QuickSettings: Microphone [CHAR LIMIT=NONE] -->
@@ -850,19 +590,13 @@
     <!-- QuickSettings: Media device [CHAR LIMIT=NONE] -->
     <string name="quick_settings_media_device_label">Media device</string>
     <!-- QuickSettings: RSSI [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_rssi_label">RSSI</string>
     <!-- QuickSettings: RSSI (No network) [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_rssi_emergency_only">Emergency Calls Only</string>
     <!-- QuickSettings: Settings [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_settings_label">Settings</string>
     <!-- QuickSettings: Time [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_time_label">Time</string>
     <!-- QuickSettings: User [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_user_label">Me</string>
     <!-- QuickSettings: Title of the user detail panel [CHAR LIMIT=NONE] -->
     <string name="quick_settings_user_title">User</string>
     <!-- QuickSettings: Label on the item for adding a new user [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_user_new_user">New user</string>
     <!-- QuickSettings: Wifi [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_label">Wi-Fi</string>
     <!-- QuickSettings: Internet [CHAR LIMIT=NONE] -->
@@ -872,13 +606,9 @@
     <!-- QuickSettings: networks unavailable [CHAR LIMIT=NONE] -->
     <string name="quick_settings_networks_unavailable">Networks unavailable</string>
     <!-- QuickSettings: Wifi (Not connected) [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_wifi_not_connected">Not Connected</string>
     <!-- QuickSettings: Wifi (No network) [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_wifi_no_network">No Network</string>
     <!-- QuickSettings: Wifi (Off) [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_wifi_off_label">Wi-Fi Off</string>
     <!-- QuickSettings: Wifi (On) [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_wifi_on_label">Wi-Fi On</string>
     <!-- QuickSettings: Wifi detail panel, text when there are no items [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_detail_empty_text">No Wi-Fi networks available</string>
     <!-- QuickSettings: Wifi secondary label shown when the wifi is being enabled [CHAR LIMIT=NONE] -->
@@ -890,19 +620,15 @@
     <!-- QuickSettings: Cast detail panel, default device name [CHAR LIMIT=NONE] -->
     <string name="quick_settings_cast_device_default_name">Unnamed device</string>
      <!-- QuickSettings: Cast detail panel, default device description [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_cast_device_default_description">Ready to cast</string>
     <!-- QuickSettings: Cast detail panel, text when there are no items [CHAR LIMIT=NONE] -->
     <string name="quick_settings_cast_detail_empty_text">No devices available</string>
     <!-- QuickSettings: Cast unavailable, text when not connected to WiFi [CHAR LIMIT=NONE] -->
     <string name="quick_settings_cast_no_wifi">Wi\u2011Fi not connected</string>
     <!-- QuickSettings: Brightness dialog title [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_dialog_title">Brightness</string>
-    <!-- QuickSettings: Brightness dialog auto brightness button [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_brightness_dialog_auto_brightness_label">AUTO</string>
     <!-- QuickSettings: Label for the toggle that controls whether display inversion is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_inversion_label">Invert colors</string>
     <!-- QuickSettings: Label for the toggle that controls whether display color correction is enabled. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_color_space_label">Color correction mode</string>
     <!-- QuickSettings: Control panel: Label for button that navigates to settings. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_more_settings">More settings</string>
     <!-- QuickSettings: Control panel: Label for button that navigates to user settings. [CHAR LIMIT=NONE] -->
@@ -918,7 +644,6 @@
     <!-- QuickSettings: Control panel: Label for connecting device. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_connecting">Connecting...</string>
     <!-- QuickSettings: Tethering. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_tethering_label">Tethering</string>
     <!-- QuickSettings: Hotspot. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_hotspot_label">Hotspot</string>
     <!-- QuickSettings: Hotspot. Secondary label shown when the hotspot is being enabled [CHAR LIMIT=NONE] -->
@@ -932,7 +657,6 @@
         <item quantity="other">%d devices</item>
     </plurals>
     <!-- QuickSettings: Notifications [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_notifications_label">Notifications</string>
     <!-- QuickSettings: Flashlight [CHAR LIMIT=NONE] -->
     <string name="quick_settings_flashlight_label">Flashlight</string>
     <!-- QuickSettings: Flashlight, used when it's not available due to camera in use [CHAR LIMIT=NONE] -->
@@ -1013,31 +737,6 @@
     <!-- QuickStep: Accessibility to toggle overview [CHAR LIMIT=40] -->
     <string name="quick_step_accessibility_toggle_overview">Toggle Overview</string>
 
-    <!-- Expanded Status Bar Header: Battery Charged [CHAR LIMIT=40] -->
-    <string name="expanded_header_battery_charged">Charged</string>
-
-    <!-- Expanded Status Bar Header: Charging, no known time [CHAR LIMIT=40] -->
-    <string name="expanded_header_battery_charging">Charging</string>
-
-    <!-- Expanded Status Bar Header: Charging, showing time left until charged [CHAR LIMIT=40] -->
-    <string name="expanded_header_battery_charging_with_time"><xliff:g id="charging_time" example="2 hrs 25 min">%s</xliff:g> until full</string>
-
-    <!-- Expanded Status Bar Header: Not charging [CHAR LIMIT=40] -->
-    <string name="expanded_header_battery_not_charging">Not charging</string>
-
-    <!-- Shows up when there is a user SSL CA Cert installed on the
-         device.  Indicates to the user that SSL traffic can be intercepted.
-         If the text fits on one line (~14 chars), it should start with a
-         linebreak to position it correctly.  [CHAR LIMIT=45] -->
-    <string name="ssl_ca_cert_warning">Network may\nbe monitored</string>
-
-    <!-- Description of the unlock target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_search">Search</string>
-    <!-- Description of the up direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_up">Slide up for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
-    <!-- Description of the left direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_left">"Slide left for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
-
     <!-- Zen mode: Priority only introduction message on first use -->
     <string name="zen_priority_introduction">You won\'t be disturbed by sounds and vibrations, except from alarms, reminders, events, and callers you specify. You\'ll still hear anything you choose to play including music, videos, and games.</string>
 
@@ -1052,12 +751,6 @@
 
     <!-- Zen mode: Total silence introduction message on first use (non-voice capable devices) -->
     <string name="zen_silence_introduction">This blocks ALL sounds and vibrations, including from alarms, music, videos, and games.</string>
-
-    <!-- Text for overflow card on Keyguard when there is not enough space for all notifications on Keyguard. [CHAR LIMIT=1] -->
-    <string name="keyguard_more_overflow_text">+<xliff:g id="number_of_notifications" example="5">%d</xliff:g></string>
-
-    <!-- An explanation for the visual speed bump in the notifications, which will appear when you click on it. [CHAR LIMIT=50] -->
-    <string name="speed_bump_explanation">Less urgent notifications below</string>
 
     <!-- Shows to explain the double tap interaction with notifications: After tapping a notification on Keyguard, this will explain users to tap again to launch a notification. [CHAR LIMIT=60] -->
     <string name="notification_tap_again">Tap again to open</string>
@@ -1134,13 +827,10 @@
     <string name="accessibility_multi_user_switch_switcher">Switch user</string>
 
     <!-- Accessibility label for the button that opens the user switcher and announces the current user. -->
-    <string name="accessibility_multi_user_switch_switcher_with_current">Switch user, current user <xliff:g id="current_user_name" example="John Doe">%s</xliff:g></string>
 
     <!-- Accessibility label for the user icon on the lock screen. -->
-    <string name="accessibility_multi_user_switch_inactive">Current user <xliff:g id="current_user_name" example="John Doe">%s</xliff:g></string>
 
     <!-- Accessibility label for the button that opens the quick contact of the user. -->
-    <string name="accessibility_multi_user_switch_quick_contact">Show profile</string>
 
     <!-- Label for the adding a new user in the user switcher [CHAR LIMIT=35] -->
     <string name="user_add_user">Add user</string>
@@ -1169,24 +859,6 @@
     <!-- Notification when resuming an existing guest session: Action that continues with the current session [CHAR LIMIT=35] -->
     <string name="guest_wipe_session_dontwipe">Yes, continue</string>
 
-    <!-- Title of the notification shown to a new guest user [CHAR LIMIT=60] -->
-    <string name="guest_notification_title">Guest user</string>
-
-    <!-- Text of the notification shown to a new guest user [CHAR LIMIT=60] -->
-    <string name="guest_notification_text">To delete apps and data, remove guest user</string>
-
-    <!-- Remove action in the notification shown to a new guest user [CHAR LIMIT=30] -->
-    <string name="guest_notification_remove_action">REMOVE GUEST</string>
-
-    <!-- Title of the notification shown to logout the current user [CHAR LIMIT=60] -->
-    <string name="user_logout_notification_title">Logout user</string>
-
-    <!-- Text of the notification shown to logout the current user [CHAR LIMIT=60] -->
-    <string name="user_logout_notification_text">Logout current user</string>
-
-    <!-- Logout action in the notification shown to logout the current user [CHAR LIMIT=30] -->
-    <string name="user_logout_notification_action">LOGOUT USER</string>
-
     <!-- Title for add user confirmation dialog [CHAR LIMIT=30] -->
     <string name="user_add_user_title" msgid="2108112641783146007">Add new user?</string>
 
@@ -1211,15 +883,6 @@
     <!-- Label for button in confirmation dialog when exiting guest session [CHAR LIMIT=35] -->
     <string name="user_remove_user_remove">Remove</string>
 
-    <!-- Battery saver notification title. [CHAR LIMIT=60]-->
-    <string name="battery_saver_notification_title">Battery Saver is on</string>
-
-    <!-- Battery saver notification text. [CHAR LIMIT=60] -->
-    <string name="battery_saver_notification_text">Reduces performance and background data</string>
-
-    <!-- Battery saver notification action text. [CHAR LIMIT=60] -->
-    <string name="battery_saver_notification_action_text">Turn off Battery Saver</string>
-
     <!-- Media projection permission dialog warning text. [CHAR LIMIT=NONE] -->
     <string name="media_projection_dialog_text"><xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
 
@@ -1233,7 +896,6 @@
     <string name="media_projection_dialog_title">Start recording or casting with <xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g>?</string>
 
     <!-- Media projection permission dialog permanent grant check box. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_remember_text">Don\'t show again</string>
 
     <!-- The text to clear all notifications. [CHAR LIMIT=60] -->
     <string name="clear_all_notifications_text">Clear all</string>
@@ -1267,15 +929,6 @@
 
     <!-- Text which is shown in the notification shade when there are no notifications. [CHAR LIMIT=30] -->
     <string name="empty_shade_text">No notifications</string>
-
-    <!-- Footer profile owned text [CHAR LIMIT=50] -->
-    <string name="profile_owned_footer">Profile may be monitored</string>
-
-    <!-- Footer vpn present text [CHAR LIMIT=50] -->
-    <string name="vpn_footer">Network may be monitored</string>
-
-    <!-- Footer vpn present text [CHAR LIMIT=50] -->
-    <string name="branded_vpn_footer">Network may be monitored</string>
 
     <!-- Disclosure at the bottom of Quick Settings that indicates that parental controls are enabled. [CHAR LIMIT=100] -->
     <string name="quick_settings_disclosure_parental_controls">This device is managed by your parent</string>
@@ -1337,12 +990,6 @@
     <!-- Monitoring dialog title for device owned devices [CHAR LIMIT=35] -->
     <string name="monitoring_title_device_owned">Device management</string>
 
-    <!-- Monitoring dialog title for profile owned devices [CHAR LIMIT=35] -->
-    <string name="monitoring_title_profile_owned">Profile monitoring</string>
-
-    <!-- Monitoring dialog title for normal devices  [CHAR LIMIT=35]-->
-    <string name="monitoring_title">Network monitoring</string>
-
     <!-- STOPSHIP Monitoring strings still need to be finalized and approved -->
     <!-- Monitoring dialog subtitle for the section describing VPN [CHAR LIMIT=35]-->
     <string name="monitoring_subtitle_vpn">VPN</string>
@@ -1352,12 +999,6 @@
 
     <!-- Monitoring dialog subtitle for the section describing certificate authorities [CHAR LIMIT=35]-->
     <string name="monitoring_subtitle_ca_certificate">CA certificates</string>
-
-    <!-- Monitoring dialog disable vpn button [CHAR LIMIT=30] -->
-    <string name="disable_vpn">Disable VPN</string>
-
-    <!-- Monitoring dialog disconnect vpn button [CHAR LIMIT=30] -->
-    <string name="disconnect_vpn">Disconnect VPN</string>
 
     <!-- Monitoring dialog label for button opening a page with more information on the admin's abilities [CHAR LIMIT=30] -->
     <string name="monitoring_button_view_policies">View Policies</string>
@@ -1401,112 +1042,26 @@
     <!-- Monitoring dialog: Description of an active VPN in the personal profile (as opposed to the work profile). [CHAR LIMIT=NONE]-->
     <string name="monitoring_description_personal_profile_named_vpn">Your personal profile is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
 
-    <!-- Monitoring dialog: Header indicating that the device is managed by a Device Owner app [CHAR LIMIT=80] -->
-    <string name="monitoring_description_do_header_generic">Your device is managed by <xliff:g id="device_owner_app" example="Google Mobile Management">%1$s</xliff:g>.</string>
-
-    <!-- Monitoring dialog: Header indicating that the device is managed by a Device Owner app [CHAR LIMIT=60] -->
-    <string name="monitoring_description_do_header_with_name"><xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> uses <xliff:g id="device_owner_app" example="Google Mobile Management">%2$s</xliff:g> to manage your device.</string>
-
-    <!-- Monitoring dialog: Part of text body explaining what a Device Owner app can do [CHAR LIMIT=130] -->
-    <string name="monitoring_description_do_body">Your admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.</string>
-
-    <!-- Monitoring dialog: Space that separates the body text and the "learn more" link that follows it. [CHAR LIMIT=5] -->
-    <string name="monitoring_description_do_learn_more_separator">" "</string>
-
-    <!-- Monitoring dialog: Link to learn more about what a Device Owner app can do [CHAR LIMIT=55] -->
-    <string name="monitoring_description_do_learn_more">Learn more</string>
-
-    <!-- Monitoring dialog: Part of text body explaining that a VPN is connected and what it can do, for devices managed by a Device Owner app [CHAR LIMIT=130] -->
-    <string name="monitoring_description_do_body_vpn">You\'re connected to <xliff:g id="vpn_app">%1$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
-
     <!-- Monitoring dialog: Space that separates the VPN body text and the "Open VPN Settings" link that follows it. [CHAR LIMIT=5] -->
     <string name="monitoring_description_vpn_settings_separator">" "</string>
 
     <!-- Monitoring dialog: Link to open the VPN settings page [CHAR LIMIT=60] -->
     <string name="monitoring_description_vpn_settings">Open VPN settings</string>
 
-    <!-- Monitoring dialog: Space that separates the CA certs body text and the "Open trusted credentials" link that follows it. [CHAR LIMIT=5] -->
-    <string name="monitoring_description_ca_cert_settings_separator">" "</string>
-
-    <!-- Monitoring dialog: Link to open the settings page containing CA certificates [CHAR LIMIT=NONE] -->
-    <string name="monitoring_description_ca_cert_settings">Open trusted credentials</string>
-
-    <!-- Monitoring dialog: Network logging text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_network_logging">Your admin has turned on network logging, which monitors traffic on your device.\n\nFor more information, contact your admin.</string>
-
-    <!-- Monitoring dialog VPN text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_vpn">You gave an app permission to set up a VPN connection.\n\nThis app can monitor your device and network activity, including emails, apps, and websites.</string>
-
-    <!-- Monitoring dialog VPN with profile owner text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_vpn_profile_owned">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>.\n\nYour admin is capable of monitoring your network activity including emails, apps, and websites.\n\nFor more information, contact your admin.\n\nYou\'re also connected to a VPN, which can monitor your network activity.</string>
-
     <!-- Dialog that a user can access via Quick Settings. [CHAR LIMIT=NONE]-->
     <string name="monitoring_description_parental_controls">This device is managed by your parent. Your parent can see and manage information such as the apps you use, your location, and your screen time.</string>
-
 
     <!-- Name for a generic legacy VPN connection [CHAR LIMIT=20] -->
     <string name="legacy_vpn_name">VPN</string>
 
-    <!-- Monitoring dialog text for single app (no profile or device owner) [CHAR LIMIT=400] -->
-    <string name="monitoring_description_app">You\'re connected to
-        <xliff:g id="application">%1$s</xliff:g>, which can monitor your network activity,
-        including emails, apps, and websites.</string>
-
-    <!-- Monitoring dialog text for single app (inside personal profile) [CHAR LIMIT=400] -->
-    <string name="monitoring_description_app_personal">You\'re connected to <xliff:g id="application">%1$s</xliff:g>, which can monitor your personal network activity, including emails, apps, and websites.</string>
-
-    <!-- Monitoring dialog text for single app (inside personal profile) [CHAR LIMIT=400] -->
-    <string name="branded_monitoring_description_app_personal">You\'re connected to <xliff:g id="application">%1$s</xliff:g>, which can monitor your personal network activity, including emails, apps, and websites.</string>
-
-    <!-- Monitoring dialog text for single app (inside work profile) [CHAR LIMIT=400] -->
-    <string name="monitoring_description_app_work">Your work profile is managed by
-        <xliff:g id="organization">%1$s</xliff:g>. The profile is connected to
-        <xliff:g id="application">%2$s</xliff:g>, which can monitor your work network activity,
-        including emails, apps, and websites.\n\nFor more information, contact your admin.</string>
-
-    <!-- Monitoring dialog text for multiple apps (in personal and work profiles) [CHAR LIMIT=400] -->
-    <string name="monitoring_description_app_personal_work">Your work profile is managed by
-        <xliff:g id="organization">%1$s</xliff:g>. The profile is connected to
-        <xliff:g id="application_work">%2$s</xliff:g>, which can monitor your work network activity,
-        including emails, apps, and websites.\n\nYou\'re also connected to
-        <xliff:g id="application_personal">%3$s</xliff:g>, which can monitor your personal network
-        activity.</string>
-
     <!-- Indication on the keyguard that appears when a trust agents unlocks the device. [CHAR LIMIT=40] -->
     <string name="keyguard_indication_trust_unlocked">Kept unlocked by TrustAgent</string>
-
-    <!-- Indication on the keyguard that appears when the user disables trust agents until the next time they unlock manually. [CHAR LIMIT=NONE] -->
-    <string name="keyguard_indication_trust_disabled">Device will stay locked until you manually unlock</string>
-
-    <!-- Indication on the keyguard that appears when trust agents unlocks the device and device is plugged in. [CHAR LIMIT=NONE] -->
-    <string name="keyguard_indication_trust_unlocked_plugged_in"><xliff:g id="keyguard_indication" example="Kept unlocked by TrustAgent">%1$s</xliff:g>\n<xliff:g id="power_indication" example="Charging Slowly">%2$s</xliff:g></string>
-
-    <!-- Title of notification educating the user about enabling notifications on the lockscreen. [CHAR LIMIT=40] -->
-    <string name="hidden_notifications_title">Get notifications faster</string>
-
-    <!-- Body of notification educating the user about enabling notifications on the lockscreen. [CHAR LIMIT=60] -->
-    <string name="hidden_notifications_text">See them before you unlock</string>
-
-    <!-- Cancel action for notification educating the user about enabling notifications on the lockscreen. [CHAR LIMIT=20] -->
-    <string name="hidden_notifications_cancel">No thanks</string>
-
-    <!-- continue action for notification educating the user about enabling notifications on the lockscreen. [CHAR LIMIT=20] -->
-    <string name="hidden_notifications_setup">Set up</string>
 
     <!-- Accessibility string for current zen mode and selected exit condition. A template that simply concatenates existing mode string and the current condition description. [CHAR LIMIT=20] -->
     <string name="zen_mode_and_condition"><xliff:g id="zen_mode" example="Priority interruptions only">%1$s</xliff:g>. <xliff:g id="exit_condition" example="For one hour">%2$s</xliff:g></string>
 
-    <!-- Button label for ending zen mode in the volume dialog -->
-    <string name="volume_zen_end_now">Turn off now</string>
-
     <!-- Content description for accessibility (not shown on the screen): volume dialog settings button. [CHAR LIMIT=NONE] -->
     <string name="accessibility_volume_settings">Sound settings</string>
-
-    <!-- Content description for accessibility (not shown on the screen): volume dialog expand button. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_volume_expand">Expand</string>
-
-    <!-- Content description for accessibility (not shown on the screen): volume dialog collapse button. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_volume_collapse">Collapse</string>
 
     <!-- Label for the odi caption initial tool tip. [CHAR LIMIT=28] -->
     <string name="volume_odi_captions_tip">Automatically caption media</string>
@@ -1523,7 +1078,6 @@
     <string name="volume_odi_captions_hint_disable">disable</string>
 
     <!-- content description for audio output chooser [CHAR LIMIT=NONE]-->
-    <string name="accessibility_output_chooser">Switch output device</string>
 
     <!-- Screen pinning dialog title. -->
     <string name="screen_pinning_title">App is pinned</string>
@@ -1555,13 +1109,10 @@
 
 
     <!-- Hide quick settings tile confirmation title -->
-    <string name="quick_settings_reset_confirmation_title">Hide <xliff:g id="tile_label" example="Hotspot">%1$s</xliff:g>?</string>
 
     <!-- Hide quick settings tile confirmation message -->
-    <string name="quick_settings_reset_confirmation_message">It will reappear the next time you turn it on in settings.</string>
 
     <!-- Hide quick settings tile confirmation button -->
-    <string name="quick_settings_reset_confirmation_button">Hide</string>
 
     <!-- volume stream names. All nouns. -->
     <string name="stream_voice_call">Call</string> <!-- STREAM_VOICE_CALL -->
@@ -1576,22 +1127,12 @@
     <string name="stream_tts" translatable="false">Transmitted Through Speaker</string> <!-- STREAM_TTS -->
     <string name="stream_accessibility">Accessibility</string> <!-- STREAM_ACCESSIBILITY -->
 
-    <string name="ring_toggle_title">Calls</string>
     <string name="volume_ringer_status_normal">Ring</string>
     <string name="volume_ringer_status_vibrate">Vibrate</string>
     <string name="volume_ringer_status_silent">Mute</string>
 
     <!-- Shown in the header of quick settings to indicate to the user that their phone ringer is on vibrate. [CHAR_LIMIT=NONE] -->
-    <string name="qs_status_phone_vibrate">Phone on vibrate</string>
     <!-- Shown in the header of quick settings to indicate to the user that their phone ringer is on silent (muted). [CHAR_LIMIT=NONE] -->
-    <string name="qs_status_phone_muted">Phone muted</string>
-
-    <string name="volume_stream_muted" translatable="false">%s silent</string>
-    <string name="volume_stream_vibrate" translatable="false">%s vibrate</string>
-    <string name="volume_stream_suppressed" translatable="false">%1$s silent — %2$s</string>
-    <string name="volume_stream_muted_dnd" translatable="false">%s silent — Total silence</string>
-    <string name="volume_stream_limited_dnd" translatable="false">%s — Priority only</string>
-    <string name="volume_stream_vibrate_dnd" translatable="false">%s vibrate — Priority only</string>
 
     <string name="volume_stream_content_description_unmute">%1$s. Tap to unmute.</string>
     <string name="volume_stream_content_description_vibrate">%1$s. Tap to set to vibrate. Accessibility services may be muted.</string>
@@ -1612,31 +1153,11 @@
 
     <string name="volume_dialog_ringer_guidance_ring">Calls and notifications will ring (<xliff:g id="volume level" example="56">%1$s</xliff:g>)</string>
 
-    <string name="output_title">Media output</string>
-    <string name="output_calls_title">Phone call output</string>
-    <string name="output_none_found">No devices found</string>
-    <string name="output_none_found_service_off">No devices found. Try turning on <xliff:g id="service" example="Bluetooth">%1$s</xliff:g></string>
-    <string name="output_service_bt">Bluetooth</string>
-    <string name="output_service_wifi">Wi-Fi</string>
-    <string name="output_service_bt_wifi">Bluetooth and Wi-Fi</string>
-
     <!-- Name of special SystemUI debug settings -->
     <string name="system_ui_tuner">System UI Tuner</string>
 
-    <!-- Preference to show/hide embedded battery percentage [CHAR LIMIT=50] -->
-    <string name="show_battery_percentage">Show embedded battery percentage</string>
-
-    <!-- Summary for battery percentage preference [CHAR LIMIT=NONE] -->
-    <string name="show_battery_percentage_summary">Show battery level percentage inside the status bar icon when not charging</string>
-
-    <!-- Name of quick settings -->
-    <string name="quick_settings">Quick Settings</string>
-
     <!-- Name of status bar -->
     <string name="status_bar">Status bar</string>
-
-    <!-- Name of overview -->
-    <string name="overview">Overview</string>
 
     <!-- Name of System UI demo mode (mode with preset icons for screenshots) -->
     <string name="demo_mode">System UI demo mode</string>
@@ -1661,7 +1182,6 @@
     <!-- Label of the button at the bottom prompting user enter wallet app. [CHAR LIMIT=NONE] -->
     <string name="wallet_app_button_label">Show all</string>
     <!-- Label of the button underneath the card carousel prompting user unlock device. [CHAR LIMIT=NONE] -->
-    <string name="wallet_action_button_label_unlock">Unlock to pay</string>
     <!-- Secondary label of the quick access wallet tile if no card. [CHAR LIMIT=NONE] -->
     <string name="wallet_secondary_label_no_card">Add a card</string>
     <!-- Secondary label of the quick access wallet tile if wallet is still updating. [CHAR LIMIT=NONE] -->
@@ -1680,15 +1200,10 @@
     <string name="status_bar_airplane">Airplane mode</string>
 
     <!-- Description for adding  a quick settings tile -->
-    <string name="add_tile">Add tile</string>
 
     <!-- Name of a quick settings tile controlled by broadcast -->
-    <string name="broadcast_tile">Broadcast Tile</string>
 
     <!-- For preview release. DO NOT TRANSLATE -->
-    <string name="regrettable_lack_of_easter_egg">
-        ¯\\_(ツ)_/¯
-    </string>
 
     <!-- Warning text when an alarm might be silenced by Do Not Disturb [CHAR LIMIT=NONE] -->
     <string name="zen_alarm_warning_indef">You won\'t hear your next alarm <xliff:g id="when" example="at 7:00 AM">%1$s</xliff:g> unless you turn this off before then</string>
@@ -1732,29 +1247,7 @@
     <!-- Dialog asking if the tuner should really be removed from settings [CHAR LIMIT=NONE]-->
     <string name="remove_from_settings_prompt">Remove System UI Tuner from Settings and stop using all of its features?"</string>
 
-    <!-- Displayed when user launches an app that was uninstalled  [CHAR LIMIT=NONE] -->
-    <string name="activity_not_found">Application is not installed on your device</string>
-
-    <!-- Name of setting to show clock seconds [CHAR LIMIT=40] -->
-    <string name="clock_seconds">Show clock seconds</string>
-    <!-- Description of setting to show clock seconds [CHAR LIMIT=NONE] -->
-    <string name="clock_seconds_desc">Show clock seconds in the status bar. May impact battery life.</string>
-
-    <!-- Button that leads to page to rearrange quick settings tiles [CHAR LIMIT=60] -->
-    <string name="qs_rearrange">Rearrange Quick Settings</string>
-    <!-- Option to show brightness bar in quick settings [CHAR LIMIT=60] -->
-    <string name="show_brightness">Show brightness in Quick Settings</string>
-    <!-- Option to use new paging layout in quick settings [CHAR LIMIT=60] -->
-    <string name="qs_paging" translatable="false">Use the new Quick Settings</string>
-
-    <!-- Category in the System UI Tuner settings, where new/experimental
-         settings are -->
-    <string name="experimental">Experimental</string>
-
-    <string name="qs_customize" translatable="false">Allow long-press customize in Quick Settings</string>
-    <string name="qs_customize_info" translatable="false">Info</string>
     <string name="qs_customize_remove" translatable="false">Remove</string>
-    <string name="no_tiles_add" translatable="false">No tiles to add</string>
 
     <!-- Dialog title asking if Bluetooth should be enabled [CHAR LIMIT=NONE] -->
     <string name="enable_bluetooth_title">Turn on Bluetooth?</string>
@@ -1766,19 +1259,8 @@
     <!-- Bluetooth enablement ok text [CHAR LIMIT=40] -->
     <string name="enable_bluetooth_confirmation_ok">Turn on</string>
 
-    <!-- [CHAR LIMIT=100] Notification importance option -->
-    <string name="show_silently">Show notifications silently</string>
-    <!-- [CHAR LIMIT=100] Notification importance option -->
-    <string name="block">Block all notifications</string>
-    <!-- [CHAR LIMIT=100] Notification importance option -->
-    <string name="do_not_silence">Don\'t silence</string>
-    <!-- [CHAR LIMIT=100] Notification importance option -->
-    <string name="do_not_silence_block">Don\'t silence or block</string>
-
     <!-- [CHAR LIMIT=NONE] Importance Tuner setting title -->
     <string name="tuner_full_importance_settings">Power notification controls</string>
-    <string name="tuner_full_importance_settings_on">On</string>
-    <string name="tuner_full_importance_settings_off">Off</string>
     <string name="power_notification_controls_description">With power notification controls, you can set an importance level from 0 to 5 for an app\'s notifications.
         \n\n<b>Level 5</b>
         \n- Show at the top of the notification list
@@ -1804,66 +1286,14 @@
         \n- Block all notifications from the app
     </string>
 
-    <!-- Notification Inline Controls: Header for apps that are not yet using notification channels. -->
-    <string name="notification_header_default_channel">Notifications</string>
-
-    <!-- Notification Inline Controls: Shown when a channel's notifications are currently blocked -->
-    <string name="notification_channel_disabled">You won\'t see these notifications anymore</string>
-
-    <!-- Notification inline controls: Shown when a channel's notifications are minimized -->
-    <string name="notification_channel_minimized">These notifications will be minimized</string>
-
-    <!-- Notification inline controls: Shown when a channel's notifications are silenced [CHAR_LIMIT=100] -->
-    <string name="notification_channel_silenced">These notifications will be shown silently</string>
-
-    <!-- Notification inline controls: Shown when a channel's notifications are set to alert [CHAR_LIMIT=100] -->
-    <string name="notification_channel_unsilenced">These notifications will alert you</string>
-
-    <!-- Notification Inline controls: continue receiving notifications prompt, channel level -->
-    <string name="inline_blocking_helper">You usually dismiss these notifications.
-    \nKeep showing them?</string>
-
     <!-- Notification Inline controls: button to dismiss the blocking helper [CHAR_LIMIT=20] -->
     <string name="inline_done_button">Done</string>
 
     <!-- Notification Inline controls: button to dismiss the blocking helper [CHAR_LIMIT=20] -->
     <string name="inline_ok_button">Apply</string>
 
-    <!-- Notification Inline controls: continue receiving notifications prompt, channel level -->
-    <string name="inline_keep_showing">Keep showing these notifications?</string>
-
-    <!-- Notification inline controls: block notifications button [CHAR_LIMIT=25] -->
-    <string name="inline_stop_button">Stop notifications</string>
-
-    <!-- Notification inline controls: button to deliver notifications silently from this channel [CHAR_LIMIT=30] -->
-    <string name="inline_deliver_silently_button">Deliver Silently</string>
-
-    <!-- Notification inline controls: button to block notifications from this channel [CHAR_LIMIT=20] -->
-    <string name="inline_block_button">Block</string>
-
-    <!-- Notification inline controls: keep getting notifications button [CHAR_LIMIT=25] -->
-    <string name="inline_keep_button">Keep showing</string>
-
-    <!-- Notification inline controls: minimize notifications button [CHAR_LIMIT=20] -->
-    <string name="inline_minimize_button">Minimize</string>
-
-    <!-- Notification inline controls: button to show notifications silently, without alerting the user [CHAR_LIMIT=35] -->
-    <string name="inline_silent_button_silent">Silent</string>
-
-    <!-- Notification inline controls: button to continue showing notifications silently [CHAR_LIMIT=35] -->
-    <string name="inline_silent_button_stay_silent">Stay silent</string>
-
-    <!-- Notification inline controls: button to make notifications alert the user [CHAR_LIMIT=35] -->
-    <string name="inline_silent_button_alert">Alerting</string>
-
-    <!-- Notification inline controls: button to continue alerting the user when notifications arrive [CHAR_LIMIT=35] -->
-    <string name="inline_silent_button_keep_alerting">Keep alerting</string>
-
     <!-- Notification inline controls: button to show block screen [CHAR_LIMIT=35] -->
     <string name="inline_turn_off_notifications">Turn off notifications</string>
-
-    <!-- Notification Inline controls: continue receiving notifications prompt, app level -->
-    <string name="inline_keep_showing_app">Keep showing notifications from this app?</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance title -->
     <string name="notification_silence_title">Silent</string>
@@ -1886,9 +1316,6 @@
     <!-- [CHAR LIMIT=150] Conversation Notification Importance title: normal conversation level, with bubbling summary -->
     <string name="notification_channel_summary_default_with_bubbles">May ring or vibrate based on phone settings. Conversations from <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> bubble by default.</string>
 
-    <!-- [CHAR LIMIT=150] Notification Importance title: bubble level summary -->
-    <string name="notification_channel_summary_bubble">Keeps your attention with a floating shortcut to this content.</string>
-
     <!-- [CHAR LIMIT=150] Notification Importance title: automatic importance level summary -->
     <string name="notification_channel_summary_automatic">Have the system determine if this notification should make sound or vibration</string>
 
@@ -1909,9 +1336,6 @@
     <string name="notification_channel_summary_priority_bubble">Shows at the top of conversation notifications and as a profile picture on lock screen, appears as a bubble</string>
     <string name="notification_channel_summary_priority_dnd">Shows at the top of conversation notifications and as a profile picture on lock screen, interrupts Do Not Disturb</string>
     <string name="notification_channel_summary_priority_all">Shows at the top of conversation notifications and as a profile picture on lock screen, appears as a bubble, interrupts Do Not Disturb</string>
-
-    <!--[CHAR LIMIT=30] Linkable text to Settings app -->
-    <string name="notification_conversation_channel_settings">Settings</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level -->
     <string name="notification_priority_title">Priority</string>
@@ -1935,22 +1359,12 @@
     <string name="see_more_title">See more</string>
 
     <!-- Notification Inline controls: describes what the app is doing in the background [CHAR_LIMIT=NONE] -->
-    <string name="appops_camera">This app is using the camera.</string>
     <!-- Notification Inline controls: describes what the app is doing in the background [CHAR_LIMIT=NONE] -->
-    <string name="appops_microphone">This app is using the microphone.</string>
     <!-- Notification Inline controls: describes what the app is doing in the background [CHAR_LIMIT=NONE] -->
-    <string name="appops_overlay">This app is displaying over other apps on your screen.</string>
     <!-- Notification Inline controls: describes what the app is doing in the background [CHAR_LIMIT=NONE] -->
-    <string name="appops_camera_mic">This app is using the microphone and camera.</string>
     <!-- Notification Inline controls: describes what the app is doing in the background [CHAR_LIMIT=NONE] -->
-    <string name="appops_camera_overlay">This app is displaying over other apps on your screen and using the camera.</string>
     <!-- Notification Inline controls: describes what the app is doing in the background [CHAR_LIMIT=NONE] -->
-    <string name="appops_mic_overlay">This app is displaying over other apps on your screen and using the microphone.</string>
     <!-- Notification Inline controls: describes what the app is doing in the background [CHAR_LIMIT=NONE] -->
-    <string name="appops_camera_mic_overlay">This app is displaying over other apps on your screen and using the microphone and camera.</string>
-
-    <string name="notification_appops_settings">Settings</string>
-    <string name="notification_appops_ok">OK</string>
 
     <!-- Notification Inline controls: describes how the notification was adjusted [CHAR_LIMIT=NONE] -->
     <string name="feedback_alerted">This notification was automatically &lt;b>promoted to Default&lt;/b> by the system.</string>
@@ -1963,8 +1377,6 @@
     <!-- Notification Inline controls: prompts the user for feedback [CHAR_LIMIT=NONE] -->
     <string name="feedback_prompt">Let the developer know your feedback. Was this correct?</string>
     <!-- Notification Inline controls: responds to user provided feedback [CHAR_LIMIT=NONE] -->
-    <string name="feedback_response">Thanks for your feedback!</string>
-    <string name="feedback_ok">OK</string>
 
     <!-- Notification: Control panel: Accessibility description for expanded inline controls view, used
         to control settings about notifications related to the current notification.  -->
@@ -1974,40 +1386,18 @@
     <string name="notification_channel_controls_closed_accessibility">Notification controls for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> closed</string>
     <!-- Notification: Control panel: Accessibility description for switch that is used to enable
         or disable notifications from this channel -->
-    <string name="notification_channel_switch_accessibility">Allow notifications from this channel</string>
     <!-- Notification: Control panel: Label for button that launches notification settings. Used
         when this app has only defined a single channel for notifications. -->
     <string name="notification_more_settings">More settings</string>
     <!-- Notification: Control panel: Label for a link that launches notification settings in the
         app that sent the notification. -->
     <string name="notification_app_settings">Customize</string>
-    <!-- Notification: Control panel: Label for button that dismisses control panel. [CHAR LIMIT=NONE] -->
-    <string name="notification_done">Done</string>
-    <!-- Notification: inline controls: undo block button -->
-    <string name="inline_undo">Undo</string>
-    <!-- Notification: Conversation: control panel, label for button that demotes notification from conversation to normal notification -->
-    <string name="demote">Mark this notification as not a conversation</string>
-
-    <!-- [CHAR LIMIT=100] This conversation is marked as important -->
-    <string name="notification_conversation_favorite">Important conversation</string>
-
-    <!-- [CHAR LIMIT=100] This conversation is not marked as important -->
-    <string name="notification_conversation_unfavorite">Not an important conversation</string>
-
-    <!-- [CHAR LIMIT=100] This conversation is silenced (will not make sound or vibrate)-->
-    <string name="notification_conversation_mute">Silenced</string>
-
-    <!-- [CHAR LIMIT=100] This conversation is alerting (may make sound and/or vibrate)-->
-    <string name="notification_conversation_unmute">Alerting</string>
 
     <!-- [CHAR LIMIT=100] Show notification as bubble -->
     <string name="notification_conversation_bubble">Show bubble</string>
 
     <!-- [CHAR LIMIT=100] Turn off bubbles for notification -->
     <string name="notification_conversation_unbubble">Remove bubbles</string>
-
-    <!-- [CHAR LIMIT=100] Add this conversation to home screen -->
-    <string name="notification_conversation_home_screen">Add to home screen</string>
 
     <!-- Notification: Menu row: Content description for menu items. [CHAR LIMIT=NONE] -->
     <string name="notification_menu_accessibility"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> <xliff:g id="menu_description" example="notification controls">%2$s</xliff:g></string>
@@ -2020,9 +1410,6 @@
 
     <!-- Notification: Menu row: Label for the snooze action shown in local context menu. [CHAR LIMIT=NONE] -->
     <string name="notification_menu_snooze_action">Remind me</string>
-
-    <!-- Notification: Menu row: Label for the snooze action shown in local context menu. [CHAR LIMIT=NONE] -->
-    <string name="notification_menu_settings_action">Settings</string>
 
     <!-- Notification: Snooze panel: Snooze undo button label. [CHAR LIMIT=50]-->
     <string name="snooze_undo">Undo</string>
@@ -2045,17 +1432,12 @@
         <item quantity="other">%d minutes</item>
     </plurals>
 
-    <!-- Title of the battery settings detail panel [CHAR LIMIT=20] -->
-    <string name="battery_panel_title">Battery usage</string>
-
     <!-- Summary of battery saver not available [CHAR LIMIT=NONE] -->
-    <string name="battery_detail_charging_summary">Battery Saver not available during charging</string>
 
     <!-- Title of switch for battery saver [CHAR LIMIT=NONE] -->
     <string name="battery_detail_switch_title">Battery Saver</string>
 
     <!-- Summary of switch for battery saver [CHAR LIMIT=NONE] -->
-    <string name="battery_detail_switch_summary">Reduces performance and background data</string>
 
     <!-- Name used for certain Keyboard keys on gamepads, e.g. "Button L1". -->
     <string name="keyboard_key_button_template">Button <xliff:g id="name">%1$s</xliff:g></string>
@@ -2141,12 +1523,8 @@
     <!-- User visible title for the keyboard shortcut that takes the user to the music app. -->
     <string name="keyboard_shortcut_group_applications_music">Music</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the YouTube app. -->
-    <string name="keyboard_shortcut_group_applications_youtube">YouTube</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the calendar app. -->
     <string name="keyboard_shortcut_group_applications_calendar">Calendar</string>
-
-    <!-- SysUI Tuner: Option to show full do not disturb panel in volume [CHAR LIMIT=60] -->
-    <string name="tuner_full_zen_title">Show with volume controls</string>
 
     <!-- SysUI Tuner: Label for screen about do not disturb settings [CHAR LIMIT=60] -->
     <string name="volume_and_do_not_disturb">Do Not Disturb</string>
@@ -2155,14 +1533,8 @@
          not disturb [CHAR LIMIT=60] -->
     <string name="volume_dnd_silent">Volume buttons shortcut</string>
 
-    <!-- SysUI Tuner: Switch to control volume up behavior [CHAR LIMIT=60] -->
-    <string name="volume_up_silent">Exit Do Not Disturb on volume up</string>
-
     <!-- Name of the battery icon in status bar [CHAR LIMIT=30] -->
     <string name="battery">Battery</string>
-
-    <!-- Name of the clock in status bar [CHAR LIMIT=30] -->
-    <string name="clock">Clock</string>
 
     <!-- Name of the headset in status bar [CHAR LIMIT=30] -->
     <string name="headset">Headset</string>
@@ -2184,7 +1556,6 @@
     <string name="accessibility_data_saver_on">Data Saver is on</string>
 
     <!-- Accessibility description for data saver being off [CHAR LIMIT=NONE] -->
-    <string name="accessibility_data_saver_off">Data Saver is off</string>
 
     <!-- Label for feature switch [CHAR LIMIT=30] -->
     <string name="switch_bar_on">On</string>
@@ -2212,10 +1583,6 @@
 
     <!-- SysUI Tuner: Setting for button type in nav bar [CHAR LIMIT=60] -->
     <string name="right_nav_bar_button_type">Extra right button type</string>
-
-
-    <!-- SysUI Tuner: Added to nav bar option to indicate it is the default [CHAR LIMIT=60] -->
-    <string name="nav_bar_default"> (default)</string>
 
     <!-- SysUI Tuner: Labels for different types of navigation bar buttons [CHAR LIMIT=60] -->
     <string-array name="nav_bar_buttons">
@@ -2246,15 +1613,10 @@
         <item>space;space;left,back,home,recent,right</item>
     </string-array>
 
-    <!-- SysUI Tuner: Name of Combination Menu / Keyboard Switcher button [CHAR LIMIT=30] -->
-    <string name="menu_ime">Keyboard switcher</string>
     <!-- SysUI Tuner: Save the current settings [CHAR LIMIT=30] -->
     <string name="save">Save</string>
     <!-- SysUI Tuner: Reset to default settings [CHAR LIMIT=30] -->
     <string name="reset">Reset</string>
-
-    <!-- SysUI Tuner: Adjust button width dialog title [CHAR LIMIT=60] -->
-    <string name="adjust_button_width">Adjust button width</string>
 
     <!-- SysUI Tuner: Nav bar button that holds the clipboard [CHAR LIMIT=30] -->
     <string name="clipboard">Clipboard</string>
@@ -2358,7 +1720,6 @@
     <string name="accessibility_quick_settings_collapse">Close quick settings.</string>
 
     <!-- accessibility label for alarm icon [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_alarm_set">Alarm set.</string>
 
     <!-- accessibility label for button to select user [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_user">Signed in as <xliff:g name="user" example="John">%s</xliff:g></string>
@@ -2373,7 +1734,6 @@
     <string name="accessibility_quick_settings_open_details">Open details.</string>
 
     <!-- accessibility label for quick settings items that are currently disabled. Must have a reason [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_not_available">Unvailable due to <xliff:g name="reason" id="reason" example="Wifi not available">%s</xliff:g></string>
 
     <!-- accessibility label for quick settings items that open a details page [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_open_settings">Open <xliff:g name="page" example="Bluetooth">%s</xliff:g> settings.</string>
@@ -2403,11 +1763,8 @@
     <string name="tuner_lock_screen">Lock screen</string>
 
     <!-- Tuner string -->
-    <string name="change_theme_reboot" translatable="false">Changing the theme requires a restart.</string>
     <!-- Tuner string -->
-    <string name="theme" translatable="false">Theme</string>
     <!-- Tuner string -->
-    <string name="default_theme" translatable="false">Default</string>
 
     <!-- Title for notification & dialog that the user's phone last shut down because it got too hot. [CHAR LIMIT=40] -->
     <string name="thermal_shutdown_title">Phone turned off due to heat</string>
@@ -2543,15 +1900,6 @@
     <!-- Prompt for when Do not disturb is on from automatic rule or app in QS [CHAR LIMIT=NONE] -->
     <string name="qs_dnd_prompt_auto_rule_app">Do Not Disturb was turned on by an automatic rule or app.</string>
 
-    <!-- Description of Do Not Disturb option in QS that ends at the specified time[CHAR LIMIT=20] -->
-    <string name="qs_dnd_until">Until <xliff:g name="time">%s</xliff:g></string>
-
-    <!-- Do Not Disturb button to keep the current settings [CHAR LIMIT=20] -->
-    <string name="qs_dnd_keep">Keep</string>
-
-    <!-- Do Not Disturb button to change the current settings [CHAR LIMIT=20] -->
-    <string name="qs_dnd_replace">Replace</string>
-
     <!-- Title of the "running foreground services" dialog. [CHAR LIMIT=NONE] -->
     <string name="running_foreground_services_title">Apps running in background</string>
 
@@ -2593,8 +1941,6 @@
     <string name="slice_permission_deny">Deny</string>
 
     <!-- List of packages for which we don't want to show recents onboarding, add into overlay as needed. -->
-    <string-array name="recents_onboarding_blacklisted_packages" translatable="false">
-    </string-array>
 
     <!-- The title of the notification to suggest enabling automatic battery saver.  [CHAR LIMIT=NONE]-->
     <string name="auto_saver_title">Tap to schedule Battery Saver</string>
@@ -2606,16 +1952,12 @@
     <string name="no_auto_saver_action">No thanks</string>
 
     <!-- The title of the dialog that tells that scheduled (i.e. automatic) battery saver has been turned on. [CHAR LIMIT=NONE]-->
-    <string name="auto_saver_enabled_title">Battery Saver schedule turned on</string>
 
     <!-- The content of the dialog that tells that scheduled (i.e. automatic) battery saver has been turned on. [CHAR LIMIT=NONE]-->
-    <string name="auto_saver_enabled_text">Battery Saver will turn on automatically once battery goes below <xliff:g id="percentage">%d</xliff:g>%%.</string>
 
     <!-- An action on the dialog that tells that scheduled (i.e. automatic) battery saver: open the battery saver setting.  [CHAR LIMIT=NONE]-->
-    <string name="open_saver_setting_action">Settings</string>
 
     <!-- An action on the dialog that tells that scheduled (i.e. automatic) battery saver: user acknowledges and closes the dialog.  [CHAR LIMIT=NONE]-->
-    <string name="auto_saver_okay_action">Got it</string>
 
     <!-- URl of the webpage that explains battery saver. -->
     <string name="help_uri_battery_saver_learn_more_link_target" translatable="false"></string>
@@ -2625,7 +1967,6 @@
     <string name="heap_dump_tile_name">Dump SysUI Heap</string>
 
     <!-- Content description for ongoing privacy chip. Use with a single app [CHAR LIMIT=NONE]-->
-    <string name="ongoing_privacy_chip_content_single_app"><xliff:g id="app" example="Example App">%1$s</xliff:g> is using your <xliff:g id="types_list" example="camera, location">%2$s</xliff:g>.</string>
 
     <!-- Content description for ongoing privacy chip. Use with multiple apps [CHAR LIMIT=NONE]-->
     <string name="ongoing_privacy_chip_content_multiple_apps">Applications are using your <xliff:g id="types_list" example="camera, location">%s</xliff:g>.</string>
@@ -2660,23 +2001,8 @@
     <!-- Text for microphone app op [CHAR LIMIT=20]-->
     <string name="privacy_type_microphone">microphone</string>
 
-    <!-- Text for the quick setting tile for sensor privacy [CHAR LIMIT=30] -->
-    <string name="sensor_privacy_mode">Sensors off</string>
-
-    <!-- Name for device services grouping system uid apps in Ongoing Privacy Dialog [CHAR_LIMIT=NONE] -->
-    <string name="device_services">Device Services</string>
-
     <!-- What to show on the ambient display player when song doesn't have a title. [CHAR LIMIT=20] -->
     <string name="music_controls_no_title">No title</string>
-
-    <!-- Action in accessibility menu to move the stack of bubbles [CHAR LIMIT=20] -->
-    <string name="bubble_accessibility_action_move">Move</string>
-
-    <!-- Notification content text when the system navigation mode changes as a result of changing the default launcher [CHAR LIMIT=NONE] -->
-    <string name="notification_content_system_nav_changed">System navigation updated. To make changes, go to Settings.</string>
-
-    <!-- Notification content text when switching to a default launcher that supports gesture navigation [CHAR LIMIT=NONE] -->
-    <string name="notification_content_gesture_nav_available">Go to Settings to update system navigation</string>
 
     <!-- Title of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=25] -->
     <string name="inattentive_sleep_warning_title">Standby</string>
@@ -2710,8 +2036,6 @@
     <!-- Accessibility floating menu strings -->
     <!-- Message for the accessibility floating button migration tooltip. It shows when the user use gestural navigation then upgrade their system. It will tell the user the accessibility gesture had been replaced by accessibility floating button. [CHAR LIMIT=100] -->
     <string name="accessibility_floating_button_migration_tooltip">Accessibility button replaced the accessibility gesture\n\n<annotation id="link">View settings</annotation></string>
-    <!-- Message for the accessibility floating button settings tooltip. It shows when the user use gestural navigation then upgrade their system. It will tell the user to have another option to switch from the accessibility gesture to a button. [CHAR LIMIT=100] -->
-    <string name="accessibility_floating_button_switch_migration_tooltip">You can switch from the accessibility gesture to a button\n\n<annotation id="link">Settings</annotation></string>
     <!-- Message for the accessibility floating button docking tooltip. It shows when the user first time drag the button. It will tell the user about docking behavior. [CHAR LIMIT=70] -->
     <string name="accessibility_floating_button_docking_tooltip">Move button to the edge to hide it temporarily</string>
     <!-- Action in accessibility menu to move the accessibility floating button to the top left of the screen. [CHAR LIMIT=30] -->
@@ -2786,9 +2110,6 @@
     <string name="controls_dialog_ok">Add</string>
     <!-- Controls dialog message. Indicates app that suggested this control [CHAR LIMIT=NONE] -->
     <string name="controls_dialog_message">Suggested by <xliff:g id="app" example="System UI">%s</xliff:g></string>
-    <!-- Controls dialog confirmation [CHAR LIMIT=30] -->
-    <string name="controls_dialog_confirmation">Controls updated</string>
-
     <!-- Controls tile secondary label when device is locked and user does not want access to controls from lockscreen [CHAR LIMIT=20] -->
     <string name="controls_tile_locked">Device locked</string>
 
@@ -2798,14 +2119,10 @@
     <string name="controls_pin_verify">Verify <xliff:g id="device" example="Backdoor lock">%s</xliff:g></string>
     <!-- Controls PIN entry dialog, title when 1st attempt failed [CHAR LIMIT=30] -->
     <string name="controls_pin_wrong">Wrong PIN</string>
-    <!-- Controls PIN entry dialog, waiting to verify [CHAR LIMIT=30] -->
-    <string name="controls_pin_verifying">Verifying\u2026</string>
     <!-- Controls PIN entry dialog, text hint [CHAR LIMIT=30] -->
     <string name="controls_pin_instructions">Enter PIN</string>
     <!-- Controls PIN entry dialog, text hint, retry [CHAR LIMIT=30] -->
     <string name="controls_pin_instructions_retry">Try another PIN</string>
-    <!-- Controls confirmation dialog, waiting to confirm [CHAR LIMIT=30] -->
-    <string name="controls_confirmation_confirming">Confirming\u2026</string>
     <!-- Controls confirmation dialog, user prompt [CHAR LIMIT=NONE] -->
     <string name="controls_confirmation_message">Confirm change for <xliff:g id="device" example="Backdoor lock">%s</xliff:g></string>
 
@@ -2844,9 +2161,6 @@
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>
-    <!-- Error message indicating that an unspecified error occurred while getting the status, and
-         a retry will be attempted [CHAR LIMIT=30] -->
-    <string name="controls_error_retryable">Error, retrying\u2026</string>
     <!-- Error message indicating that the control is no longer available in the application [CHAR LIMIT=30] -->
     <string name="controls_error_removed">Not found</string>
     <!-- Title for dialog indicating that the control is no longer available in the application [CHAR LIMIT=30] -->
@@ -2859,11 +2173,6 @@
     <string name="controls_error_generic">Can\u2019t load status</string>
     <!-- Error message indicating that a control action failed [CHAR_LIMIT=30] -->
     <string name="controls_error_failed">Error, try again</string>
-    <!-- Stateless control message informing the user that a routine has started [CHAR_LIMIT=30] -->
-    <string name="controls_in_progress">In progress</string>
-    <!-- Tooltip informing user where the recently added controls are [CHAR_LIMIT=100] -->
-    <string name="controls_added_tooltip">Open Quick Settings to see new controls</string>
-
     <!-- Controls menu, add [CHAR_LIMIT=30] -->
     <string name="controls_menu_add">Add controls</string>
     <!-- Controls menu, edit [CHAR_LIMIT=30] -->
@@ -2901,8 +2210,6 @@
     <string name="priority_conversations">Priority conversations</string>
     <!--Text header for recent conversation tiles available to be added to the home screen [CHAR LIMIT=100] -->
     <string name="recent_conversations">Recent conversations</string>
-    <!-- Text for button dismissing configuration activity with no conversations [CHAR LIMIT=20] -->
-    <string name="okay">Okay</string>
     <!-- Timestamp for notification with exact time in days plural [CHAR LIMIT=25] -->
     <string name="days_timestamp"><xliff:g id="duration" example="5">%1$s</xliff:g> days ago</string>
     <!-- Timestamp for notification from one week ago[CHAR LIMIT=25] -->
@@ -2976,8 +2283,6 @@
 
     <!-- Accessibility label for fingerprint sensor [CHAR LIMIT=NONE] -->
     <string name="accessibility_fingerprint_label">Fingerprint sensor</string>
-    <!-- Accessibility label for disabled udfps sensor [CHAR LIMIT=NONE] -->
-    <string name="accessibility_udfps_disabled_button">Fingerprint sensor disabled</string>
     <!-- Accessibility action for tapping on an affordance that will bring up the user's
     pin/pattern/password bouncer (ie: "Double tap to authenticate") [CHAR LIMIT=NONE] -->
     <string name="accessibility_authenticate_hint">authenticate</string>
@@ -3012,8 +2317,6 @@
     <string name="all_network_unavailable">No networks available</string>
     <!-- Provider Model: Panel title text for turning on the Wi-Fi networks. [CHAR LIMIT=40] -->
     <string name="turn_on_wifi">Wi\u2011Fi</string>
-    <!-- Provider Model: Title for detail page of wifi network [CHAR LIMIT=30] -->
-    <string name="pref_title_network_details" msgid="7329759534269363308">"Network details"</string>
     <!-- Provider Model: Panel subtitle for tapping a network to connect to internet. [CHAR LIMIT=60] -->
     <string name="tap_a_network_to_connect">Tap a network to connect</string>
     <!-- Provider Model: Panel subtitle for unlocking screen to view networks. [CHAR LIMIT=60] -->
