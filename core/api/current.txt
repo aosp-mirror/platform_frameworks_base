@@ -18163,8 +18163,9 @@ package android.hardware.camera2 {
     method @NonNull public java.util.List<android.util.Size> getExtensionSupportedSizes(int, int);
     method @NonNull public java.util.List<java.lang.Integer> getSupportedExtensions();
     field public static final int EXTENSION_AUTOMATIC = 0; // 0x0
-    field public static final int EXTENSION_BEAUTY = 1; // 0x1
+    field @Deprecated public static final int EXTENSION_BEAUTY = 1; // 0x1
     field public static final int EXTENSION_BOKEH = 2; // 0x2
+    field public static final int EXTENSION_FACE_RETOUCH = 1; // 0x1
     field public static final int EXTENSION_HDR = 3; // 0x3
     field public static final int EXTENSION_NIGHT = 4; // 0x4
   }
