@@ -457,6 +457,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             }, FgThread.getExecutor()).whenComplete(uncheckExceptions((association, err) -> {
                 if (err == null) {
                     addAssociation(association, userId);
+                    mServiceConnectors.forUser(userId).post(service -> {
+                        service.onAssociationCreated();
+                    });
                 } else {
                     Slog.e(LOG_TAG, "Failed to discover device(s)", err);
                     callback.onFailure("No devices found: " + err.getMessage());
