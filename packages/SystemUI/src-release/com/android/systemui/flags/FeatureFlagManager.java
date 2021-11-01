@@ -16,6 +16,7 @@
 
 package com.android.systemui.flags;
 
+import android.content.Context;
 import android.util.SparseBooleanArray;
 
 import androidx.annotation.NonNull;
@@ -39,21 +40,21 @@ import javax.inject.Inject;
 public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
     SparseBooleanArray mAccessedFlags = new SparseBooleanArray();
     @Inject
-    public FeatureFlagManager(DumpManager dumpManager) {
+    public FeatureFlagManager(SystemPropertiesHelper systemPropertiesHelper, Context context,
+            DumpManager dumpManager) {
         dumpManager.registerDumpable("SysUIFlags", this);
     }
-    public boolean isEnabled(String key, boolean defaultValue) {
-        return defaultValue;
-    }
+    @Override
     public boolean isEnabled(int key, boolean defaultValue) {
         mAccessedFlags.append(key, defaultValue);
         return defaultValue;
     }
-    public void setEnabled(String key, boolean value) {}
+    @Override
     public void setEnabled(int key, boolean value) {}
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("can override: false");
         int size = mAccessedFlags.size();
         for (int i = 0; i < size; i++) {
             pw.println("  sysui_flag_" + mAccessedFlags.keyAt(i)
