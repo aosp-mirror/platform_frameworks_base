@@ -20,9 +20,7 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.NotificationManager.EXTRA_BLOCKED_STATE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
-import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
-import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
@@ -38,6 +36,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -84,6 +83,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.session.MediaSession;
@@ -105,8 +105,10 @@ import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestablePermissions;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.Pair;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -128,7 +130,6 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -811,5 +812,35 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
 
         verify(mUsageStats, never()).registerBlocked(any());
         verify(mUsageStats).registerPostedByApp(any());
+    }
+
+    @Test
+    public void testGetAllUsersNotificationPermissions() {
+        // In this case, there are multiple users each with notification permissions (and also,
+        // for good measure, some without).
+        // make sure the collection returned contains info for all of them
+        final List<UserInfo> userInfos = new ArrayList<>();
+        userInfos.add(new UserInfo(0, "user0", 0));
+        userInfos.add(new UserInfo(1, "user1", 0));
+        userInfos.add(new UserInfo(2, "user2", 0));
+        when(mUm.getUsers()).thenReturn(userInfos);
+
+        // construct the permissions for each of them
+        ArrayMap<Pair<Integer, String>, Boolean> permissions0 = new ArrayMap<>(),
+                permissions1 = new ArrayMap<>();
+        permissions0.put(new Pair<>(10, "package1"), true);
+        permissions0.put(new Pair<>(20, "package2"), false);
+        permissions1.put(new Pair<>(11, "package1"), false);
+        permissions1.put(new Pair<>(21, "package2"), true);
+        when(mPermissionHelper.getNotificationPermissionValues(0)).thenReturn(permissions0);
+        when(mPermissionHelper.getNotificationPermissionValues(1)).thenReturn(permissions1);
+        when(mPermissionHelper.getNotificationPermissionValues(2)).thenReturn(new ArrayMap<>());
+
+        ArrayMap<Pair<Integer, String>, Boolean> combinedPermissions =
+                mService.getAllUsersNotificationPermissions();
+        assertTrue(combinedPermissions.get(new Pair<>(10, "package1")));
+        assertFalse(combinedPermissions.get(new Pair<>(20, "package2")));
+        assertFalse(combinedPermissions.get(new Pair<>(11, "package1")));
+        assertTrue(combinedPermissions.get(new Pair<>(21, "package2")));
     }
 }

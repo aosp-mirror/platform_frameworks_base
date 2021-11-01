@@ -34,6 +34,7 @@ import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.util.StatsLog.ANNOTATION_ID_IS_UID;
 
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
+import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES;
 import static com.android.os.AtomsProto.PackageNotificationChannelPreferences.CHANNEL_ID_FIELD_NUMBER;
 import static com.android.os.AtomsProto.PackageNotificationChannelPreferences.CHANNEL_NAME_FIELD_NUMBER;
 import static com.android.os.AtomsProto.PackageNotificationChannelPreferences.IMPORTANCE_FIELD_NUMBER;
@@ -97,6 +98,7 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.service.notification.ConversationChannelWrapper;
+import android.service.notification.nano.RankingHelperProto;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableContentResolver;
 import android.text.format.DateUtils;
@@ -104,19 +106,18 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Pair;
-import android.util.Slog;
 import android.util.StatsEvent;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
+import android.util.proto.ProtoOutputStream;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.os.AtomsProto.PackageNotificationPreferences;
 import com.android.server.UiServiceTestCase;
 import com.android.server.notification.PermissionHelper.PackagePermission;
-
-import com.google.common.collect.ImmutableMap;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -130,6 +131,8 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -2545,6 +2548,416 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testDumpJson_prePermissionMigration() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(false);
+        // before the migration is active, we want to verify that:
+        //   - all notification importance info should come from package preferences
+        //   - if there are permissions granted or denied from packages PreferencesHelper doesn't
+        //     know about, those are ignored if migration is not enabled
+
+        // package permissions map to be passed in
+        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
+        appPermissions.put(new Pair(UID_P, PKG_P), true);  // in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+
+        NotificationChannel channel1 =
+                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel channel3 = new NotificationChannel("id3", "name3", IMPORTANCE_HIGH);
+
+        mHelper.createNotificationChannel(PKG_P, UID_P, channel1, true, false);
+        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_LOW);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel3, false, false);
+        mHelper.setImportance(PKG_N_MR1, UID_N_MR1, IMPORTANCE_NONE);
+        mHelper.createNotificationChannel(PKG_O, UID_O, getChannel(), true, false);
+        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
+
+        // in the json array, all of the individual package preferences are simply elements in the
+        // values array. this set is to collect expected outputs for each of our packages.
+        // the key/value pairs are: (userId, package name) -> expected importance
+        ArrayMap<Pair<Integer, String>, String> expected = new ArrayMap<>();
+        expected.put(new Pair(UserHandle.getUserId(UID_P), PKG_P), "LOW");
+        expected.put(new Pair(UserHandle.getUserId(UID_O), PKG_O), "HIGH");
+        expected.put(new Pair(UserHandle.getUserId(UID_N_MR1), PKG_N_MR1), "NONE");
+
+        JSONArray actual = (JSONArray) mHelper.dumpJson(
+                new NotificationManagerService.DumpFilter(), appPermissions)
+                .get("PackagePreferencess");
+        assertThat(actual.length()).isEqualTo(expected.size());
+        for (int i = 0; i < actual.length(); i++) {
+            JSONObject pkgInfo = actual.getJSONObject(i);
+            Pair<Integer, String> pkgKey =
+                    new Pair(pkgInfo.getInt("userId"), pkgInfo.getString("packageName"));
+            assertTrue(expected.containsKey(pkgKey));
+            assertThat(pkgInfo.getString("importance")).isEqualTo(expected.get(pkgKey));
+        }
+
+        // also make sure that (more likely to actually happen) if we don't provide an array of
+        // app preferences (and do null instead), the same thing happens, so do the same checks
+        JSONArray actualWithNullInput = (JSONArray) mHelper.dumpJson(
+                new NotificationManagerService.DumpFilter(), null)
+                .get("PackagePreferencess");
+        assertThat(actualWithNullInput.length()).isEqualTo(expected.size());
+        for (int i = 0; i < actualWithNullInput.length(); i++) {
+            JSONObject pkgInfo = actualWithNullInput.getJSONObject(i);
+            Pair<Integer, String> pkgKey =
+                    new Pair(pkgInfo.getInt("userId"), pkgInfo.getString("packageName"));
+            assertTrue(expected.containsKey(pkgKey));
+            assertThat(pkgInfo.getString("importance")).isEqualTo(expected.get(pkgKey));
+        }
+    }
+
+    @Test
+    public void testDumpJson_postPermissionMigration() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        // when getting a json dump, we want to verify that:
+        //   - all notification importance info should come from the permission, even if the data
+        //     isn't there yet but is present in package preferences
+        //   - if there are permissions granted or denied from packages PreferencesHelper doesn't
+        //     know about, those should still be included
+
+        // package permissions map to be passed in
+        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
+        appPermissions.put(new Pair(UID_P, PKG_P), true);  // in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+
+        NotificationChannel channel1 =
+                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel channel2 =
+                new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
+        NotificationChannel channel3 = new NotificationChannel("id3", "name3", IMPORTANCE_HIGH);
+
+        mHelper.createNotificationChannel(PKG_P, UID_P, channel1, true, false);
+        mHelper.createNotificationChannel(PKG_P, UID_P, channel2, false, false);
+        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_LOW);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel3, false, false);
+        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+        mHelper.createNotificationChannel(PKG_O, UID_O, getChannel(), true, false);
+        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
+
+        // in the json array, all of the individual package preferences are simply elements in the
+        // values array. this set is to collect expected outputs for each of our packages.
+        // the key/value pairs are: (userId, package name) -> expected importance
+        ArrayMap<Pair<Integer, String>, String> expected = new ArrayMap<>();
+
+        // packages that only exist via the app permissions; should be present
+        expected.put(new Pair(UserHandle.getUserId(1), "first"), "DEFAULT");
+        expected.put(new Pair(UserHandle.getUserId(3), "third"), "NONE");
+
+        // packages that exist in both app permissions & local preferences
+        expected.put(new Pair(UserHandle.getUserId(UID_P), PKG_P), "DEFAULT");
+        expected.put(new Pair(UserHandle.getUserId(UID_O), PKG_O), "NONE");
+
+        // package that only exists in local preferences; expect no importance output
+        expected.put(new Pair(UserHandle.getUserId(UID_N_MR1), PKG_N_MR1), null);
+
+        JSONArray actual = (JSONArray) mHelper.dumpJson(
+                new NotificationManagerService.DumpFilter(), appPermissions)
+                .get("PackagePreferencess");
+        assertThat(actual.length()).isEqualTo(expected.size());
+        for (int i = 0; i < actual.length(); i++) {
+            JSONObject pkgInfo = actual.getJSONObject(i);
+            Pair<Integer, String> pkgKey =
+                    new Pair(pkgInfo.getInt("userId"), pkgInfo.getString("packageName"));
+            assertTrue(expected.containsKey(pkgKey));
+            if (pkgInfo.has("importance")) {
+                assertThat(pkgInfo.getString("importance")).isEqualTo(expected.get(pkgKey));
+            } else {
+                assertThat(expected.get(pkgKey)).isNull();
+            }
+        }
+    }
+
+    @Test
+    public void testDumpJson_givenNullInput_postMigration() throws Exception {
+        // simple test just to make sure nothing dies if we pass in null input even post migration
+        // for some reason, even though in practice this should not be how one calls this method
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+
+        // some packages exist, with some importance info that won't be looked at
+        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
+        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+
+        JSONArray actual = (JSONArray) mHelper.dumpJson(
+                new NotificationManagerService.DumpFilter(), null)
+                .get("PackagePreferencess");
+
+        // there should still be info for the packages
+        assertThat(actual.length()).isEqualTo(2);
+
+        // but they should not have importance info because the migration is enabled and it got
+        // no info
+        for (int i = 0; i < actual.length(); i++) {
+            assertFalse(actual.getJSONObject(i).has("importance"));
+        }
+    }
+
+    @Test
+    public void testDumpBansJson_prePermissionMigration() throws Exception {
+        // confirm that the package bans that are in json are only from package preferences, and
+        // not from the passed-in permissions map
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(false);
+
+        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+
+        // package preferences: only PKG_P is banned
+        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
+        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+
+        // make sure that's the only thing in the package ban output
+        JSONArray actual = mHelper.dumpBansJson(
+                new NotificationManagerService.DumpFilter(), appPermissions);
+        assertThat(actual.length()).isEqualTo(1);
+
+        JSONObject ban = actual.getJSONObject(0);
+        assertThat(ban.getInt("userId")).isEqualTo(UserHandle.getUserId(UID_P));
+        assertThat(ban.getString("packageName")).isEqualTo(PKG_P);
+    }
+
+    @Test
+    public void testDumpBansJson_postPermissionMigration() throws Exception {
+        // confirm that the package bans that are in the output include all packages that
+        // have their permission set to false, and not based on PackagePreferences importance
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+
+        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+
+        // package preferences: PKG_O not banned based on local importance, and PKG_P is
+        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
+        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+
+        // expected output
+        ArraySet<Pair<Integer, String>> expected = new ArraySet<>();
+        expected.add(new Pair(UserHandle.getUserId(3), "third"));
+        expected.add(new Pair(UserHandle.getUserId(UID_O), PKG_O));
+
+        // make sure that's the only thing in the package ban output
+        JSONArray actual = mHelper.dumpBansJson(
+                new NotificationManagerService.DumpFilter(), appPermissions);
+        assertThat(actual.length()).isEqualTo(expected.size());
+
+        for (int i = 0; i < actual.length(); i++) {
+            JSONObject ban = actual.getJSONObject(i);
+            assertTrue(expected.contains(
+                    new Pair(ban.getInt("userId"), ban.getString("packageName"))));
+        }
+    }
+
+    @Test
+    public void testDumpBansJson_givenNullInput() throws Exception {
+        // no one should do this, but...
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+
+        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
+        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+
+        JSONArray actual = mHelper.dumpBansJson(
+                new NotificationManagerService.DumpFilter(), null);
+        assertThat(actual.length()).isEqualTo(0);
+    }
+
+    @Test
+    public void testDumpString_prePermissionMigration() {
+        // confirm that the string resulting from dumpImpl contains only info from package prefs
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(false);
+
+        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+
+        // local package preferences: PKG_O is not banned even though the permissions would
+        // indicate so
+        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
+        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+
+        // get dump output as a string so we can inspect the contents later
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        mHelper.dump(pw, "", new NotificationManagerService.DumpFilter(), appPermissions);
+        pw.flush();
+        String actual = sw.toString();
+
+        // expected (substring) output for each preference
+        ArrayList<String> expected = new ArrayList<>();
+        expected.add(PKG_O + " (" + UID_O + ") importance=HIGH");
+        expected.add(PKG_P + " (" + UID_P + ") importance=NONE");
+
+        // make sure the things in app permissions do NOT show up
+        ArrayList<String> notExpected = new ArrayList<>();
+        notExpected.add("first (1) importance=DEFAULT");
+        notExpected.add("third (3) importance=NONE");
+
+        for (String exp : expected) {
+            assertTrue(actual.contains(exp));
+        }
+
+        for (String notExp : notExpected) {
+            assertFalse(actual.contains(notExp));
+        }
+
+        // also make sure it works the same if we pass in a null input
+        StringWriter sw2 = new StringWriter();
+        PrintWriter pw2 = new PrintWriter(sw2);
+        mHelper.dump(pw2, "", new NotificationManagerService.DumpFilter(), null);
+        pw.flush();
+        String actualWithNullInput = sw2.toString();
+        assertThat(actualWithNullInput).isEqualTo(actual);
+    }
+
+    @Test
+    public void testDumpString_postPermissionMigration() {
+        // confirm that the string resulting from dumpImpl contains only importances from permission
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+
+        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+
+        // local package preferences
+        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
+        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+
+        // get dump output as a string so we can inspect the contents later
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        mHelper.dump(pw, "", new NotificationManagerService.DumpFilter(), appPermissions);
+        pw.flush();
+        String actual = sw.toString();
+
+        // expected (substring) output for each preference via permissions
+        ArrayList<String> expected = new ArrayList<>();
+        expected.add("first (1) importance=DEFAULT");
+        expected.add("third (3) importance=NONE");
+        expected.add(PKG_O + " (" + UID_O + ") importance=NONE");
+        expected.add(PKG_P + " (" + UID_P + ")");
+
+        // make sure we don't have package preference info
+        ArrayList<String> notExpected = new ArrayList<>();
+        notExpected.add(PKG_O + " (" + UID_O + ") importance=HIGH");
+        notExpected.add(PKG_P + " (" + UID_P + ") importance=");  // no importance for PKG_P
+
+        for (String exp : expected) {
+            assertTrue(actual.contains(exp));
+        }
+
+        for (String notExp : notExpected) {
+            assertFalse(actual.contains(notExp));
+        }
+    }
+
+    @Test
+    public void testDumpString_givenNullInput() {
+        // test that this doesn't choke on null input
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+
+        // local package preferences
+        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
+        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+
+        // get dump output
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        mHelper.dump(pw, "", new NotificationManagerService.DumpFilter(), null);
+        pw.flush();
+        String actual = sw.toString();
+
+        // nobody gets any importance
+        assertFalse(actual.contains("importance="));
+    }
+
+    @Test
+    public void testDumpProto_prePermissionMigration() throws Exception {
+        // test that dumping to proto gets the importances from the right place
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(false);
+
+        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+
+        // local package preferences
+        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
+        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+
+        // expected output: only the local preferences
+        // map format: (uid, package name) -> importance (int)
+        ArrayMap<Pair<Integer, String>, Integer> expected = new ArrayMap<>();
+        expected.put(new Pair(UID_O, PKG_O), IMPORTANCE_HIGH);
+        expected.put(new Pair(UID_P, PKG_P), IMPORTANCE_NONE);
+
+        // get the proto output and inspect its contents
+        ProtoOutputStream proto = new ProtoOutputStream();
+        mHelper.dump(proto, new NotificationManagerService.DumpFilter(), appPermissions);
+
+        RankingHelperProto actual = RankingHelperProto.parseFrom(proto.getBytes());
+        assertThat(actual.records.length).isEqualTo(expected.size());
+        for (int i = 0; i < actual.records.length; i++) {
+            RankingHelperProto.RecordProto record = actual.records[i];
+            Pair<Integer, String> pkgKey = new Pair(record.uid, record.package_);
+            assertTrue(expected.containsKey(pkgKey));
+            assertThat(record.importance).isEqualTo(expected.get(pkgKey));
+        }
+
+        // also check that it's the same as passing in null input
+        ProtoOutputStream proto2 = new ProtoOutputStream();
+        mHelper.dump(proto2, new NotificationManagerService.DumpFilter(), null);
+        assertThat(proto.getBytes()).isEqualTo(proto2.getBytes());
+    }
+
+    @Test
+    public void testDumpProto_postPermissionMigration() throws Exception {
+        // test that dumping to proto gets the importances from the right place
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+
+        // permissions -- these should take precedence
+        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+
+        // local package preferences
+        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
+        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_LOW);
+
+        // expected output: all the packages, but only the ones provided via appPermissions
+        // should have importance set (aka not PKG_P)
+        // map format: (uid, package name) -> importance (int)
+        ArrayMap<Pair<Integer, String>, Integer> expected = new ArrayMap<>();
+        expected.put(new Pair(1, "first"), IMPORTANCE_DEFAULT);
+        expected.put(new Pair(3, "third"), IMPORTANCE_NONE);
+        expected.put(new Pair(UID_O, PKG_O), IMPORTANCE_NONE);
+
+        // unfortunately, due to how nano protos work, there's no distinction between unset
+        // fields and default-value fields, so we have no choice here but to check for a value of 0.
+        // at least we can make sure the local importance for PKG_P in this test is not 0 (NONE).
+        expected.put(new Pair(UID_P, PKG_P), 0);
+
+        // get the proto output and inspect its contents
+        ProtoOutputStream proto = new ProtoOutputStream();
+        mHelper.dump(proto, new NotificationManagerService.DumpFilter(), appPermissions);
+
+        RankingHelperProto actual = RankingHelperProto.parseFrom(proto.getBytes());
+        assertThat(actual.records.length).isEqualTo(expected.size());
+        for (int i = 0; i < actual.records.length; i++) {
+            RankingHelperProto.RecordProto record = actual.records[i];
+            Pair<Integer, String> pkgKey = new Pair(record.uid, record.package_);
+            assertTrue(expected.containsKey(pkgKey));
+            assertThat(record.importance).isEqualTo(expected.get(pkgKey));
+        }
+    }
+
+    @Test
     public void testBadgingOverrideTrue() throws Exception {
         Secure.putIntForUser(getContext().getContentResolver(),
                 Secure.NOTIFICATION_BADGING, 1,
@@ -4571,6 +4984,86 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                         IS_DEMOTED_CONVERSATION_FIELD_NUMBER));
                 assertTrue("is important", builder.getBoolean(
                         IS_IMPORTANT_CONVERSATION_FIELD_NUMBER));
+            }
+        }
+    }
+
+    @Test
+    public void testPullPackagePreferencesStats_prePermissionMigration() {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(false);
+
+        // build a collection of app permissions that should be passed in but ignored
+        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+
+        // package preferences: PKG_O not banned based on local importance, and PKG_P is
+        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
+        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+
+        // expected output. format: uid -> importance, as only uid (and not package name)
+        // is in PackageNotificationPreferences
+        ArrayMap<Integer, Integer> expected = new ArrayMap<>();
+        expected.put(UID_O, IMPORTANCE_HIGH);
+        expected.put(UID_P, IMPORTANCE_NONE);
+
+        // unexpected output. these UIDs should not show up in the output at all
+        ArraySet<Integer> unexpected = new ArraySet<>();
+        unexpected.add(1);
+        unexpected.add(3);
+
+        ArrayList<StatsEvent> events = new ArrayList<>();
+        mHelper.pullPackagePreferencesStats(events, appPermissions);
+
+        for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
+            if (builder.getAtomId() == PACKAGE_NOTIFICATION_PREFERENCES) {
+                int uid = builder.getInt(PackageNotificationPreferences.UID_FIELD_NUMBER);
+
+                // this shouldn't be any of the forbidden uids
+                assertFalse(unexpected.contains(uid));
+
+                // if it's one of the expected ids, then make sure the importance matches
+                assertTrue(expected.containsKey(uid));
+                assertThat(expected.get(uid)).isEqualTo(
+                            builder.getInt(PackageNotificationPreferences.IMPORTANCE_FIELD_NUMBER));
+            }
+        }
+    }
+
+    @Test
+    public void testPullPackagePreferencesStats_postPermissionMigration() {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+
+        // build a collection of app permissions that should be passed in but ignored
+        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+
+        // package preferences: PKG_O not banned based on local importance, and PKG_P is
+        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
+        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+
+        // expected output. format: uid -> importance, as only uid (and not package name)
+        // is in PackageNotificationPreferences
+        ArrayMap<Integer, Integer> expected = new ArrayMap<>();
+        expected.put(1, IMPORTANCE_DEFAULT);
+        expected.put(3, IMPORTANCE_NONE);
+        expected.put(UID_O, IMPORTANCE_NONE);    // banned by permissions
+        expected.put(UID_P, IMPORTANCE_NONE);    // defaults to none
+
+        ArrayList<StatsEvent> events = new ArrayList<>();
+        mHelper.pullPackagePreferencesStats(events, appPermissions);
+
+        for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
+            if (builder.getAtomId() == PACKAGE_NOTIFICATION_PREFERENCES) {
+                int uid = builder.getInt(PackageNotificationPreferences.UID_FIELD_NUMBER);
+
+                // if it's one of the expected ids, then make sure the importance matches
+                assertTrue(expected.containsKey(uid));
+                assertThat(expected.get(uid)).isEqualTo(
+                        builder.getInt(PackageNotificationPreferences.IMPORTANCE_FIELD_NUMBER));
             }
         }
     }
