@@ -523,43 +523,44 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
             case TYPE_PHONE:
                 return  3;
             case TYPE_SEARCH_BAR:
-            case TYPE_VOICE_INTERACTION_STARTING:
                 return  4;
-            case TYPE_VOICE_INTERACTION:
-                // voice interaction layer is almost immediately above apps.
-                return  5;
             case TYPE_INPUT_CONSUMER:
-                return  6;
+                return  5;
             case TYPE_SYSTEM_DIALOG:
-                return  7;
+                return  6;
             case TYPE_TOAST:
                 // toasts and the plugged-in battery thing
-                return  8;
+                return  7;
             case TYPE_PRIORITY_PHONE:
                 // SIM errors and unlock.  Not sure if this really should be in a high layer.
-                return  9;
+                return  8;
             case TYPE_SYSTEM_ALERT:
                 // like the ANR / app crashed dialogs
                 // Type is deprecated for non-system apps. For system apps, this type should be
                 // in a higher layer than TYPE_APPLICATION_OVERLAY.
-                return  canAddInternalSystemWindow ? 13 : 10;
+                return  canAddInternalSystemWindow ? 12 : 9;
             case TYPE_APPLICATION_OVERLAY:
-                return  12;
+                return  11;
             case TYPE_INPUT_METHOD:
                 // on-screen keyboards and other such input method user interfaces go here.
-                return  15;
+                return  13;
             case TYPE_INPUT_METHOD_DIALOG:
                 // on-screen keyboards and other such input method user interfaces go here.
-                return  16;
+                return  14;
             case TYPE_STATUS_BAR:
-                return  17;
+                return  15;
             case TYPE_STATUS_BAR_ADDITIONAL:
-                return  18;
+                return  16;
             case TYPE_NOTIFICATION_SHADE:
-                return  19;
+                return  17;
             case TYPE_STATUS_BAR_SUB_PANEL:
-                return  20;
+                return  18;
             case TYPE_KEYGUARD_DIALOG:
+                return  19;
+            case TYPE_VOICE_INTERACTION_STARTING:
+                return  20;
+            case TYPE_VOICE_INTERACTION:
+                // voice interaction layer should show above the lock screen.
                 return  21;
             case TYPE_VOLUME_OVERLAY:
                 // the on-screen volume indicator and controller shown when the user
@@ -568,7 +569,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
             case TYPE_SYSTEM_OVERLAY:
                 // the on-screen volume indicator and controller shown when the user
                 // changes the device volume
-                return  canAddInternalSystemWindow ? 23 : 11;
+                return  canAddInternalSystemWindow ? 23 : 10;
             case TYPE_NAVIGATION_BAR:
                 // the navigation bar, if available, shows atop most things
                 return  24;
@@ -581,7 +582,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
                 return  26;
             case TYPE_SYSTEM_ERROR:
                 // system-level error dialogs
-                return  canAddInternalSystemWindow ? 27 : 10;
+                return  canAddInternalSystemWindow ? 27 : 9;
             case TYPE_MAGNIFICATION_OVERLAY:
                 // used to highlight the magnified portion of a display
                 return  28;
