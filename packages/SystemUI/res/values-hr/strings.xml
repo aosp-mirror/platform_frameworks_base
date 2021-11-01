@@ -346,7 +346,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Slušni aparati"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Uključivanje…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Svjetlina"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatsko zakretanje"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Autom. zakretanje"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Automatsko zakretanje zaslona"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"Način: <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Izmjenjivanje je zaključano"</string>
