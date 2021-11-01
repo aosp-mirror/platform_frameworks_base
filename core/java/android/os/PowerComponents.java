@@ -223,22 +223,32 @@ class PowerComponents {
         for (int componentId = 0; componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
                 componentId++) {
 
-            final BatteryConsumer.Key key = mData.getKey(componentId, PROCESS_STATE_ANY);
-            final long powerDeciCoulombs = convertMahToDeciCoulombs(getConsumedPower(key));
-            final long durationMs = getUsageDurationMillis(key);
+            final BatteryConsumer.Key[] keys = mData.getKeys(componentId);
+            for (BatteryConsumer.Key key : keys) {
+                final long powerDeciCoulombs = convertMahToDeciCoulombs(getConsumedPower(key));
+                final long durationMs = getUsageDurationMillis(key);
 
-            if (powerDeciCoulombs == 0 && durationMs == 0) {
-                // No interesting data. Make sure not to even write the COMPONENT int.
-                continue;
+                if (powerDeciCoulombs == 0 && durationMs == 0) {
+                    // No interesting data. Make sure not to even write the COMPONENT int.
+                    continue;
+                }
+
+                interestingData = true;
+                if (proto == null) {
+                    // We're just asked whether there is data, not to actually write it.
+                    // And there is.
+                    return true;
+                }
+
+                if (key.processState == PROCESS_STATE_ANY) {
+                    writePowerComponentUsage(proto,
+                            BatteryUsageStatsAtomsProto.BatteryConsumerData.POWER_COMPONENTS,
+                            componentId, powerDeciCoulombs, durationMs);
+                } else {
+                    writePowerUsageSlice(proto, componentId, powerDeciCoulombs, durationMs,
+                            key.processState);
+                }
             }
-
-            interestingData = true;
-            if (proto == null) {
-                // We're just asked whether there is data, not to actually write it. And there is.
-                return true;
-            }
-
-            writePowerComponent(proto, componentId, powerDeciCoulombs, durationMs);
         }
         for (int idx = 0; idx < mData.layout.customPowerComponentCount; idx++) {
             final int componentId = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + idx;
@@ -257,15 +267,49 @@ class PowerComponents {
                 return true;
             }
 
-            writePowerComponent(proto, componentId, powerDeciCoulombs, durationMs);
+            writePowerComponentUsage(proto,
+                    BatteryUsageStatsAtomsProto.BatteryConsumerData.POWER_COMPONENTS,
+                    componentId, powerDeciCoulombs, durationMs);
         }
         return interestingData;
     }
 
-    private void writePowerComponent(ProtoOutputStream proto, int componentId,
+    private void writePowerUsageSlice(ProtoOutputStream proto, int componentId,
+            long powerDeciCoulombs, long durationMs, int processState) {
+        final long slicesToken =
+                proto.start(BatteryUsageStatsAtomsProto.BatteryConsumerData.SLICES);
+        writePowerComponentUsage(proto,
+                BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsageSlice
+                        .POWER_COMPONENT,
+                componentId, powerDeciCoulombs, durationMs);
+
+        final int procState;
+        switch (processState) {
+            case BatteryConsumer.PROCESS_STATE_FOREGROUND:
+                procState = BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsageSlice
+                        .FOREGROUND;
+                break;
+            case BatteryConsumer.PROCESS_STATE_BACKGROUND:
+                procState = BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsageSlice
+                        .BACKGROUND;
+                break;
+            case BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE:
+                procState = BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsageSlice
+                        .FOREGROUND_SERVICE;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown process state: " + processState);
+        }
+
+        proto.write(BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsageSlice
+                .PROCESS_STATE, procState);
+
+        proto.end(slicesToken);
+    }
+
+    private void writePowerComponentUsage(ProtoOutputStream proto, long tag, int componentId,
             long powerDeciCoulombs, long durationMs) {
-        final long token =
-                proto.start(BatteryUsageStatsAtomsProto.BatteryConsumerData.POWER_COMPONENTS);
+        final long token = proto.start(tag);
         proto.write(
                 BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsage
                         .COMPONENT,
