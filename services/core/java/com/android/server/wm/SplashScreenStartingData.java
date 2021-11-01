@@ -16,47 +16,25 @@
 
 package com.android.server.wm;
 
-import android.content.res.CompatibilityInfo;
-import android.content.res.Configuration;
-
-import com.android.server.policy.WindowManagerPolicy.StartingSurface;
+import com.android.server.wm.StartingSurfaceController.StartingSurface;
 
 /**
  * Represents starting data for splash screens, i.e. "traditional" starting windows.
  */
 class SplashScreenStartingData extends StartingData {
 
-    private final String mPkg;
     private final int mTheme;
-    private final CompatibilityInfo mCompatInfo;
-    private final CharSequence mNonLocalizedLabel;
-    private final int mLabelRes;
-    private final int mIcon;
-    private final int mLogo;
-    private final int mWindowFlags;
-    private final Configuration mMergedOverrideConfiguration;
 
-    SplashScreenStartingData(WindowManagerService service, String pkg, int theme,
-            CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
-            int logo, int windowFlags, Configuration mergedOverrideConfiguration, int typeParams) {
+    SplashScreenStartingData(WindowManagerService service, int theme,
+            int typeParams) {
         super(service, typeParams);
-        mPkg = pkg;
         mTheme = theme;
-        mCompatInfo = compatInfo;
-        mNonLocalizedLabel = nonLocalizedLabel;
-        mLabelRes = labelRes;
-        mIcon = icon;
-        mLogo = logo;
-        mWindowFlags = windowFlags;
-        mMergedOverrideConfiguration = mergedOverrideConfiguration;
     }
 
     @Override
     StartingSurface createStartingSurface(ActivityRecord activity) {
         return mService.mStartingSurfaceController.createSplashScreenStartingSurface(
-                activity, mPkg, mTheme, mCompatInfo, mNonLocalizedLabel, mLabelRes, mIcon,
-                mLogo, mWindowFlags, mMergedOverrideConfiguration,
-                activity.getDisplayContent().getDisplayId());
+                activity, mTheme);
     }
 
     @Override
