@@ -171,10 +171,11 @@ public interface StatusBarDependenciesModule {
     @SysUISingleton
     @Provides
     static SmartReplyController provideSmartReplyController(
+            DumpManager dumpManager,
             NotificationEntryManager entryManager,
             IStatusBarService statusBarService,
             NotificationClickNotifier clickNotifier) {
-        return new SmartReplyController(entryManager, statusBarService, clickNotifier);
+        return new SmartReplyController(dumpManager, entryManager, statusBarService, clickNotifier);
     }
 
 
