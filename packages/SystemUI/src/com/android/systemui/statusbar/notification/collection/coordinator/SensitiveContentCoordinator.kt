@@ -17,13 +17,13 @@
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.os.UserHandle
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.notification.DynamicPrivacyController
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator
 import dagger.Module
@@ -32,7 +32,7 @@ import dagger.Provides
 @Module
 object SensitiveContentCoordinatorModule {
     @Provides
-    @SysUISingleton
+    @CoordinatorScope
     fun provideCoordinator(
         dynamicPrivacyController: DynamicPrivacyController,
         lockscreenUserManager: NotificationLockscreenUserManager

@@ -45,9 +45,9 @@ import com.android.systemui.statusbar.notification.NotificationEntryManagerLogge
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
-import com.android.systemui.statusbar.notification.collection.coordinator.SensitiveContentCoordinatorModule;
 import com.android.systemui.statusbar.notification.collection.coordinator.ShadeEventCoordinator;
 import com.android.systemui.statusbar.notification.collection.coordinator.VisualStabilityCoordinator;
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorsModule;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.OnUserInteractionCallbackImpl;
@@ -96,7 +96,7 @@ import dagger.Provides;
  */
 @Module(includes = {
         NotificationSectionHeadersModule.class,
-        SensitiveContentCoordinatorModule.class
+        CoordinatorsModule.class
 })
 public interface NotificationsModule {
     @Binds
