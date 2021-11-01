@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.systemui.statusbar;
 
@@ -10,26 +25,25 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
-import android.app.RemoteInputHistoryItem;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
-import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.NotificationRemoteInputManager.RemoteInputActiveExtender;
-import com.android.systemui.statusbar.NotificationRemoteInputManager.RemoteInputHistoryExtender;
-import com.android.systemui.statusbar.NotificationRemoteInputManager.SmartReplyHistoryExtender;
+import com.android.systemui.statusbar.NotificationRemoteInputManager.LegacyRemoteInputLifetimeExtender.RemoteInputActiveExtender;
+import com.android.systemui.statusbar.NotificationRemoteInputManager.LegacyRemoteInputLifetimeExtender.RemoteInputHistoryExtender;
+import com.android.systemui.statusbar.NotificationRemoteInputManager.LegacyRemoteInputLifetimeExtender.SmartReplyHistoryExtender;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -76,13 +90,19 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     private RemoteInputHistoryExtender mRemoteInputHistoryExtender;
     private SmartReplyHistoryExtender mSmartReplyHistoryExtender;
     private RemoteInputActiveExtender mRemoteInputActiveExtender;
+    private TestableNotificationRemoteInputManager.FakeLegacyRemoteInputLifetimeExtender
+            mLegacyRemoteInputLifetimeExtender;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         mRemoteInputManager = new TestableNotificationRemoteInputManager(mContext,
-                mLockscreenUserManager, mSmartReplyController, mEntryManager,
+                mock(FeatureFlags.class),
+                mLockscreenUserManager,
+                mSmartReplyController,
+                mEntryManager,
+                mock(RemoteInputNotificationRebuilder.class),
                 () -> Optional.of(mock(StatusBar.class)),
                 mStateController,
                 Handler.createAsync(Looper.myLooper()),
@@ -120,6 +140,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     public void testShouldExtendLifetime_remoteInputActive() {
         when(mController.isRemoteInputActive(mEntry)).thenReturn(true);
 
+        assertTrue(mRemoteInputManager.isRemoteInputActive(mEntry));
         assertTrue(mRemoteInputActiveExtender.shouldExtendLifetime(mEntry));
     }
 
@@ -128,6 +149,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY = true;
         when(mController.isSpinning(mEntry.getKey())).thenReturn(true);
 
+        assertTrue(mRemoteInputManager.shouldKeepForRemoteInputHistory(mEntry));
         assertTrue(mRemoteInputHistoryExtender.shouldExtendLifetime(mEntry));
     }
 
@@ -136,6 +158,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY = true;
         mEntry.lastRemoteInputSent = SystemClock.elapsedRealtime();
 
+        assertTrue(mRemoteInputManager.shouldKeepForRemoteInputHistory(mEntry));
         assertTrue(mRemoteInputHistoryExtender.shouldExtendLifetime(mEntry));
     }
 
@@ -144,6 +167,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY = true;
         when(mSmartReplyController.isSendingSmartReply(mEntry.getKey())).thenReturn(true);
 
+        assertTrue(mRemoteInputManager.shouldKeepForSmartReplyHistory(mEntry));
         assertTrue(mSmartReplyHistoryExtender.shouldExtendLifetime(mEntry));
     }
 
@@ -151,124 +175,24 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     public void testNotificationWithRemoteInputActiveIsRemovedOnCollapse() {
         mRemoteInputActiveExtender.setShouldManageLifetime(mEntry, true /* shouldManage */);
 
-        assertEquals(mRemoteInputManager.getEntriesKeptForRemoteInputActive(),
+        assertEquals(mLegacyRemoteInputLifetimeExtender.getEntriesKeptForRemoteInputActive(),
                 Sets.newArraySet(mEntry));
 
         mRemoteInputManager.onPanelCollapsed();
 
-        assertTrue(mRemoteInputManager.getEntriesKeptForRemoteInputActive().isEmpty());
+        assertTrue(
+                mLegacyRemoteInputLifetimeExtender.getEntriesKeptForRemoteInputActive().isEmpty());
     }
-
-    @Test
-    public void testRebuildWithRemoteInput_noExistingInput_image() {
-        Uri uri = mock(Uri.class);
-        String mimeType  = "image/jpeg";
-        String text = "image inserted";
-        StatusBarNotification newSbn =
-                mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
-                        mEntry, text, false, mimeType, uri);
-        RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
-                .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
-        assertEquals(1, messages.length);
-        assertEquals(text, messages[0].getText());
-        assertEquals(mimeType, messages[0].getMimeType());
-        assertEquals(uri, messages[0].getUri());
-    }
-
-    @Test
-    public void testRebuildWithRemoteInput_noExistingInputNoSpinner() {
-        StatusBarNotification newSbn =
-                mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
-                        mEntry, "A Reply", false, null, null);
-        RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
-                .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
-        assertEquals(1, messages.length);
-        assertEquals("A Reply", messages[0].getText());
-        assertFalse(newSbn.getNotification().extras
-                .getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false));
-        assertTrue(newSbn.getNotification().extras
-                .getBoolean(Notification.EXTRA_HIDE_SMART_REPLIES, false));
-    }
-
-    @Test
-    public void testRebuildWithRemoteInput_noExistingInputWithSpinner() {
-        StatusBarNotification newSbn =
-                mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
-                        mEntry, "A Reply", true, null, null);
-        RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
-                .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
-        assertEquals(1, messages.length);
-        assertEquals("A Reply", messages[0].getText());
-        assertTrue(newSbn.getNotification().extras
-                .getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false));
-        assertTrue(newSbn.getNotification().extras
-                .getBoolean(Notification.EXTRA_HIDE_SMART_REPLIES, false));
-    }
-
-    @Test
-    public void testRebuildWithRemoteInput_withExistingInput() {
-        // Setup a notification entry with 1 remote input.
-        StatusBarNotification newSbn =
-                mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
-                        mEntry, "A Reply", false, null, null);
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setSbn(newSbn)
-                .build();
-
-        // Try rebuilding to add another reply.
-        newSbn = mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
-                entry, "Reply 2", true, null, null);
-        RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
-                .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
-        assertEquals(2, messages.length);
-        assertEquals("Reply 2", messages[0].getText());
-        assertEquals("A Reply", messages[1].getText());
-    }
-
-    @Test
-    public void testRebuildWithRemoteInput_withExistingInput_image() {
-        // Setup a notification entry with 1 remote input.
-        Uri uri = mock(Uri.class);
-        String mimeType  = "image/jpeg";
-        String text = "image inserted";
-        StatusBarNotification newSbn =
-                mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
-                        mEntry, text, false, mimeType, uri);
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setSbn(newSbn)
-                .build();
-
-        // Try rebuilding to add another reply.
-        newSbn = mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
-                entry, "Reply 2", true, null, null);
-        RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
-                .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
-        assertEquals(2, messages.length);
-        assertEquals("Reply 2", messages[0].getText());
-        assertEquals(text, messages[1].getText());
-        assertEquals(mimeType, messages[1].getMimeType());
-        assertEquals(uri, messages[1].getUri());
-    }
-
-    @Test
-    public void testRebuildNotificationForCanceledSmartReplies() {
-        // Try rebuilding to remove spinner and hide buttons.
-        StatusBarNotification newSbn =
-                mRemoteInputManager.rebuildNotificationForCanceledSmartReplies(mEntry);
-        assertFalse(newSbn.getNotification().extras
-                .getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false));
-        assertTrue(newSbn.getNotification().extras
-                .getBoolean(Notification.EXTRA_HIDE_SMART_REPLIES, false));
-    }
-
 
     private class TestableNotificationRemoteInputManager extends NotificationRemoteInputManager {
 
         TestableNotificationRemoteInputManager(
                 Context context,
+                FeatureFlags featureFlags,
                 NotificationLockscreenUserManager lockscreenUserManager,
                 SmartReplyController smartReplyController,
                 NotificationEntryManager notificationEntryManager,
+                RemoteInputNotificationRebuilder rebuilder,
                 Lazy<Optional<StatusBar>> statusBarOptionalLazy,
                 StatusBarStateController statusBarStateController,
                 Handler mainHandler,
@@ -278,9 +202,11 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 DumpManager dumpManager) {
             super(
                     context,
+                    featureFlags,
                     lockscreenUserManager,
                     smartReplyController,
                     notificationEntryManager,
+                    rebuilder,
                     statusBarOptionalLazy,
                     statusBarStateController,
                     mainHandler,
@@ -297,14 +223,28 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
             mRemoteInputController = controller;
         }
 
+        @NonNull
         @Override
-        protected void addLifetimeExtenders() {
-            mRemoteInputActiveExtender = new RemoteInputActiveExtender();
-            mRemoteInputHistoryExtender = new RemoteInputHistoryExtender();
-            mSmartReplyHistoryExtender = new SmartReplyHistoryExtender();
-            mLifetimeExtenders.add(mRemoteInputHistoryExtender);
-            mLifetimeExtenders.add(mSmartReplyHistoryExtender);
-            mLifetimeExtenders.add(mRemoteInputActiveExtender);
+        protected LegacyRemoteInputLifetimeExtender createLegacyRemoteInputLifetimeExtender(
+                Handler mainHandler,
+                NotificationEntryManager notificationEntryManager,
+                SmartReplyController smartReplyController) {
+            mLegacyRemoteInputLifetimeExtender = new FakeLegacyRemoteInputLifetimeExtender();
+            return mLegacyRemoteInputLifetimeExtender;
         }
+
+        class FakeLegacyRemoteInputLifetimeExtender extends LegacyRemoteInputLifetimeExtender {
+
+            @Override
+            protected void addLifetimeExtenders() {
+                mRemoteInputActiveExtender = new RemoteInputActiveExtender();
+                mRemoteInputHistoryExtender = new RemoteInputHistoryExtender();
+                mSmartReplyHistoryExtender = new SmartReplyHistoryExtender();
+                mLifetimeExtenders.add(mRemoteInputHistoryExtender);
+                mLifetimeExtenders.add(mSmartReplyHistoryExtender);
+                mLifetimeExtenders.add(mRemoteInputActiveExtender);
+            }
+        }
+
     }
 }
