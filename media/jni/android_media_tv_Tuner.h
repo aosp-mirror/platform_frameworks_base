@@ -130,9 +130,12 @@ struct FilterClientCallbackImpl : public FilterClientCallback {
     virtual void onFilterStatus(const DemuxFilterStatus status);
 
     void setFilter(jweak filterObj, sp<FilterClient> filterClient);
+    void setSharedFilter(jweak filterObj, sp<FilterClient> filterClient);
+
 private:
     jweak mFilterObj;
     sp<FilterClient> mFilterClient;
+    bool mSharedFilter;
     void getSectionEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
     void getMediaEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
     void getPesEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);

@@ -20,6 +20,7 @@ package android {
     field public static final String ACCESS_SURFACE_FLINGER = "android.permission.ACCESS_SURFACE_FLINGER";
     field public static final String ACCESS_TUNED_INFO = "android.permission.ACCESS_TUNED_INFO";
     field public static final String ACCESS_TV_DESCRAMBLER = "android.permission.ACCESS_TV_DESCRAMBLER";
+    field public static final String ACCESS_TV_SHARED_FILTER = "android.permission.ACCESS_TV_SHARED_FILTER";
     field public static final String ACCESS_TV_TUNER = "android.permission.ACCESS_TV_TUNER";
     field public static final String ACCESS_VIBRATOR_STATE = "android.permission.ACCESS_VIBRATOR_STATE";
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
@@ -6127,6 +6128,7 @@ package android.media.tv.tuner {
     method @Nullable public android.media.tv.tuner.filter.Filter openFilter(int, int, long, @Nullable java.util.concurrent.Executor, @Nullable android.media.tv.tuner.filter.FilterCallback);
     method @Nullable public android.media.tv.tuner.Lnb openLnb(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.LnbCallback);
     method @Nullable public android.media.tv.tuner.Lnb openLnbByName(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.LnbCallback);
+    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_SHARED_FILTER) public static android.media.tv.tuner.filter.SharedFilter openSharedFilter(@NonNull android.content.Context, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.filter.SharedFilterCallback);
     method @Nullable public android.media.tv.tuner.filter.TimeFilter openTimeFilter();
     method public int scan(@NonNull android.media.tv.tuner.frontend.FrontendSettings, int, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.ScanCallback);
     method public int setLnaEnabled(boolean);
@@ -6335,10 +6337,12 @@ package android.media.tv.tuner.filter {
   public class Filter implements java.lang.AutoCloseable {
     method public void close();
     method public int configure(@NonNull android.media.tv.tuner.filter.FilterConfiguration);
+    method @Nullable public String createSharedFilter();
     method public int flush();
     method @Deprecated public int getId();
     method public long getIdLong();
     method public int read(@NonNull byte[], long, long);
+    method public void releaseSharedFilter(@NonNull String);
     method public int setDataSource(@Nullable android.media.tv.tuner.filter.Filter);
     method public int setMonitorEventMask(int);
     method public int start();
@@ -6586,6 +6590,20 @@ package android.media.tv.tuner.filter {
 
   public abstract class Settings {
     method public int getType();
+  }
+
+  public final class SharedFilter implements java.lang.AutoCloseable {
+    method public void close();
+    method public int flush();
+    method public int read(@NonNull byte[], long, long);
+    method public int start();
+    method public int stop();
+    field public static final int STATUS_INACCESSIBLE = 128; // 0x80
+  }
+
+  public interface SharedFilterCallback {
+    method public void onFilterEvent(@NonNull android.media.tv.tuner.filter.SharedFilter, @NonNull android.media.tv.tuner.filter.FilterEvent[]);
+    method public void onFilterStatusChanged(@NonNull android.media.tv.tuner.filter.SharedFilter, int);
   }
 
   public class TemiEvent extends android.media.tv.tuner.filter.FilterEvent {
