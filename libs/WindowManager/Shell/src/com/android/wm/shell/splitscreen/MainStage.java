@@ -16,8 +16,6 @@
 
 package com.android.wm.shell.splitscreen;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
@@ -56,7 +54,6 @@ class MainStage extends StageTaskListener {
 
         final WindowContainerToken rootToken = mRootTaskInfo.token;
         wct.setBounds(rootToken, rootBounds)
-                .setWindowingMode(rootToken, WINDOWING_MODE_MULTI_WINDOW)
                 // Moving the root task to top after the child tasks were re-parented , or the root
                 // task cannot be visible and focused.
                 .reorder(rootToken, true /* onTop */);
@@ -83,11 +80,7 @@ class MainStage extends StageTaskListener {
 
         if (mRootTaskInfo == null) return;
         final WindowContainerToken rootToken = mRootTaskInfo.token;
-        wct.setLaunchRoot(
-                        rootToken,
-                        null,
-                        null)
-                .reparentTasks(
+        wct.reparentTasks(
                         rootToken,
                         null /* newParent */,
                         CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE,
@@ -96,10 +89,5 @@ class MainStage extends StageTaskListener {
                 // We want this re-order to the bottom regardless since we are re-parenting
                 // all its tasks.
                 .reorder(rootToken, false /* onTop */);
-    }
-
-    void updateConfiguration(int windowingMode, Rect bounds, WindowContainerTransaction wct) {
-        wct.setBounds(mRootTaskInfo.token, bounds)
-                .setWindowingMode(mRootTaskInfo.token, windowingMode);
     }
 }

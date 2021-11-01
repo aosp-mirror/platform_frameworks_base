@@ -4,7 +4,8 @@ import android.view.Gravity
 import android.view.Surface
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.navigationbar.gestural.FloatingRotationButtonPositionCalculator.Position
+import com.android.systemui.shared.rotation.FloatingRotationButtonPositionCalculator
+import com.android.systemui.shared.rotation.FloatingRotationButtonPositionCalculator.Position
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith

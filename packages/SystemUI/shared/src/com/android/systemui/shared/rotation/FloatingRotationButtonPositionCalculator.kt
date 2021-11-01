@@ -1,4 +1,4 @@
-package com.android.systemui.navigationbar.gestural
+package com.android.systemui.shared.rotation
 
 import android.view.Gravity
 import android.view.Surface
@@ -7,7 +7,7 @@ import android.view.Surface
  * Calculates gravity and translation that is necessary to display
  * the button in the correct position based on the current state
  */
-internal class FloatingRotationButtonPositionCalculator(
+class FloatingRotationButtonPositionCalculator(
     private val defaultMargin: Int,
     private val taskbarMarginLeft: Int,
     private val taskbarMarginBottom: Int

@@ -36,6 +36,7 @@ import com.android.telephony.Rlog;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -152,16 +153,9 @@ public final class TelephonyScanManager {
                     throw new RuntimeException(
                         "Failed to find NetworkScanInfo with id " + message.arg2);
                 }
-                NetworkScanCallback callback = nsi.mCallback;
-                Executor executor = nsi.mExecutor;
-                if (callback == null) {
-                    throw new RuntimeException(
-                        "Failed to find NetworkScanCallback with id " + message.arg2);
-                }
-                if (executor == null) {
-                    throw new RuntimeException(
-                        "Failed to find Executor with id " + message.arg2);
-                }
+
+                final NetworkScanCallback callback = nsi.mCallback;
+                final Executor executor = nsi.mExecutor;
 
                 switch (message.what) {
                     case CALLBACK_RESTRICTED_SCAN_RESULTS:
@@ -246,17 +240,24 @@ public final class TelephonyScanManager {
             NetworkScanRequest request, Executor executor, NetworkScanCallback callback,
             String callingPackage, @Nullable String callingFeatureId) {
         try {
+            Objects.requireNonNull(request, "Request was null");
+            Objects.requireNonNull(callback, "Callback was null");
+            Objects.requireNonNull(executor, "Executor was null");
             final ITelephony telephony = getITelephony();
             if (telephony == null) return null;
 
-            int scanId = telephony.requestNetworkScan(
-                    subId, request, mMessenger, new Binder(), callingPackage,
-                    callingFeatureId);
-            if (scanId == INVALID_SCAN_ID) {
-                Rlog.e(TAG, "Failed to initiate network scan");
-                return null;
-            }
+            // The lock must be taken before calling requestNetworkScan because the resulting
+            // scanId can be invoked asynchronously on another thread at any time after
+            // requestNetworkScan invoked, leaving a critical section between that call and adding
+            // the record to the ScanInfo cache.
             synchronized (mScanInfo) {
+                int scanId = telephony.requestNetworkScan(
+                        subId, request, mMessenger, new Binder(), callingPackage,
+                        callingFeatureId);
+                if (scanId == INVALID_SCAN_ID) {
+                    Rlog.e(TAG, "Failed to initiate network scan");
+                    return null;
+                }
                 // We link to death whenever a scan is started to ensure that we are linked
                 // at the point that phone process death might matter.
                 // We never unlink because:
