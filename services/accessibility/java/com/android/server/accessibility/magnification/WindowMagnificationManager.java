@@ -18,6 +18,7 @@ package com.android.server.accessibility.magnification;
 
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MAGNIFICATION_CONNECTION;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK;
+import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANIMATION_CALLBACK;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -74,7 +75,7 @@ public class WindowMagnificationManager implements
         public void onReceive(Context context, Intent intent) {
             final int displayId = context.getDisplayId();
             removeMagnificationButton(displayId);
-            disableWindowMagnification(displayId, false);
+            disableWindowMagnification(displayId, false, null);
         }
     };
 
@@ -263,7 +264,7 @@ public class WindowMagnificationManager implements
      *                or {@link Float#NaN} to leave unchanged.
      */
     void enableWindowMagnification(int displayId, float scale, float centerX, float centerY) {
-        enableWindowMagnification(displayId, scale, centerX, centerY, null);
+        enableWindowMagnification(displayId, scale, centerX, centerY, STUB_ANIMATION_CALLBACK);
     }
 
     /**
@@ -305,7 +306,7 @@ public class WindowMagnificationManager implements
      * @param clear {@true} Clears the state of window magnification.
      */
     void disableWindowMagnification(int displayId, boolean clear) {
-        disableWindowMagnification(displayId, clear, null);
+        disableWindowMagnification(displayId, clear, STUB_ANIMATION_CALLBACK);
     }
 
     /**

@@ -17,6 +17,7 @@
 package com.android.server.accessibility.magnification;
 
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
+import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANIMATION_CALLBACK;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
@@ -65,9 +66,6 @@ import java.util.Locale;
 public class FullScreenMagnificationController {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "FullScreenMagnificationController";
-
-    private static final MagnificationAnimationCallback STUB_ANIMATION_CALLBACK = success -> {
-    };
 
     private static final boolean DEBUG_SET_MAGNIFICATION_SPEC = false;
 
