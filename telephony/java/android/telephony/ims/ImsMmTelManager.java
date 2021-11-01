@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.content.Context;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -215,6 +216,7 @@ public class ImsMmTelManager implements RegistrationManager {
         }
     }
 
+    private final Context mContext;
     private final int mSubId;
     private final BinderCacheManager<ITelephony> mBinderCache;
 
@@ -256,6 +258,16 @@ public class ImsMmTelManager implements RegistrationManager {
      */
     @VisibleForTesting
     public ImsMmTelManager(int subId, BinderCacheManager<ITelephony> binderCache) {
+        this(null, subId, binderCache);
+    }
+
+    /**
+     * Only visible for testing, use {@link ImsManager#getImsMmTelManager(int)} instead.
+     * @hide
+     */
+    @VisibleForTesting
+    public ImsMmTelManager(Context context, int subId, BinderCacheManager<ITelephony> binderCache) {
+        mContext = context;
         mSubId = subId;
         mBinderCache = binderCache;
     }
@@ -1516,7 +1528,8 @@ public class ImsMmTelManager implements RegistrationManager {
 
         try {
             telephony.registerImsStateCallback(
-                    mSubId, ImsFeature.FEATURE_MMTEL, callback.getCallbackBinder());
+                    mSubId, ImsFeature.FEATURE_MMTEL,
+                    callback.getCallbackBinder(), getOpPackageName());
         } catch (ServiceSpecificException e) {
             throw new ImsException(e.getMessage(), e.errorCode);
         } catch (RemoteException | IllegalStateException e) {
@@ -1539,6 +1552,14 @@ public class ImsMmTelManager implements RegistrationManager {
             }
         } catch (RemoteException ignore) {
             // ignore it
+        }
+    }
+
+    private String getOpPackageName() {
+        if (mContext != null) {
+            return mContext.getOpPackageName();
+        } else {
+            return null;
         }
     }
 
