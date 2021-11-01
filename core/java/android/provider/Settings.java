@@ -3316,6 +3316,66 @@ public final class Settings {
         }
     }
 
+    private static float parseFloatSetting(String settingValue, String settingName)
+            throws SettingNotFoundException {
+        if (settingValue == null) {
+            throw new SettingNotFoundException(settingName);
+        }
+        try {
+            return Float.parseFloat(settingValue);
+        } catch (NumberFormatException e) {
+            throw new SettingNotFoundException(settingName);
+        }
+    }
+
+    private static float parseFloatSettingWithDefault(String settingValue, float defaultValue) {
+        try {
+            return settingValue != null ? Float.parseFloat(settingValue) : defaultValue;
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    private static int parseIntSetting(String settingValue, String settingName)
+            throws SettingNotFoundException {
+        if (settingValue == null) {
+            throw new SettingNotFoundException(settingName);
+        }
+        try {
+            return Integer.parseInt(settingValue);
+        } catch (NumberFormatException e) {
+            throw new SettingNotFoundException(settingName);
+        }
+    }
+
+    private static int parseIntSettingWithDefault(String settingValue, int defaultValue) {
+        try {
+            return settingValue != null ? Integer.parseInt(settingValue) : defaultValue;
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    private static long parseLongSetting(String settingValue, String settingName)
+            throws SettingNotFoundException {
+        if (settingValue == null) {
+            throw new SettingNotFoundException(settingName);
+        }
+        try {
+            return Long.parseLong(settingValue);
+        } catch (NumberFormatException e) {
+            throw new SettingNotFoundException(settingName);
+        }
+    }
+
+    private static long parseLongSettingWithDefault(String settingValue, long defaultValue) {
+        try {
+            return settingValue != null ? Long.parseLong(settingValue) : defaultValue;
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
     /**
      * System settings, containing miscellaneous system preferences.  This
      * table holds simple name/value pairs.  There are convenience
@@ -3603,11 +3663,7 @@ public final class Settings {
         @UnsupportedAppUsage
         public static int getIntForUser(ContentResolver cr, String name, int def, int userHandle) {
             String v = getStringForUser(cr, name, userHandle);
-            try {
-                return v != null ? Integer.parseInt(v) : def;
-            } catch (NumberFormatException e) {
-                return def;
-            }
+            return parseIntSettingWithDefault(v, def);
         }
 
         /**
@@ -3638,11 +3694,7 @@ public final class Settings {
         public static int getIntForUser(ContentResolver cr, String name, int userHandle)
                 throws SettingNotFoundException {
             String v = getStringForUser(cr, name, userHandle);
-            try {
-                return Integer.parseInt(v);
-            } catch (NumberFormatException e) {
-                throw new SettingNotFoundException(name);
-            }
+            return parseIntSetting(v, name);
         }
 
         /**
@@ -3690,14 +3742,8 @@ public final class Settings {
         /** @hide */
         public static long getLongForUser(ContentResolver cr, String name, long def,
                 int userHandle) {
-            String valString = getStringForUser(cr, name, userHandle);
-            long value;
-            try {
-                value = valString != null ? Long.parseLong(valString) : def;
-            } catch (NumberFormatException e) {
-                value = def;
-            }
-            return value;
+            String v = getStringForUser(cr, name, userHandle);
+            return parseLongSettingWithDefault(v, def);
         }
 
         /**
@@ -3725,12 +3771,8 @@ public final class Settings {
         /** @hide */
         public static long getLongForUser(ContentResolver cr, String name, int userHandle)
                 throws SettingNotFoundException {
-            String valString = getStringForUser(cr, name, userHandle);
-            try {
-                return Long.parseLong(valString);
-            } catch (NumberFormatException e) {
-                throw new SettingNotFoundException(name);
-            }
+            String v = getStringForUser(cr, name, userHandle);
+            return parseLongSetting(v, name);
         }
 
         /**
@@ -3778,11 +3820,7 @@ public final class Settings {
         public static float getFloatForUser(ContentResolver cr, String name, float def,
                 int userHandle) {
             String v = getStringForUser(cr, name, userHandle);
-            try {
-                return v != null ? Float.parseFloat(v) : def;
-            } catch (NumberFormatException e) {
-                return def;
-            }
+            return parseFloatSettingWithDefault(v, def);
         }
 
         /**
@@ -3812,14 +3850,7 @@ public final class Settings {
         public static float getFloatForUser(ContentResolver cr, String name, int userHandle)
                 throws SettingNotFoundException {
             String v = getStringForUser(cr, name, userHandle);
-            if (v == null) {
-                throw new SettingNotFoundException(name);
-            }
-            try {
-                return Float.parseFloat(v);
-            } catch (NumberFormatException e) {
-                throw new SettingNotFoundException(name);
-            }
+            return parseFloatSetting(v, name);
         }
 
         /**
@@ -6070,11 +6101,7 @@ public final class Settings {
         @UnsupportedAppUsage
         public static int getIntForUser(ContentResolver cr, String name, int def, int userHandle) {
             String v = getStringForUser(cr, name, userHandle);
-            try {
-                return v != null ? Integer.parseInt(v) : def;
-            } catch (NumberFormatException e) {
-                return def;
-            }
+            return parseIntSettingWithDefault(v, def);
         }
 
         /**
@@ -6104,11 +6131,7 @@ public final class Settings {
         public static int getIntForUser(ContentResolver cr, String name, int userHandle)
                 throws SettingNotFoundException {
             String v = getStringForUser(cr, name, userHandle);
-            try {
-                return Integer.parseInt(v);
-            } catch (NumberFormatException e) {
-                throw new SettingNotFoundException(name);
-            }
+            return parseIntSetting(v, name);
         }
 
         /**
@@ -6157,14 +6180,8 @@ public final class Settings {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static long getLongForUser(ContentResolver cr, String name, long def,
                 int userHandle) {
-            String valString = getStringForUser(cr, name, userHandle);
-            long value;
-            try {
-                value = valString != null ? Long.parseLong(valString) : def;
-            } catch (NumberFormatException e) {
-                value = def;
-            }
-            return value;
+            String v = getStringForUser(cr, name, userHandle);
+            return parseLongSettingWithDefault(v, def);
         }
 
         /**
@@ -6192,12 +6209,8 @@ public final class Settings {
         /** @hide */
         public static long getLongForUser(ContentResolver cr, String name, int userHandle)
                 throws SettingNotFoundException {
-            String valString = getStringForUser(cr, name, userHandle);
-            try {
-                return Long.parseLong(valString);
-            } catch (NumberFormatException e) {
-                throw new SettingNotFoundException(name);
-            }
+            String v = getStringForUser(cr, name, userHandle);
+            return parseLongSetting(v, name);
         }
 
         /**
@@ -6246,11 +6259,7 @@ public final class Settings {
         public static float getFloatForUser(ContentResolver cr, String name, float def,
                 int userHandle) {
             String v = getStringForUser(cr, name, userHandle);
-            try {
-                return v != null ? Float.parseFloat(v) : def;
-            } catch (NumberFormatException e) {
-                return def;
-            }
+            return parseFloatSettingWithDefault(v, def);
         }
 
         /**
@@ -6280,14 +6289,7 @@ public final class Settings {
         public static float getFloatForUser(ContentResolver cr, String name, int userHandle)
                 throws SettingNotFoundException {
             String v = getStringForUser(cr, name, userHandle);
-            if (v == null) {
-                throw new SettingNotFoundException(name);
-            }
-            try {
-                return Float.parseFloat(v);
-            } catch (NumberFormatException e) {
-                throw new SettingNotFoundException(name);
-            }
+            return parseFloatSetting(v, name);
         }
 
         /**
@@ -15429,11 +15431,7 @@ public final class Settings {
          */
         public static int getInt(ContentResolver cr, String name, int def) {
             String v = getString(cr, name);
-            try {
-                return v != null ? Integer.parseInt(v) : def;
-            } catch (NumberFormatException e) {
-                return def;
-            }
+            return parseIntSettingWithDefault(v, def);
         }
 
         /**
@@ -15457,11 +15455,7 @@ public final class Settings {
         public static int getInt(ContentResolver cr, String name)
                 throws SettingNotFoundException {
             String v = getString(cr, name);
-            try {
-                return Integer.parseInt(v);
-            } catch (NumberFormatException e) {
-                throw new SettingNotFoundException(name);
-            }
+            return parseIntSetting(v, name);
         }
 
         /**
@@ -15496,14 +15490,8 @@ public final class Settings {
          * or not a valid {@code long}.
          */
         public static long getLong(ContentResolver cr, String name, long def) {
-            String valString = getString(cr, name);
-            long value;
-            try {
-                value = valString != null ? Long.parseLong(valString) : def;
-            } catch (NumberFormatException e) {
-                value = def;
-            }
-            return value;
+            String v = getString(cr, name);
+            return parseLongSettingWithDefault(v, def);
         }
 
         /**
@@ -15525,12 +15513,8 @@ public final class Settings {
          */
         public static long getLong(ContentResolver cr, String name)
                 throws SettingNotFoundException {
-            String valString = getString(cr, name);
-            try {
-                return Long.parseLong(valString);
-            } catch (NumberFormatException e) {
-                throw new SettingNotFoundException(name);
-            }
+            String v = getString(cr, name);
+            return parseLongSetting(v, name);
         }
 
         /**
@@ -15566,11 +15550,7 @@ public final class Settings {
          */
         public static float getFloat(ContentResolver cr, String name, float def) {
             String v = getString(cr, name);
-            try {
-                return v != null ? Float.parseFloat(v) : def;
-            } catch (NumberFormatException e) {
-                return def;
-            }
+            return parseFloatSettingWithDefault(v, def);
         }
 
         /**
@@ -15594,14 +15574,7 @@ public final class Settings {
         public static float getFloat(ContentResolver cr, String name)
                 throws SettingNotFoundException {
             String v = getString(cr, name);
-            if (v == null) {
-                throw new SettingNotFoundException(name);
-            }
-            try {
-                return Float.parseFloat(v);
-            } catch (NumberFormatException e) {
-                throw new SettingNotFoundException(name);
-            }
+            return parseFloatSetting(v, name);
         }
 
         /**
