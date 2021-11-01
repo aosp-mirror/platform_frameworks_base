@@ -1451,8 +1451,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     void restartBleScan() {
-        mBluetoothAdapter.getBluetoothLeScanner().stopScan(mBleScanCallback);
-        startBleScan();
+        if (mBluetoothAdapter.getBluetoothLeScanner() != null) {
+            mBluetoothAdapter.getBluetoothLeScanner().stopScan(mBleScanCallback);
+            startBleScan();
+        } else {
+            Slog.w(LOG_TAG, "BluetoothLeScanner is null (likely BLE isn't ON yet).");
+        }
     }
 
     private List<ScanFilter> getBleScanFilters() {
