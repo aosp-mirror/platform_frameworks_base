@@ -72,12 +72,6 @@ class FooterActionsController @Inject constructor(
     private var listening: Boolean = false
 
     var expanded = false
-        set(value) {
-            if (field != value) {
-                field = value
-                updateView()
-            }
-        }
 
     private val settingsButton: SettingsButton = view.findViewById(R.id.settings_button)
     private val settingsButtonContainer: View? = view.findViewById(R.id.settings_button_container)
@@ -176,8 +170,7 @@ class FooterActionsController @Inject constructor(
     }
 
     private fun updateView() {
-        mView.updateEverything(buttonsVisible(), isTunerEnabled(),
-                multiUserSwitchController.isMultiUserEnabled)
+        mView.updateEverything(isTunerEnabled(), multiUserSwitchController.isMultiUserEnabled)
     }
 
     override fun onViewDetached() {
@@ -191,14 +184,14 @@ class FooterActionsController @Inject constructor(
         this.listening = listening
         if (this.listening) {
             userInfoController.addCallback(onUserInfoChangedListener)
+            updateView()
         } else {
             userInfoController.removeCallback(onUserInfoChangedListener)
         }
     }
 
     fun disable(state2: Int) {
-        mView.disable(buttonsVisible(), state2, isTunerEnabled(),
-                multiUserSwitchController.isMultiUserEnabled)
+        mView.disable(state2, isTunerEnabled(), multiUserSwitchController.isMultiUserEnabled)
     }
 
     fun setExpansion(headerExpansionFraction: Float) {
