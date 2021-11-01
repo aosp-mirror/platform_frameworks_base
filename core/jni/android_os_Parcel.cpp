@@ -604,6 +604,25 @@ static jint android_os_Parcel_compareData(JNIEnv* env, jclass clazz, jlong thisN
     return thisParcel->compareData(*otherParcel);
 }
 
+static jboolean android_os_Parcel_compareDataInRange(JNIEnv* env, jclass clazz, jlong thisNativePtr,
+                                                     jint thisOffset, jlong otherNativePtr,
+                                                     jint otherOffset, jint length) {
+    Parcel* thisParcel = reinterpret_cast<Parcel*>(thisNativePtr);
+    LOG_ALWAYS_FATAL_IF(thisParcel == nullptr, "Should not be null");
+
+    Parcel* otherParcel = reinterpret_cast<Parcel*>(otherNativePtr);
+    LOG_ALWAYS_FATAL_IF(otherParcel == nullptr, "Should not be null");
+
+    int result;
+    status_t err =
+            thisParcel->compareDataInRange(thisOffset, *otherParcel, otherOffset, length, &result);
+    if (err != NO_ERROR) {
+        signalExceptionForError(env, clazz, err);
+        return JNI_FALSE;
+    }
+    return (result == 0) ? JNI_TRUE : JNI_FALSE;
+}
+
 static void android_os_Parcel_appendFrom(JNIEnv* env, jclass clazz, jlong thisNativePtr,
                                           jlong otherNativePtr, jint offset, jint length)
 {
@@ -841,6 +860,7 @@ static const JNINativeMethod gParcelMethods[] = {
     {"nativeMarshall",            "(J)[B", (void*)android_os_Parcel_marshall},
     {"nativeUnmarshall",          "(J[BII)V", (void*)android_os_Parcel_unmarshall},
     {"nativeCompareData",         "(JJ)I", (void*)android_os_Parcel_compareData},
+    {"nativeCompareDataInRange",  "(JIJII)Z", (void*)android_os_Parcel_compareDataInRange},
     {"nativeAppendFrom",          "(JJII)V", (void*)android_os_Parcel_appendFrom},
     // @CriticalNative
     {"nativeHasFileDescriptors",  "(J)Z", (void*)android_os_Parcel_hasFileDescriptors},
