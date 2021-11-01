@@ -49,6 +49,8 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
+import com.android.server.apphibernation.AppHibernationManagerInternal;
+import com.android.server.apphibernation.AppHibernationService;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -169,7 +171,7 @@ final class DexOptHelper {
                 }
             }
 
-            if (!mPm.mPackageDexOptimizer.canOptimizePackage(pkg)) {
+            if (!PackageDexOptimizer.canOptimizePackage(pkg)) {
                 if (DEBUG_DEXOPT) {
                     Log.i(TAG, "Skipping update of non-optimizable app " + pkg.getPackageName());
                 }
@@ -289,10 +291,15 @@ final class DexOptHelper {
         ArraySet<String> pkgs = new ArraySet<>();
         synchronized (mPm.mLock) {
             for (AndroidPackage p : mPm.mPackages.values()) {
-                if (mPm.mPackageDexOptimizer.canOptimizePackage(p)) {
+                if (PackageDexOptimizer.canOptimizePackage(p)) {
                     pkgs.add(p.getPackageName());
                 }
             }
+        }
+        if (AppHibernationService.isAppHibernationEnabled()) {
+            AppHibernationManagerInternal appHibernationManager =
+                    mPm.mInjector.getLocalService(AppHibernationManagerInternal.class);
+            pkgs.removeIf(pkgName -> appHibernationManager.isHibernatingGlobally(pkgName));
         }
         return pkgs;
     }

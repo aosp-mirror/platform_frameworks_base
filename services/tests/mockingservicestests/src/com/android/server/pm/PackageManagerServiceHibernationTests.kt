@@ -16,10 +16,8 @@
 
 package com.android.server.pm
 
-import android.content.Context
 import android.os.Build
 import android.os.Handler
-import android.os.PowerManager
 import android.provider.DeviceConfig
 import android.provider.DeviceConfig.NAMESPACE_APP_HIBERNATION
 import android.testing.AndroidTestingRunner
@@ -57,8 +55,6 @@ class PackageManagerServiceHibernationTests {
 
     @Mock
     lateinit var appHibernationManager: AppHibernationManagerInternal
-    @Mock
-    lateinit var powerManager: PowerManager
 
     @Before
     @Throws(Exception::class)
@@ -72,24 +68,6 @@ class PackageManagerServiceHibernationTests {
             .thenReturn(appHibernationManager)
         whenever(rule.mocks().injector.handler)
             .thenReturn(Handler(TestableLooper.get(this).looper))
-        val injector = object : PackageDexOptimizer.Injector {
-            override fun getAppHibernationManagerInternal(): AppHibernationManagerInternal {
-                return appHibernationManager
-            }
-
-            override fun getPowerManager(context: Context?): PowerManager {
-                return powerManager
-            }
-        }
-        val packageDexOptimizer = PackageDexOptimizer(
-            injector,
-            rule.mocks().installer,
-            rule.mocks().installLock,
-            rule.mocks().context,
-            "*dexopt*")
-        whenever(rule.mocks().injector.packageDexOptimizer)
-            .thenReturn(packageDexOptimizer)
-        whenever(appHibernationManager.isOatArtifactDeletionEnabled).thenReturn(true)
     }
 
     @Test
