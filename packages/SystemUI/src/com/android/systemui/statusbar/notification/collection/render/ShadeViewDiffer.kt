@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection.render
 import android.annotation.MainThread
 import android.view.View
 import com.android.systemui.util.kotlin.transform
+import com.android.systemui.util.traceSection
 
 /**
  * Given a "spec" that describes a "tree" of views, adds and removes views from the
@@ -47,7 +48,7 @@ class ShadeViewDiffer(
      * provided [spec]. The root node of the spec must match the root controller passed to the
      * differ's constructor.
      */
-    fun applySpec(spec: NodeSpec) {
+    fun applySpec(spec: NodeSpec) = traceSection("ShadeViewDiffer.applySpec") {
         val specMap = treeToMap(spec)
 
         if (spec.controller != rootNode.controller) {
