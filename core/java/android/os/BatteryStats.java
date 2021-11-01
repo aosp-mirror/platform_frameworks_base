@@ -845,6 +845,12 @@ public abstract class BatteryStats implements Parcelable {
          * Returns cpu active time of an uid.
          */
         public abstract long getCpuActiveTime();
+
+        /**
+         * Returns cpu active time of a UID while in the specified process state.
+         */
+        public abstract long getCpuActiveTime(int procState);
+
         /**
          * Returns cpu times of an uid on each cluster
          */

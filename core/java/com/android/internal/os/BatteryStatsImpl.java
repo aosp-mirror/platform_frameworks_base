@@ -160,7 +160,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 203;
+    static final int VERSION = 204;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -1783,6 +1783,89 @@ public class BatteryStatsImpl extends BatteryStats {
             } else {
                 return null;
             }
+        }
+    }
+
+
+    private static class TimeMultiStateCounter implements TimeBaseObs {
+        private final TimeBase mTimeBase;
+        private final LongMultiStateCounter mCounter;
+
+        private TimeMultiStateCounter(TimeBase timeBase, Parcel in, long timestampMs) {
+            mTimeBase = timeBase;
+            mCounter = LongMultiStateCounter.CREATOR.createFromParcel(in);
+            mCounter.setEnabled(mTimeBase.isRunning(), timestampMs);
+            timeBase.add(this);
+        }
+
+        private TimeMultiStateCounter(TimeBase timeBase, int stateCount, long timestampMs) {
+            mTimeBase = timeBase;
+            mCounter = new LongMultiStateCounter(stateCount);
+            mCounter.setEnabled(mTimeBase.isRunning(), timestampMs);
+            timeBase.add(this);
+        }
+
+        private void writeToParcel(Parcel out) {
+            mCounter.writeToParcel(out, 0);
+        }
+
+        @Override
+        public void onTimeStarted(long elapsedRealtimeUs, long baseUptimeUs, long baseRealtimeUs) {
+            mCounter.setEnabled(true, elapsedRealtimeUs / 1000);
+        }
+
+        @Override
+        public void onTimeStopped(long elapsedRealtimeUs, long baseUptimeUs, long baseRealtimeUs) {
+            mCounter.setEnabled(false, elapsedRealtimeUs / 1000);
+        }
+
+        public LongMultiStateCounter getCounter() {
+            return mCounter;
+        }
+
+        public int getStateCount() {
+            return mCounter.getStateCount();
+        }
+
+        public void setTrackingEnabled(boolean enabled, long timestampMs) {
+            mCounter.setEnabled(enabled && mTimeBase.isRunning(), timestampMs);
+        }
+
+        private void setState(@BatteryConsumer.ProcessState int processState,
+                long elapsedRealtimeMs) {
+            mCounter.setState(processState, elapsedRealtimeMs);
+        }
+
+        private void update(long value, long timestampMs) {
+            mCounter.updateValue(value, timestampMs);
+        }
+
+        /**
+         * Returns accumulated count for the specified state.
+         */
+        public long getCountLocked(int procState) {
+            return mCounter.getCount(procState);
+        }
+
+        public void logState(Printer pw, String prefix) {
+            pw.println(prefix + "mCounter=" + mCounter);
+        }
+
+        /**
+         * Clears state of this counter.
+         */
+        @Override
+        public boolean reset(boolean detachIfReset, long elapsedRealtimeUs /* unused */) {
+            mCounter.reset();
+            if (detachIfReset) {
+                detach();
+            }
+            return true;
+        }
+
+        @Override
+        public void detach() {
+            mTimeBase.remove(this);
         }
     }
 
@@ -8024,7 +8107,7 @@ public class BatteryStatsImpl extends BatteryStats {
         LongSamplingCounter mUserCpuTime;
         LongSamplingCounter mSystemCpuTime;
         LongSamplingCounter[][] mCpuClusterSpeedTimesUs;
-        LongSamplingCounter mCpuActiveTimeMs;
+        TimeMultiStateCounter mCpuActiveTimeMs;
 
         LongSamplingCounterArray mCpuFreqTimeMs;
         LongSamplingCounterArray mScreenOffCpuFreqTimeMs;
@@ -8147,7 +8230,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
             mUserCpuTime = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
             mSystemCpuTime = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
-            mCpuActiveTimeMs = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
             mCpuClusterTimesMs = new LongSamplingCounterArray(mBsi.mOnBatteryTimeBase);
 
             mWakelockStats = mBsi.new OverflowArrayMap<Wakelock>(uid) {
@@ -8190,11 +8272,13 @@ public class BatteryStatsImpl extends BatteryStats {
             mProcessState = procState;
             getProcStateTimeCounter().setState(procState, elapsedTimeMs);
             getProcStateScreenOffTimeCounter().setState(procState, elapsedTimeMs);
+            final int batteryConsumerProcessState =
+                    mapUidProcessStateToBatteryConsumerProcessState(procState);
+            getCpuActiveTimeCounter().setState(batteryConsumerProcessState, elapsedTimeMs);
             final MeasuredEnergyStats energyStats =
                     getOrCreateMeasuredEnergyStatsIfSupportedLocked();
             if (energyStats != null) {
-                energyStats.setState(mapUidProcessStateToBatteryConsumerProcessState(procState),
-                        elapsedTimeMs);
+                energyStats.setState(batteryConsumerProcessState, elapsedTimeMs);
             }
         }
 
@@ -8208,9 +8292,39 @@ public class BatteryStatsImpl extends BatteryStats {
             return nullIfAllZeros(mScreenOffCpuFreqTimeMs, which);
         }
 
+        private TimeMultiStateCounter getCpuActiveTimeCounter() {
+            if (mCpuActiveTimeMs == null) {
+                final long timestampMs = mBsi.mClock.elapsedRealtime();
+                mCpuActiveTimeMs = new TimeMultiStateCounter(mBsi.mOnBatteryTimeBase,
+                        BatteryConsumer.PROCESS_STATE_COUNT, timestampMs);
+                mCpuActiveTimeMs.setState(
+                        mapUidProcessStateToBatteryConsumerProcessState(mProcessState),
+                        timestampMs);
+            }
+            return mCpuActiveTimeMs;
+        }
+
         @Override
         public long getCpuActiveTime() {
-            return mCpuActiveTimeMs.getCountLocked(STATS_SINCE_CHARGED);
+            if (mCpuActiveTimeMs == null) {
+                return 0;
+            }
+
+            long activeTime = 0;
+            for (int procState = 0; procState < BatteryConsumer.PROCESS_STATE_COUNT; procState++) {
+                activeTime += mCpuActiveTimeMs.getCountLocked(procState);
+            }
+            return activeTime;
+        }
+
+        @Override
+        public long getCpuActiveTime(int procState) {
+            if (mCpuActiveTimeMs == null
+                    || procState < 0 || procState >= BatteryConsumer.PROCESS_STATE_COUNT) {
+                return 0;
+            }
+
+            return mCpuActiveTimeMs.getCountLocked(procState);
         }
 
         @Override
@@ -9914,7 +10028,13 @@ public class BatteryStatsImpl extends BatteryStats {
             LongSamplingCounterArray.writeToParcel(out, mCpuFreqTimeMs);
             LongSamplingCounterArray.writeToParcel(out, mScreenOffCpuFreqTimeMs);
 
-            mCpuActiveTimeMs.writeToParcel(out);
+            if (mCpuActiveTimeMs != null) {
+                out.writeInt(mCpuActiveTimeMs.getStateCount());
+                mCpuActiveTimeMs.writeToParcel(out);
+            } else {
+                out.writeInt(0);
+            }
+
             mCpuClusterTimesMs.writeToParcel(out);
 
             if (mProcStateTimeMs != null) {
@@ -10217,11 +10337,18 @@ public class BatteryStatsImpl extends BatteryStats {
             mScreenOffCpuFreqTimeMs = LongSamplingCounterArray.readFromParcel(
                     in, mBsi.mOnBatteryScreenOffTimeBase);
 
-            mCpuActiveTimeMs = new LongSamplingCounter(mBsi.mOnBatteryTimeBase, in);
-            mCpuClusterTimesMs = new LongSamplingCounterArray(mBsi.mOnBatteryTimeBase, in);
-
             final long timestampMs = mBsi.mClock.elapsedRealtime();
             int stateCount = in.readInt();
+            if (stateCount != 0) {
+                final TimeMultiStateCounter counter = new TimeMultiStateCounter(
+                        mBsi.mOnBatteryTimeBase, in, timestampMs);
+                if (stateCount == BatteryConsumer.PROCESS_STATE_COUNT) {
+                    mCpuActiveTimeMs = counter;
+                }
+            }
+            mCpuClusterTimesMs = new LongSamplingCounterArray(mBsi.mOnBatteryTimeBase, in);
+
+            stateCount = in.readInt();
             if (stateCount != 0) {
                 // Read the object from the Parcel, whether it's usable or not
                 TimeInFreqMultiStateCounter counter = new TimeInFreqMultiStateCounter(
@@ -11135,12 +11262,14 @@ public class BatteryStatsImpl extends BatteryStats {
                 updateOnBatteryBgTimeBase(uptimeMs * 1000, elapsedRealtimeMs * 1000);
                 updateOnBatteryScreenOffBgTimeBase(uptimeMs * 1000, elapsedRealtimeMs * 1000);
 
+                final int batteryConsumerProcessState =
+                        mapUidProcessStateToBatteryConsumerProcessState(mProcessState);
+                getCpuActiveTimeCounter().setState(batteryConsumerProcessState, elapsedRealtimeMs);
+
                 final MeasuredEnergyStats energyStats =
                         getOrCreateMeasuredEnergyStatsIfSupportedLocked();
                 if (energyStats != null) {
-                    energyStats.setState(
-                            mapUidProcessStateToBatteryConsumerProcessState(mProcessState),
-                            elapsedRealtimeMs);
+                    energyStats.setState(batteryConsumerProcessState, elapsedRealtimeMs);
                 }
             }
 
@@ -14344,7 +14473,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public void readKernelUidCpuActiveTimesLocked(boolean onBattery) {
         final long startTimeMs = mClock.uptimeMillis();
         final long elapsedRealtimeMs = mClock.elapsedRealtime();
-        mCpuUidActiveTimeReader.readDelta(false, (uid, cpuActiveTimesMs) -> {
+        mCpuUidActiveTimeReader.readAbsolute((uid, cpuActiveTimesMs) -> {
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
                 if (DEBUG) Slog.w(TAG, "Got active times for an isolated uid: " + uid);
@@ -14355,7 +14484,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 return;
             }
             final Uid u = getUidStatsLocked(uid, elapsedRealtimeMs, startTimeMs);
-            u.mCpuActiveTimeMs.addCountLocked(cpuActiveTimesMs, onBattery);
+            u.getCpuActiveTimeCounter().update(cpuActiveTimesMs, mClock.elapsedRealtime());
         });
 
         final long elapsedTimeMs = mClock.uptimeMillis() - startTimeMs;
@@ -16496,13 +16625,20 @@ public class BatteryStatsImpl extends BatteryStats {
             u.mScreenOffCpuFreqTimeMs = LongSamplingCounterArray.readSummaryFromParcelLocked(
                     in, mOnBatteryScreenOffTimeBase);
 
-            u.mCpuActiveTimeMs.readSummaryFromParcelLocked(in);
+            int stateCount = in.readInt();
+            if (stateCount != 0) {
+                final TimeMultiStateCounter counter = new TimeMultiStateCounter(
+                        mOnBatteryTimeBase, in, mClock.elapsedRealtime());
+                if (stateCount == BatteryConsumer.PROCESS_STATE_COUNT) {
+                    u.mCpuActiveTimeMs = counter;
+                }
+            }
             u.mCpuClusterTimesMs.readSummaryFromParcelLocked(in);
 
             detachIfNotNull(u.mProcStateTimeMs);
             u.mProcStateTimeMs = null;
 
-            int stateCount = in.readInt();
+            stateCount = in.readInt();
             if (stateCount != 0) {
                 // Read the object from the Parcel, whether it's usable or not
                 TimeInFreqMultiStateCounter counter = new TimeInFreqMultiStateCounter(
@@ -17025,7 +17161,13 @@ public class BatteryStatsImpl extends BatteryStats {
             LongSamplingCounterArray.writeSummaryToParcelLocked(out, u.mCpuFreqTimeMs);
             LongSamplingCounterArray.writeSummaryToParcelLocked(out, u.mScreenOffCpuFreqTimeMs);
 
-            u.mCpuActiveTimeMs.writeSummaryFromParcelLocked(out);
+            if (u.mCpuActiveTimeMs != null) {
+                out.writeInt(u.mCpuActiveTimeMs.getStateCount());
+                u.mCpuActiveTimeMs.writeToParcel(out);
+            } else {
+                out.writeInt(0);
+            }
+
             u.mCpuClusterTimesMs.writeSummaryToParcelLocked(out);
 
             if (u.mProcStateTimeMs != null) {

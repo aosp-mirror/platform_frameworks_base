@@ -119,6 +119,20 @@ public class CpuPowerCalculatorTest {
 
         when(mMockCpuUidFreqTimeReader.perClusterTimesAvailable()).thenReturn(false);
 
+        mStatsRule.setTime(1000, 1000);
+
+        // Initialize active CPU time
+        doAnswer(invocation -> {
+            final KernelCpuUidTimeReader.Callback<Long> callback = invocation.getArgument(0);
+            callback.onUidCpuTime(APP_UID1, 1000L);
+            callback.onUidCpuTime(APP_UID2, 3000L);
+            return null;
+        }).when(mMockKerneCpuUidActiveTimeReader).readAbsolute(any());
+
+        mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true, null);
+
+        mStatsRule.setTime(2000, 2000);
+
         // User/System CPU time
         doAnswer(invocation -> {
             final KernelCpuUidTimeReader.Callback<long[]> callback = invocation.getArgument(1);
@@ -130,11 +144,11 @@ public class CpuPowerCalculatorTest {
 
         // Active CPU time
         doAnswer(invocation -> {
-            final KernelCpuUidTimeReader.Callback<Long> callback = invocation.getArgument(1);
-            callback.onUidCpuTime(APP_UID1, 1111L);
-            callback.onUidCpuTime(APP_UID2, 3333L);
+            final KernelCpuUidTimeReader.Callback<Long> callback = invocation.getArgument(0);
+            callback.onUidCpuTime(APP_UID1, 2111L);
+            callback.onUidCpuTime(APP_UID2, 6333L);
             return null;
-        }).when(mMockKerneCpuUidActiveTimeReader).readDelta(anyBoolean(), any());
+        }).when(mMockKerneCpuUidActiveTimeReader).readAbsolute(any());
 
         // Per-cluster CPU time
         doAnswer(invocation -> {
@@ -210,14 +224,6 @@ public class CpuPowerCalculatorTest {
             callback.onUidCpuTime(APP_UID2, new long[]{3333000, 4444000});
             return null;
         }).when(mMockKernelCpuUidUserSysTimeReader).readDelta(anyBoolean(), any());
-
-        // Active CPU time
-        doAnswer(invocation -> {
-            final KernelCpuUidTimeReader.Callback<Long> callback = invocation.getArgument(1);
-            callback.onUidCpuTime(APP_UID1, 1111L);
-            callback.onUidCpuTime(APP_UID2, 3333L);
-            return null;
-        }).when(mMockKerneCpuUidActiveTimeReader).readDelta(anyBoolean(), any());
 
         // Per-cluster CPU time
         doAnswer(invocation -> {
@@ -296,12 +302,29 @@ public class CpuPowerCalculatorTest {
         mockSingleUidTimeReader(APP_UID1, new long[NUM_CPU_FREQS]);
         mockSingleUidTimeReader(APP_UID2, new long[NUM_CPU_FREQS]);
 
+        // Active CPU time
+        doAnswer(invocation -> {
+            final KernelCpuUidTimeReader.Callback<Long> callback = invocation.getArgument(0);
+            callback.onUidCpuTime(APP_UID1, 1111L);
+            callback.onUidCpuTime(APP_UID2, 3333L);
+            return null;
+        }).when(mMockKerneCpuUidActiveTimeReader).readAbsolute(any());
+
+        mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true, null);
         mStatsRule.getBatteryStats().copyFromAllUidsCpuTimes(true, true);
 
         mockSingleUidTimeReader(APP_UID1, new long[]{1000, 2000, 3000, 4000});
         mockSingleUidTimeReader(APP_UID2, new long[]{1111, 2222, 3333, 4444});
 
         mStatsRule.setTime(2000, 2000);
+
+        doAnswer(invocation -> {
+            final KernelCpuUidTimeReader.Callback<Long> callback = invocation.getArgument(0);
+            callback.onUidCpuTime(APP_UID1, 2222L);
+            callback.onUidCpuTime(APP_UID2, 6666L);
+            return null;
+        }).when(mMockKerneCpuUidActiveTimeReader).readAbsolute(any());
+
         mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true, null);
         mStatsRule.getBatteryStats().copyFromAllUidsCpuTimes(true, true);
 
@@ -314,6 +337,14 @@ public class CpuPowerCalculatorTest {
                 BatteryStats.Uid.PROCESS_STATE_TOP, 2000);
 
         mStatsRule.setTime(3000, 3000);
+
+        doAnswer(invocation -> {
+            final KernelCpuUidTimeReader.Callback<Long> callback = invocation.getArgument(0);
+            callback.onUidCpuTime(APP_UID1, 3333L);
+            callback.onUidCpuTime(APP_UID2, 8888L);
+            return null;
+        }).when(mMockKerneCpuUidActiveTimeReader).readAbsolute(any());
+
         mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true, null);
         mStatsRule.getBatteryStats().copyFromAllUidsCpuTimes(true, true);
 
@@ -339,11 +370,11 @@ public class CpuPowerCalculatorTest {
                 BatteryConsumer.POWER_COMPONENT_CPU,
                 BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
 
-        assertThat(uidConsumer1.getConsumedPower(foreground)).isWithin(PRECISION).of(1.388888);
+        assertThat(uidConsumer1.getConsumedPower(foreground)).isWithin(PRECISION).of(1.611088);
         assertThat(uidConsumer1.getConsumedPower(background)).isWithin(PRECISION).of(0);
-        assertThat(uidConsumer1.getConsumedPower(fgs)).isWithin(PRECISION).of(2.0);
-        assertThat(uidConsumer2.getConsumedPower(foreground)).isWithin(PRECISION).of(2.222);
-        assertThat(uidConsumer2.getConsumedPower(background)).isWithin(PRECISION).of(1.543055);
+        assertThat(uidConsumer1.getConsumedPower(fgs)).isWithin(PRECISION).of(2.2222);
+        assertThat(uidConsumer2.getConsumedPower(foreground)).isWithin(PRECISION).of(2.6664);
+        assertThat(uidConsumer2.getConsumedPower(background)).isWithin(PRECISION).of(2.209655);
         assertThat(uidConsumer2.getConsumedPower(fgs)).isWithin(PRECISION).of(0);
     }
 
