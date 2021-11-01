@@ -113,10 +113,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mStageCoordinator.moveToSideStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT);
 
-        verify(mMainStage).activate(any(Rect.class), any(WindowContainerTransaction.class),
-                eq(true /* includingTopTask */));
-        verify(mSideStage).addTask(eq(task), any(Rect.class),
-                any(WindowContainerTransaction.class));
+        verify(mSideStage).addTask(eq(task), any(WindowContainerTransaction.class));
     }
 
     @Test

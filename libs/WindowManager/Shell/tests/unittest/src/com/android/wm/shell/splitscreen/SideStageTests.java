@@ -74,7 +74,7 @@ public class SideStageTests extends ShellTestCase {
     public void testAddTask() {
         final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
 
-        mSideStage.addTask(task, mRootTask.configuration.windowConfiguration.getBounds(), mWct);
+        mSideStage.addTask(task, mWct);
 
         verify(mWct).reparent(eq(task.token), eq(mRootTask.token), eq(true));
     }
