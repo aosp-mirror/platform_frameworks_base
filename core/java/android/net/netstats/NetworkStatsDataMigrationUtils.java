@@ -24,6 +24,7 @@ import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
 import static android.net.ConnectivityManager.TYPE_MOBILE_SUPL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
+import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
@@ -108,6 +109,7 @@ public class NetworkStatsDataMigrationUtils {
         static final int VERSION_ADD_METERED = 4;
         static final int VERSION_ADD_DEFAULT_NETWORK = 5;
         static final int VERSION_ADD_OEM_MANAGED_NETWORK = 6;
+        static final int VERSION_ADD_SUB_ID = 7;
     }
 
     /**
@@ -448,6 +450,13 @@ public class NetworkStatsDataMigrationUtils {
                 oemNetCapabilities = NetworkTemplate.OEM_MANAGED_NO;
             }
 
+            final int subId;
+            if (version >= IdentitySetVersion.VERSION_ADD_SUB_ID) {
+                subId = in.readInt();
+            } else {
+                subId = INVALID_SUBSCRIPTION_ID;
+            }
+
             // Legacy files might contain TYPE_MOBILE_* types which were deprecated in later
             // releases. For backward compatibility, record them as TYPE_MOBILE instead.
             final int collapsedLegacyType = getCollapsedLegacyType(type);
@@ -457,7 +466,8 @@ public class NetworkStatsDataMigrationUtils {
                     .setWifiNetworkKey(networkId)
                     .setRoaming(roaming).setMetered(metered)
                     .setDefaultNetwork(defaultNetwork)
-                    .setOemManaged(oemNetCapabilities);
+                    .setOemManaged(oemNetCapabilities)
+                    .setSubId(subId);
             if (type == TYPE_MOBILE && ratType != NetworkTemplate.NETWORK_TYPE_ALL) {
                 builder.setRatType(ratType);
             }
@@ -501,10 +511,10 @@ public class NetworkStatsDataMigrationUtils {
      * This is copied from {@code NetworkStatsCollection#readLegacyUid}.
      * See {@code NetworkStatsService#maybeUpgradeLegacyStatsLocked}.
      *
-     * @param taggedData whether to read tagged data. For legacy uid files, the tagged
-     *                   data was stored in the same binary file with non-tagged data.
-     *                   But in later releases, these data should be kept in different
-     *                   recorders.
+     * @param taggedData whether to read only tagged data (true) or only non-tagged data
+     *                   (false). For legacy uid files, the tagged data was stored in
+     *                   the same binary file with non-tagged data. But in later releases,
+     *                   these data should be kept in different recorders.
      * @hide
      */
     @VisibleForTesting

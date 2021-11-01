@@ -61,7 +61,6 @@ import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.INetd.FIREWALL_RULE_DENY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
-import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
@@ -171,11 +170,9 @@ import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkPolicyManager.UidState;
 import android.net.NetworkRequest;
-import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStateSnapshot;
 import android.net.NetworkTemplate;
-import android.net.TelephonyNetworkSpecifier;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.BestClock;
@@ -1500,7 +1497,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     .setType(TYPE_MOBILE)
                     .setSubscriberId(subscriberId)
                     .setMetered(true)
-                    .setDefaultNetwork(true).build();
+                    .setDefaultNetwork(true)
+                    .setSubId(subId).build();
             if (template.matches(probeIdent)) {
                 return subId;
             }
@@ -1737,7 +1735,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 .setType(TYPE_MOBILE)
                 .setSubscriberId(subscriberId)
                 .setMetered(true)
-                .setDefaultNetwork(true).build();
+                .setDefaultNetwork(true)
+                .setSubId(subId).build();
         for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
             final NetworkTemplate template = mNetworkPolicy.keyAt(i);
             if (template.matches(probeIdent)) {
@@ -1969,7 +1968,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                             .setType(TYPE_MOBILE)
                             .setSubscriberId(subscriberId)
                             .setMetered(true)
-                            .setDefaultNetwork(true).build();
+                            .setDefaultNetwork(true)
+                            .setSubId(subId).build();
                     // Template is matched when subscriber id matches.
                     if (template.matches(probeIdent)) {
                         matchingSubIds.add(subId);
@@ -2071,7 +2071,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mNetIdToSubId.clear();
         final ArrayMap<NetworkStateSnapshot, NetworkIdentity> identified = new ArrayMap<>();
         for (final NetworkStateSnapshot snapshot : snapshots) {
-            mNetIdToSubId.put(snapshot.getNetwork().getNetId(), parseSubId(snapshot));
+            final int subId = snapshot.getSubId();
+            mNetIdToSubId.put(snapshot.getNetwork().getNetId(), subId);
 
             // Policies matched by NPMS only match by subscriber ID or by network ID.
             final NetworkIdentity ident = new NetworkIdentity.Builder()
@@ -2276,7 +2277,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 .setType(TYPE_MOBILE)
                 .setSubscriberId(subscriberId)
                 .setMetered(true)
-                .setDefaultNetwork(true).build();
+                .setDefaultNetwork(true)
+                .setSubId(subId).build();
         for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
             final NetworkTemplate template = mNetworkPolicy.keyAt(i);
             if (template.matches(probeIdent)) {
@@ -5737,17 +5739,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } catch (NameNotFoundException e) {
             return -1;
         }
-    }
-
-    private int parseSubId(@NonNull NetworkStateSnapshot snapshot) {
-        int subId = INVALID_SUBSCRIPTION_ID;
-        if (snapshot.getNetworkCapabilities().hasTransport(TRANSPORT_CELLULAR)) {
-            NetworkSpecifier spec = snapshot.getNetworkCapabilities().getNetworkSpecifier();
-            if (spec instanceof TelephonyNetworkSpecifier) {
-                subId = ((TelephonyNetworkSpecifier) spec).getSubscriptionId();
-            }
-        }
-        return subId;
     }
 
     @GuardedBy("mNetworkPoliciesSecondLock")
