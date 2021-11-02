@@ -11197,6 +11197,7 @@ package android.content {
     field public static final String ACTION_QUICK_VIEW = "android.intent.action.QUICK_VIEW";
     field public static final String ACTION_REBOOT = "android.intent.action.REBOOT";
     field public static final String ACTION_RUN = "android.intent.action.RUN";
+    field public static final String ACTION_SAFETY_CENTER = "android.intent.action.SAFETY_CENTER";
     field public static final String ACTION_SCREEN_OFF = "android.intent.action.SCREEN_OFF";
     field public static final String ACTION_SCREEN_ON = "android.intent.action.SCREEN_ON";
     field public static final String ACTION_SEARCH = "android.intent.action.SEARCH";
