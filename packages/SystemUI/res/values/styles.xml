@@ -359,6 +359,9 @@
 
     <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog">
         <item name="android:buttonCornerRadius">28dp</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/Widget.QSDialog.Button</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/Widget.QSDialog.Button.BorderButton</item>
+        <item name="android:buttonBarNeutralButtonStyle">@style/Widget.QSDialog.Button.BorderButton</item>
     </style>
 
     <style name="Theme.SystemUI.Dialog.Alert" parent="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert" />
