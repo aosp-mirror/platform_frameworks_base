@@ -18,7 +18,11 @@ package android.mtp;
 
 import android.media.MediaFile;
 import android.os.FileObserver;
+import android.os.SystemProperties;
 import android.os.storage.StorageVolume;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.StructStat;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -199,7 +203,38 @@ public class MtpStorageManager {
         }
 
         public long getSize() {
-            return mIsDir ? 0 : getPath().toFile().length();
+            return mIsDir ? 0 : maybeApplyTranscodeLengthWorkaround(getPath().toFile().length());
+        }
+
+        private long maybeApplyTranscodeLengthWorkaround(long length) {
+            // Windows truncates transferred files to the size advertised in the object property.
+            if (isTranscodeMtpEnabled() && isFileTranscodeSupported()) {
+                // If the file supports transcoding, we double the returned size to accommodate
+                // the increase in size from transcoding to AVC. This is the same heuristic
+                // applied in the FUSE daemon (MediaProvider).
+                return length * 2;
+            }
+            return length;
+        }
+
+        private boolean isTranscodeMtpEnabled() {
+            return SystemProperties.getBoolean("sys.fuse.transcode_mtp", false);
+        }
+
+        private boolean isFileTranscodeSupported() {
+            // Check if the file supports transcoding by reading the |st_nlinks| struct stat
+            // field. This will be > 1 if the file supports transcoding. The FUSE daemon
+            // sets the field accordingly to enable the MTP stack workaround some Windows OS
+            // MTP client bug where they ignore the size returned as part of getting the MTP
+            // object, see MtpServer#doGetObject.
+            final Path path = getPath();
+            try {
+                StructStat stat = Os.stat(path.toString());
+                return stat.st_nlink > 1;
+            } catch (ErrnoException e) {
+                Log.w(TAG, "Failed to stat path: " + getPath() + ". Ignoring transcoding.");
+                return false;
+            }
         }
 
         public Path getPath() {
