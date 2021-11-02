@@ -39,8 +39,10 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -95,8 +97,11 @@ public class SmartReplyControllerTest extends SysuiTestCase {
                 mSmartReplyController);
 
         mRemoteInputManager = new NotificationRemoteInputManager(mContext,
+                mock(FeatureFlags.class),
                 mock(NotificationLockscreenUserManager.class), mSmartReplyController,
-                mNotificationEntryManager, () -> Optional.of(mock(StatusBar.class)),
+                mNotificationEntryManager,
+                mock(NotifPipeline.class),
+                () -> Optional.of(mock(StatusBar.class)),
                 mStatusBarStateController,
                 Handler.createAsync(Looper.myLooper()),
                 mRemoteInputUriController,
