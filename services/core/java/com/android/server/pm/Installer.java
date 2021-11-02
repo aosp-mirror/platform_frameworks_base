@@ -26,7 +26,6 @@ import android.os.Build;
 import android.os.CreateAppDataArgs;
 import android.os.CreateAppDataResult;
 import android.os.IBinder;
-import android.os.IBinder.DeathRecipient;
 import android.os.IInstalld;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -148,12 +147,9 @@ public class Installer extends SystemService {
         IBinder binder = ServiceManager.getService("installd");
         if (binder != null) {
             try {
-                binder.linkToDeath(new DeathRecipient() {
-                    @Override
-                    public void binderDied() {
-                        Slog.w(TAG, "installd died; reconnecting");
-                        connect();
-                    }
+                binder.linkToDeath(() -> {
+                    Slog.w(TAG, "installd died; reconnecting");
+                    connect();
                 }, 0);
             } catch (RemoteException e) {
                 binder = null;
@@ -168,9 +164,7 @@ public class Installer extends SystemService {
             }
         } else {
             Slog.w(TAG, "installd not found; trying again");
-            BackgroundThread.getHandler().postDelayed(() -> {
-                connect();
-            }, DateUtils.SECOND_IN_MILLIS);
+            BackgroundThread.getHandler().postDelayed(this::connect, DateUtils.SECOND_IN_MILLIS);
         }
     }
 
@@ -192,7 +186,9 @@ public class Installer extends SystemService {
         }
     }
 
-    private static CreateAppDataArgs buildCreateAppDataArgs(String uuid, String packageName,
+    // We explicitly do NOT set previousAppId because the default value should always be 0.
+    // Manually override previousAppId after building CreateAppDataArgs for specific behaviors.
+    static CreateAppDataArgs buildCreateAppDataArgs(String uuid, String packageName,
             int userId, int flags, int appId, String seInfo, int targetSdkVersion) {
         final CreateAppDataArgs args = new CreateAppDataArgs();
         args.uuid = uuid;
@@ -211,23 +207,6 @@ public class Installer extends SystemService {
         result.exceptionCode = 0;
         result.exceptionMessage = null;
         return result;
-    }
-
-    /**
-     * @deprecated callers are encouraged to migrate to using {@link Batch} to
-     *             more efficiently handle operations in bulk.
-     */
-    @Deprecated
-    public long createAppData(String uuid, String packageName, int userId, int flags, int appId,
-            String seInfo, int targetSdkVersion) throws InstallerException {
-        final CreateAppDataArgs args = buildCreateAppDataArgs(uuid, packageName, userId, flags,
-                appId, seInfo, targetSdkVersion);
-        final CreateAppDataResult result = createAppData(args);
-        if (result.exceptionCode == 0) {
-            return result.ceDataInode;
-        } else {
-            throw new InstallerException(result.exceptionMessage);
-        }
     }
 
     public @NonNull CreateAppDataResult createAppData(@NonNull CreateAppDataArgs args)
@@ -284,13 +263,11 @@ public class Installer extends SystemService {
          * Callers of this method are not required to hold a monitor lock on an
          * {@link Installer} object.
          */
-        public synchronized @NonNull CompletableFuture<Long> createAppData(String uuid,
-                String packageName, int userId, int flags, int appId, String seInfo,
-                int targetSdkVersion) {
-            if (mExecuted) throw new IllegalStateException();
-
-            final CreateAppDataArgs args = buildCreateAppDataArgs(uuid, packageName, userId, flags,
-                    appId, seInfo, targetSdkVersion);
+        @NonNull
+        public synchronized CompletableFuture<Long> createAppData(CreateAppDataArgs args) {
+            if (mExecuted) {
+                throw new IllegalStateException();
+            }
             final CompletableFuture<Long> future = new CompletableFuture<>();
             mArgs.add(args);
             mFutures.add(future);
