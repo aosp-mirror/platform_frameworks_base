@@ -212,7 +212,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         return mMaxCellHeight;
     }
 
-    private void layoutTileRecords(int numRecords) {
+    private void layoutTileRecords(int numRecords, boolean forLayout) {
         final boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
         int row = 0;
         int column = 0;
@@ -232,14 +232,18 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             final int left = getColumnStart(isRtl ? mColumns - column - 1 : column);
             final int right = left + mCellWidth;
             final int bottom = top + record.tileView.getMeasuredHeight();
-            record.tileView.layout(left, top, right, bottom);
+            if (forLayout) {
+                record.tileView.layout(left, top, right, bottom);
+            } else {
+                record.tileView.setLeftTopRightBottom(left, top, right, bottom);
+            }
             mLastTileBottom = bottom;
         }
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        layoutTileRecords(mRecords.size());
+        layoutTileRecords(mRecords.size(), true /* forLayout */);
     }
 
     protected int getRowTop(int row) {
@@ -280,6 +284,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             return;
         }
         mSquishinessFraction = squishinessFraction;
-        layoutTileRecords(mRecords.size());
+        layoutTileRecords(mRecords.size(), false /* forLayout */);
     }
 }
