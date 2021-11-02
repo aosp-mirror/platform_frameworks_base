@@ -85,7 +85,7 @@ public class DisplayAreaPolicyBuilderTest {
     @Rule
     public final SystemServicesTestRule mSystemServices = new SystemServicesTestRule();
 
-    private TestWindowManagerPolicy mPolicy = new TestWindowManagerPolicy(null, null);
+    private TestWindowManagerPolicy mPolicy = new TestWindowManagerPolicy();
     private WindowManagerService mWms;
     private RootDisplayArea mRoot;
     private DisplayArea.Tokens mImeContainer;

@@ -4697,6 +4697,9 @@
     only. The component must be part of a system app. -->
     <string name="config_defaultSupervisionProfileOwnerComponent" translatable="false"></string>
 
+    <!-- The package name of the default supervision package. -->
+    <string name="config_systemSupervision" translatable="false"></string>
+
     <!-- Trigger a warning for notifications with RemoteView objects that are larger in bytes than
     this value (default 1MB)-->
     <integer name="config_notificationWarnRemoteViewSizeBytes">2000000</integer>

@@ -142,6 +142,16 @@ public:
      */
     Result close();
 
+    /**
+     * Create a new SharedFiler.
+     */
+    string createSharedFilter();
+
+    /**
+     * Release SharedFiler.
+     */
+    Result releaseSharedFilter(const string& filterToken);
+
 private:
     Result getFilterMq();
     int64_t copyData(int8_t* buffer, int64_t size);

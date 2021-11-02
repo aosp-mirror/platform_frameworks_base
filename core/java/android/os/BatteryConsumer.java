@@ -757,6 +757,11 @@ public abstract class BatteryConsumer {
         }
 
         @Nullable
+        public Key[] getKeys(@PowerComponent int componentId) {
+            return mData.getKeys(componentId);
+        }
+
+        @Nullable
         public Key getKey(@PowerComponent int componentId, @ProcessState int processState) {
             return mData.getKey(componentId, processState);
         }

@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
+import com.android.systemui.statusbar.RemoteInputNotificationRebuilder;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -96,9 +97,11 @@ public interface StatusBarDependenciesModule {
     @Provides
     static NotificationRemoteInputManager provideNotificationRemoteInputManager(
             Context context,
+            FeatureFlags featureFlags,
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationEntryManager notificationEntryManager,
+            RemoteInputNotificationRebuilder rebuilder,
             Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             StatusBarStateController statusBarStateController,
             Handler mainHandler,
@@ -108,9 +111,11 @@ public interface StatusBarDependenciesModule {
             DumpManager dumpManager) {
         return new NotificationRemoteInputManager(
                 context,
+                featureFlags,
                 lockscreenUserManager,
                 smartReplyController,
                 notificationEntryManager,
+                rebuilder,
                 statusBarOptionalLazy,
                 statusBarStateController,
                 mainHandler,
@@ -166,10 +171,11 @@ public interface StatusBarDependenciesModule {
     @SysUISingleton
     @Provides
     static SmartReplyController provideSmartReplyController(
+            DumpManager dumpManager,
             NotificationEntryManager entryManager,
             IStatusBarService statusBarService,
             NotificationClickNotifier clickNotifier) {
-        return new SmartReplyController(entryManager, statusBarService, clickNotifier);
+        return new SmartReplyController(dumpManager, entryManager, statusBarService, clickNotifier);
     }
 
 

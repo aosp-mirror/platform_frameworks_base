@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
+import android.os.Handler;
+
 import androidx.annotation.Nullable;
 
 import com.android.systemui.dagger.SysUISingleton;
@@ -30,6 +32,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.notification.collection.notifcollection.InternalNotifUpdater;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
@@ -220,6 +223,17 @@ public class NotifPipeline implements CommonNotifCollection {
     /** Registers an invalidator that can be used to invalidate the entire notif list. */
     public void addPreRenderInvalidator(Invalidator invalidator) {
         mShadeListBuilder.addPreRenderInvalidator(invalidator);
+    }
+
+    /**
+     * Get an object which can be used to update a notification (internally to the pipeline)
+     * in response to a user action.
+     *
+     * @param name the name of the component that will update notifiations
+     * @return an updater
+     */
+    public InternalNotifUpdater getInternalNotifUpdater(String name) {
+        return mNotifCollection.getInternalNotifUpdater(name);
     }
 
     /**

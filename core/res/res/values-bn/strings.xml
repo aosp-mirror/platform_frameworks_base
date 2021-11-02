@@ -543,10 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"আশেপাশের ব্লুটুথ ডিভাইস বিজ্ঞাপন দেওয়ার জন্য অ্যাপকে অনুমতি দেয়"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"আশেপাশের Ultra-Wideband ডিভাইসগুলির আপেক্ষিক অবস্থান নির্ণয় করুন"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"অ্যাপকে আশেপাশের Ultra-Wideband ডিভাইসগুলির আপেক্ষিক অবস্থান নির্ণয় করার অনুমতি দিন"</string>
-    <!-- no translation found for permlab_nearby_wifi_devices (392774237063608500) -->
-    <skip />
-    <!-- no translation found for permdesc_nearby_wifi_devices (3054307728646332906) -->
-    <skip />
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"আশপাশের ওয়াই-ফাই ডিভাইসের সাথে ইন্টার‍্যাক্ট করুন"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"এটির ফলে অ্যাপ আশপাশের ওয়াই-ফাই ডিভাইসের তথ্য দেখাতে, তাদের সাথে কানেক্ট করতে এবং ত দূরত্বে আছে সেটি জানতে পারবে"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"পছন্দের NFC পেমেন্ট পরিষেবার তথ্য"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"অ্যাপের মাধ্যমে পছন্দসই এনএফসি পেমেন্ট পরিষেবার তথ্য, যেমন রেজিস্ট্রার করার সহায়তা এবং রুট ডেস্টিনেশন সম্পর্কিত তথ্য অ্যাক্সেস করার অনুমতি দেয়।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"নিয়ার ফিল্ড কমিউনিকেশন নিয়ন্ত্রণ করে"</string>
@@ -730,10 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"অ্যাপটিকে \'বিরক্ত করবে না\' কনফিগারেশন পড়া এবং লেখার অনুমতি দেয়।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"দেখার অনুমতি কাজে লাগানো শুরু করুন"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"কোনও অ্যাপের কোনও নির্দিষ্ট অনুমতির ব্যবহার শুরু করার ক্ষেত্রে হোল্ডারকে সাহায্য করে। সাধারণ অ্যাপের জন্য এটির পরিবর্তন হওয়ার কথা নয়।"</string>
-    <!-- no translation found for permlab_startViewAppFeatures (7955084203185903001) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewAppFeatures (7207240860165206107) -->
-    <skip />
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"অ্যাপের ফিচার দেখা শুরু করুন"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"কোনও অ্যাপের ফিচার সম্পর্কিত তথ্য দেখা শুরু করতে অনুমতি দেয়।"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"হাই স্যাম্পলিং রেটে সেন্সর ডেটা অ্যাক্সেস করুন"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz-এর বেশি রেটে অ্যাপকে স্যাম্পল সেন্সর ডেটার জন্য অনুমতি দিন"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"পাসওয়ার্ড নিয়মগুলি সেট করে"</string>

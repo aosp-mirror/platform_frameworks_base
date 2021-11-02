@@ -111,6 +111,10 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         return (mFlags & FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL) != 0;
     }
 
+    public boolean isProcessStateDataNeeded() {
+        return (mFlags & FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA) != 0;
+    }
+
     /**
      * Returns the client's tolerance for stale battery stats. The data is allowed to be up to
      * this many milliseconds out-of-date.

@@ -16,14 +16,29 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
+import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
+import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
+
+import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES;
+import static com.android.internal.policy.DecorView.STATUS_BAR_COLOR_VIEW_ATTRIBUTES;
+import static com.android.internal.policy.DecorView.getNavigationBarRect;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.ActivityThread;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.RecordingCanvas;
@@ -44,11 +59,11 @@ import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager.LayoutParams;
 import android.window.TaskSnapshot;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
+import com.android.internal.policy.DecorView;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
-import com.android.server.policy.WindowManagerPolicy.StartingSurface;
-import com.android.server.wm.TaskSnapshotSurface.SystemBarBackgroundPainter;
 import com.android.server.wm.utils.InsetUtils;
 
 import com.google.android.collect.Sets;
@@ -242,15 +257,6 @@ class TaskSnapshotController {
     }
 
     /**
-     * Creates a starting surface for {@param token} with {@param snapshot}. DO NOT HOLD THE WINDOW
-     * MANAGER LOCK WHEN CALLING THIS METHOD!
-     */
-    StartingSurface createStartingSurface(ActivityRecord activity,
-            TaskSnapshot snapshot) {
-        return TaskSnapshotSurface.create(mService, activity, snapshot);
-    }
-
-    /**
      * Find the window for a given task to take a snapshot. Top child of the task is usually the one
      * we're looking for, but during app transitions, trampoline activities can appear in the
      * children, which should be ignored.
@@ -372,12 +378,6 @@ class TaskSnapshotController {
                 mHighResTaskSnapshotScale, builder.getPixelFormat(), taskSize, builder);
         builder.setTaskSize(taskSize);
         return taskSnapshot;
-    }
-
-    @Nullable
-    SurfaceControl.ScreenshotHardwareBuffer createTaskSnapshot(@NonNull Task task,
-            float scaleFraction, TaskSnapshot.Builder builder) {
-        return createTaskSnapshot(task, scaleFraction, PixelFormat.RGBA_8888, null, builder);
     }
 
     @Nullable
@@ -573,7 +573,7 @@ class TaskSnapshotController {
         final RecordingCanvas c = node.start(width, height);
         c.drawColor(color);
         decorPainter.setInsets(systemBarInsets);
-        decorPainter.drawDecors(c, null /* statusBarExcludeFrame */);
+        decorPainter.drawDecors(c /* statusBarExcludeFrame */);
         node.end(c);
         final Bitmap hwBitmap = ThreadedRenderer.createHardwareBitmap(node, width, height);
         if (hwBitmap == null) {
@@ -703,5 +703,93 @@ class TaskSnapshotController {
         pw.println(prefix + "mHighResTaskSnapshotScale=" + mHighResTaskSnapshotScale);
         pw.println(prefix + "mTaskSnapshotEnabled=" + mTaskSnapshotEnabled);
         mCache.dump(pw, prefix);
+    }
+
+    /**
+     * Helper class to draw the background of the system bars in regions the task snapshot isn't
+     * filling the window.
+     */
+    static class SystemBarBackgroundPainter {
+
+        private final Paint mStatusBarPaint = new Paint();
+        private final Paint mNavigationBarPaint = new Paint();
+        private final int mStatusBarColor;
+        private final int mNavigationBarColor;
+        private final int mWindowFlags;
+        private final int mWindowPrivateFlags;
+        private final float mScale;
+        private final InsetsState mInsetsState;
+        private final Rect mSystemBarInsets = new Rect();
+
+        SystemBarBackgroundPainter(int windowFlags, int windowPrivateFlags, int appearance,
+                ActivityManager.TaskDescription taskDescription, float scale,
+                InsetsState insetsState) {
+            mWindowFlags = windowFlags;
+            mWindowPrivateFlags = windowPrivateFlags;
+            mScale = scale;
+            final Context context = ActivityThread.currentActivityThread().getSystemUiContext();
+            final int semiTransparent = context.getColor(
+                    R.color.system_bar_background_semi_transparent);
+            mStatusBarColor = DecorView.calculateBarColor(windowFlags, FLAG_TRANSLUCENT_STATUS,
+                    semiTransparent, taskDescription.getStatusBarColor(), appearance,
+                    APPEARANCE_LIGHT_STATUS_BARS,
+                    taskDescription.getEnsureStatusBarContrastWhenTransparent());
+            mNavigationBarColor = DecorView.calculateBarColor(windowFlags,
+                    FLAG_TRANSLUCENT_NAVIGATION, semiTransparent,
+                    taskDescription.getNavigationBarColor(), appearance,
+                    APPEARANCE_LIGHT_NAVIGATION_BARS,
+                    taskDescription.getEnsureNavigationBarContrastWhenTransparent()
+                            && context.getResources().getBoolean(R.bool.config_navBarNeedsScrim));
+            mStatusBarPaint.setColor(mStatusBarColor);
+            mNavigationBarPaint.setColor(mNavigationBarColor);
+            mInsetsState = insetsState;
+        }
+
+        void setInsets(Rect systemBarInsets) {
+            mSystemBarInsets.set(systemBarInsets);
+        }
+
+        int getStatusBarColorViewHeight() {
+            final boolean forceBarBackground =
+                    (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
+            if (STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
+                    mInsetsState, mStatusBarColor, mWindowFlags, forceBarBackground)) {
+                return (int) (mSystemBarInsets.top * mScale);
+            } else {
+                return 0;
+            }
+        }
+
+        private boolean isNavigationBarColorViewVisible() {
+            final boolean forceBarBackground =
+                    (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
+            return NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
+                    mInsetsState, mNavigationBarColor, mWindowFlags, forceBarBackground);
+        }
+
+        void drawDecors(Canvas c) {
+            drawStatusBarBackground(c, getStatusBarColorViewHeight());
+            drawNavigationBarBackground(c);
+        }
+
+        @VisibleForTesting
+        void drawStatusBarBackground(Canvas c,
+                int statusBarHeight) {
+            if (statusBarHeight > 0 && Color.alpha(mStatusBarColor) != 0) {
+                final int rightInset = (int) (mSystemBarInsets.right * mScale);
+                c.drawRect(0, 0, c.getWidth() - rightInset, statusBarHeight, mStatusBarPaint);
+            }
+        }
+
+        @VisibleForTesting
+        void drawNavigationBarBackground(Canvas c) {
+            final Rect navigationBarRect = new Rect();
+            getNavigationBarRect(c.getWidth(), c.getHeight(), mSystemBarInsets, navigationBarRect,
+                    mScale);
+            final boolean visible = isNavigationBarColorViewVisible();
+            if (visible && Color.alpha(mNavigationBarColor) != 0 && !navigationBarRect.isEmpty()) {
+                c.drawRect(navigationBarRect, mNavigationBarPaint);
+            }
+        }
     }
 }

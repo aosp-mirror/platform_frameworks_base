@@ -107,36 +107,36 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     private final SendButtonTextWatcher mTextWatcher;
     private final TextView.OnEditorActionListener mEditorActionHandler;
-    private final UiEventLogger mUiEventLogger;
-    private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
-    private final List<OnFocusChangeListener> mEditTextFocusChangeListeners = new ArrayList<>();
-    private final List<OnSendRemoteInputListener> mOnSendListeners = new ArrayList<>();
+    private final ArrayList<OnSendRemoteInputListener> mOnSendListeners = new ArrayList<>();
+    private final ArrayList<Consumer<Boolean>> mOnVisibilityChangedListeners = new ArrayList<>();
+    private final ArrayList<OnFocusChangeListener> mEditTextFocusChangeListeners =
+            new ArrayList<>();
+
     private RemoteEditText mEditText;
     private ImageButton mSendButton;
     private GradientDrawable mContentBackground;
     private ProgressBar mProgressBar;
-    private PendingIntent mPendingIntent;
-    private RemoteInput[] mRemoteInputs;
-    private RemoteInput mRemoteInput;
-    private RemoteInputController mController;
-
-    private NotificationEntry mEntry;
-
-    private boolean mRemoved;
-
+    private ImageView mDelete;
+    private ImageView mDeleteBg;
+    // TODO(b/193539698): remove reveal param fields, turn them into parameters where needed
     private int mRevealCx;
     private int mRevealCy;
     private int mRevealR;
-
     private boolean mColorized;
     private int mTint;
-
     private boolean mResetting;
-    private NotificationViewWrapper mWrapper;
-    private Consumer<Boolean> mOnVisibilityChangedListener;
+
+    // TODO(b/193539698): move these to a Controller
+    private RemoteInputController mController;
+    private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
+    private final UiEventLogger mUiEventLogger;
+    private NotificationEntry mEntry;
+    private PendingIntent mPendingIntent;
+    private RemoteInput mRemoteInput;
+    private RemoteInput[] mRemoteInputs;
     private NotificationRemoteInputManager.BouncerChecker mBouncerChecker;
-    private ImageView mDelete;
-    private ImageView mDeleteBg;
+    private boolean mRemoved;
+    private NotificationViewWrapper mWrapper;
 
     /**
      * Enum for logged notification remote input UiEvents.
@@ -388,7 +388,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private void sendRemoteInput(Intent intent) {
         if (mBouncerChecker != null && mBouncerChecker.showBouncerIfNecessary()) {
             mEditText.hideIme();
-            for (OnSendRemoteInputListener listener : mOnSendListeners) {
+            for (OnSendRemoteInputListener listener : new ArrayList<>(mOnSendListeners)) {
                 listener.onSendRequestBounced();
             }
             return;
@@ -405,7 +405,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mController.remoteInputSent(mEntry);
         mEntry.setHasSentReply();
 
-        for (OnSendRemoteInputListener listener : mOnSendListeners) {
+        for (OnSendRemoteInputListener listener : new ArrayList<>(mOnSendListeners)) {
             listener.onSendRemoteInput();
         }
 
@@ -758,15 +758,32 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mWrapper = wrapper;
     }
 
-    public void setOnVisibilityChangedListener(Consumer<Boolean> visibilityChangedListener) {
-        mOnVisibilityChangedListener = visibilityChangedListener;
+    /**
+     * Register a listener to be notified when this view's visibility changes.
+     *
+     * Specifically, the passed {@link Consumer} will receive {@code true} when
+     * {@link #getVisibility()} would return {@link View#VISIBLE}, and {@code false} it would return
+     * any other value.
+     */
+    public void addOnVisibilityChangedListener(Consumer<Boolean> listener) {
+        mOnVisibilityChangedListeners.add(listener);
+    }
+
+    /**
+     * Unregister a listener previously registered via
+     * {@link #addOnVisibilityChangedListener(Consumer)}.
+     */
+    public void removeOnVisibilityChangedListener(Consumer<Boolean> listener) {
+        mOnVisibilityChangedListeners.remove(listener);
     }
 
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
-        if (changedView == this && mOnVisibilityChangedListener != null) {
-            mOnVisibilityChangedListener.accept(visibility == VISIBLE);
+        if (changedView == this) {
+            for (Consumer<Boolean> listener : new ArrayList<>(mOnVisibilityChangedListeners)) {
+                listener.accept(visibility == VISIBLE);
+            }
             // Hide soft-keyboard when the input view became invisible
             // (i.e. The notification shade collapsed by pressing the home key)
             if (visibility != VISIBLE && !mEditText.isVisibleToUser()

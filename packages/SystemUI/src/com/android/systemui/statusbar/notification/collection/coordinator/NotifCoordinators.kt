@@ -48,6 +48,7 @@ class NotifCoordinatorsImpl @Inject constructor(
     conversationCoordinator: ConversationCoordinator,
     preparationCoordinator: PreparationCoordinator,
     mediaCoordinator: MediaCoordinator,
+    remoteInputCoordinator: RemoteInputCoordinator,
     shadeEventCoordinator: ShadeEventCoordinator,
     smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
     viewConfigCoordinator: ViewConfigCoordinator,
@@ -73,6 +74,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(bubbleCoordinator)
         mCoordinators.add(conversationCoordinator)
         mCoordinators.add(mediaCoordinator)
+        mCoordinators.add(remoteInputCoordinator)
         mCoordinators.add(shadeEventCoordinator)
         mCoordinators.add(viewConfigCoordinator)
         mCoordinators.add(visualStabilityCoordinator)

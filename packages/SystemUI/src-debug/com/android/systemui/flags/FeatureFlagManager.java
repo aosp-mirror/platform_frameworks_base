@@ -75,6 +75,7 @@ public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
     }
 
     /** Return a {@link BooleanFlag}'s value. */
+    @Override
     public boolean isEnabled(int id, boolean defaultValue) {
         if (!mBooleanFlagCache.containsKey(id)) {
             Boolean result = isEnabledInternal(id);
@@ -105,6 +106,7 @@ public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
     }
 
     /** Set whether a given {@link BooleanFlag} is enabled or not. */
+    @Override
     public void setEnabled(int id, boolean value) {
         Boolean currentValue = isEnabledInternal(id);
         if (currentValue != null && currentValue == value) {
@@ -136,8 +138,10 @@ public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
         Log.i(TAG, "Erase id " + id);
     }
 
+    @Override
     public void addListener(Listener run) {}
 
+    @Override
     public void removeListener(Listener run) {}
 
     private void restartSystemUI() {
@@ -198,6 +202,7 @@ public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("can override: true");
         ArrayList<String> flagStrings = new ArrayList<>(mBooleanFlagCache.size());
         for (Map.Entry<Integer, Boolean> entry : mBooleanFlagCache.entrySet()) {
             flagStrings.add("  sysui_flag_" + entry.getKey() + ": " + entry.getValue());

@@ -52,12 +52,18 @@ java_library {
 
 filegroup {
     name: "ReleaseJavaFiles",
-    srcs: ["src/com/android/systemui/flags/FeatureFlagManager.java"],
+    srcs: [
+        "src-release/**/*.kt",
+        "src-release/**/*.java",
+    ],
 }
 
 filegroup {
     name: "DebugJavaFiles",
-    srcs: ["src-debug/com/android/systemui/flags/FeatureFlagManager.java"],
+    srcs: [
+        "src-debug/**/*.kt",
+        "src-debug/**/*.java",
+    ],
 }
 
 android_library {
@@ -66,6 +72,8 @@ android_library {
         "src/**/*.kt",
         "src/**/*.java",
         "src/**/I*.aidl",
+        "src-release/**/*.kt",
+        "src-release/**/*.java",
     ],
     product_variables: {
         debuggable: {
@@ -171,6 +179,8 @@ android_library {
         "src/**/*.kt",
         "src/**/*.java",
         "src/**/I*.aidl",
+        "src-release/**/*.kt",
+        "src-release/**/*.java",
     ],
     static_libs: [
         "WifiTrackerLib",

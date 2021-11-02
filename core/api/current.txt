@@ -18163,8 +18163,9 @@ package android.hardware.camera2 {
     method @NonNull public java.util.List<android.util.Size> getExtensionSupportedSizes(int, int);
     method @NonNull public java.util.List<java.lang.Integer> getSupportedExtensions();
     field public static final int EXTENSION_AUTOMATIC = 0; // 0x0
-    field public static final int EXTENSION_BEAUTY = 1; // 0x1
+    field @Deprecated public static final int EXTENSION_BEAUTY = 1; // 0x1
     field public static final int EXTENSION_BOKEH = 2; // 0x2
+    field public static final int EXTENSION_FACE_RETOUCH = 1; // 0x1
     field public static final int EXTENSION_HDR = 3; // 0x3
     field public static final int EXTENSION_NIGHT = 4; // 0x4
   }
@@ -38382,6 +38383,7 @@ package android.service.controls {
     method @NonNull public CharSequence getSubtitle();
     method @NonNull public CharSequence getTitle();
     method @Nullable public CharSequence getZone();
+    method public boolean isAuthRequired();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.controls.Control> CREATOR;
     field public static final int STATUS_DISABLED = 4; // 0x4
@@ -38396,6 +38398,7 @@ package android.service.controls {
     ctor public Control.StatefulBuilder(@NonNull android.service.controls.Control);
     method @NonNull public android.service.controls.Control build();
     method @NonNull public android.service.controls.Control.StatefulBuilder setAppIntent(@NonNull android.app.PendingIntent);
+    method @NonNull public android.service.controls.Control.StatefulBuilder setAuthRequired(boolean);
     method @NonNull public android.service.controls.Control.StatefulBuilder setControlId(@NonNull String);
     method @NonNull public android.service.controls.Control.StatefulBuilder setControlTemplate(@NonNull android.service.controls.templates.ControlTemplate);
     method @NonNull public android.service.controls.Control.StatefulBuilder setCustomColor(@Nullable android.content.res.ColorStateList);
@@ -52198,6 +52201,7 @@ package android.view.inputmethod {
     method public boolean setComposingText(CharSequence, int);
     method public default boolean setImeConsumesInput(boolean);
     method public boolean setSelection(int, int);
+    method @Nullable public default android.view.inputmethod.TextSnapshot takeSnapshot();
     field public static final int CURSOR_UPDATE_IMMEDIATE = 1; // 0x1
     field public static final int CURSOR_UPDATE_MONITOR = 2; // 0x2
     field public static final int GET_EXTRACTED_TEXT_MONITOR = 1; // 0x1
@@ -52408,6 +52412,16 @@ package android.view.inputmethod {
     method @NonNull public CharSequence getText();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.SurroundingText> CREATOR;
+  }
+
+  public final class TextSnapshot {
+    ctor public TextSnapshot(@NonNull android.view.inputmethod.SurroundingText, @IntRange(from=0xffffffff) int, @IntRange(from=0xffffffff) int, int);
+    method @IntRange(from=0xffffffff) public int getCompositionEnd();
+    method @IntRange(from=0xffffffff) public int getCompositionStart();
+    method public int getCursorCapsMode();
+    method @IntRange(from=0xffffffff) public int getSelectionEnd();
+    method @IntRange(from=0xffffffff) public int getSelectionStart();
+    method @NonNull public android.view.inputmethod.SurroundingText getSurroundingText();
   }
 
 }

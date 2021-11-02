@@ -516,12 +516,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 // Skipping containers that do not have any activities to report.
                 continue;
             }
-            ActivityStack primaryContainer =
-                    new ActivityStack(
-                            container.getPrimaryContainer().collectActivities());
-            ActivityStack secondaryContainer =
-                    new ActivityStack(
-                            container.getSecondaryContainer().collectActivities());
+            ActivityStack primaryContainer = container.getPrimaryContainer().toActivityStack();
+            ActivityStack secondaryContainer = container.getSecondaryContainer().toActivityStack();
             SplitInfo splitState = new SplitInfo(primaryContainer,
                     secondaryContainer,
                     // Splits that are not showing side-by-side are reported as having 0 split

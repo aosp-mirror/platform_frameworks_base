@@ -26,13 +26,15 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.annotation.DimenRes;
+
 import com.android.systemui.navigationbar.buttons.KeyButtonRipple;
 
 public class FloatingRotationButtonView extends ImageView {
 
     private static final float BACKGROUND_ALPHA = 0.92f;
 
-    private final KeyButtonRipple mRipple;
+    private KeyButtonRipple mRipple;
     private final Paint mOvalBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
 
     public FloatingRotationButtonView(Context context, AttributeSet attrs) {
@@ -44,10 +46,13 @@ public class FloatingRotationButtonView extends ImageView {
 
         setClickable(true);
 
-        mRipple = new KeyButtonRipple(context, this);
-        setBackground(mRipple);
         setWillNotDraw(false);
         forceHasOverlappingRendering(false);
+    }
+
+    public void setRipple(@DimenRes int rippleMaxWidthResource) {
+        mRipple = new KeyButtonRipple(getContext(), this, rippleMaxWidthResource);
+        setBackground(mRipple);
     }
 
     @Override
