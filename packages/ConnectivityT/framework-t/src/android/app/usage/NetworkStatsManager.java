@@ -45,8 +45,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.ServiceManager.ServiceNotFoundException;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.DataUnit;
@@ -134,15 +132,6 @@ public class NetworkStatsManager {
     public static final int FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN = 1 << 2;
 
     private int mFlags;
-
-    /**
-     * {@hide}
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public NetworkStatsManager(Context context) throws ServiceNotFoundException {
-        this(context, INetworkStatsService.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(Context.NETWORK_STATS_SERVICE)));
-    }
 
     /** @hide */
     @VisibleForTesting
