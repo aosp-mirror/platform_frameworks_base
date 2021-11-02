@@ -56,6 +56,17 @@ public interface NotifCollectionListener {
     /**
      * Called whenever a notification with the same key as an existing notification is posted. By
      * the time this listener is called, the entry's SBN and Ranking will already have been updated.
+     * This delegates to {@link #onEntryUpdated(NotificationEntry)} by default.
+     * @param fromSystem If true, this update came from the NotificationManagerService.
+     *                   If false, the notification update is an internal change within systemui.
+     */
+    default void onEntryUpdated(@NonNull NotificationEntry entry, boolean fromSystem) {
+        onEntryUpdated(entry);
+    }
+
+    /**
+     * Called whenever a notification with the same key as an existing notification is posted. By
+     * the time this listener is called, the entry's SBN and Ranking will already have been updated.
      */
     default void onEntryUpdated(@NonNull NotificationEntry entry) {
     }
