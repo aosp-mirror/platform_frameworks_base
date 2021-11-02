@@ -67,12 +67,39 @@ public final class AidlConversionUnitTests {
     }
 
     @Test
+    public void testAudioChannelConversionApiOutputMask() {
+        final AudioChannelLayout aidl = AudioChannelLayout.layoutMask(
+                AudioChannelLayout.CHANNEL_FRONT_LEFT | AudioChannelLayout.CHANNEL_FRONT_RIGHT
+                | AudioChannelLayout.CHANNEL_FRONT_WIDE_LEFT
+                | AudioChannelLayout.CHANNEL_FRONT_WIDE_RIGHT);
+        final int api = AidlConversion.aidl2api_AudioChannelLayout_AudioFormatChannelMask(
+                aidl, false /*isInput*/);
+        assertEquals(AudioFormat.CHANNEL_OUT_FRONT_LEFT | AudioFormat.CHANNEL_OUT_FRONT_RIGHT
+                | AudioFormat.CHANNEL_OUT_FRONT_WIDE_LEFT
+                | AudioFormat.CHANNEL_OUT_FRONT_WIDE_RIGHT, api);
+    }
+
+    @Test
     public void testAudioChannelConversionApiInput() {
         final AudioChannelLayout aidl = AudioChannelLayout.layoutMask(
                 AudioChannelLayout.LAYOUT_MONO);
         final int api = AidlConversion.aidl2api_AudioChannelLayout_AudioFormatChannelMask(
                 aidl, true /*isInput*/);
         assertEquals(AudioFormat.CHANNEL_IN_MONO, api);
+    }
+
+    @Test
+    public void testAudioChannelConversionApiInputMask() {
+        final AudioChannelLayout aidl = AudioChannelLayout.layoutMask(
+                AudioChannelLayout.CHANNEL_FRONT_LEFT | AudioChannelLayout.CHANNEL_FRONT_RIGHT
+                | AudioChannelLayout.CHANNEL_TOP_SIDE_LEFT
+                | AudioChannelLayout.CHANNEL_TOP_SIDE_RIGHT);
+        final int api = AidlConversion.aidl2api_AudioChannelLayout_AudioFormatChannelMask(
+                aidl, true /*isInput*/);
+        assertEquals(AudioFormat.CHANNEL_IN_LEFT | AudioFormat.CHANNEL_IN_RIGHT
+                // | AudioFormat.CHANNEL_IN_TOP_LEFT | AudioFormat.CHANNEL_IN_TOP_RIGHT,
+                | 0x200000 | 0x400000,  // TODO: Replace with names when revealed.
+                api);
     }
 
     @Test
