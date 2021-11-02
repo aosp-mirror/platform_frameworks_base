@@ -16,6 +16,8 @@
 
 package androidx.window.extensions.embedding;
 
+import static androidx.window.extensions.embedding.SplitContainer.isStickyPlaceholderRule;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -460,6 +462,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return false;
         }
 
+        if (isStickyPlaceholderRule(splitContainer.getSplitRule())) {
+            // The placeholder should remain after it was first shown.
+            return false;
+        }
+
         if (mPresenter.shouldShowSideBySide(splitContainer)) {
             return false;
         }
@@ -641,6 +648,46 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             }
         }
         return false;
+    }
+
+    /**
+     * Checks whether the associated container should be destroyed together with a finishing
+     * container. There is a case when primary containers for placeholders should be retained
+     * despite the rule configuration to finish primary with secondary - if they are marked as
+     * 'sticky' and the placeholder was finished when fully overlapping the primary container.
+     * @return {@code true} if the associated container should be retained (and not be finished).
+     */
+    boolean shouldRetainAssociatedContainer(@NonNull TaskFragmentContainer finishingContainer,
+            @NonNull TaskFragmentContainer associatedContainer) {
+        SplitContainer splitContainer = getActiveSplitForContainers(associatedContainer,
+                finishingContainer);
+        if (splitContainer == null) {
+            // Containers are not in the same split, no need to retain.
+            return false;
+        }
+
+        if (!isStickyPlaceholderRule(splitContainer.getSplitRule())) {
+            // Currently only the containers associated with sticky placeholders can be retained.
+            return false;
+        }
+
+        // When sticky placeholder is stacked on top of the main container it should not cause the
+        // destruction of the primary one.
+        return !mPresenter.shouldShowSideBySide(splitContainer);
+    }
+
+    /**
+     * @see #shouldRetainAssociatedContainer(TaskFragmentContainer, TaskFragmentContainer)
+     */
+    boolean shouldRetainAssociatedActivity(@NonNull TaskFragmentContainer finishingContainer,
+            @NonNull Activity associatedActivity) {
+        TaskFragmentContainer associatedContainer = getContainerWithActivity(
+                associatedActivity.getActivityToken());
+        if (associatedContainer == null) {
+            return false;
+        }
+
+        return shouldRetainAssociatedContainer(finishingContainer, associatedContainer);
     }
 
     private final class LifecycleCallbacks implements ActivityLifecycleCallbacks {

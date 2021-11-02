@@ -84,6 +84,13 @@ class SplitContainer {
         return shouldFinishSecondaryWithPrimary || isPlaceholderContainer;
     }
 
+    static boolean isStickyPlaceholderRule(@NonNull SplitRule splitRule) {
+        if (!(splitRule instanceof SplitPlaceholderRule)) {
+            return false;
+        }
+        return ((SplitPlaceholderRule) splitRule).isSticky();
+    }
+
     @Override
     public String toString() {
         return "SplitContainer{"
