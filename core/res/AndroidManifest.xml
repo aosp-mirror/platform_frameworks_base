@@ -3578,6 +3578,13 @@
     <permission android:name="android.permission.GET_APP_OPS_STATS"
         android:protectionLevel="signature|privileged|development" />
 
+    <!-- @SystemApi @hide Allows an application to collect historical application operation
+         statistics.
+         <p>Not for use by third party applications.
+    -->
+    <permission android:name="android.permission.GET_HISTORICAL_APP_OPS_STATS"
+        android:protectionLevel="internal|role" />
+
     <!-- @SystemApi Allows an application to update application operation statistics. Not for
          use by third party apps.
          @hide -->

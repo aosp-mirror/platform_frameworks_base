@@ -2375,7 +2375,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return;
             }
 
-            if (!isCallerSystem && !isCallerInstrumented && !isCallerPermissionController) {
+            boolean doesCallerHavePermission = mContext.checkPermission(
+                    android.Manifest.permission.GET_HISTORICAL_APP_OPS_STATS,
+                    Binder.getCallingPid(), Binder.getCallingUid())
+                    == PackageManager.PERMISSION_GRANTED;
+
+            if (!isCallerSystem && !isCallerInstrumented && !isCallerPermissionController
+                    && !doesCallerHavePermission) {
                 mHandler.post(() -> callback.sendResult(new Bundle()));
                 return;
             }
