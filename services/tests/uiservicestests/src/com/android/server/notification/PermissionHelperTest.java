@@ -38,10 +38,11 @@ import android.Manifest;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.permission.IPermissionManager;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Pair;
+import android.util.Slog;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -50,6 +51,7 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import org.junit.Before;
@@ -66,6 +68,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -107,6 +110,9 @@ public class PermissionHelperTest extends UiServiceTestCase {
                         args.add(false);
                     } else if (type.getTypeName().equals("int")) {
                         args.add(1);
+                    } else if (type.getTypeName().equals(
+                            "com.android.server.notification.PermissionHelper$PackagePermission")) {
+                        args.add(null);
                     }
                 }
                 try {
@@ -158,15 +164,16 @@ public class PermissionHelperTest extends UiServiceTestCase {
         aiSecond.uid = 2;
         second.applicationInfo = aiSecond;
 
-        Map<Integer, String> expected = ImmutableMap.of(1, "first", 2, "second");
+        Set<Pair<Integer, String>> expected =
+                ImmutableSet.of(new Pair(1, "first"), new Pair(2, "second"));
 
         ParceledListSlice<PackageInfo> infos = new ParceledListSlice<>(
                 ImmutableList.of(notThis, none, first, second));
         when(mPackageManager.getInstalledPackages(eq(GET_PERMISSIONS), anyInt())).thenReturn(infos);
 
-        Map<Integer, String> actual = mPermissionHelper.getAppsRequestingPermission(0);
+        Set<Pair<Integer, String>> actual = mPermissionHelper.getAppsRequestingPermission(0);
 
-        assertThat(actual).containsExactlyEntriesIn(expected);
+        assertThat(actual).containsExactlyElementsIn(expected);
     }
 
     @Test
@@ -202,10 +209,11 @@ public class PermissionHelperTest extends UiServiceTestCase {
                 eq(new String[] {Manifest.permission.POST_NOTIFICATIONS}), anyInt(), eq(userId)))
                 .thenReturn(infos);
 
-        Map<Integer, String> expected = ImmutableMap.of(1, "first", 2, "second");
+        Set<Pair<Integer, String>> expected =
+                ImmutableSet.of(new Pair(1, "first"), new Pair(2, "second"));
 
         assertThat(mPermissionHelper.getAppsGrantedPermission(userId))
-                .containsExactlyEntriesIn(expected);
+                .containsExactlyElementsIn(expected);
     }
 
     @Test
@@ -267,5 +275,50 @@ public class PermissionHelperTest extends UiServiceTestCase {
                 anyInt())).thenReturn(FLAG_PERMISSION_SYSTEM_FIXED);
 
         assertThat(mPermissionHelper.isPermissionFixed("pkg", 0)).isTrue();
+    }
+
+    @Test
+    public void testGetNotificationPermissionValues() throws Exception {
+        int userId = 1;
+        PackageInfo first = new PackageInfo();
+        first.packageName = "first";
+        first.requestedPermissions =
+                new String[] {"something else", Manifest.permission.POST_NOTIFICATIONS};
+        ApplicationInfo aiFirst = new ApplicationInfo();
+        aiFirst.uid = 1;
+        first.applicationInfo = aiFirst;
+
+        PackageInfo second = new PackageInfo();
+        second.packageName = "second";
+        second.requestedPermissions = new String[] {Manifest.permission.POST_NOTIFICATIONS};
+        ApplicationInfo aiSecond = new ApplicationInfo();
+        aiSecond.uid = 2;
+        second.applicationInfo = aiSecond;
+
+        PackageInfo third = new PackageInfo();
+        third.packageName = "third";
+        third.requestedPermissions = new String[] {Manifest.permission.POST_NOTIFICATIONS};
+        ApplicationInfo aiThird = new ApplicationInfo();
+        aiThird.uid = 3;
+        third.applicationInfo = aiThird;
+
+        ParceledListSlice<PackageInfo> infos = new ParceledListSlice<>(
+                ImmutableList.of(first, second));
+        when(mPackageManager.getPackagesHoldingPermissions(
+                eq(new String[] {Manifest.permission.POST_NOTIFICATIONS}), anyInt(), eq(userId)))
+                .thenReturn(infos);
+        ParceledListSlice<PackageInfo> requesting = new ParceledListSlice<>(
+                ImmutableList.of(first, second, third));
+        when(mPackageManager.getInstalledPackages(eq(GET_PERMISSIONS), anyInt()))
+                .thenReturn(requesting);
+
+        Map<Pair<Integer, String>, Boolean> expected = ImmutableMap.of(new Pair(1, "first"), true,
+                new Pair(2, "second"), true,
+                new Pair(3, "third"), false);
+
+        Map<Pair<Integer, String>, Boolean> actual =
+                mPermissionHelper.getNotificationPermissionValues(userId);
+
+        assertThat(actual).containsExactlyEntriesIn(expected);
     }
 }
