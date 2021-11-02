@@ -387,6 +387,18 @@ final class VerificationParams extends HandlerParams {
                     PackageManager.EXTRA_VERIFICATION_LONG_VERSION_CODE,
                     pkgLite.getLongVersionCode());
 
+            final String baseCodePath = mPackageLite.getBaseApkPath();
+            final String[] splitCodePaths = mPackageLite.getSplitApkPaths();
+            final String rootHashString =
+                    PackageManagerServiceUtils.buildVerificationRootHashString(baseCodePath,
+                            splitCodePaths);
+
+            if (rootHashString != null) {
+                verification.putExtra(PackageManager.EXTRA_VERIFICATION_ROOT_HASH, rootHashString);
+            }
+
+            verification.putExtra(PackageInstaller.EXTRA_DATA_LOADER_TYPE, mDataLoaderType);
+
             populateInstallerExtras(verification);
 
             final List<ComponentName> sufficientVerifiers = matchVerifiers(pkgLite,
