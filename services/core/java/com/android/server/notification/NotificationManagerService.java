@@ -5088,6 +5088,33 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean matchesCallFilter(Bundle extras) {
+            // Because matchesCallFilter may use contact data to filter calls, the callers of this
+            // method need to either have notification listener access or permission to read
+            // contacts.
+            boolean systemAccess = false;
+            try {
+                enforceSystemOrSystemUI("INotificationManager.matchesCallFilter");
+                systemAccess = true;
+            } catch (SecurityException e) {
+            }
+
+            boolean listenerAccess = false;
+            try {
+                String[] pkgNames = mPackageManager.getPackagesForUid(Binder.getCallingUid());
+                for (int i = 0; i < pkgNames.length; i++) {
+                    // in most cases there should only be one package here
+                    listenerAccess |= mListeners.hasAllowedListener(pkgNames[i],
+                            Binder.getCallingUserHandle().getIdentifier());
+                }
+            } catch (RemoteException e) {
+            } finally {
+                if (!systemAccess && !listenerAccess) {
+                    getContext().enforceCallingPermission(Manifest.permission.READ_CONTACTS,
+                            "matchesCallFilter requires listener permission, contacts read access,"
+                            + " or system level access");
+                }
+            }
+
             return mZenModeHelper.matchesCallFilter(
                     Binder.getCallingUserHandle(),
                     extras,
@@ -10973,6 +11000,23 @@ public class NotificationManagerService extends SystemService {
                     if (packageName.equals(serviceInfo.component.getPackageName())) {
                         return true;
                     }
+                }
+            }
+            return false;
+        }
+
+        // Returns whether there is a component with listener access granted that is associated
+        // with the given package name / user ID.
+        boolean hasAllowedListener(String packageName, int userId) {
+            if (packageName == null) {
+                return false;
+            }
+
+            // Loop through allowed components to compare package names
+            List<ComponentName> allowedComponents = getAllowedComponents(userId);
+            for (int i = 0; i < allowedComponents.size(); i++) {
+                if (allowedComponents.get(i).getPackageName().equals(packageName)) {
+                    return true;
                 }
             }
             return false;
