@@ -775,16 +775,42 @@ public class ShadeListBuilder implements Dumpable {
                 for (NotificationEntry child : parent.getChildren()) {
                     setEntrySection(child, section);
                 }
-                parent.sortChildren(sChildComparator);
+                parent.sortChildren(mGroupChildrenComparator);
             }
         }
-
-        // Finally, sort all top-level elements
         mNotifList.sort(mTopLevelComparator);
+        assignIndexes(mNotifList);
 
-        // notify sections since the list is sorted now
         notifySectionEntriesUpdated();
         Trace.endSection();
+    }
+
+    /**
+     * Assign the index of each notification relative to the total order
+     * @param notifList
+     */
+    private void assignIndexes(List<ListEntry> notifList) {
+        if (notifList.size() == 0) return;
+        NotifSection currentSection = notifList.get(0).getSection();
+        int sectionMemberIndex = 0;
+        for (int i = 0; i < notifList.size(); i++) {
+            ListEntry entry = notifList.get(i);
+            NotifSection section = entry.getSection();
+            if (section.getIndex() != currentSection.getIndex()) {
+                sectionMemberIndex = 0;
+                currentSection = section;
+            }
+            entry.getAttachState().setStableIndex(sectionMemberIndex);
+            if (entry instanceof GroupEntry) {
+                GroupEntry parent = (GroupEntry) entry;
+                for (int j = 0; j < parent.getChildren().size(); j++) {
+                    entry = parent.getChildren().get(j);
+                    entry.getAttachState().setStableIndex(sectionMemberIndex);
+                    sectionMemberIndex++;
+                }
+            }
+            sectionMemberIndex++;
+        }
     }
 
     private void freeEmptyGroups() {
@@ -891,47 +917,52 @@ public class ShadeListBuilder implements Dumpable {
     }
 
     private final Comparator<ListEntry> mTopLevelComparator = (o1, o2) -> {
-
         int cmp = Integer.compare(
                 o1.getSectionIndex(),
                 o2.getSectionIndex());
+        if (cmp != 0) return cmp;
 
-        if (cmp == 0) {
-            for (int i = 0; i < mNotifComparators.size(); i++) {
-                cmp = mNotifComparators.get(i).compare(o1, o2);
-                if (cmp != 0) {
-                    break;
-                }
-            }
+        int index1 = canReorder(o1) ? -1 : o1.getPreviousAttachState().getStableIndex();
+        int index2 = canReorder(o2) ? -1 : o2.getPreviousAttachState().getStableIndex();
+        cmp = Integer.compare(index1, index2);
+        if (cmp != 0) return cmp;
+
+        for (int i = 0; i < mNotifComparators.size(); i++) {
+            cmp = mNotifComparators.get(i).compare(o1, o2);
+            if (cmp != 0) return cmp;
         }
 
         final NotificationEntry rep1 = o1.getRepresentativeEntry();
         final NotificationEntry rep2 = o2.getRepresentativeEntry();
-
-        if (cmp == 0) {
             cmp = rep1.getRanking().getRank() - rep2.getRanking().getRank();
-        }
+        if (cmp != 0) return cmp;
 
-        if (cmp == 0) {
-            cmp = Long.compare(
-                    rep2.getSbn().getNotification().when,
-                    rep1.getSbn().getNotification().when);
-        }
-
+        cmp = Long.compare(
+                rep2.getSbn().getNotification().when,
+                rep1.getSbn().getNotification().when);
         return cmp;
     };
 
-    private static final Comparator<NotificationEntry> sChildComparator = (o1, o2) -> {
-        int cmp = o1.getRanking().getRank() - o2.getRanking().getRank();
 
-        if (cmp == 0) {
-            cmp = Long.compare(
-                    o2.getSbn().getNotification().when,
-                    o1.getSbn().getNotification().when);
-        }
+    private final Comparator<ListEntry> mGroupChildrenComparator = (o1, o2) -> {
+        int index1 = canReorder(o1) ? -1 : o1.getPreviousAttachState().getStableIndex();
+        int index2 = canReorder(o2) ? -1 : o2.getPreviousAttachState().getStableIndex();
+        int cmp = Integer.compare(index1, index2);
+        if (cmp != 0) return cmp;
 
+        cmp = o1.getRepresentativeEntry().getRanking().getRank()
+                - o2.getRepresentativeEntry().getRanking().getRank();
+        if (cmp != 0) return cmp;
+
+        cmp = Long.compare(
+                o2.getRepresentativeEntry().getSbn().getNotification().when,
+                o1.getRepresentativeEntry().getSbn().getNotification().when);
         return cmp;
     };
+
+    private boolean canReorder(ListEntry entry) {
+        return mNotifStabilityManager.isEntryReorderingAllowed(entry);
+    }
 
     private boolean applyFilters(NotificationEntry entry, long now, List<NotifFilter> filters) {
         final NotifFilter filter = findRejectingFilter(entry, now, filters);

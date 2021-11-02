@@ -98,6 +98,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         mOrderedSections.add(conversationCoordinator.sectioner) // People
         mOrderedSections.add(rankingCoordinator.alertingSectioner) // Alerting
         mOrderedSections.add(rankingCoordinator.silentSectioner) // Silent
+        mOrderedSections.add(rankingCoordinator.minimizedSectioner) // Minimized
     }
 
     /**

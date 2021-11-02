@@ -22,11 +22,13 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICAT
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 
@@ -55,6 +57,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 @SmallTest
@@ -67,31 +70,41 @@ public class RankingCoordinatorTest extends SysuiTestCase {
     @Mock private NodeController mAlertingHeaderController;
     @Mock private NodeController mSilentNodeController;
     @Mock private SectionHeaderController mSilentHeaderController;
+    @Mock private NotificationListenerService.Ranking mRanking;
+    @Mock private StatusBarNotification mSbn;
 
     @Captor private ArgumentCaptor<NotifFilter> mNotifFilterCaptor;
 
     private NotificationEntry mEntry;
     private NotifFilter mCapturedSuspendedFilter;
     private NotifFilter mCapturedDozingFilter;
+    private RankingCoordinator mRankingCoordinator;
 
     private NotifSectioner mAlertingSectioner;
     private NotifSectioner mSilentSectioner;
+    private NotifSectioner mMinimizedSectioner;
+    private ArrayList<NotifSectioner> mSections = new ArrayList<>(3);
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        RankingCoordinator rankingCoordinator = new RankingCoordinator(
+        mRankingCoordinator = new RankingCoordinator(
                 mStatusBarStateController, mHighPriorityProvider, mAlertingHeaderController,
                 mSilentHeaderController, mSilentNodeController);
-        mEntry = new NotificationEntryBuilder().build();
+        mEntry = spy(new NotificationEntryBuilder().build());
+        mRanking = spy(getRankingForUnfilteredNotif().build());
+        mEntry.setRanking(mRanking);
+        when(mEntry.getSbn()).thenReturn(mSbn);
 
-        rankingCoordinator.attach(mNotifPipeline);
+        mRankingCoordinator.attach(mNotifPipeline);
         verify(mNotifPipeline, times(2)).addPreGroupFilter(mNotifFilterCaptor.capture());
         mCapturedSuspendedFilter = mNotifFilterCaptor.getAllValues().get(0);
         mCapturedDozingFilter = mNotifFilterCaptor.getAllValues().get(1);
 
-        mAlertingSectioner = rankingCoordinator.getAlertingSectioner();
-        mSilentSectioner = rankingCoordinator.getSilentSectioner();
+        mAlertingSectioner = mRankingCoordinator.getAlertingSectioner();
+        mSilentSectioner = mRankingCoordinator.getSilentSectioner();
+        mMinimizedSectioner = mRankingCoordinator.getMinimizedSectioner();
+        mSections.addAll(Arrays.asList(mAlertingSectioner, mSilentSectioner, mMinimizedSectioner));
     }
 
     @Test
@@ -109,8 +122,9 @@ public class RankingCoordinatorTest extends SysuiTestCase {
         };
         Mockito.doReturn(true).when(sbn).isClearable();
         mSilentSectioner.onEntriesUpdated(Arrays.asList(listEntry));
+        when(mRanking.isAmbient()).thenReturn(false);
         verify(mSilentHeaderController).setClearSectionEnabled(eq(true));
-
+        mRankingCoordinator.resetClearAllFlags();
         Mockito.doReturn(false).when(sbn).isClearable();
         mSilentSectioner.onEntriesUpdated(Arrays.asList(listEntry));
         verify(mSilentHeaderController).setClearSectionEnabled(eq(false));
@@ -190,10 +204,76 @@ public class RankingCoordinatorTest extends SysuiTestCase {
     public void testIncludeInSectionSilent() {
         // GIVEN the entry isn't high priority
         when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+        when(mRanking.isAmbient()).thenReturn(false);
 
         // THEN entry is in the silent section
         assertFalse(mAlertingSectioner.isInSection(mEntry));
         assertTrue(mSilentSectioner.isInSection(mEntry));
+    }
+
+    @Test
+    public void testMinSection() {
+        when(mEntry.getRanking()).thenReturn(mRanking);
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+        when(mRanking.isAmbient()).thenReturn(true);
+        assertInSection(mEntry, mMinimizedSectioner);
+    }
+
+    @Test
+    public void testSilentSection() {
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+        when(mRanking.isAmbient()).thenReturn(false);
+        assertInSection(mEntry, mSilentSectioner);
+    }
+
+    @Test
+    public void testClearableSilentSection() {
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+        when(mSbn.isClearable()).thenReturn(true);
+        when(mRanking.isAmbient()).thenReturn(false);
+        mSilentSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        verify(mSilentHeaderController).setClearSectionEnabled(eq(true));
+    }
+
+    @Test
+    public void testClearableMinimizedSection() {
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+        when(mSbn.isClearable()).thenReturn(true);
+        when(mRanking.isAmbient()).thenReturn(true);
+        mMinimizedSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        verify(mSilentHeaderController).setClearSectionEnabled(eq(true));
+    }
+
+    @Test
+    public void testNotClearableSilentSection() {
+        when(mSbn.isClearable()).thenReturn(false);
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+        when(mRanking.isAmbient()).thenReturn(false);
+        mSilentSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        mMinimizedSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        mAlertingSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        verify(mSilentHeaderController, times(2)).setClearSectionEnabled(eq(false));
+    }
+
+    @Test
+    public void testNotClearableMinimizedSection() {
+        when(mSbn.isClearable()).thenReturn(false);
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+        when(mRanking.isAmbient()).thenReturn(true);
+        mSilentSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        mMinimizedSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        mAlertingSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        verify(mSilentHeaderController, times(2)).setClearSectionEnabled(eq(false));
+    }
+
+    private void assertInSection(NotificationEntry entry, NotifSectioner section) {
+        for (NotifSectioner current: mSections) {
+            if (current == section) {
+                assertTrue(current.isInSection(entry));
+            } else {
+                assertFalse(current.isInSection(entry));
+            }
+        }
     }
 
     private RankingBuilder getRankingForUnfilteredNotif() {

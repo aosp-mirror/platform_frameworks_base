@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -52,6 +53,8 @@ public class RankingCoordinator implements Coordinator {
     private final NodeController mSilentNodeController;
     private final SectionHeaderController mSilentHeaderController;
     private final NodeController mAlertingHeaderController;
+    private boolean mHasSilentEntries;
+    private boolean mHasMinimizedEntries;
 
     @Inject
     public RankingCoordinator(
@@ -73,6 +76,7 @@ public class RankingCoordinator implements Coordinator {
 
         pipeline.addPreGroupFilter(mSuspendedFilter);
         pipeline.addPreGroupFilter(mDndVisualEffectsFilter);
+        pipeline.addOnBeforeSortListener(entries -> resetClearAllFlags());
     }
 
     public NotifSectioner getAlertingSectioner() {
@@ -81,6 +85,10 @@ public class RankingCoordinator implements Coordinator {
 
     public NotifSectioner getSilentSectioner() {
         return mSilentNotifSectioner;
+    }
+
+    public NotifSectioner getMinimizedSectioner() {
+        return mMinimizedNotifSectioner;
     }
 
     private final NotifSectioner mAlertingNotifSectioner = new NotifSectioner("Alerting",
@@ -105,7 +113,8 @@ public class RankingCoordinator implements Coordinator {
             NotificationPriorityBucketKt.BUCKET_SILENT) {
         @Override
         public boolean isInSection(ListEntry entry) {
-            return !mHighPriorityProvider.isHighPriority(entry);
+            return !mHighPriorityProvider.isHighPriority(entry)
+                    && !entry.getRepresentativeEntry().isAmbient();
         }
 
         @Nullable
@@ -119,11 +128,40 @@ public class RankingCoordinator implements Coordinator {
         public void onEntriesUpdated(@NonNull List<ListEntry> entries) {
             for (int i = 0; i < entries.size(); i++) {
                 if (entries.get(i).getRepresentativeEntry().getSbn().isClearable()) {
-                    mSilentHeaderController.setClearSectionEnabled(true);
-                    return;
+                    mHasSilentEntries = true;
+                    break;
                 }
             }
-            mSilentHeaderController.setClearSectionEnabled(false);
+            mSilentHeaderController.setClearSectionEnabled(
+                    mHasSilentEntries | mHasMinimizedEntries);
+        }
+    };
+
+    private final NotifSectioner mMinimizedNotifSectioner = new NotifSectioner("Minimized",
+            NotificationPriorityBucketKt.BUCKET_SILENT) {
+        @Override
+        public boolean isInSection(ListEntry entry) {
+            return !mHighPriorityProvider.isHighPriority(entry)
+                    && entry.getRepresentativeEntry().isAmbient();
+        }
+
+        @Nullable
+        @Override
+        public NodeController getHeaderNodeController() {
+            return mSilentNodeController;
+        }
+
+        @Nullable
+        @Override
+        public void onEntriesUpdated(@NonNull List<ListEntry> entries) {
+            for (int i = 0; i < entries.size(); i++) {
+                if (entries.get(i).getRepresentativeEntry().getSbn().isClearable()) {
+                    mHasMinimizedEntries = true;
+                    break;
+                }
+            }
+            mSilentHeaderController.setClearSectionEnabled(
+                    mHasSilentEntries | mHasMinimizedEntries);
         }
     };
 
@@ -150,6 +188,12 @@ public class RankingCoordinator implements Coordinator {
             return !mStatusBarStateController.isDozing() && entry.shouldSuppressNotificationList();
         }
     };
+
+    @VisibleForTesting
+    protected void resetClearAllFlags() {
+        mHasSilentEntries = false;
+        mHasMinimizedEntries = false;
+    }
 
     private final StatusBarStateController.StateListener mStatusBarStateCallback =
             new StatusBarStateController.StateListener() {
