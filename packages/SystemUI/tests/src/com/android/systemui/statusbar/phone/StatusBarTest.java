@@ -142,6 +142,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.unfold.UnfoldTransitionWallpaperController;
@@ -225,6 +226,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private KeyguardBypassController mKeyguardBypassController;
     @Mock private DynamicPrivacyController mDynamicPrivacyController;
     @Mock private AutoHideController mAutoHideController;
+    @Mock private StatusBarWindowController mStatusBarWindowController;
     @Mock private NotificationViewHierarchyManager mNotificationViewHierarchyManager;
     @Mock private UserSwitcherController mUserSwitcherController;
     @Mock private NetworkController mNetworkController;
@@ -368,6 +370,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotificationsController,
                 mLightBarController,
                 mAutoHideController,
+                mStatusBarWindowController,
                 mKeyguardUpdateMonitor,
                 mPulseExpansionHandler,
                 mNotificationWakeUpCoordinator,

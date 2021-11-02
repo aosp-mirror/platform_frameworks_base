@@ -109,6 +109,7 @@ import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.unfold.UnfoldTransitionWallpaperController;
@@ -147,6 +148,7 @@ public interface StatusBarPhoneModule {
             NotificationsController notificationsController,
             LightBarController lightBarController,
             AutoHideController autoHideController,
+            StatusBarWindowController statusBarWindowController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             PulseExpansionHandler pulseExpansionHandler,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
@@ -251,6 +253,7 @@ public interface StatusBarPhoneModule {
                 notificationsController,
                 lightBarController,
                 autoHideController,
+                statusBarWindowController,
                 keyguardUpdateMonitor,
                 pulseExpansionHandler,
                 notificationWakeUpCoordinator,

@@ -230,6 +230,8 @@ import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowView;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.unfold.UnfoldTransitionWallpaperController;
@@ -473,7 +475,7 @@ public class StatusBar extends SystemUI implements
     private AuthRippleController mAuthRippleController;
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     protected NotificationShadeWindowController mNotificationShadeWindowController;
-    protected StatusBarWindowController mStatusBarWindowController;
+    private final StatusBarWindowController mStatusBarWindowController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @VisibleForTesting
     DozeServiceHost mDozeServiceHost;
@@ -710,6 +712,7 @@ public class StatusBar extends SystemUI implements
             NotificationsController notificationsController,
             LightBarController lightBarController,
             AutoHideController autoHideController,
+            StatusBarWindowController statusBarWindowController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             PulseExpansionHandler pulseExpansionHandler,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
@@ -812,6 +815,7 @@ public class StatusBar extends SystemUI implements
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
         mAutoHideController = autoHideController;
+        mStatusBarWindowController = statusBarWindowController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mPulseExpansionHandler = pulseExpansionHandler;
         mWakeUpCoordinator = notificationWakeUpCoordinator;
@@ -1612,7 +1616,6 @@ public class StatusBar extends SystemUI implements
                 .getNotificationShadeWindowViewController();
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
         mNotificationShadeWindowViewController.setupExpandedStatusBar();
-        mStatusBarWindowController = statusBarComponent.getStatusBarWindowController();
         mNotificationPanelViewController = statusBarComponent.getNotificationPanelViewController();
         statusBarComponent.getLockIconViewController().init();
         mStackScrollerController = statusBarComponent.getNotificationStackScrollLayoutController();
