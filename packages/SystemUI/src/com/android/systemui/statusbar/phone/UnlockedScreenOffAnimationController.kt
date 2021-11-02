@@ -145,22 +145,27 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 .setDuration(duration.toLong())
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(1f)
-                .withEndAction {
-                    aodUiAnimationPlaying = false
+                .setListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator?) {
+                        aodUiAnimationPlaying = false
 
-                    // Lock the keyguard if it was waiting for the screen off animation to end.
-                    keyguardViewMediatorLazy.get().maybeHandlePendingLock()
+                        // Lock the keyguard if it was waiting for the screen off animation to end.
+                        keyguardViewMediatorLazy.get().maybeHandlePendingLock()
 
-                    // Tell the StatusBar to become keyguard for real - we waited on that since it
-                    // is slow and would have caused the animation to jank.
-                    statusBar.updateIsKeyguard()
+                        // Tell the StatusBar to become keyguard for real - we waited on that since
+                        // it is slow and would have caused the animation to jank.
+                        statusBar.updateIsKeyguard()
 
-                    // Run the callback given to us by the KeyguardVisibilityHelper.
-                    after.run()
+                        // Run the callback given to us by the KeyguardVisibilityHelper.
+                        after.run()
 
-                    // Done going to sleep, reset this flag.
-                    decidedToAnimateGoingToSleep = null
-                }
+                        // Done going to sleep, reset this flag.
+                        decidedToAnimateGoingToSleep = null
+
+                        // We need to unset the listener. These are persistent for future animators
+                        keyguardView.animate().setListener(null)
+                    }
+                })
                 .start()
     }
 
