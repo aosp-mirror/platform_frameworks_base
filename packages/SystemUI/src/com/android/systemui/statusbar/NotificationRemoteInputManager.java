@@ -58,7 +58,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.dagger.StatusBarDependenciesModule;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry.EditedSuggestionInfo;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -203,7 +202,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                 ViewGroup actionGroup = (ViewGroup) parent;
                 buttonIndex = actionGroup.indexOfChild(view);
             }
-            // FIXME: get this for the new pipeline!
+            // TODO(b/204183781): get this from the current pipeline
             final int count = mEntryManager.getActiveNotificationsCount();
             final int rank = entry.getRanking().getRank();
 
@@ -265,7 +264,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationEntryManager notificationEntryManager,
-            NotifPipeline notifPipeline,
+            RemoteInputNotificationRebuilder rebuilder,
             Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             StatusBarStateController statusBarStateController,
             @Main Handler mainHandler,
@@ -284,7 +283,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        mRebuilder = new RemoteInputNotificationRebuilder(context);  // TODO: inject?
+        mRebuilder = rebuilder;
         if (!featureFlags.isNewNotifPipelineRenderingEnabled()) {
             mRemoteInputListener = createLegacyRemoteInputLifetimeExtender(mainHandler,
                     notificationEntryManager, smartReplyController);
@@ -320,6 +319,19 @@ public class NotificationRemoteInputManager implements Dumpable {
         });
     }
 
+    /** Add a listener for various remote input events.  Works with NEW pipeline only. */
+    public void setRemoteInputListener(@NonNull RemoteInputListener remoteInputListener) {
+        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            if (mRemoteInputListener != null) {
+                throw new IllegalStateException("mRemoteInputListener is already set");
+            }
+            mRemoteInputListener = remoteInputListener;
+            if (mRemoteInputController != null) {
+                mRemoteInputListener.setRemoteInputController(mRemoteInputController);
+            }
+        }
+    }
+
     @NonNull
     @VisibleForTesting
     protected LegacyRemoteInputLifetimeExtender createLegacyRemoteInputLifetimeExtender(
@@ -333,7 +345,9 @@ public class NotificationRemoteInputManager implements Dumpable {
     public void setUpWithCallback(Callback callback, RemoteInputController.Delegate delegate) {
         mCallback = callback;
         mRemoteInputController = new RemoteInputController(delegate, mRemoteInputUriController);
-        mRemoteInputListener.setRemoteInputController(mRemoteInputController);
+        if (mRemoteInputListener != null) {
+            mRemoteInputListener.setRemoteInputController(mRemoteInputController);
+        }
         // Register all stored callbacks from before the Controller was initialized.
         for (RemoteInputController.Callback cb : mControllerCallbacks) {
             mRemoteInputController.addCallback(cb);
@@ -366,7 +380,6 @@ public class NotificationRemoteInputManager implements Dumpable {
             }
         });
         if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
-            // FIXME: Don't forget to implement this in the coordinator!
             mSmartReplyController.setCallback((entry, reply) -> {
                 StatusBarNotification newSbn = mRebuilder.rebuildForSendingSmartReply(entry, reply);
                 mEntryManager.updateNotification(newSbn, null /* ranking */);
@@ -572,6 +585,14 @@ public class NotificationRemoteInputManager implements Dumpable {
         // OLD pipeline code ONLY; can assume implementation
         ((LegacyRemoteInputLifetimeExtender) mRemoteInputListener)
                 .mKeysKeptForRemoteInputHistory.remove(key);
+        cleanUpRemoteInputForUserRemoval(entry);
+    }
+
+    /**
+     * Disable remote input on the entry and remove the remote input view.
+     * This should be called when a user dismisses a notification that won't be lifetime extended.
+     */
+    public void cleanUpRemoteInputForUserRemoval(NotificationEntry entry) {
         if (isRemoteInputActive(entry)) {
             entry.mRemoteEditImeVisible = false;
             mRemoteInputController.removeRemoteInput(entry, null);
@@ -762,15 +783,21 @@ public class NotificationRemoteInputManager implements Dumpable {
         boolean showBouncerIfNecessary();
     }
 
+    /** An interface for listening to remote input events that relate to notification lifetime */
     public interface RemoteInputListener {
-        void onRemoteInputSent(NotificationEntry entry);
+        /** Called when remote input pending intent has been sent */
+        void onRemoteInputSent(@NonNull NotificationEntry entry);
 
+        /** Called when the notification shade becomes fully closed */
         void onPanelCollapsed();
 
-        boolean isNotificationKeptForRemoteInputHistory(String key);
+        /** @return whether lifetime of a notification is being extended by the listener */
+        boolean isNotificationKeptForRemoteInputHistory(@NonNull String key);
 
+        /** Called on user interaction to end lifetime extension for history */
         void releaseNotificationIfKeptForRemoteInputHistory(@NonNull NotificationEntry entry);
 
+        /** Called when the RemoteInputController is attached to the manager */
         void setRemoteInputController(@NonNull RemoteInputController remoteInputController);
     }
 
@@ -826,7 +853,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         }
 
         @Override
-        public void onRemoteInputSent(NotificationEntry entry) {
+        public void onRemoteInputSent(@NonNull NotificationEntry entry) {
             if (FORCE_REMOTE_INPUT_HISTORY
                     && isNotificationKeptForRemoteInputHistory(entry.getKey())) {
                 mNotificationLifetimeFinishedCallback.onSafeToRemove(entry.getKey());
@@ -858,7 +885,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         }
 
         @Override
-        public boolean isNotificationKeptForRemoteInputHistory(String key) {
+        public boolean isNotificationKeptForRemoteInputHistory(@NonNull String key) {
             return mKeysKeptForRemoteInputHistory.contains(key);
         }
 
