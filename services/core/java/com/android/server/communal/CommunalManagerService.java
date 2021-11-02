@@ -37,15 +37,10 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.database.ContentObserver;
-import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LaunchAfterAuthenticationActivity;
@@ -55,6 +50,7 @@ import com.android.server.wm.ActivityInterceptorCallback;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -70,9 +66,6 @@ public final class CommunalManagerService extends SystemService {
     private final ActivityTaskManagerInternal mAtmInternal;
     private final KeyguardManager mKeyguardManager;
     private final AtomicBoolean mCommunalViewIsShowing = new AtomicBoolean(false);
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
-    private final Set<String> mEnabledApps = new HashSet<>();
-    private final SettingsObserver mSettingsObserver;
     private final BinderService mBinderService;
 
     /**
@@ -130,7 +123,6 @@ public final class CommunalManagerService extends SystemService {
     public CommunalManagerService(Context context) {
         super(context);
         mContext = context;
-        mSettingsObserver = new SettingsObserver();
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
         mBinderService = new BinderService();
@@ -141,35 +133,28 @@ public final class CommunalManagerService extends SystemService {
         return mBinderService;
     }
 
-    @VisibleForTesting
-    void publishBinderServices() {
+    @Override
+    public void onStart() {
         publishBinderService(Context.COMMUNAL_MANAGER_SERVICE, mBinderService);
     }
 
     @Override
-    public void onStart() {
-        publishBinderServices();
-        mAtmInternal.registerActivityStartInterceptor(COMMUNAL_MODE_ORDERED_ID,
+    public void onBootPhase(int phase) {
+        if (phase != SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) return;
+        mAtmInternal.registerActivityStartInterceptor(
+                COMMUNAL_MODE_ORDERED_ID,
                 mActivityInterceptorCallback);
-
-        updateSelectedApps();
-        mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
-                Settings.Secure.COMMUNAL_MODE_PACKAGES), false, mSettingsObserver,
-                UserHandle.USER_SYSTEM);
     }
 
-    @VisibleForTesting
-    void updateSelectedApps() {
+    private Set<String> getUserEnabledApps() {
         final String encodedApps = Settings.Secure.getStringForUser(
                 mContext.getContentResolver(),
                 Settings.Secure.COMMUNAL_MODE_PACKAGES,
                 UserHandle.USER_SYSTEM);
 
-        mEnabledApps.clear();
-
-        if (!TextUtils.isEmpty(encodedApps)) {
-            mEnabledApps.addAll(Arrays.asList(encodedApps.split(DELIMITER)));
-        }
+        return TextUtils.isEmpty(encodedApps)
+                ? Collections.emptySet()
+                : new HashSet<>(Arrays.asList(encodedApps.split(DELIMITER)));
     }
 
     private boolean isAppAllowed(ApplicationInfo appInfo) {
@@ -177,37 +162,17 @@ public final class CommunalManagerService extends SystemService {
             return true;
         }
 
-        if (appInfo.isSystemApp() || appInfo.isUpdatedSystemApp()) {
-            if (DEBUG) Slog.d(TAG, "Allowlisted as system app: " + appInfo.packageName);
-            return isAppEnabledByUser(appInfo);
-        }
-
         return isChangeEnabled(ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT, appInfo)
-                && isAppEnabledByUser(appInfo);
+                && getUserEnabledApps().contains(appInfo.packageName);
     }
 
-    private boolean isAppEnabledByUser(ApplicationInfo appInfo) {
-        return mEnabledApps.contains(appInfo.packageName);
-    }
-
-    private boolean isChangeEnabled(long changeId, ApplicationInfo appInfo) {
+    private static boolean isChangeEnabled(long changeId, ApplicationInfo appInfo) {
         return CompatChanges.isChangeEnabled(changeId, appInfo.packageName, UserHandle.SYSTEM);
     }
 
     private boolean shouldIntercept(ActivityInfo activityInfo) {
         if (!mCommunalViewIsShowing.get() || !mKeyguardManager.isKeyguardLocked()) return false;
         return !isAppAllowed(activityInfo.applicationInfo);
-    }
-
-    private final class SettingsObserver extends ContentObserver {
-        SettingsObserver() {
-            super(mHandler);
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            mContext.getMainExecutor().execute(CommunalManagerService.this::updateSelectedApps);
-        }
     }
 
     private final class BinderService extends ICommunalManager.Stub {
