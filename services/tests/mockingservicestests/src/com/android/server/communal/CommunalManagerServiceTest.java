@@ -16,6 +16,7 @@
 
 package com.android.server.communal;
 
+import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
@@ -27,18 +28,22 @@ import static com.android.server.wm.ActivityInterceptorCallback.COMMUNAL_MODE_OR
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.app.communal.ICommunalManager;
 import android.app.compat.CompatChanges;
+import android.content.BroadcastReceiver;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.net.Uri;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
@@ -89,6 +94,7 @@ public class CommunalManagerServiceTest {
     private KeyguardManager mKeyguardManager;
 
     private ActivityInterceptorCallback mActivityInterceptorCallback;
+    private BroadcastReceiver mPackageReceiver;
     private ActivityInfo mAInfo;
     private ICommunalManager mBinder;
     private ContextWrapper mContextSpy;
@@ -97,6 +103,7 @@ public class CommunalManagerServiceTest {
     public final void setUp() {
         mMockingSession = mockitoSession()
                 .initMocks(this)
+                .spyStatic(CommunalManagerService.class)
                 .mockStatic(CompatChanges.class)
                 .strictness(Strictness.WARN)
                 .startMocking();
@@ -120,6 +127,12 @@ public class CommunalManagerServiceTest {
         verify(mAtmInternal).registerActivityStartInterceptor(eq(COMMUNAL_MODE_ORDERED_ID),
                 activityInterceptorCaptor.capture());
         mActivityInterceptorCallback = activityInterceptorCaptor.getValue();
+
+        ArgumentCaptor<BroadcastReceiver> packageReceiverCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mContextSpy).registerReceiverAsUser(packageReceiverCaptor.capture(),
+                eq(UserHandle.SYSTEM), any(), any(), any());
+        mPackageReceiver = packageReceiverCaptor.getValue();
 
         mBinder = mService.getBinderServiceInstance();
 
@@ -165,6 +178,11 @@ public class CommunalManagerServiceTest {
                 Settings.Secure.COMMUNAL_MODE_PACKAGES, packages, UserHandle.USER_SYSTEM);
     }
 
+    private String getAllowedPackages() {
+        return Settings.Secure.getStringForUser(mContextSpy.getContentResolver(),
+                Settings.Secure.COMMUNAL_MODE_PACKAGES, UserHandle.USER_SYSTEM);
+    }
+
     private void assertDoesIntercept() {
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         assertThat(mActivityInterceptorCallback.intercept(buildActivityInfo(intent))).isNotNull();
@@ -173,6 +191,10 @@ public class CommunalManagerServiceTest {
     private void assertDoesNotIntercept() {
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         assertThat(mActivityInterceptorCallback.intercept(buildActivityInfo(intent))).isNull();
+    }
+
+    private Intent createPackageIntent(String packageName, @Nullable String action) {
+        return new Intent(action, Uri.parse("package:" + packageName));
     }
 
     @Test
@@ -262,5 +284,51 @@ public class CommunalManagerServiceTest {
 
         allowPackages(TEST_PACKAGE_NAME);
         assertDoesIntercept();
+    }
+
+    @Test
+    public void testUpdateSettings_packageUninstalled() {
+        allowPackages("package1,package2");
+        assertThat(getAllowedPackages()).isEqualTo("package1,package2");
+
+        mPackageReceiver.onReceive(mContextSpy,
+                createPackageIntent("package1", ACTION_PACKAGE_REMOVED));
+
+        assertThat(getAllowedPackages()).isEqualTo("package2");
+    }
+
+    @Test
+    public void testUpdateSettings_nullAction_doesNothing() {
+        allowPackages("package1,package2");
+        assertThat(getAllowedPackages()).isEqualTo("package1,package2");
+
+        mPackageReceiver.onReceive(mContextSpy,
+                createPackageIntent("package1", null));
+
+        assertThat(getAllowedPackages()).isEqualTo("package1,package2");
+    }
+
+    @Test
+    public void testUpdateSettings_invalidPackage_doesNothing() {
+        allowPackages("package1,package2");
+        assertThat(getAllowedPackages()).isEqualTo("package1,package2");
+
+        mPackageReceiver.onReceive(mContextSpy,
+                createPackageIntent("package3", ACTION_PACKAGE_REMOVED));
+
+        assertThat(getAllowedPackages()).isEqualTo("package1,package2");
+    }
+
+    @Test
+    public void testUpdateSettings_onBoot() {
+        allowPackages("package1,package2");
+        assertThat(getAllowedPackages()).isEqualTo("package1,package2");
+
+        when(CommunalManagerService.isPackageInstalled(eq("package1"), any())).thenReturn(true);
+        when(CommunalManagerService.isPackageInstalled(eq("package2"), any())).thenReturn(false);
+
+        mService.onBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
+
+        assertThat(getAllowedPackages()).isEqualTo("package1");
     }
 }

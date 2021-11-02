@@ -17,10 +17,12 @@
 package com.android.server.communal;
 
 import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
+import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 
 import static com.android.server.wm.ActivityInterceptorCallback.COMMUNAL_MODE_ORDERED_ID;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
@@ -31,16 +33,21 @@ import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.Overridable;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LaunchAfterAuthenticationActivity;
@@ -67,6 +74,8 @@ public final class CommunalManagerService extends SystemService {
     private final KeyguardManager mKeyguardManager;
     private final AtomicBoolean mCommunalViewIsShowing = new AtomicBoolean(false);
     private final BinderService mBinderService;
+    private final PackageReceiver mPackageReceiver;
+    private final PackageManager mPackageManager;
 
     /**
      * This change id is used to annotate packages which are allowed to run in communal mode.
@@ -123,9 +132,11 @@ public final class CommunalManagerService extends SystemService {
     public CommunalManagerService(Context context) {
         super(context);
         mContext = context;
+        mPackageManager = mContext.getPackageManager();
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
         mBinderService = new BinderService();
+        mPackageReceiver = new PackageReceiver(mContext);
     }
 
     @VisibleForTesting
@@ -144,6 +155,13 @@ public final class CommunalManagerService extends SystemService {
         mAtmInternal.registerActivityStartInterceptor(
                 COMMUNAL_MODE_ORDERED_ID,
                 mActivityInterceptorCallback);
+        mPackageReceiver.register();
+        removeUninstalledPackagesFromSettings();
+    }
+
+    @Override
+    public void finalize() {
+        mPackageReceiver.unregister();
     }
 
     private Set<String> getUserEnabledApps() {
@@ -155,6 +173,35 @@ public final class CommunalManagerService extends SystemService {
         return TextUtils.isEmpty(encodedApps)
                 ? Collections.emptySet()
                 : new HashSet<>(Arrays.asList(encodedApps.split(DELIMITER)));
+    }
+
+    private void removeUninstalledPackagesFromSettings() {
+        for (String packageName : getUserEnabledApps()) {
+            if (!isPackageInstalled(packageName, mPackageManager)) {
+                removePackageFromSettings(packageName);
+            }
+        }
+    }
+
+    private void removePackageFromSettings(String packageName) {
+        Set<String> enabledPackages = getUserEnabledApps();
+        if (enabledPackages.remove(packageName)) {
+            Settings.Secure.putStringForUser(
+                    mContext.getContentResolver(),
+                    Settings.Secure.COMMUNAL_MODE_PACKAGES,
+                    String.join(DELIMITER, enabledPackages),
+                    UserHandle.USER_SYSTEM);
+        }
+    }
+
+    @VisibleForTesting
+    static boolean isPackageInstalled(String packageName, PackageManager packageManager) {
+        if (packageManager == null) return false;
+        try {
+            return packageManager.getPackageInfo(packageName, 0) != null;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     private boolean isAppAllowed(ApplicationInfo appInfo) {
@@ -186,6 +233,51 @@ public final class CommunalManagerService extends SystemService {
                     Manifest.permission.WRITE_COMMUNAL_STATE
                             + "permission required to modify communal state.");
             mCommunalViewIsShowing.set(isShowing);
+        }
+    }
+
+    /**
+     * A {@link BroadcastReceiver} that listens on package removed events and updates any stored
+     * package state in Settings.
+     */
+    private final class PackageReceiver extends BroadcastReceiver {
+        private final Context mContext;
+        private final IntentFilter mIntentFilter;
+
+        private PackageReceiver(Context context) {
+            mContext = context;
+            mIntentFilter = new IntentFilter();
+            mIntentFilter.addAction(ACTION_PACKAGE_REMOVED);
+            mIntentFilter.addDataScheme("package");
+        }
+
+        private void register() {
+            mContext.registerReceiverAsUser(
+                    this,
+                    UserHandle.SYSTEM,
+                    mIntentFilter,
+                    /* broadcastPermission= */null,
+                    /* scheduler= */ null);
+        }
+
+        private void unregister() {
+            mContext.unregisterReceiver(this);
+        }
+
+        @Override
+        public void onReceive(@NonNull final Context context, @NonNull final Intent intent) {
+            final Uri data = intent.getData();
+            if (data == null) {
+                Slog.w(TAG, "Failed to get package name in package receiver");
+                return;
+            }
+            final String packageName = data.getSchemeSpecificPart();
+            final String action = intent.getAction();
+            if (ACTION_PACKAGE_REMOVED.equals(action)) {
+                removePackageFromSettings(packageName);
+            } else {
+                Slog.w(TAG, "Unsupported action in package receiver: " + action);
+            }
         }
     }
 }
