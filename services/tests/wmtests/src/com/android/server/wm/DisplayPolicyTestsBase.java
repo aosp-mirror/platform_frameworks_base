@@ -45,7 +45,6 @@ import android.testing.TestableResources;
 import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
-import android.view.Gravity;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.R;
@@ -94,10 +93,7 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
                 DISPLAY_WIDTH, DISPLAY_HEIGHT, shortSizeDp, longSizeDp);
         mDisplayPolicy.onConfigurationChanged();
 
-        mStatusBarWindow.mAttrs.gravity = Gravity.TOP;
         addWindow(mStatusBarWindow);
-
-        mNavBarWindow.mAttrs.gravity = Gravity.BOTTOM;
         addWindow(mNavBarWindow);
 
         // Update source frame and visibility of insets providers.

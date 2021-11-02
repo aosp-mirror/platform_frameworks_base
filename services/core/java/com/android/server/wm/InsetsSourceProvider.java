@@ -236,12 +236,12 @@ class InsetsSourceProvider {
     }
 
     /** @return A new source computed by the specified window frame in the given display frames. */
-    InsetsSource createSimulatedSource(DisplayFrames displayFrames, WindowFrames windowFrames) {
+    InsetsSource createSimulatedSource(DisplayFrames displayFrames, Rect winFrame) {
         // Don't copy visible frame because it might not be calculated in the provided display
         // frames and it is not significant for this usage.
         final InsetsSource source = new InsetsSource(mSource.getType());
         source.setVisible(mSource.isVisible());
-        mTmpRect.set(windowFrames.mFrame);
+        mTmpRect.set(winFrame);
         if (mFrameProvider != null) {
             mFrameProvider.accept(displayFrames, mWin, mTmpRect);
         }
