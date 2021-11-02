@@ -32,6 +32,7 @@ import dagger.Provides
 @Module
 object SensitiveContentCoordinatorModule {
     @Provides
+    @JvmStatic
     @CoordinatorScope
     fun provideCoordinator(
         dynamicPrivacyController: DynamicPrivacyController,

@@ -172,5 +172,16 @@ public final class TunerUtils {
         }
     }
 
+    /**
+     * Checks the accessibility of a resource instance.
+     *
+     * @throws IllegalStateException if the resource has already been inaccessible.
+     */
+    public static void checkResourceAccessible(String name, boolean accessible) {
+        if (!accessible) {
+            throw new IllegalStateException(name + " is inaccessible");
+        }
+    }
+
     private TunerUtils() {}
 }

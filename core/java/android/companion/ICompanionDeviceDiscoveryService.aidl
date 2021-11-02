@@ -28,4 +28,6 @@ oneway interface ICompanionDeviceDiscoveryService {
         in String callingPackage,
         in IFindDeviceCallback findCallback,
         in AndroidFuture<String> serviceCallback);
+
+    void onAssociationCreated();
 }

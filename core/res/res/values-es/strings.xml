@@ -728,10 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permite que la aplicación lea y modifique la configuración de No molestar."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"iniciar uso de permiso de visualización"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite que el titular inicie el uso de permisos de una aplicación. Las aplicaciones normales no deberían necesitar nunca este permiso."</string>
-    <!-- no translation found for permlab_startViewAppFeatures (7955084203185903001) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewAppFeatures (7207240860165206107) -->
-    <skip />
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ver funciones de una aplicación"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permite que el titular vea la información de las funciones de una aplicación."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"acceder a datos de sensores a una frecuencia de muestreo alta"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permite que la aplicación consulte datos de sensores a una frecuencia superior a 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Establecimiento de reglas de contraseña"</string>

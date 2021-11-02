@@ -20,6 +20,7 @@ import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
+import com.android.systemui.util.traceSection
 
 /**
  * Converts a notif list (the output of the ShadeListBuilder) into a NodeSpec, an abstract
@@ -36,7 +37,7 @@ class NodeSpecBuilder(
     fun buildNodeSpec(
         rootController: NodeController,
         notifList: List<ListEntry>
-    ): NodeSpec {
+    ): NodeSpec = traceSection("NodeSpecBuilder.buildNodeSpec") {
         val root = NodeSpecImpl(null, rootController)
         var currentSection: NotifSection? = null
         val prevSections = mutableSetOf<NotifSection?>()

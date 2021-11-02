@@ -199,7 +199,7 @@
     <string name="tts_play_example_summary" msgid="634044730710636383">"အသံပေါင်းစပ်ခြင်းအတွက် တိုတောင်းသောသရုပ်ပြမှုကို ပြခြင်း"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"အသံဒေတာများကို ထည့်သွင်းခြင်း"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"စကားသံပေါင်းစပ်မှုအတွက်လိုအပ်သောအသံဒေတာအား ထည့်သွင်းမည်"</string>
-    <string name="tts_engine_security_warning" msgid="3372432853837988146">"ဤစကားသံပေါင်းစပ်အင်ဂျင်အားအသုံးပြုရာရာတွင် သင့်ကိုယ်ရေးအချက်အလက်များဖြစ်သော စကားဝှက်များနှင့် ကရက်ဒစ်ကဒ်နံပါတ်စသည်တို့အပါအဝင် သင်ပြောဆိုသောစာသားများအားလုံးကို ရယူသွားမည်ဖြစ်သည်။ <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>အင်ဂျင်မှ လာပါသည်။ ဤစကားသံပေါင်းစပ်အင်ဂျင်ကို အသုံးပြုမည်လား?"</string>
+    <string name="tts_engine_security_warning" msgid="3372432853837988146">"ဤစကားသံပေါင်းစပ်စနစ်အားအသုံးပြုရာရာတွင် သင့်ကိုယ်ရေးအချက်အလက်များဖြစ်သော စကားဝှက်များနှင့် ကရက်ဒစ်ကတ်နံပါတ်စသည်တို့အပါအဝင် သင်ပြောဆိုသောစာသားများအားလုံးကို ရယူသွားမည်ဖြစ်သည်။ ဤစနစ်သည် <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> မှ လာပါသည်။ ဤစကားသံပေါင်းစပ်စနစ်ကို အသုံးပြုမလား။"</string>
     <string name="tts_engine_network_required" msgid="8722087649733906851">"ဤဘာသာစကားသည် စာသားမှ အသံထွက်ရန် အလုပ်လုပ်သော ကွန်ရက်ချိတ်ဆက်မှု လိုအပ်သည်။"</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"ဤသည်မှာ အသံတုလုပ်ခြင်း ၏ နမူနာတစ်ခုဖြစ်သည်။"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"လက်ရှိဘာသာစကားအခြေအနေ"</string>
@@ -519,7 +519,7 @@
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"ရနိုင်သောထည့်သွင်းရန်နည်းလမ်းများ"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"သတ်မှတ် ဘာသာစကားများကို သုံးပါ"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>အတွက် ဆက်တင်းများဖွင့်ရန် မအောင်မြင်ပါ။"</string>
-    <string name="ime_security_warning" msgid="6547562217880551450">"ဤထည့်သွင်းမှုနည်းလမ်းမှာ သင့်ကိုယ်ရေးအချက်အလက်များဖြစ်သော စကားဝှက်များနှင့် ကရက်ဒစ်ကဒ်နံပါတ်စသည်တို့ကို ရယူသွားမည်ဖြစ်သည်။ <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>အပလီကေးရှင်းမှလာပါသည်။ ဤထည့်သွင်းမှုနည်းလမ်းကို အသုံးပြုမည်လား?"</string>
+    <string name="ime_security_warning" msgid="6547562217880551450">"ဤထည့်သွင်းမှုနည်းလမ်းမှာ သင့်ကိုယ်ရေးအချက်အလက်များဖြစ်သော စကားဝှက်များနှင့် ခရက်ဒစ်ကတ်နံပါတ်စသည်တို့ကို ရယူသွားမည်ဖြစ်သည်။ ဤ <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> အပလီကေးရှင်းမှလာပါသည်။ ဤထည့်သွင်းမှုနည်းလမ်းကို အသုံးပြုမလား။"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"မှတ်ချက် − ပြန်လည်စတင်ပြီးနောက် သင့်ဖုန်းကိုလော့ခ်မဖွင့်မချင်း ဤအက်ပ်ကို အသုံးပြု၍မရပါ"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS မှတ်ပုံတင်ခြင်း အခြေအနေ"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"မှတ်ပုံတင်ထားသည်"</string>

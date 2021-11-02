@@ -1034,4 +1034,27 @@ public interface InputConnection {
     default boolean setImeConsumesInput(boolean imeConsumesInput) {
         return false;
     }
+
+    /**
+     * Called by the system when it needs to take a snapshot of multiple text-related data in an
+     * atomic manner.
+     *
+     * <p><strong>Editor authors</strong>: Supporting this method is strongly encouraged. Atomically
+     * taken {@link TextSnapshot} is going to be really helpful for the system when optimizing IPCs
+     * in a safe and deterministic manner.  Return {@code null} if an atomically taken
+     * {@link TextSnapshot} is unavailable.  The system continues supporting such a scenario
+     * gracefully.</p>
+     *
+     * <p><strong>IME authors</strong>: Currently IMEs cannot call this method directly and always
+     * receive {@code null} as the result.</p>
+     *
+     * @return {@code null} if {@link TextSnapshot} is unavailable and/or this API is called from
+     *         IMEs.
+     */
+    @Nullable
+    default TextSnapshot takeSnapshot() {
+        // Returning null by default because the composing text range cannot be retrieved from
+        // existing APIs.
+        return null;
+    }
 }

@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.tv.tuner.Constant;
 import android.hardware.tv.tuner.Constant64Bit;
 import android.hardware.tv.tuner.FrontendScanType;
@@ -37,6 +38,8 @@ import android.media.tv.tuner.filter.Filter;
 import android.media.tv.tuner.filter.Filter.Subtype;
 import android.media.tv.tuner.filter.Filter.Type;
 import android.media.tv.tuner.filter.FilterCallback;
+import android.media.tv.tuner.filter.SharedFilter;
+import android.media.tv.tuner.filter.SharedFilterCallback;
 import android.media.tv.tuner.filter.TimeFilter;
 import android.media.tv.tuner.frontend.Atsc3PlpInfo;
 import android.media.tv.tuner.frontend.FrontendInfo;
@@ -622,6 +625,7 @@ public class Tuner implements AutoCloseable  {
     private native int nativeCloseFrontend(int handle);
     private native int nativeClose();
 
+    private static native SharedFilter nativeOpenSharedFilter(String token);
 
     /**
      * Listener for resource lost.
@@ -1570,6 +1574,37 @@ public class Tuner implements AutoCloseable  {
         DvrPlayback dvr = nativeOpenDvrPlayback(bufferSize);
         dvr.setListener(executor, l);
         return dvr;
+    }
+
+    /**
+     * Open a shared filter instance.
+     *
+     * @param context the context of the caller.
+     * @param sharedFilterToken the token of the shared filter being opened.
+     * @param executor the executor on which callback will be invoked.
+     * @param cb the listener to receive notifications from shared filter.
+     * @return the opened shared filter object. {@code null} if the operation failed.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_SHARED_FILTER)
+    @Nullable
+    static public SharedFilter openSharedFilter(@NonNull Context context,
+            @NonNull String sharedFilterToken, @CallbackExecutor @NonNull Executor executor,
+            @NonNull SharedFilterCallback cb) {
+        Objects.requireNonNull(sharedFilterToken, "sharedFilterToken must not be null");
+        Objects.requireNonNull(executor, "executor must not be null");
+        Objects.requireNonNull(cb, "SharedFilterCallback must not be null");
+
+        if (context.checkCallingOrSelfPermission(
+                    android.Manifest.permission.ACCESS_TV_SHARED_FILTER)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Caller must have ACCESS_TV_SHAREDFILTER permission.");
+        }
+
+        SharedFilter filter = nativeOpenSharedFilter(sharedFilterToken);
+        if (filter != null) {
+            filter.setCallback(cb, executor);
+        }
+        return filter;
     }
 
     private boolean requestDemux() {

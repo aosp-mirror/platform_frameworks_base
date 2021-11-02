@@ -20,6 +20,7 @@ package android {
     field public static final String ACCESS_SURFACE_FLINGER = "android.permission.ACCESS_SURFACE_FLINGER";
     field public static final String ACCESS_TUNED_INFO = "android.permission.ACCESS_TUNED_INFO";
     field public static final String ACCESS_TV_DESCRAMBLER = "android.permission.ACCESS_TV_DESCRAMBLER";
+    field public static final String ACCESS_TV_SHARED_FILTER = "android.permission.ACCESS_TV_SHARED_FILTER";
     field public static final String ACCESS_TV_TUNER = "android.permission.ACCESS_TV_TUNER";
     field public static final String ACCESS_VIBRATOR_STATE = "android.permission.ACCESS_VIBRATOR_STATE";
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
@@ -383,6 +384,7 @@ package android {
     field public static final int config_systemNotificationIntelligence = 17039413; // 0x1040035
     field public static final int config_systemShell = 17039402; // 0x104002a
     field public static final int config_systemSpeechRecognizer = 17039406; // 0x104002e
+    field public static final int config_systemSupervision;
     field public static final int config_systemTelevisionNotificationHandler = 17039409; // 0x1040031
     field public static final int config_systemTextIntelligence = 17039414; // 0x1040036
     field public static final int config_systemUi = 17039418; // 0x104003a
@@ -485,6 +487,8 @@ package android.app {
     field public static final String OPSTR_AUTO_REVOKE_PERMISSIONS_IF_UNUSED = "android:auto_revoke_permissions_if_unused";
     field public static final String OPSTR_BIND_ACCESSIBILITY_SERVICE = "android:bind_accessibility_service";
     field public static final String OPSTR_CHANGE_WIFI_STATE = "android:change_wifi_state";
+    field public static final String OPSTR_ESTABLISH_VPN_MANAGER = "android:establish_vpn_manager";
+    field public static final String OPSTR_ESTABLISH_VPN_SERVICE = "android:establish_vpn_service";
     field public static final String OPSTR_GET_ACCOUNTS = "android:get_accounts";
     field public static final String OPSTR_GPS = "android:gps";
     field public static final String OPSTR_INSTANT_APP_START_FOREGROUND = "android:instant_app_start_foreground";
@@ -6125,6 +6129,7 @@ package android.media.tv.tuner {
     method @Nullable public android.media.tv.tuner.filter.Filter openFilter(int, int, long, @Nullable java.util.concurrent.Executor, @Nullable android.media.tv.tuner.filter.FilterCallback);
     method @Nullable public android.media.tv.tuner.Lnb openLnb(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.LnbCallback);
     method @Nullable public android.media.tv.tuner.Lnb openLnbByName(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.LnbCallback);
+    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_SHARED_FILTER) public static android.media.tv.tuner.filter.SharedFilter openSharedFilter(@NonNull android.content.Context, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.filter.SharedFilterCallback);
     method @Nullable public android.media.tv.tuner.filter.TimeFilter openTimeFilter();
     method public int scan(@NonNull android.media.tv.tuner.frontend.FrontendSettings, int, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.ScanCallback);
     method public int setLnaEnabled(boolean);
@@ -6333,10 +6338,12 @@ package android.media.tv.tuner.filter {
   public class Filter implements java.lang.AutoCloseable {
     method public void close();
     method public int configure(@NonNull android.media.tv.tuner.filter.FilterConfiguration);
+    method @Nullable public String createSharedFilter();
     method public int flush();
     method @Deprecated public int getId();
     method public long getIdLong();
     method public int read(@NonNull byte[], long, long);
+    method public void releaseSharedFilter(@NonNull String);
     method public int setDataSource(@Nullable android.media.tv.tuner.filter.Filter);
     method public int setMonitorEventMask(int);
     method public int start();
@@ -6584,6 +6591,20 @@ package android.media.tv.tuner.filter {
 
   public abstract class Settings {
     method public int getType();
+  }
+
+  public final class SharedFilter implements java.lang.AutoCloseable {
+    method public void close();
+    method public int flush();
+    method public int read(@NonNull byte[], long, long);
+    method public int start();
+    method public int stop();
+    field public static final int STATUS_INACCESSIBLE = 128; // 0x80
+  }
+
+  public interface SharedFilterCallback {
+    method public void onFilterEvent(@NonNull android.media.tv.tuner.filter.SharedFilter, @NonNull android.media.tv.tuner.filter.FilterEvent[]);
+    method public void onFilterStatusChanged(@NonNull android.media.tv.tuner.filter.SharedFilter, int);
   }
 
   public class TemiEvent extends android.media.tv.tuner.filter.FilterEvent {

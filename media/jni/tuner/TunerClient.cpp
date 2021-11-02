@@ -33,8 +33,10 @@ int32_t TunerClient::mTunerVersion;
 /////////////// TunerClient ///////////////////////
 
 TunerClient::TunerClient() {
-    ::ndk::SpAIBinder binder(AServiceManager_getService("media.tuner"));
-    mTunerService = ITunerService::fromBinder(binder);
+    if (mTunerService == nullptr) {
+        ::ndk::SpAIBinder binder(AServiceManager_getService("media.tuner"));
+        mTunerService = ITunerService::fromBinder(binder);
+    }
     if (mTunerService == nullptr) {
         ALOGE("Failed to get tuner service");
     } else {
@@ -43,8 +45,6 @@ TunerClient::TunerClient() {
 }
 
 TunerClient::~TunerClient() {
-    mTunerVersion = 0;
-    mTunerService = nullptr;
 }
 
 vector<int32_t> TunerClient::getFrontendIds() {
@@ -158,6 +158,28 @@ sp<LnbClient> TunerClient::openLnbByName(string lnbName) {
             return nullptr;
         }
         return new LnbClient(tunerLnb);
+    }
+
+    return nullptr;
+}
+
+sp<FilterClient> TunerClient::openSharedFilter(const string& filterToken,
+                                               sp<FilterClientCallback> cb) {
+    if (cb == nullptr) {
+        return nullptr;
+    }
+
+    if (mTunerService != nullptr) {
+        shared_ptr<ITunerFilter> tunerFilter;
+        shared_ptr<TunerFilterCallback> callback =
+                ::ndk::SharedRefBase::make<TunerFilterCallback>(cb);
+        Status s = mTunerService->openSharedFilter(filterToken, callback, &tunerFilter);
+        if (!s.isOk()) {
+            return nullptr;
+        }
+        DemuxFilterType type;
+        tunerFilter->getFilterType(&type);
+        return new FilterClient(type, tunerFilter);
     }
 
     return nullptr;

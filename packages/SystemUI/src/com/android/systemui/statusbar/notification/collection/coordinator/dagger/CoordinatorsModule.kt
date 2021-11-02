@@ -30,6 +30,7 @@ import javax.inject.Scope
 @Module(subcomponents = [CoordinatorsSubcomponent::class])
 object CoordinatorsModule {
     @SysUISingleton
+    @JvmStatic
     @Provides
     fun notifCoordinators(factory: CoordinatorsSubcomponent.Factory): NotifCoordinators =
             factory.create().notifCoordinators

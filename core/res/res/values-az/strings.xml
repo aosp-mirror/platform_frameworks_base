@@ -543,10 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Tətbiqə yaxınlıqdakı Bluetooth cihazlarında reklam etmək imkanı verir"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"yaxınlıqdakı Ultra Genişzolaqlı cihazları arasında nisbi mövqeyi təyin etmək"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Tətbiqə yaxınlıqdakı Ultra Genişzolaqlı cihazları arasında nisbi mövqeyi təyin etməyə icazə verin"</string>
-    <!-- no translation found for permlab_nearby_wifi_devices (392774237063608500) -->
-    <skip />
-    <!-- no translation found for permdesc_nearby_wifi_devices (3054307728646332906) -->
-    <skip />
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"yaxınlıqdakı Wi-Fi cihazları ilə əlaqə qurmaq"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Tətbiqə yaxınlıqdakı Wi-Fi cihazlarında reklam etmək, onlara qoşulmaq və nisbi mövqeyini təyin etmək icazəsi verir"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Tərcih edilən NFC ödəniş xidməti məlumatı"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tətbiqə qeydiyyatdan keçmiş yardım və marşrut təyinatı kimi tərcih edilən nfc ödəniş xidməti məlumatını əldə etmək icazəsi verir."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communication\'ı kontrol et"</string>

@@ -94,6 +94,7 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
         ))
 
         `when`(cvh.cws.ci.controlId).thenReturn(ID)
+        `when`(cvh.cws.control?.isAuthRequired()).thenReturn(true)
         action = spy(coordinator.Action(ID, {}, false))
         doReturn(action).`when`(coordinator).createAction(any(), any(), anyBoolean())
     }
@@ -103,7 +104,7 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
         `when`(keyguardStateController.isShowing()).thenReturn(false)
 
         coordinator.toggle(cvh, "", true)
-        verify(coordinator).bouncerOrRun(action)
+        verify(coordinator).bouncerOrRun(action, true /*authRequired */)
         verify(action).invoke()
     }
 
@@ -113,7 +114,7 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
         `when`(keyguardStateController.isUnlocked()).thenReturn(false)
 
         coordinator.toggle(cvh, "", true)
-        verify(coordinator).bouncerOrRun(action)
+        verify(coordinator).bouncerOrRun(action, true /*authRequired */)
         verify(activityStarter).dismissKeyguardThenExecute(any(), any(), anyBoolean())
         verify(action, never()).invoke()
 
@@ -125,6 +126,17 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
         `when`(keyguardStateController.isUnlocked()).thenReturn(true)
         reset(action)
         coordinator.runPendingAction(ID)
+        verify(action).invoke()
+    }
+
+    @Test
+    fun testToggleRunsWhenLockedAndAuthNotRequired() {
+        `when`(keyguardStateController.isShowing()).thenReturn(true)
+        `when`(keyguardStateController.isUnlocked()).thenReturn(false)
+        `when`(cvh.cws.control?.isAuthRequired()).thenReturn(false)
+
+        coordinator.toggle(cvh, "", true)
+        verify(coordinator).bouncerOrRun(action, false /* authRequired */)
         verify(action).invoke()
     }
 }

@@ -30,6 +30,7 @@ import static com.android.systemui.statusbar.notification.collection.listbuilder
 
 import android.annotation.MainThread;
 import android.annotation.Nullable;
+import android.os.Trace;
 import android.util.ArrayMap;
 
 import androidx.annotation.NonNull;
@@ -332,6 +333,7 @@ public class ShadeListBuilder implements Dumpable {
      * if we detect that behavior, we should crash instantly.
      */
     private void buildList() {
+        Trace.beginSection("ShadeListBuilder.buildList");
         mPipelineState.requireIsBefore(STATE_BUILD_STARTED);
         mPipelineState.setState(STATE_BUILD_STARTED);
 
@@ -385,9 +387,11 @@ public class ShadeListBuilder implements Dumpable {
 
         // Step 8: Dispatch the new list, first to any listeners and then to the view layer
         dispatchOnBeforeRenderList(mReadOnlyNotifList);
+        Trace.beginSection("ShadeListBuilder.onRenderList");
         if (mOnRenderListListener != null) {
             mOnRenderListListener.onRenderList(mReadOnlyNotifList);
         }
+        Trace.endSection();
 
         // Step 9: We're done!
         mLogger.logEndBuildList(
@@ -399,9 +403,11 @@ public class ShadeListBuilder implements Dumpable {
         }
         mPipelineState.setState(STATE_IDLE);
         mIterationCount++;
+        Trace.endSection();
     }
 
     private void notifySectionEntriesUpdated() {
+        Trace.beginSection("ShadeListBuilder.notifySectionEntriesUpdated");
         NotifSection currentSection = null;
         mTempSectionMembers.clear();
         for (int i = 0; i < mNotifList.size(); i++) {
@@ -415,6 +421,7 @@ public class ShadeListBuilder implements Dumpable {
             }
             mTempSectionMembers.add(currentEntry);
         }
+        Trace.endSection();
     }
 
     /**
@@ -456,6 +463,7 @@ public class ShadeListBuilder implements Dumpable {
             Collection<? extends ListEntry> entries,
             List<ListEntry> out,
             List<NotifFilter> filters) {
+        Trace.beginSection("ShadeListBuilder.filterNotifs");
         final long now = mSystemClock.uptimeMillis();
         for (ListEntry entry : entries)  {
             if (entry instanceof GroupEntry) {
@@ -487,9 +495,11 @@ public class ShadeListBuilder implements Dumpable {
                 }
             }
         }
+        Trace.endSection();
     }
 
     private void groupNotifs(List<ListEntry> entries, List<ListEntry> out) {
+        Trace.beginSection("ShadeListBuilder.groupNotifs");
         for (ListEntry listEntry : entries) {
             // since grouping hasn't happened yet, all notifs are NotificationEntries
             NotificationEntry entry = (NotificationEntry) listEntry;
@@ -545,12 +555,14 @@ public class ShadeListBuilder implements Dumpable {
                 }
             }
         }
+        Trace.endSection();
     }
 
     private void stabilizeGroupingNotifs(List<ListEntry> topLevelList) {
         if (mNotifStabilityManager == null) {
             return;
         }
+        Trace.beginSection("ShadeListBuilder.stabilizeGroupingNotifs");
 
         for (int i = 0; i < topLevelList.size(); i++) {
             final ListEntry tle = topLevelList.get(i);
@@ -576,6 +588,7 @@ public class ShadeListBuilder implements Dumpable {
                 }
             }
         }
+        Trace.endSection();
     }
 
     /**
@@ -608,6 +621,7 @@ public class ShadeListBuilder implements Dumpable {
     }
 
     private void promoteNotifs(List<ListEntry> list) {
+        Trace.beginSection("ShadeListBuilder.promoteNotifs");
         for (int i = 0; i < list.size(); i++) {
             final ListEntry tle = list.get(i);
 
@@ -626,9 +640,11 @@ public class ShadeListBuilder implements Dumpable {
                 });
             }
         }
+        Trace.endSection();
     }
 
     private void pruneIncompleteGroups(List<ListEntry> shadeList) {
+        Trace.beginSection("ShadeListBuilder.pruneIncompleteGroups");
         for (int i = 0; i < shadeList.size(); i++) {
             final ListEntry tle = shadeList.get(i);
 
@@ -683,6 +699,7 @@ public class ShadeListBuilder implements Dumpable {
                 }
             }
         }
+        Trace.endSection();
     }
 
     /**
@@ -749,6 +766,7 @@ public class ShadeListBuilder implements Dumpable {
     }
 
     private void sortListAndNotifySections() {
+        Trace.beginSection("ShadeListBuilder.sortListAndNotifySections");
         // Assign sections to top-level elements and sort their children
         for (ListEntry entry : mNotifList) {
             NotifSection section = applySections(entry);
@@ -766,6 +784,7 @@ public class ShadeListBuilder implements Dumpable {
 
         // notify sections since the list is sorted now
         notifySectionEntriesUpdated();
+        Trace.endSection();
     }
 
     private void freeEmptyGroups() {
@@ -1016,27 +1035,35 @@ public class ShadeListBuilder implements Dumpable {
     }
 
     private void dispatchOnBeforeTransformGroups(List<ListEntry> entries) {
+        Trace.beginSection("ShadeListBuilder.dispatchOnBeforeTransformGroups");
         for (int i = 0; i < mOnBeforeTransformGroupsListeners.size(); i++) {
             mOnBeforeTransformGroupsListeners.get(i).onBeforeTransformGroups(entries);
         }
+        Trace.endSection();
     }
 
     private void dispatchOnBeforeSort(List<ListEntry> entries) {
+        Trace.beginSection("ShadeListBuilder.dispatchOnBeforeSort");
         for (int i = 0; i < mOnBeforeSortListeners.size(); i++) {
             mOnBeforeSortListeners.get(i).onBeforeSort(entries);
         }
+        Trace.endSection();
     }
 
     private void dispatchOnBeforeFinalizeFilter(List<ListEntry> entries) {
+        Trace.beginSection("ShadeListBuilder.dispatchOnBeforeFinalizeFilter");
         for (int i = 0; i < mOnBeforeFinalizeFilterListeners.size(); i++) {
             mOnBeforeFinalizeFilterListeners.get(i).onBeforeFinalizeFilter(entries);
         }
+        Trace.endSection();
     }
 
     private void dispatchOnBeforeRenderList(List<ListEntry> entries) {
+        Trace.beginSection("ShadeListBuilder.dispatchOnBeforeRenderList");
         for (int i = 0; i < mOnBeforeRenderListListeners.size(); i++) {
             mOnBeforeRenderListListeners.get(i).onBeforeRenderList(entries);
         }
+        Trace.endSection();
     }
 
     @Override

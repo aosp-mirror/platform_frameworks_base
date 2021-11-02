@@ -554,7 +554,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Всегда спрашивать"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Пока вы не отключите"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Только что"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Встроенный динамик"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Встроен. динамик"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Этот смартфон"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Ошибка подключения. Выключите и снова включите устройство."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Проводное аудиоустройство"</string>

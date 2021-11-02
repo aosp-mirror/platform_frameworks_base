@@ -58,13 +58,13 @@ import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Range;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+import com.android.net.module.util.BinderUtils;
 import com.android.net.module.util.NetdUtils;
 import com.android.net.module.util.PermissionUtils;
 
@@ -1056,9 +1056,9 @@ public class IpSecService extends IIpSecService.Stub {
 
     public void systemReady() {
         if (isNetdAlive()) {
-            Slog.d(TAG, "IpSecService is ready");
+            Log.d(TAG, "IpSecService is ready");
         } else {
-            Slog.wtf(TAG, "IpSecService not ready: failed to connect to NetD Native Service!");
+            Log.wtf(TAG, "IpSecService not ready: failed to connect to NetD Native Service!");
         }
     }
 
@@ -1332,7 +1332,7 @@ public class IpSecService extends IIpSecService.Stub {
             final INetd netd = mSrvConfig.getNetdInstance();
             netd.ipSecAddTunnelInterface(intfName, localAddr, remoteAddr, ikey, okey, resourceId);
 
-            Binder.withCleanCallingIdentity(() -> {
+            BinderUtils.withCleanCallingIdentity(() -> {
                 NetdUtils.setInterfaceUp(netd, intfName);
             });
 

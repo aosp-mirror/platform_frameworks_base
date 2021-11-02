@@ -154,6 +154,9 @@ class AssociationRequestsProcessor {
                     if (err == null) {
                         mService.createAssociationInternal(
                                 userId, deviceAddress, callingPackage, deviceProfile);
+                        mServiceConnectors.forUser(userId).post(service -> {
+                            service.onAssociationCreated();
+                        });
                     } else {
                         Slog.e(TAG, "Failed to discover device(s)", err);
                         callback.onFailure("No devices found: " + err.getMessage());

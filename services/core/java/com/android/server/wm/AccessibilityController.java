@@ -2182,15 +2182,15 @@ final class AccessibilityController {
                 int callingUid, StackTraceElement[] callingStack, long timeStamp,
                 String processName, String threadName, Set<String> ignoreStackEntries) {
             SomeArgs args = SomeArgs.obtain();
-            args.arg1 = timeStamp;
-            args.arg2 = loggingTypes;
-            args.arg3 = where;
-            args.arg4 = processName;
-            args.arg5 = threadName;
-            args.arg6 = ignoreStackEntries;
-            args.arg7 = callingParams;
-            args.arg8 = callingStack;
-            args.arg9 = a11yDump;
+            args.argl1 = timeStamp;
+            args.argl2 = loggingTypes;
+            args.arg1 = where;
+            args.arg2 = processName;
+            args.arg3 = threadName;
+            args.arg4 = ignoreStackEntries;
+            args.arg5 = callingParams;
+            args.arg6 = callingStack;
+            args.arg7 = a11yDump;
 
             mHandler.obtainMessage(
                     LogHandler.MESSAGE_LOG_TRACE_ENTRY, callingUid, 0, args).sendToTarget();
@@ -2223,7 +2223,7 @@ final class AccessibilityController {
 
                             long tokenOuter = os.start(ENTRY);
 
-                            long reportedTimeStampNanos = (long) args.arg1;
+                            long reportedTimeStampNanos = args.argl1;
                             long currentElapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos();
                             long timeDiffNanos =
                                     currentElapsedRealtimeNanos - reportedTimeStampNanos;
@@ -2235,24 +2235,24 @@ final class AccessibilityController {
                             os.write(ELAPSED_REALTIME_NANOS, reportedTimeStampNanos);
                             os.write(CALENDAR_TIME, fm.format(reportedTimeMillis).toString());
 
-                            long loggingTypes = (long) args.arg2;
+                            long loggingTypes = args.argl2;
                             List<String> loggingTypeNames =
                                     AccessibilityTrace.getNamesOfLoggingTypes(loggingTypes);
 
                             for (String type : loggingTypeNames) {
                                 os.write(LOGGING_TYPE, type);
                             }
-                            os.write(WHERE, (String) args.arg3);
-                            os.write(PROCESS_NAME, (String) args.arg4);
-                            os.write(THREAD_ID_NAME, (String) args.arg5);
+                            os.write(WHERE, (String) args.arg1);
+                            os.write(PROCESS_NAME, (String) args.arg2);
+                            os.write(THREAD_ID_NAME, (String) args.arg3);
                             os.write(CALLING_PKG, pmInternal.getNameForUid(message.arg1));
-                            os.write(CALLING_PARAMS, (String) args.arg7);
+                            os.write(CALLING_PARAMS, (String) args.arg5);
 
                             String callingStack = toStackTraceString(
-                                    (StackTraceElement[]) args.arg8, (Set<String>) args.arg6);
+                                    (StackTraceElement[]) args.arg6, (Set<String>) args.arg4);
 
                             os.write(CALLING_STACKS, callingStack);
-                            os.write(ACCESSIBILITY_SERVICE, (byte[]) args.arg9);
+                            os.write(ACCESSIBILITY_SERVICE, (byte[]) args.arg7);
 
                             long tokenInner = os.start(WINDOW_MANAGER_SERVICE);
                             synchronized (mService.mGlobalLock) {

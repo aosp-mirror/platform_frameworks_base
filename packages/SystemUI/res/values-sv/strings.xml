@@ -297,8 +297,8 @@
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Arbetsläget har aktiverats."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Databesparing har inaktiverats."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Databesparing har aktiverats."</string>
-    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"Sensorsekretess har inaktiverats."</string>
-    <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"Sensorsekretess har aktiverats."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"Sensorintegritet har inaktiverats."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"Sensorintegritet har aktiverats."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Skärmens ljusstyrka"</string>
     <string name="accessibility_ambient_display_charging" msgid="7725523068728128968">"Laddas"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5716594205739750015">"2G- och 3G-data har pausats"</string>
@@ -1111,7 +1111,7 @@
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupp"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 enhet har valts"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> enheter har valts"</string>
-    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (frånkopplad)"</string>
+    <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(frånkopplad)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Det gick inte att ansluta. Försök igen."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Parkoppla en ny enhet"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Versionsnummer"</string>
