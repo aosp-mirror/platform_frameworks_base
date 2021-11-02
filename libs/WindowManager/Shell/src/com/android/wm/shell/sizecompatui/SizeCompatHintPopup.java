@@ -17,13 +17,10 @@
 package com.android.wm.shell.sizecompatui;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 
@@ -58,10 +55,8 @@ public class SizeCompatHintPopup extends FrameLayout implements View.OnClickList
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        final Button gotItButton = findViewById(R.id.got_it);
-        gotItButton.setBackground(new RippleDrawable(ColorStateList.valueOf(Color.LTGRAY),
-                null /* content */, null /* mask */));
-        gotItButton.setOnClickListener(this);
+        final LinearLayout hintPopup = findViewById(R.id.size_compat_hint_popup);
+        hintPopup.setOnClickListener(this);
     }
 
     @Override
