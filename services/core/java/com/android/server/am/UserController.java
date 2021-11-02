@@ -141,9 +141,11 @@ class UserController implements Handler.Callback {
     // giving up on them and unfreezing the screen.
     static final int USER_SWITCH_TIMEOUT_MS = 3 * 1000;
 
-    // Amount of time we wait for observers to handle a user switch before we log a warning.
-    // Must be smaller than USER_SWITCH_TIMEOUT_MS.
-    private static final int USER_SWITCH_WARNING_TIMEOUT_MS = 500;
+    /**
+     * Amount of time we wait for an observer to handle a user switch before we log a warning. This
+     * wait time is per observer.
+     */
+    private static final int LONG_USER_SWITCH_OBSERVER_WARNING_TIME_MS = 500;
 
     // ActivityManager thread message constants
     static final int REPORT_USER_SWITCH_MSG = 10;
@@ -1877,6 +1879,7 @@ class UserController implements Handler.Callback {
             final AtomicInteger waitingCallbacksCount = new AtomicInteger(observerCount);
             final long dispatchStartedTime = SystemClock.elapsedRealtime();
             for (int i = 0; i < observerCount; i++) {
+                final long dispatchStartedTimeForObserver = SystemClock.elapsedRealtime();
                 try {
                     // Prepend with unique prefix to guarantee that keys are unique
                     final String name = "#" + i + " " + mUserSwitchObservers.getBroadcastCookie(i);
@@ -1887,13 +1890,20 @@ class UserController implements Handler.Callback {
                         @Override
                         public void sendResult(Bundle data) throws RemoteException {
                             synchronized (mLock) {
-                                long delay = SystemClock.elapsedRealtime() - dispatchStartedTime;
-                                if (delay > USER_SWITCH_TIMEOUT_MS) {
-                                    Slogf.e(TAG, "User switch timeout: observer " + name
-                                            + " sent result after " + delay + " ms");
-                                } else if (delay > USER_SWITCH_WARNING_TIMEOUT_MS) {
+                                long delayForObserver = SystemClock.elapsedRealtime()
+                                        - dispatchStartedTimeForObserver;
+                                if (delayForObserver > LONG_USER_SWITCH_OBSERVER_WARNING_TIME_MS) {
                                     Slogf.w(TAG, "User switch slowed down by observer " + name
-                                            + ": result sent after " + delay + " ms");
+                                            + ": result took " + delayForObserver
+                                            + " ms to process.");
+                                }
+
+                                long totalDelay = SystemClock.elapsedRealtime()
+                                        - dispatchStartedTime;
+                                if (totalDelay > USER_SWITCH_TIMEOUT_MS) {
+                                    Slogf.e(TAG, "User switch timeout: observer " + name
+                                            + "'s result was received " + totalDelay
+                                            + " ms after dispatchUserSwitch.");
                                 }
 
                                 curWaitingUserSwitchCallbacks.remove(name);
