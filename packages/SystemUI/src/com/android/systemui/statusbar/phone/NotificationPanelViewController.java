@@ -169,6 +169,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -686,6 +687,7 @@ public class NotificationPanelViewController extends PanelViewController {
             SplitShadeHeaderController splitShadeHeaderController,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             LockscreenGestureLogger lockscreenGestureLogger,
+            PanelExpansionStateManager panelExpansionStateManager,
             NotificationRemoteInputManager remoteInputManager,
             ControlsComponent controlsComponent) {
         super(view,
@@ -699,6 +701,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 flingAnimationUtilsBuilder.get(),
                 statusBarTouchableRegionManager,
                 lockscreenGestureLogger,
+                panelExpansionStateManager,
                 ambientState);
         mView = view;
         mVibratorHelper = vibratorHelper;
@@ -2204,10 +2207,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 && mFalsingCollector.shouldEnforceBouncer()) {
             mStatusBar.executeRunnableDismissingKeyguard(null, null /* cancelAction */,
                     false /* dismissShade */, true /* afterKeyguardGone */, false /* deferred */);
-        }
-        for (int i = 0; i < mExpansionListeners.size(); i++) {
-            mExpansionListeners.get(i).onQsExpansionChanged(
-                    mQsMaxExpansionHeight != 0 ? mQsExpansionHeight / mQsMaxExpansionHeight : 0);
         }
         if (DEBUG) {
             mView.invalidate();

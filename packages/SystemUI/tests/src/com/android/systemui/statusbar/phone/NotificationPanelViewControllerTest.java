@@ -121,6 +121,7 @@ import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -444,6 +445,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mSplitShadeHeaderController,
                 mUnlockedScreenOffAnimationController,
                 mLockscreenGestureLogger,
+                new PanelExpansionStateManager(),
                 mNotificationRemoteInputManager,
                 mControlsComponent);
         mNotificationPanelViewController.initDependencies(
