@@ -93,7 +93,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
-import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
@@ -103,7 +102,6 @@ import android.app.LoadedApk;
 import android.app.ResourcesManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
@@ -843,11 +841,6 @@ public class DisplayPolicy {
         return true;
     }
 
-    private boolean hasStatusBarServicePermission(int pid, int uid) {
-        return mContext.checkPermission(permission.STATUS_BAR_SERVICE, pid, uid)
-                == PackageManager.PERMISSION_GRANTED;
-    }
-
     /**
      * Only trusted overlays are allowed to use FLAG_SLIPPERY.
      */
@@ -1098,9 +1091,10 @@ public class DisplayPolicy {
                 mNavigationBar = win;
                 mDisplayContent.setInsetProvider(ITYPE_NAVIGATION_BAR, win,
                         (displayFrames, windowState, inOutFrame) -> {
-                            inOutFrame.inset(windowState.getLayoutingAttrs(
-                                    displayFrames.mRotation).providedInternalInsets);
-
+                            if (!mNavButtonForcedVisible) {
+                                inOutFrame.inset(windowState.getLayoutingAttrs(
+                                        displayFrames.mRotation).providedInternalInsets);
+                            }
                         },
 
                         // For IME we use regular frame.
@@ -1799,7 +1793,6 @@ public class DisplayPolicy {
         final int upsideDownRotation = displayRotation.getUpsideDownRotation();
         final int landscapeRotation = displayRotation.getLandscapeRotation();
         final int seascapeRotation = displayRotation.getSeascapeRotation();
-        final int uiMode = mService.mPolicy.getUiMode();
 
         if (hasStatusBar()) {
             mStatusBarHeightForRotation[portraitRotation] =
@@ -2150,16 +2143,6 @@ public class DisplayPolicy {
     @NavigationBarPosition
     public int getNavBarPosition() {
         return mNavigationBarPosition;
-    }
-
-    @WindowManagerPolicy.AltBarPosition
-    int getAlternateStatusBarPosition() {
-        return mStatusBarAltPosition;
-    }
-
-    @WindowManagerPolicy.AltBarPosition
-    int getAlternateNavBarPosition() {
-        return mNavigationBarAltPosition;
     }
 
     /**
