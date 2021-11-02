@@ -6305,6 +6305,7 @@ package android.media.tv.tuner.filter {
     method public int getAudioStreamType();
     method public int getVideoStreamType();
     method public boolean isPassthrough();
+    method public boolean useSecureMemory();
     field public static final int AUDIO_STREAM_TYPE_AAC = 6; // 0x6
     field public static final int AUDIO_STREAM_TYPE_AC3 = 7; // 0x7
     field public static final int AUDIO_STREAM_TYPE_AC4 = 9; // 0x9
@@ -6340,6 +6341,7 @@ package android.media.tv.tuner.filter {
     method @NonNull public android.media.tv.tuner.filter.AvSettings build();
     method @NonNull public android.media.tv.tuner.filter.AvSettings.Builder setAudioStreamType(int);
     method @NonNull public android.media.tv.tuner.filter.AvSettings.Builder setPassthrough(boolean);
+    method @NonNull public android.media.tv.tuner.filter.AvSettings.Builder setUseSecureMemory(boolean);
     method @NonNull public android.media.tv.tuner.filter.AvSettings.Builder setVideoStreamType(int);
   }
 
@@ -6515,6 +6517,7 @@ package android.media.tv.tuner.filter {
     method public int getTsIndexMask();
     field public static final int INDEX_TYPE_NONE = 0; // 0x0
     field public static final int INDEX_TYPE_SC = 1; // 0x1
+    field public static final int INDEX_TYPE_SC_AVC = 3; // 0x3
     field public static final int INDEX_TYPE_SC_HEVC = 2; // 0x2
     field public static final int MPT_INDEX_AUDIO = 262144; // 0x40000
     field public static final int MPT_INDEX_MPT = 65536; // 0x10000
@@ -6607,6 +6610,7 @@ package android.media.tv.tuner.filter {
     method @NonNull public static android.media.tv.tuner.filter.SectionSettingsWithTableInfo.Builder builder(int);
     method public int getTableId();
     method public int getVersion();
+    field public static final int INVALID_TABLE_INFO_VERSION = -1; // 0xffffffff
   }
 
   public static class SectionSettingsWithTableInfo.Builder extends android.media.tv.tuner.filter.SectionSettings.Builder<android.media.tv.tuner.filter.SectionSettingsWithTableInfo.Builder> {
