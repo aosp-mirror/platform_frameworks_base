@@ -19,6 +19,7 @@ import static com.android.systemui.Prefs.Key.QS_HAS_TURNED_OFF_MOBILE_DATA;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -122,6 +123,7 @@ public class InternetDialog extends SystemUIDialog implements
     private Switch mWiFiToggle;
     private FrameLayout mDoneLayout;
     private Drawable mBackgroundOn;
+    private Drawable mBackgroundOff = null;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private boolean mCanConfigMobileData;
 
@@ -208,6 +210,14 @@ public class InternetDialog extends SystemUIDialog implements
         mBackgroundOn = mContext.getDrawable(R.drawable.settingslib_switch_bar_bg_on);
         mInternetDialogTitle.setText(getDialogTitleText());
         mInternetDialogTitle.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+
+        TypedArray typedArray = mContext.obtainStyledAttributes(
+                new int[]{android.R.attr.selectableItemBackground});
+        try {
+            mBackgroundOff = typedArray.getDrawable(0 /* index */);
+        } finally {
+            typedArray.recycle();
+        }
 
         setOnClickListener();
         mTurnWifiOnLayout.setBackground(null);
@@ -364,7 +374,8 @@ public class InternetDialog extends SystemUIDialog implements
             mMobileSummaryText.setTextAppearance(isCarrierNetworkConnected
                     ? R.style.TextAppearance_InternetDialog_Secondary_Active
                     : R.style.TextAppearance_InternetDialog_Secondary);
-            mMobileNetworkLayout.setBackground(isCarrierNetworkConnected ? mBackgroundOn : null);
+            mMobileNetworkLayout.setBackground(
+                    isCarrierNetworkConnected ? mBackgroundOn : mBackgroundOff);
 
             mMobileDataToggle.setVisibility(mCanConfigMobileData ? View.VISIBLE : View.INVISIBLE);
         }
