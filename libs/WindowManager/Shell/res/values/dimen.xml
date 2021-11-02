@@ -194,8 +194,17 @@
     <!-- Size of user education views on large screens (phone is just match parent). -->
     <dimen name="bubbles_user_education_width_large_screen">400dp</dimen>
 
-    <!-- The width/height of the size compat restart button. -->
-    <dimen name="size_compat_button_size">48dp</dimen>
+    <!-- The width of the size compat restart button including padding. -->
+    <dimen name="size_compat_button_width">80dp</dimen>
+
+    <!-- The height of the size compat restart button including padding. -->
+    <dimen name="size_compat_button_height">64dp</dimen>
+
+    <!-- The radius of the corners of the size compat hint bubble. -->
+    <dimen name="size_compat_hint_corner_radius">28dp</dimen>
+
+    <!-- The width of the size compat hint point. -->
+    <dimen name="size_compat_hint_point_width">10dp</dimen>
 
     <!-- The width of the brand image on staring surface. -->
     <dimen name="starting_surface_brand_image_width">200dp</dimen>

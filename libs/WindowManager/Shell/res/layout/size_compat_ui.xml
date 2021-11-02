@@ -19,12 +19,21 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
-    <ImageButton
-        android:id="@+id/size_compat_restart_button"
-        android:layout_width="@dimen/size_compat_button_size"
-        android:layout_height="@dimen/size_compat_button_size"
-        android:layout_gravity="center"
-        android:src="@drawable/size_compat_restart_button"
-        android:contentDescription="@string/restart_button_description"/>
+    <FrameLayout
+        android:layout_width="@dimen/size_compat_button_width"
+        android:layout_height="@dimen/size_compat_button_height"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp">
+
+        <ImageButton
+            android:id="@+id/size_compat_restart_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/size_compat_restart_button"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/restart_button_description"/>
+
+    </FrameLayout>
 
 </com.android.wm.shell.sizecompatui.SizeCompatRestartButton>
