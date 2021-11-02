@@ -983,12 +983,15 @@
     <style name="InternetDialog.Network">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">88dp</item>
+        <item name="android:layout_marginStart">@dimen/internet_dialog_network_layout_margin</item>
         <item name="android:layout_marginEnd">@dimen/internet_dialog_network_layout_margin</item>
+        <item name="android:layout_gravity">center_vertical|start</item>
         <item name="android:paddingStart">22dp</item>
         <item name="android:paddingEnd">22dp</item>
         <item name="android:orientation">horizontal</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
     <style name="InternetDialog.NetworkTitle">
