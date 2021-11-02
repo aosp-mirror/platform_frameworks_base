@@ -21,6 +21,8 @@ import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
 import android.apex.ApexSessionParams;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
@@ -31,13 +33,16 @@ import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.apk.ApkSignatureVerifier;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageHelper;
 import com.android.server.LocalServices;
 import com.android.server.pm.parsing.PackageParser2;
@@ -76,6 +81,79 @@ final class PackageSessionVerifier {
         mHandler = new Handler(looper);
     }
 
+    @VisibleForTesting
+    PackageSessionVerifier() {
+        mContext = null;
+        mPm = null;
+        mApexManager = null;
+        mPackageParserSupplier = null;
+        mHandler = null;
+    }
+
+    /**
+     * Runs verifications that are common to both staged and non-staged sessions.
+     */
+    public void verifyNonStaged(PackageInstallerSession session, Callback callback) {
+        mHandler.post(() -> {
+            try {
+                storeSession(session.mStagedSession);
+                if (session.isMultiPackage()) {
+                    for (PackageInstallerSession child : session.getChildSessions()) {
+                        checkRebootlessApex(child);
+                    }
+                } else {
+                    checkRebootlessApex(session);
+                }
+                verifyAPK(session, callback);
+            } catch (PackageManagerException e) {
+                callback.onResult(e.error, e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Runs verifications particular to APK. This includes APEX sessions since an APEX can also
+     * be treated as APK.
+     */
+    private void verifyAPK(PackageInstallerSession session, Callback callback)
+            throws PackageManagerException {
+        final IPackageInstallObserver2 observer = new IPackageInstallObserver2.Stub() {
+            @Override
+            public void onUserActionRequired(Intent intent) {
+                throw new IllegalStateException();
+            }
+            @Override
+            public void onPackageInstalled(String basePackageName, int returnCode, String msg,
+                    Bundle extras) {
+                callback.onResult(returnCode, msg);
+            }
+        };
+        final VerificationParams verifyingSession = makeVerificationParams(session, observer);
+        if (session.isMultiPackage()) {
+            final List<PackageInstallerSession> childSessions = session.getChildSessions();
+            List<VerificationParams> verifyingChildSessions = new ArrayList<>(childSessions.size());
+            for (PackageInstallerSession child : childSessions) {
+                verifyingChildSessions.add(makeVerificationParams(child, null));
+            }
+            verifyingSession.verifyStage(verifyingChildSessions);
+        } else {
+            verifyingSession.verifyStage();
+        }
+    }
+
+    private VerificationParams makeVerificationParams(
+            PackageInstallerSession session, IPackageInstallObserver2 observer) {
+        final UserHandle user;
+        if ((session.params.installFlags & PackageManager.INSTALL_ALL_USERS) != 0) {
+            user = UserHandle.ALL;
+        } else {
+            user = new UserHandle(session.userId);
+        }
+        return new VerificationParams(user, session.stageDir, observer, session.params,
+                session.getInstallSource(), session.getInstallerUid(), session.getSigningDetails(),
+                session.sessionId, session.getPackageLite(), mPm);
+    }
+
     /**
      * Starts pre-reboot verification for the staged-session. This operation is broken into the
      * following phases:
@@ -94,7 +172,6 @@ final class PackageSessionVerifier {
         Slog.d(TAG, "Starting preRebootVerification for session " + session.sessionId());
         mHandler.post(() -> {
             try {
-                storeSession(session);
                 checkActiveSessions();
                 checkRollbacks(session);
                 if (session.isMultiPackage()) {
@@ -114,8 +191,11 @@ final class PackageSessionVerifier {
     /**
      * Stores staged-sessions for checking package overlapping and rollback conflicts.
      */
-    private void storeSession(StagingManager.StagedSession session) {
-        mStagedSessions.add(session);
+    @VisibleForTesting
+    void storeSession(StagingManager.StagedSession session) {
+        if (session != null) {
+            mStagedSessions.add(session);
+        }
     }
 
     private void onVerificationSuccess(StagingManager.StagedSession session, Callback callback) {
@@ -382,17 +462,49 @@ final class PackageSessionVerifier {
     }
 
     /**
+     * Fails this rebootless APEX session if the same package name found in any staged sessions.
+     */
+    @VisibleForTesting
+    void checkRebootlessApex(PackageInstallerSession session)
+            throws PackageManagerException {
+        if (session.isStaged() || !session.isApexSession()) {
+            return;
+        }
+        String packageName = session.getPackageName();
+        if (packageName == null) {
+            throw new PackageManagerException(
+                    PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                    "Invalid session " + session.sessionId + " with package name null");
+        }
+        for (StagingManager.StagedSession stagedSession : mStagedSessions) {
+            if (stagedSession.isDestroyed() || stagedSession.isInTerminalState()) {
+                continue;
+            }
+            if (stagedSession.sessionContains(s -> packageName.equals(s.getPackageName()))) {
+                // Staged-sessions take priority over rebootless APEX
+                throw new PackageManagerException(
+                        PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                        "Staged session " + stagedSession.sessionId() + " already contains "
+                                + packageName);
+            }
+        }
+    }
+
+    /**
      * Checks if multiple staged-sessions are supported. It is supported only when the system
      * supports checkpoint.
      */
     private void checkActiveSessions() throws PackageManagerException {
-        final boolean supportsCheckpoint;
         try {
-            supportsCheckpoint = PackageHelper.getStorageManager().supportsCheckpoint();
+            checkActiveSessions(PackageHelper.getStorageManager().supportsCheckpoint());
         } catch (RemoteException e) {
             throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                     "Can't query fs-checkpoint status : " + e);
         }
+    }
+
+    @VisibleForTesting
+    void checkActiveSessions(boolean supportsCheckpoint) throws PackageManagerException {
         int activeSessions = 0;
         for (StagingManager.StagedSession stagedSession : mStagedSessions) {
             if (stagedSession.isDestroyed() || stagedSession.isInTerminalState()) {
@@ -412,7 +524,8 @@ final class PackageSessionVerifier {
      * downgrade of SDK extension which in turn will result in dependency violation of other
      * non-rollback sessions.
      */
-    private void checkRollbacks(StagingManager.StagedSession session)
+    @VisibleForTesting
+    void checkRollbacks(StagingManager.StagedSession session)
             throws PackageManagerException {
         for (StagingManager.StagedSession stagedSession : mStagedSessions) {
             if (stagedSession.isDestroyed() || stagedSession.isInTerminalState()) {
@@ -449,7 +562,8 @@ final class PackageSessionVerifier {
      * @param child The child session whose package name will be checked.
      *              This will equal to {@code parent} for a single-package session.
      */
-    private void checkOverlaps(StagingManager.StagedSession parent,
+    @VisibleForTesting
+    void checkOverlaps(StagingManager.StagedSession parent,
             StagingManager.StagedSession child) throws PackageManagerException {
         final String packageName = child.getPackageName();
         if (packageName == null) {
