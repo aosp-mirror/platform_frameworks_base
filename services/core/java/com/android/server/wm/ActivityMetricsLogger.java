@@ -190,7 +190,7 @@ class ActivityMetricsLogger {
 
         @VisibleForTesting
         boolean allDrawn() {
-            return mAssociatedTransitionInfo != null && mAssociatedTransitionInfo.allDrawn();
+            return mAssociatedTransitionInfo != null && mAssociatedTransitionInfo.mIsDrawn;
         }
 
         boolean hasActiveTransitionInfo() {
@@ -224,8 +224,8 @@ class ActivityMetricsLogger {
         final boolean mProcessRunning;
         /** whether the process of the launching activity didn't have any active activity. */
         final boolean mProcessSwitch;
-        /** The activities that should be drawn. */
-        final ArrayList<ActivityRecord> mPendingDrawActivities = new ArrayList<>(2);
+        /** Whether the last launched activity has reported drawn. */
+        boolean mIsDrawn;
         /** The latest activity to have been launched. */
         @NonNull ActivityRecord mLastLaunchedActivity;
 
@@ -318,10 +318,7 @@ class ActivityMetricsLogger {
                 mLastLaunchedActivity.mLaunchRootTask = null;
             }
             mLastLaunchedActivity = r;
-            if (!r.noDisplay && !r.isReportedDrawn()) {
-                if (DEBUG_METRICS) Slog.i(TAG, "Add pending draw " + r);
-                mPendingDrawActivities.add(r);
-            }
+            mIsDrawn = r.isReportedDrawn();
         }
 
         /** Returns {@code true} if the incoming activity can belong to this transition. */
@@ -332,29 +329,7 @@ class ActivityMetricsLogger {
 
         /** @return {@code true} if the activity matches a launched activity in this transition. */
         boolean contains(ActivityRecord r) {
-            return r != null && (r == mLastLaunchedActivity || mPendingDrawActivities.contains(r));
-        }
-
-        /** Called when the activity is drawn or won't be drawn. */
-        void removePendingDrawActivity(ActivityRecord r) {
-            if (DEBUG_METRICS) Slog.i(TAG, "Remove pending draw " + r);
-            mPendingDrawActivities.remove(r);
-        }
-
-        boolean allDrawn() {
-            return mPendingDrawActivities.isEmpty();
-        }
-
-        /** Only keep the records which can be drawn. */
-        void updatePendingDraw(boolean keepInitializing) {
-            for (int i = mPendingDrawActivities.size() - 1; i >= 0; i--) {
-                final ActivityRecord r = mPendingDrawActivities.get(i);
-                if (!r.mVisibleRequested
-                        && !(keepInitializing && r.isState(ActivityRecord.State.INITIALIZING))) {
-                    if (DEBUG_METRICS) Slog.i(TAG, "Discard pending draw " + r);
-                    mPendingDrawActivities.remove(i);
-                }
-            }
+            return r == mLastLaunchedActivity;
         }
 
         /**
@@ -377,7 +352,7 @@ class ActivityMetricsLogger {
         @Override
         public String toString() {
             return "TransitionInfo{" + Integer.toHexString(System.identityHashCode(this))
-                    + " a=" + mLastLaunchedActivity + " ua=" + mPendingDrawActivities + "}";
+                    + " a=" + mLastLaunchedActivity + " d=" + mIsDrawn + "}";
         }
     }
 
@@ -683,8 +658,7 @@ class ActivityMetricsLogger {
         // visible such as after the top task is finished.
         for (int i = mTransitionInfoList.size() - 2; i >= 0; i--) {
             final TransitionInfo prevInfo = mTransitionInfoList.get(i);
-            prevInfo.updatePendingDraw(false /* keepInitializing */);
-            if (prevInfo.allDrawn()) {
+            if (prevInfo.mIsDrawn || !prevInfo.mLastLaunchedActivity.mVisibleRequested) {
                 abort(prevInfo, "nothing will be drawn");
             }
         }
@@ -711,17 +685,16 @@ class ActivityMetricsLogger {
         if (DEBUG_METRICS) Slog.i(TAG, "notifyWindowsDrawn " + r);
 
         final TransitionInfo info = getActiveTransitionInfo(r);
-        if (info == null || info.allDrawn()) {
-            if (DEBUG_METRICS) Slog.i(TAG, "notifyWindowsDrawn no activity to be drawn");
+        if (info == null || info.mIsDrawn) {
+            if (DEBUG_METRICS) Slog.i(TAG, "notifyWindowsDrawn not pending drawn " + info);
             return null;
         }
         // Always calculate the delay because the caller may need to know the individual drawn time.
         info.mWindowsDrawnDelayMs = info.calculateDelay(timestampNs);
-        info.removePendingDrawActivity(r);
-        info.updatePendingDraw(false /* keepInitializing */);
+        info.mIsDrawn = true;
         final TransitionInfoSnapshot infoSnapshot = new TransitionInfoSnapshot(info);
-        if (info.mLoggedTransitionStarting && info.allDrawn()) {
-            done(false /* abort */, info, "notifyWindowsDrawn - all windows drawn", timestampNs);
+        if (info.mLoggedTransitionStarting) {
+            done(false /* abort */, info, "notifyWindowsDrawn", timestampNs);
         }
         if (r.mWmService.isRecentsAnimationTarget(r)) {
             r.mWmService.getRecentsAnimationController().logRecentsAnimationStartTime(
@@ -770,12 +743,8 @@ class ActivityMetricsLogger {
             info.mCurrentTransitionDelayMs = info.calculateDelay(timestampNs);
             info.mReason = activityToReason.valueAt(index);
             info.mLoggedTransitionStarting = true;
-            // Do not remove activity in initializing state because the transition may be started
-            // by starting window. The initializing activity may be requested to visible soon.
-            info.updatePendingDraw(true /* keepInitializing */);
-            if (info.allDrawn()) {
-                done(false /* abort */, info, "notifyTransitionStarting - all windows drawn",
-                        timestampNs);
+            if (info.mIsDrawn) {
+                done(false /* abort */, info, "notifyTransitionStarting drawn", timestampNs);
             }
         }
     }
@@ -828,12 +797,9 @@ class ActivityMetricsLogger {
             return;
         }
         if (!r.mVisibleRequested || r.finishing) {
-            info.removePendingDrawActivity(r);
-            if (info.mLastLaunchedActivity == r) {
-                // Check if the tracker can be cancelled because the last launched activity may be
-                // no longer visible.
-                scheduleCheckActivityToBeDrawn(r, 0 /* delay */);
-            }
+            // Check if the tracker can be cancelled because the last launched activity may be
+            // no longer visible.
+            scheduleCheckActivityToBeDrawn(r, 0 /* delay */);
         }
     }
 
@@ -852,14 +818,9 @@ class ActivityMetricsLogger {
             // If we have an active transition that's waiting on a certain activity that will be
             // invisible now, we'll never get onWindowsDrawn, so abort the transition if necessary.
 
-            // We have no active transitions.
+            // We have no active transitions. Or the notified activity whose visibility changed is
+            // no longer the launched activity, then we can still wait to get onWindowsDrawn.
             if (info == null) {
-                return;
-            }
-
-            // The notified activity whose visibility changed is no longer the launched activity.
-            // We can still wait to get onWindowsDrawn.
-            if (info.mLastLaunchedActivity != r) {
                 return;
             }
 
@@ -945,7 +906,6 @@ class ActivityMetricsLogger {
             }
             logAppTransitionFinished(info, isHibernating != null ? isHibernating : false);
         }
-        info.mPendingDrawActivities.clear();
         mTransitionInfoList.remove(info);
     }
 
@@ -1122,7 +1082,7 @@ class ActivityMetricsLogger {
         if (info == null) {
             return null;
         }
-        if (!info.allDrawn() && info.mPendingFullyDrawn == null) {
+        if (!info.mIsDrawn && info.mPendingFullyDrawn == null) {
             // There are still undrawn activities, postpone reporting fully drawn until all of its
             // windows are drawn. So that is closer to an usable state.
             info.mPendingFullyDrawn = () -> {
