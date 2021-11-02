@@ -2433,7 +2433,12 @@ final class InstallPackageHelper {
                 }
                 incrementalStorages.add(storage);
             }
-            appDataHelper.prepareAppDataAfterInstallLIF(pkg);
+            int previousAppId = 0;
+            if (reconciledPkg.mScanResult.needsNewAppId()) {
+                // Only set previousAppId if the app is migrating out of shared UID
+                previousAppId = reconciledPkg.mScanResult.mPreviousAppId;
+            }
+            appDataHelper.prepareAppDataPostCommitLIF(pkg, previousAppId);
             if (reconciledPkg.mPrepareResult.mClearCodeCache) {
                 appDataHelper.clearAppDataLIF(pkg, UserHandle.USER_ALL,
                         FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL

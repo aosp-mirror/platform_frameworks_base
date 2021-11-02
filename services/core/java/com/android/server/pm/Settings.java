@@ -61,6 +61,7 @@ import android.content.pm.pkg.PackageUserStateUtils;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.CreateAppDataArgs;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -4016,9 +4017,11 @@ public final class Settings implements Watchable, Snappable {
                     // Accumulate all required args and call the installer after mPackages lock
                     // has been released
                     final String seInfo = AndroidPackageUtils.getSeInfo(ps.getPkg(), ps);
-                    batch.createAppData(ps.getVolumeUuid(), ps.getPackageName(), userHandle,
+                    final CreateAppDataArgs args = Installer.buildCreateAppDataArgs(
+                            ps.getVolumeUuid(), ps.getPackageName(), userHandle,
                             StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE,
                             ps.getAppId(), seInfo, ps.getPkg().getTargetSdkVersion());
+                    batch.createAppData(args);
                 } else {
                     // Make sure the app is excluded from storage mapping for this user
                     writeKernelMappingLPr(ps);
