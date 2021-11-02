@@ -40728,11 +40728,11 @@ package android.telephony {
   }
 
   public class CarrierConfigManager {
-    method @Nullable public android.os.PersistableBundle getConfig();
-    method @Nullable public android.os.PersistableBundle getConfigByComponentForSubId(@NonNull String, int);
-    method @Nullable public android.os.PersistableBundle getConfigForSubId(int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfig();
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfigByComponentForSubId(@NonNull String, int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfigForSubId(int);
     method public static boolean isConfigForIdentifiedCarrier(android.os.PersistableBundle);
-    method public void notifyConfigChangedForSubId(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyConfigChangedForSubId(int);
     field public static final String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
     field public static final int CARRIER_NR_AVAILABILITY_NSA = 1; // 0x1
     field public static final int CARRIER_NR_AVAILABILITY_SA = 2; // 0x2

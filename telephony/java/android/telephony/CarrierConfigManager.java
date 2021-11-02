@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -5874,12 +5875,15 @@ public class CarrierConfigManager {
      * any carrier specific configuration has been applied.
      *
      * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}, or the calling app
+     * has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges()}).
      *
      * @param subId the subscription ID, normally obtained from {@link SubscriptionManager}.
      * @return A {@link PersistableBundle} containing the config for the given subId, or default
      *         values for an invalid subId.
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     @Nullable
     public PersistableBundle getConfigForSubId(int subId) {
         try {
@@ -5968,10 +5972,13 @@ public class CarrierConfigManager {
      * called to confirm whether any carrier specific configuration has been applied.
      *
      * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}, or the calling app
+     * has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges()}).
      *
      * @see #getConfigForSubId
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     @Nullable
     public PersistableBundle getConfig() {
         return getConfigForSubId(SubscriptionManager.getDefaultSubscriptionId());
@@ -5980,8 +5987,8 @@ public class CarrierConfigManager {
     /**
      * Determines whether a configuration {@link PersistableBundle} obtained from
      * {@link #getConfig()} or {@link #getConfigForSubId(int)} corresponds to an identified carrier.
-     * <p>
-     * When an app receives the {@link CarrierConfigManager#ACTION_CARRIER_CONFIG_CHANGED}
+     *
+     * <p>When an app receives the {@link CarrierConfigManager#ACTION_CARRIER_CONFIG_CHANGED}
      * broadcast which informs it that the carrier configuration has changed, it is possible
      * that another reload of the carrier configuration has begun since the intent was sent.
      * In this case, the carrier configuration the app fetches (e.g. via {@link #getConfig()})
@@ -5990,14 +5997,12 @@ public class CarrierConfigManager {
      * return true because it may belong to another previous identified carrier. Users should
      * always call {@link #getConfig()} or {@link #getConfigForSubId(int)} after receiving the
      * broadcast {@link #ACTION_CARRIER_CONFIG_CHANGED}.
-     * </p>
-     * <p>
-     * After using {@link #getConfig()} or {@link #getConfigForSubId(int)} an app should always
+     *
+     * <p>After using {@link #getConfig()} or {@link #getConfigForSubId(int)} an app should always
      * use this method to confirm whether any carrier specific configuration has been applied.
      * Especially when an app misses the broadcast {@link #ACTION_CARRIER_CONFIG_CHANGED} but it
      * still needs to get the current configuration, it must use this method to verify whether the
      * configuration is default or carrier overridden.
-     * </p>
      *
      * @param bundle the configuration bundle to be checked.
      * @return boolean true if any carrier specific configuration bundle has been applied, false
@@ -6009,19 +6014,20 @@ public class CarrierConfigManager {
 
     /**
      * Calling this method triggers telephony services to fetch the current carrier configuration.
-     * <p>
-     * Normally this does not need to be called because the platform reloads config on its own.
+     *
+     * <p>Normally this does not need to be called because the platform reloads config on its own.
      * This should be called by a carrier service app if it wants to update config at an arbitrary
      * moment.
-     * </p>
-     * <p>Requires that the calling app has carrier privileges.
-     * <p>
-     * This method returns before the reload has completed, and
-     * {@link android.service.carrier.CarrierService#onLoadConfig} will be called from an
-     * arbitrary thread.
-     * </p>
-     * @see TelephonyManager#hasCarrierPrivileges
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}, or the calling app
+     * has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges()}).
+     *
+     * <p>This method returns before the reload has completed, and {@link
+     * android.service.carrier.CarrierService#onLoadConfig} will be called from an arbitrary thread.
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void notifyConfigChangedForSubId(int subId) {
         try {
             ICarrierConfigLoader loader = getICarrierConfigLoader();
@@ -6037,11 +6043,10 @@ public class CarrierConfigManager {
     }
 
     /**
-     * Request the carrier config loader to update the cofig for phoneId.
-     * <p>
-     * Depending on simState, the config may be cleared or loaded from config app. This is only used
-     * by SubscriptionInfoUpdater.
-     * </p>
+     * Request the carrier config loader to update the config for phoneId.
+     *
+     * <p>Depending on simState, the config may be cleared or loaded from config app. This is only
+     * used by SubscriptionInfoUpdater.
      *
      * @hide
      */
@@ -6112,13 +6117,16 @@ public class CarrierConfigManager {
      * Gets the configuration values for a component using its prefix.
      *
      * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}, or the calling app
+     * has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges()}).
      *
      * @param prefix prefix of the component.
      * @param subId the subscription ID, normally obtained from {@link SubscriptionManager}.
      *
      * @see #getConfigForSubId
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     @Nullable
     public PersistableBundle getConfigByComponentForSubId(@NonNull String prefix, int subId) {
         PersistableBundle configs = getConfigForSubId(subId);
