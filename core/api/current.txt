@@ -31534,6 +31534,7 @@ package android.os {
     method @Nullable public android.os.PersistableBundle readPersistableBundle();
     method @Nullable public android.os.PersistableBundle readPersistableBundle(@Nullable ClassLoader);
     method @Nullable public java.io.Serializable readSerializable();
+    method @Nullable public <T extends java.io.Serializable> T readSerializable(@Nullable ClassLoader, @NonNull Class<T>);
     method @NonNull public android.util.Size readSize();
     method @NonNull public android.util.SizeF readSizeF();
     method @Nullable public <T> android.util.SparseArray<T> readSparseArray(@Nullable ClassLoader);
