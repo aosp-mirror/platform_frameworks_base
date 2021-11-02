@@ -21,6 +21,7 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static com.android.server.pm.PackageManagerService.CHECK_PENDING_INTEGRITY_VERIFICATION;
 import static com.android.server.pm.PackageManagerService.CHECK_PENDING_VERIFICATION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
+import static com.android.server.pm.PackageManagerService.DEFAULT_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD;
 import static com.android.server.pm.PackageManagerService.DEFAULT_VERIFICATION_RESPONSE;
 import static com.android.server.pm.PackageManagerService.DEFERRED_NO_KILL_INSTALL_OBSERVER;
 import static com.android.server.pm.PackageManagerService.DEFERRED_NO_KILL_POST_DELETE;
@@ -32,6 +33,7 @@ import static com.android.server.pm.PackageManagerService.INSTANT_APP_RESOLUTION
 import static com.android.server.pm.PackageManagerService.INTEGRITY_VERIFICATION_COMPLETE;
 import static com.android.server.pm.PackageManagerService.PACKAGE_VERIFIED;
 import static com.android.server.pm.PackageManagerService.POST_INSTALL;
+import static com.android.server.pm.PackageManagerService.PRUNE_UNUSED_STATIC_SHARED_LIBRARIES;
 import static com.android.server.pm.PackageManagerService.SEND_PENDING_BROADCAST;
 import static com.android.server.pm.PackageManagerService.SNAPSHOT_UNCORK;
 import static com.android.server.pm.PackageManagerService.TAG;
@@ -53,8 +55,11 @@ import android.os.Process;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
+
+import java.io.IOException;
 
 /**
  * Part of PackageManagerService that handles events.
@@ -373,6 +378,18 @@ final class PackageHandler extends Handler {
                 int corking = mPm.sSnapshotCorked.decrementAndGet();
                 if (TRACE_SNAPSHOTS && corking == 0) {
                     Log.e(TAG, "snapshot: corking goes to zero in message handler");
+                }
+                break;
+            }
+            case PRUNE_UNUSED_STATIC_SHARED_LIBRARIES: {
+                try {
+                    mPm.pruneUnusedStaticSharedLibraries(Long.MAX_VALUE,
+                            Settings.Global.getLong(mPm.mContext.getContentResolver(),
+                                    Settings.Global.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD,
+                                    DEFAULT_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD));
+                } catch (IOException e) {
+                    Log.w(TAG, "Failed to prune unused static shared libraries :"
+                            + e.getMessage());
                 }
                 break;
             }

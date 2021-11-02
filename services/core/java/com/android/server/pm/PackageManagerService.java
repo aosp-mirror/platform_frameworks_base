@@ -303,6 +303,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -918,6 +919,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int CHECK_PENDING_INTEGRITY_VERIFICATION = 26;
     static final int DOMAIN_VERIFICATION = 27;
     static final int SNAPSHOT_UNCORK = 28;
+    static final int PRUNE_UNUSED_STATIC_SHARED_LIBRARIES = 29;
 
     static final int DEFERRED_NO_KILL_POST_DELETE_DELAY_MS = 3 * 1000;
     private static final int DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS = 500;
@@ -927,11 +929,16 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final long BROADCAST_DELAY_DURING_STARTUP = 10 * 1000L; // 10 seconds (in millis)
     private static final long BROADCAST_DELAY = 1 * 1000L; // 1 second (in millis)
 
+    private static final long PRUNE_UNUSED_STATIC_SHARED_LIBRARIES_DELAY =
+            TimeUnit.MINUTES.toMillis(3); // 3 minutes
+
     // When the service constructor finished plus a delay (used for broadcast delay computation)
     private long mServiceStartWithDelay;
 
-    private static final long DEFAULT_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD =
-            2 * 60 * 60 * 1000L; /* two hours */
+    private static final long FREE_STORAGE_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD =
+            TimeUnit.HOURS.toMillis(2); /* two hours */
+    static final long DEFAULT_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD =
+            TimeUnit.DAYS.toMillis(7); /* 7 days */
 
     final UserManagerService mUserManager;
 
@@ -1253,6 +1260,12 @@ public class PackageManagerService extends IPackageManager.Stub
     void scheduleDeferredNoKillPostDelete(InstallArgs args) {
         Message message = mHandler.obtainMessage(DEFERRED_NO_KILL_POST_DELETE, args);
         mHandler.sendMessageDelayed(message, DEFERRED_NO_KILL_POST_DELETE_DELAY_MS);
+    }
+
+    void schedulePruneUnusedStaticSharedLibraries(boolean delay) {
+        mHandler.removeMessages(PRUNE_UNUSED_STATIC_SHARED_LIBRARIES);
+        mHandler.sendEmptyMessageDelayed(PRUNE_UNUSED_STATIC_SHARED_LIBRARIES,
+                delay ? PRUNE_UNUSED_STATIC_SHARED_LIBRARIES_DELAY : 0);
     }
 
     @Override
@@ -2913,7 +2926,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (internalVolume && pruneUnusedStaticSharedLibraries(bytes,
                     android.provider.Settings.Global.getLong(mContext.getContentResolver(),
                             Global.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD,
-                            DEFAULT_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD))) {
+                            FREE_STORAGE_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD))) {
                 return;
             }
 
@@ -2968,7 +2981,7 @@ public class PackageManagerService extends IPackageManager.Stub
         throw new IOException("Failed to free " + bytes + " on storage device at " + file);
     }
 
-    private boolean pruneUnusedStaticSharedLibraries(long neededSpace, long maxCachePeriod)
+    boolean pruneUnusedStaticSharedLibraries(long neededSpace, long maxCachePeriod)
             throws IOException {
         final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         final File volume = storage.findPathForUuid(StorageManager.UUID_PRIVATE_INTERNAL);
@@ -8464,6 +8477,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 });
 
         mBackgroundDexOptService.systemReady();
+
+        // Prune unused static shared libraries which have been cached a period of time
+        schedulePruneUnusedStaticSharedLibraries(false /* delay */);
     }
 
     /**

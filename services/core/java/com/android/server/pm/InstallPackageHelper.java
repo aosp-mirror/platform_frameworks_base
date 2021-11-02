@@ -3183,6 +3183,9 @@ final class InstallPackageHelper {
             mPm.notifyInstallObserver(res, installObserver);
         }
 
+        // Prune unused static shared libraries which have been cached a period of time
+        mPm.schedulePruneUnusedStaticSharedLibraries(true /* delay */);
+
         // Log tracing if needed
         if (installArgs.mTraceMethod != null) {
             Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, installArgs.mTraceMethod,
