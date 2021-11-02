@@ -1043,6 +1043,58 @@ public class SubscriptionManager {
     public static final String ALLOWED_NETWORK_TYPES =
             SimInfo.COLUMN_ALLOWED_NETWORK_TYPES_FOR_REASONS;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"USAGE_SETTING_"},
+        value = {
+            USAGE_SETTING_UNKNOWN,
+            USAGE_SETTING_DEFAULT,
+            USAGE_SETTING_VOICE_CENTRIC,
+            USAGE_SETTING_DATA_CENTRIC})
+    public @interface UsageSetting {}
+
+    /**
+     * The usage setting is unknown.
+     *
+     * This will be the usage setting returned on devices that do not support querying the
+     * or setting the usage setting.
+     *
+     * It may also be provided by a carrier that wishes to provide a value to avoid making any
+     * settings changes.
+     *
+     * @hide
+     */
+    public static final int USAGE_SETTING_UNKNOWN = -1;
+
+    /**
+     * Subscription uses the default setting.
+     *
+     * The value is based upon device capability and the other properties of the subscription.
+     *
+     * Most subscriptions will default to voice-centric when in a phone.
+     *
+     * An opportunistic subscription will default to data-centric.
+     *
+     * {@see SubscriptionInfo#isOpportunistic}
+     *
+     * @hide
+     */
+    public static final int USAGE_SETTING_DEFAULT = 0;
+
+    /**
+     * This subscription is forced to voice-centric mode
+     *
+     * @hide
+     */
+    public static final int USAGE_SETTING_VOICE_CENTRIC = 1;
+
+    /**
+     * This subscription is forced to data-centric mode
+     *
+     * @hide
+     */
+    public static final int USAGE_SETTING_DATA_CENTRIC = 2;
+
     /**
      * Broadcast Action: The user has changed one of the default subs related to
      * data, phone calls, or sms</p>
