@@ -32,7 +32,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
-import com.android.server.wm.flicker.repetitions
 import com.android.wm.shell.flicker.helpers.LaunchBubbleHelper
 import org.junit.runners.Parameterized
 
@@ -51,14 +50,13 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
     protected val uid = context.packageManager.getApplicationInfo(
             testApp.component.packageName, 0).uid
 
-    protected abstract val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    protected abstract val transition: FlickerBuilder.() -> Unit
 
     @JvmOverloads
     protected open fun buildTransition(
-        extraSpec: FlickerBuilder.(Map<String, Any?>) -> Unit = {}
-    ): FlickerBuilder.(Map<String, Any?>) -> Unit {
-        return { configuration ->
-
+        extraSpec: FlickerBuilder.() -> Unit = {}
+    ): FlickerBuilder.() -> Unit {
+        return {
             setup {
                 test {
                     notifyManager.setBubblesAllowed(testApp.component.packageName,
@@ -75,7 +73,7 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
                 testApp.exit()
             }
 
-            extraSpec(this, configuration)
+            extraSpec(this)
         }
     }
 
@@ -87,8 +85,7 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            repeat { testSpec.config.repetitions }
-            transition(this, testSpec.config)
+            transition(this)
         }
     }
 

@@ -32,11 +32,9 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
@@ -68,7 +66,7 @@ class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestParamet
     private val testApp1 = SimpleAppHelper(instrumentation)
     private val testApp2 = NonResizeableAppHelper(instrumentation)
 
-    private val startDisplayBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
+    private val startDisplayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
@@ -92,7 +90,7 @@ class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestParamet
                         startDisplayBounds.bounds.bottom,
                         2 * startDisplayBounds.bounds.right / 3,
                         startDisplayBounds.bounds.bottom,
-                        if (testSpec.config.startRotation.isRotated()) 75 else 30
+                        if (testSpec.isLandscapeOrSeascapeAtStart) 75 else 30
                 )
 
                 wmHelper.waitForFullScreenApp(testApp1.component)

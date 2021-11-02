@@ -102,7 +102,7 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
     }
 
     /**
-     * Checks that the visible region of [pipApp] covers the full display area at the end of
+     * Checks that the visible region oft [pipApp] covers the full display area at the end of
      * the transition
      */
     @Presubmit

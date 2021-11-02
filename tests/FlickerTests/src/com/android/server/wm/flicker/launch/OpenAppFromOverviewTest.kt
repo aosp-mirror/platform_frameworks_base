@@ -27,7 +27,6 @@ import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import org.junit.FixMethodOrder
@@ -64,9 +63,9 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
     /**
      * Defines the transition used to run the test
      */
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this, it)
+            super.transition(this)
             setup {
                 test {
                     testApp.launchViaIntent(wmHelper)
@@ -81,7 +80,7 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
                         WindowManagerConditionsFactory.isActivityVisible(LAUNCHER_COMPONENT),
                         WindowManagerConditionsFactory.hasLayersAnimating().negate()
                     )
-                    this.setRotation(testSpec.config.startRotation)
+                    this.setRotation(testSpec.startRotation)
                 }
             }
             transitions {

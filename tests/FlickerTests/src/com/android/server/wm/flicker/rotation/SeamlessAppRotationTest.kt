@@ -81,14 +81,14 @@ class SeamlessAppRotationTest(
 ) : RotationTransition(testSpec) {
     override val testApp = SeamlessRotationAppHelper(instrumentation)
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this, it)
+            super.transition(this)
             setup {
                 test {
                     testApp.launchViaIntent(wmHelper,
-                        stringExtras = mapOf(
-                            ActivityOptions.EXTRA_STARVE_UI_THREAD to it.starveUiThread.toString())
+                        stringExtras = mapOf(ActivityOptions.EXTRA_STARVE_UI_THREAD
+                            to testSpec.starveUiThread.toString())
                     )
                 }
             }
@@ -185,15 +185,17 @@ class SeamlessAppRotationTest(
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
     companion object {
-        private val Map<String, Any?>.starveUiThread
-            get() = this.getOrDefault(ActivityOptions.EXTRA_STARVE_UI_THREAD, false) as Boolean
+        private val FlickerTestParameter.starveUiThread
+            get() = config.getOrDefault(ActivityOptions.EXTRA_STARVE_UI_THREAD, false) as Boolean
 
-        private fun FlickerTestParameter.createConfig(
+        private fun createConfig(
+            sourceConfig: FlickerTestParameter,
             starveUiThread: Boolean
-        ): MutableMap<String, Any?> {
-            val config = this.config.toMutableMap()
-            config[ActivityOptions.EXTRA_STARVE_UI_THREAD] = starveUiThread
-            return config
+        ): FlickerTestParameter {
+            val newConfig = sourceConfig.config.toMutableMap()
+                .also { it[ActivityOptions.EXTRA_STARVE_UI_THREAD] = starveUiThread }
+            val nameExt = if (starveUiThread) "_BUSY_UI_THREAD" else ""
+            return FlickerTestParameter(newConfig, nameOverride = "$sourceConfig$nameExt")
         }
 
         /**
@@ -206,15 +208,10 @@ class SeamlessAppRotationTest(
         private fun getConfigurations(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigRotationTests(repetitions = 2)
-                .flatMap {
-                    val defaultRun = it.createConfig(starveUiThread = false)
-                    val busyUiRun = it.createConfig(starveUiThread = true)
-                    listOf(
-                        FlickerTestParameter(defaultRun),
-                        FlickerTestParameter(busyUiRun,
-                            name = "${FlickerTestParameter.defaultName(busyUiRun)}_BUSY_UI_THREAD"
-                        )
-                    )
+                .flatMap { sourceConfig ->
+                    val defaultRun = createConfig(sourceConfig, starveUiThread = false)
+                    val busyUiRun = createConfig(sourceConfig, starveUiThread = true)
+                    listOf(defaultRun, busyUiRun)
                 }
         }
 
