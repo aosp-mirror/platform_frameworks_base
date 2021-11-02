@@ -24,7 +24,6 @@ import static android.view.InsetsState.ITYPE_TOP_GESTURES;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
-import static android.view.ViewRootImpl.INSETS_LAYOUT_GENERALIZATION;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
@@ -59,7 +58,6 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
-import android.util.SparseArray;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
@@ -221,13 +219,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
         InsetsSourceProvider provider =
                 mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR);
-        if (INSETS_LAYOUT_GENERALIZATION) {
-            // In the new flexible insets setup, the insets frame should always respect the window
-            // layout result.
-            assertEquals(new Rect(0, 0, 500, 100), provider.getSource().getFrame());
-        } else {
-            assertNotEquals(new Rect(0, 0, 500, 100), provider.getSource().getFrame());
-        }
+        // In the new flexible insets setup, the insets frame should always respect the window
+        // layout result.
+        assertEquals(new Rect(0, 0, 500, 100), provider.getSource().getFrame());
     }
 
     @Test
@@ -706,8 +700,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         // Force the display bounds because it is not synced with display frames in policy test.
         mDisplayContent.getWindowConfiguration().setBounds(mFrames.mUnrestricted);
         mDisplayContent.getInsetsStateController().onPostLayout();
-        mDisplayPolicy.simulateLayoutDisplay(simulatedDisplayFrames,
-                new SparseArray<>() /* barContentFrames */);
+        mDisplayPolicy.simulateLayoutDisplay(simulatedDisplayFrames);
 
         final StringWriter realFramesDump = new StringWriter();
         mFrames.dump(prefix, new PrintWriter(realFramesDump));

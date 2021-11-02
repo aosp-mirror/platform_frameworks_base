@@ -397,8 +397,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
     @Test
     public void testAspectRatioMatchParentBoundsAndImeAttachable() {
-        setUpApp(new TestDisplayContent.Builder(mAtm, 1000, 2000)
-                .setSystemDecorations(true).build());
+        setUpApp(new TestDisplayContent.Builder(mAtm, 1000, 2000).build());
         prepareUnresizable(mActivity, 2f /* maxAspect */, SCREEN_ORIENTATION_UNSPECIFIED);
         assertFitted();
 
