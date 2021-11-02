@@ -223,7 +223,7 @@ public final class ContentCaptureManagerService extends
     @Override // from AbstractMasterSystemService
     protected ContentCapturePerUserService newServiceLocked(@UserIdInt int resolvedUserId,
             boolean disabled) {
-        return new ContentCapturePerUserService(this, mLock, disabled, resolvedUserId);
+        return new ContentCapturePerUserService(this, mLock, disabled, resolvedUserId, mHandler);
     }
 
     @Override // from SystemService

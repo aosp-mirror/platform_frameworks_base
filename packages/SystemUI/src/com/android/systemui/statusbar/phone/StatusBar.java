@@ -129,7 +129,6 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.AutoReinflateContainer;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.Dumpable;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.InitController;
 import com.android.systemui.Prefs;
@@ -235,6 +234,7 @@ import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.unfold.UnfoldTransitionWallpaperController;
 import com.android.systemui.unfold.config.UnfoldTransitionConfig;
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider;
+import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
@@ -936,8 +936,6 @@ public class StatusBar extends SystemUI implements
                 data -> mCommandQueueCallbacks.animateExpandSettingsPanel(data.mSubpanel));
         mMessageRouter.subscribeTo(MSG_LAUNCH_TRANSITION_TIMEOUT,
                 id -> onLaunchTransitionTimeout());
-
-        dumpManager.registerDumpable(this);
     }
 
     @Override
@@ -2445,8 +2443,14 @@ public class StatusBar extends SystemUI implements
         }
         pw.println("  mStackScroller: ");
         if (mStackScroller != null) {
-            pw.print  ("      ");
-            ((Dumpable) mStackScroller).dump(fd, pw, args);
+            DumpUtilsKt.withIndenting(pw, ipw -> {
+                // Triple indent until we rewrite the rest of this dump()
+                ipw.increaseIndent();
+                ipw.increaseIndent();
+                mStackScroller.dump(fd, ipw, args);
+                ipw.decreaseIndent();
+                ipw.decreaseIndent();
+            });
         }
         pw.println("  Theme:");
         String nightMode = mUiModeManager == null ? "null" : mUiModeManager.getNightMode() + "";

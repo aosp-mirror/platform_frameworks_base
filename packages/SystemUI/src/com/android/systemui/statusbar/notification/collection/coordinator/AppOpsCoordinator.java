@@ -23,11 +23,11 @@ import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.appops.AppOpsController;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt;
@@ -48,7 +48,7 @@ import javax.inject.Inject;
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceNotificationListener
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceLifetimeExtender
  */
-@SysUISingleton
+@CoordinatorScope
 public class AppOpsCoordinator implements Coordinator {
     private static final String TAG = "AppOpsCoordinator";
 

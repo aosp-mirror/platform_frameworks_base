@@ -586,12 +586,12 @@ public class WallpaperManager {
 
             Rect dimensions = null;
             synchronized (this) {
+                ParcelFileDescriptor pfd = null;
                 try {
                     Bundle params = new Bundle();
+                    pfd = mService.getWallpaperWithFeature(context.getOpPackageName(),
+                            context.getAttributionTag(), this, FLAG_SYSTEM, params, userId);
                     // Let's peek user wallpaper first.
-                    ParcelFileDescriptor pfd = mService.getWallpaperWithFeature(
-                            context.getOpPackageName(), context.getAttributionTag(), this,
-                            FLAG_SYSTEM, params, userId);
                     if (pfd != null) {
                         BitmapFactory.Options options = new BitmapFactory.Options();
                         options.inJustDecodeBounds = true;
@@ -600,6 +600,13 @@ public class WallpaperManager {
                     }
                 } catch (RemoteException ex) {
                     Log.w(TAG, "peek wallpaper dimensions failed", ex);
+                } finally {
+                    if (pfd != null) {
+                        try {
+                            pfd.close();
+                        } catch (IOException ignored) {
+                        }
+                    }
                 }
             }
             // If user wallpaper is unavailable, may be the default one instead.

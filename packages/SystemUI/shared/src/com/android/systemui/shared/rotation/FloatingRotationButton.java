@@ -16,6 +16,9 @@
 
 package com.android.systemui.shared.rotation;
 
+import android.annotation.DimenRes;
+import android.annotation.IdRes;
+import android.annotation.LayoutRes;
 import android.annotation.StringRes;
 import android.content.Context;
 import android.content.res.Resources;
@@ -61,29 +64,33 @@ public class FloatingRotationButton implements RotationButton {
     private RotationButtonUpdatesCallback mUpdatesCallback;
     private Position mPosition;
 
-    public FloatingRotationButton(Context context, @StringRes int contentDescription) {
+    public FloatingRotationButton(Context context, @StringRes int contentDescription,
+            @LayoutRes int layout, @IdRes int keyButtonId, @DimenRes int minMargin,
+            @DimenRes int roundedContentPadding, @DimenRes int taskbarLeftMargin,
+            @DimenRes int taskbarBottomMargin, @DimenRes int buttonDiameter,
+            @DimenRes int rippleMaxWidth) {
         mWindowManager = context.getSystemService(WindowManager.class);
-        mKeyButtonContainer = (ViewGroup) LayoutInflater.from(context).inflate(
-                R.layout.rotate_suggestion, null);
-        mKeyButtonView = mKeyButtonContainer.findViewById(R.id.rotate_suggestion);
+        mKeyButtonContainer = (ViewGroup) LayoutInflater.from(context).inflate(layout, null);
+        mKeyButtonView = mKeyButtonContainer.findViewById(keyButtonId);
         mKeyButtonView.setVisibility(View.VISIBLE);
         mKeyButtonView.setContentDescription(context.getString(contentDescription));
+        mKeyButtonView.setRipple(rippleMaxWidth);
 
         Resources res = context.getResources();
 
         int defaultMargin = Math.max(
-                res.getDimensionPixelSize(R.dimen.floating_rotation_button_min_margin),
-                res.getDimensionPixelSize(R.dimen.rounded_corner_content_padding));
+                res.getDimensionPixelSize(minMargin),
+                res.getDimensionPixelSize(roundedContentPadding));
 
         int taskbarMarginLeft =
-                res.getDimensionPixelSize(R.dimen.floating_rotation_button_taskbar_left_margin);
+                res.getDimensionPixelSize(taskbarLeftMargin);
         int taskbarMarginBottom =
-                res.getDimensionPixelSize(R.dimen.floating_rotation_button_taskbar_bottom_margin);
+                res.getDimensionPixelSize(taskbarBottomMargin);
 
         mPositionCalculator = new FloatingRotationButtonPositionCalculator(defaultMargin,
                 taskbarMarginLeft, taskbarMarginBottom);
 
-        final int diameter = res.getDimensionPixelSize(R.dimen.floating_rotation_button_diameter);
+        final int diameter = res.getDimensionPixelSize(buttonDiameter);
         mContainerSize = diameter + Math.max(defaultMargin, Math.max(taskbarMarginLeft,
                 taskbarMarginBottom));
     }
