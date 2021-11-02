@@ -18,10 +18,34 @@ package com.android.server.input;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.KeyEvent.KEYCODE_ALT_LEFT;
+import static android.view.KeyEvent.KEYCODE_ALT_RIGHT;
+import static android.view.KeyEvent.KEYCODE_CTRL_LEFT;
+import static android.view.KeyEvent.KEYCODE_CTRL_RIGHT;
+import static android.view.KeyEvent.KEYCODE_META_LEFT;
+import static android.view.KeyEvent.KEYCODE_META_RIGHT;
+import static android.view.KeyEvent.KEYCODE_SHIFT_LEFT;
+import static android.view.KeyEvent.KEYCODE_SHIFT_RIGHT;
+import static android.view.KeyEvent.META_ALT_LEFT_ON;
+import static android.view.KeyEvent.META_ALT_ON;
+import static android.view.KeyEvent.META_ALT_RIGHT_ON;
+import static android.view.KeyEvent.META_CTRL_LEFT_ON;
+import static android.view.KeyEvent.META_CTRL_ON;
+import static android.view.KeyEvent.META_CTRL_RIGHT_ON;
+import static android.view.KeyEvent.META_META_LEFT_ON;
+import static android.view.KeyEvent.META_META_ON;
+import static android.view.KeyEvent.META_META_RIGHT_ON;
+import static android.view.KeyEvent.META_SHIFT_LEFT_ON;
+import static android.view.KeyEvent.META_SHIFT_ON;
+import static android.view.KeyEvent.META_SHIFT_RIGHT_ON;
+
+import static java.util.Collections.unmodifiableMap;
 
 import android.hardware.input.InputManager;
 import android.os.ShellCommand;
 import android.os.SystemClock;
+import android.util.ArrayMap;
+import android.util.IntArray;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -29,8 +53,6 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -52,18 +74,39 @@ public class InputShellCommand extends ShellCommand {
     private static final int DEFAULT_BUTTON_STATE = 0;
     private static final int DEFAULT_FLAGS = 0;
 
-    private static final Map<String, Integer> SOURCES = new HashMap<String, Integer>() {{
-            put("keyboard", InputDevice.SOURCE_KEYBOARD);
-            put("dpad", InputDevice.SOURCE_DPAD);
-            put("gamepad", InputDevice.SOURCE_GAMEPAD);
-            put("touchscreen", InputDevice.SOURCE_TOUCHSCREEN);
-            put("mouse", InputDevice.SOURCE_MOUSE);
-            put("stylus", InputDevice.SOURCE_STYLUS);
-            put("trackball", InputDevice.SOURCE_TRACKBALL);
-            put("touchpad", InputDevice.SOURCE_TOUCHPAD);
-            put("touchnavigation", InputDevice.SOURCE_TOUCH_NAVIGATION);
-            put("joystick", InputDevice.SOURCE_JOYSTICK);
-        }};
+    /** Modifier key to meta state */
+    private static final Map<Integer, Integer> MODIFIER;
+    static {
+        final Map<Integer, Integer> map = new ArrayMap<>();
+        map.put(KEYCODE_CTRL_LEFT, META_CTRL_LEFT_ON | META_CTRL_ON);
+        map.put(KEYCODE_CTRL_RIGHT, META_CTRL_RIGHT_ON | META_CTRL_ON);
+        map.put(KEYCODE_ALT_LEFT, META_ALT_LEFT_ON | META_ALT_ON);
+        map.put(KEYCODE_ALT_RIGHT, META_ALT_RIGHT_ON | META_ALT_ON);
+        map.put(KEYCODE_SHIFT_LEFT, META_SHIFT_LEFT_ON | META_SHIFT_ON);
+        map.put(KEYCODE_SHIFT_RIGHT, META_SHIFT_RIGHT_ON | META_SHIFT_ON);
+        map.put(KEYCODE_META_LEFT, META_META_LEFT_ON | META_META_ON);
+        map.put(KEYCODE_META_RIGHT, META_META_RIGHT_ON | META_META_ON);
+
+        MODIFIER = unmodifiableMap(map);
+    }
+
+    /** String to device source */
+    private static final Map<String, Integer> SOURCES;
+    static {
+        final Map<String, Integer> map = new ArrayMap<>();
+        map.put("keyboard", InputDevice.SOURCE_KEYBOARD);
+        map.put("dpad", InputDevice.SOURCE_DPAD);
+        map.put("gamepad", InputDevice.SOURCE_GAMEPAD);
+        map.put("touchscreen", InputDevice.SOURCE_TOUCHSCREEN);
+        map.put("mouse", InputDevice.SOURCE_MOUSE);
+        map.put("stylus", InputDevice.SOURCE_STYLUS);
+        map.put("trackball", InputDevice.SOURCE_TRACKBALL);
+        map.put("touchpad", InputDevice.SOURCE_TOUCHPAD);
+        map.put("touchnavigation", InputDevice.SOURCE_TOUCH_NAVIGATION);
+        map.put("joystick", InputDevice.SOURCE_JOYSTICK);
+
+        SOURCES = unmodifiableMap(map);
+    }
 
     private void injectKeyEvent(KeyEvent event) {
         InputManager.getInstance().injectInputEvent(event,
@@ -237,8 +280,8 @@ public class InputShellCommand extends ShellCommand {
             out.println("      press (Default: trackball)");
             out.println("      roll <dx> <dy> (Default: trackball)");
             out.println("      motionevent <DOWN|UP|MOVE|CANCEL> <x> <y> (Default: touchscreen)");
-            out.println("      keycombination <key code 1> <key code 2> ..."
-                    + " (Default: keyboard)");
+            out.println("      keycombination [-t duration(ms)] <key code 1> <key code 2> ..."
+                    + " (Default: keyboard, the key order is important here.)");
         }
     }
 
@@ -459,8 +502,16 @@ public class InputShellCommand extends ShellCommand {
 
     private void runKeyCombination(int inputSource, int displayId) {
         String arg = getNextArgRequired();
-        ArrayList<Integer> keyCodes = new ArrayList<>();
 
+        // Get duration (optional).
+        long duration = 0;
+        if ("-t".equals(arg)) {
+            arg = getNextArgRequired();
+            duration = Integer.parseInt(arg);
+            arg = getNextArgRequired();
+        }
+
+        IntArray keyCodes = new IntArray();
         while (arg != null) {
             final int keyCode = KeyEvent.keyCodeFromString(arg);
             if (keyCode == KeyEvent.KEYCODE_UNKNOWN) {
@@ -475,7 +526,7 @@ public class InputShellCommand extends ShellCommand {
             throw new IllegalArgumentException("keycombination requires at least 2 keycodes");
         }
 
-        sendKeyCombination(inputSource, keyCodes, displayId);
+        sendKeyCombination(inputSource, keyCodes, displayId, duration);
     }
 
     private void injectKeyEventAsync(KeyEvent event) {
@@ -483,16 +534,21 @@ public class InputShellCommand extends ShellCommand {
                 InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 
-    private void sendKeyCombination(int inputSource, ArrayList<Integer> keyCodes, int displayId) {
+    private void sendKeyCombination(int inputSource, IntArray keyCodes, int displayId,
+            long duration) {
         final long now = SystemClock.uptimeMillis();
         final int count = keyCodes.size();
         final KeyEvent[] events = new KeyEvent[count];
+        int metaState = 0;
         for (int i = 0; i < count; i++) {
-            final KeyEvent event = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCodes.get(i), 0,
-                    0 /*metaState*/, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/, 0 /*flags*/,
+            final int keyCode = keyCodes.get(i);
+            final KeyEvent event = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0,
+                    metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/, 0 /*flags*/,
                     inputSource);
             event.setDisplayId(displayId);
             events[i] = event;
+            // The order is important here, metaState could be updated and applied to the next key.
+            metaState |= MODIFIER.getOrDefault(keyCode, 0);
         }
 
         for (KeyEvent event: events) {
@@ -501,7 +557,7 @@ public class InputShellCommand extends ShellCommand {
             injectKeyEventAsync(event);
         }
 
-        sleep(ViewConfiguration.getTapTimeout());
+        sleep(duration);
 
         for (KeyEvent event: events) {
             injectKeyEventAsync(KeyEvent.changeAction(event, KeyEvent.ACTION_UP));
@@ -513,7 +569,7 @@ public class InputShellCommand extends ShellCommand {
      *
      * @param milliseconds The time to sleep in milliseconds.
      */
-    private void sleep(int milliseconds) {
+    private void sleep(long milliseconds) {
         try {
             Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
