@@ -127,6 +127,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
     // Default package name
     static final String DEFAULT_COMPONENT_PACKAGE_NAME = "com.foo";
 
+    static final int DEFAULT_TASK_FRAGMENT_ORGANIZER_UID = 10000;
+    static final String DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME = "Test:TaskFragmentOrganizer";
+
     // Default base activity name
     private static final String DEFAULT_COMPONENT_CLASS_NAME = ".BarActivity";
 
@@ -1227,7 +1230,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
             if (mOrganizer != null) {
                 taskFragment.setTaskFragmentOrganizer(
-                        mOrganizer.getOrganizerToken(), 10000 /* pid */);
+                        mOrganizer.getOrganizerToken(), DEFAULT_TASK_FRAGMENT_ORGANIZER_UID,
+                        DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME);
             }
             return taskFragment;
         }

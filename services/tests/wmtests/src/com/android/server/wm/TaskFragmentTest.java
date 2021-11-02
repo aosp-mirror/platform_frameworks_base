@@ -20,12 +20,15 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.clearInvocations;
 
 import android.graphics.Rect;
+import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.window.ITaskFragmentOrganizer;
+import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOrganizer;
 
 import androidx.test.filters.MediumTest;
@@ -64,6 +67,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         mTaskFragment = new TaskFragmentBuilder(mAtm)
                 .setCreateParentTask()
                 .setOrganizer(mOrganizer)
+                .setFragmentToken(new Binder())
                 .build();
         mLeash = mTaskFragment.getSurfaceControl();
         spyOn(mTaskFragment);
@@ -101,5 +105,24 @@ public class TaskFragmentTest extends WindowTestsBase {
         // Update surface after animation.
         verify(mTransaction).setPosition(mLeash, 500, 500);
         verify(mTransaction).setWindowCrop(mLeash, 500, 500);
+    }
+
+    /**
+     * Tests that when a {@link TaskFragmentInfo} is generated from a {@link TaskFragment}, an
+     * activity that has not yet been attached to a process because it is being initialized but
+     * belongs to the TaskFragmentOrganizer process is still reported in the TaskFragmentInfo.
+     */
+    @Test
+    public void testActivityStillReported_NotYetAssignedToProcess() {
+        mTaskFragment.addChild(new ActivityBuilder(mAtm).setUid(DEFAULT_TASK_FRAGMENT_ORGANIZER_UID)
+                .setProcessName(DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME).build());
+        final ActivityRecord activity = mTaskFragment.getTopMostActivity();
+        // Remove the process to simulate an activity that has not yet been attached to a process
+        activity.app = null;
+        final TaskFragmentInfo info = activity.getTaskFragment().getTaskFragmentInfo();
+        assertEquals(1, info.getRunningActivityCount());
+        assertEquals(1, info.getActivities().size());
+        assertEquals(false, info.isEmpty());
+        assertEquals(activity.token, info.getActivities().get(0));
     }
 }
