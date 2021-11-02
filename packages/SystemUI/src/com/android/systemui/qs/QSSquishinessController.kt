@@ -34,17 +34,17 @@ class QSSquishinessController @Inject constructor(
      * Change the height of all tiles and repositions their siblings.
      */
     private fun updateSquishiness() {
-        // Start by updating the height of all tiles
+        // Update tile positions in the layout
+        val tileLayout = quickQSPanelController.tileLayout as TileLayout
+        tileLayout.setSquishinessFraction(squishiness)
+
+        // Adjust their heights as well
         for (tile in qsTileHost.tiles) {
             val tileView = quickQSPanelController.getTileView(tile)
             (tileView as? HeightOverrideable)?.let {
                 it.squishinessFraction = squishiness
             }
         }
-
-        // Update tile positions in the layout
-        val tileLayout = quickQSPanelController.tileLayout as TileLayout
-        tileLayout.setSquishinessFraction(squishiness)
 
         // Calculate how much we should move the footer
         val tileHeightOffset = tileLayout.height - tileLayout.tilesHeight
