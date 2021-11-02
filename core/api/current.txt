@@ -6189,10 +6189,12 @@ package android.app {
     method public long[] getVibrationPattern();
     method public boolean hasUserSetImportance();
     method public boolean hasUserSetSound();
+    method public boolean isBlockable();
     method public boolean isConversation();
     method public boolean isDemoted();
     method public boolean isImportantConversation();
     method public void setAllowBubbles(boolean);
+    method public void setBlockable(boolean);
     method public void setBypassDnd(boolean);
     method public void setConversationId(@NonNull String, @NonNull String);
     method public void setDescription(String);

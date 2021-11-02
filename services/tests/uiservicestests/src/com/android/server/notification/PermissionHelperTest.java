@@ -15,6 +15,8 @@
  */
 package com.android.server.notification;
 
+import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.permission.PermissionManager.PERMISSION_GRANTED;
@@ -36,6 +38,7 @@ import android.Manifest;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.permission.IPermissionManager;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -243,5 +246,26 @@ public class PermissionHelperTest extends UiServiceTestCase {
                 eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS), eq(10), anyString());
         verify(mPermManager, never()).updatePermissionFlags(
                 anyString(), anyString(), anyInt(), anyInt(), anyBoolean(), anyInt());
+    }
+
+    @Test
+    public void testIsPermissionFixed() throws Exception {
+        when(mPermManager.getPermissionFlags(anyString(),
+                eq(Manifest.permission.POST_NOTIFICATIONS),
+                anyInt())).thenReturn(FLAG_PERMISSION_USER_SET);
+
+        assertThat(mPermissionHelper.isPermissionFixed("pkg", 0)).isFalse();
+
+        when(mPermManager.getPermissionFlags(anyString(),
+                eq(Manifest.permission.POST_NOTIFICATIONS),
+                anyInt())).thenReturn(FLAG_PERMISSION_USER_SET|FLAG_PERMISSION_POLICY_FIXED);
+
+        assertThat(mPermissionHelper.isPermissionFixed("pkg", 0)).isTrue();
+
+        when(mPermManager.getPermissionFlags(anyString(),
+                eq(Manifest.permission.POST_NOTIFICATIONS),
+                anyInt())).thenReturn(FLAG_PERMISSION_SYSTEM_FIXED);
+
+        assertThat(mPermissionHelper.isPermissionFixed("pkg", 0)).isTrue();
     }
 }

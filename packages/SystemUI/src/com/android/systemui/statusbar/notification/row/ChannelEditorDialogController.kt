@@ -156,6 +156,7 @@ class ChannelEditorDialogController @Inject constructor(
         groupList: Sequence<NotificationChannelGroup>
     ): Sequence<NotificationChannel> {
 
+        // TODO (b/194833441): remove channel level settings when we move to a permission
         val channels = groupList
                 .flatMap { group ->
                     group.channels.asSequence().filterNot { channel ->

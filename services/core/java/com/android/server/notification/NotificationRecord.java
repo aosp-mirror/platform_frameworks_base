@@ -193,6 +193,7 @@ public final class NotificationRecord {
     private boolean mHasSentValidMsg;
     private boolean mAppDemotedFromConvo;
     private boolean mPkgAllowedAsConvo;
+    private boolean mImportanceFixed;
     /**
      * Whether this notification (and its channels) should be considered user locked. Used in
      * conjunction with user sentiment calculation.
@@ -823,6 +824,14 @@ public final class NotificationRecord {
         return mAssistantImportance;
     }
 
+    public void setImportanceFixed(boolean fixed) {
+        mImportanceFixed = fixed;
+    }
+
+    public boolean isImportanceFixed() {
+        return mImportanceFixed;
+    }
+
     /**
      * Recalculates the importance of the record after fields affecting importance have changed,
      * and records an explanation.
@@ -834,8 +843,7 @@ public final class NotificationRecord {
         // Consider Notification Assistant and system overrides to importance. If both, system wins.
         if (!getChannel().hasUserSetImportance()
                 && mAssistantImportance != IMPORTANCE_UNSPECIFIED
-                && !getChannel().isImportanceLockedByOEM()
-                && !getChannel().isImportanceLockedByCriticalDeviceFunction()) {
+                && !mImportanceFixed) {
             mImportance = mAssistantImportance;
             mImportanceExplanationCode = MetricsEvent.IMPORTANCE_EXPLANATION_ASST;
         }
