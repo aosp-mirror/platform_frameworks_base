@@ -51,6 +51,7 @@ import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -137,9 +138,13 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController,
                 mKeyguardMessageAreaFactory,
                 mShadeController);
-        mStatusBarKeyguardViewManager.registerStatusBar(mStatusBar,
-                mNotificationPanelView, mBiometrucUnlockController,
-                mNotificationContainer, mBypassController);
+        mStatusBarKeyguardViewManager.registerStatusBar(
+                mStatusBar,
+                mNotificationPanelView,
+                new PanelExpansionStateManager(),
+                mBiometrucUnlockController,
+                mNotificationContainer,
+                mBypassController);
         mStatusBarKeyguardViewManager.show(null);
     }
 

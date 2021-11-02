@@ -133,6 +133,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -385,6 +386,7 @@ public class StatusBarTest extends SysuiTestCase {
                 notificationLogger,
                 mNotificationInterruptStateProvider,
                 mNotificationViewHierarchyManager,
+                new PanelExpansionStateManager(),
                 mKeyguardViewMediator,
                 new DisplayMetrics(),
                 mMetricsLogger,
@@ -464,9 +466,13 @@ public class StatusBarTest extends SysuiTestCase {
                 mock(DumpManager.class),
                 mActivityLaunchAnimator,
                 mDialogLaunchAnimator);
-        when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class),
-                any(NotificationPanelViewController.class), any(BiometricUnlockController.class),
-                any(ViewGroup.class), any(KeyguardBypassController.class)))
+        when(mKeyguardViewMediator.registerStatusBar(
+                any(StatusBar.class),
+                any(NotificationPanelViewController.class),
+                any(PanelExpansionStateManager.class),
+                any(BiometricUnlockController.class),
+                any(ViewGroup.class),
+                any(KeyguardBypassController.class)))
                 .thenReturn(mStatusBarKeyguardViewManager);
 
         when(mKeyguardViewMediator.getViewMediatorCallback()).thenReturn(
