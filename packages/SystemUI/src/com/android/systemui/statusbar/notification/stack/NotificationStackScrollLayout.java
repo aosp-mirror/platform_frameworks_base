@@ -109,6 +109,7 @@ import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.DumpUtilsKt;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -4899,54 +4900,42 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(String.format("[%s: pulsing=%s visibility=%s"
-                        + " alpha=%f scrollY:%d maxTopPadding=%d showShelfOnly=%s"
-                        + " qsExpandFraction=%f"
-                        + " hideAmount=%f]",
-                this.getClass().getSimpleName(),
-                mPulsing ? "T" : "f",
-                getVisibility() == View.VISIBLE ? "visible"
-                        : getVisibility() == View.GONE ? "gone"
-                                : "invisible",
-                getAlpha(),
-                mAmbientState.getScrollY(),
-                mMaxTopPadding,
-                mShouldShowShelfOnly ? "T" : "f",
-                mQsExpansionFraction,
-                mAmbientState.getHideAmount()));
-        int childCount = getChildCount();
-        pw.println("  Number of children: " + childCount);
-        pw.println();
+        StringBuilder sb = new StringBuilder("[")
+                .append(this.getClass().getSimpleName()).append(":")
+                .append(" pulsing=").append(mPulsing ? "T" : "f")
+                .append(" visibility=").append(DumpUtilsKt.visibilityString(getVisibility()))
+                .append(" alpha=").append(getAlpha())
+                .append(" scrollY=").append(mAmbientState.getScrollY())
+                .append(" maxTopPadding=").append(mMaxTopPadding)
+                .append(" showShelfOnly=").append(mShouldShowShelfOnly ? "T" : "f")
+                .append(" qsExpandFraction=").append(mQsExpansionFraction)
+                .append(" isCurrentUserSetup=").append(mIsCurrentUserSetup)
+                .append(" hideAmount=").append(mAmbientState.getHideAmount())
+                .append("]");
+        pw.println(sb.toString());
+        DumpUtilsKt.withIndenting(pw, ipw -> {
+            int childCount = getChildCount();
+            ipw.println("Number of children: " + childCount);
+            ipw.println();
 
-        for (int i = 0; i < childCount; i++) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
-            child.dump(fd, pw, args);
-            if (!(child instanceof ExpandableNotificationRow)) {
-                pw.println("  " + child.getClass().getSimpleName());
-                // Notifications dump it's viewstate as part of their dump to support children
-                ExpandableViewState viewState = child.getViewState();
-                if (viewState == null) {
-                    pw.println("    no viewState!!!");
-                } else {
-                    pw.print("    ");
-                    viewState.dump(fd, pw, args);
-                    pw.println();
-                    pw.println();
-                }
+            for (int i = 0; i < childCount; i++) {
+                ExpandableView child = (ExpandableView) getChildAt(i);
+                child.dump(fd, ipw, args);
+                ipw.println();
             }
-        }
-        int transientViewCount = getTransientViewCount();
-        pw.println("  Transient Views: " + transientViewCount);
-        for (int i = 0; i < transientViewCount; i++) {
-            ExpandableView child = (ExpandableView) getTransientView(i);
-            child.dump(fd, pw, args);
-        }
-        View swipedView = mSwipeHelper.getSwipedView();
-        pw.println("  Swiped view: " + swipedView);
-        if (swipedView instanceof ExpandableView) {
-            ExpandableView expandableView = (ExpandableView) swipedView;
-            expandableView.dump(fd, pw, args);
-        }
+            int transientViewCount = getTransientViewCount();
+            pw.println("Transient Views: " + transientViewCount);
+            for (int i = 0; i < transientViewCount; i++) {
+                ExpandableView child = (ExpandableView) getTransientView(i);
+                child.dump(fd, pw, args);
+            }
+            View swipedView = mSwipeHelper.getSwipedView();
+            pw.println("Swiped view: " + swipedView);
+            if (swipedView instanceof ExpandableView) {
+                ExpandableView expandableView = (ExpandableView) swipedView;
+                expandableView.dump(fd, pw, args);
+            }
+        });
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)

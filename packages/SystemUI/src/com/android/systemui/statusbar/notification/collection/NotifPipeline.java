@@ -23,6 +23,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
@@ -214,6 +215,11 @@ public class NotifPipeline implements CommonNotifCollection {
      */
     public void addOnBeforeRenderListListener(OnBeforeRenderListListener listener) {
         mShadeListBuilder.addOnBeforeRenderListListener(listener);
+    }
+
+    /** Registers an invalidator that can be used to invalidate the entire notif list. */
+    public void addPreRenderInvalidator(Invalidator invalidator) {
+        mShadeListBuilder.addPreRenderInvalidator(invalidator);
     }
 
     /**

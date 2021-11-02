@@ -1028,13 +1028,16 @@ public class BubbleController {
                 // If this entry is no longer allowed to bubble, dismiss with the BLOCKED reason.
                 // This means that the app or channel's ability to bubble has been revoked.
                 mBubbleData.dismissBubbleWithKey(key, DISMISS_BLOCKED);
-            } else if (isActiveBubble && !shouldBubbleUp) {
-                // If this entry is allowed to bubble, but cannot currently bubble up, dismiss it.
-                // This happens when DND is enabled and configured to hide bubbles. Dismissing with
-                // the reason DISMISS_NO_BUBBLE_UP will retain the underlying notification, so that
-                // the bubble will be re-created if shouldBubbleUp returns true.
+            } else if (isActiveBubble && (!shouldBubbleUp || entry.getRanking().isSuspended())) {
+                // If this entry is allowed to bubble, but cannot currently bubble up or is
+                // suspended, dismiss it. This happens when DND is enabled and configured to hide
+                // bubbles, or focus mode is enabled and the app is designated as distracting.
+                // Dismissing with the reason DISMISS_NO_BUBBLE_UP will retain the underlying
+                // notification, so that the bubble will be re-created if shouldBubbleUp returns
+                // true.
                 mBubbleData.dismissBubbleWithKey(key, DISMISS_NO_BUBBLE_UP);
-            } else if (entry != null && mTmpRanking.isBubble() && !isActiveBubble) {
+            } else if (entry != null && mTmpRanking.isBubble() && !isActiveBubble
+                    && !entry.getRanking().isSuspended()) {
                 entry.setFlagBubble(true);
                 onEntryUpdated(entry, true /* shouldBubbleUp */);
             }

@@ -18,6 +18,8 @@ package com.android.systemui.flags;
 
 import android.content.Context;
 import android.util.FeatureFlagUtils;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
@@ -84,6 +86,22 @@ public class FeatureFlags {
         if (mListeners.containsKey(flag.getId())) {
             mListeners.get(flag.getId()).remove(listener);
         }
+    }
+
+    public void assertLegacyPipelineEnabled() {
+        if (isNewNotifPipelineRenderingEnabled()) {
+            throw new IllegalStateException("Old pipeline code running w/ new pipeline enabled");
+        }
+    }
+
+    public boolean checkLegacyPipelineEnabled() {
+        if (!isNewNotifPipelineRenderingEnabled()) {
+            return true;
+        }
+        Log.d("NotifPipeline", "Old pipeline code running w/ new pipeline enabled",
+                new Exception());
+        Toast.makeText(mContext, "Old pipeline code running!", Toast.LENGTH_SHORT).show();
+        return false;
     }
 
     public boolean isNewNotifPipelineEnabled() {

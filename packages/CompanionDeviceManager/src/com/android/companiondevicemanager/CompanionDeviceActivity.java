@@ -254,8 +254,14 @@ public class CompanionDeviceActivity extends Activity {
         Log.i(LOG_TAG, "onDeviceConfirmed(selectedDevice = " + selectedDevice + ")");
         getService().onDeviceSelected(
                 getCallingPackage(), getDeviceMacAddress(selectedDevice.device));
+    }
+
+    void setResultAndFinish() {
+        Log.i(LOG_TAG, "setResultAndFinish(selectedDevice = "
+                + getService().mSelectedDevice.device + ")");
         setResult(RESULT_OK,
-                new Intent().putExtra(CompanionDeviceManager.EXTRA_DEVICE, selectedDevice.device));
+                new Intent().putExtra(
+                        CompanionDeviceManager.EXTRA_DEVICE, getService().mSelectedDevice.device));
         finish();
     }
 

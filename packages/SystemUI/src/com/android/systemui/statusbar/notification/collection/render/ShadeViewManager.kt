@@ -18,10 +18,13 @@ package com.android.systemui.statusbar.notification.collection.render
 
 import android.content.Context
 import android.view.View
+import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
+import com.android.systemui.util.traceSection
 import javax.inject.Inject
 
 /**
@@ -32,7 +35,7 @@ class ShadeViewManager constructor(
     context: Context,
     listContainer: NotificationListContainer,
     logger: ShadeViewDifferLogger,
-    viewBarn: NotifViewBarn,
+    private val viewBarn: NotifViewBarn,
     private val notificationIconAreaController: NotificationIconAreaController
 ) {
     // We pass a shim view here because the listContainer may not actually have a view associated
@@ -45,8 +48,21 @@ class ShadeViewManager constructor(
             listBuilder.setOnRenderListListener(::onNewNotifTree)
 
     private fun onNewNotifTree(notifList: List<ListEntry>) {
-        viewDiffer.applySpec(specBuilder.buildNodeSpec(rootController, notifList))
-        notificationIconAreaController.updateNotificationIcons(notifList)
+        traceSection("ShadeViewManager.onNewNotifTree") {
+            viewDiffer.applySpec(specBuilder.buildNodeSpec(rootController, notifList))
+            updateGroupCounts(notifList)
+            notificationIconAreaController.updateNotificationIcons(notifList)
+        }
+    }
+
+    private fun updateGroupCounts(notifList: List<ListEntry>) {
+        traceSection("ShadeViewManager.updateGroupCounts") {
+            notifList.asSequence().filterIsInstance<GroupEntry>().forEach { groupEntry ->
+                val controller = viewBarn.requireView(checkNotNull(groupEntry.summary))
+                val row = controller.view as ExpandableNotificationRow
+                row.setUntruncatedChildCount(groupEntry.untruncatedChildCount)
+            }
+        }
     }
 }
 
