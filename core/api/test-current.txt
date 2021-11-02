@@ -257,7 +257,8 @@ package android.app {
 
   public class DreamManager {
     method @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE) public boolean isDreaming();
-    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setActiveDream(@NonNull android.content.ComponentName);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setActiveDream(@Nullable android.content.ComponentName);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setDreamOverlay(@Nullable android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void startDream(@NonNull android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void stopDream();
   }
@@ -2360,6 +2361,17 @@ package android.service.autofill.augmented {
     method @Nullable public android.view.inputmethod.InlineSuggestionsRequest getInlineSuggestionsRequest();
     method @Nullable public android.service.autofill.augmented.PresentationParams getPresentationParams();
     method public int getTaskId();
+  }
+
+}
+
+package android.service.dreams {
+
+  public abstract class DreamOverlayService extends android.app.Service {
+    ctor public DreamOverlayService();
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onStartDream(@NonNull android.view.WindowManager.LayoutParams);
+    method public final void requestExit();
   }
 
 }
