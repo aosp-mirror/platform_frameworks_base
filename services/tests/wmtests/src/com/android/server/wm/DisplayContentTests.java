@@ -291,11 +291,11 @@ public class DisplayContentTests extends WindowTestsBase {
                 mAppWindow,
                 mChildAppWindowAbove,
                 mDockedDividerWindow,
-                voiceInteractionWindow,
                 mImeWindow,
                 mImeDialogWindow,
                 mStatusBarWindow,
                 mNotificationShadeWindow,
+                voiceInteractionWindow, // It can show above lock screen.
                 mNavBarWindow));
     }
 
