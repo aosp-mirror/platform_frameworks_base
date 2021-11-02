@@ -42738,7 +42738,7 @@ package android.telephony {
     method public boolean isEmergencyNumber(@NonNull String);
     method public boolean isHearingAidCompatibilitySupported();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public boolean isManualNetworkSelectionAllowed();
-    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isModemEnabledForSlot(int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public boolean isModemEnabledForSlot(int);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int isMultiSimSupported();
     method public boolean isNetworkRoaming();
     method public boolean isRadioInterfaceCapabilitySupported(@NonNull String);
