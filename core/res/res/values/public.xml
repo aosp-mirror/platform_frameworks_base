@@ -3303,6 +3303,7 @@
     <public name="sharedUserMaxSdkVersion" />
     <public name="requiredSplitTypes" />
     <public name="splitTypes" />
+    <public name="canDisplayOnRemoteDevices" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">

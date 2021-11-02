@@ -411,6 +411,7 @@ package android {
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
     field public static final int canControlMagnification = 16844039; // 0x1010507
+    field public static final int canDisplayOnRemoteDevices;
     field public static final int canPauseRecording = 16844314; // 0x101061a
     field public static final int canPerformGestures = 16844045; // 0x101050d
     field public static final int canRecord = 16844060; // 0x101051c

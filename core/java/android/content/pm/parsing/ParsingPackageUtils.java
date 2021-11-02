@@ -52,7 +52,6 @@ import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ComponentMutateUtils;
 import android.content.pm.parsing.component.ComponentParseUtils;
 import android.content.pm.parsing.component.ParsedActivity;
-import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedActivityUtils;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedAttributionUtils;
@@ -194,6 +193,8 @@ public class ParsingPackageUtils {
 
     public static final String METADATA_MAX_ASPECT_RATIO = "android.max_aspect";
     public static final String METADATA_SUPPORTS_SIZE_CHANGES = "android.supports_size_changes";
+    public static final String METADATA_CAN_DISPLAY_ON_REMOTE_DEVICES =
+            "android.can_display_on_remote_devices";
     public static final String METADATA_ACTIVITY_WINDOW_LAYOUT_AFFINITY =
             "android.activity_window_layout_affinity";
     public static final String METADATA_ACTIVITY_LAUNCH_MODE = "android.activity.launch_mode";

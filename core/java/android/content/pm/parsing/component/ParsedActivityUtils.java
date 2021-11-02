@@ -420,6 +420,21 @@ public class ParsedActivityUtils {
             }
         }
 
+        if (!isAlias) {
+            // Default allow the activity to be displayed on a remote device unless it explicitly
+            // set to false.
+            boolean canDisplayOnRemoteDevices = array.getBoolean(
+                    R.styleable.AndroidManifestActivity_canDisplayOnRemoteDevices, true);
+            if (activity.getMetaData() != null && !activity.getMetaData().getBoolean(
+                    ParsingPackageUtils.METADATA_CAN_DISPLAY_ON_REMOTE_DEVICES, true)) {
+                canDisplayOnRemoteDevices = false;
+            }
+            if (canDisplayOnRemoteDevices) {
+                activity.setFlags(activity.getFlags()
+                        | ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES);
+            }
+        }
+
         ParseResult<ActivityInfo.WindowLayout> layoutResult =
                 resolveActivityWindowLayout(activity, input);
         if (layoutResult.isError()) {

@@ -447,6 +447,12 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @see android.app.Activity#setVrModeEnabled(boolean, ComponentName)
      */
     public static final int FLAG_ENABLE_VR_MODE = 0x8000;
+    /**
+     * Bit in {@link #flags} indicating if the activity can be displayed on a remote device.
+     * Corresponds to {@link android.R.attr#canDisplayOnRemoteDevices}
+     * @hide
+     */
+    public static final int FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES = 0x10000;
 
     /**
      * Bit in {@link #flags} indicating if the activity is always focusable regardless of if it is
