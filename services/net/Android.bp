@@ -41,6 +41,7 @@ java_library {
     sdk_version: "module_current",
     min_sdk_version: "30",
     libs: [
+        "framework-annotations-lib",
         "unsupportedappusage",
         "framework-wifi-util-lib",
         "framework-connectivity",
