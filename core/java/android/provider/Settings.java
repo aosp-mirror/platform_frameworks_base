@@ -10267,6 +10267,15 @@ public final class Settings {
         public static final String COMMUNAL_MODE_PACKAGES = "communal_mode_packages";
 
         /**
+         * An array of SSIDs of Wi-Fi networks that, when connected, are considered safe to enable
+         * the communal mode.
+         *
+         * @hide
+         */
+        public static final String COMMUNAL_MODE_TRUSTED_NETWORKS =
+                "communal_mode_trusted_networks";
+
+        /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */
