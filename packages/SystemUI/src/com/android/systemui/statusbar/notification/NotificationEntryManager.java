@@ -721,8 +721,12 @@ public class NotificationEntryManager implements
      * @param reason why the notifications are updating
      */
     public void updateNotifications(String reason) {
+        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            mLogger.logUseWhileNewPipelineActive("updateNotifications", reason);
+            return;
+        }
         reapplyFilterAndSort(reason);
-        if (mPresenter != null && !mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (mPresenter != null) {
             mPresenter.updateNotificationViews(reason);
         }
     }
@@ -880,11 +884,19 @@ public class NotificationEntryManager implements
 
     /** Resorts / filters the current notification set with the current RankingMap */
     public void reapplyFilterAndSort(String reason) {
+        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            mLogger.logUseWhileNewPipelineActive("reapplyFilterAndSort", reason);
+            return;
+        }
         updateRankingAndSort(mRanker.getRankingMap(), reason);
     }
 
     /** Calls to NotificationRankingManager and updates mSortedAndFiltered */
     private void updateRankingAndSort(@NonNull RankingMap rankingMap, String reason) {
+        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            mLogger.logUseWhileNewPipelineActive("updateRankingAndSort", reason);
+            return;
+        }
         mSortedAndFiltered.clear();
         mSortedAndFiltered.addAll(mRanker.updateRanking(
                 rankingMap, mActiveNotifications.values(), reason));
@@ -892,7 +904,7 @@ public class NotificationEntryManager implements
 
     /** dump the current active notification list. Called from StatusBar */
     public void dump(PrintWriter pw, String indent) {
-        pw.println("NotificationEntryManager");
+        pw.println("NotificationEntryManager (Legacy)");
         int filteredLen = mSortedAndFiltered.size();
         pw.print(indent);
         pw.println("active notifications: " + filteredLen);
