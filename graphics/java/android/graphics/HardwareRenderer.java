@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -1075,6 +1076,53 @@ public class HardwareRenderer {
         ProcessInitializer.sInstance.setContext(context);
     }
 
+    /**
+     * Returns true if HardwareRender will produce output.
+     *
+     * This value is global to the process and affects all uses of HardwareRenderer,
+     * including
+     * those created by the system such as those used by the View tree when using hardware
+     * accelerated rendering.
+     *
+     * Default is true in all production environments, but may be false in testing-focused
+     * emulators or if {@link #setDrawingEnabled(boolean)} is used.
+     *
+     * Backported from android T.
+     *
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public static boolean isDrawingEnabled() {
+        return nIsDrawingEnabled();
+    }
+
+    /**
+     * Toggles whether or not HardwareRenderer will produce drawing output globally in the current
+     * process.
+     *
+     * This applies to all HardwareRenderer instances, including those created by the platform such
+     * as those used by the system for hardware accelerated View rendering.
+     *
+     * The capability to disable drawing output is intended for test environments, primarily
+     * headless ones. By setting this to false, tests that launch activities or interact with Views
+     * can be quicker with less RAM usage by skipping the final step of View drawing. All View
+     * lifecycle events will occur as normal, only the final step of rendering on the GPU to the
+     * display will be skipped.
+     *
+     * This can be toggled on and off at will, so screenshot tests can also run in this same
+     * environment by toggling drawing back on and forcing a frame to be drawn such as by calling
+     * view#invalidate(). Once drawn and the screenshot captured, this can then be turned back off.
+     *
+     * Backported from android T.
+     *
+     * @hide
+     */
+    // TODO: Add link to androidx's Screenshot library for help with this
+    @UnsupportedAppUsage
+    public static void setDrawingEnabled(boolean drawingEnabled) {
+        nSetDrawingEnabled(drawingEnabled);
+    }
+
     private static final class DestroyContextRunnable implements Runnable {
         private final long mNativeInstance;
 
@@ -1393,4 +1441,8 @@ public class HardwareRenderer {
 
     private static native void nInitDisplayInfo(int width, int height, float refreshRate,
             int wideColorDataspace, long appVsyncOffsetNanos, long presentationDeadlineNanos);
+
+    private static native void nSetDrawingEnabled(boolean drawingEnabled);
+
+    private static native boolean nIsDrawingEnabled();
 }
