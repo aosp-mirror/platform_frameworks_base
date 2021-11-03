@@ -3307,13 +3307,21 @@ public class AppOpsService extends IAppOpsService.Stub {
         Objects.requireNonNull(packageName);
         try {
             verifyAndGetBypass(uid, packageName, null);
-            if (filterAppAccessUnlocked(packageName)) {
-                return AppOpsManager.MODE_ERRORED;
+            // When the caller is the system, it's possible that the packageName is the special
+            // one (e.g., "root") which isn't actually existed.
+            if (resolveUid(packageName) == uid
+                    || (isPackageExisted(packageName) && !filterAppAccessUnlocked(packageName))) {
+                return AppOpsManager.MODE_ALLOWED;
             }
-            return AppOpsManager.MODE_ALLOWED;
+            return AppOpsManager.MODE_ERRORED;
         } catch (SecurityException ignored) {
             return AppOpsManager.MODE_ERRORED;
         }
+    }
+
+    private boolean isPackageExisted(String packageName) {
+        return LocalServices.getService(PackageManagerInternal.class)
+                .getPackageSetting(packageName) != null;
     }
 
     /**
