@@ -329,7 +329,9 @@ class NotificationShadeDepthController @Inject constructor(
     /**
      * Update blurs when pulling down the shade
      */
-    override fun onPanelExpansionChanged(rawFraction: Float, tracking: Boolean) {
+    override fun onPanelExpansionChanged(
+        rawFraction: Float, expanded: Boolean, tracking: Boolean
+    ) {
         val timestamp = SystemClock.elapsedRealtimeNanos()
         val expansion = MathUtils.saturate(
                 (rawFraction - panelPullDownMinFraction) / (1f - panelPullDownMinFraction))
