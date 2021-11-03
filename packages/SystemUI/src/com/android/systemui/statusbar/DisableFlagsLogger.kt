@@ -85,24 +85,30 @@ class DisableFlagsLogger constructor(
      * is no difference. the new-after-modification state also won't be included if there's no
      * difference from the new state.
      *
-     * @param old the disable state that had been previously sent.
+     * @param old the disable state that had been previously sent. Null if we don't need to log the
+     *   previously sent state.
      * @param new the new disable state that has just been sent.
      * @param newAfterLocalModification the new disable states after a class has locally modified
      *   them. Null if the class does not locally modify.
      */
     fun getDisableFlagsString(
-        old: DisableState,
+        old: DisableState? = null,
         new: DisableState,
         newAfterLocalModification: DisableState? = null
     ): String {
         val builder = StringBuilder("Received new disable state. ")
-        builder.append("Old: ")
-        builder.append(getFlagsString(old))
-        builder.append(" | New: ")
-        if (old != new) {
+
+        old?.let {
+            builder.append("Old: ")
+            builder.append(getFlagsString(old))
+            builder.append(" | ")
+        }
+
+        builder.append("New: ")
+        if (old != null && old != new) {
             builder.append(getFlagsStringWithDiff(old, new))
         } else {
-            builder.append(getFlagsString(old))
+            builder.append(getFlagsString(new))
         }
 
         if (newAfterLocalModification != null && new != newAfterLocalModification) {
