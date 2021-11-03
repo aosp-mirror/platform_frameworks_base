@@ -107,7 +107,7 @@ public class NotificationShadeWindowViewController {
     private final DockManager mDockManager;
     private final NotificationPanelViewController mNotificationPanelViewController;
     private final PanelExpansionStateManager mPanelExpansionStateManager;
-    private final StatusBarWindowView mStatusBarWindowView;
+    private final StatusBarWindowController mStatusBarWindowController;
 
     // Used for determining view / touch intersection
     private int[] mTempLocation = new int[2];
@@ -137,7 +137,7 @@ public class NotificationShadeWindowViewController {
             NotificationShadeWindowView notificationShadeWindowView,
             NotificationPanelViewController notificationPanelViewController,
             PanelExpansionStateManager panelExpansionStateManager,
-            StatusBarWindowView statusBarWindowView,
+            StatusBarWindowController statusBarWindowController,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             LockIconViewController lockIconViewController) {
@@ -162,7 +162,7 @@ public class NotificationShadeWindowViewController {
         mNotificationPanelViewController = notificationPanelViewController;
         mPanelExpansionStateManager = panelExpansionStateManager;
         mDepthController = depthController;
-        mStatusBarWindowView = statusBarWindowView;
+        mStatusBarWindowController = statusBarWindowController;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mLockIconViewController = lockIconViewController;
@@ -500,7 +500,7 @@ public class NotificationShadeWindowViewController {
         if (statusBarView != null) {
             mBarTransitions = new PhoneStatusBarTransitions(
                     statusBarView,
-                    mStatusBarWindowView.findViewById(R.id.status_bar_container));
+                    mStatusBarWindowController.getBackgroundView());
         }
     }
 

@@ -505,7 +505,6 @@ public class StatusBar extends SystemUI implements
     private final StatusBarNotificationActivityStarter.Builder
             mStatusBarNotificationActivityStarterBuilder;
     private final ShadeController mShadeController;
-    private final StatusBarWindowView mStatusBarWindowView;
     private final LightsOutNotifController mLightsOutNotifController;
     private final InitController mInitController;
 
@@ -770,7 +769,6 @@ public class StatusBar extends SystemUI implements
             StatusBarNotificationActivityStarter.Builder
                     statusBarNotificationActivityStarterBuilder,
             ShadeController shadeController,
-            StatusBarWindowView statusBarWindowView,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
@@ -876,7 +874,6 @@ public class StatusBar extends SystemUI implements
         mSplitScreenOptional = splitScreenOptional;
         mStatusBarNotificationActivityStarterBuilder = statusBarNotificationActivityStarterBuilder;
         mShadeController = shadeController;
-        mStatusBarWindowView = statusBarWindowView;
         mLightsOutNotifController =  lightsOutNotifController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardViewMediatorCallback = viewMediatorCallback;
@@ -1169,7 +1166,7 @@ public class StatusBar extends SystemUI implements
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
         mPluginDependencyProvider.allowPluginDependency(DarkIconDispatcher.class);
         mPluginDependencyProvider.allowPluginDependency(StatusBarStateController.class);
-        FragmentHostManager.get(mStatusBarWindowView)
+        mStatusBarWindowController.getFragmentHostManager()
                 .addTagListener(CollapsedStatusBarFragment.TAG, (tag, fragment) -> {
                     CollapsedStatusBarFragment statusBarFragment =
                             (CollapsedStatusBarFragment) fragment;
@@ -1695,10 +1692,6 @@ public class StatusBar extends SystemUI implements
 
     public NotificationShadeWindowView getNotificationShadeWindowView() {
         return mNotificationShadeWindowView;
-    }
-
-    public StatusBarWindowView getStatusBarWindow() {
-        return mStatusBarWindowView;
     }
 
     public NotificationShadeWindowViewController getNotificationShadeWindowViewController() {
@@ -2427,7 +2420,7 @@ public class StatusBar extends SystemUI implements
         pw.print("  mDozing="); pw.println(mDozing);
         pw.print("  mWallpaperSupported= "); pw.println(mWallpaperSupported);
 
-        pw.println("  StatusBarWindowView: ");
+        pw.println("  ShadeWindowView: ");
         if (mNotificationShadeWindowViewController != null) {
             mNotificationShadeWindowViewController.dump(fd, pw, args);
             dumpBarTransitions(pw, "PhoneStatusBarTransitions",
