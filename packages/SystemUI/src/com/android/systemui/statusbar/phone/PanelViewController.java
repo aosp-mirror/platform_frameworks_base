@@ -1093,7 +1093,8 @@ public abstract class PanelViewController {
             mBar.panelExpansionChanged(mExpandedFraction, isExpanded());
         }
         updateVisibility();
-        mPanelExpansionStateManager.onPanelExpansionChanged(mExpandedFraction, mTracking);
+        mPanelExpansionStateManager.onPanelExpansionChanged(
+                mExpandedFraction, isExpanded(), mTracking);
     }
 
     public boolean isExpanded() {

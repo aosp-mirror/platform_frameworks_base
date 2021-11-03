@@ -294,7 +294,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
         this.state = newState
     }
 
-    override fun onPanelExpansionChanged(fraction: Float, tracking: Boolean) {
+    override fun onPanelExpansionChanged(fraction: Float, expanded: Boolean, tracking: Boolean) {
         val collapsedEnough = fraction <= 0.9f
         if (collapsedEnough != this.collapsedEnoughToHide) {
             val couldShowPulsingHuns = canShowPulsingHuns
