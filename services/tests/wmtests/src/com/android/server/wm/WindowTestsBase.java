@@ -793,7 +793,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     TestTransitionPlayer registerTestTransitionPlayer() {
         final TestTransitionPlayer testPlayer = new TestTransitionPlayer(
                 mAtm.getTransitionController(), mAtm.mWindowOrganizerController);
-        testPlayer.mController.registerTransitionPlayer(testPlayer);
+        testPlayer.mController.registerTransitionPlayer(testPlayer, null /* appThread */);
         return testPlayer;
     }
 

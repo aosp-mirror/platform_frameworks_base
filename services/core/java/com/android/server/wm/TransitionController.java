@@ -27,6 +27,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.IApplicationThread;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
@@ -68,6 +69,7 @@ class TransitionController {
     private ITransitionPlayer mTransitionPlayer;
     final TransitionMetricsReporter mTransitionMetricsReporter = new TransitionMetricsReporter();
 
+    private IApplicationThread mTransitionPlayerThread;
     final ActivityTaskManagerService mAtm;
     final TaskSnapshotController mTaskSnapshotController;
 
@@ -136,7 +138,8 @@ class TransitionController {
         return mCollectingTransition;
     }
 
-    void registerTransitionPlayer(@Nullable ITransitionPlayer player) {
+    void registerTransitionPlayer(@Nullable ITransitionPlayer player,
+            @Nullable IApplicationThread appThread) {
         try {
             // Note: asBinder() can be null if player is same process (likely in a test).
             if (mTransitionPlayer != null) {
@@ -149,6 +152,7 @@ class TransitionController {
                 player.asBinder().linkToDeath(mTransitionPlayerDeath, 0);
             }
             mTransitionPlayer = player;
+            mTransitionPlayerThread = appThread;
         } catch (RemoteException e) {
             throw new RuntimeException("Unable to set transition player");
         }
@@ -362,6 +366,9 @@ class TransitionController {
         }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Finish Transition: %s", record);
         mPlayingTransitions.remove(record);
+        if (mPlayingTransitions.isEmpty()) {
+            setAnimationRunning(false /* running */);
+        }
         record.finishTransition();
         mRunningLock.doNotifyLocked();
     }
@@ -371,7 +378,20 @@ class TransitionController {
             throw new IllegalStateException("Trying to move non-collecting transition to playing");
         }
         mCollectingTransition = null;
+        if (mPlayingTransitions.isEmpty()) {
+            setAnimationRunning(true /* running */);
+        }
         mPlayingTransitions.add(transition);
+    }
+
+    private void setAnimationRunning(boolean running) {
+        if (mTransitionPlayerThread == null) return;
+        final WindowProcessController wpc = mAtm.getProcessController(mTransitionPlayerThread);
+        if (wpc == null) {
+            Slog.w(TAG, "Unable to find process for player thread=" + mTransitionPlayerThread);
+            return;
+        }
+        wpc.setRunningRemoteAnimation(running);
     }
 
     void abort(Transition transition) {
