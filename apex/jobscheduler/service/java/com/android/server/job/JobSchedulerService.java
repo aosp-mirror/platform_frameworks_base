@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -438,6 +439,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         case Constants.KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS:
                         case Constants.KEY_RUNTIME_MIN_GUARANTEE_MS:
                         case Constants.KEY_RUNTIME_MIN_EJ_GUARANTEE_MS:
+                        case Constants.KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS:
                             if (!runtimeUpdated) {
                                 mConstants.updateRuntimeConstantsLocked();
                                 runtimeUpdated = true;
@@ -504,6 +506,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 "runtime_free_quota_max_limit_ms";
         private static final String KEY_RUNTIME_MIN_GUARANTEE_MS = "runtime_min_guarantee_ms";
         private static final String KEY_RUNTIME_MIN_EJ_GUARANTEE_MS = "runtime_min_ej_guarantee_ms";
+        private static final String KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS =
+                "runtime_min_high_priority_guarantee_ms";
 
         private static final int DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT = 5;
         private static final long DEFAULT_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = 31 * MINUTE_IN_MILLIS;
@@ -525,6 +529,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         public static final long DEFAULT_RUNTIME_MIN_GUARANTEE_MS = 10 * MINUTE_IN_MILLIS;
         @VisibleForTesting
         public static final long DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS = 3 * MINUTE_IN_MILLIS;
+        @VisibleForTesting
+        static final long DEFAULT_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS = 5 * MINUTE_IN_MILLIS;
         private static final boolean DEFAULT_USE_TARE_POLICY = false;
 
         /**
@@ -612,6 +618,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         public long RUNTIME_MIN_EJ_GUARANTEE_MS = DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS;
 
         /**
+         * The minimum amount of time we try to guarantee high priority jobs will run for.
+         */
+        public long RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS =
+                DEFAULT_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS;
+
+        /**
          * If true, use TARE policy for job limiting. If false, use quotas.
          */
         public boolean USE_TARE_POLICY = DEFAULT_USE_TARE_POLICY;
@@ -686,12 +698,18 @@ public class JobSchedulerService extends com.android.server.SystemService
             DeviceConfig.Properties properties = DeviceConfig.getProperties(
                     DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
-                    KEY_RUNTIME_MIN_GUARANTEE_MS, KEY_RUNTIME_MIN_EJ_GUARANTEE_MS);
+                    KEY_RUNTIME_MIN_GUARANTEE_MS, KEY_RUNTIME_MIN_EJ_GUARANTEE_MS,
+                    KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS);
 
             // Make sure min runtime for regular jobs is at least 10 minutes.
             RUNTIME_MIN_GUARANTEE_MS = Math.max(10 * MINUTE_IN_MILLIS,
                     properties.getLong(
                             KEY_RUNTIME_MIN_GUARANTEE_MS, DEFAULT_RUNTIME_MIN_GUARANTEE_MS));
+            // Make sure min runtime for high priority jobs is at least 4 minutes.
+            RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS = Math.max(4 * MINUTE_IN_MILLIS,
+                    properties.getLong(
+                            KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
+                            DEFAULT_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS));
             // Make sure min runtime for expedited jobs is at least one minute.
             RUNTIME_MIN_EJ_GUARANTEE_MS = Math.max(MINUTE_IN_MILLIS,
                     properties.getLong(
@@ -739,6 +757,8 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             pw.print(KEY_RUNTIME_MIN_GUARANTEE_MS, RUNTIME_MIN_GUARANTEE_MS).println();
             pw.print(KEY_RUNTIME_MIN_EJ_GUARANTEE_MS, RUNTIME_MIN_EJ_GUARANTEE_MS).println();
+            pw.print(KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
+                    RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS).println();
             pw.print(KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS, RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
                     .println();
 
@@ -775,7 +795,31 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @VisibleForTesting
     class PendingJobComparator implements Comparator<JobStatus> {
-        private final SparseLongArray mEarliestRegEnqueueTimeCache = new SparseLongArray();
+        private static final int EJ_PRIORITY_MODIFIER = 10;
+
+        /** Cache of the earliest non-PRIORITY_MAX enqueue time found per UID. */
+        private final SparseLongArray mEarliestNonMaxEnqueueTimeCache = new SparseLongArray();
+        /**
+         * Cache of the last enqueue time of each priority for each UID. The SparseArray is keyed
+         * by UID and the SparseLongArray is keyed by the priority.
+         */
+        private final SparseArray<SparseLongArray> mLastPriorityEnqueueTimeCache =
+                new SparseArray<>();
+        /**
+         * The earliest enqueue time each UID's priority's jobs should use. The SparseArray is keyed
+         * by UID and the SparseLongArray is keyed by the value returned from
+         * {@link #getPriorityIndex(int, boolean)}.
+         */
+        private final SparseArray<SparseLongArray> mEarliestAllowedEnqueueTimes =
+                new SparseArray<>();
+
+        private int getPriorityIndex(int priority, boolean isEJ) {
+            // We need to separate HIGH priority EJs from HIGH priority regular jobs.
+            if (isEJ) {
+                return priority * EJ_PRIORITY_MODIFIER;
+            }
+            return priority;
+        }
 
         /**
          * Refresh sorting determinants based on the current state of {@link #mPendingJobs}.
@@ -783,17 +827,82 @@ public class JobSchedulerService extends com.android.server.SystemService
         @GuardedBy("mLock")
         @VisibleForTesting
         void refreshLocked() {
-            mEarliestRegEnqueueTimeCache.clear();
+            mEarliestNonMaxEnqueueTimeCache.clear();
             for (int i = 0; i < mPendingJobs.size(); ++i) {
                 final JobStatus job = mPendingJobs.get(i);
                 final int uid = job.getSourceUid();
-                if (!job.isRequestedExpeditedJob()) {
+                if (job.getEffectivePriority() < JobInfo.PRIORITY_MAX) {
                     final long earliestEnqueueTime =
-                            mEarliestRegEnqueueTimeCache.get(uid, Long.MAX_VALUE);
-                    mEarliestRegEnqueueTimeCache.put(uid,
+                            mEarliestNonMaxEnqueueTimeCache.get(uid, Long.MAX_VALUE);
+                    mEarliestNonMaxEnqueueTimeCache.put(uid,
                             Math.min(earliestEnqueueTime, job.enqueueTime));
                 }
+
+                final int pIdx =
+                        getPriorityIndex(job.getEffectivePriority(), job.isRequestedExpeditedJob());
+                SparseLongArray lastPriorityEnqueueTime = mLastPriorityEnqueueTimeCache.get(uid);
+                if (lastPriorityEnqueueTime == null) {
+                    lastPriorityEnqueueTime = new SparseLongArray();
+                    mLastPriorityEnqueueTimeCache.put(uid, lastPriorityEnqueueTime);
+                }
+                lastPriorityEnqueueTime.put(pIdx,
+                        Math.max(job.enqueueTime, lastPriorityEnqueueTime.get(pIdx, 0)));
             }
+
+            // Move lower priority jobs behind higher priority jobs (instead of moving higher
+            // priority jobs ahead of lower priority jobs), except for EJs.
+            for (int i = 0; i < mLastPriorityEnqueueTimeCache.size(); ++i) {
+                final int uid = mLastPriorityEnqueueTimeCache.keyAt(i);
+                SparseLongArray lastEnqueueTimes = mLastPriorityEnqueueTimeCache.valueAt(i);
+                SparseLongArray earliestAllowedEnqueueTimes = new SparseLongArray();
+                mEarliestAllowedEnqueueTimes.put(uid, earliestAllowedEnqueueTimes);
+                long earliestAllowedEnqueueTime = mEarliestNonMaxEnqueueTimeCache.get(uid,
+                        lastEnqueueTimes.get(getPriorityIndex(JobInfo.PRIORITY_MAX, true), -1));
+                earliestAllowedEnqueueTimes.put(getPriorityIndex(JobInfo.PRIORITY_MAX, true),
+                        earliestAllowedEnqueueTime);
+                earliestAllowedEnqueueTime = 1
+                        + Math.max(earliestAllowedEnqueueTime,
+                        lastEnqueueTimes.get(getPriorityIndex(JobInfo.PRIORITY_HIGH, true), -1));
+                earliestAllowedEnqueueTimes.put(getPriorityIndex(JobInfo.PRIORITY_HIGH, true),
+                        earliestAllowedEnqueueTime);
+                earliestAllowedEnqueueTime++;
+                for (int p = JobInfo.PRIORITY_HIGH; p >= JobInfo.PRIORITY_MIN; --p) {
+                    final int pIdx = getPriorityIndex(p, false);
+                    earliestAllowedEnqueueTimes.put(pIdx, earliestAllowedEnqueueTime);
+                    final long lastEnqueueTime = lastEnqueueTimes.get(pIdx, -1);
+                    if (lastEnqueueTime != -1) {
+                        // Add additional millisecond for the next priority to ensure sorting is
+                        // stable/accurate when comparing to other apps.
+                        earliestAllowedEnqueueTime = 1
+                                + Math.max(earliestAllowedEnqueueTime, lastEnqueueTime);
+                    }
+                }
+            }
+
+            // Clear intermediate state that we don't need to reduce steady state memory usage.
+            mLastPriorityEnqueueTimeCache.clear();
+        }
+
+        @ElapsedRealtimeLong
+        private long getEffectiveEnqueueTime(@NonNull JobStatus job) {
+            // Move lower priority jobs behind higher priority jobs (instead of moving higher
+            // priority jobs ahead of lower priority jobs), except for MAX EJs.
+            final int uid = job.getSourceUid();
+            if (job.isRequestedExpeditedJob()
+                    && job.getEffectivePriority() == JobInfo.PRIORITY_MAX) {
+                return Math.min(job.enqueueTime,
+                        mEarliestNonMaxEnqueueTimeCache.get(uid, Long.MAX_VALUE));
+            }
+            final int priorityIdx =
+                    getPriorityIndex(job.getEffectivePriority(), job.isRequestedExpeditedJob());
+            final SparseLongArray earliestAllowedEnqueueTimes =
+                    mEarliestAllowedEnqueueTimes.get(uid);
+            if (earliestAllowedEnqueueTimes == null) {
+                // We're probably trying to insert directly without refreshing the internal arrays.
+                // Since we haven't seen this UID before, we can just use the job's enqueue time.
+                return job.enqueueTime;
+            }
+            return Math.max(job.enqueueTime, earliestAllowedEnqueueTimes.get(priorityIdx));
         }
 
         @Override
@@ -816,38 +925,39 @@ public class JobSchedulerService extends com.android.server.SystemService
                     // expedited job quota.
                     return o1EJ ? -1 : 1;
                 }
-            }
-            if (o1EJ || o2EJ) {
-                // We MUST prioritize EJs ahead of regular jobs within a single app. Since we do
-                // that, in order to satisfy the transitivity constraint of the comparator, if
-                // any UID has an EJ, we must ensure that the EJ is ordered ahead of the regular
-                // job of a different app IF the app with an EJ had another job that came before
-                // the differing app. For example, if app A has regJob1 at t1 and eJob3 at t3 and
-                // app B has regJob2 at t2, eJob3 must be ordered before regJob2 because it will be
-                // ordered before regJob1.
-                // Regular jobs don't need to jump the line.
+                if (o1.getEffectivePriority() != o2.getEffectivePriority()) {
+                    // Use the priority set by an app for intra-app job ordering. Higher
+                    // priority should be before lower priority.
+                    return o2.getEffectivePriority() - o1.getEffectivePriority();
+                }
+            } else {
+                // TODO: see if we can simplify this using explicit topological sorting
+                // Since we order jobs within a UID by the job's priority, in order to satisfy the
+                // transitivity constraint of the comparator, we must ensure consistent/appropriate
+                // ordering between apps as well. That is, if a job is ordered before or behind
+                // another job because of its priority, that ordering must translate to the
+                // relative ordering against other jobs.
+                // The effective ordering implementation here is to use HIGH priority EJs as a
+                // pivot point. MAX priority EJs are moved *ahead* of HIGH priority EJs. All
+                // regular jobs are moved *behind* HIGH priority EJs. The intention for moving jobs
+                // "behind" the EJs instead of moving all high priority jobs before lower priority
+                // jobs is to reduce any potential abuse (or just unfortunate execution) cases where
+                // there are early low priority jobs that don't get to run because so many of the
+                // app's high priority jobs are pushed before low priority job. This may still
+                // happen because of the job ordering mechanism, but moving jobs back prevents
+                // one app's jobs from always being at the front (due to the early scheduled low
+                // priority job and our base case of sorting by enqueue time).
 
-                final long uid1EarliestRegEnqueueTime = Math.min(o1.enqueueTime,
-                        mEarliestRegEnqueueTimeCache.get(o1.getSourceUid(), Long.MAX_VALUE));
-                final long uid2EarliestRegEnqueueTime = Math.min(o2.enqueueTime,
-                        mEarliestRegEnqueueTimeCache.get(o2.getSourceUid(), Long.MAX_VALUE));
+                final long o1EffectiveEnqueueTime = getEffectiveEnqueueTime(o1);
+                final long o2EffectiveEnqueueTime = getEffectiveEnqueueTime(o2);
 
-                if (o1EJ && o2EJ) {
-                    if (uid1EarliestRegEnqueueTime < uid2EarliestRegEnqueueTime) {
-                        return -1;
-                    } else if (uid1EarliestRegEnqueueTime > uid2EarliestRegEnqueueTime) {
-                        return 1;
-                    }
-                } else if (o1EJ && uid1EarliestRegEnqueueTime <= o2.enqueueTime) {
-                    // Include = to ensure that if we sorted an EJ ahead of a regular job at time X
-                    // then we make sure to sort it ahead of all regular jobs at time X.
+                if (o1EffectiveEnqueueTime < o2EffectiveEnqueueTime) {
                     return -1;
-                } else if (o2EJ && uid2EarliestRegEnqueueTime <= o1.enqueueTime) {
-                    // Include = to ensure that if we sorted an EJ ahead of a regular job at time X
-                    // then we make sure to sort it ahead of all regular jobs at time X.
+                } else if (o1EffectiveEnqueueTime > o2EffectiveEnqueueTime) {
                     return 1;
                 }
             }
+
             if (o1.enqueueTime < o2.enqueueTime) {
                 return -1;
             }
@@ -2313,8 +2423,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         private void postProcessLocked() {
             noteJobsPending(newReadyJobs);
             mPendingJobs.addAll(newReadyJobs);
+            mPendingJobComparator.refreshLocked();
             if (mPendingJobs.size() > 1) {
-                mPendingJobComparator.refreshLocked();
                 mPendingJobs.sort(mPendingJobComparator);
             }
 
@@ -2442,8 +2552,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
                 noteJobsPending(runnableJobs);
                 mPendingJobs.addAll(runnableJobs);
+                mPendingJobComparator.refreshLocked();
                 if (mPendingJobs.size() > 1) {
-                    mPendingJobComparator.refreshLocked();
                     mPendingJobs.sort(mPendingJobComparator);
                 }
             } else {
@@ -2653,6 +2763,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 return job.getEffectiveStandbyBucket() != RESTRICTED_INDEX
                         ? mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS
                         : Math.min(mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS, 5 * MINUTE_IN_MILLIS);
+            } else if (job.getEffectivePriority() == JobInfo.PRIORITY_HIGH) {
+                return mConstants.RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS;
             } else {
                 return mConstants.RUNTIME_MIN_GUARANTEE_MS;
             }

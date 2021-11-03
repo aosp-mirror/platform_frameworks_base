@@ -882,6 +882,7 @@ public final class QuotaController extends StateController {
         if (isQuotaFreeLocked(standbyBucket)) return true;
 
         ExecutionStats stats = getExecutionStatsLocked(userId, packageName, standbyBucket);
+        // TODO: use a higher minimum remaining time for jobs with MINIMUM priority
         return getRemainingExecutionTimeLocked(stats) > 0
                 && isUnderJobCountQuotaLocked(stats, standbyBucket)
                 && isUnderSessionCountQuotaLocked(stats, standbyBucket);
