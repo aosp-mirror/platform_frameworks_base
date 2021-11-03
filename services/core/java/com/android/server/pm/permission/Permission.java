@@ -480,9 +480,10 @@ public final class Permission {
             r.append("DUP:");
             r.append(permissionInfo.name);
         }
-        if (permission.isRuntime() && (ownerChanged || wasNonRuntime)) {
-            // If this is a runtime permission and the owner has changed, or this wasn't a runtime
-            // permission, then permission state should be cleaned up
+        if ((permission.isInternal() && ownerChanged)
+                || (permission.isRuntime() && (ownerChanged || wasNonRuntime))) {
+            // If this is an internal/runtime permission and the owner has changed, or this wasn't a
+            // runtime permission, then permission state should be cleaned up.
             permission.mDefinitionChanged = true;
         }
         if (PackageManagerService.DEBUG_PACKAGE_SCANNING && r != null) {
