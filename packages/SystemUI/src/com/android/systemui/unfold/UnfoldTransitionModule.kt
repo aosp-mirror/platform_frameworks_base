@@ -43,21 +43,27 @@ class UnfoldTransitionModule {
     fun provideUnfoldTransitionProgressProvider(
         context: Context,
         config: UnfoldTransitionConfig,
-        screenStatusProvider: LifecycleScreenStatusProvider,
+        screenStatusProvider: Lazy<LifecycleScreenStatusProvider>,
         deviceStateManager: DeviceStateManager,
         sensorManager: SensorManager,
         @Main executor: Executor,
         @Main handler: Handler
-    ): UnfoldTransitionProgressProvider =
-        createUnfoldTransitionProgressProvider(
-            context,
-            config,
-            screenStatusProvider,
-            deviceStateManager,
-            sensorManager,
-            handler,
-            executor
-        )
+    ) =
+        if (config.isEnabled) {
+            Optional.of(
+                createUnfoldTransitionProgressProvider(
+                    context,
+                    config,
+                    screenStatusProvider.get(),
+                    deviceStateManager,
+                    sensorManager,
+                    handler,
+                    executor
+                )
+            )
+        } else {
+            Optional.empty()
+        }
 
     @Provides
     @Singleton
@@ -69,30 +75,34 @@ class UnfoldTransitionModule {
     fun provideNaturalRotationProgressProvider(
         context: Context,
         windowManager: IWindowManager,
-        unfoldTransitionProgressProvider: UnfoldTransitionProgressProvider
-    ): NaturalRotationUnfoldProgressProvider =
-        NaturalRotationUnfoldProgressProvider(
-            context,
-            windowManager,
-            unfoldTransitionProgressProvider
-        )
+        unfoldTransitionProgressProvider: Optional<UnfoldTransitionProgressProvider>
+    ) =
+        unfoldTransitionProgressProvider.map {
+            provider -> NaturalRotationUnfoldProgressProvider(
+                context,
+                windowManager,
+                provider
+            )
+        }
 
     @Provides
     @Named(UNFOLD_STATUS_BAR)
     @Singleton
     fun provideStatusBarScopedTransitionProvider(
-        source: NaturalRotationUnfoldProgressProvider
-    ): ScopedUnfoldTransitionProgressProvider =
-        ScopedUnfoldTransitionProgressProvider(source)
+        source: Optional<NaturalRotationUnfoldProgressProvider>
+    ) =
+        source.map {
+            provider -> ScopedUnfoldTransitionProgressProvider(provider)
+        }
 
     @Provides
     @Singleton
     fun provideShellProgressProvider(
         config: UnfoldTransitionConfig,
-        provider: Lazy<UnfoldTransitionProgressProvider>
+        provider: Optional<UnfoldTransitionProgressProvider>
     ): Optional<ShellUnfoldProgressProvider> =
-        if (config.isEnabled) {
-            Optional.ofNullable(ShellUnfoldProgressProvider(provider.get()))
+        if (config.isEnabled && provider.isPresent()) {
+            Optional.of(UnfoldProgressProvider(provider.get()))
         } else {
             Optional.empty()
         }

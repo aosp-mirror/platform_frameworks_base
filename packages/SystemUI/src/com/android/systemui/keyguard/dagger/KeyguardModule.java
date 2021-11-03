@@ -49,11 +49,11 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
-import com.android.systemui.unfold.config.UnfoldTransitionConfig;
+import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import dagger.Lazy;
@@ -92,8 +92,7 @@ public class KeyguardModule {
             NavigationModeController navigationModeController,
             KeyguardDisplayManager keyguardDisplayManager,
             DozeParameters dozeParameters,
-            UnfoldTransitionConfig unfoldTransitionConfig,
-            Lazy<UnfoldLightRevealOverlayAnimation> unfoldLightRevealOverlayAnimation,
+            Optional<SysUIUnfoldComponent> unfoldComponent,
             SysuiStatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
             Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationController,
@@ -116,8 +115,7 @@ public class KeyguardModule {
                 navigationModeController,
                 keyguardDisplayManager,
                 dozeParameters,
-                unfoldTransitionConfig,
-                unfoldLightRevealOverlayAnimation,
+                unfoldComponent,
                 statusBarStateController,
                 keyguardStateController,
                 keyguardUnlockAnimationController,
