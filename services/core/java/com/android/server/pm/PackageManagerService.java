@@ -1257,11 +1257,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mHandler.sendMessageDelayed(message, DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS);
     }
 
-    void scheduleDeferredNoKillPostDelete(InstallArgs args) {
-        Message message = mHandler.obtainMessage(DEFERRED_NO_KILL_POST_DELETE, args);
-        mHandler.sendMessageDelayed(message, DEFERRED_NO_KILL_POST_DELETE_DELAY_MS);
-    }
-
     void schedulePruneUnusedStaticSharedLibraries(boolean delay) {
         mHandler.removeMessages(PRUNE_UNUSED_STATIC_SHARED_LIBRARIES);
         mHandler.sendEmptyMessageDelayed(PRUNE_UNUSED_STATIC_SHARED_LIBRARIES,
@@ -1395,38 +1390,6 @@ public class PackageManagerService extends IPackageManager.Stub
             if (!mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)) {
                 mHandler.sendEmptyMessageDelayed(WRITE_PACKAGE_RESTRICTIONS, WRITE_SETTINGS_DELAY);
             }
-        }
-    }
-
-    private void writePendingRestrictionsLocked() {
-        if (mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)) {
-            mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
-            for (int userId : mDirtyUsers) {
-                mSettings.writePackageRestrictionsLPr(userId);
-            }
-            mDirtyUsers.clear();
-        }
-    }
-
-    void writePendingRestrictions() {
-        synchronized (mLock) {
-            writePendingRestrictionsLocked();
-        }
-    }
-
-    void writeSettings() {
-        synchronized (mLock) {
-            mHandler.removeMessages(WRITE_SETTINGS);
-            mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
-            writeSettingsLPrTEMP();
-            mDirtyUsers.clear();
-        }
-    }
-
-    void writePackageList(int userId) {
-        synchronized (mLock) {
-            mHandler.removeMessages(WRITE_PACKAGE_LIST);
-            mSettings.writePackageListLPr(userId);
         }
     }
 
@@ -1822,7 +1785,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(this, mRemovePackageHelper,
                 mAppDataHelper);
         mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
-                mAppDataHelper);
+                mInitAndSystemPackageHelper, mAppDataHelper);
         mPreferredActivityHelper = new PreferredActivityHelper(this);
         mResolveIntentHelper = new ResolveIntentHelper(this, mPreferredActivityHelper);
         mDexOptHelper = new DexOptHelper(this);
@@ -5109,7 +5072,13 @@ public class PackageManagerService extends IPackageManager.Stub
             mPackageUsage.writeNow(mSettings.getPackagesLocked());
 
             // This is the last chance to write out pending restriction settings
-            writePendingRestrictionsLocked();
+            if (mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)) {
+                mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
+                for (int userId : mDirtyUsers) {
+                    mSettings.writePackageRestrictionsLPr(userId);
+                }
+                mDirtyUsers.clear();
+            }
         }
     }
 
@@ -7852,8 +7821,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (isSystemStub
                     && (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                     || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)) {
-                if (!new InstallPackageHelper(this).enableCompressedPackage(deletedPkg,
-                        pkgSetting)) {
+                if (!mInitAndSystemPackageHelper.enableCompressedPackage(deletedPkg, pkgSetting)) {
                     Slog.w(TAG, "Failed setApplicationEnabledSetting: failed to enable "
                             + "commpressed package " + setting.getPackageName());
                     updateAllowed[i] = false;
@@ -11131,24 +11099,11 @@ public class PackageManagerService extends IPackageManager.Stub
         return mIsPreNMR1Upgrade;
     }
 
-    boolean isOverlayMutable(String packageName) {
-        return mOverlayConfig.isMutable(packageName);
+    InitAndSystemPackageHelper getInitAndSystemPackageHelper() {
+        return mInitAndSystemPackageHelper;
     }
 
-    @ScanFlags int getSystemPackageScanFlags(File codePath) {
-        List<ScanPartition> dirsToScanAsSystem =
-                mInitAndSystemPackageHelper.getDirsToScanAsSystem();
-        @PackageManagerService.ScanFlags int scanFlags = SCAN_AS_SYSTEM;
-        for (int i = dirsToScanAsSystem.size() - 1; i >= 0; i--) {
-            ScanPartition partition = dirsToScanAsSystem.get(i);
-            if (partition.containsFile(codePath)) {
-                scanFlags |= partition.scanFlag;
-                if (partition.containsPrivApp(codePath)) {
-                    scanFlags |= SCAN_AS_PRIVILEGED;
-                }
-                break;
-            }
-        }
-        return scanFlags;
+    boolean isOverlayMutable(String packageName) {
+        return mOverlayConfig.isMutable(packageName);
     }
 }
