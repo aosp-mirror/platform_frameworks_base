@@ -15,6 +15,7 @@ per-file IActivityController.aidl = file:/services/core/java/com/android/server/
 per-file IActivityManager.aidl = file:/services/core/java/com/android/server/am/OWNERS
 per-file IApplicationThread.aidl = file:/services/core/java/com/android/server/am/OWNERS
 per-file IAppTraceRetriever.aidl = file:/services/core/java/com/android/server/am/OWNERS
+per-file IForegroundServiceObserver.aidl = file:/services/core/java/com/android/server/am/OWNERS
 per-file IInstrumentationWatcher.aidl = file:/services/core/java/com/android/server/am/OWNERS
 per-file IntentService.aidl = file:/services/core/java/com/android/server/am/OWNERS
 per-file IServiceConnection.aidl = file:/services/core/java/com/android/server/am/OWNERS

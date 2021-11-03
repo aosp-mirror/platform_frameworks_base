@@ -21,6 +21,7 @@ import static android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST;
 import static android.Manifest.permission.FILTER_EVENTS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS;
@@ -167,6 +168,7 @@ import android.app.ContentProviderHolder;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
+import android.app.IForegroundServiceObserver;
 import android.app.IInstrumentationWatcher;
 import android.app.INotificationManager;
 import android.app.IProcessObserver;
@@ -3753,12 +3755,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void makeServicesNonForeground(final String packageName, int userId) {
-        if (checkCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+        if (checkCallingPermission(MANAGE_ACTIVITY_TASKS)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: makeServicesNonForeground() from pid="
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid()
-                    + " requires " + android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
+                    + " requires " + MANAGE_ACTIVITY_TASKS;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
@@ -3771,6 +3773,27 @@ public class ActivityManagerService extends IActivityManager.Stub
             makeServicesNonForegroundUnchecked(packageName, userId);
         } finally {
             Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
+    @Override
+    public boolean registerForegroundServiceObserver(IForegroundServiceObserver callback) {
+        final int callingUid = Binder.getCallingUid();
+        final int permActivityTasks = checkCallingPermission(MANAGE_ACTIVITY_TASKS);
+        final int permAcrossUsersFull = checkCallingPermission(INTERACT_ACROSS_USERS_FULL);
+        if (permActivityTasks != PackageManager.PERMISSION_GRANTED
+                || permAcrossUsersFull != PERMISSION_GRANTED) {
+            String msg = "Permission Denial: registerForegroundServiceObserver() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + callingUid
+                    + " requires " + MANAGE_ACTIVITY_TASKS
+                    + " and " + INTERACT_ACROSS_USERS_FULL;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+
+        synchronized (this) {
+            return mServices.registerForegroundServiceObserverLocked(callingUid, callback);
         }
     }
 
