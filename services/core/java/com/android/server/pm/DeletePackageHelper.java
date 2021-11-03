@@ -725,6 +725,9 @@ final class DeletePackageHelper {
                 Log.i(TAG, "Observer no longer exists.");
             } //end catch
             notifyPackageChangeObserversOnDelete(packageName, versionCode);
+
+            // Prune unused static shared libraries which have been cached a period of time
+            mPm.schedulePruneUnusedStaticSharedLibraries(true /* delay */);
         });
     }
 
