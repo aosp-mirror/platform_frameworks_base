@@ -230,8 +230,6 @@ public final class SurfaceControl implements Parcelable {
             float frameRate, int compatibility, int changeFrameRateStrategy);
     private static native long nativeGetHandle(long nativeObject);
 
-    private static native long nativeAcquireFrameRateFlexibilityToken();
-    private static native void nativeReleaseFrameRateFlexibilityToken(long token);
     private static native void nativeSetFixedTransformHint(long transactionObj, long nativeObject,
             int transformHint);
     private static native void nativeSetFocusedWindow(long transactionObj, IBinder toToken,
@@ -3706,27 +3704,6 @@ public final class SurfaceControl implements Parcelable {
         public void apply(boolean sync) {
             throw new RuntimeException("Global transaction must be applied from closeTransaction");
         }
-    }
-
-    /**
-     * Acquire a frame rate flexibility token, which allows surface flinger to freely switch display
-     * frame rates. This is used by CTS tests to put the device in a consistent state. See
-     * ISurfaceComposer::acquireFrameRateFlexibilityToken(). The caller must have the
-     * ACCESS_SURFACE_FLINGER permission, or else the call will fail, returning 0.
-     * @hide
-     */
-    @TestApi
-    public static long acquireFrameRateFlexibilityToken() {
-        return nativeAcquireFrameRateFlexibilityToken();
-    }
-
-    /**
-     * Release a frame rate flexibility token.
-     * @hide
-     */
-    @TestApi
-    public static void releaseFrameRateFlexibilityToken(long token) {
-        nativeReleaseFrameRateFlexibilityToken(token);
     }
 
     /**
