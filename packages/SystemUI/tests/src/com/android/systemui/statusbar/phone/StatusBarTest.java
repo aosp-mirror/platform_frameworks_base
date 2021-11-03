@@ -117,6 +117,7 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -317,6 +318,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mFeatureFlags,
                 mVisibilityProvider,
                 mock(NotificationEntryManager.class),
+                mock(NotifPipeline.class),
                 mStatusBarStateController,
                 mExpansionStateLogger,
                 new NotificationPanelLoggerFake()

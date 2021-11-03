@@ -71,7 +71,7 @@ import java.util.concurrent.Executor;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class NotificationLoggerTest extends SysuiTestCase {
+public class NotificationLoggerLegacyTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
 
@@ -97,7 +97,6 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(true);
 
         mEntry = new NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_NAME)
@@ -121,8 +120,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 mExpansionStateLogger
         );
         mLogger.setUpWithContainer(mListContainer);
-        verify(mEntryManager, never()).addNotificationEntryListener(any());
-        verify(mNotifPipeline).addCollectionListener(any());
+        verify(mEntryManager).addNotificationEntryListener(any());
+        verify(mNotifPipeline, never()).addCollectionListener(any());
     }
 
     @Test
@@ -146,7 +145,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 any(NotificationVisibility[].class));
 
         when(mListContainer.isInVisibleLocation(any())).thenReturn(true);
-        when(mNotifPipeline.getFlatShadeList()).thenReturn(Lists.newArrayList(mEntry));
+        when(mEntryManager.getVisibleNotifications()).thenReturn(Lists.newArrayList(mEntry));
         mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         TestableLooper.get(this).processAllMessages();
         mUiBgExecutor.runAllReady();
@@ -168,7 +167,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
     public void testStoppingNotificationLoggingReportsCurrentNotifications()
             throws Exception {
         when(mListContainer.isInVisibleLocation(any())).thenReturn(true);
-        when(mNotifPipeline.getFlatShadeList()).thenReturn(Lists.newArrayList(mEntry));
+        when(mEntryManager.getVisibleNotifications()).thenReturn(Lists.newArrayList(mEntry));
         mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         TestableLooper.get(this).processAllMessages();
         mUiBgExecutor.runAllReady();
@@ -197,7 +196,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
     @Test
     public void testLogPanelShownOnWake() {
-        when(mNotifPipeline.getFlatShadeList()).thenReturn(Lists.newArrayList(mEntry));
+        when(mEntryManager.getVisibleNotifications()).thenReturn(Lists.newArrayList(mEntry));
         setStateAsleep();
         mLogger.onDozingChanged(false);  // Wake to lockscreen
         assertEquals(1, mNotificationPanelLoggerFake.getCalls().size());
@@ -213,7 +212,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
     @Test
     public void testLogPanelShownOnShadePull() {
-        when(mNotifPipeline.getFlatShadeList()).thenReturn(Lists.newArrayList(mEntry));
+        when(mEntryManager.getVisibleNotifications()).thenReturn(Lists.newArrayList(mEntry));
         setStateAwake();
         // Now expand panel
         mLogger.onPanelExpandedChanged(true);
@@ -241,7 +240,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 .build();
         entry.setRow(mRow);
 
-        when(mNotifPipeline.getFlatShadeList()).thenReturn(Lists.newArrayList(entry));
+        when(mEntryManager.getVisibleNotifications()).thenReturn(Lists.newArrayList(entry));
         setStateAsleep();
         mLogger.onDozingChanged(false);  // Wake to lockscreen
         assertEquals(1, mNotificationPanelLoggerFake.getCalls().size());

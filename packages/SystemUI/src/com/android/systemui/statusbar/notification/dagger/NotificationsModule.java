@@ -214,6 +214,7 @@ public interface NotificationsModule {
             FeatureFlags featureFlags,
             NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager entryManager,
+            NotifPipeline notifPipeline,
             StatusBarStateController statusBarStateController,
             NotificationLogger.ExpansionStateLogger expansionStateLogger,
             NotificationPanelLogger notificationPanelLogger) {
@@ -223,6 +224,7 @@ public interface NotificationsModule {
                 featureFlags,
                 visibilityProvider,
                 entryManager,
+                notifPipeline,
                 statusBarStateController,
                 expansionStateLogger,
                 notificationPanelLogger);
