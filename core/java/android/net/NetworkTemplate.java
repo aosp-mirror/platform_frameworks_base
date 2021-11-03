@@ -782,8 +782,8 @@ public class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Examine the given template and normalize if it refers to a "merged"
-     * mobile subscriber. We pick the "lowest" merged subscriber as the primary
+     * Examine the given template and normalize it.
+     * We pick the "lowest" merged subscriber as the primary
      * for key purposes, and expand the template to match all other merged
      * subscribers.
      * <p>
@@ -798,8 +798,8 @@ public class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Examine the given template and normalize if it refers to a "merged"
-     * mobile subscriber. We pick the "lowest" merged subscriber as the primary
+     * Examine the given template and normalize it.
+     * We pick the "lowest" merged subscriber as the primary
      * for key purposes, and expand the template to match all other merged
      * subscribers.
      *
@@ -811,7 +811,12 @@ public class NetworkTemplate implements Parcelable {
      * A, but also matches B.
      */
     public static NetworkTemplate normalize(NetworkTemplate template, List<String[]> mergedList) {
-        if (!template.isMatchRuleMobile()) return template;
+        // Now there are several types of network which uses SubscriberId to store network
+        // information. For instances:
+        // The TYPE_WIFI with subscriberId means that it is a merged carrier wifi network.
+        // The TYPE_CARRIER means that the network associate to specific carrier network.
+
+        if (template.mSubscriberId == null) return template;
 
         for (String[] merged : mergedList) {
             if (ArrayUtils.contains(merged, template.mSubscriberId)) {
