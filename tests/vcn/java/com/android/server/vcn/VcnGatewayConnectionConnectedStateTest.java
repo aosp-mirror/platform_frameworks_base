@@ -297,8 +297,6 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                         any(),
                         any());
         verify(mNetworkAgent).register();
-        verify(mNetworkAgent)
-                .setUnderlyingNetworks(eq(singletonList(TEST_UNDERLYING_NETWORK_RECORD_1.network)));
         verify(mNetworkAgent).markConnected();
 
         verify(mIpSecSvc)
@@ -313,6 +311,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         final NetworkCapabilities nc = ncCaptor.getValue();
         assertTrue(nc.hasTransport(TRANSPORT_CELLULAR));
         assertFalse(nc.hasTransport(TRANSPORT_WIFI));
+        assertEquals(List.of(TEST_UNDERLYING_NETWORK_RECORD_1.network), nc.getUnderlyingNetworks());
         for (int cap : mConfig.getAllExposedCapabilities()) {
             assertTrue(nc.hasCapability(cap));
         }
