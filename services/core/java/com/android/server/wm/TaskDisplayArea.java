@@ -148,7 +148,8 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     /**
      * A launch root task for activity launching with {@link FLAG_ACTIVITY_LAUNCH_ADJACENT} flag.
      */
-    private Task mLaunchAdjacentFlagRootTask;
+    @VisibleForTesting
+    Task mLaunchAdjacentFlagRootTask;
 
     /**
      * A focusable root task that is purposely to be positioned at the top. Although the root
