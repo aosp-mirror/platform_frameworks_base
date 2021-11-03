@@ -72,8 +72,10 @@ import org.json.JSONObject;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * Provider for a single instance of the {@link IFingerprint} HAL.
@@ -169,11 +171,13 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             prop.sensorType,
                             true /* resetLockoutRequiresHardwareAuthToken */,
                             !workaroundLocations.isEmpty() ? workaroundLocations :
-                                    List.of(new SensorLocationInternal(
-                                        "" /* displayId */,
-                                        prop.sensorLocations[0].sensorLocationX,
-                                        prop.sensorLocations[0].sensorLocationY,
-                                        prop.sensorLocations[0].sensorRadius)));
+                                    Arrays.stream(prop.sensorLocations).map(location ->
+                                            new SensorLocationInternal(
+                                                    location.display,
+                                                    location.sensorLocationX,
+                                                    location.sensorLocationY,
+                                                    location.sensorRadius))
+                                            .collect(Collectors.toList()));
             final Sensor sensor = new Sensor(getTag() + "/" + sensorId, this, mContext, mHandler,
                     internalProp, lockoutResetDispatcher, gestureAvailabilityDispatcher);
 
