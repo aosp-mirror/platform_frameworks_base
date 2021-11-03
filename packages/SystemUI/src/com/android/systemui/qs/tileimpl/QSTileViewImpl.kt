@@ -242,12 +242,12 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     private fun updateHeight() {
-        val actualHeight = (if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
+        val actualHeight = if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
             heightOverride
         } else {
             measuredHeight
-        } * squishinessFraction).toInt()
-        bottom = top + actualHeight
+        }
+        bottom = top + (actualHeight * squishinessFraction).toInt()
         scrollY = (actualHeight - height) / 2
     }
 
