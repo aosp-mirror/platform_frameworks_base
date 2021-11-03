@@ -1663,8 +1663,6 @@ public class VcnGatewayConnection extends StateMachine {
                             } /* validationStatusCallback */);
 
             agent.register();
-            agent.setUnderlyingNetworks(
-                    mUnderlying == null ? null : Collections.singletonList(mUnderlying.network));
             agent.markConnected();
 
             return agent;
@@ -2039,6 +2037,7 @@ public class VcnGatewayConnection extends StateMachine {
                         "Unknown transport type or missing TransportInfo/NetworkSpecifier for"
                                 + " non-null underlying network");
             }
+            builder.setUnderlyingNetworks(List.of(underlying.network));
         } else {
             Slog.wtf(
                     TAG,
