@@ -246,7 +246,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private StatusBarComponent mStatusBarComponent;
     @Mock private PluginManager mPluginManager;
     @Mock private LegacySplitScreen mLegacySplitScreen;
-    @Mock private StatusBarWindowView mStatusBarWindowView;
     @Mock private LightsOutNotifController mLightsOutNotifController;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
     @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
@@ -426,7 +425,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mLightsOutNotifController,
                 mStatusBarNotificationActivityStarterBuilder,
                 mShadeController,
-                mStatusBarWindowView,
                 mStatusBarKeyguardViewManager,
                 mViewMediatorCallback,
                 mInitController,
