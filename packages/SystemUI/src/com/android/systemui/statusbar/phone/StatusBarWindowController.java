@@ -34,6 +34,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.IWindowManager;
+import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +46,7 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.fragments.FragmentHostManager;
 
 import java.util.Optional;
 
@@ -66,7 +68,7 @@ public class StatusBarWindowController {
     private int mBarHeight = -1;
     private final State mCurrentState = new State();
 
-    private final ViewGroup mStatusBarView;
+    private final ViewGroup mStatusBarWindowView;
     // The container in which we should run launch animations started from the status bar and
     //   expanding into the opening window.
     private final ViewGroup mLaunchAnimationContainer;
@@ -78,15 +80,14 @@ public class StatusBarWindowController {
             Context context,
             WindowManager windowManager,
             IWindowManager iWindowManager,
-            StatusBarWindowView statusBarWindowView,
             StatusBarContentInsetsProvider contentInsetsProvider,
             @Main Resources resources) {
         mContext = context;
         mWindowManager = windowManager;
         mIWindowManager = iWindowManager;
         mContentInsetsProvider = contentInsetsProvider;
-        mStatusBarView = statusBarWindowView;
-        mLaunchAnimationContainer = mStatusBarView.findViewById(
+        mStatusBarWindowView = createWindowView(mContext);
+        mLaunchAnimationContainer = mStatusBarWindowView.findViewById(
                 R.id.status_bar_launch_animation_container);
         mLpChanged = new WindowManager.LayoutParams();
         mResources = resources;
@@ -124,11 +125,26 @@ public class StatusBarWindowController {
         // hardware-accelerated.
         mLp = getBarLayoutParams(mContext.getDisplay().getRotation());
 
-        mWindowManager.addView(mStatusBarView, mLp);
+        mWindowManager.addView(mStatusBarWindowView, mLp);
         mLpChanged.copyFrom(mLp);
 
         mContentInsetsProvider.addCallback(this::calculateStatusBarLocationsForAllRotations);
         calculateStatusBarLocationsForAllRotations();
+    }
+
+    /** Adds the given view to the status bar window view. */
+    public void addViewToWindow(View view, ViewGroup.LayoutParams layoutParams) {
+        mStatusBarWindowView.addView(view, layoutParams);
+    }
+
+    /** Returns the status bar window's background view. */
+    public View getBackgroundView() {
+        return mStatusBarWindowView.findViewById(R.id.status_bar_container);
+    }
+
+    /** Returns a fragment host manager for the status bar window view. */
+    public FragmentHostManager getFragmentHostManager() {
+        return FragmentHostManager.get(mStatusBarWindowView);
     }
 
     /**
@@ -146,7 +162,7 @@ public class StatusBarWindowController {
      */
     public Optional<ActivityLaunchAnimator.Controller> wrapAnimationControllerIfInStatusBar(
             View rootView, ActivityLaunchAnimator.Controller animationController) {
-        if (rootView != mStatusBarView) {
+        if (rootView != mStatusBarWindowView) {
             return Optional.empty();
         }
 
@@ -258,7 +274,7 @@ public class StatusBarWindowController {
         applyForceStatusBarVisibleFlag(state);
         applyHeight(state);
         if (mLp != null && mLp.copyFrom(mLpChanged) != 0) {
-            mWindowManager.updateViewLayout(mStatusBarView, mLp);
+            mWindowManager.updateViewLayout(mStatusBarWindowView, mLp);
         }
     }
 
@@ -277,5 +293,15 @@ public class StatusBarWindowController {
         } else {
             mLpChanged.privateFlags &= ~PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
         }
+    }
+
+    private ViewGroup createWindowView(Context context) {
+        ViewGroup view = (ViewGroup) LayoutInflater.from(context).inflate(
+                R.layout.super_status_bar, /* root= */ null);
+        if (view == null) {
+            throw new IllegalStateException(
+                    "R.layout.super_status_bar could not be properly inflated");
+        }
+        return view;
     }
 }

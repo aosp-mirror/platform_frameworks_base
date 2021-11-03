@@ -18,7 +18,6 @@ package com.android.systemui.dagger;
 
 import android.app.INotificationManager;
 import android.content.Context;
-import android.view.LayoutInflater;
 
 import androidx.annotation.Nullable;
 
@@ -27,7 +26,6 @@ import com.android.keyguard.clock.ClockModule;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
-import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
@@ -67,7 +65,6 @@ import com.android.systemui.statusbar.notification.row.dagger.NotificationRowCom
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -213,18 +210,5 @@ public abstract class SystemUIModule {
                 interruptionStateProvider, zenModeController, notifUserManager,
                 groupManager, entryManager, notifPipeline, sysUiState, featureFlags, dumpManager,
                 sysuiMainExecutor));
-    }
-
-    @Provides
-    @SysUISingleton
-    static StatusBarWindowView providesStatusBarWindowView(LayoutInflater layoutInflater) {
-        StatusBarWindowView view =
-                (StatusBarWindowView) layoutInflater.inflate(R.layout.super_status_bar,
-                        /* root= */ null);
-        if (view == null) {
-            throw new IllegalStateException(
-                    "R.layout.super_status_bar could not be properly inflated");
-        }
-        return view;
     }
 }
