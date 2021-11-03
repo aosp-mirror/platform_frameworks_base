@@ -34,6 +34,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.Overridable;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
@@ -45,6 +46,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.dreams.DreamManagerInternal;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -76,6 +78,7 @@ public final class CommunalManagerService extends SystemService {
     private final BinderService mBinderService;
     private final PackageReceiver mPackageReceiver;
     private final PackageManager mPackageManager;
+    private final DreamManagerInternal mDreamManagerInternal;
 
     /**
      * This change id is used to annotate packages which are allowed to run in communal mode.
@@ -134,6 +137,7 @@ public final class CommunalManagerService extends SystemService {
         mContext = context;
         mPackageManager = mContext.getPackageManager();
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
+        mDreamManagerInternal = LocalServices.getService(DreamManagerInternal.class);
         mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
         mBinderService = new BinderService();
         mPackageReceiver = new PackageReceiver(mContext);
@@ -205,12 +209,25 @@ public final class CommunalManagerService extends SystemService {
     }
 
     private boolean isAppAllowed(ApplicationInfo appInfo) {
-        if (isChangeEnabled(ALLOW_COMMUNAL_MODE_BY_DEFAULT, appInfo)) {
+        if (isActiveDream(appInfo) || isChangeEnabled(ALLOW_COMMUNAL_MODE_BY_DEFAULT, appInfo)) {
             return true;
         }
 
         return isChangeEnabled(ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT, appInfo)
                 && getUserEnabledApps().contains(appInfo.packageName);
+    }
+
+    private boolean isActiveDream(ApplicationInfo appInfo) {
+        final ComponentName activeDream = mDreamManagerInternal.getActiveDreamComponent(
+                /* doze= */ false);
+        final ComponentName activeDoze = mDreamManagerInternal.getActiveDreamComponent(
+                /* doze= */ true);
+        return isFromPackage(activeDream, appInfo) || isFromPackage(activeDoze, appInfo);
+    }
+
+    private static boolean isFromPackage(ComponentName componentName, ApplicationInfo appInfo) {
+        if (componentName == null) return false;
+        return TextUtils.equals(appInfo.packageName, componentName.getPackageName());
     }
 
     private static boolean isChangeEnabled(long changeId, ApplicationInfo appInfo) {

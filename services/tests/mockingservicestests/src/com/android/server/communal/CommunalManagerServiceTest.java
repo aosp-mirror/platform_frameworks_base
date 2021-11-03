@@ -39,6 +39,7 @@ import android.app.KeyguardManager;
 import android.app.communal.ICommunalManager;
 import android.app.compat.CompatChanges;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -48,6 +49,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
+import android.service.dreams.DreamManagerInternal;
 import android.test.mock.MockContentResolver;
 
 import androidx.test.InstrumentationRegistry;
@@ -92,6 +94,8 @@ public class CommunalManagerServiceTest {
     private ActivityTaskManagerInternal mAtmInternal;
     @Mock
     private KeyguardManager mKeyguardManager;
+    @Mock
+    private DreamManagerInternal mDreamManagerInternal;
 
     private ActivityInterceptorCallback mActivityInterceptorCallback;
     private BroadcastReceiver mPackageReceiver;
@@ -115,6 +119,7 @@ public class CommunalManagerServiceTest {
 
         when(mContextSpy.getSystemService(KeyguardManager.class)).thenReturn(mKeyguardManager);
         addLocalServiceMock(ActivityTaskManagerInternal.class, mAtmInternal);
+        addLocalServiceMock(DreamManagerInternal.class, mDreamManagerInternal);
 
         doNothing().when(mContextSpy).enforceCallingPermission(
                 eq(Manifest.permission.WRITE_COMMUNAL_STATE), anyString());
@@ -284,6 +289,17 @@ public class CommunalManagerServiceTest {
 
         allowPackages(TEST_PACKAGE_NAME);
         assertDoesIntercept();
+    }
+
+    @Test
+    public void testIntercept_locked_communalOn_dream() throws RemoteException {
+        mBinder.setCommunalViewShowing(true);
+        when(mKeyguardManager.isKeyguardLocked()).thenReturn(true);
+        when(mDreamManagerInternal.getActiveDreamComponent(false)).thenReturn(
+                new ComponentName(TEST_PACKAGE_NAME, "SomeClass"));
+
+        allowPackages(TEST_PACKAGE_NAME);
+        assertDoesNotIntercept();
     }
 
     @Test
