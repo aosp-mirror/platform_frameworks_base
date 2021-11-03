@@ -80,7 +80,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             mSurfaceControlTransactionFactory;
     private OneHandedTutorialHandler mTutorialHandler;
     private List<OneHandedTransitionCallback> mTransitionCallbacks = new ArrayList<>();
-    private OneHandedBackgroundPanelOrganizer mBackgroundPanelOrganizer;
 
     @VisibleForTesting
     OneHandedAnimationCallback mOneHandedAnimationCallback =
@@ -135,7 +134,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             OneHandedSettingsUtil oneHandedSettingsUtil,
             OneHandedAnimationController animationController,
             OneHandedTutorialHandler tutorialHandler,
-            OneHandedBackgroundPanelOrganizer oneHandedBackgroundGradientOrganizer,
             InteractionJankMonitor jankMonitor,
             ShellExecutor mainExecutor) {
         super(mainExecutor);
@@ -150,7 +148,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                 SystemProperties.getInt(ONE_HANDED_MODE_TRANSLATE_ANIMATION_DURATION,
                         animationDurationConfig);
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
-        mBackgroundPanelOrganizer = oneHandedBackgroundGradientOrganizer;
         mTutorialHandler = tutorialHandler;
     }
 
@@ -258,7 +255,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             animator.setTransitionDirection(direction)
                     .addOneHandedAnimationCallback(mOneHandedAnimationCallback)
                     .addOneHandedAnimationCallback(mTutorialHandler)
-                    .addOneHandedAnimationCallback(mBackgroundPanelOrganizer)
                     .setDuration(durationMs)
                     .start();
         }
