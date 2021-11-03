@@ -1037,7 +1037,7 @@ public class SubscriptionManager {
     public static final String UICC_APPLICATIONS_ENABLED = SimInfo.COLUMN_UICC_APPLICATIONS_ENABLED;
 
     /**
-     * Indicate which network type is allowed. By default it's enabled.
+     * Indicate which network type is allowed.
      * @hide
      */
     public static final String ALLOWED_NETWORK_TYPES =
@@ -1094,6 +1094,17 @@ public class SubscriptionManager {
      * @hide
      */
     public static final int USAGE_SETTING_DATA_CENTRIC = 2;
+
+    /**
+     * Indicate the preferred usage setting for the subscription.
+     *
+     * 0 - Default - If the value has not been explicitly set, it will be "default"
+     * 1 - Voice-centric
+     * 2 - Data-centric
+     *
+     * @hide
+     */
+    public static final String USAGE_SETTING = SimInfo.COLUMN_USAGE_SETTING;
 
     /**
      * Broadcast Action: The user has changed one of the default subs related to
