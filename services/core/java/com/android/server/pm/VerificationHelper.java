@@ -27,12 +27,18 @@ import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.Settings;
 
-final class VerificationUtils {
+public final class VerificationHelper {
     /**
      * The default maximum time to wait for the verification agent to return in
      * milliseconds.
      */
     private static final long DEFAULT_VERIFICATION_TIMEOUT = 10 * 1000;
+
+    Context mContext;
+
+    public VerificationHelper(Context context) {
+        mContext = context;
+    }
 
     /**
      * Get the verification agent timeout.  Used for both the APK verifier and the
@@ -40,17 +46,17 @@ final class VerificationUtils {
      *
      * @return verification timeout in milliseconds
      */
-    public static long getVerificationTimeout(Context context) {
-        long timeout = Settings.Global.getLong(context.getContentResolver(),
+    public long getVerificationTimeout() {
+        long timeout = Settings.Global.getLong(mContext.getContentResolver(),
                 Settings.Global.PACKAGE_VERIFIER_TIMEOUT, DEFAULT_VERIFICATION_TIMEOUT);
         // The setting can be used to increase the timeout but not decrease it, since that is
         // equivalent to disabling the verifier.
         return Math.max(timeout, DEFAULT_VERIFICATION_TIMEOUT);
     }
 
-    public static void broadcastPackageVerified(int verificationId, Uri packageUri,
+    public void broadcastPackageVerified(int verificationId, Uri packageUri,
             int verificationCode, @Nullable String rootHashString, int dataLoaderType,
-            UserHandle user, Context context) {
+            UserHandle user) {
         final Intent intent = new Intent(Intent.ACTION_PACKAGE_VERIFIED);
         intent.setDataAndType(packageUri, PACKAGE_MIME_TYPE);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -61,7 +67,7 @@ final class VerificationUtils {
         }
         intent.putExtra(PackageInstaller.EXTRA_DATA_LOADER_TYPE, dataLoaderType);
 
-        context.sendBroadcastAsUser(intent, user,
+        mContext.sendBroadcastAsUser(intent, user,
                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT);
     }
 }
