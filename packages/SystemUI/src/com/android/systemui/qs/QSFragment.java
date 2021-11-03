@@ -15,6 +15,7 @@
 package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
+import static com.android.systemui.statusbar.DisableFlagsLogger.DisableState;
 
 import static com.android.systemui.media.dagger.MediaModule.QS_PANEL;
 import static com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL;
@@ -101,6 +102,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private final MediaHost mQsMediaHost;
     private final MediaHost mQqsMediaHost;
     private final QSFragmentComponent.Factory mQsComponentFactory;
+    private final QSFragmentDisableFlagsLogger mQsFragmentDisableFlagsLogger;
     private final QSTileHost mHost;
     private boolean mShowCollapsedOnKeyguard;
     private boolean mLastKeyguardAndExpanded;
@@ -151,6 +153,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             @Named(QUICK_QS_PANEL) MediaHost qqsMediaHost,
             KeyguardBypassController keyguardBypassController,
             QSFragmentComponent.Factory qsComponentFactory,
+            QSFragmentDisableFlagsLogger qsFragmentDisableFlagsLogger,
             FalsingManager falsingManager, DumpManager dumpManager) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mCommandQueue = commandQueue;
@@ -158,6 +161,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQsMediaHost = qsMediaHost;
         mQqsMediaHost = qqsMediaHost;
         mQsComponentFactory = qsComponentFactory;
+        mQsFragmentDisableFlagsLogger = qsFragmentDisableFlagsLogger;
         commandQueue.observe(getLifecycle(), this);
         mHost = qsTileHost;
         mFalsingManager = falsingManager;
@@ -363,7 +367,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (displayId != getContext().getDisplayId()) {
             return;
         }
+        int state2BeforeAdjustment = state2;
         state2 = mRemoteInputQuickSettingsDisabler.adjustDisableFlags(state2);
+
+        mQsFragmentDisableFlagsLogger.logDisableFlagChange(
+                /* new= */ new DisableState(state1, state2BeforeAdjustment),
+                /* newAfterLocalModification= */ new DisableState(state1, state2)
+        );
 
         final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
         if (disabled == mQsDisabled) return;
