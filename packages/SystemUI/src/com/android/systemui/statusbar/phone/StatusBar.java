@@ -2666,26 +2666,12 @@ public class StatusBar extends SystemUI implements
     private ActivityLaunchAnimator.Controller wrapAnimationController(
             ActivityLaunchAnimator.Controller animationController, boolean dismissShade) {
         View rootView = animationController.getLaunchContainer().getRootView();
-        if (rootView == mStatusBarWindowView) {
-            // We are animating a view in the status bar. We have to make sure that the status bar
-            // window matches the full screen during the animation and that we are expanding the
-            // view below the other status bar text.
-            animationController.setLaunchContainer(
-                    mStatusBarWindowController.getLaunchAnimationContainer());
 
-            return new DelegateLaunchAnimatorController(animationController) {
-                @Override
-                public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {
-                    getDelegate().onLaunchAnimationStart(isExpandingFullyAbove);
-                    mStatusBarWindowController.setLaunchAnimationRunning(true);
-                }
-
-                @Override
-                public void onLaunchAnimationEnd(boolean isExpandingFullyAbove) {
-                    getDelegate().onLaunchAnimationEnd(isExpandingFullyAbove);
-                    mStatusBarWindowController.setLaunchAnimationRunning(false);
-                }
-            };
+        Optional<ActivityLaunchAnimator.Controller> controllerFromStatusBar =
+                mStatusBarWindowController.wrapAnimationControllerIfInStatusBar(
+                        rootView, animationController);
+        if (controllerFromStatusBar.isPresent()) {
+            return controllerFromStatusBar.get();
         }
 
         if (dismissShade && rootView == mNotificationShadeWindowView) {
