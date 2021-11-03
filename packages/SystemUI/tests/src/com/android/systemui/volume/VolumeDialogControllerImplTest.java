@@ -101,6 +101,11 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         // Initial non-set value
         when(mRingerModeLiveData.getValue()).thenReturn(-1);
         when(mRingerModeInternalLiveData.getValue()).thenReturn(-1);
+        // Enable group volume adjustments
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions,
+                true);
+
         mCallback = mock(VolumeDialogControllerImpl.C.class);
         mThreadFactory.setLooper(TestableLooper.get(this).getLooper());
         mVolumeController = new TestableVolumeDialogControllerImpl(mContext,
