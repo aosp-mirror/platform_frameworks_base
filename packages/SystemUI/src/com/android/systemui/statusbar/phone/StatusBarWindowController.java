@@ -35,13 +35,18 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.Surface;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.R;
+import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -62,6 +67,8 @@ public class StatusBarWindowController {
     private final State mCurrentState = new State();
 
     private final ViewGroup mStatusBarView;
+    // The container in which we should run launch animations started from the status bar and
+    //   expanding into the opening window.
     private final ViewGroup mLaunchAnimationContainer;
     private WindowManager.LayoutParams mLp;
     private final WindowManager.LayoutParams mLpChanged;
@@ -122,6 +129,41 @@ public class StatusBarWindowController {
 
         mContentInsetsProvider.addCallback(this::calculateStatusBarLocationsForAllRotations);
         calculateStatusBarLocationsForAllRotations();
+    }
+
+    /**
+     * Provides an updated animation controller if we're animating a view in the status bar.
+     *
+     * This is needed because we have to make sure that the status bar window matches the full
+     * screen during the animation and that we are expanding the view below the other status bar
+     * text.
+     *
+     * @param rootView the root view of the animation
+     * @param animationController the default animation controller to use
+     * @return If the animation is on a view in the status bar, returns an Optional containing an
+     *   updated animation controller that handles status-bar-related animation details. Returns an
+     *   empty optional if the animation is *not* on a view in the status bar.
+     */
+    public Optional<ActivityLaunchAnimator.Controller> wrapAnimationControllerIfInStatusBar(
+            View rootView, ActivityLaunchAnimator.Controller animationController) {
+        if (rootView != mStatusBarView) {
+            return Optional.empty();
+        }
+
+        animationController.setLaunchContainer(mLaunchAnimationContainer);
+        return Optional.of(new DelegateLaunchAnimatorController(animationController) {
+            @Override
+            public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {
+                getDelegate().onLaunchAnimationStart(isExpandingFullyAbove);
+                setLaunchAnimationRunning(true);
+            }
+
+            @Override
+            public void onLaunchAnimationEnd(boolean isExpandingFullyAbove) {
+                getDelegate().onLaunchAnimationEnd(isExpandingFullyAbove);
+                setLaunchAnimationRunning(false);
+            }
+        });
     }
 
     private WindowManager.LayoutParams getBarLayoutParams(int rotation) {
@@ -194,21 +236,11 @@ public class StatusBarWindowController {
     }
 
     /**
-     * Return the container in which we should run launch animations started from the status bar and
-     * expanding into the opening window.
-     *
-     * @see #setLaunchAnimationRunning
-     */
-    public ViewGroup getLaunchAnimationContainer() {
-        return mLaunchAnimationContainer;
-    }
-
-    /**
      * Set whether a launch animation is currently running. If true, this will ensure that the
      * window matches its parent height so that the animation is not clipped by the normal status
      * bar height.
      */
-    public void setLaunchAnimationRunning(boolean isLaunchAnimationRunning) {
+    private void setLaunchAnimationRunning(boolean isLaunchAnimationRunning) {
         if (isLaunchAnimationRunning == mCurrentState.mIsLaunchAnimationRunning) {
             return;
         }
