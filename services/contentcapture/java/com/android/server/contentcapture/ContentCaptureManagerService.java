@@ -1072,26 +1072,18 @@ public final class ContentCaptureManagerService extends
             ParcelFileDescriptor sourceOut = servicePipe.second;
             ParcelFileDescriptor sinkOut = servicePipe.first;
 
-            mParentService.mPackagesWithShareRequests.add(mDataShareRequest.getPackageName());
-
-            try {
-                mClientAdapter.write(sourceIn);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to call write() the client operation", e);
-                sendErrorSignal(mClientAdapter, serviceAdapter,
-                        ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
-                logServiceEvent(
-                        CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_CLIENT_PIPE_FAIL);
-                return;
+            synchronized (mParentService.mLock) {
+                mParentService.mPackagesWithShareRequests.add(mDataShareRequest.getPackageName());
             }
-            try {
-                serviceAdapter.start(sinkOut);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to call start() the service operation", e);
+
+            if (!setUpSharingPipeline(mClientAdapter, serviceAdapter, sourceIn, sinkOut)) {
                 sendErrorSignal(mClientAdapter, serviceAdapter,
                         ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
-                logServiceEvent(
-                        CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_SERVICE_PIPE_FAIL);
+                bestEffortCloseFileDescriptors(sourceIn, sinkIn, sourceOut, sinkOut);
+                synchronized (mParentService.mLock) {
+                    mParentService.mPackagesWithShareRequests
+                        .remove(mDataShareRequest.getPackageName());
+                }
                 return;
             }
 
@@ -1182,6 +1174,32 @@ public final class ContentCaptureManagerService extends
                     Slog.w(TAG, "Failed to call error() the client operation", e2);
                 }
             }
+        }
+
+        private boolean setUpSharingPipeline(
+                IDataShareWriteAdapter clientAdapter,
+                IDataShareReadAdapter serviceAdapter,
+                ParcelFileDescriptor sourceIn,
+                ParcelFileDescriptor sinkOut) {
+            try {
+                clientAdapter.write(sourceIn);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to call write() the client operation", e);
+                logServiceEvent(
+                        CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_CLIENT_PIPE_FAIL);
+                return false;
+            }
+
+            try {
+                serviceAdapter.start(sinkOut);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to call start() the service operation", e);
+                logServiceEvent(
+                        CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_SERVICE_PIPE_FAIL);
+                return false;
+            }
+
+            return true;
         }
 
         private void enforceDataSharingTtl(ParcelFileDescriptor sourceIn,
