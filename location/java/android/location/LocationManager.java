@@ -180,6 +180,11 @@ public class LocationManager {
      * <p>If present, this provider determines location using GNSS satellites. The responsiveness
      * and accuracy of location fixes may depend on GNSS signal conditions.
      *
+     * <p>Locations returned from this provider are with respect to the primary GNSS antenna
+     * position within the device. {@link #getGnssAntennaInfos()} may be used to determine the GNSS
+     * antenna position with respect to the Android Coordinate System, and convert between them if
+     * necessary. This is generally only necessary if working with high accuracy GNSS results.
+     *
      * <p>The extras Bundle for locations derived by this location provider may contain the
      * following key/value pairs:
      * <ul>
@@ -1450,6 +1455,11 @@ public class LocationManager {
      * <p>In case the provider you have selected is disabled, location updates will cease, and a
      * provider availability update will be sent. As soon as the provider is enabled again, another
      * provider availability update will be sent and location updates will resume.
+     *
+     * <p>Locations returned from {@link #GPS_PROVIDER} are with respect to the primary GNSS antenna
+     * position within the device. {@link #getGnssAntennaInfos()} may be used to determine the GNSS
+     * antenna position with respect to the Android Coordinate System, and convert between them if
+     * necessary. This is generally only necessary if working with high accuracy GNSS results.
      *
      * <p>When location callbacks are invoked, the system will hold a wakelock on your
      * application's behalf for some period of time, but not indefinitely. If your application
