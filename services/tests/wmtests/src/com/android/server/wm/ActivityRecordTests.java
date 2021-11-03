@@ -526,8 +526,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Rect insets = new Rect();
         final DisplayInfo displayInfo = task.mDisplayContent.getDisplayInfo();
         final DisplayPolicy policy = task.mDisplayContent.getDisplayPolicy();
-        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.logicalWidth,
-                displayInfo.logicalHeight, displayInfo.displayCutout, insets);
+        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.displayCutout, insets);
         policy.convertNonDecorInsetsToStableInsets(insets, displayInfo.rotation);
         Task.intersectWithInsetsIfFits(stableRect, stableRect, insets);
 
@@ -568,8 +567,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Rect insets = new Rect();
         final DisplayInfo displayInfo = rootTask.mDisplayContent.getDisplayInfo();
         final DisplayPolicy policy = rootTask.mDisplayContent.getDisplayPolicy();
-        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.logicalWidth,
-                displayInfo.logicalHeight, displayInfo.displayCutout, insets);
+        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.displayCutout, insets);
         policy.convertNonDecorInsetsToStableInsets(insets, displayInfo.rotation);
         Task.intersectWithInsetsIfFits(stableRect, stableRect, insets);
 

@@ -44,7 +44,6 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryManagerInternal;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -59,6 +58,7 @@ import android.util.SparseArrayMap;
 import android.util.SparseSetArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
@@ -245,9 +245,8 @@ public class InternalResourceService extends SystemService {
     private static final int MSG_NOTIFY_AFFORDABILITY_CHANGE_LISTENER = 0;
     private static final int MSG_SCHEDULE_UNUSED_WEALTH_RECLAMATION_EVENT = 1;
     private static final int MSG_PROCESS_USAGE_EVENT = 2;
-    private static final int MSG_MAYBE_FOCE_RECLAIM = 3;
+    private static final int MSG_MAYBE_FORCE_RECLAIM = 3;
     private static final String ALARM_TAG_WEALTH_RECLAMATION = "*tare.reclamation*";
-    private static final String KEY_PKG = "pkg";
 
     /**
      * Initializes the system service.
@@ -364,7 +363,7 @@ public class InternalResourceService extends SystemService {
             if (newBatteryLevel > mCurrentBatteryLevel) {
                 mAgent.distributeBasicIncomeLocked(newBatteryLevel);
             } else if (newBatteryLevel < mCurrentBatteryLevel) {
-                mHandler.obtainMessage(MSG_MAYBE_FOCE_RECLAIM).sendToTarget();
+                mHandler.obtainMessage(MSG_MAYBE_FORCE_RECLAIM).sendToTarget();
             }
             mCurrentBatteryLevel = newBatteryLevel;
         }
@@ -463,12 +462,11 @@ public class InternalResourceService extends SystemService {
             Slog.d(TAG, userId + ":" + pkgName + " affordability changed to "
                     + affordabilityNote.isCurrentlyAffordable());
         }
-        Message msg = mHandler.obtainMessage(
-                MSG_NOTIFY_AFFORDABILITY_CHANGE_LISTENER, userId, 0, affordabilityNote);
-        Bundle data = new Bundle();
-        data.putString(KEY_PKG, pkgName);
-        msg.setData(data);
-        msg.sendToTarget();
+        final SomeArgs args = SomeArgs.obtain();
+        args.argi1 = userId;
+        args.arg1 = pkgName;
+        args.arg2 = affordabilityNote;
+        mHandler.obtainMessage(MSG_NOTIFY_AFFORDABILITY_CHANGE_LISTENER, args).sendToTarget();
     }
 
     @GuardedBy("mLock")
@@ -684,8 +682,8 @@ public class InternalResourceService extends SystemService {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_MAYBE_FOCE_RECLAIM: {
-                    removeMessages(MSG_MAYBE_FOCE_RECLAIM);
+                case MSG_MAYBE_FORCE_RECLAIM: {
+                    removeMessages(MSG_MAYBE_FORCE_RECLAIM);
                     synchronized (mLock) {
                         maybeForceReclaimLocked();
                     }
@@ -693,16 +691,19 @@ public class InternalResourceService extends SystemService {
                 break;
 
                 case MSG_NOTIFY_AFFORDABILITY_CHANGE_LISTENER: {
-                    Bundle data = msg.getData();
-                    final int userId = msg.arg1;
-                    final String pkgName = data.getString(KEY_PKG);
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final int userId = args.argi1;
+                    final String pkgName = (String) args.arg1;
                     final Agent.ActionAffordabilityNote affordabilityNote =
-                            (Agent.ActionAffordabilityNote) msg.obj;
+                            (Agent.ActionAffordabilityNote) args.arg2;
+
                     final EconomyManagerInternal.AffordabilityChangeListener listener =
                             affordabilityNote.getListener();
                     listener.onAffordabilityChanged(userId, pkgName,
                             affordabilityNote.getActionBill(),
                             affordabilityNote.isCurrentlyAffordable());
+
+                    args.recycle();
                 }
                 break;
 

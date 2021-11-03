@@ -176,6 +176,11 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
         return mUserContexts.get(user);
     }
 
+    public void tearDown() {
+        mAppOpsManager.stopWatchingActive(this);
+        mAppOpsManager.stopWatchingStarted(this);
+    }
+
     @Override
     public void onOpActiveChanged(@NonNull String op, int uid, @NonNull String packageName,
             boolean active) {

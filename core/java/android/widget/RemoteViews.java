@@ -5746,11 +5746,9 @@ public class RemoteViews implements Parcelable, Filter {
         // persisted across change, and has the RemoteViews re-applied in a different situation
         // (orientation or size), we throw an exception, since the layouts may be completely
         // unrelated.
-        if (hasMultipleLayouts()) {
-            if (!rvToApply.canRecycleView(v)) {
-                throw new RuntimeException("Attempting to re-apply RemoteViews to a view that" +
-                        " that does not share the same root layout id.");
-            }
+        if (!rvToApply.canRecycleView(v)) {
+            throw new RuntimeException("Attempting to re-apply RemoteViews to a view that"
+                    + " that does not share the same root layout id.");
         }
 
         rvToApply.performApply(v, (ViewGroup) v.getParent(), handler, colorResources);
@@ -5794,11 +5792,9 @@ public class RemoteViews implements Parcelable, Filter {
         // In the case that a view has this RemoteViews applied in one orientation, is persisted
         // across orientation change, and has the RemoteViews re-applied in the new orientation,
         // we throw an exception, since the layouts may be completely unrelated.
-        if (hasMultipleLayouts()) {
-            if (!rvToApply.canRecycleView(v)) {
-                throw new RuntimeException("Attempting to re-apply RemoteViews to a view that" +
-                        " that does not share the same root layout id.");
-            }
+        if (!rvToApply.canRecycleView(v)) {
+            throw new RuntimeException("Attempting to re-apply RemoteViews to a view that"
+                    + " that does not share the same root layout id.");
         }
 
         return new AsyncApplyTask(rvToApply, (ViewGroup) v.getParent(),

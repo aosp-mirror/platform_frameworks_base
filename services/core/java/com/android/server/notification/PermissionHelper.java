@@ -24,8 +24,10 @@ import android.Manifest;
 import android.annotation.UserIdInt;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.permission.IPermissionManager;
 import android.util.Slog;
 
@@ -155,6 +157,19 @@ public final class PermissionHelper {
         } catch (RemoteException e) {
             Slog.e(TAG, "Could not reach system server", e);
         }
+    }
+
+    public boolean isPermissionFixed(String packageName, @UserIdInt int userId) {
+        assertFlag();
+        try {
+            int flags = mPermManager.getPermissionFlags(packageName, NOTIFICATION_PERMISSION,
+                    userId);
+            return (flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0
+                    || (flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0;
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Could not reach system server", e);
+        }
+        return false;
     }
 
     private void assertFlag() {

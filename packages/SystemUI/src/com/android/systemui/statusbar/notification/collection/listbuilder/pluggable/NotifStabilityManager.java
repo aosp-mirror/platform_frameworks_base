@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.listbuilder.pluggable;
 
+import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
@@ -52,4 +53,11 @@ public abstract class NotifStabilityManager extends Pluggable<NotifStabilityMana
      * being suppressed.
      */
     public abstract boolean isSectionChangeAllowed(NotificationEntry entry);
+
+    /**
+     *  Is a notification entry is allowed be reordered
+     * @param entry
+     * @return if can re-order
+     */
+    public abstract boolean isEntryReorderingAllowed(ListEntry entry);
 }

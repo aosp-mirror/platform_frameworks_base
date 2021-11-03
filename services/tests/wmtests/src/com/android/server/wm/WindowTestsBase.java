@@ -30,7 +30,6 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.os.Process.SYSTEM_UID;
 import static android.view.View.VISIBLE;
-import static android.view.ViewRootImpl.INSETS_LAYOUT_GENERALIZATION;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -279,12 +278,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_STATUS_BAR)) {
             mStatusBarWindow = createCommonWindow(null, TYPE_STATUS_BAR, "mStatusBarWindow");
-            if (INSETS_LAYOUT_GENERALIZATION) {
-                mStatusBarWindow.mAttrs.height = STATUS_BAR_HEIGHT;
-                mStatusBarWindow.mAttrs.gravity = Gravity.TOP;
-                mStatusBarWindow.mAttrs.layoutInDisplayCutoutMode =
-                        LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-            }
+            mStatusBarWindow.mAttrs.height = STATUS_BAR_HEIGHT;
+            mStatusBarWindow.mAttrs.gravity = Gravity.TOP;
+            mStatusBarWindow.mAttrs.layoutInDisplayCutoutMode =
+                    LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_NOTIFICATION_SHADE)) {
             mNotificationShadeWindow = createCommonWindow(null, TYPE_NOTIFICATION_SHADE,
@@ -292,14 +289,12 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_NAVIGATION_BAR)) {
             mNavBarWindow = createCommonWindow(null, TYPE_NAVIGATION_BAR, "mNavBarWindow");
-            if (INSETS_LAYOUT_GENERALIZATION) {
-                mNavBarWindow.mAttrs.height = NAV_BAR_HEIGHT;
-                mNavBarWindow.mAttrs.gravity = Gravity.BOTTOM;
-                mNavBarWindow.mAttrs.paramsForRotation = new WindowManager.LayoutParams[4];
-                for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
-                    mNavBarWindow.mAttrs.paramsForRotation[rot] =
-                            getNavBarLayoutParamsForRotation(rot);
-                }
+            mNavBarWindow.mAttrs.height = NAV_BAR_HEIGHT;
+            mNavBarWindow.mAttrs.gravity = Gravity.BOTTOM;
+            mNavBarWindow.mAttrs.paramsForRotation = new WindowManager.LayoutParams[4];
+            for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
+                mNavBarWindow.mAttrs.paramsForRotation[rot] =
+                        getNavBarLayoutParamsForRotation(rot);
             }
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_DOCK_DIVIDER)) {
@@ -332,30 +327,26 @@ class WindowTestsBase extends SystemServiceTestsBase {
         int width = WindowManager.LayoutParams.MATCH_PARENT;
         int height = WindowManager.LayoutParams.MATCH_PARENT;
         int gravity = Gravity.BOTTOM;
-        if (INSETS_LAYOUT_GENERALIZATION) {
-            switch (rotation) {
-                case ROTATION_UNDEFINED:
-                case Surface.ROTATION_0:
-                case Surface.ROTATION_180:
-                    height = NAV_BAR_HEIGHT;
-                    break;
-                case Surface.ROTATION_90:
-                    gravity = Gravity.RIGHT;
-                    width = NAV_BAR_HEIGHT;
-                    break;
-                case Surface.ROTATION_270:
-                    gravity = Gravity.LEFT;
-                    width = NAV_BAR_HEIGHT;
-                    break;
-            }
+        switch (rotation) {
+            case ROTATION_UNDEFINED:
+            case Surface.ROTATION_0:
+            case Surface.ROTATION_180:
+                height = NAV_BAR_HEIGHT;
+                break;
+            case Surface.ROTATION_90:
+                gravity = Gravity.RIGHT;
+                width = NAV_BAR_HEIGHT;
+                break;
+            case Surface.ROTATION_270:
+                gravity = Gravity.LEFT;
+                width = NAV_BAR_HEIGHT;
+                break;
         }
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR);
         lp.width = width;
         lp.height = height;
-        if (INSETS_LAYOUT_GENERALIZATION) {
-            lp.gravity = gravity;
-        }
+        lp.gravity = gravity;
         return lp;
     }
 

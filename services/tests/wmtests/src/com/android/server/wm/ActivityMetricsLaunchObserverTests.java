@@ -477,7 +477,6 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
     @Test
     public void testConsecutiveLaunch() {
-        mTrampolineActivity.setState(ActivityRecord.State.INITIALIZING, "test");
         onActivityLaunched(mTrampolineActivity);
         mActivityMetricsLogger.notifyActivityLaunching(mTopActivity.intent,
                 mTrampolineActivity /* caller */, mTrampolineActivity.getUid());

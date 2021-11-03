@@ -6189,10 +6189,12 @@ package android.app {
     method public long[] getVibrationPattern();
     method public boolean hasUserSetImportance();
     method public boolean hasUserSetSound();
+    method public boolean isBlockable();
     method public boolean isConversation();
     method public boolean isDemoted();
     method public boolean isImportantConversation();
     method public void setAllowBubbles(boolean);
+    method public void setBlockable(boolean);
     method public void setBypassDnd(boolean);
     method public void setConversationId(@NonNull String, @NonNull String);
     method public void setDescription(String);
@@ -31639,6 +31641,7 @@ package android.os {
     method @Nullable public android.os.PersistableBundle readPersistableBundle();
     method @Nullable public android.os.PersistableBundle readPersistableBundle(@Nullable ClassLoader);
     method @Nullable public java.io.Serializable readSerializable();
+    method @Nullable public <T extends java.io.Serializable> T readSerializable(@Nullable ClassLoader, @NonNull Class<T>);
     method @NonNull public android.util.Size readSize();
     method @NonNull public android.util.SizeF readSizeF();
     method @Nullable public <T> android.util.SparseArray<T> readSparseArray(@Nullable ClassLoader);

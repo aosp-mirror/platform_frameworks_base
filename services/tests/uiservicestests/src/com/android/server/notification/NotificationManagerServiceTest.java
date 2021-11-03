@@ -8347,6 +8347,36 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testPostNotification_channelLockedFixed() throws Exception {
+        mTestNotificationChannel.setImportanceLockedByOEM(true);
+
+        NotificationRecord temp = generateNotificationRecord(mTestNotificationChannel);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testPostNotification_appPermissionFixed", 0,
+                temp.getNotification(), 0);
+        waitForIdle();
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(1);
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(PKG);
+        assertThat(mService.getNotificationRecord(notifs[0].getKey()).isImportanceFixed()).isTrue();
+
+        mBinderService.cancelAllNotifications(PKG, 0);
+        waitForIdle();
+
+        mTestNotificationChannel.setImportanceLockedByOEM(false);
+        mTestNotificationChannel.setImportanceLockedByCriticalDeviceFunction(true);
+
+        temp = generateNotificationRecord(mTestNotificationChannel);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testPostNotification_appPermissionFixed", 0,
+                temp.getNotification(), 0);
+        waitForIdle();
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(1);
+        notifs = mBinderService.getActiveNotifications(PKG);
+        assertThat(mService.getNotificationRecord(notifs[0].getKey()).isImportanceFixed()).isTrue();
+    }
+
+    @Test
     public void testGetNotificationChannelsBypassingDnd_blocked() throws RemoteException {
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mPreferencesHelper.getImportance(PKG, mUid)).thenReturn(IMPORTANCE_NONE);
@@ -8355,5 +8385,80 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .isEmpty();
         verify(mPermissionHelper, never()).hasPermission(anyInt());
         verify(mPreferencesHelper, never()).getNotificationChannelsBypassingDnd(PKG, mUid);
+    }
+
+    @Test
+    public void testMatchesCallFilter_noPermissionShouldThrow() throws Exception {
+        // set the testable NMS to not system uid
+        mService.isSystemUid = false;
+
+        // make sure a caller without listener access or read_contacts permission can't call
+        // matchesCallFilter.
+        when(mListeners.hasAllowedListener(anyString(), anyInt())).thenReturn(false);
+        doThrow(new SecurityException()).when(mContext).enforceCallingPermission(
+                eq("android.permission.READ_CONTACTS"), anyString());
+
+        try {
+            // shouldn't matter what we're passing in, if we get past this line fail immediately
+            ((INotificationManager) mService.mService).matchesCallFilter(null);
+            fail("call to matchesCallFilter with no permissions should fail");
+        } catch (SecurityException e) {
+            // pass
+        }
+    }
+
+    @Test
+    public void testMatchesCallFilter_hasSystemPermission() throws Exception {
+        // set the testable NMS to system uid
+        mService.isSystemUid = true;
+
+        // make sure caller doesn't have listener access or read_contacts permission
+        when(mListeners.hasAllowedListener(anyString(), anyInt())).thenReturn(false);
+        doThrow(new SecurityException()).when(mContext).enforceCallingPermission(
+                eq("android.permission.READ_CONTACTS"), anyString());
+
+        try {
+            ((INotificationManager) mService.mService).matchesCallFilter(null);
+            // pass, but check that we actually checked for system permissions
+            assertTrue(mService.countSystemChecks > 0);
+        } catch (SecurityException e) {
+            fail("call to matchesCallFilter with just system permissions should work");
+        }
+    }
+
+    @Test
+    public void testMatchesCallFilter_hasListenerPermission() throws Exception {
+        mService.isSystemUid = false;
+
+        // make sure a caller with only listener access and not read_contacts permission can call
+        // matchesCallFilter.
+        when(mListeners.hasAllowedListener(anyString(), anyInt())).thenReturn(true);
+        doThrow(new SecurityException()).when(mContext).enforceCallingPermission(
+                eq("android.permission.READ_CONTACTS"), anyString());
+
+        try {
+            ((INotificationManager) mService.mService).matchesCallFilter(null);
+            // pass, this is not a functionality test
+        } catch (SecurityException e) {
+            fail("call to matchesCallFilter with listener permissions should work");
+        }
+    }
+
+    @Test
+    public void testMatchesCallFilter_hasContactsPermission() throws Exception {
+        mService.isSystemUid = false;
+
+        // make sure a caller with only read_contacts permission and not listener access can call
+        // matchesCallFilter.
+        when(mListeners.hasAllowedListener(anyString(), anyInt())).thenReturn(false);
+        doNothing().when(mContext).enforceCallingPermission(
+                eq("android.permission.READ_CONTACTS"), anyString());
+
+        try {
+            ((INotificationManager) mService.mService).matchesCallFilter(null);
+            // pass, this is not a functionality test
+        } catch (SecurityException e) {
+            fail("call to matchesCallFilter with listener permissions should work");
+        }
     }
 }

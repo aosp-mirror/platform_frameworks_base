@@ -1982,8 +1982,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mTmpBounds.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
 
         final DisplayPolicy policy = rootTask.mDisplayContent.getDisplayPolicy();
-        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.logicalWidth,
-                displayInfo.logicalHeight, displayInfo.displayCutout, mTmpInsets);
+        policy.getNonDecorInsetsLw(displayInfo.rotation,
+                displayInfo.displayCutout, mTmpInsets);
         intersectWithInsetsIfFits(outNonDecorBounds, mTmpBounds, mTmpInsets);
 
         policy.convertNonDecorInsetsToStableInsets(mTmpInsets, displayInfo.rotation);

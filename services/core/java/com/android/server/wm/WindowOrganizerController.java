@@ -1176,6 +1176,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
             return;
         }
+        if (!ownerActivity.isResizeable()) {
+            final IllegalArgumentException exception = new IllegalArgumentException("Not allowed"
+                    + " to operate with non-resizable owner Activity");
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+            return;
+        }
         // The ownerActivity has to belong to the same app as the root Activity of the target Task.
         final ActivityRecord rootActivity = ownerActivity.getTask().getRootActivity();
         if (rootActivity.getUid() != ownerActivity.getUid()) {

@@ -72,6 +72,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @hide
@@ -145,6 +146,8 @@ public class ContextHubService extends IContextHubService.Stub {
     private final Object mSendWifiSettingUpdateLock = new Object();
 
     private final SensorPrivacyManagerInternal mSensorPrivacyManagerInternal;
+
+    private final Map<Integer, AtomicLong> mLastRestartTimestampMap = new HashMap<>();
 
     /**
      * Class extending the callback to register with a Context Hub.
@@ -223,6 +226,9 @@ public class ContextHubService extends IContextHubService.Stub {
 
         HashMap<Integer, IContextHubClient> defaultClientMap = new HashMap<>();
         for (int contextHubId : mContextHubIdToInfoMap.keySet()) {
+            mLastRestartTimestampMap.put(contextHubId,
+                    new AtomicLong(SystemClock.elapsedRealtimeNanos()));
+
             ContextHubInfo contextHubInfo = mContextHubIdToInfoMap.get(contextHubId);
             IContextHubClient client = mClientManager.registerClient(
                     contextHubInfo, createDefaultClientCallback(contextHubId),
@@ -700,6 +706,12 @@ public class ContextHubService extends IContextHubService.Stub {
      */
     private void handleHubEventCallback(int contextHubId, int eventType) {
         if (eventType == CONTEXT_HUB_EVENT_RESTARTED) {
+            long now = SystemClock.elapsedRealtimeNanos();
+            long lastRestartTimeNs = mLastRestartTimestampMap.get(contextHubId).getAndSet(now);
+            ContextHubStatsLog.write(
+                    ContextHubStatsLog.CONTEXT_HUB_RESTARTED, now - lastRestartTimeNs,
+                    contextHubId);
+
             sendLocationSettingUpdate();
             sendWifiSettingUpdate(true /* forceUpdate */);
             sendAirplaneModeSettingUpdate();
