@@ -124,7 +124,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     public void setControl(@Nullable InsetsSourceControl control, int[] showTypes,
             int[] hideTypes) {
         super.setControl(control, showTypes, hideTypes);
-        if (control == null && !mIsRequestedVisibleAwaitingControl) {
+        if (control == null && !isRequestedVisibleAwaitingControl()) {
             hide();
             removeSurface();
         }
