@@ -75,10 +75,10 @@ java_library {
     static_kotlin_stdlib: false,
     libs: [
         "androidx.concurrent_concurrent-futures",
-        "SystemUI-flags",
     ],
     static_libs: [
         "SystemUI-flag-types",
+        "SystemUI-flags",
     ],
     java_version: "1.8",
     min_sdk_version: "current",
