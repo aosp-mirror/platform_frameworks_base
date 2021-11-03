@@ -912,8 +912,6 @@ public class StatusBar extends SystemUI implements
         lockscreenShadeTransitionController.setStatusbar(this);
 
         mExpansionChangedListeners = new ArrayList<>();
-        addExpansionChangedListener(
-                (expansion, expanded) -> mScrimController.setRawPanelExpansionFraction(expansion));
         addExpansionChangedListener(this::onPanelExpansionChanged);
 
         mBubbleExpandListener =
