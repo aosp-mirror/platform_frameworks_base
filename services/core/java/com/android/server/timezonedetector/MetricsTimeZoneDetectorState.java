@@ -111,6 +111,11 @@ public final class MetricsTimeZoneDetectorState {
         return mConfigurationInternal.isGeoDetectionSupported();
     }
 
+    /** Returns true if the device supports telephony time zone detection fallback. */
+    public boolean isTelephonyTimeZoneFallbackSupported() {
+        return mConfigurationInternal.isTelephonyFallbackSupported();
+    }
+
     /** Returns true if user's location can be used generally. */
     public boolean getUserLocationEnabledSetting() {
         return mConfigurationInternal.getLocationEnabledSetting();

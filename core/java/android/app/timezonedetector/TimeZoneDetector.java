@@ -96,6 +96,13 @@ public interface TimeZoneDetector {
     String SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE = "suggest_telephony_time_zone";
 
     /**
+     * A shell command that enables telephony time zone fallback. See {@link
+     * com.android.server.timezonedetector.TimeZoneDetectorStrategy} for details.
+     * @hide
+     */
+    String SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK = "enable_telephony_fallback";
+
+    /**
      * A shared utility method to create a {@link ManualTimeZoneSuggestion}.
      *
      * @hide

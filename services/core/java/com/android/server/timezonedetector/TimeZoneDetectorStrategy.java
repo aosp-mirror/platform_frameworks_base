@@ -69,6 +69,20 @@ import android.util.IndentingPrintWriter;
  * users enter areas without the necessary signals. Ultimately, with no perfect algorithm available,
  * the user is left to choose which algorithm works best for their circumstances.
  *
+ * <p>When geolocation detection is supported and enabled, in certain circumstances, such as during
+ * international travel, it makes sense to prioritize speed of detection via telephony (when
+ * available) Vs waiting for the geolocation algorithm to reach certainty. Geolocation detection can
+ * sometimes be slow to get a location fix and can require network connectivity (which cannot be
+ * assumed when users are travelling) for server-assisted location detection or time zone lookup.
+ * Therefore, as a restricted form of prioritization between geolocation and telephony algorithms,
+ * the strategy provides "telephony fallback" behavior, which can be set to "supported" via device
+ * config. Fallback mode is toggled on at runtime via {@link #enableTelephonyTimeZoneFallback()} in
+ * response to signals outside of the scope of this class. Telephony fallback allows the use of
+ * telephony suggestions to help with faster detection but only until geolocation detection
+ * provides a concrete, "certain" suggestion. After geolocation has made the first certain
+ * suggestion, telephony fallback is disabled until the next call to {@link
+ * #enableTelephonyTimeZoneFallback()}.
+ *
  * <p>Threading:
  *
  * <p>Implementations of this class must be thread-safe as calls calls like {@link
@@ -99,6 +113,13 @@ public interface TimeZoneDetectorStrategy extends Dumpable {
      * suggestion.
      */
     void suggestTelephonyTimeZone(@NonNull TelephonyTimeZoneSuggestion suggestion);
+
+    /**
+     * Tells the strategy that it can fall back to telephony detection while geolocation detection
+     * remains uncertain. {@link #suggestGeolocationTimeZone(GeolocationTimeZoneSuggestion)} can
+     * disable it again. See {@link TimeZoneDetectorStrategy} for details.
+     */
+    void enableTelephonyTimeZoneFallback();
 
     /** Generates a state snapshot for metrics. */
     @NonNull

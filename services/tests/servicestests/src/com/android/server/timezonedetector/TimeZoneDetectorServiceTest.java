@@ -375,6 +375,7 @@ public class TimeZoneDetectorServiceTest {
         return new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
+                .setTelephonyFallbackSupported(false)
                 .setUserConfigAllowed(true)
                 .setAutoDetectionEnabledSetting(autoDetectionEnabled)
                 .setLocationEnabledSetting(geoDetectionEnabled)
