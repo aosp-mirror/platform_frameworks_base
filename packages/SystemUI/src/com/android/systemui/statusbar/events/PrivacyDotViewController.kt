@@ -394,11 +394,11 @@ class PrivacyDotViewController @Inject constructor(
             animationScheduler.addCallback(systemStatusAnimationCallback)
         }
 
-        val left = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_SEASCAPE)
-        val top = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_NONE)
-        val right = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_LANDSCAPE)
+        val left = contentInsetsProvider.getStatusBarContentAreaForRotation(ROTATION_SEASCAPE)
+        val top = contentInsetsProvider.getStatusBarContentAreaForRotation(ROTATION_NONE)
+        val right = contentInsetsProvider.getStatusBarContentAreaForRotation(ROTATION_LANDSCAPE)
         val bottom = contentInsetsProvider
-                .getStatusBarContentInsetsForRotation(ROTATION_UPSIDE_DOWN)
+                .getStatusBarContentAreaForRotation(ROTATION_UPSIDE_DOWN)
         val paddingTop = contentInsetsProvider.getStatusBarPaddingTop()
 
         synchronized(lock) {
@@ -529,11 +529,11 @@ class PrivacyDotViewController @Inject constructor(
 
     // Returns [left, top, right, bottom] aka [seascape, none, landscape, upside-down]
     private fun getLayoutRects(): List<Rect> {
-        val left = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_SEASCAPE)
-        val top = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_NONE)
-        val right = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_LANDSCAPE)
+        val left = contentInsetsProvider.getStatusBarContentAreaForRotation(ROTATION_SEASCAPE)
+        val top = contentInsetsProvider.getStatusBarContentAreaForRotation(ROTATION_NONE)
+        val right = contentInsetsProvider.getStatusBarContentAreaForRotation(ROTATION_LANDSCAPE)
         val bottom = contentInsetsProvider
-                .getStatusBarContentInsetsForRotation(ROTATION_UPSIDE_DOWN)
+                .getStatusBarContentAreaForRotation(ROTATION_UPSIDE_DOWN)
 
         return listOf(left, top, right, bottom)
     }
