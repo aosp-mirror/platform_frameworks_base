@@ -230,7 +230,7 @@ public class SubscriptionInfo implements Parcelable {
     /**
      * Subscription's preferred usage setting.
      */
-    private int mUsageSetting = SubscriptionManager.USAGE_SETTING_UNKNOWN;
+    private @UsageSetting int mUsageSetting = SubscriptionManager.USAGE_SETTING_UNKNOWN;
 
     /**
      * Public copy constructor.
@@ -822,7 +822,20 @@ public class SubscriptionInfo implements Parcelable {
         return mAreUiccApplicationsEnabled;
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<SubscriptionInfo> CREATOR = new Parcelable.Creator<SubscriptionInfo>() {
+    /**
+     * Get the usage setting for this subscription.
+     *
+     * @return the usage setting used for this subscription.
+     *
+     * @hide
+     */
+    public @UsageSetting int getUsageSetting() {
+        return mUsageSetting;
+    }
+
+    public static final @android.annotation.NonNull
+            Parcelable.Creator<SubscriptionInfo> CREATOR =
+                    new Parcelable.Creator<SubscriptionInfo>() {
         @Override
         public SubscriptionInfo createFromParcel(Parcel source) {
             int id = source.readInt();
