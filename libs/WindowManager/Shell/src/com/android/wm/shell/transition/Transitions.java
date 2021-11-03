@@ -171,24 +171,6 @@ public class Transitions implements RemoteCallable<Transitions> {
         }
     }
 
-    /** Create an empty/non-registering transitions object for system-ui tests. */
-    @VisibleForTesting
-    public static ShellTransitions createEmptyForTesting() {
-        return new ShellTransitions() {
-            @Override
-            public void registerRemote(@androidx.annotation.NonNull TransitionFilter filter,
-                    @androidx.annotation.NonNull RemoteTransition remoteTransition) {
-                // Do nothing
-            }
-
-            @Override
-            public void unregisterRemote(
-                    @androidx.annotation.NonNull RemoteTransition remoteTransition) {
-                // Do nothing
-            }
-        };
-    }
-
     /** Register this transition handler with Core */
     public void register(ShellTaskOrganizer taskOrganizer) {
         if (mPlayerImpl == null) return;

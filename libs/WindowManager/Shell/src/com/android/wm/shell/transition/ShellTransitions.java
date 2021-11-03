@@ -38,11 +38,11 @@ public interface ShellTransitions {
     /**
      * Registers a remote transition.
      */
-    void registerRemote(@NonNull TransitionFilter filter,
-            @NonNull RemoteTransition remoteTransition);
+    default void registerRemote(@NonNull TransitionFilter filter,
+            @NonNull RemoteTransition remoteTransition) {}
 
     /**
      * Unregisters a remote transition.
      */
-    void unregisterRemote(@NonNull RemoteTransition remoteTransition);
+    default void unregisterRemote(@NonNull RemoteTransition remoteTransition) {}
 }
