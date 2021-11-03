@@ -205,8 +205,8 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
         mAgentUnderTest.mSettingsHelper = settingsHelper;
 
         byte[] backupData = generateBackupData(TEST_VALUES);
-        mAgentUnderTest.restoreSettings(backupData, /* pos */ 0, backupData.length, TEST_URI, new HashSet<>(),
-                Collections.emptySet(), /* blockedSettingsArrayId */ 0, Collections.emptySet(),
+        mAgentUnderTest.restoreSettings(backupData, /* pos */ 0, backupData.length, TEST_URI,
+                null, null, null, /* blockedSettingsArrayId */ 0, Collections.emptySet(),
                 new HashSet<>(Collections.singletonList(SettingsBackupAgent.getQualifiedKeyForSetting(PRESERVED_TEST_SETTING, TEST_URI))));
 
         assertTrue(settingsHelper.mWrittenValues.containsKey(OVERRIDDEN_TEST_SETTING));

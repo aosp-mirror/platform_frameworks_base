@@ -345,7 +345,6 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
-    @GuardedBy("mLock")
     public Setting getSettingLocked(String name) {
         if (TextUtils.isEmpty(name)) {
             return mNullSetting;
@@ -385,7 +384,6 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
-    @GuardedBy("mLock")
     public boolean insertSettingOverrideableByRestoreLocked(String name, String value, String tag,
             boolean makeDefault, String packageName) {
         return insertSettingLocked(name, value, tag, makeDefault, false, packageName,

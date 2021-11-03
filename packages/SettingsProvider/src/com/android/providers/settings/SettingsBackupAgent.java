@@ -284,10 +284,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         // versionCode of com.android.providers.settings corresponds to SDK_INT
         mRestoredFromSdkInt = (int) appVersionCode;
 
-        HashSet<String> movedToGlobal = new HashSet<String>();
-        Settings.System.getMovedToGlobalSettings(movedToGlobal);
-        Settings.Secure.getMovedToGlobalSettings(movedToGlobal);
+        Set<String> movedToGlobal = getMovedToGlobalSettings();
         Set<String> movedToSecure = getMovedToSecureSettings();
+        Set<String> movedToSystem = getMovedToSystemSettings();
 
         Set<String> preservedGlobalSettings = getSettingsToPreserveInRestore(
                 Settings.Global.CONTENT_URI);
@@ -318,32 +317,23 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             switch (key) {
                 case KEY_SYSTEM :
                     restoreSettings(data, Settings.System.CONTENT_URI, movedToGlobal,
-                            movedToSecure, R.array.restore_blocked_system_settings,
-                            dynamicBlockList,
+                            movedToSecure, /* movedToSystem= */ null,
+                            R.array.restore_blocked_system_settings, dynamicBlockList,
                             preservedSystemSettings);
                     mSettingsHelper.applyAudioSettings();
                     break;
 
                 case KEY_SECURE :
-                    restoreSettings(
-                            data,
-                            Settings.Secure.CONTENT_URI,
-                            movedToGlobal,
-                            null,
-                            R.array.restore_blocked_secure_settings,
-                            dynamicBlockList,
+                    restoreSettings(data, Settings.Secure.CONTENT_URI, movedToGlobal,
+                            /* movedToSecure= */ null, movedToSystem,
+                            R.array.restore_blocked_secure_settings, dynamicBlockList,
                             preservedSecureSettings);
                     break;
 
                 case KEY_GLOBAL :
-                    restoreSettings(
-                            data,
-                            Settings.Global.CONTENT_URI,
-                            null,
-                            movedToSecure,
-                            R.array.restore_blocked_global_settings,
-                            dynamicBlockList,
-                            preservedGlobalSettings);
+                    restoreSettings(data, Settings.Global.CONTENT_URI, /* movedToGlobal= */ null,
+                            movedToSecure, movedToSystem, R.array.restore_blocked_global_settings,
+                            dynamicBlockList, preservedGlobalSettings);
                     break;
 
                 case KEY_WIFI_SUPPLICANT :
@@ -435,10 +425,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         if (DEBUG_BACKUP) Log.d(TAG, "Flattened data version " + version);
         if (version <= FULL_BACKUP_VERSION) {
             // Generate the moved-to-global lookup table
-            HashSet<String> movedToGlobal = new HashSet<String>();
-            Settings.System.getMovedToGlobalSettings(movedToGlobal);
-            Settings.Secure.getMovedToGlobalSettings(movedToGlobal);
+            Set<String> movedToGlobal = getMovedToGlobalSettings();
             Set<String> movedToSecure = getMovedToSecureSettings();
+            Set<String> movedToSystem = getMovedToSystemSettings();
 
             // system settings data first
             int nBytes = in.readInt();
@@ -446,22 +435,19 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             byte[] buffer = new byte[nBytes];
             in.readFully(buffer, 0, nBytes);
             restoreSettings(buffer, nBytes, Settings.System.CONTENT_URI, movedToGlobal,
-                    movedToSecure, R.array.restore_blocked_system_settings,
-                    Collections.emptySet(), Collections.emptySet());
+                    movedToSecure, /* movedToSystem= */ null,
+                    R.array.restore_blocked_system_settings, Collections.emptySet(),
+                    Collections.emptySet());
 
             // secure settings
             nBytes = in.readInt();
             if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of secure settings data");
             if (nBytes > buffer.length) buffer = new byte[nBytes];
             in.readFully(buffer, 0, nBytes);
-            restoreSettings(
-                    buffer,
-                    nBytes,
-                    Settings.Secure.CONTENT_URI,
-                    movedToGlobal,
-                    null,
-                    R.array.restore_blocked_secure_settings,
-                    Collections.emptySet(), Collections.emptySet());
+            restoreSettings(buffer, nBytes, Settings.Secure.CONTENT_URI, movedToGlobal,
+                    /* movedToSecure= */ null, movedToSystem,
+                    R.array.restore_blocked_secure_settings, Collections.emptySet(),
+                    Collections.emptySet());
 
             // Global only if sufficiently new
             if (version >= FULL_BACKUP_ADDED_GLOBAL) {
@@ -469,10 +455,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of global settings data");
                 if (nBytes > buffer.length) buffer = new byte[nBytes];
                 in.readFully(buffer, 0, nBytes);
-                movedToGlobal.clear();  // no redirection; this *is* the global namespace
-                restoreSettings(buffer, nBytes, Settings.Global.CONTENT_URI, movedToGlobal,
-                        movedToSecure, R.array.restore_blocked_global_settings,
-                        Collections.emptySet(), Collections.emptySet());
+                restoreSettings(buffer, nBytes, Settings.Global.CONTENT_URI,
+                        /* movedToGlobal= */ null, movedToSecure, movedToSystem,
+                        R.array.restore_blocked_global_settings, Collections.emptySet(),
+                        Collections.emptySet());
             }
 
             // locale
@@ -543,11 +529,25 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         }
     }
 
+    private Set<String> getMovedToGlobalSettings() {
+        HashSet<String> movedToGlobalSettings = new HashSet<String>();
+        Settings.System.getMovedToGlobalSettings(movedToGlobalSettings);
+        Settings.Secure.getMovedToGlobalSettings(movedToGlobalSettings);
+        return movedToGlobalSettings;
+    }
+
     private Set<String> getMovedToSecureSettings() {
         Set<String> movedToSecureSettings = new HashSet<>();
         Settings.Global.getMovedToSecureSettings(movedToSecureSettings);
         Settings.System.getMovedToSecureSettings(movedToSecureSettings);
         return movedToSecureSettings;
+    }
+
+    private Set<String> getMovedToSystemSettings() {
+        Set<String> movedToSystemSettings = new HashSet<>();
+        Settings.Global.getMovedToSystemSettings(movedToSystemSettings);
+        Settings.Secure.getMovedToSystemSettings(movedToSystemSettings);
+        return movedToSystemSettings;
     }
 
     private long[] readOldChecksums(ParcelFileDescriptor oldState) throws IOException {
@@ -710,8 +710,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private void restoreSettings(
             BackupDataInput data,
             Uri contentUri,
-            HashSet<String> movedToGlobal,
+            Set<String> movedToGlobal,
             Set<String> movedToSecure,
+            Set<String> movedToSystem,
             int blockedSettingsArrayId,
             Set<String> dynamicBlockList,
             Set<String> settingsToPreserve) {
@@ -728,6 +729,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 contentUri,
                 movedToGlobal,
                 movedToSecure,
+                movedToSystem,
                 blockedSettingsArrayId,
                 dynamicBlockList,
                 settingsToPreserve);
@@ -737,8 +739,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             byte[] settings,
             int bytes,
             Uri contentUri,
-            HashSet<String> movedToGlobal,
+            Set<String> movedToGlobal,
             Set<String> movedToSecure,
+            Set<String> movedToSystem,
             int blockedSettingsArrayId,
             Set<String> dynamicBlockList,
             Set<String> settingsToPreserve) {
@@ -749,6 +752,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 contentUri,
                 movedToGlobal,
                 movedToSecure,
+                movedToSystem,
                 blockedSettingsArrayId,
                 dynamicBlockList,
                 settingsToPreserve);
@@ -760,8 +764,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             int pos,
             int bytes,
             Uri contentUri,
-            HashSet<String> movedToGlobal,
+            Set<String> movedToGlobal,
             Set<String> movedToSecure,
+            Set<String> movedToSystem,
             int blockedSettingsArrayId,
             Set<String> dynamicBlockList,
             Set<String> settingsToPreserve) {
@@ -842,6 +847,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 destination = Settings.Global.CONTENT_URI;
             } else if (movedToSecure != null && movedToSecure.contains(key)) {
                 destination = Settings.Secure.CONTENT_URI;
+            } else if (movedToSystem != null && movedToSystem.contains(key)) {
+                destination = Settings.System.CONTENT_URI;
             } else {
                 destination = contentUri;
             }
@@ -1190,6 +1197,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 dataStart,
                 data.length,
                 Settings.Secure.CONTENT_URI,
+                null,
                 null,
                 null,
                 blockedSettingsArrayId,

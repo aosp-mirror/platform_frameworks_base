@@ -601,7 +601,7 @@ message GlobalSettingsProto {
     // ringer mode.
     optional SettingProto mode_ringer = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
-    optional SettingProto apply_ramping_ringer = 147 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    reserved 147; // Used to be apply_ramping_ringer
 
     message MultiSim {
         option (android.msg_privacy).dest = DEST_EXPLICIT;

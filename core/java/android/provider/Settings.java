@@ -54,6 +54,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.location.ILocationManager;
 import android.location.LocationManager;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
 import android.net.Uri;
@@ -3622,6 +3623,12 @@ public final class Settings {
 
         private static boolean putStringForUser(ContentResolver resolver, String name, String value,
                 int userHandle, boolean overrideableByRestore) {
+            return putStringForUser(resolver, name, value, /* tag= */ null,
+                    /* makeDefault= */ false, userHandle, overrideableByRestore);
+        }
+
+        private static boolean putStringForUser(ContentResolver resolver, String name, String value,
+                String tag, boolean makeDefault, int userHandle, boolean overrideableByRestore) {
             if (MOVED_TO_SECURE.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
                         + " to android.provider.Settings.Secure, value is unchanged.");
@@ -3632,8 +3639,8 @@ public final class Settings {
                         + " to android.provider.Settings.Global, value is unchanged.");
                 return false;
             }
-            return sNameValueCache.putStringForUser(resolver, name, value, null, false, userHandle,
-                    overrideableByRestore);
+            return sNameValueCache.putStringForUser(resolver, name, value, tag, makeDefault,
+                    userHandle, overrideableByRestore);
         }
 
         /**
@@ -4467,6 +4474,15 @@ public final class Settings {
          */
         @Readable
         public static final String VIBRATE_ON = "vibrate_on";
+
+        /**
+         * Whether applying ramping ringer on incoming phone call ringtone.
+         * <p>1 = apply ramping ringer
+         * <p>0 = do not apply ramping ringer
+         * @hide
+         */
+        @Readable
+        public static final String APPLY_RAMPING_RINGER = "apply_ramping_ringer";
 
         /**
          * If 1, redirects the system vibrator to all currently attached input devices
@@ -5338,6 +5354,7 @@ public final class Settings {
             PUBLIC_SETTINGS.add(HAPTIC_FEEDBACK_ENABLED);
             PUBLIC_SETTINGS.add(SHOW_WEB_SUGGESTIONS);
             PUBLIC_SETTINGS.add(VIBRATE_WHEN_RINGING);
+            PUBLIC_SETTINGS.add(APPLY_RAMPING_RINGER);
         }
 
         /**
@@ -5872,6 +5889,10 @@ public final class Settings {
         /** @hide */
         public static void getMovedToGlobalSettings(Set<String> outKeySet) {
             outKeySet.addAll(MOVED_TO_GLOBAL);
+        }
+
+        /** @hide */
+        public static void getMovedToSystemSettings(Set<String> outKeySet) {
         }
 
         /** @hide */
@@ -10472,7 +10493,9 @@ public final class Settings {
          * Whether applying ramping ringer on incoming phone call ringtone.
          * <p>1 = apply ramping ringer
          * <p>0 = do not apply ramping ringer
+         * @deprecated Use {@link AudioManager#isRampingRingerEnabled()} instead
          */
+        @Deprecated
         @Readable
         public static final String APPLY_RAMPING_RINGER = "apply_ramping_ringer";
 
@@ -15251,9 +15274,21 @@ public final class Settings {
             MOVED_TO_SECURE.add(Global.NOTIFICATION_BUBBLES);
         }
 
+        // Certain settings have been moved from global to the per-user system namespace
+        private static final HashSet<String> MOVED_TO_SYSTEM;
+        static {
+            MOVED_TO_SYSTEM = new HashSet<>(1);
+            MOVED_TO_SYSTEM.add(Global.APPLY_RAMPING_RINGER);
+        }
+
         /** @hide */
         public static void getMovedToSecureSettings(Set<String> outKeySet) {
             outKeySet.addAll(MOVED_TO_SECURE);
+        }
+
+        /** @hide */
+        public static void getMovedToSystemSettings(Set<String> outKeySet) {
+            outKeySet.addAll(MOVED_TO_SYSTEM);
         }
 
         /** @hide */
@@ -15287,6 +15322,11 @@ public final class Settings {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Global"
                         + " to android.provider.Settings.Secure, returning read-only value.");
                 return Secure.getStringForUser(resolver, name, userHandle);
+            }
+            if (MOVED_TO_SYSTEM.contains(name)) {
+                Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Global"
+                        + " to android.provider.Settings.System, returning read-only value.");
+                return System.getStringForUser(resolver, name, userHandle);
             }
             return sNameValueCache.getStringForUser(resolver, name, userHandle);
         }
@@ -15450,6 +15490,13 @@ public final class Settings {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Global"
                         + " to android.provider.Settings.Secure, value is unchanged.");
                 return Secure.putStringForUser(resolver, name, value, tag,
+                        makeDefault, userHandle, overrideableByRestore);
+            }
+            // Global and System have the same access policy so we can forward writes
+            if (MOVED_TO_SYSTEM.contains(name)) {
+                Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Global"
+                        + " to android.provider.Settings.System, value is unchanged.");
+                return System.putStringForUser(resolver, name, value, tag,
                         makeDefault, userHandle, overrideableByRestore);
             }
             return sNameValueCache.putStringForUser(resolver, name, value, tag,
