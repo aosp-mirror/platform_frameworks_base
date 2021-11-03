@@ -344,6 +344,16 @@ public final class DisplayManager {
      */
     public static final int VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP = 1 << 11;
 
+    /**
+     * Virtual display flags: Indicates that the virtual display should always be unlocked and not
+     * have keyguard displayed on it. Only valid for virtual displays that aren't in the default
+     * display group.
+     *
+     * @see #createVirtualDisplay
+     * @see #VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED = 1 << 12;
 
     /** @hide */
     @IntDef(prefix = {"MATCH_CONTENT_FRAMERATE_"}, value = {
@@ -1363,5 +1373,13 @@ public final class DisplayManager {
          * @hide
          */
         String KEY_HIGH_REFRESH_RATE_BLACKLIST = "high_refresh_rate_blacklist";
+
+        /**
+         * Whether to allow the creation of always unlocked virtual displays by apps having the
+         * required permissions.
+         * @hide
+         */
+        String KEY_ALLOW_ALWAYS_UNLOCKED_VIRTUAL_DISPLAYS =
+                "allow_always_unlocked_virtual_displays";
     }
 }

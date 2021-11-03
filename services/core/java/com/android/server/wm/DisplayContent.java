@@ -5928,6 +5928,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
+     * @return whether keyguard should always be unlocked for this display
+     */
+    boolean isKeyguardAlwaysUnlocked() {
+        return (mDisplayInfo.flags & Display.FLAG_ALWAYS_UNLOCKED) != 0;
+    }
+
+    /**
      * @return whether AOD is showing on this display
      */
     boolean isAodShowing() {

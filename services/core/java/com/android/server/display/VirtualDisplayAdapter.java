@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
@@ -28,6 +29,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOUL
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
 
+import static com.android.server.display.DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_TRUSTED;
 
@@ -452,6 +454,10 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 }
                 if ((mFlags & VIRTUAL_DISPLAY_FLAG_TRUSTED) != 0) {
                     mInfo.flags |= FLAG_TRUSTED;
+                }
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED) != 0
+                        && (mInfo.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP) != 0) {
+                    mInfo.flags |= FLAG_ALWAYS_UNLOCKED;
                 }
 
                 mInfo.type = Display.TYPE_VIRTUAL;

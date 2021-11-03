@@ -16,11 +16,13 @@
 
 package com.android.server.display;
 
+import static android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY;
 import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
 import static android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.CAPTURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.hardware.display.DisplayManager.EventsMask;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
@@ -94,6 +96,8 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
+import android.provider.DeviceConfigInterface;
 import android.provider.Settings;
 import android.sysprop.DisplayProperties;
 import android.text.TextUtils;
@@ -393,6 +397,7 @@ public final class DisplayManagerService extends SystemService {
     private final SparseArray<IntArray> mDisplayAccessUIDs = new SparseArray<>();
 
     private final Injector mInjector;
+    private final DeviceConfigInterface mDeviceConfig;
 
     // The minimum brightness curve, which guarantess that any brightness curve that dips below it
     // is rejected by the system.
@@ -443,6 +448,7 @@ public final class DisplayManagerService extends SystemService {
     DisplayManagerService(Context context, Injector injector) {
         super(context);
         mInjector = injector;
+        mDeviceConfig = mInjector.getDeviceConfig();
         mContext = context;
         mHandler = new DisplayManagerHandler(DisplayThread.get().getLooper());
         mUiHandler = UiThread.getHandler();
@@ -1251,6 +1257,31 @@ public final class DisplayManagerService extends SystemService {
             if (!checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
                 throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
                         + "create a virtual display which is not in the default DisplayGroup.");
+            }
+        }
+
+        if ((flags & VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED) != 0) {
+            if (callingUid != Process.SYSTEM_UID
+                    && !checkCallingPermission(ADD_ALWAYS_UNLOCKED_DISPLAY,
+                    "createVirtualDisplay()")) {
+                throw new SecurityException(
+                        "Requires ADD_ALWAYS_UNLOCKED_DISPLAY permission to "
+                                + "create an always unlocked virtual display.");
+            }
+            boolean allowedByDeviceConfig = false;
+            final long token = Binder.clearCallingIdentity();
+            try {
+                allowedByDeviceConfig = mDeviceConfig.getBoolean(
+                        DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+                        DisplayManager.DeviceConfig.KEY_ALLOW_ALWAYS_UNLOCKED_VIRTUAL_DISPLAYS,
+                        false);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            if (!allowedByDeviceConfig) {
+                Slog.w(TAG, "Ignoring flag VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED "
+                        + "because it is not allowed by DeviceConfig");
+                flags &= ~VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
             }
         }
 
@@ -2365,6 +2396,11 @@ public final class DisplayManagerService extends SystemService {
         boolean getAllowNonNativeRefreshRateOverride() {
             return DisplayProperties
                     .debug_allow_non_native_refresh_rate_override().orElse(false);
+        }
+
+        @NonNull
+        public DeviceConfigInterface getDeviceConfig() {
+            return DeviceConfigInterface.REAL;
         }
     }
 
