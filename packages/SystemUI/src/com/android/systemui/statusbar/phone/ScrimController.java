@@ -272,7 +272,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             }
         });
         panelExpansionStateManager.addListener(
-                (fraction, tracking) -> setRawPanelExpansionFraction(fraction)
+                (fraction, expanded, tracking) -> setRawPanelExpansionFraction(fraction)
         );
 
         mColors = new GradientColors();
