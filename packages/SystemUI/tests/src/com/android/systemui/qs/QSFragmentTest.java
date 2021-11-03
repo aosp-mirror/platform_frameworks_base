@@ -183,6 +183,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mQQSMediaHost,
                 mBypassController,
                 mQsComponentFactory,
+                mock(QSFragmentDisableFlagsLogger.class),
                 mFalsingManager,
                 mock(DumpManager.class));
     }
