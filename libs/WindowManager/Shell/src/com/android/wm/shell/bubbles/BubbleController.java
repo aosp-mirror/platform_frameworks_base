@@ -1137,7 +1137,8 @@ public class BubbleController {
                 if (reason == DISMISS_USER_CHANGED || reason == DISMISS_NO_BUBBLE_UP) {
                     continue;
                 }
-                if (reason == DISMISS_NOTIF_CANCEL) {
+                if (reason == DISMISS_NOTIF_CANCEL
+                        || reason == DISMISS_SHORTCUT_REMOVED) {
                     bubblesToBeRemovedFromRepository.add(bubble);
                 }
                 if (!mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
