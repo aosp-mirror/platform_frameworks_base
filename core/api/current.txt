@@ -1409,6 +1409,7 @@ package android {
     field public static final int summaryColumn = 16843426; // 0x10102a2
     field public static final int summaryOff = 16843248; // 0x10101f0
     field public static final int summaryOn = 16843247; // 0x10101ef
+    field public static final int supportedTypes;
     field public static final int supportsAssist = 16844016; // 0x10104f0
     field public static final int supportsInlineSuggestions = 16844301; // 0x101060d
     field public static final int supportsLaunchVoiceAssistFromKeyguard = 16844017; // 0x10104f1
