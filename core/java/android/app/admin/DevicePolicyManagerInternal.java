@@ -200,10 +200,10 @@ public abstract class DevicePolicyManagerInternal {
     public abstract List<String> getAllCrossProfilePackages();
 
     /**
-     * Returns the default package names set by the OEM that are allowed to request user consent for
-     * cross-profile communication without being explicitly enabled by the admin, via
-     * {@link com.android.internal.R.array#cross_profile_apps} and
-     * {@link com.android.internal.R.array#vendor_cross_profile_apps}.
+     * Returns the default package names set by the OEM that are allowed to communicate
+     * cross-profile without being explicitly enabled by the admin, via {@link
+     * com.android.internal.R.array#cross_profile_apps} and {@link
+     * com.android.internal.R.array#vendor_cross_profile_apps}.
      *
      * @hide
      */
