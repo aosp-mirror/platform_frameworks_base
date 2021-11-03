@@ -30,7 +30,10 @@ import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED_
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__DEVICE_FOLDED;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__DRAG_DIVIDER;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__ROOT_TASK_VANISHED;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__SCREEN_LOCKED;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__SCREEN_LOCKED_SHOW_ON_TOP;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__UNKNOWN_EXIT;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_UNDEFINED;
@@ -523,6 +526,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     void exitSplitScreen(int toTopTaskId, int exitReason) {
+        if (!mMainStage.isActive()) return;
+
         StageTaskListener childrenToTop = null;
         if (mMainStage.containsTask(toTopTaskId)) {
             childrenToTop = mMainStage;
@@ -538,6 +543,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     private void exitSplitScreen(StageTaskListener childrenToTop, int exitReason) {
+        if (!mMainStage.isActive()) return;
+
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         applyExitSplitScreen(childrenToTop, wct, exitReason);
     }
@@ -554,6 +561,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         setDividerVisibility(false);
         mSplitLayout.resetDividerPosition();
         mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
+        Slog.i(TAG, "applyExitSplitScreen, reason = " + exitReasonToString(exitReason));
         if (childrenToTop != null) {
             logExitToStage(exitReason, childrenToTop == mMainStage);
         } else {
@@ -1267,6 +1275,31 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 !toMainStage ? getSideStagePosition() : SPLIT_POSITION_UNDEFINED,
                 !toMainStage ? mSideStage.getTopChildTaskUid() : 0 /* sideStageUid */,
                 mSplitLayout.isLandscape());
+    }
+
+    private String exitReasonToString(int exitReason) {
+        switch (exitReason) {
+            case SPLITSCREEN_UICHANGED__EXIT_REASON__UNKNOWN_EXIT:
+                return "UNKNOWN_EXIT";
+            case SPLITSCREEN_UICHANGED__EXIT_REASON__DRAG_DIVIDER:
+                return "DRAG_DIVIDER";
+            case SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME:
+                return "RETURN_HOME";
+            case SPLITSCREEN_UICHANGED__EXIT_REASON__SCREEN_LOCKED:
+                return "SCREEN_LOCKED";
+            case SPLITSCREEN_UICHANGED__EXIT_REASON__SCREEN_LOCKED_SHOW_ON_TOP:
+                return "SCREEN_LOCKED_SHOW_ON_TOP";
+            case SPLITSCREEN_UICHANGED__EXIT_REASON__DEVICE_FOLDED:
+                return "DEVICE_FOLDED";
+            case SPLITSCREEN_UICHANGED__EXIT_REASON__ROOT_TASK_VANISHED:
+                return "ROOT_TASK_VANISHED";
+            case SPLITSCREEN_UICHANGED__EXIT_REASON__APP_FINISHED:
+                return "APP_FINISHED";
+            case SPLITSCREEN_UICHANGED__EXIT_REASON__APP_DOES_NOT_SUPPORT_MULTIWINDOW:
+                return "APP_DOES_NOT_SUPPORT_MULTIWINDOW";
+            default:
+                return "unknown reason, reason int = " + exitReason;
+        }
     }
 
     class StageListenerImpl implements StageTaskListener.StageListenerCallbacks {
