@@ -83,19 +83,15 @@ final class DeletePackageHelper {
     private final UserManagerInternal mUserManagerInternal;
     private final PermissionManagerServiceInternal mPermissionManager;
     private final RemovePackageHelper mRemovePackageHelper;
-    // TODO(b/201815903): remove dependency to InitAndSystemPackageHelper
-    private final InitAndSystemPackageHelper mInitAndSystemPackageHelper;
     private final AppDataHelper mAppDataHelper;
 
     // TODO(b/198166813): remove PMS dependency
     DeletePackageHelper(PackageManagerService pm, RemovePackageHelper removePackageHelper,
-            InitAndSystemPackageHelper initAndSystemPackageHelper,
             AppDataHelper appDataHelper) {
         mPm = pm;
         mUserManagerInternal = mPm.mInjector.getUserManagerInternal();
         mPermissionManager = mPm.mInjector.getPermissionManagerServiceInternal();
         mRemovePackageHelper = removePackageHelper;
-        mInitAndSystemPackageHelper = initAndSystemPackageHelper;
         mAppDataHelper = appDataHelper;
     }
 
@@ -105,7 +101,6 @@ final class DeletePackageHelper {
         mUserManagerInternal = mPm.mInjector.getUserManagerInternal();
         mPermissionManager = mPm.mInjector.getPermissionManagerServiceInternal();
         mRemovePackageHelper = new RemovePackageHelper(mPm, mAppDataHelper);
-        mInitAndSystemPackageHelper = mPm.getInitAndSystemPackageHelper();
     }
 
     /**
@@ -282,7 +277,7 @@ final class DeletePackageHelper {
                             Slog.i(TAG, "Enabling system stub after removal; pkg: "
                                     + stubPkg.getPackageName());
                         }
-                        mInitAndSystemPackageHelper.enableCompressedPackage(stubPkg, stubPs);
+                        new InstallPackageHelper(mPm).enableCompressedPackage(stubPkg, stubPs);
                     } else if (DEBUG_COMPRESSION) {
                         Slog.i(TAG, "System stub disabled for all users, leaving uncompressed "
                                 + "after removal; pkg: " + stubPkg.getPackageName());
@@ -422,7 +417,7 @@ final class DeletePackageHelper {
             // as well and fall back to existing code in system partition
             PackageSetting disabledPs = deleteInstalledSystemPackage(action, ps, allUserHandles,
                     flags, outInfo, writeSettings);
-            mInitAndSystemPackageHelper.restoreDisabledSystemPackageLIF(
+            new InstallPackageHelper(mPm).restoreDisabledSystemPackageLIF(
                     action, ps, allUserHandles, outInfo, writeSettings, disabledPs);
         } else {
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package: " + ps.getPackageName());
