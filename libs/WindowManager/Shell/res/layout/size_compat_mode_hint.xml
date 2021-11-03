@@ -22,41 +22,34 @@
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
         android:clipToPadding="false"
-        android:padding="@dimen/bubble_elevation">
+        android:paddingBottom="5dp">
 
         <LinearLayout
+            android:id="@+id/size_compat_hint_popup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/background_light"
-            android:elevation="@dimen/bubble_elevation"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:clickable="true">
 
             <TextView
-                android:layout_width="180dp"
+                android:layout_width="188dp"
                 android:layout_height="wrap_content"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:paddingTop="10dp"
+                android:lineSpacingExtra="4sp"
+                android:background="@drawable/size_compat_hint_bubble"
+                android:padding="16dp"
                 android:text="@string/restart_button_description"
                 android:textAlignment="viewStart"
-                android:textColor="@android:color/primary_text_light"
-                android:textSize="16sp"/>
+                android:textColor="#E4E3DA"
+                android:textSize="14sp"/>
 
-            <Button
-                android:id="@+id/got_it"
+            <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:includeFontPadding="false"
                 android:layout_gravity="end"
-                android:minHeight="36dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:text="@string/got_it"
-                android:textAllCaps="true"
-                android:textColor="#3c78d8"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
+                android:src="@drawable/size_compat_hint_point"
+                android:paddingHorizontal="@dimen/size_compat_hint_corner_radius"
+                android:contentDescription="@null"/>
 
         </LinearLayout>
 

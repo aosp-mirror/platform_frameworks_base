@@ -284,8 +284,8 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
                     mShownOnFinish, mCurrentAlpha, mCurrentInsets));
             mController.notifyFinished(this, mShownOnFinish);
             releaseLeashes();
+            if (DEBUG) Log.d(TAG, "Animation finished abruptly.");
         }
-        if (DEBUG) Log.d(TAG, "Animation finished abruptly.");
         return mFinished;
     }
 
