@@ -340,8 +340,13 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
                 augmentedNonApps[augmentedNonApps.length - 1] = getDividerBarLegacyTarget();
                 try {
-                    ActivityTaskManager.getService().setRunningRemoteTransitionDelegate(
-                            adapter.getCallingApplication());
+                    try {
+                        ActivityTaskManager.getService().setRunningRemoteTransitionDelegate(
+                                adapter.getCallingApplication());
+                    } catch (SecurityException e) {
+                        Slog.e(TAG, "Unable to boost animation thread. This should only happen"
+                                + " during unit tests");
+                    }
                     adapter.getRunner().onAnimationStart(transit, apps, wallpapers, nonApps,
                             finishedCallback);
                 } catch (RemoteException e) {
