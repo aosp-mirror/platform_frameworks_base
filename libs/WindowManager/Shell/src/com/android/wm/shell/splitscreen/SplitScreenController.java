@@ -34,7 +34,6 @@ import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -61,6 +60,7 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
@@ -433,46 +433,26 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     @BinderThread
     private static class ISplitScreenImpl extends ISplitScreen.Stub {
         private SplitScreenController mController;
-        private ISplitScreenListener mListener;
+        private final SingleInstanceRemoteListener<SplitScreenController,
+                ISplitScreenListener> mListener;
         private final SplitScreen.SplitScreenListener mSplitScreenListener =
                 new SplitScreen.SplitScreenListener() {
                     @Override
                     public void onStagePositionChanged(int stage, int position) {
-                        try {
-                            if (mListener != null) {
-                                mListener.onStagePositionChanged(stage, position);
-                            }
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "onStagePositionChanged", e);
-                        }
+                        mListener.call(l -> l.onStagePositionChanged(stage, position));
                     }
 
                     @Override
                     public void onTaskStageChanged(int taskId, int stage, boolean visible) {
-                        try {
-                            if (mListener != null) {
-                                mListener.onTaskStageChanged(taskId, stage, visible);
-                            }
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "onTaskStageChanged", e);
-                        }
-                    }
-                };
-        private final IBinder.DeathRecipient mListenerDeathRecipient =
-                new IBinder.DeathRecipient() {
-                    @Override
-                    @BinderThread
-                    public void binderDied() {
-                        final SplitScreenController controller = mController;
-                        controller.getRemoteCallExecutor().execute(() -> {
-                            mListener = null;
-                            controller.unregisterSplitScreenListener(mSplitScreenListener);
-                        });
+                        mListener.call(l -> l.onTaskStageChanged(taskId, stage, visible));
                     }
                 };
 
         public ISplitScreenImpl(SplitScreenController controller) {
             mController = controller;
+            mListener = new SingleInstanceRemoteListener<>(controller,
+                    c -> c.registerSplitScreenListener(mSplitScreenListener),
+                    c -> c.unregisterSplitScreenListener(mSplitScreenListener));
         }
 
         /**
@@ -485,36 +465,13 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         @Override
         public void registerSplitScreenListener(ISplitScreenListener listener) {
             executeRemoteCallWithTaskPermission(mController, "registerSplitScreenListener",
-                    (controller) -> {
-                        if (mListener != null) {
-                            mListener.asBinder().unlinkToDeath(mListenerDeathRecipient,
-                                    0 /* flags */);
-                        }
-                        if (listener != null) {
-                            try {
-                                listener.asBinder().linkToDeath(mListenerDeathRecipient,
-                                        0 /* flags */);
-                            } catch (RemoteException e) {
-                                Slog.e(TAG, "Failed to link to death");
-                                return;
-                            }
-                        }
-                        mListener = listener;
-                        controller.registerSplitScreenListener(mSplitScreenListener);
-                    });
+                    (controller) -> mListener.register(listener));
         }
 
         @Override
         public void unregisterSplitScreenListener(ISplitScreenListener listener) {
             executeRemoteCallWithTaskPermission(mController, "unregisterSplitScreenListener",
-                    (controller) -> {
-                        if (mListener != null) {
-                            mListener.asBinder().unlinkToDeath(mListenerDeathRecipient,
-                                    0 /* flags */);
-                        }
-                        mListener = null;
-                        controller.unregisterSplitScreenListener(mSplitScreenListener);
-                    });
+                    (controller) -> mListener.unregister());
         }
 
         @Override
