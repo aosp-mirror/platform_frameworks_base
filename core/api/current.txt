@@ -32249,6 +32249,7 @@ package android.os {
     field public static final String DISALLOW_UNMUTE_MICROPHONE = "no_unmute_microphone";
     field public static final String DISALLOW_USB_FILE_TRANSFER = "no_usb_file_transfer";
     field public static final String DISALLOW_USER_SWITCH = "no_user_switch";
+    field public static final String DISALLOW_WIFI_TETHERING = "no_wifi_tethering";
     field public static final String ENSURE_VERIFY_APPS = "ensure_verify_apps";
     field public static final String KEY_RESTRICTIONS_PENDING = "restrictions_pending";
     field public static final int QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED = 1; // 0x1
