@@ -98,7 +98,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     }
 
     private final Object mLock = new Object();
-    private final WorkSource mWorkSource = new WorkSource();
+    private final WorkSource mWorkSource;
     private final PowerManager.WakeLock mWakeLock;
     private final IBatteryStats mBatteryStatsService;
     private final VibrationSettings mVibrationSettings;
@@ -119,9 +119,8 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         mVibrationSettings = vibrationSettings;
         mDeviceEffectAdapter = effectAdapter;
         mCallbacks = callbacks;
+        mWorkSource = new WorkSource(mVibration.uid);
         mWakeLock = wakeLock;
-        mWorkSource.set(vib.uid);
-        mWakeLock.setWorkSource(mWorkSource);
         mBatteryStatsService = batteryStatsService;
 
         CombinedVibration effect = vib.getEffect();
@@ -152,6 +151,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     @Override
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
+        mWakeLock.setWorkSource(mWorkSource);
         mWakeLock.acquire();
         try {
             mVibration.token.linkToDeath(this, 0);
