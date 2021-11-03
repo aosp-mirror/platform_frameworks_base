@@ -3528,7 +3528,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // avoid power mode from being cleared before that, add a special reason to consider whether
         // the unknown visibility is resolved. The case from SystemUI is excluded because it should
         // rely on keyguard-going-away.
-        if (mService.mKeyguardController.isKeyguardLocked() && targetActivity != null
+        final boolean isKeyguardLocked = (targetActivity != null)
+                ? targetActivity.isKeyguardLocked() : mDefaultDisplay.isKeyguardLocked();
+        if (isKeyguardLocked && targetActivity != null
                 && !targetActivity.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_SYSTEMUI)) {
             final ActivityOptions opts = targetActivity.getOptions();
             if (opts == null || opts.getSourceInfo() == null

@@ -6046,11 +6046,13 @@ class Task extends TaskFragment {
 
     boolean shouldSleepActivities() {
         final DisplayContent display = mDisplayContent;
+        final boolean isKeyguardGoingAway = (mDisplayContent != null)
+                ? mDisplayContent.isKeyguardGoingAway()
+                : mRootWindowContainer.getDefaultDisplay().isKeyguardGoingAway();
 
         // Do not sleep activities in this root task if we're marked as focused and the keyguard
         // is in the process of going away.
-        if (mTaskSupervisor.getKeyguardController().isKeyguardGoingAway()
-                && isFocusedRootTaskOnDisplay()
+        if (isKeyguardGoingAway && isFocusedRootTaskOnDisplay()
                 // Avoid resuming activities on secondary displays since we don't want bubble
                 // activities to be resumed while bubble is still collapsed.
                 // TODO(b/113840485): Having keyguard going away state for secondary displays.

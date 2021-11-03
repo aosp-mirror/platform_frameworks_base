@@ -2799,7 +2799,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mH.sendMessage(msg);
             }
             try {
-                mKeyguardController.setKeyguardShown(keyguardShowing, aodShowing);
+                mRootWindowContainer.forAllDisplays(displayContent -> {
+                    mKeyguardController.setKeyguardShown(displayContent.getDisplayId(),
+                            keyguardShowing, aodShowing);
+                });
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -3359,7 +3362,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                mKeyguardController.keyguardGoingAway(flags);
+                mRootWindowContainer.forAllDisplays(displayContent -> {
+                    mKeyguardController.keyguardGoingAway(displayContent.getDisplayId(), flags);
+                });
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -3442,7 +3447,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         };
 
-        if (isKeyguardLocked()) {
+        if (r.isKeyguardLocked()) {
             // If the keyguard is showing or occluded, then try and dismiss it before
             // entering picture-in-picture (this will prompt the user to authenticate if the
             // device is currently locked).
@@ -3787,8 +3792,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mRecentTasks.notifyTaskPersisterLocked(task, flush);
     }
 
-    boolean isKeyguardLocked() {
-        return mKeyguardController.isKeyguardLocked();
+    boolean isKeyguardLocked(int displayId) {
+        return mKeyguardController.isKeyguardLocked(displayId);
     }
 
     /**
@@ -6019,7 +6024,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     if (mAmInternal.shouldConfirmCredentials(userId)) {
-                        if (mKeyguardController.isKeyguardLocked()) {
+                        if (mKeyguardController.isKeyguardLocked(DEFAULT_DISPLAY)) {
                             // Showing launcher to avoid user entering credential twice.
                             startHomeActivity(currentUserId, "notifyLockedProfile");
                         }

@@ -5840,6 +5840,30 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return (flags & FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0;
     }
 
+    /**
+     * @return whether keyguard is locked for this display
+     */
+    boolean isKeyguardLocked() {
+        return mRootWindowContainer.mTaskSupervisor
+                .getKeyguardController().isKeyguardLocked(mDisplayId);
+    }
+
+    /**
+     * @return whether keyguard is going away on this display
+     */
+    boolean isKeyguardGoingAway() {
+        return mRootWindowContainer.mTaskSupervisor
+                .getKeyguardController().isKeyguardGoingAway(mDisplayId);
+    }
+
+    /**
+     * @return whether AOD is showing on this display
+     */
+    boolean isAodShowing() {
+        return mRootWindowContainer.mTaskSupervisor
+                .getKeyguardController().isAodShowing(mDisplayId);
+    }
+
     @VisibleForTesting
     void removeAllTasks() {
         forAllTasks((t) -> { t.getRootTask().removeChild(t, "removeAllTasks"); });
