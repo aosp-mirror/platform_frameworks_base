@@ -3361,6 +3361,9 @@ class Task extends TaskFragment {
         info.resizeMode = top != null ? top.mResizeMode : mResizeMode;
         info.topActivityType = top.getActivityType();
         info.isResizeable = isResizeable();
+        info.minWidth = mMinWidth;
+        info.minHeight = mMinHeight;
+        info.defaultMinSize = mRootWindowContainer.mDefaultMinSizeOfResizeableTaskDp;
 
         info.positionInParent = getRelativePosition();
 

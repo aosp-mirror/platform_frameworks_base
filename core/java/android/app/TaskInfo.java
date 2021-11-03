@@ -219,6 +219,24 @@ public class TaskInfo {
     public boolean isResizeable;
 
     /**
+     * Minimal width of the task when it's resizeable.
+     * @hide
+     */
+    public int minWidth;
+
+    /**
+     * Minimal height of the task when it's resizeable.
+     * @hide
+     */
+    public int minHeight;
+
+    /**
+     * The default minimal size of the task used when a minWidth or minHeight is not specified.
+     * @hide
+     */
+    public int defaultMinSize;
+
+    /**
      * Relative position of the task's top left corner in the parent container.
      * @hide
      */
@@ -418,6 +436,9 @@ public class TaskInfo {
         displayCutoutInsets = source.readTypedObject(Rect.CREATOR);
         topActivityInfo = source.readTypedObject(ActivityInfo.CREATOR);
         isResizeable = source.readBoolean();
+        minWidth = source.readInt();
+        minHeight = source.readInt();
+        defaultMinSize = source.readInt();
         source.readBinderList(launchCookies);
         positionInParent = source.readTypedObject(Point.CREATOR);
         parentTaskId = source.readInt();
@@ -458,6 +479,9 @@ public class TaskInfo {
         dest.writeTypedObject(displayCutoutInsets, flags);
         dest.writeTypedObject(topActivityInfo, flags);
         dest.writeBoolean(isResizeable);
+        dest.writeInt(minWidth);
+        dest.writeInt(minHeight);
+        dest.writeInt(defaultMinSize);
         dest.writeBinderList(launchCookies);
         dest.writeTypedObject(positionInParent, flags);
         dest.writeInt(parentTaskId);
@@ -483,6 +507,9 @@ public class TaskInfo {
                 + " supportsMultiWindow=" + supportsMultiWindow
                 + " resizeMode=" + resizeMode
                 + " isResizeable=" + isResizeable
+                + " minWidth=" + minWidth
+                + " minHeight=" + minHeight
+                + " defaultMinSize=" + defaultMinSize
                 + " token=" + token
                 + " topActivityType=" + topActivityType
                 + " pictureInPictureParams=" + pictureInPictureParams
