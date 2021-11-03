@@ -47,6 +47,7 @@ import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Notification;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -62,6 +63,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.LogBufferEulogizer;
 import com.android.systemui.flags.FeatureFlags;
@@ -76,6 +78,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.En
 import com.android.systemui.statusbar.notification.collection.notifcollection.EntryRemovedEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.EntryUpdatedEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.InitEntryEvent;
+import com.android.systemui.statusbar.notification.collection.notifcollection.InternalNotifUpdater;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionLogger;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
@@ -131,6 +134,7 @@ public class NotifCollection implements Dumpable {
     private final SystemClock mClock;
     private final FeatureFlags mFeatureFlags;
     private final NotifCollectionLogger mLogger;
+    private final Handler mMainHandler;
     private final LogBufferEulogizer mEulogizer;
 
     private final Map<String, NotificationEntry> mNotificationSet = new ArrayMap<>();
@@ -154,6 +158,7 @@ public class NotifCollection implements Dumpable {
             SystemClock clock,
             FeatureFlags featureFlags,
             NotifCollectionLogger logger,
+            @Main Handler mainHandler,
             LogBufferEulogizer logBufferEulogizer,
             DumpManager dumpManager) {
         Assert.isMainThread();
@@ -161,6 +166,7 @@ public class NotifCollection implements Dumpable {
         mClock = clock;
         mFeatureFlags = featureFlags;
         mLogger = logger;
+        mMainHandler = mainHandler;
         mEulogizer = logBufferEulogizer;
 
         dumpManager.registerDumpable(TAG, this);
@@ -442,7 +448,7 @@ public class NotifCollection implements Dumpable {
             mEventQueue.add(new BindEntryEvent(entry, sbn));
 
             mLogger.logNotifUpdated(sbn.getKey());
-            mEventQueue.add(new EntryUpdatedEvent(entry));
+            mEventQueue.add(new EntryUpdatedEvent(entry, true /* fromSystem */));
         }
     }
 
@@ -790,6 +796,51 @@ public class NotifCollection implements Dumpable {
     };
 
     private static final String TAG = "NotifCollection";
+
+    /**
+     * Get an object which can be used to update a notification (internally to the pipeline)
+     * in response to a user action.
+     *
+     * @param name the name of the component that will update notifiations
+     * @return an updater
+     */
+    public InternalNotifUpdater getInternalNotifUpdater(String name) {
+        return (sbn, reason) -> mMainHandler.post(
+                () -> updateNotificationInternally(sbn, name, reason));
+    }
+
+    /**
+     * Provide an updated StatusBarNotification for an existing entry.  If no entry exists for the
+     * given notification key, this method does nothing.
+     *
+     * @param sbn the updated notification
+     * @param name the component which is updating the notification
+     * @param reason the reason the notification is being updated
+     */
+    private void updateNotificationInternally(StatusBarNotification sbn, String name,
+            String reason) {
+        Assert.isMainThread();
+        checkForReentrantCall();
+
+        // Make sure we have the notification to update
+        NotificationEntry entry = mNotificationSet.get(sbn.getKey());
+        if (entry == null) {
+            mLogger.logNotifInternalUpdateFailed(sbn.getKey(), name, reason);
+            return;
+        }
+        mLogger.logNotifInternalUpdate(sbn.getKey(), name, reason);
+
+        // First do the pieces of postNotification which are not about assuming the notification
+        // was sent by the app
+        entry.setSbn(sbn);
+        mEventQueue.add(new BindEntryEvent(entry, sbn));
+
+        mLogger.logNotifUpdated(sbn.getKey());
+        mEventQueue.add(new EntryUpdatedEvent(entry, false /* fromSystem */));
+
+        // Skip the applyRanking step and go straight to dispatching the events
+        dispatchEventsAndRebuildList();
+    }
 
     @IntDef(prefix = { "REASON_" }, value = {
             REASON_NOT_CANCELED,

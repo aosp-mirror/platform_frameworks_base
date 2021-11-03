@@ -255,6 +255,22 @@ public class NotificationTestHelper {
     }
 
     /**
+     * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
+     */
+    public ExpandableNotificationRow createShortcutBubble(String shortcutId)
+            throws Exception {
+        Notification n = createNotification(false /* isGroupSummary */,
+                null /* groupKey */, makeShortcutBubbleMetadata(shortcutId));
+        n.flags |= FLAG_BUBBLE;
+        ExpandableNotificationRow row = generateRow(n, PKG, UID, USER_HANDLE,
+                0 /* extraInflationFlags */, IMPORTANCE_HIGH);
+        modifyRanking(row.getEntry())
+                .setCanBubble(true)
+                .build();
+        return row;
+    }
+
+    /**
      * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble and is part
      * of a group of notifications.
      */
@@ -502,6 +518,12 @@ public class NotificationTestHelper {
         return new BubbleMetadata.Builder(bubbleIntent,
                         Icon.createWithResource(mContext, R.drawable.android))
                 .setDeleteIntent(deleteIntent)
+                .setDesiredHeight(314)
+                .build();
+    }
+
+    private BubbleMetadata makeShortcutBubbleMetadata(String shortcutId) {
+        return new BubbleMetadata.Builder(shortcutId)
                 .setDesiredHeight(314)
                 .build();
     }

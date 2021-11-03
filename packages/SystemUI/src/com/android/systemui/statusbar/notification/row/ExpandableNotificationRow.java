@@ -1760,7 +1760,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * Called when a notification is dropped on proper target window.
      */
     public void dragAndDropSuccess() {
-        mOnDragSuccessListener.onDragSuccess(getEntry());
+        if (mOnDragSuccessListener != null) {
+            mOnDragSuccessListener.onDragSuccess(getEntry());
+        }
     }
 
     private void doLongClickCallback() {

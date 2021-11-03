@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tuner.TunerService;
 
@@ -90,7 +91,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private NotificationStackScrollLayout mNotificationStackScrollLayout;
     @Mock private NotificationShadeDepthController mNotificationShadeDepthController;
-    @Mock private StatusBarWindowView mStatusBarWindowView;
+    @Mock private StatusBarWindowController mStatusBarWindowController;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -135,7 +136,8 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mNotificationShadeDepthController,
                 mView,
                 mNotificationPanelViewController,
-                mStatusBarWindowView,
+                new PanelExpansionStateManager(),
+                mStatusBarWindowController,
                 mNotificationStackScrollLayoutController,
                 mStatusBarKeyguardViewManager,
                 mLockIconViewController);
