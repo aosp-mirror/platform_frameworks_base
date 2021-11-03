@@ -3333,6 +3333,20 @@
          and one pSIM) -->
     <integer name="config_num_physical_slots">1</integer>
 
+    <!--The default "usage setting" indicating that the device is either a voice-centric
+    device (1) or a data-centric device (2). A voice-centric device will require that any cellular
+    service that it uses provides access to voice capability, and a data-centric device will
+    likewise require that the network provides access to data services. These settings are
+    sent to the cellular modem and control the behavior in accordance with 3gpp TS 24.301 sec 4.3
+    (and equivalent functionality in other generations of cellular).-->
+    <integer name="config_default_cellular_usage_setting">1</integer>
+
+    <!--The list of supported cellular usage settings for this device.-->
+    <integer-array translatable="false" name="config_supported_cellular_usage_settings">
+        <item>1</item>    <!-- USAGE_SETTING_VOICE_CENTRIC -->
+        <item>2</item>    <!-- USAGE_SETTING_DATA_CENTRIC -->
+    </integer-array>
+
     <!-- When a radio power off request is received, we will delay completing the request until
          either IMS moves to the deregistered state or the timeout defined by this configuration
          elapses. If 0, this feature is disabled and we do not delay radio power off requests.-->
