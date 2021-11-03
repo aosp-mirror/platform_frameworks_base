@@ -3525,7 +3525,12 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationStackScrollLayoutController.setPulsing(pulsing, animatePulse);
     }
 
-    public void setAmbientIndicationBottomPadding(int ambientIndicationBottomPadding) {
+    public void setAmbientIndicationTop(int ambientIndicationTop, boolean ambientTextVisible) {
+        int ambientIndicationBottomPadding = 0;
+        if (ambientTextVisible) {
+            int stackBottom = mNotificationStackScrollLayoutController.getView().getBottom();
+            ambientIndicationBottomPadding = stackBottom - ambientIndicationTop;
+        }
         if (mAmbientIndicationBottomPadding != ambientIndicationBottomPadding) {
             mAmbientIndicationBottomPadding = ambientIndicationBottomPadding;
             updateMaxDisplayedNotifications(true);

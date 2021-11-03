@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.drawable.AnimatedStateListDrawable;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.SensorLocationInternal;
@@ -39,10 +40,10 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Vibrator;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
@@ -70,6 +71,7 @@ import com.airbnb.lottie.LottieAnimationView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -88,7 +90,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
     private @Mock AnimatedStateListDrawable mIconDrawable;
     private @Mock Context mContext;
     private @Mock Resources mResources;
-    private @Mock DisplayMetrics mDisplayMetrics;
+    private @Mock(answer = Answers.RETURNS_DEEP_STUBS) WindowManager mWindowManager;
     private @Mock StatusBarStateController mStatusBarStateController;
     private @Mock KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private @Mock KeyguardViewController mKeyguardViewController;
@@ -137,7 +139,9 @@ public class LockIconViewControllerTest extends SysuiTestCase {
         when(mLockIconView.getContext()).thenReturn(mContext);
         when(mLockIconView.findViewById(R.layout.udfps_aod_lock_icon)).thenReturn(mAodFp);
         when(mContext.getResources()).thenReturn(mResources);
-        when(mResources.getDisplayMetrics()).thenReturn(mDisplayMetrics);
+        when(mContext.getSystemService(WindowManager.class)).thenReturn(mWindowManager);
+        Rect windowBounds = new Rect(0, 0, 800, 1200);
+        when(mWindowManager.getCurrentWindowMetrics().getBounds()).thenReturn(windowBounds);
         when(mResources.getString(R.string.accessibility_unlock_button)).thenReturn(UNLOCKED_LABEL);
         when(mResources.getDrawable(anyInt(), any())).thenReturn(mIconDrawable);
 
