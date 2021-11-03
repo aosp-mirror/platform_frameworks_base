@@ -238,6 +238,50 @@ public final class UsbPortAidl implements UsbPortHal {
     }
 
     @Override
+    public boolean resetUsbPort(String portName, long operationID,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(portName);
+        Objects.requireNonNull(callback);
+        long key = operationID;
+        synchronized (mLock) {
+            try {
+                if (mProxy == null) {
+                    logAndPrint(Log.ERROR, mPw,
+                            "resetUsbPort: Proxy is null. Retry !opID:"
+                            + operationID);
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                    return false;
+                }
+                while (sCallbacks.get(key) != null) {
+                    key = ThreadLocalRandom.current().nextInt();
+                }
+                if (key != operationID) {
+                    logAndPrint(Log.INFO, mPw, "resetUsbPort: operationID exists ! opID:"
+                            + operationID + " key:" + key);
+                }
+                try {
+                    sCallbacks.put(operationID, callback);
+                    mProxy.resetUsbPort(portName, operationID);
+                } catch (RemoteException e) {
+                    logAndPrintException(mPw,
+                            "resetUsbPort: Failed to resetUsbPort: portID="
+                            + portName + "opId:" + operationID, e);
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                    sCallbacks.remove(key);
+                    return false;
+                }
+            } catch (RemoteException e) {
+                logAndPrintException(mPw,
+                        "resetUsbPort: Failed to call onOperationComplete portID="
+                        + portName + "opID:" + operationID, e);
+                sCallbacks.remove(key);
+                return false;
+            }
+            return true;
+        }
+    }
+
+    @Override
     public boolean enableUsbData(String portName, boolean enable, long operationID,
             IUsbOperationInternal callback) {
         Objects.requireNonNull(portName);
@@ -602,6 +646,28 @@ public final class UsbPortAidl implements UsbPortHal {
             } catch (RemoteException e) {
                 logAndPrintException(mPw,
                         "notifyEnableUsbDataWhileDockedStatus: Failed to call onOperationComplete",
+                        e);
+            }
+        }
+
+        @Override
+        public void notifyResetUsbPortStatus(String portName, int retval,
+                long operationID) {
+            if (retval == Status.SUCCESS) {
+                UsbPortManager.logAndPrint(Log.INFO, mPw, "notifyResetUsbPortStatus:"
+                        + portName + ": opID:" + operationID);
+            } else {
+                UsbPortManager.logAndPrint(Log.ERROR, mPw, portName
+                        + "notifyEnableUsbDataStatus: opID:"
+                        + operationID + " failed. err:" + retval);
+            }
+            try {
+                sCallbacks.get(operationID).onOperationComplete(retval == Status.SUCCESS
+                        ? USB_OPERATION_SUCCESS
+                        : USB_OPERATION_ERROR_INTERNAL);
+            } catch (RemoteException e) {
+                logAndPrintException(mPw,
+                        "notifyResetUsbPortStatus: Failed to call onOperationComplete",
                         e);
             }
         }

@@ -4690,6 +4690,7 @@ package android.hardware.usb {
     method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int enableUsbData(boolean);
     method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int enableUsbDataWhileDocked();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USB) public android.hardware.usb.UsbPortStatus getStatus();
+    method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int resetUsbPort();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void setRoles(int, int);
     field public static final int ENABLE_LIMIT_POWER_TRANSFER_ERROR_INTERNAL = 1; // 0x1
     field public static final int ENABLE_LIMIT_POWER_TRANSFER_ERROR_NOT_SUPPORTED = 2; // 0x2
