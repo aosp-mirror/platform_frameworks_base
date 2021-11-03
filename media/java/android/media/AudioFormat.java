@@ -675,8 +675,44 @@ public final class AudioFormat implements Parcelable {
     public static final int CHANNEL_IN_Z_AXIS = 0x2000;
     public static final int CHANNEL_IN_VOICE_UPLINK = 0x4000;
     public static final int CHANNEL_IN_VOICE_DNLINK = 0x8000;
+    // CHANNEL_IN_BACK_LEFT to TOP_RIGHT are not microphone positions
+    // but surround channels which are used when dealing with multi-channel inputs,
+    // e.g. via HDMI input on TV.
+    /** @hide */
+    public static final int CHANNEL_IN_BACK_LEFT = 0x10000;
+    /** @hide */
+    public static final int CHANNEL_IN_BACK_RIGHT = 0x20000;
+    /** @hide */
+    public static final int CHANNEL_IN_CENTER = 0x40000;
+    /** @hide */
+    public static final int CHANNEL_IN_LOW_FREQUENCY = 0x100000;
+    /** @hide */
+    public static final int CHANNEL_IN_TOP_LEFT = 0x200000;
+    /** @hide */
+    public static final int CHANNEL_IN_TOP_RIGHT = 0x400000;
     public static final int CHANNEL_IN_MONO = CHANNEL_IN_FRONT;
     public static final int CHANNEL_IN_STEREO = (CHANNEL_IN_LEFT | CHANNEL_IN_RIGHT);
+    // Surround channel masks corresponding to output masks, used for
+    // surround sound inputs.
+    /** @hide */
+    public static final int CHANNEL_IN_2POINT0POINT2 = (
+            CHANNEL_IN_LEFT | CHANNEL_IN_RIGHT | CHANNEL_IN_TOP_LEFT | CHANNEL_IN_TOP_RIGHT);
+    /** @hide */
+    public static final int CHANNEL_IN_2POINT1POINT2 = (
+            CHANNEL_IN_LEFT | CHANNEL_IN_RIGHT | CHANNEL_IN_TOP_LEFT | CHANNEL_IN_TOP_RIGHT
+            | CHANNEL_IN_LOW_FREQUENCY);
+    /** @hide */
+    public static final int CHANNEL_IN_3POINT0POINT2 = (
+            CHANNEL_IN_LEFT | CHANNEL_IN_CENTER | CHANNEL_IN_RIGHT | CHANNEL_IN_TOP_LEFT
+            | CHANNEL_IN_TOP_RIGHT);
+    /** @hide */
+    public static final int CHANNEL_IN_3POINT1POINT2 = (
+            CHANNEL_IN_LEFT | CHANNEL_IN_CENTER | CHANNEL_IN_RIGHT | CHANNEL_IN_TOP_LEFT
+            | CHANNEL_IN_TOP_RIGHT | CHANNEL_IN_LOW_FREQUENCY);
+    /** @hide */
+    public static final int CHANNEL_IN_5POINT1 = (
+            CHANNEL_IN_LEFT | CHANNEL_IN_CENTER | CHANNEL_IN_RIGHT | CHANNEL_IN_BACK_LEFT
+            | CHANNEL_IN_BACK_RIGHT | CHANNEL_IN_LOW_FREQUENCY);
     /** @hide */
     public static final int CHANNEL_IN_FRONT_BACK = CHANNEL_IN_FRONT | CHANNEL_IN_BACK;
     // CHANNEL_IN_ALL is not yet defined; if added then it should match AUDIO_CHANNEL_IN_ALL

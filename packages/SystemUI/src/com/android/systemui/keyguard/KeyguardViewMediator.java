@@ -82,6 +82,8 @@ import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -117,6 +119,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
@@ -2660,10 +2663,16 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
      */
     public KeyguardViewController registerStatusBar(StatusBar statusBar,
             NotificationPanelViewController panelView,
+            @Nullable PanelExpansionStateManager panelExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer, KeyguardBypassController bypassController) {
-        mKeyguardViewControllerLazy.get().registerStatusBar(statusBar, panelView,
-                biometricUnlockController, notificationContainer, bypassController);
+        mKeyguardViewControllerLazy.get().registerStatusBar(
+                statusBar,
+                panelView,
+                panelExpansionStateManager,
+                biometricUnlockController,
+                notificationContainer,
+                bypassController);
         return mKeyguardViewControllerLazy.get();
     }
 

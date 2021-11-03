@@ -282,7 +282,6 @@ package android.app {
 
   public final class NotificationChannel implements android.os.Parcelable {
     method public int getOriginalImportance();
-    method public boolean isBlockable();
     method public boolean isImportanceLockedByCriticalDeviceFunction();
     method public boolean isImportanceLockedByOEM();
     method public void lockFields(int);

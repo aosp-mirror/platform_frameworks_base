@@ -33,7 +33,6 @@ import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.SurfaceControl.getGlobalTransaction;
-import static android.view.ViewRootImpl.INSETS_LAYOUT_GENERALIZATION;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
@@ -1308,10 +1307,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    // TODO(b/161810301): Remove this after INSETS_LAYOUT_GENERALIZATION is removed.
-    void computeFrameAndUpdateSourceFrame(DisplayFrames displayFrames) {
-    }
-
     @Override
     public Rect getBounds() {
         // The window bounds are used for layout in screen coordinates. If the token has bounds for
@@ -1352,9 +1347,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     WindowManager.LayoutParams getLayoutingAttrs(int rotation) {
-        if (!INSETS_LAYOUT_GENERALIZATION) {
-            return mAttrs;
-        }
         final WindowManager.LayoutParams[] paramsForRotation = mAttrs.paramsForRotation;
         if (paramsForRotation == null || paramsForRotation.length != 4
                 || paramsForRotation[rotation] == null) {

@@ -1325,7 +1325,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * flashlight brightness level via
      * {android.hardware.camera2.CameraManager#setTorchStrengthLevel}.
      * If this value is equal to 1, flashlight brightness control is not supported.
-     * This value will be -1 if the flash unit is not available.</p>
+     * The value for this key will be null for devices with no flash unit.</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      */
     @PublicKey
@@ -1337,14 +1337,15 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Default flashlight brightness level to be set via
      * {android.hardware.camera2.CameraManager#setTorchStrengthLevel}.</p>
      * <p>If flash unit is available this will be greater than or equal to 1 and less
-     * or equal to <code>{@link CameraCharacteristics#FLASH_INFO_STRENGTH_MAXIMUM_LEVEL android.flash.info.strengthMaximumLevel}</code>.
-     * If flash unit is not available this will be set to -1.</p>
+     * or equal to <code>{@link CameraCharacteristics#FLASH_INFO_STRENGTH_MAXIMUM_LEVEL android.flash.info.strengthMaximumLevel}</code>.</p>
      * <p>Setting flashlight brightness above the default level
      * (i.e.<code>{@link CameraCharacteristics#FLASH_INFO_STRENGTH_DEFAULT_LEVEL android.flash.info.strengthDefaultLevel}</code>) may make the device more
      * likely to reach thermal throttling conditions and slow down, or drain the
      * battery quicker than normal. To minimize such issues, it is recommended to
      * start the flashlight at this default brightness until a user explicitly requests
-     * a brighter level.</p>
+     * a brighter level.
+     * Note that the value for this key will be null for devices with no flash unit.
+     * The default level should always be &gt; 0.</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#FLASH_INFO_STRENGTH_DEFAULT_LEVEL

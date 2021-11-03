@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.ViewRootImpl.INSETS_LAYOUT_GENERALIZATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
@@ -47,7 +46,6 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayAdjustments.FixedRotationAdjustments;
 import android.view.DisplayInfo;
@@ -133,7 +131,6 @@ class WindowToken extends WindowContainer<WindowState> {
          */
         final ArrayList<WindowToken> mAssociatedTokens = new ArrayList<>(3);
         final ArrayList<WindowContainer<?>> mRotatedContainers = new ArrayList<>(3);
-        final SparseArray<Rect> mBarContentFrames = new SparseArray<>();
         boolean mIsTransforming = true;
 
         FixedRotationTransformState(DisplayInfo rotatedDisplayInfo,
@@ -442,9 +439,6 @@ class WindowToken extends WindowContainer<WindowState> {
         if (!isFixedRotationTransforming()) {
             return null;
         }
-        if (!INSETS_LAYOUT_GENERALIZATION) {
-            return mFixedRotationTransformState.mBarContentFrames.get(windowType);
-        }
         final DisplayFrames displayFrames = mFixedRotationTransformState.mDisplayFrames;
         final Rect tmpRect = new Rect();
         if (windowType == TYPE_NAVIGATION_BAR) {
@@ -474,8 +468,7 @@ class WindowToken extends WindowContainer<WindowState> {
         mFixedRotationTransformState = new FixedRotationTransformState(info, displayFrames,
                 new Configuration(config), mDisplayContent.getRotation());
         mFixedRotationTransformState.mAssociatedTokens.add(this);
-        mDisplayContent.getDisplayPolicy().simulateLayoutDisplay(displayFrames,
-                mFixedRotationTransformState.mBarContentFrames);
+        mDisplayContent.getDisplayPolicy().simulateLayoutDisplay(displayFrames);
         onFixedRotationStatePrepared();
     }
 

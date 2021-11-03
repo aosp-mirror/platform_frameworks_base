@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
-import static android.view.ViewRootImpl.INSETS_LAYOUT_GENERALIZATION;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
@@ -136,25 +134,7 @@ public class StatusBarWindowController {
     }
 
     private WindowManager.LayoutParams getBarLayoutParamsForRotation(int rotation) {
-        int height = mBarHeight;
-        if (INSETS_LAYOUT_GENERALIZATION) {
-            switch (rotation) {
-                case ROTATION_UNDEFINED:
-                case Surface.ROTATION_0:
-                case Surface.ROTATION_180:
-                    height = SystemBarUtils.getStatusBarHeightForRotation(
-                            mContext, Surface.ROTATION_0);
-                    break;
-                case Surface.ROTATION_90:
-                    height = SystemBarUtils.getStatusBarHeightForRotation(
-                            mContext, Surface.ROTATION_90);
-                    break;
-                case Surface.ROTATION_270:
-                    height = SystemBarUtils.getStatusBarHeightForRotation(
-                            mContext, Surface.ROTATION_270);
-                    break;
-            }
-        }
+        int height = SystemBarUtils.getStatusBarHeightForRotation(mContext, rotation);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
                 height,

@@ -324,12 +324,14 @@ public class PreferencesHelper implements RankingConfig {
                                         } else {
                                             channel.populateFromXml(parser);
                                         }
-                                        channel.setImportanceLockedByCriticalDeviceFunction(
-                                                r.defaultAppLockedImportance);
-                                        channel.setImportanceLockedByOEM(r.oemLockedImportance);
-                                        if (!channel.isImportanceLockedByOEM()) {
-                                            if (r.oemLockedChannels.contains(channel.getId())) {
-                                                channel.setImportanceLockedByOEM(true);
+                                        if (!mPermissionHelper.isMigrationEnabled()) {
+                                            channel.setImportanceLockedByCriticalDeviceFunction(
+                                                    r.defaultAppLockedImportance);
+                                            channel.setImportanceLockedByOEM(r.oemLockedImportance);
+                                            if (!channel.isImportanceLockedByOEM()) {
+                                                if (r.oemLockedChannels.contains(channel.getId())) {
+                                                    channel.setImportanceLockedByOEM(true);
+                                                }
                                             }
                                         }
 
@@ -942,13 +944,16 @@ public class PreferencesHelper implements RankingConfig {
                             : NotificationChannel.DEFAULT_ALLOW_BUBBLE);
                 }
                 clearLockedFieldsLocked(channel);
-                channel.setImportanceLockedByOEM(r.oemLockedImportance);
-                if (!channel.isImportanceLockedByOEM()) {
-                    if (r.oemLockedChannels.contains(channel.getId())) {
-                        channel.setImportanceLockedByOEM(true);
+                if (!mPermissionHelper.isMigrationEnabled()) {
+                    channel.setImportanceLockedByOEM(r.oemLockedImportance);
+                    if (!channel.isImportanceLockedByOEM()) {
+                        if (r.oemLockedChannels.contains(channel.getId())) {
+                            channel.setImportanceLockedByOEM(true);
+                        }
                     }
+                    channel.setImportanceLockedByCriticalDeviceFunction(
+                            r.defaultAppLockedImportance);
                 }
-                channel.setImportanceLockedByCriticalDeviceFunction(r.defaultAppLockedImportance);
                 if (channel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
                     channel.setLockscreenVisibility(
                             NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE);
@@ -1028,16 +1033,23 @@ public class PreferencesHelper implements RankingConfig {
             } else {
                 updatedChannel.unlockFields(updatedChannel.getUserLockedFields());
             }
-            // no importance updates are allowed if OEM blocked it
-            updatedChannel.setImportanceLockedByOEM(channel.isImportanceLockedByOEM());
-            if (updatedChannel.isImportanceLockedByOEM()) {
-                updatedChannel.setImportance(channel.getImportance());
-            }
-            updatedChannel.setImportanceLockedByCriticalDeviceFunction(
-                    r.defaultAppLockedImportance);
-            if (updatedChannel.isImportanceLockedByCriticalDeviceFunction()
-                    && updatedChannel.getImportance() == IMPORTANCE_NONE) {
-                updatedChannel.setImportance(channel.getImportance());
+
+            if (mPermissionHelper.isMigrationEnabled()) {
+                if (mPermissionHelper.isPermissionFixed(r.pkg, UserHandle.getUserId(r.uid))) {
+                    updatedChannel.setImportance(channel.getImportance());
+                }
+            } else {
+                // no importance updates are allowed if OEM blocked it
+                updatedChannel.setImportanceLockedByOEM(channel.isImportanceLockedByOEM());
+                if (updatedChannel.isImportanceLockedByOEM()) {
+                    updatedChannel.setImportance(channel.getImportance());
+                }
+                updatedChannel.setImportanceLockedByCriticalDeviceFunction(
+                        r.defaultAppLockedImportance);
+                if (updatedChannel.isImportanceLockedByCriticalDeviceFunction()
+                        && updatedChannel.getImportance() == IMPORTANCE_NONE) {
+                    updatedChannel.setImportance(channel.getImportance());
+                }
             }
 
             r.channels.put(updatedChannel.getId(), updatedChannel);
@@ -1217,6 +1229,9 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public void lockChannelsForOEM(String[] appOrChannelList) {
+        if (mPermissionHelper.isMigrationEnabled()) {
+            return;
+        }
         if (appOrChannelList == null) {
             return;
         }
@@ -1265,6 +1280,9 @@ public class PreferencesHelper implements RankingConfig {
 
     public void updateDefaultApps(int userId, ArraySet<String> toRemove,
             ArraySet<Pair<String, Integer>> toAdd) {
+        if (mPermissionHelper.isMigrationEnabled()) {
+            return;
+        }
         synchronized (mPackagePreferences) {
             for (PackagePreferences p : mPackagePreferences.values()) {
                 if (userId == UserHandle.getUserId(p.uid)) {
@@ -1278,7 +1296,8 @@ public class PreferencesHelper implements RankingConfig {
             }
             if (toAdd != null) {
                 for (Pair<String, Integer> approvedApp : toAdd) {
-                    PackagePreferences p = getOrCreatePackagePreferencesLocked(approvedApp.first,
+                    PackagePreferences p = getOrCreatePackagePreferencesLocked(
+                            approvedApp.first,
                             approvedApp.second);
                     p.defaultAppLockedImportance = true;
                     for (NotificationChannel channel : p.channels.values()) {

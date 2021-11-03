@@ -20,11 +20,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewRootImpl;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 
 /**
  *  Interface to control Keyguard View. It should be implemented by KeyguardViewManagers, which
@@ -184,14 +187,10 @@ public interface KeyguardViewController {
 
     /**
      * Registers the StatusBar to which this Keyguard View is mounted.
-     * @param statusBar
-     * @param notificationPanelViewController
-     * @param biometricUnlockController
-     * @param notificationContainer
-     * @param bypassController
      */
     void registerStatusBar(StatusBar statusBar,
             NotificationPanelViewController notificationPanelViewController,
+            @Nullable PanelExpansionStateManager panelExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer,
             KeyguardBypassController bypassController);

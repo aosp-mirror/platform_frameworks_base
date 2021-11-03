@@ -29,6 +29,7 @@
     <color name="bubbles_light">#FFFFFF</color>
     <color name="bubbles_dark">@color/GM2_grey_800</color>
     <color name="bubbles_icon_tint">@color/GM2_grey_700</color>
+    <color name="size_compat_hint_bubble">#30312B</color>
 
     <!-- GM2 colors -->
     <color name="GM2_grey_200">#E8EAED</color>

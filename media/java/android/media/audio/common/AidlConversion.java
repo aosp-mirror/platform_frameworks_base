@@ -131,6 +131,124 @@ public class AidlConversion {
     /** Convert from legacy audio_usage_t to AIDL AudioUsage. */
     public static native int legacy2aidl_audio_usage_t_AudioUsage(int /*audio_usage_t*/ legacy);
 
+    /** Convert from a channel bit of AIDL AudioChannelLayout to SDK AudioFormat.CHANNEL_* bit. */
+    private static int aidl2api_AudioChannelLayoutBit_AudioFormatChannel(
+            int aidlBit, boolean isInput) {
+        if (isInput) {
+            switch (aidlBit) {
+                case AudioChannelLayout.CHANNEL_FRONT_LEFT:
+                    return AudioFormat.CHANNEL_IN_LEFT;
+                case AudioChannelLayout.CHANNEL_FRONT_RIGHT:
+                    return AudioFormat.CHANNEL_IN_RIGHT;
+                case AudioChannelLayout.CHANNEL_FRONT_CENTER:
+                    return AudioFormat.CHANNEL_IN_CENTER;
+                case AudioChannelLayout.CHANNEL_BACK_CENTER:
+                    return AudioFormat.CHANNEL_IN_BACK;
+                // CHANNEL_IN_*_PROCESSED not supported
+                // CHANNEL_IN_PRESSURE not supported
+                // CHANNEL_IN_*_AXIS not supported
+                // CHANNEL_IN_VOICE_* not supported
+                case AudioChannelLayout.CHANNEL_BACK_LEFT:
+                    return AudioFormat.CHANNEL_IN_BACK_LEFT;
+                case AudioChannelLayout.CHANNEL_BACK_RIGHT:
+                    return AudioFormat.CHANNEL_IN_BACK_RIGHT;
+                case AudioChannelLayout.CHANNEL_LOW_FREQUENCY:
+                    return AudioFormat.CHANNEL_IN_LOW_FREQUENCY;
+                case AudioChannelLayout.CHANNEL_TOP_SIDE_LEFT:
+                    return AudioFormat.CHANNEL_IN_TOP_LEFT;
+                case AudioChannelLayout.CHANNEL_TOP_SIDE_RIGHT:
+                    return AudioFormat.CHANNEL_IN_TOP_RIGHT;
+                default:
+                    return AudioFormat.CHANNEL_INVALID;
+            }
+        } else {
+            switch (aidlBit) {
+                case AudioChannelLayout.CHANNEL_FRONT_LEFT:
+                    return AudioFormat.CHANNEL_OUT_FRONT_LEFT;
+                case AudioChannelLayout.CHANNEL_FRONT_RIGHT:
+                    return AudioFormat.CHANNEL_OUT_FRONT_RIGHT;
+                case AudioChannelLayout.CHANNEL_FRONT_CENTER:
+                    return AudioFormat.CHANNEL_OUT_FRONT_CENTER;
+                case AudioChannelLayout.CHANNEL_LOW_FREQUENCY:
+                    return AudioFormat.CHANNEL_OUT_LOW_FREQUENCY;
+                case AudioChannelLayout.CHANNEL_BACK_LEFT:
+                    return AudioFormat.CHANNEL_OUT_BACK_LEFT;
+                case AudioChannelLayout.CHANNEL_BACK_RIGHT:
+                    return AudioFormat.CHANNEL_OUT_BACK_RIGHT;
+                case AudioChannelLayout.CHANNEL_FRONT_LEFT_OF_CENTER:
+                    return AudioFormat.CHANNEL_OUT_FRONT_LEFT_OF_CENTER;
+                case AudioChannelLayout.CHANNEL_FRONT_RIGHT_OF_CENTER:
+                    return AudioFormat.CHANNEL_OUT_FRONT_RIGHT_OF_CENTER;
+                case AudioChannelLayout.CHANNEL_BACK_CENTER:
+                    return AudioFormat.CHANNEL_OUT_BACK_CENTER;
+                case AudioChannelLayout.CHANNEL_SIDE_LEFT:
+                    return AudioFormat.CHANNEL_OUT_SIDE_LEFT;
+                case AudioChannelLayout.CHANNEL_SIDE_RIGHT:
+                    return AudioFormat.CHANNEL_OUT_SIDE_RIGHT;
+                case AudioChannelLayout.CHANNEL_TOP_CENTER:
+                    return AudioFormat.CHANNEL_OUT_TOP_CENTER;
+                case AudioChannelLayout.CHANNEL_TOP_FRONT_LEFT:
+                    return AudioFormat.CHANNEL_OUT_TOP_FRONT_LEFT;
+                case AudioChannelLayout.CHANNEL_TOP_FRONT_CENTER:
+                    return AudioFormat.CHANNEL_OUT_TOP_FRONT_CENTER;
+                case AudioChannelLayout.CHANNEL_TOP_FRONT_RIGHT:
+                    return AudioFormat.CHANNEL_OUT_TOP_FRONT_RIGHT;
+                case AudioChannelLayout.CHANNEL_TOP_BACK_LEFT:
+                    return AudioFormat.CHANNEL_OUT_TOP_BACK_LEFT;
+                case AudioChannelLayout.CHANNEL_TOP_BACK_CENTER:
+                    return AudioFormat.CHANNEL_OUT_TOP_BACK_CENTER;
+                case AudioChannelLayout.CHANNEL_TOP_BACK_RIGHT:
+                    return AudioFormat.CHANNEL_OUT_TOP_BACK_RIGHT;
+                case AudioChannelLayout.CHANNEL_TOP_SIDE_LEFT:
+                    return AudioFormat.CHANNEL_OUT_TOP_SIDE_LEFT;
+                case AudioChannelLayout.CHANNEL_TOP_SIDE_RIGHT:
+                    return AudioFormat.CHANNEL_OUT_TOP_SIDE_RIGHT;
+                case AudioChannelLayout.CHANNEL_BOTTOM_FRONT_LEFT:
+                    return AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_LEFT;
+                case AudioChannelLayout.CHANNEL_BOTTOM_FRONT_CENTER:
+                    return AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_CENTER;
+                case AudioChannelLayout.CHANNEL_BOTTOM_FRONT_RIGHT:
+                    return AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_RIGHT;
+                case AudioChannelLayout.CHANNEL_LOW_FREQUENCY_2:
+                    return AudioFormat.CHANNEL_OUT_LOW_FREQUENCY_2;
+                case AudioChannelLayout.CHANNEL_FRONT_WIDE_LEFT:
+                    return AudioFormat.CHANNEL_OUT_FRONT_WIDE_LEFT;
+                case AudioChannelLayout.CHANNEL_FRONT_WIDE_RIGHT:
+                    return AudioFormat.CHANNEL_OUT_FRONT_WIDE_RIGHT;
+                case AudioChannelLayout.CHANNEL_HAPTIC_A:
+                    return AudioFormat.CHANNEL_OUT_HAPTIC_A;
+                case AudioChannelLayout.CHANNEL_HAPTIC_B:
+                    return AudioFormat.CHANNEL_OUT_HAPTIC_B;
+                default:
+                    return AudioFormat.CHANNEL_INVALID;
+            }
+        }
+    }
+
+    /**
+     * Convert from a channel bitmask of AIDL AudioChannelLayout to
+     * SDK AudioFormat.CHANNEL_* bitmask.
+     */
+    private static int aidl2api_AudioChannelLayoutBitMask_AudioFormatChannelMask(
+            int aidlBitMask, boolean isInput) {
+        int apiMask = 0;
+        for (int bit = 1 << 31; bit != 0; bit >>>= 1) {
+            if ((aidlBitMask & bit) == bit) {
+                int apiBit = aidl2api_AudioChannelLayoutBit_AudioFormatChannel(bit, isInput);
+                if (apiBit != AudioFormat.CHANNEL_INVALID) {
+                    apiMask |= apiBit;
+                    aidlBitMask &= ~bit;
+                    if (aidlBitMask == 0) {
+                        return apiMask;
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+        return AudioFormat.CHANNEL_INVALID;
+    }
+
     /** Convert from AIDL AudioChannelLayout to SDK AudioFormat.CHANNEL_*. */
     public static int aidl2api_AudioChannelLayout_AudioFormatChannelMask(
             @NonNull AudioChannelLayout aidlMask, boolean isInput) {
@@ -155,8 +273,17 @@ public class AidlConversion {
                             return AudioFormat.CHANNEL_IN_STEREO;
                         case AudioChannelLayout.LAYOUT_FRONT_BACK:
                             return AudioFormat.CHANNEL_IN_FRONT_BACK;
-                        default:
-                            return AudioFormat.CHANNEL_INVALID;
+                        case AudioChannelLayout.LAYOUT_2POINT0POINT2:
+                            return AudioFormat.CHANNEL_IN_2POINT0POINT2;
+                        case AudioChannelLayout.LAYOUT_2POINT1POINT2:
+                            return AudioFormat.CHANNEL_IN_2POINT1POINT2;
+                        case AudioChannelLayout.LAYOUT_3POINT0POINT2:
+                            return AudioFormat.CHANNEL_IN_3POINT0POINT2;
+                        case AudioChannelLayout.LAYOUT_3POINT1POINT2:
+                            return AudioFormat.CHANNEL_IN_3POINT1POINT2;
+                        case AudioChannelLayout.LAYOUT_5POINT1:
+                            return AudioFormat.CHANNEL_IN_5POINT1;
+                        default: // fall through
                     }
                 } else {
                     switch (aidlMask.getLayoutMask()) {
@@ -264,10 +391,12 @@ public class AidlConversion {
                         case AudioChannelLayout.LAYOUT_FRONT_BACK:
                             return AudioFormat.CHANNEL_OUT_FRONT_CENTER
                                     | AudioFormat.CHANNEL_OUT_BACK_CENTER;
-                        default:
-                            return AudioFormat.CHANNEL_INVALID;
+                        default: // fall through
                     }
                 }
+                // If a match for a predefined layout wasn't found, make a custom one from bits.
+                return aidl2api_AudioChannelLayoutBitMask_AudioFormatChannelMask(
+                        aidlMask.getLayoutMask(), isInput);
             case AudioChannelLayout.voiceMask:
                 if (isInput) {
                     switch (aidlMask.getVoiceMask()) {

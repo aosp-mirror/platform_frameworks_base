@@ -2647,7 +2647,12 @@ public class NotificationManagerService extends SystemService {
 
             @Override
             public void addAutoGroupSummary(int userId, String pkg, String triggeringKey) {
-                createAutoGroupSummary(userId, pkg, triggeringKey);
+                NotificationRecord r = createAutoGroupSummary(userId, pkg, triggeringKey);
+                if (r != null) {
+                    final boolean isAppForeground =
+                            mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
+                    mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground));
+                }
             }
 
             @Override
@@ -5083,6 +5088,33 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean matchesCallFilter(Bundle extras) {
+            // Because matchesCallFilter may use contact data to filter calls, the callers of this
+            // method need to either have notification listener access or permission to read
+            // contacts.
+            boolean systemAccess = false;
+            try {
+                enforceSystemOrSystemUI("INotificationManager.matchesCallFilter");
+                systemAccess = true;
+            } catch (SecurityException e) {
+            }
+
+            boolean listenerAccess = false;
+            try {
+                String[] pkgNames = mPackageManager.getPackagesForUid(Binder.getCallingUid());
+                for (int i = 0; i < pkgNames.length; i++) {
+                    // in most cases there should only be one package here
+                    listenerAccess |= mListeners.hasAllowedListener(pkgNames[i],
+                            Binder.getCallingUserHandle().getIdentifier());
+                }
+            } catch (RemoteException e) {
+            } finally {
+                if (!systemAccess && !listenerAccess) {
+                    getContext().enforceCallingPermission(Manifest.permission.READ_CONTACTS,
+                            "matchesCallFilter requires listener permission, contacts read access,"
+                            + " or system level access");
+                }
+            }
+
             return mZenModeHelper.matchesCallFilter(
                     Binder.getCallingUserHandle(),
                     extras,
@@ -5559,6 +5591,12 @@ public class NotificationManagerService extends SystemService {
             return isPackagePausedOrSuspended(pkg, Binder.getCallingUid());
         }
 
+        @Override
+        public boolean isPermissionFixed(String pkg, @UserIdInt int userId) {
+            enforceSystemOrSystemUI("isPermissionFixed");
+            return mPermissionHelper.isPermissionFixed(pkg, userId);
+        }
+
         private void verifyPrivilegedListener(INotificationListener token, UserHandle user,
                 boolean assistantAllowed) {
             ManagedServiceInfo info;
@@ -5757,18 +5795,23 @@ public class NotificationManagerService extends SystemService {
         return summaries != null && summaries.containsKey(sbn.getPackageName());
     }
 
-    // Posts a 'fake' summary for a package that has exceeded the solo-notification limit.
-    private void createAutoGroupSummary(int userId, String pkg, String triggeringKey) {
+    // Creates a 'fake' summary for a package that has exceeded the solo-notification limit.
+    NotificationRecord createAutoGroupSummary(int userId, String pkg, String triggeringKey) {
         NotificationRecord summaryRecord = null;
-        final boolean isAppForeground =
-                mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
+        boolean isPermissionFixed = mPermissionHelper.isMigrationEnabled()
+                ? mPermissionHelper.isPermissionFixed(pkg, userId) : false;
         synchronized (mNotificationLock) {
             NotificationRecord notificationRecord = mNotificationsByKey.get(triggeringKey);
             if (notificationRecord == null) {
                 // The notification could have been cancelled again already. A successive
                 // adjustment will post a summary if needed.
-                return;
+                return null;
             }
+            NotificationChannel channel = notificationRecord.getChannel();
+            boolean isImportanceFixed = mPermissionHelper.isMigrationEnabled()
+                    ? isPermissionFixed
+                    : (channel.isImportanceLockedByOEM()
+                            || channel.isImportanceLockedByCriticalDeviceFunction());
             final StatusBarNotification adjustedSbn = notificationRecord.getSbn();
             userId = adjustedSbn.getUser().getIdentifier();
             ArrayMap<String, String> summaries = mAutobundledSummaries.get(userId);
@@ -5812,6 +5855,7 @@ public class NotificationManagerService extends SystemService {
                                 System.currentTimeMillis());
                 summaryRecord = new NotificationRecord(getContext(), summarySbn,
                         notificationRecord.getChannel());
+                summaryRecord.setImportanceFixed(isImportanceFixed);
                 summaryRecord.setIsAppImportanceLocked(
                         notificationRecord.getIsAppImportanceLocked());
                 summaries.put(pkg, summarySbn.getKey());
@@ -5819,9 +5863,10 @@ public class NotificationManagerService extends SystemService {
             if (summaryRecord != null && checkDisqualifyingFeatures(userId, MY_UID,
                     summaryRecord.getSbn().getId(), summaryRecord.getSbn().getTag(), summaryRecord,
                     true)) {
-                mHandler.post(new EnqueueNotificationRunnable(userId, summaryRecord, isAppForeground));
+                return summaryRecord;
             }
         }
+        return null;
     }
 
     private String disableNotificationEffects(NotificationRecord record) {
@@ -6336,6 +6381,11 @@ public class NotificationManagerService extends SystemService {
         r.setPostSilently(postSilently);
         r.setFlagBubbleRemoved(false);
         r.setPkgAllowedAsConvo(mMsgPkgsAllowedAsConvos.contains(pkg));
+        boolean isImportanceFixed = mPermissionHelper.isMigrationEnabled()
+                ? mPermissionHelper.isPermissionFixed(pkg, userId)
+                : (channel.isImportanceLockedByOEM()
+                        || channel.isImportanceLockedByCriticalDeviceFunction());
+        r.setImportanceFixed(isImportanceFixed);
 
         if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
             final boolean fgServiceShown = channel.isFgServiceShown();
@@ -10950,6 +11000,23 @@ public class NotificationManagerService extends SystemService {
                     if (packageName.equals(serviceInfo.component.getPackageName())) {
                         return true;
                     }
+                }
+            }
+            return false;
+        }
+
+        // Returns whether there is a component with listener access granted that is associated
+        // with the given package name / user ID.
+        boolean hasAllowedListener(String packageName, int userId) {
+            if (packageName == null) {
+                return false;
+            }
+
+            // Loop through allowed components to compare package names
+            List<ComponentName> allowedComponents = getAllowedComponents(userId);
+            for (int i = 0; i < allowedComponents.size(); i++) {
+                if (allowedComponents.get(i).getPackageName().equals(packageName)) {
+                    return true;
                 }
             }
             return false;

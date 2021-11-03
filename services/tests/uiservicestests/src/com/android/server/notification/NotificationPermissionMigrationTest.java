@@ -20,6 +20,7 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.NotificationManager.EXTRA_BLOCKED_STATE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
@@ -271,6 +272,8 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
                 "android.permission.READ_CONTACTS");
 
         MockitoAnnotations.initMocks(this);
+
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
 
         DeviceIdleInternal deviceIdleInternal = mock(DeviceIdleInternal.class);
         when(deviceIdleInternal.getNotificationAllowlistDuration()).thenReturn(3000L);
@@ -677,5 +680,35 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
 
         verify(mPermissionHelper).setNotificationPermission(
                 PKG_N_MR1, ActivityManager.getCurrentUser(), false, true);
+    }
+
+    @Test
+    public void testPostNotification_appPermissionFixed() throws Exception {
+        when(mPermissionHelper.hasPermission(mUid)).thenReturn(true);
+        when(mPermissionHelper.isPermissionFixed(PKG, 0)).thenReturn(true);
+
+        NotificationRecord temp = generateNotificationRecord(mTestNotificationChannel);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testPostNotification_appPermissionFixed", 0,
+                temp.getNotification(), 0);
+        waitForIdle();
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(1);
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(PKG);
+        assertThat(mService.getNotificationRecord(notifs[0].getKey()).isImportanceFixed()).isTrue();
+    }
+
+    @Test
+    public void testSummaryNotification_appPermissionFixed() {
+        NotificationRecord temp = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(temp);
+
+        when(mPermissionHelper.hasPermission(mUid)).thenReturn(true);
+        when(mPermissionHelper.isPermissionFixed(PKG, temp.getUserId())).thenReturn(true);
+
+        NotificationRecord r = mService.createAutoGroupSummary(
+                temp.getUserId(), temp.getSbn().getPackageName(), temp.getKey());
+
+        assertThat(r.isImportanceFixed()).isTrue();
     }
 }

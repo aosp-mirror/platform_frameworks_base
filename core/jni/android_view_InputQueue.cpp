@@ -39,6 +39,7 @@ namespace android {
 
 static struct {
     jmethodID finishInputEvent;
+    jmethodID getNativePtr;
 } gInputQueueClassInfo;
 
 enum {
@@ -263,8 +264,15 @@ int register_android_view_InputQueue(JNIEnv* env)
     jclass clazz = FindClassOrDie(env, kInputQueuePathName);
     gInputQueueClassInfo.finishInputEvent = GetMethodIDOrDie(env, clazz, "finishInputEvent",
                                                              "(JZ)V");
+    gInputQueueClassInfo.getNativePtr = GetMethodIDOrDie(env, clazz, "getNativePtr", "()J");
 
     return RegisterMethodsOrDie(env, kInputQueuePathName, g_methods, NELEM(g_methods));
+}
+
+AInputQueue* android_view_InputQueue_getNativePtr(jobject inputQueue) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jlong ptr = env->CallLongMethod(inputQueue, gInputQueueClassInfo.getNativePtr);
+    return reinterpret_cast<AInputQueue*>(ptr);
 }
 
 } // namespace android

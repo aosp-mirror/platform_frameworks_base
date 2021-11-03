@@ -2835,6 +2835,28 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testLockChannelsForOEM_onlyGivenPkg_appDoesNotExistYet_restoreData_postMigration()
+            throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        mHelper.lockChannelsForOEM(new String[] {PKG_O});
+
+        final String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
+                + "<channel id=\"a\" name=\"a\" importance=\"3\"/>"
+                + "<channel id=\"b\" name=\"b\" importance=\"3\"/>"
+                + "</package>"
+                + "</ranking>";
+        TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        assertFalse(mHelper.getNotificationChannel(PKG_O, UID_O, "a", false)
+                .isImportanceLockedByOEM());
+    }
+
+    @Test
     public void testLockChannelsForOEM_channelSpecific_appDoesNotExistYet_restoreData()
             throws Exception {
         mHelper.lockChannelsForOEM(new String[] {PKG_O + ":b", PKG_O + ":c"});
@@ -2859,6 +2881,35 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertTrue(mHelper.getNotificationChannel(PKG_O, 3, "b", false)
                 .isImportanceLockedByOEM());
         assertTrue(mHelper.getNotificationChannel(PKG_O, 30, "c", false)
+                .isImportanceLockedByOEM());
+    }
+
+    @Test
+    public void testLockChannelsForOEM_channelSpecific_appDoesNotExistYet_restoreData_postMigration()
+            throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":b", PKG_O + ":c"});
+
+        final String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + 3 + "\" >\n"
+                + "<channel id=\"a\" name=\"a\" importance=\"3\"/>"
+                + "<channel id=\"b\" name=\"b\" importance=\"3\"/>"
+                + "</package>"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + 30 + "\" >\n"
+                + "<channel id=\"c\" name=\"c\" importance=\"3\"/>"
+                + "</package>"
+                + "</ranking>";
+        TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        assertFalse(mHelper.getNotificationChannel(PKG_O, 3, "a", false)
+                .isImportanceLockedByOEM());
+        assertFalse(mHelper.getNotificationChannel(PKG_O, 3, "b", false)
+                .isImportanceLockedByOEM());
+        assertFalse(mHelper.getNotificationChannel(PKG_O, 30, "c", false)
                 .isImportanceLockedByOEM());
     }
 
@@ -2913,6 +2964,59 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testLockChannelsForOEM_channelSpecific_clearData_postMigration() {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        mHelper.getImportance(PKG_O, UID_O);
+        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":" + a.getId()});
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+        assertFalse(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
+                .isImportanceLockedByOEM());
+
+        mHelper.clearData(PKG_O, UID_O);
+
+        // it's back!
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+        // and never locked
+        assertFalse(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
+                .isImportanceLockedByOEM());
+    }
+
+    @Test
+    public void testLockChannelsForOEM_channelDoesNotExistYet_appWide_postMigration() {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
+        mHelper.createNotificationChannel(PKG_O, 3, a, true, false);
+
+        mHelper.lockChannelsForOEM(new String[] {PKG_O});
+
+        assertFalse(mHelper.getNotificationChannel(PKG_O, 3, a.getId(), false)
+                .isImportanceLockedByOEM());
+
+        mHelper.createNotificationChannel(PKG_O, 3, b, true, false);
+        assertFalse(mHelper.getNotificationChannel(PKG_O, 3, b.getId(), false)
+                .isImportanceLockedByOEM());
+    }
+
+    @Test
+    public void testLockChannelsForOEM_channelDoesNotExistYet_channelSpecific_postMigration() {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+
+        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":a", PKG_O + ":b"});
+
+        assertFalse(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
+                .isImportanceLockedByOEM());
+
+        mHelper.createNotificationChannel(PKG_O, UID_O, b, true, false);
+        assertFalse(mHelper.getNotificationChannel(PKG_O, UID_O, b.getId(), false)
+                .isImportanceLockedByOEM());
+    }
+
+    @Test
     public void testUpdateNotificationChannel_oemLockedImportance() {
         NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
         mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
@@ -2933,6 +3037,44 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         assertEquals(IMPORTANCE_HIGH,
                 mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
+    }
+
+    @Test
+    public void testUpdateNotificationChannel_fixedPermission() {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(true);
+
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+
+        NotificationChannel update = new NotificationChannel("a", "a", IMPORTANCE_NONE);
+        update.setAllowBubbles(false);
+
+        mHelper.updateNotificationChannel(PKG_O, UID_O, update, true);
+
+        assertEquals(IMPORTANCE_HIGH,
+                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
+        assertEquals(false,
+                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).canBubble());
+    }
+
+    @Test
+    public void testUpdateNotificationChannel_notFixedPermission() {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(false);
+
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+
+        NotificationChannel update = new NotificationChannel("a", "a", IMPORTANCE_NONE);
+        update.setAllowBubbles(false);
+
+        mHelper.updateNotificationChannel(PKG_O, UID_O, update, true);
+
+        assertEquals(IMPORTANCE_NONE,
+                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
+        assertEquals(false,
+                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).canBubble());
     }
 
     @Test

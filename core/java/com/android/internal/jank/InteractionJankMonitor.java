@@ -230,6 +230,7 @@ public class InteractionJankMonitor {
     private final SparseArray<FrameTracker> mRunningTrackers;
     private final SparseArray<Runnable> mTimeoutActions;
     private final HandlerThread mWorker;
+    private final Object mLock = new Object();
 
     private boolean mEnabled = DEFAULT_ENABLED;
     private int mSamplingInterval = DEFAULT_SAMPLING_INTERVAL;
@@ -325,6 +326,10 @@ public class InteractionJankMonitor {
                 mPropertiesChangedListener);
     }
 
+    Object getLock() {
+        return mLock;
+    }
+
     /**
      * Creates a {@link FrameTracker} instance.
      *
@@ -344,7 +349,7 @@ public class InteractionJankMonitor {
         final ChoreographerWrapper choreographer =
                 new ChoreographerWrapper(Choreographer.getInstance());
 
-        synchronized (this) {
+        synchronized (mLock) {
             FrameTrackerListener eventsListener =
                     (s, act) -> handleCujEvents(config.getContext(), act, s);
             return new FrameTracker(session, mWorker.getThreadHandler(),
@@ -372,11 +377,16 @@ public class InteractionJankMonitor {
         final boolean badEnd = action.equals(ACTION_SESSION_END)
                 && session.getReason() != REASON_END_NORMAL;
         final boolean badCancel = action.equals(ACTION_SESSION_CANCEL)
-                && session.getReason() != REASON_CANCEL_NORMAL;
+                && !(session.getReason() == REASON_CANCEL_NORMAL
+                || session.getReason() == REASON_CANCEL_TIMEOUT);
         return badEnd || badCancel;
     }
 
-    private void notifyEvents(Context context, String action, Session session) {
+    /**
+     * Notifies who may interest in some CUJ events.
+     */
+    @VisibleForTesting
+    public void notifyEvents(Context context, String action, Session session) {
         if (action.equals(ACTION_SESSION_CANCEL)
                 && session.getReason() == REASON_CANCEL_NOT_BEGUN) {
             return;
@@ -389,7 +399,7 @@ public class InteractionJankMonitor {
     }
 
     private void removeTimeout(@CujType int cujType) {
-        synchronized (this) {
+        synchronized (mLock) {
             Runnable timeout = mTimeoutActions.get(cujType);
             if (timeout != null) {
                 mWorker.getThreadHandler().removeCallbacks(timeout);
@@ -432,17 +442,9 @@ public class InteractionJankMonitor {
     }
 
     private boolean beginInternal(@NonNull Configuration conf) {
-        synchronized (this) {
+        synchronized (mLock) {
             int cujType = conf.mCujType;
-            boolean shouldSample = ThreadLocalRandom.current().nextInt() % mSamplingInterval == 0;
-            if (!mEnabled || !shouldSample) {
-                if (DEBUG) {
-                    Log.d(TAG, "Skip monitoring cuj: " + getNameOfCuj(cujType)
-                            + ", enable=" + mEnabled + ", debuggable=" + DEFAULT_ENABLED
-                            + ", sample=" + shouldSample + ", interval=" + mSamplingInterval);
-                }
-                return false;
-            }
+            if (!shouldMonitor(cujType)) return false;
             FrameTracker tracker = getTracker(cujType);
             // Skip subsequent calls if we already have an ongoing tracing.
             if (tracker != null) return false;
@@ -457,6 +459,24 @@ public class InteractionJankMonitor {
                     cujType, conf.mTimeout, () -> cancel(cujType, REASON_CANCEL_TIMEOUT));
             return true;
         }
+    }
+
+    /**
+     * Check if the monitoring is enabled and if it should be sampled.
+     */
+    @SuppressWarnings("RandomModInteger")
+    @VisibleForTesting
+    public boolean shouldMonitor(@CujType int cujType) {
+        boolean shouldSample = ThreadLocalRandom.current().nextInt() % mSamplingInterval == 0;
+        if (!mEnabled || !shouldSample) {
+            if (DEBUG) {
+                Log.d(TAG, "Skip monitoring cuj: " + getNameOfCuj(cujType)
+                        + ", enable=" + mEnabled + ", debuggable=" + DEFAULT_ENABLED
+                        + ", sample=" + shouldSample + ", interval=" + mSamplingInterval);
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -478,14 +498,16 @@ public class InteractionJankMonitor {
      * @return boolean true if the tracker is ended successfully, false otherwise.
      */
     public boolean end(@CujType int cujType) {
-        synchronized (this) {
+        synchronized (mLock) {
             // remove the timeout action first.
             removeTimeout(cujType);
             FrameTracker tracker = getTracker(cujType);
             // Skip this call since we haven't started a trace yet.
             if (tracker == null) return false;
-            tracker.end(REASON_END_NORMAL);
-            removeTracker(cujType);
+            // if the end call doesn't return true, another thread is handling end of the cuj.
+            if (tracker.end(REASON_END_NORMAL)) {
+                removeTracker(cujType);
+            }
             return true;
         }
     }
@@ -499,33 +521,37 @@ public class InteractionJankMonitor {
         return cancel(cujType, REASON_CANCEL_NORMAL);
     }
 
-    boolean cancel(@CujType int cujType, @Reasons int reason) {
-        synchronized (this) {
+    /**
+     * Cancels the trace session.
+     *
+     * @return boolean true if the tracker is cancelled successfully, false otherwise.
+     */
+    @VisibleForTesting
+    public boolean cancel(@CujType int cujType, @Reasons int reason) {
+        synchronized (mLock) {
             // remove the timeout action first.
             removeTimeout(cujType);
             FrameTracker tracker = getTracker(cujType);
             // Skip this call since we haven't started a trace yet.
             if (tracker == null) return false;
-            tracker.cancel(reason);
-            removeTracker(cujType);
+            // if the cancel call doesn't return true, another thread is handling cancel of the cuj.
+            if (tracker.cancel(reason)) {
+                removeTracker(cujType);
+            }
             return true;
         }
     }
 
     private FrameTracker getTracker(@CujType int cuj) {
-        synchronized (this) {
-            return mRunningTrackers.get(cuj);
-        }
+        return mRunningTrackers.get(cuj);
     }
 
     private void removeTracker(@CujType int cuj) {
-        synchronized (this) {
-            mRunningTrackers.remove(cuj);
-        }
+        mRunningTrackers.remove(cuj);
     }
 
     private void updateProperties(DeviceConfig.Properties properties) {
-        synchronized (this) {
+        synchronized (mLock) {
             mSamplingInterval = properties.getInt(SETTINGS_SAMPLING_INTERVAL_KEY,
                     DEFAULT_SAMPLING_INTERVAL);
             mEnabled = properties.getBoolean(SETTINGS_ENABLED_KEY, DEFAULT_ENABLED);
@@ -547,10 +573,8 @@ public class InteractionJankMonitor {
      */
     @VisibleForTesting
     public void trigger(Session session) {
-        synchronized (this) {
-            mWorker.getThreadHandler().post(
-                    () -> PerfettoTrigger.trigger(session.getPerfettoTrigger()));
-        }
+        mWorker.getThreadHandler().post(
+                () -> PerfettoTrigger.trigger(session.getPerfettoTrigger()));
     }
 
     /**
