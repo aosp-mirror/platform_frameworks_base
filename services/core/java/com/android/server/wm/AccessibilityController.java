@@ -20,11 +20,11 @@ import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATIO
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK;
 import static android.os.Build.IS_USER;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 
 import static com.android.server.accessibility.AccessibilityTraceFileProto.ENTRY;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER;
@@ -1009,8 +1009,6 @@ final class AccessibilityController {
                     final int windowType = windowState.mAttrs.type;
                     if (isExcludedWindowType(windowType)
                             || ((windowState.mAttrs.privateFlags
-                            & PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION) != 0)
-                            || ((windowState.mAttrs.privateFlags
                             & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0)) {
                         continue;
                     }
@@ -1075,6 +1073,7 @@ final class AccessibilityController {
                         }
                     }
                 }
+
                 visibleWindows.clear();
 
                 mMagnificationRegion.op(mDrawBorderInset, mDrawBorderInset,
@@ -1111,6 +1110,9 @@ final class AccessibilityController {
 
             private boolean isExcludedWindowType(int windowType) {
                 return windowType == TYPE_MAGNIFICATION_OVERLAY
+                        // Omit the touch region to avoid the cut out of the magnification
+                        // bounds because nav bar panel is unmagnifiable.
+                        || windowType == TYPE_NAVIGATION_BAR_PANEL
                         // Omit the touch region of window magnification to avoid the cut out of the
                         // magnification and the magnified center of window magnification could be
                         // in the bounds
