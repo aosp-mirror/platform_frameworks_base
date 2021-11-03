@@ -806,10 +806,16 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mProtectedBroadcasts")
     final ArraySet<String> mProtectedBroadcasts = new ArraySet<>();
 
-    /** List of packages waiting for verification. */
+    /**
+     * List of packages waiting for verification.
+     * Handler thread only!
+     */
     final SparseArray<PackageVerificationState> mPendingVerification = new SparseArray<>();
 
-    /** List of packages waiting for rollback to be enabled. */
+    /**
+     * List of packages waiting for rollback to be enabled.
+     * Handler thread only!
+     */
     final SparseArray<VerificationParams> mPendingEnableRollback = new SparseArray<>();
 
     final PackageInstallerService mInstallerService;
@@ -830,10 +836,16 @@ public class PackageManagerService extends IPackageManager.Stub
     // Cache of users who need badging.
     private final SparseBooleanArray mUserNeedsBadging = new SparseBooleanArray();
 
-    /** Token for keys in mPendingVerification. */
+    /**
+     * Token for keys in mPendingVerification.
+     * Handler thread only!
+     */
     int mPendingVerificationToken = 0;
 
-    /** Token for keys in mPendingEnableRollback. */
+    /**
+     * Token for keys in mPendingEnableRollback.
+     * Handler thread only!
+     */
     int mPendingEnableRollbackToken = 0;
 
     @Watched(manual = true)
@@ -6357,25 +6369,28 @@ public class PackageManagerService extends IPackageManager.Stub
                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
                 "Only package verification agents can extend verification timeouts");
 
-        final PackageVerificationState state = mPendingVerification.get(id);
-        final PackageVerificationResponse response = new PackageVerificationResponse(
-                verificationCodeAtTimeout, Binder.getCallingUid());
+        mHandler.post(() -> {
+            final PackageVerificationState state = mPendingVerification.get(id);
+            final PackageVerificationResponse response = new PackageVerificationResponse(
+                    verificationCodeAtTimeout, Binder.getCallingUid());
 
-        if (millisecondsToDelay > PackageManager.MAXIMUM_VERIFICATION_TIMEOUT) {
-            millisecondsToDelay = PackageManager.MAXIMUM_VERIFICATION_TIMEOUT;
-        }
-        if (millisecondsToDelay < 0) {
-            millisecondsToDelay = 0;
-        }
+            long delay = millisecondsToDelay;
+            if (delay > PackageManager.MAXIMUM_VERIFICATION_TIMEOUT) {
+                delay = PackageManager.MAXIMUM_VERIFICATION_TIMEOUT;
+            }
+            if (delay < 0) {
+                delay = 0;
+            }
 
-        if ((state != null) && !state.timeoutExtended()) {
-            state.extendTimeout();
+            if ((state != null) && !state.timeoutExtended()) {
+                state.extendTimeout();
 
-            final Message msg = mHandler.obtainMessage(PACKAGE_VERIFIED);
-            msg.arg1 = id;
-            msg.obj = response;
-            mHandler.sendMessageDelayed(msg, millisecondsToDelay);
-        }
+                final Message msg = mHandler.obtainMessage(PACKAGE_VERIFIED);
+                msg.arg1 = id;
+                msg.obj = response;
+                mHandler.sendMessageDelayed(msg, delay);
+            }
+        });
     }
 
     private void setEnableRollbackCode(int token, int enableRollbackCode) {
