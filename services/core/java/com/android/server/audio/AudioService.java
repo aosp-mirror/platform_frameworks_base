@@ -10023,22 +10023,6 @@ public class AudioService extends IAudioService.Stub
         mRecordMonitor.releaseRecorder(riid);
     }
 
-    public void disableRingtoneSync(final int userId) {
-        final int callingUserId = UserHandle.getCallingUserId();
-        if (callingUserId != userId) {
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "disable sound settings syncing for another profile");
-        }
-        final long token = Binder.clearCallingIdentity();
-        try {
-            // Disable the sync setting so the profile uses its own sound settings.
-            Settings.Secure.putIntForUser(mContentResolver, Settings.Secure.SYNC_PARENT_SOUNDS,
-                    0 /* false */, userId);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
     //======================
     // Audio playback notification
     //======================

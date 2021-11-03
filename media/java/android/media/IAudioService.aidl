@@ -268,8 +268,6 @@ interface IAudioService {
 
     List<AudioPlaybackConfiguration> getActivePlaybackConfigurations();
 
-    void disableRingtoneSync(in int userId);
-
     int getFocusRampTimeMs(in int focusGain, in AudioAttributes attr);
 
     int dispatchFocusChange(in AudioFocusInfo afi, in int focusChange,
