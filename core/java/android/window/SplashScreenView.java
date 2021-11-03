@@ -20,6 +20,10 @@ import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACK
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLASHSCREEN_AVD;
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -54,6 +58,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.android.internal.R;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.DecorView;
 import com.android.internal.util.ContrastColorUtil;
 
@@ -487,6 +492,23 @@ public final class SplashScreenView extends FrameLayout {
         }
         IconAnimateListener aniDrawable = (IconAnimateListener) iconDrawable;
         aniDrawable.prepareAnimate(duration, this::animationStartCallback);
+        aniDrawable.setAnimationJankMonitoring(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                InteractionJankMonitor.getInstance().cancel(CUJ_SPLASHSCREEN_AVD);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                InteractionJankMonitor.getInstance().end(CUJ_SPLASHSCREEN_AVD);
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                InteractionJankMonitor.getInstance().begin(
+                        SplashScreenView.this, CUJ_SPLASHSCREEN_AVD);
+            }
+        });
     }
 
     private void animationStartCallback() {
@@ -669,6 +691,12 @@ public final class SplashScreenView extends FrameLayout {
          * Stop animation.
          */
         void stopAnimation();
+
+        /**
+         * Provides a chance to start interaction jank monitoring in avd animation.
+         * @param listener a listener to start jank monitoring
+         */
+        default void setAnimationJankMonitoring(AnimatorListenerAdapter listener) {}
     }
 
     /**
