@@ -115,7 +115,6 @@ cc_defaults {
         "libui",
         "libvibratorservice",
         "PlatformProperties",
-        "InputFlingerProperties",
         "libinput",
         "libinputflinger",
         "libinputflinger_base",
