@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 7.1.0-dev" type="baseline" client="" dependencies="true" name="" variant="all" version="7.1.0-dev">
+
+    <issue
+        id="NewApi"
+        message="Call requires API level S (current min is 29): `MediaParceledListSlice`"
+        errorLine1="                    new MediaParceledListSlice&lt;>(getSession2TokensLocked(ALL.getIdentifier()));"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/service/java/com/android/server/media/MediaCommunicationService.java"
+            line="242"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level S (current min is 29): `MediaParceledListSlice`"
+        errorLine1="            userSession2Tokens = new MediaParceledListSlice&lt;>(getSession2TokensLocked(userId));"
+        errorLine2="                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/service/java/com/android/server/media/MediaCommunicationService.java"
+            line="243"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level S (current min is 29): `MediaParceledListSlice`"
+        errorLine1="                MediaParceledListSlice parceledListSlice = new MediaParceledListSlice&lt;>(result);"
+        errorLine2="                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/service/java/com/android/server/media/MediaCommunicationService.java"
+            line="386"
+            column="60"/>
+    </issue>
+
+</issues>
