@@ -56,6 +56,7 @@ message CriticalEventProto {
   oneof event {
     Watchdog watchdog = 2;
     HalfWatchdog half_watchdog = 3;
+    AppNotResponding anr = 4;
   }
 
   message Watchdog {
@@ -74,5 +75,35 @@ message CriticalEventProto {
     // The half-watchdog subject.
     // Required.
     optional string subject = 1;
+  }
+
+  message AppNotResponding {
+    // The ANR subject.
+    // Optional, may be redacted for privacy.
+    optional string subject = 1;
+
+    // Name of the ANRing process.
+    // Optional, may be redacted for privacy.
+    optional string process = 2;
+
+    // PID of the ANRing process.
+    // Required.
+    optional int32 pid = 3;
+
+    // UID of the ANRing process.
+    // Required.
+    optional int32 uid = 4;
+
+    // Category of the ANRing process (DATA_APP, SYSTEM_APP, etc).
+    // Required.
+    optional ProcessClass process_class = 5;
+  }
+
+  // Mirrors definition & values in {@link android.server.ServerProtoEnums}.
+  enum ProcessClass {
+    PROCESS_CLASS_UNKNOWN = 0;
+    DATA_APP = 1;
+    SYSTEM_APP = 2;
+    SYSTEM_SERVER = 3;
   }
 }

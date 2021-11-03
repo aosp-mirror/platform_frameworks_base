@@ -332,6 +332,13 @@ class ProcessErrorStateRecord {
             }
         }
 
+        // Get critical event log before logging the ANR so that it doesn't occur in the log.
+        final String criticalEventLog =
+                CriticalEventLog.getInstance().logLinesForTraceFile(
+                        mApp.getProcessClassEnum(), mApp.processName, mApp.uid);
+        CriticalEventLog.getInstance().logAnr(annotation, mApp.getProcessClassEnum(),
+                mApp.processName, mApp.uid, mApp.mPid);
+
         // Log the ANR to the main log.
         StringBuilder info = new StringBuilder();
         info.setLength(0);
@@ -401,7 +408,6 @@ class ProcessErrorStateRecord {
         StringWriter tracesFileException = new StringWriter();
         // To hold the start and end offset to the ANR trace file respectively.
         final long[] offsets = new long[2];
-        final String criticalEventLog = CriticalEventLog.getInstance().logLinesForAnrFile();
         File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
                 isSilentAnr ? null : processCpuTracker, isSilentAnr ? null : lastPids,
                 nativePids, tracesFileException, offsets, annotation, criticalEventLog);
