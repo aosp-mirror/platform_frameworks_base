@@ -1330,7 +1330,7 @@ public class DisplayRotation {
             case ActivityInfo.SCREEN_ORIENTATION_USER:
             case ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED:
                 // Works with any rotation except upside down.
-                return (preferredRotation >= 0) && (preferredRotation != mUpsideDownRotation);
+                return (preferredRotation >= 0) && (preferredRotation != Surface.ROTATION_180);
         }
 
         return false;
