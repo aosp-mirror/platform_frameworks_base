@@ -143,7 +143,6 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
             throw new AssertionError(); // Not possible, the native code won't return it.
         }
         mCloseGuard.open("close");
-        recordNewWindow(Binder.getCallingPid(), mWindowPtr);
     }
 
     /**
@@ -191,7 +190,6 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
             mCloseGuard.close();
         }
         if (mWindowPtr != 0) {
-            recordClosingOfWindow(mWindowPtr);
             nativeDispose(mWindowPtr);
             mWindowPtr = 0;
         }
@@ -744,64 +742,6 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     @Override
     protected void onAllReferencesReleased() {
         dispose();
-    }
-
-    @UnsupportedAppUsage
-    private static final LongSparseArray<Integer> sWindowToPidMap = new LongSparseArray<Integer>();
-
-    private void recordNewWindow(int pid, long window) {
-        synchronized (sWindowToPidMap) {
-            sWindowToPidMap.put(window, pid);
-            if (Log.isLoggable(STATS_TAG, Log.VERBOSE)) {
-                Log.i(STATS_TAG, "Created a new Cursor. " + printStats());
-            }
-        }
-    }
-
-    private void recordClosingOfWindow(long window) {
-        synchronized (sWindowToPidMap) {
-            if (sWindowToPidMap.size() == 0) {
-                // this means we are not in the ContentProvider.
-                return;
-            }
-            sWindowToPidMap.delete(window);
-        }
-    }
-
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private String printStats() {
-        StringBuilder buff = new StringBuilder();
-        int myPid = Process.myPid();
-        int total = 0;
-        SparseIntArray pidCounts = new SparseIntArray();
-        synchronized (sWindowToPidMap) {
-            int size = sWindowToPidMap.size();
-            if (size == 0) {
-                // this means we are not in the ContentProvider.
-                return "";
-            }
-            for (int indx = 0; indx < size; indx++) {
-                int pid = sWindowToPidMap.valueAt(indx);
-                int value = pidCounts.get(pid);
-                pidCounts.put(pid, ++value);
-            }
-        }
-        int numPids = pidCounts.size();
-        for (int i = 0; i < numPids;i++) {
-            buff.append(" (# cursors opened by ");
-            int pid = pidCounts.keyAt(i);
-            if (pid == myPid) {
-                buff.append("this proc=");
-            } else {
-                buff.append("pid ").append(pid).append('=');
-            }
-            int num = pidCounts.get(pid);
-            buff.append(num).append(')');
-            total += num;
-        }
-        // limit the returned string size to 1000
-        String s = (buff.length() > 980) ? buff.substring(0, 980) : buff.toString();
-        return "# Open Cursors=" + total + s;
     }
 
     private static int getCursorWindowSize() {
