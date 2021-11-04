@@ -31,14 +31,12 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
-import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
+import static androidx.test.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.app.Instrumentation;
 import android.content.Context;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
@@ -49,9 +47,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -62,7 +58,7 @@ import java.util.concurrent.TimeUnit;
  * Tests for {@link ViewRootImpl}
  *
  * Build/Install/Run:
- * atest FrameworksCoreTests:ViewRootImplTest
+ *  atest FrameworksCoreTests:ViewRootImplTest
  */
 @Presubmit
 @SmallTest
@@ -70,32 +66,15 @@ import java.util.concurrent.TimeUnit;
 public class ViewRootImplTest {
 
     private ViewRootImpl mViewRootImpl;
+    private Context mContext;
     private volatile boolean mKeyReceived = false;
-
-    private static Context sContext;
-    private static Instrumentation sInstrumentation = InstrumentationRegistry.getInstrumentation();
-
-    // The touch mode state before the test was started, needed to return the system to the original
-    // state after the test completes.
-    private static boolean sOriginalTouchMode;
-
-    @BeforeClass
-    public static void setUpClass() {
-        sContext = sInstrumentation.getTargetContext();
-        View view = new View(sContext);
-        sOriginalTouchMode = view.isInTouchMode();
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-        sInstrumentation.setInTouchMode(sOriginalTouchMode);
-    }
 
     @Before
     public void setUp() throws Exception {
-        sInstrumentation.setInTouchMode(true);
-        sInstrumentation.runOnMainSync(() ->
-                mViewRootImpl = new ViewRootImpl(sContext, sContext.getDisplayNoVerify()));
+        mContext = getInstrumentation().getTargetContext();
+
+        getInstrumentation().runOnMainSync(() ->
+                mViewRootImpl = new ViewRootImpl(mContext, mContext.getDisplayNoVerify()));
     }
 
     @Test
@@ -245,9 +224,9 @@ public class ViewRootImplTest {
      */
     @Test
     public void requestScrollCapture_timeout() {
-        final View view = new View(sContext);
+        final View view = new View(mContext);
         view.setScrollCaptureCallback(new TestScrollCaptureCallback()); // Does nothing
-        sInstrumentation.runOnMainSync(() -> {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             WindowManager.LayoutParams wmlp =
                     new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
             // Set a fake token to bypass 'is your activity running' check
@@ -269,29 +248,6 @@ public class ViewRootImplTest {
                 fail("requestScrollCapture timeout did not occur");
             }
         } catch (InterruptedException e) { /* ignore */ }
-    }
-
-    @Test
-    public void whenTouchModeChanges_viewRootIsNotified() throws Exception {
-        View view = new View(sContext);
-        attachViewToWindow(view);
-        ViewTreeObserver viewTreeObserver = view.getRootView().getViewTreeObserver();
-        CountDownLatch latch = new CountDownLatch(1);
-        ViewTreeObserver.OnTouchModeChangeListener touchModeListener = (boolean inTouchMode) -> {
-            assertWithMessage("addOnTouchModeChangeListener parameter").that(
-                    inTouchMode).isFalse();
-            latch.countDown();
-        };
-        viewTreeObserver.addOnTouchModeChangeListener(touchModeListener);
-
-        try {
-            view.requestFocusFromTouch();
-
-            assertThat(latch.await(1, TimeUnit.SECONDS)).isTrue();
-            assertThat(view.isInTouchMode()).isFalse();
-        } finally {
-            viewTreeObserver.removeOnTouchModeChangeListener(touchModeListener);
-        }
     }
 
     /**
@@ -352,31 +308,27 @@ public class ViewRootImplTest {
      * Next, inject an event into this view, and check whether it is received.
      */
     private void checkKeyEvent(Runnable setup, boolean shouldReceiveKey) {
-        final KeyView view = new KeyView(sContext);
+        final KeyView view = new KeyView(mContext);
 
-        attachViewToWindow(view);
-
-        mViewRootImpl = view.getViewRootImpl();
-        sInstrumentation.runOnMainSync(setup);
-        sInstrumentation.waitForIdleSync();
-
-        // Inject a key event, and wait for it to be processed
-        sInstrumentation.runOnMainSync(() -> {
-            KeyEvent event = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_A);
-            mViewRootImpl.dispatchInputEvent(event);
-        });
-        sInstrumentation.waitForIdleSync();
-        assertEquals(mKeyReceived, shouldReceiveKey);
-    }
-
-    private void attachViewToWindow(View view) {
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
         wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
 
-        sInstrumentation.runOnMainSync(() -> {
-            WindowManager wm = sContext.getSystemService(WindowManager.class);
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            WindowManager wm = mContext.getSystemService(WindowManager.class);
             wm.addView(view, wmlp);
         });
-        sInstrumentation.waitForIdleSync();
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+        mViewRootImpl = view.getViewRootImpl();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(setup);
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+        // Inject a key event, and wait for it to be processed
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            KeyEvent event = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_A);
+            mViewRootImpl.dispatchInputEvent(event);
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+        assertEquals(mKeyReceived, shouldReceiveKey);
     }
 }
