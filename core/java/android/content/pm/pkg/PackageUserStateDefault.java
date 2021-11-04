@@ -139,6 +139,7 @@ class PackageUserStateDefault implements PackageUserState {
         return false;
     }
 
+    @Nullable
     @Override
     public OverlayPaths getAllOverlayPaths() {
         return null;
