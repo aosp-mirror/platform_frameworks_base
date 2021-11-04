@@ -30,6 +30,7 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -72,7 +73,7 @@ public class RemoteTransitionCompat implements Parcelable {
     }
 
     public RemoteTransitionCompat(@NonNull RemoteTransitionRunner runner,
-            @NonNull Executor executor) {
+            @NonNull Executor executor, @Nullable IApplicationThread appThread) {
         IRemoteTransition remote = new IRemoteTransition.Stub() {
             @Override
             public void startAnimation(IBinder transition, TransitionInfo info,
@@ -103,12 +104,12 @@ public class RemoteTransitionCompat implements Parcelable {
                         finishAdapter));
             }
         };
-        mTransition = new RemoteTransition(remote);
+        mTransition = new RemoteTransition(remote, appThread);
     }
 
     /** Constructor specifically for recents animation */
     public RemoteTransitionCompat(RecentsAnimationListener recents,
-            RecentsAnimationControllerCompat controller) {
+            RecentsAnimationControllerCompat controller, IApplicationThread appThread) {
         IRemoteTransition remote = new IRemoteTransition.Stub() {
             final RecentsControllerWrap mRecentsSession = new RecentsControllerWrap();
             IBinder mToken = null;
@@ -168,7 +169,7 @@ public class RemoteTransitionCompat implements Parcelable {
                 }
             }
         };
-        mTransition = new RemoteTransition(remote);
+        mTransition = new RemoteTransition(remote, appThread);
     }
 
     /** Adds a filter check that restricts this remote transition to home open transitions. */

@@ -31,16 +31,29 @@ class PanelExpansionStateManager @Inject constructor() {
 
     private val listeners: MutableList<PanelExpansionListener> = mutableListOf()
 
-    /** Adds a listener that will be notified about panel events. */
+    @FloatRange(from = 0.0, to = 1.0) private var fraction: Float = 0f
+    private var expanded: Boolean = false
+    private var tracking: Boolean = false
+
+    /**
+     * Adds a listener that will be notified when the panel expansion has changed.
+     *
+     * Listener will also be immediately notified with the current values.
+     */
     fun addListener(listener: PanelExpansionListener) {
         listeners.add(listener)
+        listener.onPanelExpansionChanged(fraction, expanded, tracking)
     }
 
     /** Called when the panel expansion has changed. Notifies all listeners of change. */
     fun onPanelExpansionChanged(
         @FloatRange(from = 0.0, to = 1.0) fraction: Float,
+        expanded: Boolean,
         tracking: Boolean
     ) {
-        listeners.forEach { it.onPanelExpansionChanged(fraction, tracking) }
+        this.fraction = fraction
+        this.expanded = expanded
+        this.tracking = tracking
+        listeners.forEach { it.onPanelExpansionChanged(fraction, expanded, tracking) }
     }
 }

@@ -28,22 +28,31 @@ class CollapsedStatusBarFragmentLogger @Inject constructor(
         private val disableFlagsLogger: DisableFlagsLogger,
 ) {
 
-    /** Logs a string representing the old and new disable flag states to [buffer]. */
+    /**
+     * Logs a string representing the new state received by [CollapsedStatusBarFragment] and any
+     * modifications that were made to the flags locally.
+     *
+     * @param new see [DisableFlagsLogger.getDisableFlagsString]
+     * @param newAfterLocalModification see [DisableFlagsLogger.getDisableFlagsString]
+     */
     fun logDisableFlagChange(
-            oldState: DisableFlagsLogger.DisableState,
-            newState: DisableFlagsLogger.DisableState) {
+        new: DisableFlagsLogger.DisableState,
+        newAfterLocalModification: DisableFlagsLogger.DisableState
+    ) {
         buffer.log(
                 TAG,
                 LogLevel.INFO,
                 {
-                    int1 = oldState.disable1
-                    int2 = oldState.disable2
-                    long1 = newState.disable1.toLong()
-                    long2 = newState.disable2.toLong()
+                    int1 = new.disable1
+                    int2 = new.disable2
+                    long1 = newAfterLocalModification.disable1.toLong()
+                    long2 = newAfterLocalModification.disable2.toLong()
                 },
                 {
                     disableFlagsLogger.getDisableFlagsString(
-                            DisableFlagsLogger.DisableState(int1, int2),
+                        old = null,
+                        new = DisableFlagsLogger.DisableState(int1, int2),
+                        newAfterLocalModification =
                             DisableFlagsLogger.DisableState(long1.toInt(), long2.toInt())
                     )
                 }

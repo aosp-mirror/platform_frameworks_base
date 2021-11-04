@@ -19,6 +19,7 @@ package com.android.wm.shell.startingsurface;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
@@ -263,15 +264,21 @@ public class SplashscreenIconDrawableFactory {
      * A lightweight AdaptiveIconDrawable which support foreground to be Animatable, and keep this
      * drawable masked by config_icon_mask.
      */
-    private static class AnimatableIconAnimateListener extends AdaptiveForegroundDrawable
+    public static class AnimatableIconAnimateListener extends AdaptiveForegroundDrawable
             implements SplashScreenView.IconAnimateListener {
         private Animatable mAnimatableIcon;
         private Animator mIconAnimator;
         private boolean mAnimationTriggered;
+        private AnimatorListenerAdapter mJankMonitoringListener;
 
         AnimatableIconAnimateListener(@NonNull Drawable foregroundDrawable) {
             super(foregroundDrawable);
             mForegroundDrawable.setCallback(mCallback);
+        }
+
+        @Override
+        public void setAnimationJankMonitoring(AnimatorListenerAdapter listener) {
+            mJankMonitoringListener = listener;
         }
 
         @Override
@@ -286,6 +293,9 @@ public class SplashscreenIconDrawableFactory {
                         startListener.run();
                     }
                     try {
+                        if (mJankMonitoringListener != null) {
+                            mJankMonitoringListener.onAnimationStart(animation);
+                        }
                         mAnimatableIcon.start();
                     } catch (Exception ex) {
                         Log.e(TAG, "Error while running the splash screen animated icon", ex);
@@ -296,11 +306,17 @@ public class SplashscreenIconDrawableFactory {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     mAnimatableIcon.stop();
+                    if (mJankMonitoringListener != null) {
+                        mJankMonitoringListener.onAnimationEnd(animation);
+                    }
                 }
 
                 @Override
                 public void onAnimationCancel(Animator animation) {
                     mAnimatableIcon.stop();
+                    if (mJankMonitoringListener != null) {
+                        mJankMonitoringListener.onAnimationCancel(animation);
+                    }
                 }
 
                 @Override
@@ -316,6 +332,7 @@ public class SplashscreenIconDrawableFactory {
         public void stopAnimation() {
             if (mIconAnimator != null && mIconAnimator.isRunning()) {
                 mIconAnimator.end();
+                mJankMonitoringListener = null;
             }
         }
 

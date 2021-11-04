@@ -45,6 +45,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.IApplicationThread;
 import android.app.WindowConfiguration;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -565,17 +566,17 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT: {
                 final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
                 final Task task = wc != null ? wc.asTask() : null;
+                final boolean clearRoot = hop.getToTop();
                 if (task == null) {
                     throw new IllegalArgumentException("Cannot set non-task as launch root: " + wc);
                 } else if (!task.mCreatedByOrganizer) {
                     throw new UnsupportedOperationException(
                             "Cannot set non-organized task as adjacent flag root: " + wc);
-                } else if (task.getAdjacentTaskFragment() == null) {
+                } else if (task.getAdjacentTaskFragment() == null && !clearRoot) {
                     throw new UnsupportedOperationException(
                             "Cannot set non-adjacent task as adjacent flag root: " + wc);
                 }
 
-                final boolean clearRoot = hop.getToTop();
                 task.getDisplayArea().setLaunchAdjacentFlagRootTask(clearRoot ? null : task);
                 break;
             }
@@ -1030,10 +1031,18 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     @Override
     public void registerTransitionPlayer(ITransitionPlayer player) {
         enforceTaskPermission("registerTransitionPlayer()");
+        final int callerPid = Binder.getCallingPid();
+        final int callerUid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                mTransitionController.registerTransitionPlayer(player);
+                final WindowProcessController wpc =
+                        mService.getProcessController(callerPid, callerUid);
+                IApplicationThread appThread = null;
+                if (wpc != null) {
+                    appThread = wpc.getThread();
+                }
+                mTransitionController.registerTransitionPlayer(player, appThread);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

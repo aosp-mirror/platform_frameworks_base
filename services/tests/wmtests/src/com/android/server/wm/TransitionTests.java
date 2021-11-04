@@ -473,7 +473,7 @@ public class TransitionTests extends WindowTestsBase {
         final TaskSnapshotController snapshotController = mock(TaskSnapshotController.class);
         final TransitionController controller = new TransitionController(mAtm, snapshotController);
         final ITransitionPlayer player = new ITransitionPlayer.Default();
-        controller.registerTransitionPlayer(player);
+        controller.registerTransitionPlayer(player, null /* appThread */);
         ITaskOrganizer mockOrg = mock(ITaskOrganizer.class);
         final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
 
@@ -539,7 +539,7 @@ public class TransitionTests extends WindowTestsBase {
         final TaskSnapshotController snapshotController = mock(TaskSnapshotController.class);
         final TransitionController controller = new TransitionController(mAtm, snapshotController);
         final ITransitionPlayer player = new ITransitionPlayer.Default();
-        controller.registerTransitionPlayer(player);
+        controller.registerTransitionPlayer(player, null /* appThread */);
         ITaskOrganizer mockOrg = mock(ITaskOrganizer.class);
         final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
 

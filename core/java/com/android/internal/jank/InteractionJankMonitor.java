@@ -58,6 +58,8 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_ROW_EXPAND;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_ROW_SWIPE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_SCROLL_FLING;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_AVD;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_EXIT_ANIM;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_SWITCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION;
@@ -173,6 +175,8 @@ public class InteractionJankMonitor {
     public static final int CUJ_PIP_TRANSITION = 35;
     public static final int CUJ_WALLPAPER_TRANSITION = 36;
     public static final int CUJ_USER_SWITCH = 37;
+    public static final int CUJ_SPLASHSCREEN_AVD = 38;
+    public static final int CUJ_SPLASHSCREEN_EXIT_ANIM = 39;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -219,6 +223,8 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PIP_TRANSITION,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_SWITCH,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_AVD,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_EXIT_ANIM,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -277,6 +283,8 @@ public class InteractionJankMonitor {
             CUJ_PIP_TRANSITION,
             CUJ_WALLPAPER_TRANSITION,
             CUJ_USER_SWITCH,
+            CUJ_SPLASHSCREEN_AVD,
+            CUJ_SPLASHSCREEN_EXIT_ANIM,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -672,6 +680,10 @@ public class InteractionJankMonitor {
                 return "WALLPAPER_TRANSITION";
             case CUJ_USER_SWITCH:
                 return "USER_SWITCH";
+            case CUJ_SPLASHSCREEN_AVD:
+                return "SPLASHSCREEN_AVD";
+            case CUJ_SPLASHSCREEN_EXIT_ANIM:
+                return "SPLASHSCREEN_EXIT_ANIM";
         }
         return "UNKNOWN";
     }

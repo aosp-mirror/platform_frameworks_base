@@ -112,6 +112,17 @@ public class LogModule {
     }
 
     /**
+     * Provides a logging buffer for logs related to {@link com.android.systemui.qs.QSFragment}'s
+     * disable flag adjustments.
+     */
+    @Provides
+    @SysUISingleton
+    @QSFragmentDisableLog
+    public static LogBuffer provideQSFragmentDisableLogBuffer(LogBufferFactory factory) {
+        return factory.create("QSFragmentDisableFlagsLog", 10);
+    }
+
+    /**
      * Provides a logging buffer for logs related to swiping away the status bar while in immersive
      * mode. See {@link com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureLogger}.
      */

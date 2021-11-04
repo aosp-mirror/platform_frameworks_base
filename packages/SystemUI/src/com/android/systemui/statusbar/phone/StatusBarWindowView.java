@@ -21,25 +21,14 @@ import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowInsets.Type.systemBars;
 
-import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
-
 import android.content.Context;
 import android.graphics.Insets;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Pair;
-import android.view.Display;
 import android.view.DisplayCutout;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
-
-import androidx.annotation.NonNull;
-
-import com.android.systemui.util.leak.RotationUtils;
 
 /**
  * Status bar view.
@@ -110,87 +99,5 @@ public class StatusBarWindowView extends FrameLayout {
                 }
             }
         }
-    }
-
-    /**
-     * Compute the padding needed for status bar related views, e.g., PhoneStatusBar,
-     * QuickStatusBarHeader and KeyguardStatusBarView).
-     *
-     * @param cutout
-     * @param cornerCutoutPadding
-     * @param roundedCornerContentPadding
-     * @return
-     */
-    @NonNull
-    public static Pair<Integer, Integer> paddingNeededForCutoutAndRoundedCorner(
-            DisplayCutout cutout, Pair<Integer, Integer> cornerCutoutPadding,
-            int roundedCornerContentPadding) {
-        if (cutout == null) {
-            return new Pair<>(roundedCornerContentPadding, roundedCornerContentPadding);
-        }
-
-        // padding needed for corner cutout.
-        int leftCornerCutoutPadding = cutout.getSafeInsetLeft();
-        int rightCornerCutoutPadding = cutout.getSafeInsetRight();
-        if (cornerCutoutPadding != null) {
-            leftCornerCutoutPadding = Math.max(leftCornerCutoutPadding, cornerCutoutPadding.first);
-            rightCornerCutoutPadding = Math.max(rightCornerCutoutPadding,
-                    cornerCutoutPadding.second);
-        }
-
-        return new Pair<>(
-                Math.max(leftCornerCutoutPadding, roundedCornerContentPadding),
-                Math.max(rightCornerCutoutPadding, roundedCornerContentPadding));
-    }
-
-
-    /**
-     * Compute the corner cutout margins in portrait mode
-     */
-    public static Pair<Integer, Integer> cornerCutoutMargins(DisplayCutout cutout,
-            Display display) {
-        return statusBarCornerCutoutMargins(cutout, display, RotationUtils.ROTATION_NONE, 0);
-    }
-
-    /**
-     * Compute the corner cutout margins in the given orientation (exactRotation)
-     */
-    public static Pair<Integer, Integer> statusBarCornerCutoutMargins(DisplayCutout cutout,
-            Display display, int exactRotation, int statusBarHeight) {
-        if (cutout == null) {
-            return null;
-        }
-        Point size = new Point();
-        display.getRealSize(size);
-
-        Rect bounds = new Rect();
-        switch (exactRotation) {
-            case RotationUtils.ROTATION_LANDSCAPE:
-                boundsFromDirection(cutout, Gravity.LEFT, bounds);
-                break;
-            case RotationUtils.ROTATION_SEASCAPE:
-                boundsFromDirection(cutout, Gravity.RIGHT, bounds);
-                break;
-            case RotationUtils.ROTATION_NONE:
-                boundsFromDirection(cutout, Gravity.TOP, bounds);
-                break;
-            case RotationUtils.ROTATION_UPSIDE_DOWN:
-                // we assume the cutout is always on top in portrait mode
-                return null;
-        }
-
-        if (statusBarHeight >= 0 && bounds.top > statusBarHeight) {
-            return null;
-        }
-
-        if (bounds.left <= 0) {
-            return new Pair<>(bounds.right, 0);
-        }
-
-        if (bounds.right >= size.x) {
-            return new Pair<>(0, size.x - bounds.left);
-        }
-
-        return null;
     }
 }

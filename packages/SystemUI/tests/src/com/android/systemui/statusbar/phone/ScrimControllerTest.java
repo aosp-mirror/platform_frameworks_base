@@ -55,6 +55,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.scrim.ScrimView;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -112,6 +113,10 @@ public class ScrimControllerTest extends SysuiTestCase {
     private ConfigurationController mConfigurationController;
     @Mock
     private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    // TODO(b/204991468): Use a real PanelExpansionStateManager object once this bug is fixed. (The
+    //   event-dispatch-on-registration pattern caused some of these unit tests to fail.)
+    @Mock
+    private PanelExpansionStateManager mPanelExpansionStateManager;
 
 
     private static class AnimatorListener implements Animator.AnimatorListener {
@@ -224,7 +229,8 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mDozeParameters, mAlarmManager, mKeyguardStateController, mDelayedWakeLockBuilder,
                 new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor,
                 mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()),
-                mUnlockedScreenOffAnimationController);
+                mUnlockedScreenOffAnimationController,
+                mPanelExpansionStateManager);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);

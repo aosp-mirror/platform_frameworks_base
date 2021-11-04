@@ -303,6 +303,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -918,6 +919,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int CHECK_PENDING_INTEGRITY_VERIFICATION = 26;
     static final int DOMAIN_VERIFICATION = 27;
     static final int SNAPSHOT_UNCORK = 28;
+    static final int PRUNE_UNUSED_STATIC_SHARED_LIBRARIES = 29;
 
     static final int DEFERRED_NO_KILL_POST_DELETE_DELAY_MS = 3 * 1000;
     private static final int DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS = 500;
@@ -927,11 +929,16 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final long BROADCAST_DELAY_DURING_STARTUP = 10 * 1000L; // 10 seconds (in millis)
     private static final long BROADCAST_DELAY = 1 * 1000L; // 1 second (in millis)
 
+    private static final long PRUNE_UNUSED_STATIC_SHARED_LIBRARIES_DELAY =
+            TimeUnit.MINUTES.toMillis(3); // 3 minutes
+
     // When the service constructor finished plus a delay (used for broadcast delay computation)
     private long mServiceStartWithDelay;
 
-    private static final long DEFAULT_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD =
-            2 * 60 * 60 * 1000L; /* two hours */
+    private static final long FREE_STORAGE_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD =
+            TimeUnit.HOURS.toMillis(2); /* two hours */
+    static final long DEFAULT_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD =
+            TimeUnit.DAYS.toMillis(7); /* 7 days */
 
     final UserManagerService mUserManager;
 
@@ -1250,9 +1257,10 @@ public class PackageManagerService extends IPackageManager.Stub
         mHandler.sendMessageDelayed(message, DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS);
     }
 
-    void scheduleDeferredNoKillPostDelete(InstallArgs args) {
-        Message message = mHandler.obtainMessage(DEFERRED_NO_KILL_POST_DELETE, args);
-        mHandler.sendMessageDelayed(message, DEFERRED_NO_KILL_POST_DELETE_DELAY_MS);
+    void schedulePruneUnusedStaticSharedLibraries(boolean delay) {
+        mHandler.removeMessages(PRUNE_UNUSED_STATIC_SHARED_LIBRARIES);
+        mHandler.sendEmptyMessageDelayed(PRUNE_UNUSED_STATIC_SHARED_LIBRARIES,
+                delay ? PRUNE_UNUSED_STATIC_SHARED_LIBRARIES_DELAY : 0);
     }
 
     @Override
@@ -1382,38 +1390,6 @@ public class PackageManagerService extends IPackageManager.Stub
             if (!mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)) {
                 mHandler.sendEmptyMessageDelayed(WRITE_PACKAGE_RESTRICTIONS, WRITE_SETTINGS_DELAY);
             }
-        }
-    }
-
-    private void writePendingRestrictionsLocked() {
-        if (mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)) {
-            mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
-            for (int userId : mDirtyUsers) {
-                mSettings.writePackageRestrictionsLPr(userId);
-            }
-            mDirtyUsers.clear();
-        }
-    }
-
-    void writePendingRestrictions() {
-        synchronized (mLock) {
-            writePendingRestrictionsLocked();
-        }
-    }
-
-    void writeSettings() {
-        synchronized (mLock) {
-            mHandler.removeMessages(WRITE_SETTINGS);
-            mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
-            writeSettingsLPrTEMP();
-            mDirtyUsers.clear();
-        }
-    }
-
-    void writePackageList(int userId) {
-        synchronized (mLock) {
-            mHandler.removeMessages(WRITE_PACKAGE_LIST);
-            mSettings.writePackageListLPr(userId);
         }
     }
 
@@ -1809,7 +1785,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(this, mRemovePackageHelper,
                 mAppDataHelper);
         mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
-                mAppDataHelper);
+                mInitAndSystemPackageHelper, mAppDataHelper);
         mPreferredActivityHelper = new PreferredActivityHelper(this);
         mResolveIntentHelper = new ResolveIntentHelper(this, mPreferredActivityHelper);
         mDexOptHelper = new DexOptHelper(this);
@@ -2913,7 +2889,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (internalVolume && pruneUnusedStaticSharedLibraries(bytes,
                     android.provider.Settings.Global.getLong(mContext.getContentResolver(),
                             Global.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD,
-                            DEFAULT_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD))) {
+                            FREE_STORAGE_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD))) {
                 return;
             }
 
@@ -2968,7 +2944,7 @@ public class PackageManagerService extends IPackageManager.Stub
         throw new IOException("Failed to free " + bytes + " on storage device at " + file);
     }
 
-    private boolean pruneUnusedStaticSharedLibraries(long neededSpace, long maxCachePeriod)
+    boolean pruneUnusedStaticSharedLibraries(long neededSpace, long maxCachePeriod)
             throws IOException {
         final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         final File volume = storage.findPathForUuid(StorageManager.UUID_PRIVATE_INTERNAL);
@@ -5096,7 +5072,13 @@ public class PackageManagerService extends IPackageManager.Stub
             mPackageUsage.writeNow(mSettings.getPackagesLocked());
 
             // This is the last chance to write out pending restriction settings
-            writePendingRestrictionsLocked();
+            if (mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)) {
+                mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
+                for (int userId : mDirtyUsers) {
+                    mSettings.writePackageRestrictionsLPr(userId);
+                }
+                mDirtyUsers.clear();
+            }
         }
     }
 
@@ -7839,8 +7821,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (isSystemStub
                     && (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                     || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)) {
-                if (!new InstallPackageHelper(this).enableCompressedPackage(deletedPkg,
-                        pkgSetting)) {
+                if (!mInitAndSystemPackageHelper.enableCompressedPackage(deletedPkg, pkgSetting)) {
                     Slog.w(TAG, "Failed setApplicationEnabledSetting: failed to enable "
                             + "commpressed package " + setting.getPackageName());
                     updateAllowed[i] = false;
@@ -8464,6 +8445,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 });
 
         mBackgroundDexOptService.systemReady();
+
+        // Prune unused static shared libraries which have been cached a period of time
+        schedulePruneUnusedStaticSharedLibraries(false /* delay */);
     }
 
     /**
@@ -11115,24 +11099,11 @@ public class PackageManagerService extends IPackageManager.Stub
         return mIsPreNMR1Upgrade;
     }
 
-    boolean isOverlayMutable(String packageName) {
-        return mOverlayConfig.isMutable(packageName);
+    InitAndSystemPackageHelper getInitAndSystemPackageHelper() {
+        return mInitAndSystemPackageHelper;
     }
 
-    @ScanFlags int getSystemPackageScanFlags(File codePath) {
-        List<ScanPartition> dirsToScanAsSystem =
-                mInitAndSystemPackageHelper.getDirsToScanAsSystem();
-        @PackageManagerService.ScanFlags int scanFlags = SCAN_AS_SYSTEM;
-        for (int i = dirsToScanAsSystem.size() - 1; i >= 0; i--) {
-            ScanPartition partition = dirsToScanAsSystem.get(i);
-            if (partition.containsFile(codePath)) {
-                scanFlags |= partition.scanFlag;
-                if (partition.containsPrivApp(codePath)) {
-                    scanFlags |= SCAN_AS_PRIVILEGED;
-                }
-                break;
-            }
-        }
-        return scanFlags;
+    boolean isOverlayMutable(String packageName) {
+        return mOverlayConfig.isMutable(packageName);
     }
 }

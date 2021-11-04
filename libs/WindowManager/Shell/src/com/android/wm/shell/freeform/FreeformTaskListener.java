@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.freeform;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
@@ -27,6 +28,7 @@ import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
+import android.window.WindowContainerTransaction;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -83,6 +85,13 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener {
             Slog.e(TAG, "Task already vanished: #" + taskInfo.taskId);
             return;
         }
+
+        // Clears windowing mode and window bounds to let the task inherits from its new parent.
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setBounds(taskInfo.token, null)
+                .setWindowingMode(taskInfo.token, WINDOWING_MODE_UNDEFINED);
+        mSyncQueue.queue(wct);
+
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Freeform Task Vanished: #%d",
                 taskInfo.taskId);
         mTasks.remove(taskInfo.taskId);

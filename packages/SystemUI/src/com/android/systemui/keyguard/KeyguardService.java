@@ -238,7 +238,7 @@ public class KeyguardService extends Service {
                 TransitionFilter f = new TransitionFilter();
                 f.mFlags = TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
                 shellTransitions.registerRemote(f,
-                        new RemoteTransition(wrap(mExitAnimationRunner)));
+                        new RemoteTransition(wrap(mExitAnimationRunner), getIApplicationThread()));
             }
             if (sEnableRemoteKeyguardOccludeAnimation) {
                 Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_(UN)OCCLUDE");
@@ -257,7 +257,8 @@ public class KeyguardService extends Service {
                 f.mRequirements[1].mMustBeIndependent = false;
                 f.mRequirements[1].mFlags = FLAG_OCCLUDES_KEYGUARD;
                 f.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
-                shellTransitions.registerRemote(f, new RemoteTransition(mOccludeAnimation));
+                shellTransitions.registerRemote(f,
+                        new RemoteTransition(mOccludeAnimation, getIApplicationThread()));
 
                 // Now register for un-occlude.
                 f = new TransitionFilter();
@@ -277,7 +278,8 @@ public class KeyguardService extends Service {
                 f.mRequirements[0].mMustBeIndependent = false;
                 f.mRequirements[0].mFlags = FLAG_OCCLUDES_KEYGUARD;
                 f.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
-                shellTransitions.registerRemote(f, new RemoteTransition(mUnoccludeAnimation));
+                shellTransitions.registerRemote(f,
+                        new RemoteTransition(mUnoccludeAnimation, getIApplicationThread()));
             }
         } else {
             RemoteAnimationDefinition definition = new RemoteAnimationDefinition();

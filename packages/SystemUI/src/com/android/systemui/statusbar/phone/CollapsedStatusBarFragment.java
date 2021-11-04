@@ -253,8 +253,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         state1 = adjustDisableFlags(state1);
 
         mCollapsedStatusBarFragmentLogger.logDisableFlagChange(
-                new DisableState(state1BeforeAdjustment, state2),
-                new DisableState(state1, state2));
+                /* new= */ new DisableState(state1BeforeAdjustment, state2),
+                /* newAfterLocalModification= */ new DisableState(state1, state2));
 
         final int old1 = mDisabled1;
         final int diff1 = state1 ^ old1;
