@@ -39,7 +39,6 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.util.leak.RotationUtils;
 
-import java.util.List;
 import java.util.Objects;
 
 public class PhoneStatusBarView extends PanelBar {
@@ -62,8 +61,6 @@ public class PhoneStatusBarView extends PanelBar {
     private DisplayCutout mDisplayCutout;
     private int mStatusBarHeight;
     @Nullable
-    private List<StatusBar.ExpansionChangedListener> mExpansionChangedListeners;
-    @Nullable
     private TouchEventHandler mTouchEventHandler;
 
     /**
@@ -78,11 +75,6 @@ public class PhoneStatusBarView extends PanelBar {
 
     public void setBar(StatusBar bar) {
         mBar = bar;
-    }
-
-    public void setExpansionChangedListeners(
-            @Nullable List<StatusBar.ExpansionChangedListener> listeners) {
-        mExpansionChangedListeners = listeners;
     }
 
     void setTouchEventHandler(TouchEventHandler handler) {
@@ -198,16 +190,6 @@ public class PhoneStatusBarView extends PanelBar {
     public boolean onInterceptTouchEvent(MotionEvent event) {
         mBar.onTouchEvent(event);
         return super.onInterceptTouchEvent(event);
-    }
-
-    @Override
-    public void panelExpansionChanged(float frac, boolean expanded) {
-        super.panelExpansionChanged(frac, expanded);
-        if (mExpansionChangedListeners != null) {
-            for (StatusBar.ExpansionChangedListener listener : mExpansionChangedListeners) {
-                listener.onExpansionChanged(frac, expanded);
-            }
-        }
     }
 
     public void updateResources() {

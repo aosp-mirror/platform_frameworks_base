@@ -30,16 +30,16 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.time.SystemClock;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Optional;
 
 /**
  * Class that coordinates non-HBM animations during keyguard authentication.
@@ -77,7 +77,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     protected UdfpsKeyguardViewController(
             @NonNull UdfpsKeyguardView view,
             @NonNull StatusBarStateController statusBarStateController,
-            @NonNull Optional<StatusBar> statusBarOptional,
+            @NonNull PanelExpansionStateManager panelExpansionStateManager,
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
             @NonNull DumpManager dumpManager,
@@ -87,7 +87,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             @NonNull KeyguardStateController keyguardStateController,
             @NonNull UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             @NonNull UdfpsController udfpsController) {
-        super(view, statusBarStateController, statusBarOptional, dumpManager);
+        super(view, statusBarStateController, panelExpansionStateManager, dumpManager);
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockScreenShadeTransitionController = transitionController;
@@ -126,9 +126,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mInputBouncerHiddenAmount = KeyguardBouncer.EXPANSION_HIDDEN;
         mIsBouncerVisible = mKeyguardViewManager.bouncerIsOrWillBeShowing();
         mConfigurationController.addCallback(mConfigurationListener);
-        mStatusBarOptional.ifPresent(
-                statusBar -> statusBar.addExpansionChangedListener(
-                        mStatusBarExpansionChangedListener));
+        mPanelExpansionStateManager.addListener(mPanelExpansionListener);
         updateAlpha();
         updatePauseAuth();
 
@@ -147,9 +145,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mKeyguardViewManager.removeAlternateAuthInterceptor(mAlternateAuthInterceptor);
         mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
         mConfigurationController.removeCallback(mConfigurationListener);
-        mStatusBarOptional.ifPresent(
-                statusBar -> statusBar.removeExpansionChangedListener(
-                        mStatusBarExpansionChangedListener));
+        mPanelExpansionStateManager.removeListener(mPanelExpansionListener);
         if (mLockScreenShadeTransitionController.getUdfpsKeyguardViewController() == this) {
             mLockScreenShadeTransitionController.setUdfpsKeyguardViewController(null);
         }
@@ -403,14 +399,14 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 }
             };
 
-    private final StatusBar.ExpansionChangedListener mStatusBarExpansionChangedListener =
-            new StatusBar.ExpansionChangedListener() {
-                @Override
-                public void onExpansionChanged(float expansion, boolean expanded) {
-                    mStatusBarExpansion = expansion;
-                    updateAlpha();
-                }
-            };
+    private final PanelExpansionListener mPanelExpansionListener = new PanelExpansionListener() {
+        @Override
+        public void onPanelExpansionChanged(
+                float fraction, boolean expanded, boolean tracking) {
+            mStatusBarExpansion = fraction;
+            updateAlpha();
+        }
+    };
 
     private final KeyguardStateController.Callback mKeyguardStateControllerCallback =
             new KeyguardStateController.Callback() {
