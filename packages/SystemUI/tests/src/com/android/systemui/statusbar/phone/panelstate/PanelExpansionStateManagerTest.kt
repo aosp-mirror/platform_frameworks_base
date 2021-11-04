@@ -37,23 +37,43 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
         val listener = TestPanelExpansionListener()
         panelExpansionStateManager.addListener(listener)
         val fraction = 0.6f
+        val expanded = true
         val tracking = true
 
-        panelExpansionStateManager.onPanelExpansionChanged(fraction, tracking)
+        panelExpansionStateManager.onPanelExpansionChanged(fraction, expanded, tracking)
 
         assertThat(listener.fraction).isEqualTo(fraction)
+        assertThat(listener.expanded).isEqualTo(expanded)
+        assertThat(listener.tracking).isEqualTo(tracking)
+    }
+
+    @Test
+    fun addPanelExpansionListener_listenerNotifiedOfCurrentValues() {
+        val fraction = 0.6f
+        val expanded = true
+        val tracking = true
+        panelExpansionStateManager.onPanelExpansionChanged(fraction, expanded, tracking)
+        val listener = TestPanelExpansionListener()
+
+        panelExpansionStateManager.addListener(listener)
+
+        assertThat(listener.fraction).isEqualTo(fraction)
+        assertThat(listener.expanded).isEqualTo(expanded)
         assertThat(listener.tracking).isEqualTo(tracking)
     }
 
     class TestPanelExpansionListener : PanelExpansionListener {
         var fraction: Float = 0f
+        var expanded: Boolean = false
         var tracking: Boolean = false
 
         override fun onPanelExpansionChanged(
             fraction: Float,
+            expanded: Boolean,
             tracking: Boolean
         ) {
             this.fraction = fraction
+            this.expanded = expanded
             this.tracking = tracking
         }
     }

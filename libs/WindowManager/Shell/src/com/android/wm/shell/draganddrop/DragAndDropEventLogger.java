@@ -25,6 +25,8 @@ import android.content.ClipDescription;
 import android.content.pm.ActivityInfo;
 import android.view.DragEvent;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.UiEvent;
@@ -61,9 +63,7 @@ public class DragAndDropEventLogger {
             mInstanceId = mIdSequence.newInstanceId();
         }
         mActivityInfo = item.getActivityInfo();
-        mUiEventLogger.logWithInstanceId(getStartEnum(description),
-                mActivityInfo.applicationInfo.uid,
-                mActivityInfo.applicationInfo.packageName, mInstanceId);
+        log(getStartEnum(description), mActivityInfo);
         return mInstanceId;
     }
 
@@ -71,18 +71,21 @@ public class DragAndDropEventLogger {
      * Logs a successful drop.
      */
     public void logDrop() {
-        mUiEventLogger.logWithInstanceId(DragAndDropUiEventEnum.GLOBAL_APP_DRAG_DROPPED,
-                mActivityInfo.applicationInfo.uid,
-                mActivityInfo.applicationInfo.packageName, mInstanceId);
+        log(DragAndDropUiEventEnum.GLOBAL_APP_DRAG_DROPPED, mActivityInfo);
     }
 
     /**
      * Logs the end of a drag.
      */
     public void logEnd() {
-        mUiEventLogger.logWithInstanceId(DragAndDropUiEventEnum.GLOBAL_APP_DRAG_END,
-                mActivityInfo.applicationInfo.uid,
-                mActivityInfo.applicationInfo.packageName, mInstanceId);
+        log(DragAndDropUiEventEnum.GLOBAL_APP_DRAG_END, mActivityInfo);
+    }
+
+    private void log(UiEventLogger.UiEventEnum event, @Nullable ActivityInfo activityInfo) {
+        mUiEventLogger.logWithInstanceId(event,
+                activityInfo == null ? 0 : activityInfo.applicationInfo.uid,
+                activityInfo == null ? null : activityInfo.applicationInfo.packageName,
+                mInstanceId);
     }
 
     /**

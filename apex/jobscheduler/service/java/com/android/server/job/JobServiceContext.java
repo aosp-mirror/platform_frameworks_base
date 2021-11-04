@@ -16,6 +16,8 @@
 
 package com.android.server.job;
 
+import static android.app.job.JobInfo.getPriorityString;
+
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
@@ -378,18 +380,40 @@ public final class JobServiceContext implements ServiceConnection {
 
     @EconomicPolicy.AppAction
     private static int getStartActionId(@NonNull JobStatus job) {
-        if (job.startedAsExpeditedJob || job.shouldTreatAsExpeditedJob()) {
-            return JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START;
+        switch (job.getEffectivePriority()) {
+            case JobInfo.PRIORITY_MAX:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START;
+            case JobInfo.PRIORITY_HIGH:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_START;
+            case JobInfo.PRIORITY_LOW:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_LOW_START;
+            case JobInfo.PRIORITY_MIN:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_MIN_START;
+            default:
+                Slog.wtf(TAG, "Unknown priority: " + getPriorityString(job.getEffectivePriority()));
+                // Intentional fallthrough
+            case JobInfo.PRIORITY_DEFAULT:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_START;
         }
-        return JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_START;
     }
 
     @EconomicPolicy.AppAction
     private static int getRunningActionId(@NonNull JobStatus job) {
-        if (job.startedAsExpeditedJob || job.shouldTreatAsExpeditedJob()) {
-            return JobSchedulerEconomicPolicy.ACTION_JOB_MAX_RUNNING;
+        switch (job.getEffectivePriority()) {
+            case JobInfo.PRIORITY_MAX:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_MAX_RUNNING;
+            case JobInfo.PRIORITY_HIGH:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_RUNNING;
+            case JobInfo.PRIORITY_LOW:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_LOW_RUNNING;
+            case JobInfo.PRIORITY_MIN:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_MIN_RUNNING;
+            default:
+                Slog.wtf(TAG, "Unknown priority: " + getPriorityString(job.getEffectivePriority()));
+                // Intentional fallthrough
+            case JobInfo.PRIORITY_DEFAULT:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING;
         }
-        return JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING;
     }
 
     /**

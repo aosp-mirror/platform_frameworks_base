@@ -282,6 +282,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mStatusBarWindow.mAttrs.gravity = Gravity.TOP;
             mStatusBarWindow.mAttrs.layoutInDisplayCutoutMode =
                     LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+            mStatusBarWindow.mAttrs.setFitInsetsTypes(0);
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_NOTIFICATION_SHADE)) {
             mNotificationShadeWindow = createCommonWindow(null, TYPE_NOTIFICATION_SHADE,
@@ -292,6 +293,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mNavBarWindow.mAttrs.height = NAV_BAR_HEIGHT;
             mNavBarWindow.mAttrs.gravity = Gravity.BOTTOM;
             mNavBarWindow.mAttrs.paramsForRotation = new WindowManager.LayoutParams[4];
+            mNavBarWindow.mAttrs.setFitInsetsTypes(0);
             for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
                 mNavBarWindow.mAttrs.paramsForRotation[rot] =
                         getNavBarLayoutParamsForRotation(rot);
@@ -347,6 +349,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         lp.width = width;
         lp.height = height;
         lp.gravity = gravity;
+        lp.setFitInsetsTypes(0);
         return lp;
     }
 
@@ -790,7 +793,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     TestTransitionPlayer registerTestTransitionPlayer() {
         final TestTransitionPlayer testPlayer = new TestTransitionPlayer(
                 mAtm.getTransitionController(), mAtm.mWindowOrganizerController);
-        testPlayer.mController.registerTransitionPlayer(testPlayer);
+        testPlayer.mController.registerTransitionPlayer(testPlayer, null /* appThread */);
         return testPlayer;
     }
 

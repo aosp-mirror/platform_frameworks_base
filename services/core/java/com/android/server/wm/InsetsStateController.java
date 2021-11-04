@@ -40,6 +40,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.WindowingMode;
+import android.graphics.Rect;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -385,15 +386,14 @@ class InsetsStateController {
      *
      * @param win The owner window of insets provider.
      * @param displayFrames The display frames to create insets source.
-     * @param windowFrames The specified frames to represent the owner window.
+     * @param winFrame The frame of the insets source window.
      */
-    void computeSimulatedState(WindowState win, DisplayFrames displayFrames,
-            WindowFrames windowFrames) {
+    void computeSimulatedState(WindowState win, DisplayFrames displayFrames, Rect winFrame) {
         final InsetsState state = displayFrames.mInsetsState;
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             final InsetsSourceProvider provider = mProviders.valueAt(i);
             if (provider.mWin == win) {
-                state.addSource(provider.createSimulatedSource(displayFrames, windowFrames));
+                state.addSource(provider.createSimulatedSource(displayFrames, winFrame));
             }
         }
     }

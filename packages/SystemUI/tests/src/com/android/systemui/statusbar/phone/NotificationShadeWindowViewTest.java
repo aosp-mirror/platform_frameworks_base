@@ -91,7 +91,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private NotificationStackScrollLayout mNotificationStackScrollLayout;
     @Mock private NotificationShadeDepthController mNotificationShadeDepthController;
-    @Mock private StatusBarWindowView mStatusBarWindowView;
+    @Mock private StatusBarWindowController mStatusBarWindowController;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -137,7 +137,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mView,
                 mNotificationPanelViewController,
                 new PanelExpansionStateManager(),
-                mStatusBarWindowView,
+                mStatusBarWindowController,
                 mNotificationStackScrollLayoutController,
                 mStatusBarKeyguardViewManager,
                 mLockIconViewController);

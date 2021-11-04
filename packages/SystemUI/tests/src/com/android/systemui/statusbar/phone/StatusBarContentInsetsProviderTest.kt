@@ -467,7 +467,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
             screenBounds = Rect(0, 0, 1080, 2160),
             displayUniqueId = "1"
         )
-        val firstDisplayInsets = provider.getStatusBarContentInsetsForRotation(ROTATION_NONE)
+        val firstDisplayInsets = provider.getStatusBarContentAreaForRotation(ROTATION_NONE)
         givenDisplay(
             screenBounds = Rect(0, 0, 800, 600),
             displayUniqueId = "2"
@@ -475,7 +475,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         configurationController.onConfigurationChanged(configuration)
 
         // WHEN: get insets on the second display
-        val secondDisplayInsets = provider.getStatusBarContentInsetsForRotation(ROTATION_NONE)
+        val secondDisplayInsets = provider.getStatusBarContentAreaForRotation(ROTATION_NONE)
 
         // THEN: insets are updated
         assertThat(firstDisplayInsets).isNotEqualTo(secondDisplayInsets)
@@ -492,13 +492,13 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
             displayUniqueId = "1"
         )
         val firstDisplayInsetsFirstCall = provider
-            .getStatusBarContentInsetsForRotation(ROTATION_NONE)
+            .getStatusBarContentAreaForRotation(ROTATION_NONE)
         givenDisplay(
             screenBounds = Rect(0, 0, 800, 600),
             displayUniqueId = "2"
         )
         configurationController.onConfigurationChanged(configuration)
-        provider.getStatusBarContentInsetsForRotation(ROTATION_NONE)
+        provider.getStatusBarContentAreaForRotation(ROTATION_NONE)
         givenDisplay(
             screenBounds = Rect(0, 0, 1080, 2160),
             displayUniqueId = "1"
@@ -507,7 +507,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
 
         // WHEN: get insets on the first display again
         val firstDisplayInsetsSecondCall = provider
-            .getStatusBarContentInsetsForRotation(ROTATION_NONE)
+            .getStatusBarContentAreaForRotation(ROTATION_NONE)
 
         // THEN: insets for the first and second calls for the first display are the same
         assertThat(firstDisplayInsetsFirstCall).isEqualTo(firstDisplayInsetsSecondCall)

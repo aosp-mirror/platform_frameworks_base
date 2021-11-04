@@ -18,6 +18,7 @@ package com.android.wm.shell.transition;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityTaskManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -130,6 +131,13 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
         };
         try {
             handleDeath(remote.asBinder(), finishCallback);
+            try {
+                ActivityTaskManager.getService().setRunningRemoteTransitionDelegate(
+                        remote.getAppThread());
+            } catch (SecurityException e) {
+                Log.e(Transitions.TAG, "Unable to boost animation thread. This should only happen"
+                        + " during unit tests");
+            }
             remote.getRemoteTransition().startAnimation(transition, info, startTransaction, cb);
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error running remote transition.", e);

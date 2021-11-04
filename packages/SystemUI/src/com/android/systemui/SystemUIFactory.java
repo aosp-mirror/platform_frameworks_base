@@ -30,6 +30,7 @@ import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.navigationbar.gestural.BackGestureTfClassifierProvider;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
+import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -133,7 +134,7 @@ public class SystemUIFactory {
                     .setShellCommandHandler(Optional.ofNullable(null))
                     .setAppPairs(Optional.ofNullable(null))
                     .setTaskViewFactory(Optional.ofNullable(null))
-                    .setTransitions(Transitions.createEmptyForTesting())
+                    .setTransitions(new ShellTransitions() {})
                     .setDisplayAreaHelper(Optional.ofNullable(null))
                     .setStartingSurface(Optional.ofNullable(null))
                     .setTaskSurfaceHelper(Optional.ofNullable(null));

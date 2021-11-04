@@ -18,6 +18,7 @@ package com.android.wm.shell.fullscreen;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -30,6 +31,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.os.SystemProperties;
 import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
@@ -46,6 +48,8 @@ import java.util.Optional;
 
 @SmallTest
 public class FullscreenTaskListenerTest {
+    private static final boolean ENABLE_SHELL_TRANSITIONS =
+            SystemProperties.getBoolean("persist.debug.shell_transit", false);
 
     @Mock
     private SyncTransactionQueue mSyncQueue;
@@ -67,6 +71,7 @@ public class FullscreenTaskListenerTest {
 
     @Test
     public void testAnimatableTaskAppeared_notifiesUnfoldController() {
+        assumeFalse(ENABLE_SHELL_TRANSITIONS);
         RunningTaskInfo info = createTaskInfo(/* visible */ true, /* taskId */ 0);
 
         mListener.onTaskAppeared(info, mSurfaceControl);
@@ -76,6 +81,7 @@ public class FullscreenTaskListenerTest {
 
     @Test
     public void testMultipleAnimatableTasksAppeared_notifiesUnfoldController() {
+        assumeFalse(ENABLE_SHELL_TRANSITIONS);
         RunningTaskInfo animatable1 = createTaskInfo(/* visible */ true, /* taskId */ 0);
         RunningTaskInfo animatable2 = createTaskInfo(/* visible */ true, /* taskId */ 1);
 
@@ -89,6 +95,7 @@ public class FullscreenTaskListenerTest {
 
     @Test
     public void testNonAnimatableTaskAppeared_doesNotNotifyUnfoldController() {
+        assumeFalse(ENABLE_SHELL_TRANSITIONS);
         RunningTaskInfo info = createTaskInfo(/* visible */ false, /* taskId */ 0);
 
         mListener.onTaskAppeared(info, mSurfaceControl);
@@ -98,6 +105,7 @@ public class FullscreenTaskListenerTest {
 
     @Test
     public void testNonAnimatableTaskChanged_doesNotNotifyUnfoldController() {
+        assumeFalse(ENABLE_SHELL_TRANSITIONS);
         RunningTaskInfo info = createTaskInfo(/* visible */ false, /* taskId */ 0);
         mListener.onTaskAppeared(info, mSurfaceControl);
 
@@ -108,6 +116,7 @@ public class FullscreenTaskListenerTest {
 
     @Test
     public void testNonAnimatableTaskVanished_doesNotNotifyUnfoldController() {
+        assumeFalse(ENABLE_SHELL_TRANSITIONS);
         RunningTaskInfo info = createTaskInfo(/* visible */ false, /* taskId */ 0);
         mListener.onTaskAppeared(info, mSurfaceControl);
 
@@ -118,6 +127,7 @@ public class FullscreenTaskListenerTest {
 
     @Test
     public void testAnimatableTaskBecameInactive_notifiesUnfoldController() {
+        assumeFalse(ENABLE_SHELL_TRANSITIONS);
         RunningTaskInfo animatableTask = createTaskInfo(/* visible */ true, /* taskId */ 0);
         mListener.onTaskAppeared(animatableTask, mSurfaceControl);
         RunningTaskInfo notAnimatableTask = createTaskInfo(/* visible */ false, /* taskId */ 0);
@@ -129,6 +139,7 @@ public class FullscreenTaskListenerTest {
 
     @Test
     public void testAnimatableTaskVanished_notifiesUnfoldController() {
+        assumeFalse(ENABLE_SHELL_TRANSITIONS);
         RunningTaskInfo taskInfo = createTaskInfo(/* visible */ true, /* taskId */ 0);
         mListener.onTaskAppeared(taskInfo, mSurfaceControl);
 

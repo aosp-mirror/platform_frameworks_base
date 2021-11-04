@@ -93,6 +93,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
+import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleEntry;
@@ -167,6 +168,9 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
 
     @Captor
     private ArgumentCaptor<NotifCollectionListener> mNotifListenerCaptor;
+    @Captor
+    private ArgumentCaptor<List<Bubble>> mBubbleListCaptor;
+
     private BubblesManager mBubblesManager;
     private TestableBubbleController mBubbleController;
     private NotificationShadeWindowControllerImpl mNotificationShadeWindowController;
@@ -1011,6 +1015,23 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
 
         verify(mDataRepository, times(1)).loadBubbles(anyInt(), any());
+    }
+
+    /**
+     * Verifies that shortcut deletions triggers that bubble being removed from XML.
+     */
+    @Test
+    public void testDeleteShortcutsDeletesXml() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createShortcutBubble("shortcutId");
+        BubbleEntry shortcutBubbleEntry = BubblesManager.notifToBubbleEntry(row.getEntry());
+        mBubbleController.updateBubble(shortcutBubbleEntry);
+
+        mBubbleData.dismissBubbleWithKey(shortcutBubbleEntry.getKey(),
+                Bubbles.DISMISS_SHORTCUT_REMOVED);
+
+        verify(mDataRepository, atLeastOnce()).removeBubbles(anyInt(), mBubbleListCaptor.capture());
+        assertThat(mBubbleListCaptor.getValue().get(0).getKey()).isEqualTo(
+                shortcutBubbleEntry.getKey());
     }
 
     @Test

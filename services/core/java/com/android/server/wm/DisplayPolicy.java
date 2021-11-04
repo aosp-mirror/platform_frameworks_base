@@ -118,9 +118,9 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
@@ -283,14 +283,11 @@ public class DisplayPolicy {
     @WindowManagerPolicy.AltBarPosition
     private int mExtraNavBarAltPosition = ALT_BAR_UNKNOWN;
 
-    /** See {@link #getNavigationBarFrameHeight} */
-    private int[] mNavigationBarFrameHeightForRotationDefault = new int[4];
+    private final ArraySet<WindowState> mInsetsSourceWindowsExceptIme = new ArraySet<>();
 
     private boolean mIsFreeformWindowOverlappingWithNavBar;
 
     private boolean mLastImmersiveMode;
-
-    private final SparseArray<Rect> mBarContentFrames = new SparseArray<>();
 
     // The windows we were told about in focusChanged.
     private WindowState mFocusedWindow;
@@ -339,9 +336,11 @@ public class DisplayPolicy {
     private long mPendingPanicGestureUptime;
 
     private static final Rect sTmpRect = new Rect();
-    private static final Rect sTmpDecorFrame = new Rect();
     private static final Rect sTmpLastParentFrame = new Rect();
-    private static final Rect sTmpDisplayFrameBounds = new Rect();
+    private static final Rect sTmpDisplayCutoutSafe = new Rect();
+    private static final Rect sTmpDisplayFrame = new Rect();
+    private static final Rect sTmpParentFrame = new Rect();
+    private static final Rect sTmpFrame = new Rect();
 
     private final WindowLayout mWindowLayout = new WindowLayout();
 
@@ -1093,6 +1092,7 @@ public class DisplayPolicy {
                 mDisplayContent.setInsetProvider(
                         ITYPE_TOP_MANDATORY_GESTURES, win, gestureFrameProvider);
                 mDisplayContent.setInsetProvider(ITYPE_TOP_TAPPABLE_ELEMENT, win, null);
+                mInsetsSourceWindowsExceptIme.add(win);
                 break;
             case TYPE_NAVIGATION_BAR:
                 mNavigationBar = win;
@@ -1137,6 +1137,7 @@ public class DisplayPolicy {
                                 inOutFrame.setEmpty();
                             }
                         });
+                mInsetsSourceWindowsExceptIme.add(win);
                 if (DEBUG_LAYOUT) Slog.i(TAG, "NAVIGATION BAR: " + mNavigationBar);
                 break;
             default:
@@ -1170,6 +1171,7 @@ public class DisplayPolicy {
                                 windowState, inOutFrame) -> inOutFrame.inset(
                                 windowState.getLayoutingAttrs(displayFrames.mRotation)
                                         .providedInternalInsets), imeFrameProvider);
+                        mInsetsSourceWindowsExceptIme.add(win);
                     }
                 }
                 break;
@@ -1253,6 +1255,7 @@ public class DisplayPolicy {
         if (mLastFocusedWindow == win) {
             mLastFocusedWindow = null;
         }
+        mInsetsSourceWindowsExceptIme.remove(win);
     }
 
     private int getStatusBarHeight(DisplayFrames displayFrames) {
@@ -1433,73 +1436,27 @@ public class DisplayPolicy {
         return mForceShowSystemBars;
     }
 
-    private void simulateLayoutDecorWindow(WindowState win, DisplayFrames displayFrames,
-            WindowFrames simulatedWindowFrames, Consumer<Rect> layout) {
-        win.setSimulatedWindowFrames(simulatedWindowFrames);
-        final int requestedHeight = win.mRequestedHeight;
-        final int requestedWidth = win.mRequestedWidth;
-        // Without a full layout process, in order to layout the system bars correctly, we need
-        // to set the requested size and the initial display frames to the window.
-        WindowManager.LayoutParams params = win.getLayoutingAttrs(displayFrames.mRotation);
-        win.setRequestedSize(params.width, params.height);
-        sTmpDecorFrame.set(0, 0, displayFrames.mDisplayWidth, displayFrames.mDisplayHeight);
-        simulatedWindowFrames.setFrames(sTmpDecorFrame /* parentFrame */,
-                sTmpDecorFrame /* displayFrame */);
-        simulatedWindowFrames.mIsSimulatingDecorWindow = true;
-        final Rect contentFrame = new Rect();
-        try {
-            layout.accept(contentFrame);
-        } finally {
-            win.setSimulatedWindowFrames(null);
-            win.setRequestedSize(requestedWidth, requestedHeight);
-        }
-        mDisplayContent.getInsetsStateController().computeSimulatedState(
-                win, displayFrames, simulatedWindowFrames);
-    }
-
     /**
      * Computes the frames of display (its logical size, rotation and cutout should already be set)
      * used to layout window. This method only changes the given display frames, insets state and
      * some temporal states, but doesn't change the window frames used to show on screen.
      */
     void simulateLayoutDisplay(DisplayFrames displayFrames) {
-        final InsetsStateController insetsStateController =
-                mDisplayContent.getInsetsStateController();
-        for (int type = 0; type < InsetsState.SIZE; type++) {
-            final InsetsSourceProvider provider =
-                    insetsStateController.peekSourceProvider(type);
-            if (provider == null || !provider.hasWindow()
-                    || provider.mWin.getControllableInsetProvider() != provider) {
-                continue;
-            }
-            final WindowFrames simulatedWindowFrames = new WindowFrames();
-            simulateLayoutDecorWindow(provider.mWin, displayFrames, simulatedWindowFrames,
-                    contentFrame -> simulateLayoutForContentFrame(displayFrames,
-                            provider.mWin, contentFrame));
+        final InsetsStateController controller = mDisplayContent.getInsetsStateController();
+        for (int i = mInsetsSourceWindowsExceptIme.size() - 1; i >= 0; i--) {
+            final WindowState win = mInsetsSourceWindowsExceptIme.valueAt(i);
+            mWindowLayout.computeWindowFrames(win.getLayoutingAttrs(displayFrames.mRotation),
+                    displayFrames.mInsetsState, displayFrames.mDisplayCutoutSafe,
+                    displayFrames.mUnrestricted, win.getWindowingMode(), UNSPECIFIED_LENGTH,
+                    UNSPECIFIED_LENGTH, win.getRequestedVisibilities(),
+                    null /* attachedWindowFrame */, win.mGlobalScale,
+                    sTmpDisplayFrame, sTmpParentFrame, sTmpFrame);
+            controller.computeSimulatedState(win, displayFrames, sTmpFrame);
         }
     }
 
     void onDisplayInfoChanged(DisplayInfo info) {
         mSystemGestures.onDisplayInfoChanged(info);
-    }
-
-    private void simulateLayoutForContentFrame(DisplayFrames displayFrames, WindowState win,
-            Rect simulatedContentFrame) {
-        layoutWindowLw(win, null /* attached */, displayFrames);
-        final Rect contentFrame = sTmpRect;
-        contentFrame.set(win.getLayoutingWindowFrames().mFrame);
-        // Excluding the display cutout before set to the simulated content frame.
-        contentFrame.intersect(displayFrames.mDisplayCutoutSafe);
-        simulatedContentFrame.set(contentFrame);
-    }
-
-    private boolean canReceiveInput(WindowState win) {
-        boolean notFocusable =
-                (win.getAttrs().flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) != 0;
-        boolean altFocusableIm =
-                (win.getAttrs().flags & WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM) != 0;
-        boolean notFocusableForIm = notFocusable ^ altFocusableIm;
-        return !notFocusableForIm;
     }
 
     /**
@@ -1514,51 +1471,37 @@ public class DisplayPolicy {
      * @param displayFrames The display frames.
      */
     public void layoutWindowLw(WindowState win, WindowState attached, DisplayFrames displayFrames) {
-        final WindowManager.LayoutParams attrs = win.getLayoutingAttrs(displayFrames.mRotation);
 
-        final int type = attrs.type;
-        final int fl = attrs.flags;
-        final int sim = attrs.softInputMode;
-
+        // This window might be in the simulated environment.
+        // We invoke this to get the proper DisplayFrames.
         displayFrames = win.getDisplayFrames(displayFrames);
-        final WindowFrames windowFrames = win.getLayoutingWindowFrames();
 
+        final WindowManager.LayoutParams attrs = win.getLayoutingAttrs(displayFrames.mRotation);
+        final WindowFrames windowFrames = win.getWindowFrames();
         final Rect pf = windowFrames.mParentFrame;
         final Rect df = windowFrames.mDisplayFrame;
         final Rect f = windowFrames.mFrame;
         final Rect attachedWindowFrame = attached != null ? attached.getFrame() : null;
+
+        // If this window has different LayoutParams for rotations, we cannot trust its requested
+        // size. Because it might have not sent its requested size for the new rotation.
+        final boolean trustedSize = attrs == win.mAttrs;
+        final int requestedWidth = trustedSize ? win.mRequestedWidth : UNSPECIFIED_LENGTH;
+        final int requestedHeight = trustedSize ? win.mRequestedHeight : UNSPECIFIED_LENGTH;
+
         sTmpLastParentFrame.set(pf);
-
-        final Rect winBounds;
-        final int requestedWidth;
-        final int requestedHeight;
-        if (windowFrames.mIsSimulatingDecorWindow) {
-            // Override the bounds in window token has many side effects. Directly use the display
-            // frame set for the simulated layout.
-            winBounds = df;
-
-            // The view hierarchy has not been measured in the simulated layout. Use
-            // UNSPECIFIED_LENGTH as the requested width and height so that WindowLayout will choose
-            // the proper values in this case.
-            requestedWidth = UNSPECIFIED_LENGTH;
-            requestedHeight = UNSPECIFIED_LENGTH;
-        } else {
-            winBounds = win.getBounds();
-            requestedWidth = win.mRequestedWidth;
-            requestedHeight = win.mRequestedHeight;
-        }
 
         final boolean clippedByDisplayCutout = mWindowLayout.computeWindowFrames(attrs,
                 win.getInsetsState(), displayFrames.mDisplayCutoutSafe,
-                winBounds, win.getWindowingMode(), requestedWidth, requestedHeight,
+                win.getBounds(), win.getWindowingMode(), requestedWidth, requestedHeight,
                 win.getRequestedVisibilities(), attachedWindowFrame, win.mGlobalScale,
                 df, pf, f);
         windowFrames.setParentFrameWasClippedByDisplayCutout(clippedByDisplayCutout);
 
         if (DEBUG_LAYOUT) Slog.v(TAG, "Compute frame " + attrs.getTitle()
-                + ": sim=#" + Integer.toHexString(sim)
-                + " attach=" + attached + " type=" + type
-                + " flags=" + ViewDebug.flagsToString(LayoutParams.class, "flags", fl)
+                + ": sim=#" + Integer.toHexString(attrs.softInputMode)
+                + " attach=" + attached + " type=" + attrs.type
+                + " flags=" + ViewDebug.flagsToString(LayoutParams.class, "flags", attrs.flags)
                 + " pf=" + pf.toShortString() + " df=" + df.toShortString()
                 + " f=" + f.toShortString());
 
@@ -1566,9 +1509,7 @@ public class DisplayPolicy {
             windowFrames.setContentChanged(true);
         }
 
-        if (!windowFrames.mIsSimulatingDecorWindow) {
-            win.setFrame();
-        }
+        win.setFrame();
     }
 
     WindowState getTopFullscreenOpaqueWindow() {
@@ -2510,22 +2451,22 @@ public class DisplayPolicy {
         return source != null && Rect.intersects(win.getFrame(), source.getFrame());
     }
 
-    private Rect getBarContentFrameForWindow(WindowState win, int windowType) {
-        final Rect rotatedBarFrame = win.mToken.getFixedRotationBarContentFrame(windowType);
-        if (rotatedBarFrame != null) {
-            return rotatedBarFrame;
-        }
-        // We only need a window specific information for the fixed rotation, use raw insets state
-        // for all other cases.
-        InsetsState insetsState = mDisplayContent.getInsetsStateController().getRawInsetsState();
+    private Rect getBarContentFrameForWindow(WindowState win, @InternalInsetsType int type) {
+        final DisplayFrames displayFrames = win.getDisplayFrames(mDisplayContent.mDisplayFrames);
+        final InsetsState state = displayFrames.mInsetsState;
         final Rect tmpRect = new Rect();
-        if (windowType == TYPE_NAVIGATION_BAR) {
-            tmpRect.set(insetsState.getSource(InsetsState.ITYPE_NAVIGATION_BAR).getFrame());
+        sTmpDisplayCutoutSafe.set(displayFrames.mDisplayCutoutSafe);
+        if (type == ITYPE_STATUS_BAR) {
+            // The status bar content can extend into regular display cutout insets but not
+            // waterfall insets.
+            sTmpDisplayCutoutSafe.top =
+                    Math.max(state.getDisplayCutout().getWaterfallInsets().top, 0);
         }
-        if (windowType == TYPE_STATUS_BAR) {
-            tmpRect.set(insetsState.getSource(InsetsState.ITYPE_STATUS_BAR).getFrame());
+        final InsetsSource source = state.peekSource(type);
+        if (source != null) {
+            tmpRect.set(source.getFrame());
+            tmpRect.intersect(sTmpDisplayCutoutSafe);
         }
-        tmpRect.intersect(mDisplayContent.mDisplayFrames.mDisplayCutoutSafe);
         return tmpRect;
     }
 
@@ -2539,11 +2480,11 @@ public class DisplayPolicy {
      * be drawn over letterboxed activity.
      */
     @VisibleForTesting
-    boolean isFullyTransparentAllowed(WindowState win, int windowType) {
+    boolean isFullyTransparentAllowed(WindowState win, @InternalInsetsType int type) {
         if (win == null) {
             return true;
         }
-        return win.isFullyTransparentBarAllowed(getBarContentFrameForWindow(win, windowType));
+        return win.isFullyTransparentBarAllowed(getBarContentFrameForWindow(win, type));
     }
 
     private boolean drawsBarBackground(WindowState win) {
@@ -2566,7 +2507,7 @@ public class DisplayPolicy {
         for (int i = mStatusBarBackgroundWindows.size() - 1; i >= 0; i--) {
             final WindowState window = mStatusBarBackgroundWindows.get(i);
             drawBackground &= drawsBarBackground(window);
-            isFullyTransparentAllowed &= isFullyTransparentAllowed(window, TYPE_STATUS_BAR);
+            isFullyTransparentAllowed &= isFullyTransparentAllowed(window, ITYPE_STATUS_BAR);
         }
 
         if (drawBackground) {
@@ -2606,7 +2547,7 @@ public class DisplayPolicy {
             }
         }
 
-        if (!isFullyTransparentAllowed(mNavBarBackgroundWindow, TYPE_NAVIGATION_BAR)) {
+        if (!isFullyTransparentAllowed(mNavBarBackgroundWindow, ITYPE_NAVIGATION_BAR)) {
             appearance |= APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
         }
 
