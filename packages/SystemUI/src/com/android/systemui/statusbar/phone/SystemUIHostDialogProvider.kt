@@ -3,6 +3,7 @@ package com.android.systemui.statusbar.phone
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
+import android.view.ViewGroup
 import com.android.systemui.animation.HostDialogProvider
 
 /** An implementation of [HostDialogProvider] to be used when animating SysUI dialogs. */
@@ -37,6 +38,14 @@ class SystemUIHostDialogProvider : HostDialogProvider {
             dismissOverride {
                 super.dismiss()
             }
+        }
+
+        override fun getWidth(): Int {
+            return ViewGroup.LayoutParams.MATCH_PARENT
+        }
+
+        override fun getHeight(): Int {
+            return ViewGroup.LayoutParams.MATCH_PARENT
         }
     }
 }
