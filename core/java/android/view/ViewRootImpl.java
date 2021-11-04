@@ -879,6 +879,13 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /** Remove a static config callback. */
+    public static void removeConfigCallback(ConfigChangedCallback callback) {
+        synchronized (sConfigCallbacks) {
+            sConfigCallbacks.remove(callback);
+        }
+    }
+
     /** Add activity config callback to be notified about override config changes. */
     public void setActivityConfigCallback(ActivityConfigCallback callback) {
         mActivityConfigCallback = callback;
@@ -4164,11 +4171,6 @@ public final class ViewRootImpl implements ViewParent,
                         }
                     });
                 });
-            } else if (reportNextDraw) {
-                // If we need to report next draw, wait for adapter to flush its shadow queue
-                // by processing previously queued buffers so that we can submit the
-                // transaction a timely manner.
-                mBlastBufferQueue.flushShadowQueue();
             }
         };
         registerRtFrameCallback(frameDrawingCallback);

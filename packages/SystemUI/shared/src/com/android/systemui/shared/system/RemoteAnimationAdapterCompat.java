@@ -26,6 +26,7 @@ import static android.view.WindowManager.TransitionOldType;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
 import android.annotation.SuppressLint;
+import android.app.IApplicationThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -51,10 +52,10 @@ public class RemoteAnimationAdapterCompat {
     private final RemoteTransitionCompat mRemoteTransition;
 
     public RemoteAnimationAdapterCompat(RemoteAnimationRunnerCompat runner, long duration,
-            long statusBarTransitionDelay) {
+            long statusBarTransitionDelay, IApplicationThread appThread) {
         mWrapped = new RemoteAnimationAdapter(wrapRemoteAnimationRunner(runner), duration,
                 statusBarTransitionDelay);
-        mRemoteTransition = buildRemoteTransition(runner);
+        mRemoteTransition = buildRemoteTransition(runner, appThread);
     }
 
     RemoteAnimationAdapter getWrapped() {
@@ -62,9 +63,10 @@ public class RemoteAnimationAdapterCompat {
     }
 
     /** Helper to just build a remote transition. Use this if the legacy adapter isn't needed. */
-    public static RemoteTransitionCompat buildRemoteTransition(RemoteAnimationRunnerCompat runner) {
+    public static RemoteTransitionCompat buildRemoteTransition(RemoteAnimationRunnerCompat runner,
+            IApplicationThread appThread) {
         return new RemoteTransitionCompat(
-                new RemoteTransition(wrapRemoteTransition(runner)));
+                new RemoteTransition(wrapRemoteTransition(runner), appThread));
     }
 
     public RemoteTransitionCompat getRemoteTransition() {
