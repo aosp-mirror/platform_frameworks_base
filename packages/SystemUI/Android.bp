@@ -50,6 +50,17 @@ java_library {
     srcs: ["src/com/android/systemui/EventLogTags.logtags"],
 }
 
+java_library {
+    name: "SystemUI-flags",
+    srcs: [
+        "src/com/android/systemui/flags/Flags.java",
+    ],
+    libs: [
+        "SystemUI-flag-types",
+    ],
+    static_kotlin_stdlib: false,
+}
+
 filegroup {
     name: "ReleaseJavaFiles",
     srcs: [
@@ -116,6 +127,7 @@ android_library {
         "iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
+        "SystemUI-flags",
         "monet",
         "dagger2",
         "jsr330",
