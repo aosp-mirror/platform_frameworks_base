@@ -38,9 +38,6 @@ private const val TAG = "DialogLaunchAnimator"
 /**
  * A class that allows dialogs to be started in a seamless way from a view that is transforming
  * nicely into the starting dialog.
- *
- * Important: Don't forget to call [DialogLaunchAnimator.onDozeAmountChanged] when the doze amount
- * changes to gracefully handle dialogs fading out when the device is dozing.
  */
 class DialogLaunchAnimator(
     private val context: Context,
@@ -89,8 +86,17 @@ class DialogLaunchAnimator(
         // host dialog.
         if (dialog is ListenableDialog) {
             dialog.addListener(object : DialogListener {
-                override fun onDismiss() {
+                override fun onDismiss(reason: DialogListener.DismissReason) {
                     dialog.removeListener(this)
+
+                    // We disable the exit animation if we are dismissing the dialog because the
+                    // device is being locked, otherwise the animation looks bad if AOD is enabled.
+                    // If AOD is disabled the screen will directly becomes black and we won't see
+                    // the animation anyways.
+                    if (reason == DialogListener.DismissReason.DEVICE_LOCKED) {
+                        launchAnimation.exitAnimationDisabled = true
+                    }
+
                     hostDialog.dismiss()
                 }
 
@@ -115,13 +121,6 @@ class DialogLaunchAnimator(
 
         launchAnimation.start()
         return hostDialog
-    }
-
-    /** Notify the current doze amount, to ensure that dialogs fade out when dozing. */
-    // TODO(b/193634619): Replace this by some mandatory constructor parameter to make sure that we
-    // don't forget to call this when the doze amount changes.
-    fun onDozeAmountChanged(amount: Float) {
-        currentAnimations.forEach { it.onDozeAmountChanged(amount) }
     }
 
     /**
@@ -168,8 +167,16 @@ interface ListenableDialog {
 }
 
 interface DialogListener {
+    /** The reason why a dialog was dismissed. */
+    enum class DismissReason {
+        UNKNOWN,
+
+        /** The device was locked, which dismissed this dialog. */
+        DEVICE_LOCKED,
+    }
+
     /** Called when this dialog dismiss() is called. */
-    fun onDismiss()
+    fun onDismiss(reason: DismissReason)
 
     /** Called when this dialog hide() is called. */
     fun onHide()
@@ -637,15 +644,5 @@ private class DialogLaunchAnimation(
         }
 
         return (touchSurface.parent as? View)?.isShown ?: true
-    }
-
-    internal fun onDozeAmountChanged(amount: Float) {
-        val alpha = Interpolators.ALPHA_OUT.getInterpolation(1 - amount)
-        val decorView = this.hostDialog.window?.decorView ?: return
-        if (decorView.hasOverlappingRendering() && alpha > 0.0f &&
-            alpha < 1.0f && decorView.layerType != View.LAYER_TYPE_HARDWARE) {
-            decorView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
-        }
-        decorView.alpha = alpha
     }
 }
