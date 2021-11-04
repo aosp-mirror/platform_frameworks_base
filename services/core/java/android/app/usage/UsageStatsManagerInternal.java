@@ -16,6 +16,7 @@
 
 package android.app.usage;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -234,6 +235,10 @@ public abstract class UsageStatsManagerInternal {
     public abstract void setLastJobRunTime(String packageName, @UserIdInt int userId,
             long elapsedRealtime);
 
+    /** Returns the estimated time that the app will be launched, in milliseconds since epoch. */
+    @CurrentTimeMillisLong
+    public abstract long getEstimatedPackageLaunchTime(String packageName, @UserIdInt int userId);
+
     /**
      * Returns the time in millis since a job was executed for this app, in elapsed realtime
      * timebase. This value can be larger than the current elapsed realtime if the job was executed
@@ -340,4 +345,21 @@ public abstract class UsageStatsManagerInternal {
 
     /** Unregister a listener from being notified of every new usage event. */
     public abstract void unregisterListener(@NonNull UsageEventListener listener);
+
+    /**
+     * Listener interface for estimated launch time changes.
+     */
+    public interface EstimatedLaunchTimeChangedListener {
+        /** Callback to inform listeners when estimated launch times change. */
+        void onEstimatedLaunchTimeChanged(@UserIdInt int userId, @NonNull String packageName,
+                @CurrentTimeMillisLong long newEstimatedLaunchTime);
+    }
+
+    /** Register a listener that will be notified of every estimated launch time change. */
+    public abstract void registerLaunchTimeChangedListener(
+            @NonNull EstimatedLaunchTimeChangedListener listener);
+
+    /** Unregister a listener from being notified of every estimated launch time change. */
+    public abstract void unregisterLaunchTimeChangedListener(
+            @NonNull EstimatedLaunchTimeChangedListener listener);
 }
