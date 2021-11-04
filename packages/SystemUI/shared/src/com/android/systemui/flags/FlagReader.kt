@@ -31,7 +31,7 @@ interface FlagReader {
     fun removeListener(listener: Listener) {}
 
     /** A simple listener to be alerted when a flag changes.  */
-    interface Listener {
+    fun interface Listener {
         /**  */
         fun onFlagChanged(id: Int)
     }
