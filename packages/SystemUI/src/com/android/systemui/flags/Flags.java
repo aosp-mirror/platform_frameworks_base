@@ -77,21 +77,24 @@ public class Flags {
     public static final BooleanFlag NEW_USER_SWITCHER =
             new BooleanFlag(500, true);
 
+    public static final BooleanFlag COMBINED_QS_HEADERS =
+            new BooleanFlag(501, false);
+
     /***************************************/
     // 600- status bar
     public static final BooleanFlag COMBINED_STATUS_BAR_SIGNAL_ICONS =
-            new BooleanFlag(501, false);
+            new BooleanFlag(601, false);
 
     /***************************************/
     // 700 - dialer/calls
     public static final BooleanFlag ONGOING_CALL_STATUS_BAR_CHIP =
-            new BooleanFlag(600, true);
+            new BooleanFlag(700, true);
 
     public static final BooleanFlag ONGOING_CALL_IN_IMMERSIVE =
-            new BooleanFlag(601, true);
+            new BooleanFlag(701, true);
 
     public static final BooleanFlag ONGOING_CALL_IN_IMMERSIVE_CHIP_TAP =
-            new BooleanFlag(602, true);
+            new BooleanFlag(702, true);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
