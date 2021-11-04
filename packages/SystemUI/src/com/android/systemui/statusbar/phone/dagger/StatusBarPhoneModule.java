@@ -29,7 +29,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.InitController;
 import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
@@ -244,8 +243,7 @@ public interface StatusBarPhoneModule {
             Optional<StartingSurface> startingSurfaceOptional,
             TunerService tunerService,
             DumpManager dumpManager,
-            ActivityLaunchAnimator activityLaunchAnimator,
-            DialogLaunchAnimator dialogLaunchAnimator) {
+            ActivityLaunchAnimator activityLaunchAnimator) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -346,7 +344,7 @@ public interface StatusBarPhoneModule {
                 startingSurfaceOptional,
                 tunerService,
                 dumpManager,
-                activityLaunchAnimator,
-                dialogLaunchAnimator);
+                activityLaunchAnimator
+        );
     }
 }

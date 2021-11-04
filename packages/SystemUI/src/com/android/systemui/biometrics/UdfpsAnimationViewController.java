@@ -23,12 +23,12 @@ import android.graphics.RectF;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.util.ViewController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Optional;
 
 /**
  * Handles:
@@ -43,7 +43,7 @@ import java.util.Optional;
 abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
         extends ViewController<T> implements Dumpable {
     @NonNull final StatusBarStateController mStatusBarStateController;
-    @NonNull final Optional<StatusBar> mStatusBarOptional;
+    @NonNull final PanelExpansionStateManager mPanelExpansionStateManager;
     @NonNull final DumpManager mDumpManger;
 
     boolean mNotificationShadeExpanded;
@@ -51,11 +51,11 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
     protected UdfpsAnimationViewController(
             T view,
             @NonNull StatusBarStateController statusBarStateController,
-            @NonNull Optional<StatusBar> statusBarOptional,
+            @NonNull PanelExpansionStateManager panelExpansionStateManager,
             @NonNull DumpManager dumpManager) {
         super(view);
         mStatusBarStateController = statusBarStateController;
-        mStatusBarOptional = statusBarOptional;
+        mPanelExpansionStateManager = panelExpansionStateManager;
         mDumpManger = dumpManager;
     }
 
@@ -63,17 +63,13 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
 
     @Override
     protected void onViewAttached() {
-        mStatusBarOptional.ifPresent(
-                statusBar -> statusBar.addExpansionChangedListener(
-                        mStatusBarExpansionChangedListener));
+        mPanelExpansionStateManager.addListener(mPanelExpansionListener);
         mDumpManger.registerDumpable(getDumpTag(), this);
     }
 
     @Override
     protected void onViewDetached() {
-        mStatusBarOptional.ifPresent(
-                statusBar -> statusBar.removeExpansionChangedListener(
-                        mStatusBarExpansionChangedListener));
+        mPanelExpansionStateManager.removeListener(mPanelExpansionListener);
         mDumpManger.unregisterDumpable(getDumpTag());
     }
 
@@ -182,13 +178,13 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
      */
     void onTouchOutsideView() { }
 
-    private final StatusBar.ExpansionChangedListener mStatusBarExpansionChangedListener =
-            new StatusBar.ExpansionChangedListener() {
-                @Override
-                public void onExpansionChanged(float expansion, boolean expanded) {
-                    mNotificationShadeExpanded = expanded;
-                    mView.onExpansionChanged(expansion, expanded);
-                    updatePauseAuth();
-                }
-            };
+    private final PanelExpansionListener mPanelExpansionListener = new PanelExpansionListener() {
+        @Override
+        public void onPanelExpansionChanged(
+                float fraction, boolean expanded, boolean tracking) {
+            mNotificationShadeExpanded = expanded;
+            mView.onExpansionChanged(fraction, expanded);
+            updatePauseAuth();
+        }
+    };
 }

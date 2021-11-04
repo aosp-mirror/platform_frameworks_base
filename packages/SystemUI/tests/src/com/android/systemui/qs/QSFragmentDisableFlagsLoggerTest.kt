@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.qs
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -29,15 +29,15 @@ import java.io.PrintWriter
 import java.io.StringWriter
 
 @SmallTest
-class CollapsedStatusBarFragmentLoggerTest : SysuiTestCase() {
+class QSFragmentDisableFlagsLoggerTest : SysuiTestCase() {
 
     private val buffer = LogBufferFactory(DumpManager(), mock(LogcatEchoTracker::class.java))
-            .create("buffer", 10)
+        .create("buffer", 10)
     private val disableFlagsLogger = DisableFlagsLogger(
-            listOf(DisableFlagsLogger.DisableFlag(0b001, 'A', 'a')),
-            listOf(DisableFlagsLogger.DisableFlag(0b001, 'B', 'b'))
+        listOf(DisableFlagsLogger.DisableFlag(0b001, 'A', 'a')),
+        listOf(DisableFlagsLogger.DisableFlag(0b001, 'B', 'b'))
     )
-    private val logger = CollapsedStatusBarFragmentLogger(buffer, disableFlagsLogger)
+    private val logger = QSFragmentDisableFlagsLogger(buffer, disableFlagsLogger)
 
     @Test
     fun logDisableFlagChange_bufferHasStates() {

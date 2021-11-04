@@ -379,6 +379,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
     /** Test that restore correctly parses the user_set attribute. */
     @Test
     public void testReadXml_restoresUserSet() throws Exception {
+        mVersionString = "4";
         for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
             ManagedServices service =
                     new TestManagedServices(
@@ -1513,7 +1514,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
         for (int userId : mExpectedPrimary.get(service.mApprovalLevel).keySet()) {
             String pkgOrCmp = mExpectedPrimary.get(service.mApprovalLevel).get(userId);
             xml.append(getXmlEntry(
-                    pkgOrCmp, userId, true, !(pkgOrCmp.startsWith("non.user.set.package"))));
+                    pkgOrCmp, userId, true,
+                    !(pkgOrCmp.startsWith("non.user.set.package"))));
         }
         for (int userId : mExpectedSecondary.get(service.mApprovalLevel).keySet()) {
             xml.append(getXmlEntry(
@@ -1541,7 +1543,9 @@ public class ManagedServicesTest extends UiServiceTestCase {
     private TypedXmlPullParser getParserWithEntries(ManagedServices service, String... xmlEntries)
             throws Exception {
         final StringBuffer xml = new StringBuffer();
-        xml.append("<" + service.getConfig().xmlTag + ">\n");
+        xml.append("<" + service.getConfig().xmlTag
+                + (mVersionString != null ? " version=\"" + mVersionString + "\" " : "")
+                + ">\n");
         for (String xmlEntry : xmlEntries) {
             xml.append(xmlEntry);
         }
@@ -1726,12 +1730,19 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     private String getXmlEntry(String approved, int userId, boolean isPrimary, boolean userSet) {
+        String userSetString = "";
+        if (mVersionString.equals("4")) {
+            userSetString =
+                    ManagedServices.ATT_USER_CHANGED + "=\"" + String.valueOf(userSet) + "\" ";
+        } else if (mVersionString.equals("3")) {
+            userSetString =
+                    ManagedServices.ATT_USER_SET + "=\"" + (userSet ? approved : "") + "\" ";
+        }
         return "<" + ManagedServices.TAG_MANAGED_SERVICES + " "
                 + ManagedServices.ATT_USER_ID + "=\"" + userId +"\" "
                 + ManagedServices.ATT_IS_PRIMARY + "=\"" + isPrimary +"\" "
                 + ManagedServices.ATT_APPROVED_LIST + "=\"" + approved +"\" "
-                + ManagedServices.ATT_USER_SET + "=\"" + (userSet ? approved : "") + "\" "
-                + "/>\n";
+                + userSetString + "/>\n";
     }
 
     class TestManagedServices extends ManagedServices {

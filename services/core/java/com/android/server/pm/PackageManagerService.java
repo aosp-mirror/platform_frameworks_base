@@ -9296,6 +9296,10 @@ public class PackageManagerService extends IPackageManager.Stub
             if (freeBytesRequired > 0) {
                 smInternal.freeCache(volumeUuid, freeBytesRequired);
             }
+
+            // 12. Clear temp install session files
+            mInstallerService.freeStageDirs(volumeUuid);
+
             if (file.getUsableSpace() >= bytes) return;
         } else {
             try {
@@ -12818,7 +12822,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     return;
                 }
             } else {
-                if (isInstantApp(packageName, callingUserId)) {
+                if (isInstantAppInternal(packageName, callingUserId, Process.SYSTEM_UID)) {
                     return;
                 }
             }

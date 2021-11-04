@@ -33,6 +33,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -52,7 +53,8 @@ import java.io.StringWriter;
 public class FeatureFlagManagerTest extends SysuiTestCase {
     FeatureFlagManager mFeatureFlagManager;
 
-    @Mock private SystemPropertiesHelper mProps;
+    @Mock private FlagManager mFlagManager;
+    @Mock private SecureSettings mSecureSettings;
     @Mock private Context mContext;
     @Mock private DumpManager mDumpManager;
 
@@ -60,14 +62,14 @@ public class FeatureFlagManagerTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mFeatureFlagManager = new FeatureFlagManager(mProps, mContext, mDumpManager);
+        mFeatureFlagManager = new FeatureFlagManager(mSecureSettings, mContext, mDumpManager);
     }
 
     @After
     public void onFinished() {
-        // SystemPropertiesHelper and Context are provided for constructor consistency with the
+        // SecureSettings and Context are provided for constructor consistency with the
         // debug version of the FeatureFlagManager, but should never be used.
-        verifyZeroInteractions(mProps, mContext);
+        verifyZeroInteractions(mSecureSettings, mContext);
         // The dump manager should be registered with even for the release version, but that's it.
         verify(mDumpManager).registerDumpable(anyString(), any());
         verifyNoMoreInteractions(mDumpManager);

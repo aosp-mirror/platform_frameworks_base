@@ -38,9 +38,6 @@ private const val TAG = "DialogLaunchAnimator"
 /**
  * A class that allows dialogs to be started in a seamless way from a view that is transforming
  * nicely into the starting dialog.
- *
- * Important: Don't forget to call [DialogLaunchAnimator.onDozeAmountChanged] when the doze amount
- * changes to gracefully handle dialogs fading out when the device is dozing.
  */
 class DialogLaunchAnimator(
     private val context: Context,
@@ -89,8 +86,17 @@ class DialogLaunchAnimator(
         // host dialog.
         if (dialog is ListenableDialog) {
             dialog.addListener(object : DialogListener {
-                override fun onDismiss() {
+                override fun onDismiss(reason: DialogListener.DismissReason) {
                     dialog.removeListener(this)
+
+                    // We disable the exit animation if we are dismissing the dialog because the
+                    // device is being locked, otherwise the animation looks bad if AOD is enabled.
+                    // If AOD is disabled the screen will directly becomes black and we won't see
+                    // the animation anyways.
+                    if (reason == DialogListener.DismissReason.DEVICE_LOCKED) {
+                        launchAnimation.exitAnimationDisabled = true
+                    }
+
                     hostDialog.dismiss()
                 }
 
@@ -110,18 +116,15 @@ class DialogLaunchAnimator(
                     launchAnimation.ignoreNextCallToHide = true
                     dialog.hide()
                 }
+
+                override fun onSizeChanged() {
+                    launchAnimation.onOriginalDialogSizeChanged()
+                }
             })
         }
 
         launchAnimation.start()
         return hostDialog
-    }
-
-    /** Notify the current doze amount, to ensure that dialogs fade out when dozing. */
-    // TODO(b/193634619): Replace this by some mandatory constructor parameter to make sure that we
-    // don't forget to call this when the doze amount changes.
-    fun onDozeAmountChanged(amount: Float) {
-        currentAnimations.forEach { it.onDozeAmountChanged(amount) }
     }
 
     /**
@@ -147,6 +150,7 @@ interface HostDialogProvider {
      *   2. call [dismissOverride] instead of doing any dismissing logic. The actual dismissing
      *      logic should instead be done inside the lambda passed to [dismissOverride], which will
      *      be called after the exit animation.
+     *   3. Be full screen, i.e. have a window matching its parent size.
      *
      * See SystemUIHostDialogProvider for an example of implementation.
      */
@@ -168,14 +172,25 @@ interface ListenableDialog {
 }
 
 interface DialogListener {
+    /** The reason why a dialog was dismissed. */
+    enum class DismissReason {
+        UNKNOWN,
+
+        /** The device was locked, which dismissed this dialog. */
+        DEVICE_LOCKED,
+    }
+
     /** Called when this dialog dismiss() is called. */
-    fun onDismiss()
+    fun onDismiss(reason: DismissReason)
 
     /** Called when this dialog hide() is called. */
     fun onHide()
 
     /** Called when this dialog show() is called. */
     fun onShow()
+
+    /** Called when this dialog size might have changed, e.g. because of configuration changes. */
+    fun onSizeChanged()
 }
 
 private class DialogLaunchAnimation(
@@ -254,10 +269,6 @@ private class DialogLaunchAnimation(
         val window = hostDialog.window
             ?: throw IllegalStateException("There is no window associated to the host dialog")
         window.setBackgroundDrawableResource(android.R.color.transparent)
-        window.setLayout(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT
-        )
 
         // If we are using gesture navigation, then we can overlay the navigation/task bars with
         // the host dialog.
@@ -423,6 +434,19 @@ private class DialogLaunchAnimation(
                 maybeStartLaunchAnimation()
             }
         })
+    }
+
+    fun onOriginalDialogSizeChanged() {
+        // The dialog is the single child of the root.
+        if (hostDialogRoot.childCount != 1) {
+            return
+        }
+
+        val dialogView = hostDialogRoot.getChildAt(0)
+        val layoutParams = dialogView.layoutParams as? FrameLayout.LayoutParams ?: return
+        layoutParams.width = originalDialog.window.attributes.width
+        layoutParams.height = originalDialog.window.attributes.height
+        dialogView.layoutParams = layoutParams
     }
 
     private fun maybeStartLaunchAnimation() {
@@ -637,15 +661,5 @@ private class DialogLaunchAnimation(
         }
 
         return (touchSurface.parent as? View)?.isShown ?: true
-    }
-
-    internal fun onDozeAmountChanged(amount: Float) {
-        val alpha = Interpolators.ALPHA_OUT.getInterpolation(1 - amount)
-        val decorView = this.hostDialog.window?.decorView ?: return
-        if (decorView.hasOverlappingRendering() && alpha > 0.0f &&
-            alpha < 1.0f && decorView.layerType != View.LAYER_TYPE_HARDWARE) {
-            decorView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
-        }
-        decorView.alpha = alpha
     }
 }
