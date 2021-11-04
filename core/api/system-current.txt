@@ -344,6 +344,7 @@ package android {
 
   public static final class R.attr {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
+    field public static final int gameSessionService;
     field public static final int hotwordDetectionService = 16844326; // 0x1010626
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844305; // 0x1010611
@@ -10736,12 +10737,35 @@ package android.service.euicc {
 
 package android.service.games {
 
+  public final class CreateGameSessionRequest implements android.os.Parcelable {
+    ctor public CreateGameSessionRequest(int, @NonNull String);
+    method public int describeContents();
+    method @NonNull public String getGamePackageName();
+    method public int getTaskId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.games.CreateGameSessionRequest> CREATOR;
+  }
+
   public class GameService extends android.app.Service {
     ctor public GameService();
     method @Nullable public android.os.IBinder onBind(@Nullable android.content.Intent);
     method public void onConnected();
     method public void onDisconnected();
-    field public static final String SERVICE_INTERFACE = "android.service.games.GameService";
+    field public static final String ACTION_GAME_SERVICE = "android.service.games.action.GAME_SERVICE";
+    field public static final String SERVICE_META_DATA = "android.game_service";
+  }
+
+  public abstract class GameSession {
+    ctor public GameSession();
+    method public void onCreate();
+    method public void onDestroy();
+  }
+
+  public abstract class GameSessionService extends android.app.Service {
+    ctor public GameSessionService();
+    method @Nullable public android.os.IBinder onBind(@Nullable android.content.Intent);
+    method @NonNull public abstract android.service.games.GameSession onNewSession(@NonNull android.service.games.CreateGameSessionRequest);
+    field public static final String ACTION_GAME_SESSION_SERVICE = "android.service.games.action.GAME_SESSION_SERVICE";
   }
 
 }

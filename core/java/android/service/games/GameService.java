@@ -46,7 +46,7 @@ import java.util.Objects;
  */
 @SystemApi
 public class GameService extends Service {
-    static final String TAG = "GameService";
+    private static final String TAG = "GameService";
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -55,8 +55,16 @@ public class GameService extends Service {
      * that other applications can not abuse it.
      */
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
-    public static final String SERVICE_INTERFACE =
-            "android.service.games.GameService";
+    public static final String ACTION_GAME_SERVICE =
+            "android.service.games.action.GAME_SERVICE";
+
+    /**
+     * Name under which a GameService component publishes information about itself.
+     * This meta-data should reference an XML resource containing a
+     * <code>&lt;{@link
+     * android.R.styleable#GameService game-session-service}&gt;</code> tag.
+     */
+    public static final String SERVICE_META_DATA = "android.game_service";
 
     private IGameManagerService mGameManagerService;
     private final IGameService mInterface = new IGameService.Stub() {
@@ -72,6 +80,7 @@ public class GameService extends Service {
                     GameService::onDisconnected, GameService.this));
         }
     };
+
     private final IBinder.DeathRecipient mGameManagerServiceDeathRecipient = () -> {
         Log.w(TAG, "System service binder died. Shutting down");
 
@@ -82,9 +91,10 @@ public class GameService extends Service {
     @Override
     @Nullable
     public IBinder onBind(@Nullable Intent intent) {
-        if (SERVICE_INTERFACE.equals(intent.getAction())) {
+        if (ACTION_GAME_SERVICE.equals(intent.getAction())) {
             return mInterface.asBinder();
         }
+
         return null;
     }
 

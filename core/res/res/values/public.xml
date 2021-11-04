@@ -3250,6 +3250,8 @@
     <public name="supportedTypes" />
     <public name="resetEnabledSettingsOnAppDataCleared" />
     <public name="supportsStylusHandwriting" />
+    <!-- @hide @SystemApi -->
+    <public name="gameSessionService" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">
