@@ -1,4 +1,3 @@
-<<<<<<< TARGET BRANCH (b3a386 Merge "Update package data API docs")
 /*
  * Copyright (C) 2021 The Android Open Source Project
  *
@@ -47,6 +46,7 @@ public class Flags {
 
     public static final BooleanFlag NOTIFICATION_UPDATES =
             new BooleanFlag(102, true);
+
 
     /***************************************/
     // 200 - keyguard/lockscreen
@@ -127,5 +127,3 @@ public class Flags {
     // \_/\_/\_/\_/\_/\_/\_/\_/\_/\_/\_/\_/\_/\_/\_/\_/\_/\_/\_/\_/
 
 }
-=======
->>>>>>> SOURCE BRANCH (abef1d Merge "Add a shared library for setting flags in SysUI." int)
