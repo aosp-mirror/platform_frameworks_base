@@ -174,10 +174,10 @@ public abstract class InputEventReceiver {
      * Called when the display for the window associated with the input channel has entered or
      * exited touch mode.
      *
-     * @param inTouchMode {@code true} if the display showing the window associated with the
+     * @param isInTouchMode {@code true} if the display showing the window associated with the
      *                                  input channel entered touch mode.
      */
-    public void onTouchModeChanged(boolean inTouchMode) {
+    public void onTouchModeChanged(boolean isInTouchMode) {
     }
 
     /**
