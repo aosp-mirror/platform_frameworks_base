@@ -772,6 +772,10 @@ public class ScreenshotController {
             }
             mWindowManager.removeViewImmediate(decorView);
         }
+        // Ensure that we remove the input monitor
+        if (mScreenshotView != null) {
+            mScreenshotView.stopInputListening();
+        }
     }
 
     /**
