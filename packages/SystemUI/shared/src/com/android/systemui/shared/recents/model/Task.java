@@ -38,6 +38,7 @@ import java.util.Objects;
 
 /**
  * A task in the recent tasks list.
+ * TODO: Move this into Launcher or see if we can remove now
  */
 public class Task {
 

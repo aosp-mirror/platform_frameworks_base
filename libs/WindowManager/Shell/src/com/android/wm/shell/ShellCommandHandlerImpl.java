@@ -24,6 +24,7 @@ import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.io.PrintWriter;
@@ -43,6 +44,7 @@ public final class ShellCommandHandlerImpl {
     private final Optional<OneHandedController> mOneHandedOptional;
     private final Optional<HideDisplayCutoutController> mHideDisplayCutout;
     private final Optional<AppPairsController> mAppPairsOptional;
+    private final Optional<RecentTasksController> mRecentTasks;
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final ShellExecutor mMainExecutor;
     private final HandlerImpl mImpl = new HandlerImpl();
@@ -55,8 +57,10 @@ public final class ShellCommandHandlerImpl {
             Optional<OneHandedController> oneHandedOptional,
             Optional<HideDisplayCutoutController> hideDisplayCutout,
             Optional<AppPairsController> appPairsOptional,
+            Optional<RecentTasksController> recentTasks,
             ShellExecutor mainExecutor) {
         mShellTaskOrganizer = shellTaskOrganizer;
+        mRecentTasks = recentTasks;
         mLegacySplitScreenOptional = legacySplitScreenOptional;
         mSplitScreenOptional = splitScreenOptional;
         mPipOptional = pipOptional;
@@ -85,6 +89,9 @@ public final class ShellCommandHandlerImpl {
         pw.println();
         pw.println();
         mSplitScreenOptional.ifPresent(splitScreen -> splitScreen.dump(pw, ""));
+        pw.println();
+        pw.println();
+        mRecentTasks.ifPresent(recentTasks -> recentTasks.dump(pw, ""));
     }
 
 

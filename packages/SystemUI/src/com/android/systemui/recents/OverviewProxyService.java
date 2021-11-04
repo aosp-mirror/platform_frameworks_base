@@ -25,6 +25,7 @@ import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
+import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_RECENT_TASKS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_ONE_HANDED;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_PIP;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
@@ -105,6 +106,7 @@ import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
+import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.transition.ShellTransitions;
@@ -158,6 +160,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final ShellTransitions mShellTransitions;
     private final Optional<StartingSurface> mStartingSurface;
     private final SmartspaceTransitionController mSmartspaceTransitionController;
+    private final Optional<RecentTasks> mRecentTasks;
 
     private Region mActiveNavBarRegion;
 
@@ -491,6 +494,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
             params.putBinder(
                     KEY_EXTRA_SMARTSPACE_TRANSITION_CONTROLLER,
                     mSmartspaceTransitionController.createExternalInterface().asBinder());
+            mRecentTasks.ifPresent(recentTasks -> params.putBinder(
+                    KEY_EXTRA_RECENT_TASKS,
+                    recentTasks.createExternalInterface().asBinder()));
 
             try {
                 mOverviewProxy.onInitialize(params);
@@ -541,17 +547,18 @@ public class OverviewProxyService extends CurrentUserTracker implements
     @Inject
     public OverviewProxyService(Context context, CommandQueue commandQueue,
             Lazy<NavigationBarController> navBarControllerLazy,
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
             Optional<Pip> pipOptional,
             Optional<LegacySplitScreen> legacySplitScreenOptional,
             Optional<SplitScreen> splitScreenOptional,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             Optional<OneHanded> oneHandedOptional,
+            Optional<RecentTasks> recentTasks,
+            Optional<StartingSurface> startingSurface,
             BroadcastDispatcher broadcastDispatcher,
             ShellTransitions shellTransitions,
             ScreenLifecycle screenLifecycle,
-            Optional<StartingSurface> startingSurface,
             SmartspaceTransitionController smartspaceTransitionController,
             DumpManager dumpManager) {
         super(broadcastDispatcher);
@@ -573,6 +580,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         mSysUiState.addCallback(this::notifySystemUiStateFlags);
         mOneHandedOptional = oneHandedOptional;
         mShellTransitions = shellTransitions;
+        mRecentTasks = recentTasks;
 
         // Assumes device always starts with back button until launcher tells it that it does not
         mNavBarButtonAlpha = 1.0f;
