@@ -63,6 +63,14 @@ public class SpatializerHelper {
     private @Nullable SensorManager mSensorManager;
 
     //------------------------------------------------------------
+    /** head tracker sensor name */
+    // TODO: replace with generic head tracker sensor name.
+    //       the current implementation refers to the "google" namespace but will be replaced
+    //       by an android name at the next API level revision, it is not Google-specific.
+    //       Also see "TODO-HT" in onInitSensors() method
+    private static final String HEADTRACKER_SENSOR =
+            "com.google.hardware.sensor.hid_dynamic.headtracker";
+
     // Spatializer state machine
     private static final int STATE_UNINITIALIZED = 0;
     private static final int STATE_NOT_SUPPORTED = 1;
@@ -81,7 +89,7 @@ public class SpatializerHelper {
     private @Nullable ISpatializer mSpat;
     private @Nullable SpatializerCallback mSpatCallback;
     private @Nullable SpatializerHeadTrackingCallback mSpatHeadTrackingCallback;
-
+    private @Nullable HelperDynamicSensorCallback mDynSensorCallback;
 
     // default attributes and format that determine basic availability of spatialization
     private static final AudioAttributes DEFAULT_ATTRIBUTES = new AudioAttributes.Builder()
@@ -209,11 +217,7 @@ public class SpatializerHelper {
             // TODO use reported spat level to change state
 
             // init sensors
-            if (level == SpatializationLevel.NONE) {
-                initSensors(/*init*/false);
-            } else {
-                postInitSensors(true);
-            }
+            postInitSensors();
         }
 
         public void onOutputChanged(int output) {
@@ -229,6 +233,7 @@ public class SpatializerHelper {
         }
     };
 
+    //------------------------------------------------------
     // spatializer head tracking callback from native
     private final class SpatializerHeadTrackingCallback
             extends ISpatializerHeadTrackingCallback.Stub {
@@ -267,6 +272,20 @@ public class SpatializerHelper {
             dispatchPoseUpdate(headToStage);
         }
     };
+
+    //------------------------------------------------------
+    // dynamic sensor callback
+    private final class HelperDynamicSensorCallback extends SensorManager.DynamicSensorCallback {
+        @Override
+        public void onDynamicSensorConnected(Sensor sensor) {
+            postInitSensors();
+        }
+
+        @Override
+        public void onDynamicSensorDisconnected(Sensor sensor) {
+            postInitSensors();
+        }
+    }
 
     //------------------------------------------------------
     // compatible devices
@@ -851,48 +870,12 @@ public class SpatializerHelper {
 
     //------------------------------------------------------
     // sensors
-    private void initSensors(boolean init) {
-        if (mSensorManager == null) {
-            mSensorManager = (SensorManager)
-                    mAudioService.mContext.getSystemService(Context.SENSOR_SERVICE);
-        }
-        final int headHandle;
-        final int screenHandle;
-        if (init) {
-            if (mSensorManager == null) {
-                Log.e(TAG, "Null SensorManager, can't init sensors");
-                return;
-            }
-            // TODO replace with dynamic association of sensor for headtracker
-            Sensor headSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
-            headHandle = headSensor.getHandle();
-            //Sensor screenSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-            //screenHandle = deviceSensor.getHandle();
-            screenHandle = -1;
-        } else {
-            // -1 is disable value
-            screenHandle = -1;
-            headHandle = -1;
-        }
-        try {
-            Log.i(TAG, "setScreenSensor:" + screenHandle);
-            mSpat.setScreenSensor(screenHandle);
-        } catch (Exception e) {
-            Log.e(TAG, "Error calling setScreenSensor:" + screenHandle, e);
-        }
-        try {
-            Log.i(TAG, "setHeadSensor:" + headHandle);
-            mSpat.setHeadSensor(headHandle);
-        } catch (Exception e) {
-            Log.e(TAG, "Error calling setHeadSensor:" + headHandle, e);
-        }
+    private void postInitSensors() {
+        mAudioService.postInitSpatializerHeadTrackingSensors();
     }
 
-    private void postInitSensors(boolean init) {
-        mAudioService.postInitSpatializerHeadTrackingSensors(init);
-    }
-
-    synchronized void onInitSensors(boolean init) {
+    synchronized void onInitSensors() {
+        final boolean init = (mSpatLevel != SpatializationLevel.NONE);
         final String action = init ? "initializing" : "releasing";
         if (mSpat == null) {
             Log.e(TAG, "not " + action + " sensors, null spatializer");
@@ -907,7 +890,53 @@ public class SpatializerHelper {
             Log.e(TAG, "not " + action + " sensors, error querying headtracking", e);
             return;
         }
-        initSensors(init);
+        int headHandle = -1;
+        int screenHandle = -1;
+        if (init) {
+            if (mSensorManager == null) {
+                try {
+                    mSensorManager = (SensorManager)
+                            mAudioService.mContext.getSystemService(Context.SENSOR_SERVICE);
+                    mDynSensorCallback = new HelperDynamicSensorCallback();
+                    mSensorManager.registerDynamicSensorCallback(mDynSensorCallback);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error with SensorManager, can't initialize sensors", e);
+                    mSensorManager = null;
+                    mDynSensorCallback = null;
+                    return;
+                }
+            }
+            // initialize sensor handles
+            // TODO-HT update to non-private sensor once head tracker sensor is defined
+            for (Sensor sensor : mSensorManager.getDynamicSensorList(
+                    Sensor.TYPE_DEVICE_PRIVATE_BASE)) {
+                if (sensor.getStringType().equals(HEADTRACKER_SENSOR)) {
+                    headHandle = sensor.getHandle();
+                    break;
+                }
+            }
+            Sensor screenSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+            screenHandle = screenSensor.getHandle();
+        } else {
+            if (mSensorManager != null && mDynSensorCallback != null) {
+                mSensorManager.unregisterDynamicSensorCallback(mDynSensorCallback);
+                mSensorManager = null;
+                mDynSensorCallback = null;
+            }
+            // -1 is disable value for both screen and head tracker handles
+        }
+        try {
+            Log.i(TAG, "setScreenSensor:" + screenHandle);
+            mSpat.setScreenSensor(screenHandle);
+        } catch (Exception e) {
+            Log.e(TAG, "Error calling setScreenSensor:" + screenHandle, e);
+        }
+        try {
+            Log.i(TAG, "setHeadSensor:" + headHandle);
+            mSpat.setHeadSensor(headHandle);
+        } catch (Exception e) {
+            Log.e(TAG, "Error calling setHeadSensor:" + headHandle, e);
+        }
     }
 
     //------------------------------------------------------
