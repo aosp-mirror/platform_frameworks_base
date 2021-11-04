@@ -150,5 +150,10 @@ interface ISystemUiProxy {
      */
     oneway void notifyTaskbarAutohideSuspend(boolean suspend) = 48;
 
-    // Next id = 49
+    /**
+     * Notifies SystemUI to invoke IME Switcher.
+     */
+    void onImeSwitcherPressed() = 49;
+
+    // Next id = 50
 }

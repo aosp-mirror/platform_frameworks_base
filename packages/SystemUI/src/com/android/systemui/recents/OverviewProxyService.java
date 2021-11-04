@@ -17,6 +17,7 @@
 package com.android.systemui.recents;
 
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
@@ -68,6 +69,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.accessibility.AccessibilityManager;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 
@@ -234,6 +236,15 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
                 notifyBackAction(true, -1, -1, true, false);
             });
+        }
+
+        @Override
+        public void onImeSwitcherPressed() throws RemoteException {
+            // TODO(b/204901476) We're intentionally using DEFAULT_DISPLAY for now since
+            // Launcher/Taskbar isn't display aware.
+            mContext.getSystemService(InputMethodManager.class)
+                    .showInputMethodPickerFromSystem(true /* showAuxiliarySubtypes */,
+                            DEFAULT_DISPLAY);
         }
 
         @Override
