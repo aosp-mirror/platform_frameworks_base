@@ -102,6 +102,8 @@ public class QuickStatusBarHeader extends FrameLayout {
     private boolean mHasCenterCutout;
     private boolean mConfigShowBatteryEstimate;
 
+    private boolean mUseCombinedQSHeader;
+
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -158,7 +160,9 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     void onAttach(TintedIconManager iconManager,
             QSExpansionPathInterpolator qsExpansionPathInterpolator,
-            List<String> rssiIgnoredSlots) {
+            List<String> rssiIgnoredSlots,
+            boolean useCombinedQSHeader) {
+        mUseCombinedQSHeader = useCombinedQSHeader;
         mTintedIconManager = iconManager;
         mRssiIgnoredSlots = rssiIgnoredSlots;
         int fillColor = Utils.getColorAttrDefaultColor(getContext(),
@@ -233,8 +237,11 @@ public class QuickStatusBarHeader extends FrameLayout {
         // status bar is already displayed out of QS in split shade
         boolean shouldUseSplitShade =
                 resources.getBoolean(R.bool.config_use_split_notification_shade);
-        mStatusIconsView.setVisibility(shouldUseSplitShade ? View.GONE : View.VISIBLE);
-        mDatePrivacyView.setVisibility(shouldUseSplitShade ? View.GONE : View.VISIBLE);
+
+        mStatusIconsView.setVisibility(
+                shouldUseSplitShade || mUseCombinedQSHeader ? View.GONE : View.VISIBLE);
+        mDatePrivacyView.setVisibility(
+                shouldUseSplitShade || mUseCombinedQSHeader ? View.GONE : View.VISIBLE);
 
         mConfigShowBatteryEstimate = resources.getBoolean(R.bool.config_showBatteryEstimateQSBH);
 
@@ -273,8 +280,8 @@ public class QuickStatusBarHeader extends FrameLayout {
         }
 
         MarginLayoutParams qqsLP = (MarginLayoutParams) mHeaderQsPanel.getLayoutParams();
-        qqsLP.topMargin = mContext.getResources()
-                .getDimensionPixelSize(R.dimen.qqs_layout_margin_top);
+        qqsLP.topMargin = shouldUseSplitShade || !mUseCombinedQSHeader ? mContext.getResources()
+                .getDimensionPixelSize(R.dimen.qqs_layout_margin_top) : qsOffsetHeight;
         mHeaderQsPanel.setLayoutParams(qqsLP);
 
         updateBatteryMode();
