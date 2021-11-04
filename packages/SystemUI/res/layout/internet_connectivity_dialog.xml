@@ -156,6 +156,14 @@
                             style="@style/InternetDialog.NetworkSummary"/>
                     </LinearLayout>
 
+                    <View
+                        android:id="@+id/mobile_toggle_divider"
+                        android:layout_width="1dp"
+                        android:layout_height="28dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="?android:attr/textColorSecondary"/>
+
                     <FrameLayout
                         android:layout_width="@dimen/settingslib_switch_track_width"
                         android:layout_height="48dp"
@@ -367,8 +375,9 @@
                 android:id="@+id/done_layout"
                 android:layout_width="67dp"
                 android:layout_height="48dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="24dp"
-                android:layout_marginBottom="40dp"
+                android:layout_marginBottom="34dp"
                 android:layout_gravity="end|center_vertical"
                 android:clickable="true"
                 android:focusable="true">

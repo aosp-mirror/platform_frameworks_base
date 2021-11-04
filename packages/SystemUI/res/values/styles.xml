@@ -947,4 +947,10 @@
 
     <style name="TextAppearance.InternetDialog.Secondary.Active"/>
 
+    <style name="InternetDialog.Divider">
+        <item name="android:background">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="InternetDialog.Divider.Active"/>
+
 </resources>

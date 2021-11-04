@@ -56,6 +56,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
+import com.android.settingslib.Utils;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.accessibility.floatingmenu.AnnotationLinkSpan;
@@ -120,6 +121,7 @@ public class InternetDialog extends SystemUIDialog implements
     private TextView mMobileTitleText;
     private TextView mMobileSummaryText;
     private Switch mMobileDataToggle;
+    private View mMobileToggleDivider;
     private Switch mWiFiToggle;
     private FrameLayout mDoneLayout;
     private Drawable mBackgroundOn;
@@ -207,6 +209,7 @@ public class InternetDialog extends SystemUIDialog implements
         mSignalIcon = mDialogView.requireViewById(R.id.signal_icon);
         mMobileTitleText = mDialogView.requireViewById(R.id.mobile_title);
         mMobileSummaryText = mDialogView.requireViewById(R.id.mobile_summary);
+        mMobileToggleDivider = mDialogView.requireViewById(R.id.mobile_toggle_divider);
         mMobileDataToggle = mDialogView.requireViewById(R.id.mobile_toggle);
         mWiFiToggle = mDialogView.requireViewById(R.id.wifi_toggle);
         mBackgroundOn = mContext.getDrawable(R.drawable.settingslib_switch_bar_bg_on);
@@ -377,6 +380,14 @@ public class InternetDialog extends SystemUIDialog implements
                     : R.style.TextAppearance_InternetDialog_Secondary);
             mMobileNetworkLayout.setBackground(
                     isCarrierNetworkConnected ? mBackgroundOn : mBackgroundOff);
+
+            TypedArray array = mContext.obtainStyledAttributes(
+                    R.style.InternetDialog_Divider_Active, new int[]{android.R.attr.background});
+            int dividerColor = Utils.getColorAttrDefaultColor(mContext,
+                    android.R.attr.textColorSecondary);
+            mMobileToggleDivider.setBackgroundColor(isCarrierNetworkConnected
+                    ? array.getColor(0, dividerColor) : dividerColor);
+            array.recycle();
 
             mMobileDataToggle.setVisibility(mCanConfigMobileData ? View.VISIBLE : View.INVISIBLE);
         }
