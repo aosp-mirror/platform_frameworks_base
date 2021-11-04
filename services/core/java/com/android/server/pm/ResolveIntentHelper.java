@@ -51,6 +51,7 @@ import android.util.Slog;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -428,7 +429,7 @@ final class ResolveIntentHelper {
                                 && isTargetHiddenFromInstantApp));
                 final boolean blockNormalResolution = !isTargetInstantApp && !isCallerInstantApp
                         && mPm.shouldFilterApplicationLocked(
-                        mPm.getPackageSettingInternal(pi.applicationInfo.packageName,
+                        mPm.getPackageStateInternal(pi.applicationInfo.packageName,
                                 Process.SYSTEM_UID), callingUid, userId);
                 if (!blockResolution && !blockNormalResolution) {
                     final ResolveInfo ri = new ResolveInfo();
@@ -475,8 +476,8 @@ final class ResolveIntentHelper {
             if (instantAppPkgName == null) {
                 SettingBase callingSetting =
                         mPm.mSettings.getSettingLPr(UserHandle.getAppId(callingUid));
-                PackageSetting resolvedSetting =
-                        mPm.getPackageSettingInternal(info.providerInfo.packageName, 0);
+                PackageStateInternal resolvedSetting =
+                        mPm.getPackageStateInternal(info.providerInfo.packageName, 0);
                 if (!mPm.mAppsFilter.shouldFilterApplication(
                         callingUid, callingSetting, resolvedSetting, userId)) {
                     continue;

@@ -37,6 +37,7 @@ import android.content.pm.UserInfo;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -164,18 +165,18 @@ public interface Computer {
             String ephemeralPkgName, boolean allowDynamicSplits, int filterCallingUid,
             boolean resolveForStart, int userId, Intent intent);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    PackageInfo generatePackageInfo(PackageSetting ps, int flags, int userId);
+    PackageInfo generatePackageInfo(PackageStateInternal ps, int flags, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     PackageInfo getPackageInfo(String packageName, int flags, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     PackageInfo getPackageInfoInternal(String packageName, long versionCode, int flags,
             int filterCallingUid, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    PackageSetting getPackageSetting(String packageName);
+    PackageStateInternal getPackageStateInternal(String packageName);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
-    PackageSetting getPackageSettingInternal(String packageName, int callingUid);
+    PackageStateInternal getPackageStateInternal(String packageName, int callingUid);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
-    @Nullable PackageState getPackageState(@NonNull String packageName);
+    @Nullable PackageState getPackageStateCopied(@NonNull String packageName);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     ParceledListSlice<PackageInfo> getInstalledPackages(int flags, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
@@ -198,7 +199,7 @@ public interface Computer {
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean canViewInstantApps(int callingUid, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    boolean filterSharedLibPackageLPr(@Nullable PackageSetting ps, int uid, int userId,
+    boolean filterSharedLibPackageLPr(@Nullable PackageStateInternal ps, int uid, int userId,
             int flags);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean isCallerSameApp(String packageName, int uid);
@@ -217,11 +218,11 @@ public interface Computer {
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean isSameProfileGroup(@UserIdInt int callerUserId, @UserIdInt int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    boolean shouldFilterApplicationLocked(@Nullable PackageSetting ps, int callingUid,
+    boolean shouldFilterApplicationLocked(@Nullable PackageStateInternal ps, int callingUid,
             @Nullable ComponentName component, @PackageManager.ComponentType int componentType,
             int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    boolean shouldFilterApplicationLocked(@Nullable PackageSetting ps, int callingUid,
+    boolean shouldFilterApplicationLocked(@Nullable PackageStateInternal ps, int callingUid,
             int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean shouldFilterApplicationLocked(@NonNull SharedUserSetting sus, int callingUid,

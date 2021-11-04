@@ -75,6 +75,7 @@ import com.android.server.pm.dex.DexoptUtils;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import dalvik.system.DexFile;
 
@@ -172,7 +173,7 @@ public class PackageDexOptimizer {
      * synchronized on {@link #mInstallLock}.
      */
     @DexOptResult
-    int performDexOpt(AndroidPackage pkg, @NonNull PackageSetting pkgSetting,
+    int performDexOpt(AndroidPackage pkg, @NonNull PackageStateInternal pkgSetting,
             String[] instructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
         if (PLATFORM_PACKAGE_NAME.equals(pkg.getPackageName())) {
@@ -212,12 +213,12 @@ public class PackageDexOptimizer {
      */
     @GuardedBy("mInstallLock")
     @DexOptResult
-    private int performDexOptLI(AndroidPackage pkg, @NonNull PackageSetting pkgSetting,
+    private int performDexOptLI(AndroidPackage pkg, @NonNull PackageStateInternal pkgSetting,
             String[] targetInstructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
         // ClassLoader only refers non-native (jar) shared libraries and must ignore
         // native (so) shared libraries. See also LoadedApk#createSharedLibraryLoader().
-        final List<SharedLibraryInfo> sharedLibraries = pkgSetting.getPkgState()
+        final List<SharedLibraryInfo> sharedLibraries = pkgSetting.getTransientState()
                 .getNonNativeUsesLibraryInfos();
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(
@@ -360,10 +361,11 @@ public class PackageDexOptimizer {
      */
     @GuardedBy("mInstallLock")
     @DexOptResult
-    private int dexOptPath(AndroidPackage pkg, @NonNull PackageSetting pkgSetting, String path,
-            String isa, String compilerFilter, int profileAnalysisResult, String classLoaderContext,
-            int dexoptFlags, int uid, CompilerStats.PackageStats packageStats, boolean downgrade,
-            String profileName, String dexMetadataPath, int compilationReason) {
+    private int dexOptPath(AndroidPackage pkg, @NonNull PackageStateInternal pkgSetting,
+            String path, String isa, String compilerFilter, int profileAnalysisResult,
+            String classLoaderContext, int dexoptFlags, int uid,
+            CompilerStats.PackageStats packageStats, boolean downgrade, String profileName,
+            String dexMetadataPath, int compilationReason) {
         int dexoptNeeded = getDexoptNeeded(path, isa, compilerFilter, classLoaderContext,
                 profileAnalysisResult, downgrade);
         if (Math.abs(dexoptNeeded) == DexFile.NO_DEXOPT_NEEDED) {
@@ -371,7 +373,7 @@ public class PackageDexOptimizer {
         }
 
         String oatDir = getPackageOatDirIfSupported(pkg,
-                pkgSetting.getPkgState().isUpdatedSystemApp());
+                pkgSetting.getTransientState().isUpdatedSystemApp());
 
         Log.i(TAG, "Running dexopt (dexoptNeeded=" + dexoptNeeded + ") on: " + path
                 + " pkg=" + pkg.getPackageName() + " isa=" + isa
@@ -615,8 +617,8 @@ public class PackageDexOptimizer {
     /**
      * Dumps the dexopt state of the given package {@code pkg} to the given {@code PrintWriter}.
      */
-    void dumpDexoptState(IndentingPrintWriter pw, AndroidPackage pkg, PackageSetting pkgSetting,
-            PackageDexUsage.PackageUseInfo useInfo) {
+    void dumpDexoptState(IndentingPrintWriter pw, AndroidPackage pkg,
+            PackageStateInternal pkgSetting, PackageDexUsage.PackageUseInfo useInfo) {
         final String[] instructionSets = getAppDexInstructionSets(
                 AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting),
                 AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting));
@@ -753,7 +755,7 @@ public class PackageDexOptimizer {
                 info.getHiddenApiEnforcementPolicy(), info.splitDependencies,
                 info.requestsIsolatedSplitLoading(), compilerFilter, options);
     }
-    private int getDexFlags(AndroidPackage pkg, @NonNull PackageSetting pkgSetting,
+    private int getDexFlags(AndroidPackage pkg, @NonNull PackageStateInternal pkgSetting,
             String compilerFilter, DexoptOptions options) {
         return getDexFlags(pkg.isDebuggable(),
                 AndroidPackageUtils.getHiddenApiEnforcementPolicy(pkg, pkgSetting),

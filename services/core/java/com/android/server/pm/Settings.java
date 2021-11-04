@@ -825,7 +825,7 @@ public final class Settings implements Watchable, Snappable {
         PackageSetting ret = addPackageLPw(name, p.getRealName(), p.getPath(),
                 p.getLegacyNativeLibraryPath(), p.getPrimaryCpuAbi(),
                 p.getSecondaryCpuAbi(), p.getCpuAbiOverride(),
-                p.getAppId(), p.getLongVersionCode(), p.pkgFlags, p.pkgPrivateFlags,
+                p.getAppId(), p.getVersionCode(), p.pkgFlags, p.pkgPrivateFlags,
                 p.usesStaticLibraries, p.usesStaticLibrariesVersions, p.mimeGroups,
                 mDomainVerificationManager.generateNewId());
         if (ret != null) {
@@ -2688,7 +2688,7 @@ public final class Settings implements Watchable, Snappable {
         serializer.attributeLongHex(null, "ft", pkg.getLastModifiedTime());
         serializer.attributeLongHex(null, "it", pkg.getFirstInstallTime());
         serializer.attributeLongHex(null, "ut", pkg.getLastUpdateTime());
-        serializer.attributeLong(null, "version", pkg.getLongVersionCode());
+        serializer.attributeLong(null, "version", pkg.getVersionCode());
         if (pkg.getLegacyNativeLibraryPath() != null) {
             serializer.attribute(null, "nativeLibraryPath", pkg.getLegacyNativeLibraryPath());
         }
@@ -2741,7 +2741,7 @@ public final class Settings implements Watchable, Snappable {
         serializer.attributeLongHex(null, "ft", pkg.getLastModifiedTime());
         serializer.attributeLongHex(null, "it", pkg.getFirstInstallTime());
         serializer.attributeLongHex(null, "ut", pkg.getLastUpdateTime());
-        serializer.attributeLong(null, "version", pkg.getLongVersionCode());
+        serializer.attributeLong(null, "version", pkg.getVersionCode());
         if (pkg.getSharedUser() == null) {
             serializer.attributeInt(null, "userId", pkg.getAppId());
         } else {
@@ -4403,7 +4403,7 @@ public final class Settings implements Watchable, Snappable {
             pw.print(",");
             pw.print(ps.getAppId());
             pw.print(",");
-            pw.print(ps.getLongVersionCode());
+            pw.print(ps.getVersionCode());
             pw.print(",");
             pw.print(ps.getFirstInstallTime());
             pw.print(",");
@@ -4483,7 +4483,7 @@ public final class Settings implements Watchable, Snappable {
             pw.print(prefix); pw.print("  secondaryCpuAbi="); pw.println(ps.getSecondaryCpuAbi());
             pw.print(prefix); pw.print("  cpuAbiOverride="); pw.println(ps.getCpuAbiOverride());
         }
-        pw.print(prefix); pw.print("  versionCode="); pw.print(ps.getLongVersionCode());
+        pw.print(prefix); pw.print("  versionCode="); pw.print(ps.getVersionCode());
         if (pkg != null) {
             pw.print(" minSdk="); pw.print(pkg.getMinSdkVersion());
             pw.print(" targetSdk="); pw.println(pkg.getTargetSdkVersion());

@@ -3321,7 +3321,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private boolean isPackageExisted(String packageName) {
         return LocalServices.getService(PackageManagerInternal.class)
-                .getPackageSetting(packageName) != null;
+                .getPackageStateInternal(packageName) != null;
     }
 
     /**

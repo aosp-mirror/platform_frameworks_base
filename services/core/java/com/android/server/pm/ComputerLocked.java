@@ -32,6 +32,7 @@ import android.content.pm.SigningDetails;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -121,16 +122,16 @@ public final class ComputerLocked extends ComputerEngine {
                     filterCallingUid, userId);
         }
     }
-    public PackageSetting getPackageSettingInternal(String packageName, int callingUid) {
+    public PackageStateInternal getPackageStateInternal(String packageName, int callingUid) {
         synchronized (mLock) {
-            return super.getPackageSettingInternal(packageName, callingUid);
+            return super.getPackageStateInternal(packageName, callingUid);
         }
     }
 
     @Nullable
-    public PackageState getPackageState(@NonNull String packageName) {
+    public PackageState getPackageStateCopied(@NonNull String packageName) {
         synchronized (mLock) {
-            return super.getPackageState(packageName);
+            return super.getPackageStateCopied(packageName);
         }
     }
 

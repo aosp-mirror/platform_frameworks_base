@@ -51,6 +51,7 @@ import com.android.server.pm.PackageSetting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.AndroidPackageApi;
 import com.android.server.pm.pkg.PackageState;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -657,7 +658,8 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
     @Nullable
     public abstract AndroidPackageApi getAndroidPackage(@NonNull String packageName);
 
-    public abstract @Nullable PackageSetting getPackageSetting(@NonNull String packageName);
+    @Nullable
+    public abstract PackageStateInternal getPackageStateInternal(@NonNull String packageName);
 
     public abstract @Nullable PackageState getPackageState(@NonNull String packageName);
 

@@ -19,6 +19,7 @@ package com.android.server.pm.pkg;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.UserIdInt;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -130,7 +131,7 @@ public interface PackageState {
      * Cached here in case the physical code directory on device is unmounted.
      * @see AndroidPackageApi#getLongVersionCode()
      */
-    long getLongVersionCode();
+    long getVersionCode();
 
     /**
      * Maps mime group name to the set of Mime types in a group. Mime groups declared by app are
@@ -147,6 +148,7 @@ public interface PackageState {
     String getPackageName();
 
     /**
+     * TODO: Rename this to getCodePath
      * @see AndroidPackageApi#getPath()
      */
     @NonNull
@@ -176,8 +178,18 @@ public interface PackageState {
     @NonNull
     SigningInfo getSigningInfo();
 
-    @Nullable
+    @NonNull
     SparseArray<? extends PackageUserState> getUserStates();
+
+    /**
+     * @return the result of {@link #getUserStates()}.get(userId) or
+     * {@link PackageUserState#DEFAULT} if the state doesn't exist.
+     */
+    @NonNull
+    default PackageUserState getUserStateOrDefault(@UserIdInt int userId) {
+        PackageUserState userState = getUserStates().get(userId);
+        return userState == null ? PackageUserState.DEFAULT : userState;
+    }
 
     /**
      * The actual files resolved for each shared library.
