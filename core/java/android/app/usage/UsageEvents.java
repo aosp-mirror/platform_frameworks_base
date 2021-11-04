@@ -15,7 +15,6 @@
  */
 package android.app.usage;
 
-import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -585,7 +584,6 @@ public final class UsageEvents implements Parcelable {
          * <p/>
          * See {@link System#currentTimeMillis()}.
          */
-        @CurrentTimeMillisLong
         public long getTimeStamp() {
             return mTimeStamp;
         }
@@ -803,9 +801,6 @@ public final class UsageEvents implements Parcelable {
      * @return true if an event was available, false if there are no more events.
      */
     public boolean getNextEvent(Event eventOut) {
-        if (eventOut == null) {
-            throw new IllegalArgumentException("Given eventOut must not be null");
-        }
         if (mIndex >= mEventCount) {
             return false;
         }

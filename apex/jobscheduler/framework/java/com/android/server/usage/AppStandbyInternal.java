@@ -1,6 +1,5 @@
 package com.android.server.usage;
 
-import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.usage.AppStandbyInfo;
@@ -24,7 +23,7 @@ public interface AppStandbyInternal {
         try {
             final Class<?> clazz = Class.forName("com.android.server.usage.AppStandbyController",
                     true, loader);
-            final Constructor<?> ctor = clazz.getConstructor(Context.class);
+            final Constructor<?> ctor =  clazz.getConstructor(Context.class);
             return (AppStandbyInternal) ctor.newInstance(context);
         } catch (NoSuchMethodException | InstantiationException
                 | IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
@@ -71,16 +70,6 @@ public interface AppStandbyInternal {
     void setLastJobRunTime(String packageName, int userId, long elapsedRealtime);
 
     long getTimeSinceLastJobRun(String packageName, int userId);
-
-    void setEstimatedLaunchTime(String packageName, int userId,
-            @CurrentTimeMillisLong long launchTimeMs);
-
-    /**
-     * Returns the saved estimated launch time for the app. Will return {@code Long#MAX_VALUE} if no
-     * value is saved.
-     */
-    @CurrentTimeMillisLong
-    long getEstimatedLaunchTime(String packageName, int userId);
 
     /**
      * Returns the time (in milliseconds) since the app was last interacted with by the user.

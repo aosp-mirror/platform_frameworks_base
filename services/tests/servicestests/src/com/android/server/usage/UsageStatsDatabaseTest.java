@@ -67,10 +67,9 @@ public class UsageStatsDatabaseTest {
     private static final UsageStatsDatabase.StatCombiner<IntervalStats> mIntervalStatsVerifier =
             new UsageStatsDatabase.StatCombiner<IntervalStats>() {
                 @Override
-                public boolean combine(IntervalStats stats, boolean mutable,
+                public void combine(IntervalStats stats, boolean mutable,
                         List<IntervalStats> accResult) {
                     accResult.add(stats);
-                    return true;
                 }
             };
 

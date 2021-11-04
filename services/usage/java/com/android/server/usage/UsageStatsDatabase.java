@@ -799,10 +799,8 @@ public class UsageStatsDatabase {
          * @param stats             The {@link IntervalStats} object selected.
          * @param mutable           Whether or not the data inside the stats object is mutable.
          * @param accumulatedResult The list to which to add extracted data.
-         * @return Whether or not to continue providing new stats to this combiner. If {@code false}
-         * is returned, then combine will no longer be called.
          */
-        boolean combine(IntervalStats stats, boolean mutable, List<T> accumulatedResult);
+        void combine(IntervalStats stats, boolean mutable, List<T> accumulatedResult);
     }
 
     /**
@@ -865,9 +863,8 @@ public class UsageStatsDatabase {
 
                 try {
                     readLocked(f, stats);
-                    if (beginTime < stats.endTime
-                            && !combiner.combine(stats, false, results)) {
-                        break;
+                    if (beginTime < stats.endTime) {
+                        combiner.combine(stats, false, results);
                     }
                 } catch (Exception e) {
                     Slog.e(TAG, "Failed to read usage stats file", e);

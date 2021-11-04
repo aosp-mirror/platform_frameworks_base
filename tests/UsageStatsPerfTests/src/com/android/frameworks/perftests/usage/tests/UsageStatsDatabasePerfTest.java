@@ -62,13 +62,12 @@ public class UsageStatsDatabasePerfTest {
     private static final StatCombiner<UsageEvents.Event> sUsageStatsCombiner =
             new StatCombiner<UsageEvents.Event>() {
                 @Override
-                public boolean combine(IntervalStats stats, boolean mutable,
+                public void combine(IntervalStats stats, boolean mutable,
                         List<UsageEvents.Event> accResult) {
                     final int size = stats.events.size();
                     for (int i = 0; i < size; i++) {
                         accResult.add(stats.events.get(i));
                     }
-                    return true;
                 }
             };
 
