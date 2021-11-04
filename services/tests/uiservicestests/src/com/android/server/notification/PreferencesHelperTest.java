@@ -29,6 +29,8 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION;
+import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.util.StatsLog.ANNOTATION_ID_IS_UID;
 
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
@@ -102,6 +104,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.StatsEvent;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
@@ -111,6 +114,9 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;
+import com.android.server.notification.PermissionHelper.PackagePermission;
+
+import com.google.common.collect.ImmutableMap;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -579,6 +585,394 @@ public class PreferencesHelperTest extends UiServiceTestCase {
             }
         }
         assertTrue(foundChannel2Group);
+    }
+
+    @Test
+    public void testReadXml_oldXml_migrates() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
+
+        String xml = "<ranking version=\"2\">\n"
+                + "<package name=\"" + PKG_N_MR1 + "\" show_badge=\"true\">\n"
+                + "<channel id=\"idn\" name=\"name\" importance=\"2\" />\n"
+                + "<channel id=\"miscellaneous\" name=\"Uncategorized\" />\n"
+                + "</package>\n"
+                + "<package name=\"" + PKG_O + "\" importance=\"0\">\n"
+                + "<channel id=\"ido\" name=\"name2\" importance=\"2\" show_badge=\"true\"/>\n"
+                + "</package>\n"
+                + "<package name=\"" + PKG_P + "\" importance=\"2\">\n"
+                + "<channel id=\"idp\" name=\"name3\" importance=\"4\" locked=\"2\" />\n"
+                + "</package>\n"
+                + "</ranking>\n";
+        NotificationChannel idn = new NotificationChannel("idn", "name", IMPORTANCE_LOW);
+        idn.setSound(null, new AudioAttributes.Builder()
+                .setUsage(USAGE_NOTIFICATION)
+                .setContentType(CONTENT_TYPE_SONIFICATION)
+                .setFlags(0)
+                .build());
+        idn.setShowBadge(false);
+        NotificationChannel ido = new NotificationChannel("ido", "name2", IMPORTANCE_LOW);
+        ido.setShowBadge(true);
+        ido.setSound(null, new AudioAttributes.Builder()
+                .setUsage(USAGE_NOTIFICATION)
+                .setContentType(CONTENT_TYPE_SONIFICATION)
+                .setFlags(0)
+                .build());
+        NotificationChannel idp = new NotificationChannel("idp", "name3", IMPORTANCE_HIGH);
+        idp.lockFields(2);
+        idp.setSound(null, new AudioAttributes.Builder()
+                .setUsage(USAGE_NOTIFICATION)
+                .setContentType(CONTENT_TYPE_SONIFICATION)
+                .setFlags(0)
+                .build());
+
+        // Notifications enabled, not user set
+        PackagePermission nMr1Expected = new PackagePermission(PKG_N_MR1, 0, true, false);
+        // Notifications not enabled, so user set
+        PackagePermission oExpected = new PackagePermission(PKG_O, 0, false, true);
+        // Notifications enabled, user set b/c channel modified
+        PackagePermission pExpected = new PackagePermission(PKG_P, 0, true, true);
+
+        loadByteArrayXml(xml.getBytes(), true, UserHandle.USER_SYSTEM);
+
+        assertTrue(mHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
+
+        assertEquals(idn, mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, idn.getId(), false));
+        compareChannels(ido, mHelper.getNotificationChannel(PKG_O, UID_O, ido.getId(), false));
+        compareChannels(idp, mHelper.getNotificationChannel(PKG_P, UID_P, idp.getId(), false));
+
+        verify(mPermissionHelper).setNotificationPermission(nMr1Expected);
+        verify(mPermissionHelper).setNotificationPermission(oExpected);
+        verify(mPermissionHelper).setNotificationPermission(pExpected);
+    }
+
+    @Test
+    public void testReadXml_newXml_noMigration() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
+
+        String xml = "<ranking version=\"3\">\n"
+                + "<package name=\"" + PKG_N_MR1 + "\" show_badge=\"true\">\n"
+                + "<channel id=\"idn\" name=\"name\" importance=\"2\"/>\n"
+                + "<channel id=\"miscellaneous\" name=\"Uncategorized\" />\n"
+                + "</package>\n"
+                + "<package name=\"" + PKG_O + "\" >\n"
+                + "<channel id=\"ido\" name=\"name2\" importance=\"2\" show_badge=\"true\"/>\n"
+                + "</package>\n"
+                + "<package name=\"" + PKG_P + "\" >\n"
+                + "<channel id=\"idp\" name=\"name3\" importance=\"4\" locked=\"2\" />\n"
+                + "</package>\n"
+                + "</ranking>\n";
+        NotificationChannel idn = new NotificationChannel("idn", "name", IMPORTANCE_LOW);
+        idn.setSound(null, new AudioAttributes.Builder()
+                .setUsage(USAGE_NOTIFICATION)
+                .setContentType(CONTENT_TYPE_SONIFICATION)
+                .setFlags(0)
+                .build());
+        idn.setShowBadge(false);
+        NotificationChannel ido = new NotificationChannel("ido", "name2", IMPORTANCE_LOW);
+        ido.setShowBadge(true);
+        ido.setSound(null, new AudioAttributes.Builder()
+                .setUsage(USAGE_NOTIFICATION)
+                .setContentType(CONTENT_TYPE_SONIFICATION)
+                .setFlags(0)
+                .build());
+        NotificationChannel idp = new NotificationChannel("idp", "name3", IMPORTANCE_HIGH);
+        idp.lockFields(2);
+        idp.setSound(null, new AudioAttributes.Builder()
+                .setUsage(USAGE_NOTIFICATION)
+                .setContentType(CONTENT_TYPE_SONIFICATION)
+                .setFlags(0)
+                .build());
+
+        loadByteArrayXml(xml.getBytes(), true, UserHandle.USER_SYSTEM);
+
+        assertTrue(mHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
+
+        assertEquals(idn, mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, idn.getId(), false));
+        compareChannels(ido, mHelper.getNotificationChannel(PKG_O, UID_O, ido.getId(), false));
+        compareChannels(idp, mHelper.getNotificationChannel(PKG_P, UID_P, idp.getId(), false));
+
+        verify(mPermissionHelper, never()).setNotificationPermission(any());
+    }
+
+    @Test
+    public void testChannelXmlForNonBackup_postMigration() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
+
+        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), true);
+        appPermissions.put(new Pair(3, "third"), false);
+        appPermissions.put(new Pair(UID_P, PKG_P), true);
+        appPermissions.put(new Pair(UID_O, PKG_O), false);
+        appPermissions.put(new Pair(UID_N_MR1, PKG_N_MR1), true);
+
+        when(mPermissionHelper.getNotificationPermissionValues(UserHandle.USER_SYSTEM))
+                .thenReturn(appPermissions);
+
+        NotificationChannelGroup ncg = new NotificationChannelGroup("1", "bye");
+        NotificationChannelGroup ncg2 = new NotificationChannelGroup("2", "hello");
+        NotificationChannel channel1 =
+                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+        channel1.setSound(null, null);
+        NotificationChannel channel2 =
+                new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
+        channel2.setDescription("descriptions for all");
+        channel2.setSound(null, null);
+        channel2.enableLights(true);
+        channel2.setBypassDnd(true);
+        channel2.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
+        channel2.enableVibration(false);
+        channel2.setGroup(ncg.getId());
+        channel2.setLightColor(Color.BLUE);
+        NotificationChannel channel3 = new NotificationChannel("id3", "NAM3", IMPORTANCE_HIGH);
+        channel3.enableVibration(true);
+
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, ncg, true);
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, ncg2, true);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1, true, false);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel2, false, false);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel3, false, false);
+        mHelper.createNotificationChannel(PKG_O, UID_O, getChannel(), true, false);
+
+        mHelper.setShowBadge(PKG_N_MR1, UID_N_MR1, true);
+        mHelper.setInvalidMessageSent(PKG_P, UID_P);
+        mHelper.setValidMessageSent(PKG_P, UID_P);
+        mHelper.setInvalidMsgAppDemoted(PKG_P, UID_P, true);
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(
+                PKG_N_MR1, UID_N_MR1, false, UserHandle.USER_SYSTEM);
+        String expected = "<ranking version=\"3\">\n"
+                + "<package name=\"com.example.o\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
+                + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" uid=\"1111\">\n"
+                + "<channel id=\"id\" name=\"name\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" orig_imp=\"2\" />\n"
+                + "</package>\n"
+                + "<package name=\"com.example.p\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
+                + " user_demote_msg_app=\"true\" uid=\"2222\" />\n"
+                + "<package name=\"com.example.n_mr1\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
+                + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" uid=\"0\">\n"
+                + "<channelGroup id=\"1\" name=\"bye\" blocked=\"false\" locked=\"0\" />\n"
+                + "<channelGroup id=\"2\" name=\"hello\" blocked=\"false\" locked=\"0\" />\n"
+                + "<channel id=\"id1\" name=\"name1\" importance=\"4\" show_badge=\"true\" "
+                + "orig_imp=\"4\" />\n"
+                + "<channel id=\"id2\" name=\"name2\" desc=\"descriptions for all\" "
+                + "importance=\"2\" priority=\"2\" visibility=\"-1\" lights=\"true\" "
+                + "light_color=\"-16776961\" show_badge=\"true\" group=\"1\" orig_imp=\"2\" />\n"
+                + "<channel id=\"id3\" name=\"NAM3\" importance=\"4\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" vibration_enabled=\"true\" show_badge=\"true\" "
+                + "orig_imp=\"4\" />\n"
+                + "<channel id=\"miscellaneous\" name=\"Uncategorized\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "</package>\n"
+                + "</ranking>";
+        assertThat(baos.toString()).contains(expected);
+    }
+
+    @Test
+    public void testChannelXmlForBackup_postMigration() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
+
+        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), true);
+        appPermissions.put(new Pair(3, "third"), false);
+        appPermissions.put(new Pair(UID_P, PKG_P), true);
+        appPermissions.put(new Pair(UID_O, PKG_O), false);
+        appPermissions.put(new Pair(UID_N_MR1, PKG_N_MR1), true);
+
+        when(mPermissionHelper.getNotificationPermissionValues(UserHandle.USER_SYSTEM))
+                .thenReturn(appPermissions);
+
+        NotificationChannelGroup ncg = new NotificationChannelGroup("1", "bye");
+        NotificationChannelGroup ncg2 = new NotificationChannelGroup("2", "hello");
+        NotificationChannel channel1 =
+                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+        channel1.setSound(null, null);
+        NotificationChannel channel2 =
+                new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
+        channel2.setDescription("descriptions for all");
+        channel2.setSound(null, null);
+        channel2.enableLights(true);
+        channel2.setBypassDnd(true);
+        channel2.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
+        channel2.enableVibration(false);
+        channel2.setGroup(ncg.getId());
+        channel2.setLightColor(Color.BLUE);
+        NotificationChannel channel3 = new NotificationChannel("id3", "NAM3", IMPORTANCE_HIGH);
+        channel3.enableVibration(true);
+
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, ncg, true);
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, ncg2, true);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1, true, false);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel2, false, false);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel3, false, false);
+        mHelper.createNotificationChannel(PKG_O, UID_O, getChannel(), true, false);
+
+        mHelper.setShowBadge(PKG_N_MR1, UID_N_MR1, true);
+        mHelper.setInvalidMessageSent(PKG_P, UID_P);
+        mHelper.setValidMessageSent(PKG_P, UID_P);
+        mHelper.setInvalidMsgAppDemoted(PKG_P, UID_P, true);
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(
+                PKG_N_MR1, UID_N_MR1, true, UserHandle.USER_SYSTEM);
+        String expected = "<ranking version=\"3\">\n"
+                // Importance 0 because off in permissionhelper
+                + "<package name=\"com.example.o\" importance=\"0\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
+                + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\">\n"
+                + "<channel id=\"id\" name=\"name\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" orig_imp=\"2\" />\n"
+                + "</package>\n"
+                // Importance default because on in permission helper
+                + "<package name=\"com.example.p\" importance=\"3\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
+                + " user_demote_msg_app=\"true\" />\n"
+                // Importance default because on in permission helper
+                + "<package name=\"com.example.n_mr1\" importance=\"3\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
+                + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\">\n"
+                + "<channelGroup id=\"1\" name=\"bye\" blocked=\"false\" locked=\"0\" />\n"
+                + "<channelGroup id=\"2\" name=\"hello\" blocked=\"false\" locked=\"0\" />\n"
+                + "<channel id=\"id1\" name=\"name1\" importance=\"4\" show_badge=\"true\" "
+                + "orig_imp=\"4\" />\n"
+                + "<channel id=\"id2\" name=\"name2\" desc=\"descriptions for all\" "
+                + "importance=\"2\" priority=\"2\" visibility=\"-1\" lights=\"true\" "
+                + "light_color=\"-16776961\" show_badge=\"true\" group=\"1\" orig_imp=\"2\" />\n"
+                + "<channel id=\"id3\" name=\"NAM3\" importance=\"4\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" vibration_enabled=\"true\" show_badge=\"true\" "
+                + "orig_imp=\"4\" />\n"
+                + "<channel id=\"miscellaneous\" name=\"Uncategorized\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "</package>\n"
+                // Packages that exist solely in permissionhelper
+                + "<package name=\"first\" importance=\"3\" />\n"
+                + "<package name=\"third\" importance=\"0\" />\n"
+                + "</ranking>";
+        assertThat(baos.toString()).contains(expected);
+    }
+
+    @Test
+    public void testChannelXmlForBackup_postMigration_noExternal() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
+
+        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(UID_P, PKG_P), true);
+        appPermissions.put(new Pair(UID_O, PKG_O), false);
+        when(mPermissionHelper.getNotificationPermissionValues(UserHandle.USER_SYSTEM))
+                .thenReturn(appPermissions);
+
+        NotificationChannelGroup ncg = new NotificationChannelGroup("1", "bye");
+        NotificationChannelGroup ncg2 = new NotificationChannelGroup("2", "hello");
+        NotificationChannel channel1 =
+                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+        channel1.setSound(null, null);
+        NotificationChannel channel2 =
+                new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
+        channel2.setDescription("descriptions for all");
+        channel2.setSound(null, null);
+        channel2.enableLights(true);
+        channel2.setBypassDnd(true);
+        channel2.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
+        channel2.enableVibration(false);
+        channel2.setGroup(ncg.getId());
+        channel2.setLightColor(Color.BLUE);
+        NotificationChannel channel3 = new NotificationChannel("id3", "NAM3", IMPORTANCE_HIGH);
+        channel3.enableVibration(true);
+
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, ncg, true);
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, ncg2, true);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1, true, false);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel2, false, false);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel3, false, false);
+        mHelper.createNotificationChannel(PKG_O, UID_O, getChannel(), true, false);
+
+        mHelper.setShowBadge(PKG_N_MR1, UID_N_MR1, true);
+        mHelper.setInvalidMessageSent(PKG_P, UID_P);
+        mHelper.setValidMessageSent(PKG_P, UID_P);
+        mHelper.setInvalidMsgAppDemoted(PKG_P, UID_P, true);
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(
+                PKG_N_MR1, UID_N_MR1, true, UserHandle.USER_SYSTEM);
+        String expected = "<ranking version=\"3\">\n"
+                // Importance 0 because off in permissionhelper
+                + "<package name=\"com.example.o\" importance=\"0\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
+                + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\">\n"
+                + "<channel id=\"id\" name=\"name\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" orig_imp=\"2\" />\n"
+                + "</package>\n"
+                // Importance default because on in permission helper
+                + "<package name=\"com.example.p\" importance=\"3\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
+                + " user_demote_msg_app=\"true\" />\n"
+                // Importance missing because missing from permission helper
+                + "<package name=\"com.example.n_mr1\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
+                + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\">\n"
+                + "<channelGroup id=\"1\" name=\"bye\" blocked=\"false\" locked=\"0\" />\n"
+                + "<channelGroup id=\"2\" name=\"hello\" blocked=\"false\" locked=\"0\" />\n"
+                + "<channel id=\"id1\" name=\"name1\" importance=\"4\" show_badge=\"true\" "
+                + "orig_imp=\"4\" />\n"
+                + "<channel id=\"id2\" name=\"name2\" desc=\"descriptions for all\" "
+                + "importance=\"2\" priority=\"2\" visibility=\"-1\" lights=\"true\" "
+                + "light_color=\"-16776961\" show_badge=\"true\" group=\"1\" orig_imp=\"2\" />\n"
+                + "<channel id=\"id3\" name=\"NAM3\" importance=\"4\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" vibration_enabled=\"true\" show_badge=\"true\" "
+                + "orig_imp=\"4\" />\n"
+                + "<channel id=\"miscellaneous\" name=\"Uncategorized\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "</package>\n"
+                + "</ranking>";
+        assertThat(baos.toString()).contains(expected);
+    }
+
+    @Test
+    public void testChannelXmlForBackup_postMigration_noLocalSettings() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
+
+        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), true);
+        appPermissions.put(new Pair(3, "third"), false);
+        appPermissions.put(new Pair(UID_P, PKG_P), true);
+        appPermissions.put(new Pair(UID_O, PKG_O), false);
+        appPermissions.put(new Pair(UID_N_MR1, PKG_N_MR1), true);
+
+        when(mPermissionHelper.getNotificationPermissionValues(UserHandle.USER_SYSTEM))
+                .thenReturn(appPermissions);
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(
+                PKG_N_MR1, UID_N_MR1, true, UserHandle.USER_SYSTEM);
+        String expected = "<ranking version=\"3\">\n"
+                // Packages that exist solely in permissionhelper
+                + "<package name=\"" + PKG_P + "\" importance=\"3\" />\n"
+                + "<package name=\"" + PKG_O + "\" importance=\"0\" />\n"
+                + "<package name=\"" + PKG_N_MR1 + "\" importance=\"3\" />\n"
+                + "<package name=\"first\" importance=\"3\" />\n"
+                + "<package name=\"third\" importance=\"0\" />\n"
+                + "</ranking>";
+        assertThat(baos.toString()).contains(expected);
     }
 
     @Test
