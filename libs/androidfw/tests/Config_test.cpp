@@ -27,15 +27,19 @@ namespace android {
 
 static ResTable_config selectBest(const ResTable_config& target,
                                   const Vector<ResTable_config>& configs) {
-  ResTable_config bestConfig;
-  memset(&bestConfig, 0, sizeof(bestConfig));
+  Vector<ResTable_config> matchedConfigs;
   const size_t configCount = configs.size();
   for (size_t i = 0; i < configCount; i++) {
     const ResTable_config& thisConfig = configs[i];
-    if (!thisConfig.match(target)) {
-      continue;
+    if (thisConfig.match(target)) {
+      matchedConfigs.add(thisConfig);
     }
+  }
 
+  ResTable_config bestConfig = matchedConfigs[0];
+  const size_t matchingConfigCount = matchedConfigs.size();
+  for (size_t i = 1; i < matchingConfigCount; i++) {
+    const ResTable_config& thisConfig = configs[i];
     if (thisConfig.isBetterThan(bestConfig, &target)) {
       bestConfig = thisConfig;
     }
@@ -73,6 +77,9 @@ TEST(ConfigTest, shouldSelectBestDensity) {
   ASSERT_EQ(expectedBest, selectBest(deviceConfig, configs));
 
   configs.add(buildDensityConfig(int(ResTable_config::DENSITY_HIGH) + 20));
+  ASSERT_EQ(expectedBest, selectBest(deviceConfig, configs));
+
+  configs.add(buildDensityConfig(int(ResTable_config::DENSITY_XHIGH) - 1));
   ASSERT_EQ(expectedBest, selectBest(deviceConfig, configs));
 
   expectedBest = buildDensityConfig(ResTable_config::DENSITY_XHIGH);
