@@ -51,6 +51,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.sizecompatui.SizeCompatUIController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
 
@@ -59,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -150,20 +152,34 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     @Nullable
     private final SizeCompatUIController mSizeCompatUI;
 
+    @Nullable
+    private final Optional<RecentTasksController> mRecentTasks;
+
     public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context) {
-        this(null /* taskOrganizerController */, mainExecutor, context, null /* sizeCompatUI */);
+        this(null /* taskOrganizerController */, mainExecutor, context, null /* sizeCompatUI */,
+                Optional.empty() /* recentTasksController */);
     }
 
     public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context, @Nullable
             SizeCompatUIController sizeCompatUI) {
-        this(null /* taskOrganizerController */, mainExecutor, context, sizeCompatUI);
+        this(null /* taskOrganizerController */, mainExecutor, context, sizeCompatUI,
+                Optional.empty() /* recentTasksController */);
+    }
+
+    public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context, @Nullable
+            SizeCompatUIController sizeCompatUI,
+            Optional<RecentTasksController> recentTasks) {
+        this(null /* taskOrganizerController */, mainExecutor, context, sizeCompatUI,
+                recentTasks);
     }
 
     @VisibleForTesting
     ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController, ShellExecutor mainExecutor,
-            Context context, @Nullable SizeCompatUIController sizeCompatUI) {
+            Context context, @Nullable SizeCompatUIController sizeCompatUI,
+            Optional<RecentTasksController> recentTasks) {
         super(taskOrganizerController, mainExecutor);
         mSizeCompatUI = sizeCompatUI;
+        mRecentTasks = recentTasks;
         if (sizeCompatUI != null) {
             sizeCompatUI.setSizeCompatUICallback(this);
         }
@@ -401,6 +417,11 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 // Notify the size compat UI if the listener or task info changed.
                 notifySizeCompatUI(taskInfo, newListener);
             }
+            if (data.getTaskInfo().getWindowingMode() != taskInfo.getWindowingMode()) {
+                // Notify the recent tasks when a task changes windowing modes
+                mRecentTasks.ifPresent(recentTasks ->
+                        recentTasks.onTaskWindowingModeChanged(taskInfo));
+            }
         }
     }
 
@@ -428,6 +449,8 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             notifyLocusVisibilityIfNeeded(taskInfo);
             // Pass null for listener to remove the size compat UI on this task if there is any.
             notifySizeCompatUI(taskInfo, null /* taskListener */);
+            // Notify the recent tasks that a task has been removed
+            mRecentTasks.ifPresent(recentTasks -> recentTasks.onTaskRemoved(taskInfo));
         }
     }
 

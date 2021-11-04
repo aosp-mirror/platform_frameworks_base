@@ -65,6 +65,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * Tests for the shell task organizer.
@@ -131,7 +132,7 @@ public class ShellTaskOrganizerTests {
                     .when(mTaskOrganizerController).registerTaskOrganizer(any());
         } catch (RemoteException e) {}
         mOrganizer = spy(new ShellTaskOrganizer(mTaskOrganizerController, mTestExecutor, mContext,
-                mSizeCompatUI));
+                mSizeCompatUI, Optional.empty()));
     }
 
     @Test
