@@ -1041,10 +1041,6 @@ public class TelephonyRegistryManager {
             eventList.add(TelephonyCallback.EVENT_SIGNAL_STRENGTHS_CHANGED);
         }
 
-        if ((eventMask & PhoneStateListener.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH) != 0) {
-            eventList.add(TelephonyCallback.EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED);
-        }
-
         if ((eventMask & PhoneStateListener.LISTEN_CELL_INFO) != 0) {
             eventList.add(TelephonyCallback.EVENT_CELL_INFO_CHANGED);
         }
