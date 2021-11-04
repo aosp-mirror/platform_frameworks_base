@@ -1937,13 +1937,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (userId == mSettings.getCurrentUserId()) {
             return mSettings.getEnabledInputMethodListLocked();
         }
-        final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
-        final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
-        final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
-                new ArrayMap<>();
-        AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
-        queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
-                methodList);
+        final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
         final InputMethodSettings settings = new InputMethodSettings(mContext.getResources(),
                 mContext.getContentResolver(), methodMap, userId, true);
         return settings.getEnabledInputMethodListLocked();
@@ -2108,13 +2102,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return mSettings.getEnabledInputMethodSubtypeListLocked(
                     mContext, imi, allowsImplicitlySelectedSubtypes);
         }
-        final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
-        final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
-        final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
-                new ArrayMap<>();
-        AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
-        queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
-                methodList);
+        final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
         final InputMethodInfo imi = methodMap.get(imiId);
         if (imi == null) {
             return Collections.emptyList();
@@ -4814,34 +4802,68 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    private ArrayMap<String, InputMethodInfo> queryMethodMapForUser(@UserIdInt int userId) {
+        final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+        final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
+        final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
+                new ArrayMap<>();
+        AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+        queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
+                methodMap, methodList);
+        return methodMap;
+    }
+
     private boolean switchToInputMethod(String imeId, @UserIdInt int userId) {
         synchronized (mMethodMap) {
             if (userId == mSettings.getCurrentUserId()) {
                 if (!mMethodMap.containsKey(imeId)
                         || !mSettings.getEnabledInputMethodListLocked()
                                 .contains(mMethodMap.get(imeId))) {
-                    return false; // IME is not is found or not enabled.
+                    return false; // IME is not found or not enabled.
                 }
                 setInputMethodLocked(imeId, NOT_A_SUBTYPE_ID);
                 return true;
             }
-            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
-            final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
-            final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
-                    new ArrayMap<>();
-            AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
-            queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
-                    methodMap, methodList);
+            final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
             final InputMethodSettings settings = new InputMethodSettings(
                     mContext.getResources(), mContext.getContentResolver(), methodMap,
                     userId, false);
             if (!methodMap.containsKey(imeId)
                     || !settings.getEnabledInputMethodListLocked()
                             .contains(methodMap.get(imeId))) {
-                return false; // IME is not is found or not enabled.
+                return false; // IME is not found or not enabled.
             }
             settings.putSelectedInputMethod(imeId);
             settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
+            return true;
+        }
+    }
+
+    private boolean setInputMethodEnabled(String imeId, boolean enabled, @UserIdInt int userId) {
+        synchronized (mMethodMap) {
+            if (userId == mSettings.getCurrentUserId()) {
+                if (!mMethodMap.containsKey(imeId)) {
+                    return false; // IME is not found.
+                }
+                setInputMethodEnabledLocked(imeId, enabled);
+                return true;
+            }
+            final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
+            final InputMethodSettings settings = new InputMethodSettings(
+                    mContext.getResources(), mContext.getContentResolver(), methodMap,
+                    userId, false);
+            if (!methodMap.containsKey(imeId)) {
+                return false; // IME is not found.
+            }
+            if (enabled) {
+                if (!settings.getEnabledInputMethodListLocked().contains(methodMap.get(imeId))) {
+                    settings.appendAndPutEnabledInputMethodLocked(imeId, false);
+                }
+            } else {
+                settings.buildAndPutEnabledInputMethodsStrRemovingIdLocked(
+                        new StringBuilder(),
+                        settings.getEnabledInputMethodsAndSubtypeListLocked(), imeId);
+            }
             return true;
         }
     }
@@ -4915,6 +4937,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public boolean switchToInputMethod(String imeId, int userId) {
             return mService.switchToInputMethod(imeId, userId);
+        }
+
+        @Override
+        public boolean setInputMethodEnabled(String imeId, boolean enabled, int userId) {
+            return mService.setInputMethodEnabled(imeId, enabled, userId);
         }
 
         @Override
@@ -5513,13 +5540,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 previouslyEnabled = setInputMethodEnabledLocked(imeId, enabled);
             }
         } else {
-            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
-            final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
-            final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
-                    new ArrayMap<>();
-            AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
-            queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
-                    methodMap, methodList);
+            final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
             final InputMethodSettings settings = new InputMethodSettings(mContext.getResources(),
                     mContext.getContentResolver(), methodMap, userId, false);
             if (enabled) {
