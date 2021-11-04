@@ -31,7 +31,7 @@ import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
-import static android.app.ActivityManager.StopBgUsersOnSwitch;
+import static android.app.ActivityManager.StopUserOnSwitch;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.AppOpsManager.OP_NONE;
@@ -15099,8 +15099,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void setStopBackgroundUsersOnSwitch(@StopBgUsersOnSwitch int value) {
-        mUserController.setStopBackgroundUsersOnSwitch(value);
+    public void setStopUserOnSwitch(@StopUserOnSwitch int value) {
+        mUserController.setStopUserOnSwitch(value);
     }
 
     @Override
@@ -16402,8 +16402,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void setStopBackgroundUsersOnSwitch(int value) {
-            ActivityManagerService.this.setStopBackgroundUsersOnSwitch(value);
+        public void setStopUserOnSwitch(int value) {
+            ActivityManagerService.this.setStopUserOnSwitch(value);
         }
     }
 
