@@ -71,6 +71,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -81,7 +82,6 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
-
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
@@ -284,6 +284,12 @@ public final class OverlayManagerService extends SystemService {
                     userFilter, null, null);
 
             restoreSettings();
+
+            // Wipe all shell overlays on boot, to recover from a potentially broken device
+            String shellPkgName = TextUtils.emptyIfNull(
+                    getContext().getString(android.R.string.config_systemShell));
+            mSettings.removeIf(overlayInfo -> overlayInfo.isFabricated
+                    && shellPkgName.equals(overlayInfo.packageName));
 
             initIfNeeded();
             onSwitchUser(UserHandle.USER_SYSTEM);
@@ -891,6 +897,16 @@ public final class OverlayManagerService extends SystemService {
                     throw new IllegalArgumentException(request.typeToString()
                             + " unsupported for user " + request.userId);
                 }
+
+                // Normal apps are blocked from accessing OMS via SELinux, so to block non-root,
+                // non privileged callers, a simple check against the shell UID is sufficient, since
+                // that's the only exception from the other categories. This is enough while OMS
+                // is not a public API, but this will have to be changed if it's ever exposed.
+                if (callingUid == Process.SHELL_UID) {
+                    EventLog.writeEvent(0x534e4554, "202768292", -1, "");
+                    throw new IllegalArgumentException("Non-root shell cannot fabricate overlays");
+                }
+
                 realUserId = UserHandle.USER_ALL;
 
                 // Enforce that the calling process can only register and unregister fabricated
