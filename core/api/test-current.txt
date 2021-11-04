@@ -114,7 +114,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.RESET_APP_ERRORS) public void resetAppErrors();
     method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void setStopBackgroundUsersOnSwitch(int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void setStopUserOnSwitch(int);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean stopUser(int, boolean);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.DUMP) public void waitForBroadcastIdle();
@@ -129,9 +129,9 @@ package android.app {
     field public static final int PROCESS_CAPABILITY_NONE = 0; // 0x0
     field public static final int PROCESS_STATE_FOREGROUND_SERVICE = 4; // 0x4
     field public static final int PROCESS_STATE_TOP = 2; // 0x2
-    field public static final int STOP_BG_USERS_ON_SWITCH_DEFAULT = -1; // 0xffffffff
-    field public static final int STOP_BG_USERS_ON_SWITCH_FALSE = 0; // 0x0
-    field public static final int STOP_BG_USERS_ON_SWITCH_TRUE = 1; // 0x1
+    field public static final int STOP_USER_ON_SWITCH_DEFAULT = -1; // 0xffffffff
+    field public static final int STOP_USER_ON_SWITCH_FALSE = 0; // 0x0
+    field public static final int STOP_USER_ON_SWITCH_TRUE = 1; // 0x1
   }
 
   public static class ActivityManager.RunningAppProcessInfo implements android.os.Parcelable {
