@@ -7260,6 +7260,8 @@ package android.media.tv.tuner.frontend {
     method public int getHierarchy();
     method public long getInnerFec();
     method @NonNull public int[] getInterleaving();
+    method public int getIsdbtMode();
+    method public int getIsdbtPartialReceptionFlag();
     method @IntRange(from=0, to=255) @NonNull public int[] getIsdbtSegment();
     method @NonNull public boolean[] getLayerErrors();
     method public int getLnbVoltage();
@@ -7298,6 +7300,8 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_TYPE_GUARD_INTERVAL = 26; // 0x1a
     field public static final int FRONTEND_STATUS_TYPE_HIERARCHY = 19; // 0x13
     field public static final int FRONTEND_STATUS_TYPE_INTERLEAVINGS = 30; // 0x1e
+    field public static final int FRONTEND_STATUS_TYPE_ISDBT_MODE = 37; // 0x25
+    field public static final int FRONTEND_STATUS_TYPE_ISDBT_PARTIAL_RECEPTION_FLAG = 38; // 0x26
     field public static final int FRONTEND_STATUS_TYPE_ISDBT_SEGMENTS = 31; // 0x1f
     field public static final int FRONTEND_STATUS_TYPE_IS_LINEAR = 35; // 0x23
     field public static final int FRONTEND_STATUS_TYPE_IS_MISO_ENABLED = 34; // 0x22
@@ -7430,15 +7434,20 @@ package android.media.tv.tuner.frontend {
     method public int getGuardIntervalCapability();
     method public int getModeCapability();
     method public int getModulationCapability();
+    method public int getTimeInterleaveModeCapability();
+    method public boolean isFullSegmentSupported();
+    method public boolean isSegmentAutoSupported();
   }
 
   public class IsdbtFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @NonNull public static android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder builder();
     method public int getBandwidth();
-    method public int getCodeRate();
+    method @Deprecated public int getCodeRate();
     method public int getGuardInterval();
+    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings[] getLayerSettings();
     method public int getMode();
-    method public int getModulation();
+    method @Deprecated public int getModulation();
+    method public int getPartialReceptionFlag();
     method public int getServiceAreaId();
     method public int getType();
     field public static final int BANDWIDTH_6MHZ = 8; // 0x8
@@ -7457,18 +7466,53 @@ package android.media.tv.tuner.frontend {
     field public static final int MODULATION_MOD_DQPSK = 2; // 0x2
     field public static final int MODULATION_MOD_QPSK = 4; // 0x4
     field public static final int MODULATION_UNDEFINED = 0; // 0x0
+    field public static final int PARTIAL_RECEPTION_FLAG_FALSE = 2; // 0x2
+    field public static final int PARTIAL_RECEPTION_FLAG_TRUE = 4; // 0x4
+    field public static final int PARTIAL_RECEPTION_FLAG_UNDEFINED = 0; // 0x0
+    field public static final int TIME_INTERLEAVE_MODE_1_0 = 2; // 0x2
+    field public static final int TIME_INTERLEAVE_MODE_1_16 = 16; // 0x10
+    field public static final int TIME_INTERLEAVE_MODE_1_4 = 4; // 0x4
+    field public static final int TIME_INTERLEAVE_MODE_1_8 = 8; // 0x8
+    field public static final int TIME_INTERLEAVE_MODE_2_0 = 32; // 0x20
+    field public static final int TIME_INTERLEAVE_MODE_2_2 = 64; // 0x40
+    field public static final int TIME_INTERLEAVE_MODE_2_4 = 128; // 0x80
+    field public static final int TIME_INTERLEAVE_MODE_2_8 = 256; // 0x100
+    field public static final int TIME_INTERLEAVE_MODE_3_0 = 512; // 0x200
+    field public static final int TIME_INTERLEAVE_MODE_3_1 = 1024; // 0x400
+    field public static final int TIME_INTERLEAVE_MODE_3_2 = 2048; // 0x800
+    field public static final int TIME_INTERLEAVE_MODE_3_4 = 4096; // 0x1000
+    field public static final int TIME_INTERLEAVE_MODE_AUTO = 1; // 0x1
+    field public static final int TIME_INTERLEAVE_MODE_UNDEFINED = 0; // 0x0
   }
 
   public static class IsdbtFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setBandwidth(int);
-    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setCodeRate(int);
+    method @Deprecated @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setCodeRate(int);
     method @Deprecated @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setFrequency(int);
     method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setFrequencyLong(long);
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setGuardInterval(int);
+    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setLayerSettings(@NonNull android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings[]);
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setMode(int);
-    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setModulation(int);
+    method @Deprecated @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setModulation(int);
+    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setPartialReceptionFlag(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setServiceAreaId(int);
+  }
+
+  public static final class IsdbtFrontendSettings.IsdbtLayerSettings {
+    method @NonNull public static android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder builder();
+    method public int getCodeRate();
+    method public int getModulation();
+    method @IntRange(from=0, to=255) public int getNumOfSegment();
+    method public int getTimeInterleaveMode();
+  }
+
+  public static final class IsdbtFrontendSettings.IsdbtLayerSettings.Builder {
+    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings build();
+    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder setCodeRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder setModulation(int);
+    method @IntRange(from=0, to=255) @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder setNumOfSegment(int);
+    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder setTimeInterleaveMode(int);
   }
 
   public interface OnTuneEventListener {

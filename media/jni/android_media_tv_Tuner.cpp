@@ -123,9 +123,12 @@
 #include <aidl/android/hardware/tv/tuner/FrontendIsdbtBandwidth.h>
 #include <aidl/android/hardware/tv/tuner/FrontendIsdbtCoderate.h>
 #include <aidl/android/hardware/tv/tuner/FrontendIsdbtGuardInterval.h>
+#include <aidl/android/hardware/tv/tuner/FrontendIsdbtLayerSettings.h>
 #include <aidl/android/hardware/tv/tuner/FrontendIsdbtMode.h>
 #include <aidl/android/hardware/tv/tuner/FrontendIsdbtModulation.h>
+#include <aidl/android/hardware/tv/tuner/FrontendIsdbtPartialReceptionFlag.h>
 #include <aidl/android/hardware/tv/tuner/FrontendIsdbtSettings.h>
+#include <aidl/android/hardware/tv/tuner/FrontendIsdbtTimeInterleaveMode.h>
 #include <aidl/android/hardware/tv/tuner/FrontendModulation.h>
 #include <aidl/android/hardware/tv/tuner/FrontendModulationStatus.h>
 #include <aidl/android/hardware/tv/tuner/FrontendRollOff.h>
@@ -268,9 +271,12 @@ using ::aidl::android::hardware::tv::tuner::FrontendIsdbsStreamIdType;
 using ::aidl::android::hardware::tv::tuner::FrontendIsdbtBandwidth;
 using ::aidl::android::hardware::tv::tuner::FrontendIsdbtCoderate;
 using ::aidl::android::hardware::tv::tuner::FrontendIsdbtGuardInterval;
+using ::aidl::android::hardware::tv::tuner::FrontendIsdbtLayerSettings;
 using ::aidl::android::hardware::tv::tuner::FrontendIsdbtMode;
 using ::aidl::android::hardware::tv::tuner::FrontendIsdbtModulation;
+using ::aidl::android::hardware::tv::tuner::FrontendIsdbtPartialReceptionFlag;
 using ::aidl::android::hardware::tv::tuner::FrontendIsdbtSettings;
+using ::aidl::android::hardware::tv::tuner::FrontendIsdbtTimeInterleaveMode;
 using ::aidl::android::hardware::tv::tuner::FrontendModulation;
 using ::aidl::android::hardware::tv::tuner::FrontendModulationStatus;
 using ::aidl::android::hardware::tv::tuner::FrontendRollOff;
@@ -1355,16 +1361,19 @@ jobject JTuner::getIsdbsFrontendCaps(JNIEnv *env, FrontendCapabilities &caps) {
 
 jobject JTuner::getIsdbtFrontendCaps(JNIEnv *env, FrontendCapabilities &caps) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/IsdbtFrontendCapabilities");
-    jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IIIII)V");
+    jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IIIIIIZZ)V");
 
     jint modeCap = caps.get<FrontendCapabilities::Tag::isdbtCaps>().modeCap;
     jint bandwidthCap = caps.get<FrontendCapabilities::Tag::isdbtCaps>().bandwidthCap;
     jint modulationCap = caps.get<FrontendCapabilities::Tag::isdbtCaps>().modulationCap;
     jint coderateCap = caps.get<FrontendCapabilities::Tag::isdbtCaps>().coderateCap;
     jint guardIntervalCap = caps.get<FrontendCapabilities::Tag::isdbtCaps>().guardIntervalCap;
+    jint timeInterleaveCap = caps.get<FrontendCapabilities::Tag::isdbtCaps>().timeInterleaveCap;
+    jboolean isSegmentAuto = caps.get<FrontendCapabilities::Tag::isdbtCaps>().isSegmentAuto;
+    jboolean isFullSegment = caps.get<FrontendCapabilities::Tag::isdbtCaps>().isFullSegment;
 
     return env->NewObject(clazz, capsInit, modeCap, bandwidthCap, modulationCap, coderateCap,
-            guardIntervalCap);
+                          guardIntervalCap, timeInterleaveCap, isSegmentAuto, isFullSegment);
 }
 
 jobject JTuner::getDtmbFrontendCaps(JNIEnv *env, FrontendCapabilities &caps) {
@@ -2336,6 +2345,13 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                             valid = true;
                            break;
                         }
+                        case FrontendInterleaveMode::Tag::isdbt: {
+                            in[0] = static_cast<jint>(
+                                    interleaving.get<FrontendInterleaveMode::Tag::isdbt>());
+                            env->SetIntArrayRegion(valObj, i, 1, in);
+                            valid = true;
+                            break;
+                        }
                         default:
                             break;
                     }
@@ -2412,6 +2428,22 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                 jobject newBooleanObj = env->NewObject(booleanClazz, initBoolean,
                                                        s.get<FrontendStatus::Tag::isShortFrames>());
                 env->SetObjectField(statusObj, field, newBooleanObj);
+                break;
+            }
+            case FrontendStatus::Tag::isdbtMode: {
+                jfieldID field = env->GetFieldID(clazz, "mIsdbtMode", "Ljava/lang/Integer;");
+                jobject newIntegerObj =
+                        env->NewObject(intClazz, initInt, s.get<FrontendStatus::Tag::isdbtMode>());
+                env->SetObjectField(statusObj, field, newIntegerObj);
+                break;
+            }
+            case FrontendStatus::Tag::partialReceptionFlag: {
+                jfieldID field =
+                        env->GetFieldID(clazz, "mIsdbtPartialReceptionFlag", "Ljava/lang/Integer;");
+                jobject newIntegerObj =
+                        env->NewObject(intClazz, initInt,
+                                       s.get<FrontendStatus::Tag::partialReceptionFlag>());
+                env->SetObjectField(statusObj, field, newIntegerObj);
                 break;
             }
             default: {
@@ -2879,35 +2911,55 @@ static FrontendSettings getIsdbtFrontendSettings(JNIEnv *env, const jobject& set
     int64_t endFreq = getFrontendSettingsEndFreq(env, settings);
     FrontendSpectralInversion inversion = getFrontendSettingsSpectralInversion(env, settings);
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/IsdbtFrontendSettings");
-    FrontendIsdbtModulation modulation =
-            static_cast<FrontendIsdbtModulation>(
-                    env->GetIntField(settings, env->GetFieldID(clazz, "mModulation", "I")));
     FrontendIsdbtBandwidth bandwidth =
             static_cast<FrontendIsdbtBandwidth>(
                     env->GetIntField(settings, env->GetFieldID(clazz, "mBandwidth", "I")));
-    FrontendIsdbtMode mode =
-            static_cast<FrontendIsdbtMode>(
-                    env->GetIntField(settings, env->GetFieldID(clazz, "mMode", "I")));
-    FrontendIsdbtCoderate coderate =
-            static_cast<FrontendIsdbtCoderate>(
-                    env->GetIntField(settings, env->GetFieldID(clazz, "mCodeRate", "I")));
+    FrontendIsdbtMode mode = static_cast<FrontendIsdbtMode>(
+            env->GetIntField(settings, env->GetFieldID(clazz, "mMode", "I")));
     FrontendIsdbtGuardInterval guardInterval =
             static_cast<FrontendIsdbtGuardInterval>(
                     env->GetIntField(settings, env->GetFieldID(clazz, "mGuardInterval", "I")));
     int32_t serviceAreaId =
             env->GetIntField(settings, env->GetFieldID(clazz, "mServiceAreaId", "I"));
+    FrontendIsdbtPartialReceptionFlag partialReceptionFlag =
+            static_cast<FrontendIsdbtPartialReceptionFlag>(
+                    env->GetIntField(settings,
+                                     env->GetFieldID(clazz, "mPartialReceptionFlag", "I")));
 
     FrontendIsdbtSettings frontendIsdbtSettings{
             .frequency = freq,
             .endFrequency = endFreq,
-            .modulation = modulation,
             .bandwidth = bandwidth,
             .mode = mode,
-            .coderate = coderate,
             .guardInterval = guardInterval,
             .serviceAreaId = serviceAreaId,
             .inversion = inversion,
+            .partialReceptionFlag = partialReceptionFlag,
     };
+
+    jobjectArray layerSettings = reinterpret_cast<jobjectArray>(
+            env->GetObjectField(settings,
+                                env->GetFieldID(clazz, "mLayerSettings",
+                                                "[Landroid/media/tv/tuner/frontend/"
+                                                "IsdbtFrontendSettings$IsdbtLayerSettings;")));
+    int len = env->GetArrayLength(layerSettings);
+    jclass layerClazz = env->FindClass(
+            "android/media/tv/tuner/frontend/IsdbtFrontendSettings$IsdbtLayerSettings");
+    frontendIsdbtSettings.layerSettings.resize(len);
+    for (int i = 0; i < len; i++) {
+        jobject layer = env->GetObjectArrayElement(layerSettings, i);
+        frontendIsdbtSettings.layerSettings[i].modulation = static_cast<FrontendIsdbtModulation>(
+                env->GetIntField(layer, env->GetFieldID(layerClazz, "mModulation", "I")));
+        frontendIsdbtSettings.layerSettings[i].timeInterleave =
+                static_cast<FrontendIsdbtTimeInterleaveMode>(
+                        env->GetIntField(layer,
+                                         env->GetFieldID(layerClazz, "mTimeInterleaveMode", "I")));
+        frontendIsdbtSettings.layerSettings[i].coderate = static_cast<FrontendIsdbtCoderate>(
+                env->GetIntField(layer, env->GetFieldID(layerClazz, "mCodeRate", "I")));
+        frontendIsdbtSettings.layerSettings[i].numOfSegment =
+                env->GetIntField(layer, env->GetFieldID(layerClazz, "mNumOfSegment", "I"));
+    }
+
     frontendSettings.set<FrontendSettings::Tag::isdbt>(frontendIsdbtSettings);
     return frontendSettings;
 }
