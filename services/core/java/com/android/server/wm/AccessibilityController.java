@@ -318,11 +318,6 @@ final class AccessibilityController {
         if (displayMagnifier != null) {
             displayMagnifier.onDisplaySizeChanged(displayContent);
         }
-        final WindowsForAccessibilityObserver windowsForA11yObserver =
-                mWindowsForAccessibilityObserver.get(displayId);
-        if (windowsForA11yObserver != null) {
-            windowsForA11yObserver.scheduleComputeChangedWindows();
-        }
     }
 
     void onAppWindowTransition(int displayId, int transition) {
@@ -349,11 +344,6 @@ final class AccessibilityController {
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
             displayMagnifier.onWindowTransition(windowState, transition);
-        }
-        final WindowsForAccessibilityObserver windowsForA11yObserver =
-                mWindowsForAccessibilityObserver.get(displayId);
-        if (windowsForA11yObserver != null) {
-            windowsForA11yObserver.scheduleComputeChangedWindows();
         }
     }
 

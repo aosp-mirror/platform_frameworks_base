@@ -4807,9 +4807,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (isAnimating()) {
             return;
         }
-        if (mWmService.mAccessibilityController.hasCallbacks()) {
-            mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(getDisplayId());
-        }
 
         if (!isSelfOrAncestorWindowAnimatingExit()) {
             return;
