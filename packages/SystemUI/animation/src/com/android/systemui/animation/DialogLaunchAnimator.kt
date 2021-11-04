@@ -116,6 +116,10 @@ class DialogLaunchAnimator(
                     launchAnimation.ignoreNextCallToHide = true
                     dialog.hide()
                 }
+
+                override fun onSizeChanged() {
+                    launchAnimation.onOriginalDialogSizeChanged()
+                }
             })
         }
 
@@ -146,6 +150,7 @@ interface HostDialogProvider {
      *   2. call [dismissOverride] instead of doing any dismissing logic. The actual dismissing
      *      logic should instead be done inside the lambda passed to [dismissOverride], which will
      *      be called after the exit animation.
+     *   3. Be full screen, i.e. have a window matching its parent size.
      *
      * See SystemUIHostDialogProvider for an example of implementation.
      */
@@ -183,6 +188,9 @@ interface DialogListener {
 
     /** Called when this dialog show() is called. */
     fun onShow()
+
+    /** Called when this dialog size might have changed, e.g. because of configuration changes. */
+    fun onSizeChanged()
 }
 
 private class DialogLaunchAnimation(
@@ -261,10 +269,6 @@ private class DialogLaunchAnimation(
         val window = hostDialog.window
             ?: throw IllegalStateException("There is no window associated to the host dialog")
         window.setBackgroundDrawableResource(android.R.color.transparent)
-        window.setLayout(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT
-        )
 
         // If we are using gesture navigation, then we can overlay the navigation/task bars with
         // the host dialog.
@@ -430,6 +434,19 @@ private class DialogLaunchAnimation(
                 maybeStartLaunchAnimation()
             }
         })
+    }
+
+    fun onOriginalDialogSizeChanged() {
+        // The dialog is the single child of the root.
+        if (hostDialogRoot.childCount != 1) {
+            return
+        }
+
+        val dialogView = hostDialogRoot.getChildAt(0)
+        val layoutParams = dialogView.layoutParams as? FrameLayout.LayoutParams ?: return
+        layoutParams.width = originalDialog.window.attributes.width
+        layoutParams.height = originalDialog.window.attributes.height
+        dialogView.layoutParams = layoutParams
     }
 
     private fun maybeStartLaunchAnimation() {
