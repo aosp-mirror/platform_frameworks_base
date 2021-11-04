@@ -69,9 +69,9 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -112,7 +112,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final LayoutInflater mInflater;
     private final WindowManager mWindowManager;
     private final DelayableExecutor mFgExecutor;
-    @NonNull private final Optional<StatusBar> mStatusBarOptional;
+    @NonNull private final PanelExpansionStateManager mPanelExpansionStateManager;
     @NonNull private final StatusBarStateController mStatusBarStateController;
     @NonNull private final KeyguardStateController mKeyguardStateController;
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
@@ -521,7 +521,7 @@ public class UdfpsController implements DozeReceiver {
             @NonNull WindowManager windowManager,
             @NonNull StatusBarStateController statusBarStateController,
             @Main DelayableExecutor fgExecutor,
-            @NonNull Optional<StatusBar> statusBarOptional,
+            @NonNull PanelExpansionStateManager panelExpansionStateManager,
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull DumpManager dumpManager,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -550,7 +550,7 @@ public class UdfpsController implements DozeReceiver {
         mFingerprintManager = checkNotNull(fingerprintManager);
         mWindowManager = windowManager;
         mFgExecutor = fgExecutor;
-        mStatusBarOptional = statusBarOptional;
+        mPanelExpansionStateManager = panelExpansionStateManager;
         mStatusBarStateController = statusBarStateController;
         mKeyguardStateController = keyguardStateController;
         mKeyguardViewManager = statusBarKeyguardViewManager;
@@ -805,7 +805,7 @@ public class UdfpsController implements DozeReceiver {
                         enrollView,
                         mServerRequest.mEnrollHelper,
                         mStatusBarStateController,
-                        mStatusBarOptional,
+                        mPanelExpansionStateManager,
                         mDumpManager
                 );
             case BiometricOverlayConstants.REASON_AUTH_KEYGUARD:
@@ -815,7 +815,7 @@ public class UdfpsController implements DozeReceiver {
                 return new UdfpsKeyguardViewController(
                         keyguardView,
                         mStatusBarStateController,
-                        mStatusBarOptional,
+                        mPanelExpansionStateManager,
                         mKeyguardViewManager,
                         mKeyguardUpdateMonitor,
                         mDumpManager,
@@ -833,7 +833,7 @@ public class UdfpsController implements DozeReceiver {
                 return new UdfpsBpViewController(
                         bpView,
                         mStatusBarStateController,
-                        mStatusBarOptional,
+                        mPanelExpansionStateManager,
                         mDumpManager
                 );
             case BiometricOverlayConstants.REASON_AUTH_OTHER:
@@ -843,7 +843,7 @@ public class UdfpsController implements DozeReceiver {
                 return new UdfpsFpmOtherViewController(
                         authOtherView,
                         mStatusBarStateController,
-                        mStatusBarOptional,
+                        mPanelExpansionStateManager,
                         mDumpManager
                 );
             default:

@@ -54,25 +54,6 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun panelExpansionChanged_expansionChangeListenerNotified() {
-        val listener = TestExpansionChangedListener()
-        view.setExpansionChangedListeners(listOf(listener))
-        val fraction = 0.4f
-        val isExpanded = true
-
-        view.panelExpansionChanged(fraction, isExpanded)
-
-        assertThat(listener.fraction).isEqualTo(fraction)
-        assertThat(listener.isExpanded).isEqualTo(isExpanded)
-    }
-
-    @Test
-    fun panelExpansionChanged_noListeners_noCrash() {
-        view.panelExpansionChanged(1f, false)
-        // No assert needed, just testing no crash
-    }
-
-    @Test
     fun panelStateChanged_toStateOpening_listenerNotified() {
         val listener = TestStateChangedListener()
         view.setPanelStateChangeListener(listener)
@@ -143,17 +124,6 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     fun onTouchEvent_noListener_noCrash() {
         view.onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
         // No assert needed, just testing no crash
-    }
-
-    private class TestExpansionChangedListener
-        : StatusBar.ExpansionChangedListener {
-        var fraction: Float = 0f
-        var isExpanded: Boolean = false
-
-        override fun onExpansionChanged(expansion: Float, expanded: Boolean) {
-            this.fraction = expansion
-            this.isExpanded = expanded
-        }
     }
 
     private class TestStateChangedListener : PanelBar.PanelStateChangeListener {

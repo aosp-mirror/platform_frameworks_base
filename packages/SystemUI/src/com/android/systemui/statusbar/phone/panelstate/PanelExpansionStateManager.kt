@@ -45,6 +45,11 @@ class PanelExpansionStateManager @Inject constructor() {
         listener.onPanelExpansionChanged(fraction, expanded, tracking)
     }
 
+    /** Removes a listener. */
+    fun removeListener(listener: PanelExpansionListener) {
+        listeners.remove(listener)
+    }
+
     /** Called when the panel expansion has changed. Notifies all listeners of change. */
     fun onPanelExpansionChanged(
         @FloatRange(from = 0.0, to = 1.0) fraction: Float,
