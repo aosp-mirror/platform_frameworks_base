@@ -258,6 +258,7 @@ public class SystemServicesTestRule implements TestRule {
         final ActivityManagerInternal amInternal = mAmService.mInternal;
         spyOn(amInternal);
         doNothing().when(amInternal).trimApplications();
+        doNothing().when(amInternal).scheduleAppGcs();
         doNothing().when(amInternal).updateCpuStats();
         doNothing().when(amInternal).updateOomAdj();
         doNothing().when(amInternal).updateBatteryStats(any(), anyInt(), anyInt(), anyBoolean());

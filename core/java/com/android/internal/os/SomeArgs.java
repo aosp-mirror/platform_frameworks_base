@@ -63,6 +63,8 @@ public final class SomeArgs {
     public int argi4;
     public int argi5;
     public int argi6;
+    public long argl1;
+    public long argl2;
 
     private SomeArgs() {
         /* do nothing - reduce visibility */
@@ -129,5 +131,7 @@ public final class SomeArgs {
         argi4 = 0;
         argi5 = 0;
         argi6 = 0;
+        argl1 = 0;
+        argl2 = 0;
     }
 }

@@ -113,6 +113,11 @@ package android.media {
   public class AudioManager {
     method public void adjustStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
     method public void adjustSuggestedStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
+    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setA2dpSuspended(boolean);
+    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setBluetoothHeadsetProperties(@NonNull String, boolean, boolean);
+    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpEnabled(boolean);
+    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpSamplingRate(int);
+    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpVolume(int);
     method public void setStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
     field public static final int FLAG_FROM_KEY = 4096; // 0x1000
   }
