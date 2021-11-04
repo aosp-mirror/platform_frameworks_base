@@ -27,10 +27,12 @@ namespace android {
 
 // --- SpriteController ---
 
-SpriteController::SpriteController(const sp<Looper>& looper, int32_t overlayLayer) :
-        mLooper(looper), mOverlayLayer(overlayLayer) {
+SpriteController::SpriteController(const sp<Looper>& looper, int32_t overlayLayer,
+                                   ParentSurfaceProvider parentSurfaceProvider)
+      : mLooper(looper),
+        mOverlayLayer(overlayLayer),
+        mParentSurfaceProvider(std::move(parentSurfaceProvider)) {
     mHandler = new WeakMessageHandler(this);
-
     mLocked.transactionNestingCount = 0;
     mLocked.deferredSpriteUpdate = false;
 }
@@ -168,8 +170,7 @@ void SpriteController::doUpdateSprites() {
 
         // If surface is a new one, we have to set right layer stack.
         if (update.surfaceChanged || update.state.dirty & DIRTY_DISPLAY_ID) {
-            t.setLayerStack(update.state.surfaceControl,
-                            ui::LayerStack::fromValue(update.state.displayId));
+            t.reparent(update.state.surfaceControl, mParentSurfaceProvider(update.state.displayId));
             needApplyTransaction = true;
         }
     }

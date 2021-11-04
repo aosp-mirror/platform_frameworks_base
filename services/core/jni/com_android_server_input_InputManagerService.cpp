@@ -129,6 +129,7 @@ static struct {
     jmethodID getTouchCalibrationForInputDevice;
     jmethodID getContextForDisplay;
     jmethodID notifyDropWindow;
+    jmethodID getParentSurfaceForPointers;
 } gServiceClassInfo;
 
 static struct {
@@ -390,7 +391,7 @@ private:
     void handleInterceptActions(jint wmActions, nsecs_t when, uint32_t& policyFlags);
     void ensureSpriteControllerLocked();
     int32_t getPointerDisplayId();
-    void updatePointerDisplayLocked();
+    sp<SurfaceControl> getParentSurfaceForPointers(int displayId);
     static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
 
     static inline JNIEnv* jniEnv() {
@@ -669,6 +670,18 @@ int32_t NativeInputManager::getPointerDisplayId() {
     return pointerDisplayId;
 }
 
+sp<SurfaceControl> NativeInputManager::getParentSurfaceForPointers(int displayId) {
+    JNIEnv* env = jniEnv();
+    jlong nativeSurfaceControlPtr =
+            env->CallLongMethod(mServiceObj, gServiceClassInfo.getParentSurfaceForPointers,
+                                displayId);
+    if (checkAndClearExceptionFromCallback(env, "getParentSurfaceForPointers")) {
+        return nullptr;
+    }
+
+    return reinterpret_cast<SurfaceControl*>(nativeSurfaceControlPtr);
+}
+
 void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
     if (mLocked.spriteController == nullptr) {
         JNIEnv* env = jniEnv();
@@ -676,7 +689,9 @@ void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
         if (checkAndClearExceptionFromCallback(env, "getPointerLayer")) {
             layer = -1;
         }
-        mLocked.spriteController = new SpriteController(mLooper, layer);
+        mLocked.spriteController = new SpriteController(mLooper, layer, [this](int displayId) {
+            return getParentSurfaceForPointers(displayId);
+        });
     }
 }
 
@@ -2504,9 +2519,11 @@ int register_android_server_InputManager(JNIEnv* env) {
             "getTouchCalibrationForInputDevice",
             "(Ljava/lang/String;I)Landroid/hardware/input/TouchCalibration;");
 
-    GET_METHOD_ID(gServiceClassInfo.getContextForDisplay, clazz,
-            "getContextForDisplay",
-            "(I)Landroid/content/Context;")
+    GET_METHOD_ID(gServiceClassInfo.getContextForDisplay, clazz, "getContextForDisplay",
+                  "(I)Landroid/content/Context;");
+
+    GET_METHOD_ID(gServiceClassInfo.getParentSurfaceForPointers, clazz,
+                  "getParentSurfaceForPointers", "(I)J");
 
     // InputDevice
 
