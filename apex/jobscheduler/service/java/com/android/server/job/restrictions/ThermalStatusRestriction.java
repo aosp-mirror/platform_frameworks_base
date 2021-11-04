@@ -16,27 +16,29 @@
 
 package com.android.server.job.restrictions;
 
+import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.os.PowerManager;
 import android.os.PowerManager.OnThermalStatusChangedListener;
 import android.util.IndentingPrintWriter;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.controllers.JobStatus;
 
 public class ThermalStatusRestriction extends JobRestriction {
     private static final String TAG = "ThermalStatusRestriction";
 
-    /** The threshold at which we start restricting non-EJ jobs. */
-    private static final int REGULAR_JOB_THRESHOLD = PowerManager.THERMAL_STATUS_SEVERE;
+    /** The threshold at which we start restricting low and min priority jobs. */
+    private static final int LOW_PRIORITY_THRESHOLD = PowerManager.THERMAL_STATUS_LIGHT;
+    /** The threshold at which we start restricting higher priority jobs. */
+    private static final int HIGHER_PRIORITY_THRESHOLD = PowerManager.THERMAL_STATUS_MODERATE;
     /** The lowest threshold at which we start restricting jobs. */
-    private static final int LOWER_THRESHOLD = REGULAR_JOB_THRESHOLD;
+    private static final int LOWER_THRESHOLD = LOW_PRIORITY_THRESHOLD;
     /** The threshold at which we start restricting ALL jobs. */
-    private static final int UPPER_THRESHOLD = PowerManager.THERMAL_STATUS_CRITICAL;
+    private static final int UPPER_THRESHOLD = PowerManager.THERMAL_STATUS_SEVERE;
 
     private volatile int mThermalStatus = PowerManager.THERMAL_STATUS_NONE;
-
-    private PowerManager mPowerManager;
 
     public ThermalStatusRestriction(JobSchedulerService service) {
         super(service, JobParameters.STOP_REASON_DEVICE_STATE,
@@ -45,9 +47,10 @@ public class ThermalStatusRestriction extends JobRestriction {
 
     @Override
     public void onSystemServicesReady() {
-        mPowerManager = mService.getContext().getSystemService(PowerManager.class);
+        final PowerManager powerManager =
+                mService.getTestableContext().getSystemService(PowerManager.class);
         // Use MainExecutor
-        mPowerManager.addThermalStatusListener(new OnThermalStatusChangedListener() {
+        powerManager.addThermalStatusListener(new OnThermalStatusChangedListener() {
             @Override
             public void onThermalStatusChanged(int status) {
                 // This is called on the main thread. Do not do any slow operations in it.
@@ -83,10 +86,26 @@ public class ThermalStatusRestriction extends JobRestriction {
         if (mThermalStatus >= UPPER_THRESHOLD) {
             return true;
         }
-        if (mThermalStatus >= REGULAR_JOB_THRESHOLD) {
-            return !job.shouldTreatAsExpeditedJob();
+        final int priority = job.getEffectivePriority();
+        if (mThermalStatus >= HIGHER_PRIORITY_THRESHOLD) {
+            // For moderate throttling, only let expedited jobs and high priority regular jobs that
+            // are already running run.
+            return !job.shouldTreatAsExpeditedJob()
+                    && !(priority == JobInfo.PRIORITY_HIGH
+                    && mService.isCurrentlyRunningLocked(job));
+        }
+        if (mThermalStatus >= LOW_PRIORITY_THRESHOLD) {
+            // For light throttling, throttle all min priority jobs and all low priority jobs that
+            // aren't already running.
+            return (priority == JobInfo.PRIORITY_LOW && !mService.isCurrentlyRunningLocked(job))
+                    || priority == JobInfo.PRIORITY_MIN;
         }
         return false;
+    }
+
+    @VisibleForTesting
+    int getThermalStatus() {
+        return mThermalStatus;
     }
 
     @Override
