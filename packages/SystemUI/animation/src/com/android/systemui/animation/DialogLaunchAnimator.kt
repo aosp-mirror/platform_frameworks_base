@@ -221,10 +221,11 @@ private class DialogLaunchAnimation(
     private val hostDialogRoot = FrameLayout(context)
 
     /**
-     * The content view of [originalDialog], which will be stolen from that dialog and added to
-     * [hostDialogRoot].
+     * The parent of the original dialog content view, that serves as a fake window that will have
+     * the same size as the original dialog window and to which we will set the original dialog
+     * window background.
      */
-    private var originalDialogView: View? = null
+    private val dialogContentParent = FrameLayout(context)
 
     /**
      * The background color of [originalDialogView], taking into consideration the [originalDialog]
@@ -374,9 +375,6 @@ private class DialogLaunchAnimation(
     }
 
     private fun showDialogFromView(dialogView: View) {
-        // Save the dialog view for later as we will need it for the close animation.
-        this.originalDialogView = dialogView
-
         // Close the dialog when clicking outside of it.
         hostDialogRoot.setOnClickListener { hostDialog.dismiss() }
         dialogView.isClickable = true
@@ -394,17 +392,13 @@ private class DialogLaunchAnimation(
             throw IllegalStateException("Dialogs with no backgrounds on window are not supported")
         }
 
-        dialogView.setBackgroundResource(backgroundRes)
-        originalDialogBackgroundColor =
-            GhostedViewLaunchAnimatorController.findGradientDrawable(dialogView.background!!)
-                ?.color
-                ?.defaultColor ?: Color.BLACK
-
-        // Add the dialog view to the host (fullscreen) dialog and make it invisible to make sure
-        // it's not drawn yet.
-        (dialogView.parent as? ViewGroup)?.removeView(dialogView)
+        // Add a parent view to the original dialog view to which we will set the original dialog
+        // window background. This View serves as a fake window with background, so that we are sure
+        // that we don't override the dialog view paddings with the window background that usually
+        // has insets.
+        dialogContentParent.setBackgroundResource(backgroundRes)
         hostDialogRoot.addView(
-            dialogView,
+            dialogContentParent,
 
             // We give it the size of its original dialog window.
             FrameLayout.LayoutParams(
@@ -413,10 +407,31 @@ private class DialogLaunchAnimation(
                 Gravity.CENTER
             )
         )
-        dialogView.visibility = View.INVISIBLE
+
+        // Make the dialog view parent invisible for now, to make sure it's not drawn yet.
+        dialogContentParent.visibility = View.INVISIBLE
+
+        val background = dialogContentParent.background!!
+        originalDialogBackgroundColor =
+            GhostedViewLaunchAnimatorController.findGradientDrawable(background)
+                ?.color
+                ?.defaultColor ?: Color.BLACK
+
+        // Add the dialog view to its parent (that has the original window background).
+        (dialogView.parent as? ViewGroup)?.removeView(dialogView)
+        dialogContentParent.addView(
+            dialogView,
+
+            // It should match its parent size, which is sized the same as the original dialog
+            // window.
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        )
 
         // Start the animation when the dialog is laid out in the center of the host dialog.
-        dialogView.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+        dialogContentParent.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
             override fun onLayoutChange(
                 view: View,
                 left: Int,
@@ -428,7 +443,7 @@ private class DialogLaunchAnimation(
                 oldRight: Int,
                 oldBottom: Int
             ) {
-                dialogView.removeOnLayoutChangeListener(this)
+                dialogContentParent.removeOnLayoutChangeListener(this)
 
                 isOriginalDialogViewLaidOut = true
                 maybeStartLaunchAnimation()
@@ -548,7 +563,7 @@ private class DialogLaunchAnimation(
                 }
 
                 touchSurface.visibility = View.VISIBLE
-                originalDialogView!!.visibility = View.INVISIBLE
+                dialogContentParent.visibility = View.INVISIBLE
 
                 // The animated ghost was just removed. We create a temporary ghost that will be
                 // removed only once we draw the touch surface, to avoid flickering that would
@@ -578,12 +593,10 @@ private class DialogLaunchAnimation(
         onLaunchAnimationStart: () -> Unit = {},
         onLaunchAnimationEnd: () -> Unit = {}
     ) {
-        val dialogView = this.originalDialogView!!
-
         // Create 2 ghost controllers to animate both the dialog and the touch surface in the host
         // dialog.
-        val startView = if (isLaunching) touchSurface else dialogView
-        val endView = if (isLaunching) dialogView else touchSurface
+        val startView = if (isLaunching) touchSurface else dialogContentParent
+        val endView = if (isLaunching) dialogContentParent else touchSurface
         val startViewController = GhostedViewLaunchAnimatorController(startView)
         val endViewController = GhostedViewLaunchAnimatorController(endView)
         startViewController.launchContainer = hostDialogRoot
