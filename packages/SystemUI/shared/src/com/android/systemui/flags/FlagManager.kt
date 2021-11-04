@@ -18,13 +18,19 @@ package com.android.systemui.flags
 
 import android.content.Context
 import android.content.Intent
+import android.database.ContentObserver
+import android.net.Uri
+import android.os.Handler
 import android.provider.Settings
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import com.google.common.util.concurrent.ListenableFuture
 import org.json.JSONException
 import org.json.JSONObject
 
-class FlagManager constructor(val context: Context) : FlagReader {
+class FlagManager constructor(
+    private val context: Context,
+    private val handler: Handler
+) : FlagReader {
     companion object {
         const val RECEIVING_PACKAGE = "com.android.systemui"
         const val ACTION_SET_FLAG = "com.android.systemui.action.SET_FLAG"
@@ -35,6 +41,9 @@ class FlagManager constructor(val context: Context) : FlagReader {
         const val TYPE_BOOLEAN = "boolean"
         private const val SETTINGS_PREFIX = "systemui/flags"
     }
+
+    private val listeners: MutableSet<FlagReader.Listener> = mutableSetOf()
+    private val settingsObserver: ContentObserver = SettingsObserver()
 
     fun getFlagsFuture(): ListenableFuture<Collection<Flag<*>>> {
         val knownFlagMap = Flags.collectFlags()
@@ -82,6 +91,27 @@ class FlagManager constructor(val context: Context) : FlagReader {
         }
     }
 
+    override fun addListener(listener: FlagReader.Listener) {
+        synchronized(listeners) {
+            val registerNeeded = listeners.isEmpty()
+            listeners.add(listener)
+            if (registerNeeded) {
+                context.contentResolver.registerContentObserver(
+                    Settings.Secure.getUriFor(SETTINGS_PREFIX), true, settingsObserver)
+            }
+        }
+    }
+
+    override fun removeListener(listener: FlagReader.Listener) {
+        synchronized(listeners) {
+            val isRegistered = !listeners.isEmpty()
+            listeners.remove(listener)
+            if (isRegistered && listeners.isEmpty()) {
+                context.contentResolver.unregisterContentObserver(settingsObserver)
+            }
+        }
+    }
+
     private fun createIntent(id: Int): Intent {
         val intent = Intent(ACTION_SET_FLAG)
         intent.setPackage(RECEIVING_PACKAGE)
@@ -90,7 +120,7 @@ class FlagManager constructor(val context: Context) : FlagReader {
         return intent
     }
 
-    fun keyToSettingsPrefix(key: Int): String? {
+    fun keyToSettingsPrefix(key: Int): String {
         return SETTINGS_PREFIX + "/" + key
     }
 
@@ -99,6 +129,22 @@ class FlagManager constructor(val context: Context) : FlagReader {
             json.getString(FIELD_TYPE) == TYPE_BOOLEAN
         } catch (e: JSONException) {
             false
+        }
+    }
+
+    inner class SettingsObserver : ContentObserver(handler) {
+        override fun onChange(selfChange: Boolean, uri: Uri?) {
+            if (uri == null) {
+                return
+            }
+            val parts = uri.pathSegments
+            val idStr = parts[parts.size - 1]
+            try {
+                val id = idStr.toInt()
+                listeners.forEach { l -> l.onFlagChanged(id) }
+            } catch (e: NumberFormatException) {
+                // no-op
+            }
         }
     }
 }
