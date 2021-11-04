@@ -16,11 +16,6 @@
 
 package com.android.systemui.flags;
 
-import static com.android.systemui.flags.FlagManager.ACTION_SET_FLAG;
-import static com.android.systemui.flags.FlagManager.FIELD_ID;
-import static com.android.systemui.flags.FlagManager.FIELD_VALUE;
-import static com.android.systemui.flags.FlagManager.FLAGS_PERMISSION;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -60,7 +55,11 @@ public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
 
     private static final String SYSPROP_PREFIX = "persist.systemui.flag_";
     private static final String FIELD_TYPE = "type";
+    private static final String FIELD_ID = "id";
+    private static final String FIELD_VALUE = "value";
     private static final String TYPE_BOOLEAN = "boolean";
+    private static final String ACTION_SET_FLAG = "com.android.systemui.action.SET_FLAG";
+    private static final String FLAGS_PERMISSION = "com.android.systemui.permission.FLAGS";
     private final SystemPropertiesHelper mSystemPropertiesHelper;
 
     private final Map<Integer, Boolean> mBooleanFlagCache = new HashMap<>();
