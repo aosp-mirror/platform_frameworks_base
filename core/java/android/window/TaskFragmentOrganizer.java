@@ -216,4 +216,17 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
             return null;
         }
     }
+
+    /**
+     * Checks if an activity organized by a {@link android.window.TaskFragmentOrganizer} and
+     * only occupies a portion of Task bounds.
+     * @hide
+     */
+    public boolean isActivityEmbedded(@NonNull IBinder activityToken) {
+        try {
+            return getController().isActivityEmbedded(activityToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
