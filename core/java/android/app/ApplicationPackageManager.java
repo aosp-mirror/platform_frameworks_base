@@ -79,7 +79,7 @@ import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
-import android.content.pm.pkg.PackageUserState;
+import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -2130,7 +2130,7 @@ public class ApplicationPackageManager extends PackageManager {
             return null;
         }
         return PackageInfoWithoutStateUtils.generate(result.getResult(), null, flags, 0, 0, null,
-                PackageUserState.DEFAULT, UserHandle.getCallingUserId());
+                FrameworkPackageUserState.DEFAULT, UserHandle.getCallingUserId());
     }
 
     @Override

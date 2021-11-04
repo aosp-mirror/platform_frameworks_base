@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,29 @@
  * limitations under the License.
  */
 
-package android.content.pm.pkg;
+package com.android.server.pm.pkg;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.content.pm.overlay.OverlayPaths;
+import android.content.pm.pkg.FrameworkPackageUserState;
 import android.os.UserHandle;
 
 import java.util.Map;
 import java.util.Set;
 
 /**
- * The API surface for a {@link PackageUserStateImpl}. Methods are expected to return
- * immutable objects. This may mean copying data on each invocation until related classes are
- * refactored to be immutable.
- * @hide
+ * The API surface for {@link PackageUserStateInternal}, for use by in-process mainline consumers.
+ *
+ * The parent of this class is {@link PackageState}, which handles non-user state, exposing this
+ * interface for per-user state.
  */
 // TODO(b/173807334): Expose API
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public interface PackageUserState {
+public interface PackageUserState extends FrameworkPackageUserState {
 
-    PackageUserState DEFAULT = new PackageUserStateDefault();
+    PackageUserState DEFAULT = PackageUserStateInternal.DEFAULT;
 
     /**
      * Combination of {@link #getOverlayPaths()} and {@link #getSharedLibraryOverlayPaths()}

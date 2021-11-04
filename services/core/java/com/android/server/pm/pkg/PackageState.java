@@ -19,14 +19,11 @@ package com.android.server.pm.pkg;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
-import android.annotation.SystemApi;
-import android.annotation.UserIdInt;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningInfo;
-import android.content.pm.pkg.PackageUserState;
 import android.util.SparseArray;
 
 import com.android.internal.R;

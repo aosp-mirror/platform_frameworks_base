@@ -63,7 +63,6 @@ import android.content.pm.parsing.component.ParsedServiceImpl;
 import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.content.pm.parsing.component.ParsedUsesPermissionImpl;
 import android.content.pm.permission.CompatibilityPermissionInfo;
-import android.content.pm.pkg.PackageUserState;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -85,6 +84,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.PackageUserState;
 
 import org.junit.Before;
 import org.junit.Rule;

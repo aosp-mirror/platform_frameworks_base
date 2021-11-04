@@ -28,7 +28,7 @@ import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
-import android.content.pm.pkg.PackageUserState;
+import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.pm.pkg.PackageUserStateUtils;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -169,13 +169,13 @@ public class ComponentParseUtils {
         return component.getIcon();
     }
 
-    public static boolean isMatch(PackageUserState state, boolean isSystem,
+    public static boolean isMatch(FrameworkPackageUserState state, boolean isSystem,
             boolean isPackageEnabled, ParsedMainComponent component, int flags) {
         return PackageUserStateUtils.isMatch(state, isSystem, isPackageEnabled,
                 component.isEnabled(), component.isDirectBootAware(), component.getName(), flags);
     }
 
-    public static boolean isEnabled(PackageUserState state, boolean isPackageEnabled,
+    public static boolean isEnabled(FrameworkPackageUserState state, boolean isPackageEnabled,
             ParsedMainComponent parsedComponent, int flags) {
         return PackageUserStateUtils.isEnabled(state, isPackageEnabled, parsedComponent.isEnabled(),
                 parsedComponent.getName(), flags);

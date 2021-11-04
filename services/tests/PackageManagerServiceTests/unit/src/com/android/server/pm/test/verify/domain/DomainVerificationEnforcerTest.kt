@@ -21,7 +21,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedActivityImpl
 import android.content.pm.parsing.component.ParsedIntentInfoImpl
-import android.content.pm.pkg.PackageUserStateInternal
+import com.android.server.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationState
 import android.os.Build

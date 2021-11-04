@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.content.pm.pkg;
+package com.android.server.pm.pkg;
 
 import android.annotation.Nullable;
 import android.content.pm.SuspendDialogInfo;
@@ -37,7 +37,7 @@ import java.util.Objects;
  */
 public final class SuspendParams {
 
-    private static final String LOG_TAG = "PackageUserState";
+    private static final String LOG_TAG = "FrameworkPackageUserState";
     private static final String TAG_DIALOG_INFO = "dialog-info";
     private static final String TAG_APP_EXTRAS = "app-extras";
     private static final String TAG_LAUNCHER_EXTRAS = "launcher-extras";
