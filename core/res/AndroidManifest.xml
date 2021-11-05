@@ -4880,6 +4880,11 @@
     <permission android:name="android.permission.CHANGE_APP_IDLE_STATE"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @hide @SystemApi Allows an application to change the estimated launch time of an app.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @hide @SystemApi Allows an application to temporarily allowlist an inactive app to
          access the network and acquire wakelocks.
          <p>Not for use by third-party applications. -->
