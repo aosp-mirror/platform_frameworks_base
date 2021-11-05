@@ -62,6 +62,7 @@ java_library {
     srcs: [
         "src/com/android/systemui/flags/Flag.kt",
     ],
+    include_srcs: true,
     static_kotlin_stdlib: false,
     java_version: "1.8",
     min_sdk_version: "current",
@@ -74,11 +75,11 @@ java_library {
     ],
     static_kotlin_stdlib: false,
     libs: [
+        "SystemUI-flags",
         "androidx.concurrent_concurrent-futures",
     ],
     static_libs: [
         "SystemUI-flag-types",
-        "SystemUI-flags",
     ],
     java_version: "1.8",
     min_sdk_version: "current",

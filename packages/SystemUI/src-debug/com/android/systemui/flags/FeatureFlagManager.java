@@ -16,10 +16,11 @@
 
 package com.android.systemui.flags;
 
+import static com.android.systemui.flags.FlagManager.ACTION_GET_FLAGS;
 import static com.android.systemui.flags.FlagManager.ACTION_SET_FLAG;
+import static com.android.systemui.flags.FlagManager.FIELD_FLAGS;
 import static com.android.systemui.flags.FlagManager.FIELD_ID;
 import static com.android.systemui.flags.FlagManager.FIELD_VALUE;
-import static com.android.systemui.flags.FlagManager.FLAGS_PERMISSION;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -69,8 +70,10 @@ public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
             DumpManager dumpManager) {
         mFlagManager = flagManager;
         mSecureSettings = secureSettings;
-        IntentFilter filter = new IntentFilter(ACTION_SET_FLAG);
-        context.registerReceiver(mReceiver, filter, FLAGS_PERMISSION, null);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_SET_FLAG);
+        filter.addAction(ACTION_GET_FLAGS);
+        context.registerReceiver(mReceiver, filter, null, null);
         dumpManager.registerDumpable(TAG, this);
     }
 
@@ -151,9 +154,15 @@ public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
             if (action == null) {
                 return;
             }
-
             if (ACTION_SET_FLAG.equals(action)) {
                 handleSetFlag(intent.getExtras());
+            } else if (ACTION_GET_FLAGS.equals(action)) {
+                Map<Integer, Flag<?>> knownFlagMap = Flags.collectFlags();
+                ArrayList<Flag<?>> flags = new ArrayList<>(knownFlagMap.values());
+                Bundle extras =  getResultExtras(true);
+                if (extras != null) {
+                    extras.putParcelableArrayList(FIELD_FLAGS, flags);
+                }
             }
         }
 
