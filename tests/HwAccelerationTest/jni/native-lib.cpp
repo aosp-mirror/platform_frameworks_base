@@ -41,7 +41,7 @@ struct MyWrapper {
 };
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_android_test_hwui_FrontBufferedLayer_nCreate(JNIEnv* env, jobject jSurface) {
+Java_com_android_test_hwui_FrontBufferedLayer_nCreate(JNIEnv* env, jclass, jobject jSurface) {
     ANativeWindow* window = ANativeWindow_fromSurface(env, jSurface);
     MyWrapper* wrapper = new MyWrapper(window);
     ANativeWindow_release(window);
@@ -49,13 +49,13 @@ Java_com_android_test_hwui_FrontBufferedLayer_nCreate(JNIEnv* env, jobject jSurf
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_android_test_hwui_FrontBufferedLayer_nDestroy(jlong ptr) {
+Java_com_android_test_hwui_FrontBufferedLayer_nDestroy(JNIEnv*, jclass, jlong ptr) {
     MyWrapper* wrapper = reinterpret_cast<MyWrapper*>(ptr);
     delete wrapper;
 }
 
 extern "C" JNIEXPORT void JNICALL Java_com_android_test_hwui_FrontBufferedLayer_nUpdateBuffer(
-        JNIEnv* env, jlong ptr, jobject jbuffer) {
+        JNIEnv* env, jclass, jlong ptr, jobject jbuffer) {
     MyWrapper* wrapper = reinterpret_cast<MyWrapper*>(ptr);
     AHardwareBuffer* buffer = AHardwareBuffer_fromHardwareBuffer(env, jbuffer);
     wrapper->setBuffer(buffer);
