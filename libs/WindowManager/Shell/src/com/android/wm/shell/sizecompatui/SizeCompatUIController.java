@@ -24,11 +24,16 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.InsetsSourceControl;
+import android.view.InsetsState;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayController.OnDisplaysChangedListener;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.DisplayInsetsController.OnInsetsChangedListener;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
@@ -42,7 +47,7 @@ import java.util.function.Consumer;
  * Controls to show/update restart-activity buttons on Tasks based on whether the foreground
  * activities are in size compatibility mode.
  */
-public class SizeCompatUIController implements DisplayController.OnDisplaysChangedListener,
+public class SizeCompatUIController implements OnDisplaysChangedListener,
         DisplayImeController.ImePositionProcessor {
 
     /** Callback for size compat UI interaction. */
@@ -58,6 +63,10 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
     /** Whether the IME is shown on display id. */
     private final Set<Integer> mDisplaysWithIme = new ArraySet<>(1);
 
+    /** {@link PerDisplayOnInsetsChangedListener} by display id. */
+    private final SparseArray<PerDisplayOnInsetsChangedListener> mOnInsetsChangedListeners =
+            new SparseArray<>(0);
+
     /** The showing UIs by task id. */
     private final SparseArray<SizeCompatUILayout> mActiveLayouts = new SparseArray<>(0);
 
@@ -66,6 +75,7 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
 
     private final Context mContext;
     private final DisplayController mDisplayController;
+    private final DisplayInsetsController mDisplayInsetsController;
     private final DisplayImeController mImeController;
     private final SyncTransactionQueue mSyncQueue;
 
@@ -76,10 +86,12 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
 
     public SizeCompatUIController(Context context,
             DisplayController displayController,
+            DisplayInsetsController displayInsetsController,
             DisplayImeController imeController,
             SyncTransactionQueue syncQueue) {
         mContext = context;
         mDisplayController = displayController;
+        mDisplayInsetsController = displayInsetsController;
         mImeController = imeController;
         mSyncQueue = syncQueue;
         mDisplayController.addDisplayWindowListener(this);
@@ -115,8 +127,14 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
     }
 
     @Override
+    public void onDisplayAdded(int displayId) {
+        addOnInsetsChangedListener(displayId);
+    }
+
+    @Override
     public void onDisplayRemoved(int displayId) {
         mDisplayContextCache.remove(displayId);
+        removeOnInsetsChangedListener(displayId);
 
         // Remove all size compat UIs on the removed display.
         final List<Integer> toRemoveTaskIds = new ArrayList<>();
@@ -126,8 +144,29 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
         }
     }
 
+    private void addOnInsetsChangedListener(int displayId) {
+        PerDisplayOnInsetsChangedListener listener = new PerDisplayOnInsetsChangedListener(
+                displayId);
+        listener.register();
+        mOnInsetsChangedListeners.put(displayId, listener);
+    }
+
+    private void removeOnInsetsChangedListener(int displayId) {
+        PerDisplayOnInsetsChangedListener listener = mOnInsetsChangedListeners.get(displayId);
+        if (listener == null) {
+            return;
+        }
+        listener.unregister();
+        mOnInsetsChangedListeners.remove(displayId);
+    }
+
+
     @Override
     public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
+        updateDisplayLayout(displayId);
+    }
+
+    private void updateDisplayLayout(int displayId) {
         final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(displayId);
         forAllLayoutsOnDisplay(displayId, layout -> layout.updateDisplayLayout(displayLayout));
     }
@@ -217,6 +256,39 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
             if (layout != null && layout.getDisplayId() == displayId) {
                 callback.accept(layout);
             }
+        }
+    }
+
+    /** An implementation of {@link OnInsetsChangedListener} for a given display id. */
+    private class PerDisplayOnInsetsChangedListener implements OnInsetsChangedListener {
+        final int mDisplayId;
+        final InsetsState mInsetsState = new InsetsState();
+
+        PerDisplayOnInsetsChangedListener(int displayId) {
+            mDisplayId = displayId;
+        }
+
+        void register() {
+            mDisplayInsetsController.addInsetsChangedListener(mDisplayId, this);
+        }
+
+        void unregister() {
+            mDisplayInsetsController.removeInsetsChangedListener(mDisplayId, this);
+        }
+
+        @Override
+        public void insetsChanged(InsetsState insetsState) {
+            if (mInsetsState.equals(insetsState)) {
+                return;
+            }
+            mInsetsState.set(insetsState);
+            updateDisplayLayout(mDisplayId);
+        }
+
+        @Override
+        public void insetsControlChanged(InsetsState insetsState,
+                InsetsSourceControl[] activeControls) {
+            insetsChanged(insetsState);
         }
     }
 }

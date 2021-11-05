@@ -55,6 +55,7 @@ class SizeCompatUILayout {
     private final int mTaskId;
     private ShellTaskOrganizer.TaskListener mTaskListener;
     private DisplayLayout mDisplayLayout;
+    private final Rect mStableBounds;
     private final int mButtonWidth;
     private final int mButtonHeight;
     private final int mPopupOffsetX;
@@ -88,6 +89,9 @@ class SizeCompatUILayout {
         mDisplayLayout = displayLayout;
         mShouldShowHint = !hasShownHint;
         mButtonWindowManager = new SizeCompatUIWindowManager(mContext, taskConfig, this);
+
+        mStableBounds = new Rect();
+        mDisplayLayout.getStableBounds(mStableBounds);
 
         final Resources resources = mContext.getResources();
         mButtonWidth = resources.getDimensionPixelSize(R.dimen.size_compat_button_width);
@@ -173,8 +177,7 @@ class SizeCompatUILayout {
         if (!taskConfig.windowConfiguration.getBounds()
                 .equals(prevTaskConfig.windowConfiguration.getBounds())) {
             // Reposition the UI surfaces.
-            updateButtonSurfacePosition();
-            updateHintSurfacePosition();
+            updateAllSurfacePositions();
         }
 
         if (taskConfig.getLayoutDirection() != prevTaskConfig.getLayoutDirection()) {
@@ -190,19 +193,14 @@ class SizeCompatUILayout {
 
     /** Called when display layout changed. */
     void updateDisplayLayout(DisplayLayout displayLayout) {
-        if (displayLayout == mDisplayLayout) {
-            return;
-        }
-
-        final Rect prevStableBounds = new Rect();
+        final Rect prevStableBounds = mStableBounds;
         final Rect curStableBounds = new Rect();
-        mDisplayLayout.getStableBounds(prevStableBounds);
         displayLayout.getStableBounds(curStableBounds);
         mDisplayLayout = displayLayout;
         if (!prevStableBounds.equals(curStableBounds)) {
             // Stable bounds changed, update UI surface positions.
-            updateButtonSurfacePosition();
-            updateHintSurfacePosition();
+            updateAllSurfacePositions();
+            mStableBounds.set(curStableBounds);
         }
     }
 
@@ -268,6 +266,11 @@ class SizeCompatUILayout {
         createSizeCompatHint();
     }
 
+    private void updateAllSurfacePositions() {
+        updateButtonSurfacePosition();
+        updateHintSurfacePosition();
+    }
+
     @VisibleForTesting
     void updateButtonSurfacePosition() {
         if (mButton == null || mButtonWindowManager.getSurfaceControl() == null) {
@@ -290,6 +293,7 @@ class SizeCompatUILayout {
         updateSurfacePosition(leash, positionX, positionY);
     }
 
+    @VisibleForTesting
     void updateHintSurfacePosition() {
         if (mHint == null || mHintWindowManager == null
                 || mHintWindowManager.getSurfaceControl() == null) {
