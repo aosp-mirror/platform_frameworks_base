@@ -77,15 +77,15 @@ public class LocaleManagerService extends SystemService {
     @VisibleForTesting
     LocaleManagerService(Context context, ActivityTaskManagerInternal activityTaskManagerInternal,
             ActivityManagerInternal activityManagerInternal,
-            PackageManagerInternal packageManagerInternal) {
+            PackageManagerInternal packageManagerInternal,
+            LocaleManagerBackupHelper localeManagerBackupHelper) {
         super(context);
         mContext = context;
         mBinderService = new LocaleManagerBinderService();
         mActivityTaskManagerInternal = activityTaskManagerInternal;
         mActivityManagerInternal = activityManagerInternal;
         mPackageManagerInternal = packageManagerInternal;
-        mBackupHelper = new LocaleManagerBackupHelper(this,
-                mPackageManagerInternal);
+        mBackupHelper = localeManagerBackupHelper;
     }
 
     @Override
@@ -141,11 +141,6 @@ public class LocaleManagerService extends SystemService {
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
 
-    }
-
-    @VisibleForTesting
-    LocaleManagerBackupHelper getBackupHelper() {
-        return mBackupHelper;
     }
 
     /**
