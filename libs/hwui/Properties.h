@@ -214,7 +214,7 @@ enum class StretchEffectBehavior {
     UniformScale  // Uniform scale stretch everywhere
 };
 
-enum class OverrideDrawingEnabled { Default, On, Off };
+enum class DrawingEnabled { NotInitialized, On, Off };
 
 /**
  * Renderthread-only singleton which manages several static rendering properties. Most of these
@@ -310,9 +310,8 @@ public:
         stretchEffectBehavior = behavior;
     }
 
-    // Represents if GL drawing is enabled. Should only be false in headless testing environments
-    static bool drawingEnabled;
-    static OverrideDrawingEnabled overrideDrawingEnabled;
+    // Represents if drawing is enabled. Should only be Off in headless testing environments
+    static DrawingEnabled drawingEnabled;
     static bool isDrawingEnabled();
     static void setDrawingEnabled(bool enable);
 

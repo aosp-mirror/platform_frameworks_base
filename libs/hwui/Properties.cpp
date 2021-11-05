@@ -89,8 +89,7 @@ bool Properties::enableWebViewOverlays = true;
 
 StretchEffectBehavior Properties::stretchEffectBehavior = StretchEffectBehavior::ShaderHWUI;
 
-bool Properties::drawingEnabled = true;
-OverrideDrawingEnabled Properties::overrideDrawingEnabled = OverrideDrawingEnabled::Default;
+DrawingEnabled Properties::drawingEnabled = DrawingEnabled::NotInitialized;
 
 bool Properties::load() {
     bool prevDebugLayersUpdates = debugLayersUpdates;
@@ -145,10 +144,8 @@ bool Properties::load() {
 
     enableWebViewOverlays = base::GetBoolProperty(PROPERTY_WEBVIEW_OVERLAYS_ENABLED, true);
 
-    drawingEnabled = base::GetBoolProperty(PROPERTY_DRAWING_ENABLED, true);
-    if (!drawingEnabled) {
-        enableRTAnimations = false;
-    }
+    // call isDrawingEnabled to force loading of the property
+    isDrawingEnabled();
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw);
 }
@@ -220,16 +217,17 @@ void Properties::overrideRenderPipelineType(RenderPipelineType type, bool inUnit
 }
 
 void Properties::setDrawingEnabled(bool newDrawingEnabled) {
-    overrideDrawingEnabled =
-            newDrawingEnabled ? OverrideDrawingEnabled::On : OverrideDrawingEnabled::Off;
+    drawingEnabled = newDrawingEnabled ? DrawingEnabled::On : DrawingEnabled::Off;
     enableRTAnimations = newDrawingEnabled;
 }
 
 bool Properties::isDrawingEnabled() {
-    if (overrideDrawingEnabled == OverrideDrawingEnabled::Default) {
-        return drawingEnabled;
+    if (drawingEnabled == DrawingEnabled::NotInitialized) {
+        bool drawingEnabledProp = base::GetBoolProperty(PROPERTY_DRAWING_ENABLED, true);
+        drawingEnabled = drawingEnabledProp ? DrawingEnabled::On : DrawingEnabled::Off;
+        enableRTAnimations = drawingEnabledProp;
     }
-    return overrideDrawingEnabled == OverrideDrawingEnabled::On;
+    return drawingEnabled == DrawingEnabled::On;
 }
 
 }  // namespace uirenderer
