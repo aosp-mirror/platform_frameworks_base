@@ -56,12 +56,6 @@ final class HealthServiceWrapperHidl extends HealthServiceWrapper {
     // Last IHealth service received.
     private final AtomicReference<IHealth> mLastService = new AtomicReference<>();
 
-    /**
-     * init should be called after constructor. For testing purposes, init is not called by
-     * constructor.
-     */
-    HealthServiceWrapperHidl() {}
-
     private static void traceBegin(String name) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, name);
     }
@@ -181,7 +175,7 @@ final class HealthServiceWrapperHidl extends HealthServiceWrapper {
      * @throws NullPointerException when supplier is null
      */
     @VisibleForTesting
-    void init(
+    HealthServiceWrapperHidl(
             @Nullable Callback callback,
             @NonNull IServiceManagerSupplier managerSupplier,
             @NonNull IHealthSupplier healthSupplier)

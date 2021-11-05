@@ -102,8 +102,7 @@ public abstract class HealthServiceWrapper {
             @NonNull HealthServiceWrapperHidl.IServiceManagerSupplier hidlServiceManagerSupplier,
             @NonNull HealthServiceWrapperHidl.IHealthSupplier hidlHealthSupplier)
             throws RemoteException, NoSuchElementException {
-        HealthServiceWrapperHidl service = new HealthServiceWrapperHidl();
-        service.init(hidlRegCallback, hidlServiceManagerSupplier, hidlHealthSupplier);
-        return service;
+        return new HealthServiceWrapperHidl(
+                hidlRegCallback, hidlServiceManagerSupplier, hidlHealthSupplier);
     }
 }
