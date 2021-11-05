@@ -1123,7 +1123,11 @@ class Task extends TaskFragment {
         if (inMultiWindowMode() || !hasChild()) return false;
         if (intent != null) {
             final int returnHomeFlags = FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME;
-            return intent != null && (intent.getFlags() & returnHomeFlags) == returnHomeFlags;
+            final Task task = getDisplayArea() != null ? getDisplayArea().getRootHomeTask() : null;
+            final boolean isLockTaskModeViolation = task != null
+                    && mAtmService.getLockTaskController().isLockTaskModeViolation(task);
+            return (intent.getFlags() & returnHomeFlags) == returnHomeFlags
+                    && !isLockTaskModeViolation;
         }
         final Task bottomTask = getBottomMostTask();
         return bottomTask != this && bottomTask.returnsToHomeRootTask();
