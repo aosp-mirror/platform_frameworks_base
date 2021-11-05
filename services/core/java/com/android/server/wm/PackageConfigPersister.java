@@ -243,12 +243,16 @@ public class PackageConfigPersister {
     }
 
     @GuardedBy("mLock")
-    void onPackageUninstall(String packageName) {
+    void onPackageUninstall(String packageName, int userId) {
         synchronized (mLock) {
-            for (int i = mModified.size() - 1; i >= 0; i--) {
-                final int userId = mModified.keyAt(i);
-                removePackage(packageName, userId);
-            }
+            removePackage(packageName, userId);
+        }
+    }
+
+    @GuardedBy("mLock")
+    void onPackageDataCleared(String packageName, int userId) {
+        synchronized (mLock) {
+            removePackage(packageName, userId);
         }
     }
 
