@@ -1077,7 +1077,8 @@ public class DisplayPolicy {
                             if (cutout != null) {
                                 final Rect top = cutout.getBoundingRectTop();
                                 if (!top.isEmpty()) {
-                                    rect.bottom = rect.bottom + mDisplayCutoutTouchableRegionSize;
+                                    rect.bottom = Math.max(rect.bottom,
+                                            top.bottom + mDisplayCutoutTouchableRegionSize);
                                 }
                             }
                         };
