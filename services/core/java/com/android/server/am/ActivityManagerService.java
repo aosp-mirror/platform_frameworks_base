@@ -31,6 +31,7 @@ import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
+import static android.app.ActivityManager.StopBgUsersOnSwitch;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.AppOpsManager.OP_NONE;
@@ -15330,6 +15331,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public void setStopBackgroundUsersOnSwitch(@StopBgUsersOnSwitch int value) {
+        mUserController.setStopBackgroundUsersOnSwitch(value);
+    }
+
+    @Override
     public int stopUser(final int userId, boolean force, final IStopUserCallback callback) {
         return mUserController.stopUser(userId, force, /* allowDelayedLocking= */ false,
                 /* callback= */ callback, /* keyEvictedCallback= */ null);
@@ -16651,6 +16657,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void setVoiceInteractionManagerProvider(
                 @Nullable ActivityManagerInternal.VoiceInteractionManagerProvider provider) {
             ActivityManagerService.this.setVoiceInteractionManagerProvider(provider);
+        }
+
+        @Override
+        public void setStopBackgroundUsersOnSwitch(int value) {
+            ActivityManagerService.this.setStopBackgroundUsersOnSwitch(value);
         }
     }
 
