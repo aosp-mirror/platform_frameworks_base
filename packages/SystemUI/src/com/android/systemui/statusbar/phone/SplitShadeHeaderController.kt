@@ -17,8 +17,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.view.View
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
+import androidx.constraintlayout.motion.widget.MotionLayout
 import com.android.systemui.R
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
@@ -38,6 +37,11 @@ class SplitShadeHeaderController @Inject constructor(
     featureFlags: FeatureFlags,
     batteryMeterViewController: BatteryMeterViewController
 ) {
+
+    companion object {
+        private val HEADER_TRANSITION_ID = R.id.header_transition
+        private val SPLIT_HEADER_TRANSITION_ID = R.id.split_header_transition
+    }
 
     private val combinedHeaders = featureFlags.useCombinedQSHeaders()
     // TODO(b/194178072) Handle RSSI hiding when multi carrier
@@ -59,6 +63,7 @@ class SplitShadeHeaderController @Inject constructor(
             }
             field = value
             updateVisibility()
+            updatePosition()
         }
 
     var splitShadeMode = false
@@ -68,6 +73,7 @@ class SplitShadeHeaderController @Inject constructor(
             }
             field = value
             updateVisibility()
+            updateConstraints()
         }
 
     var shadeExpandedFraction = -1f
@@ -83,13 +89,22 @@ class SplitShadeHeaderController @Inject constructor(
             if (visible && field != value) {
                 field = value
                 updateVisibility()
+                updatePosition()
             }
         }
 
-    private val constraintSplit = ConstraintSet()
-            .apply { load(statusBar.context, R.xml.split_header) }
-    private val constraintQQS = ConstraintSet().apply { load(statusBar.context, R.xml.qqs_header) }
-    private val constraintQS = ConstraintSet().apply { load(statusBar.context, R.xml.qs_header) }
+    init {
+        if (statusBar is MotionLayout) {
+            val context = statusBar.context
+            val resources = statusBar.resources
+            statusBar.getConstraintSet(R.id.qqs_header_constraint)
+                    .load(context, resources.getXml(R.xml.qqs_header))
+            statusBar.getConstraintSet(R.id.qs_header_constraint)
+                    .load(context, resources.getXml(R.xml.qs_header))
+            statusBar.getConstraintSet(R.id.split_header_constraint)
+                    .load(context, resources.getXml(R.xml.split_header))
+        }
+    }
 
     init {
         batteryMeterViewController.init()
@@ -104,6 +119,8 @@ class SplitShadeHeaderController @Inject constructor(
         qsCarrierGroupController = qsCarrierGroupControllerBuilder
                 .setQSCarrierGroup(statusBar.findViewById(R.id.carrier_group))
                 .build()
+        updateVisibility()
+        updateConstraints()
     }
 
     private fun updateVisibility() {
@@ -118,20 +135,25 @@ class SplitShadeHeaderController @Inject constructor(
             statusBar.visibility = visibility
             visible = visibility == View.VISIBLE
         }
-        updateConstraints()
     }
 
     private fun updateConstraints() {
         if (!combinedHeaders) {
             return
         }
-        statusBar as ConstraintLayout
+        statusBar as MotionLayout
         if (splitShadeMode) {
-            constraintSplit.applyTo(statusBar)
-        } else if (qsExpandedFraction == 1f) {
-            constraintQS.applyTo(statusBar)
+            statusBar.setTransition(SPLIT_HEADER_TRANSITION_ID)
         } else {
-            constraintQQS.applyTo(statusBar)
+            statusBar.setTransition(HEADER_TRANSITION_ID)
+            statusBar.transitionToStart()
+            updatePosition()
+        }
+    }
+
+    private fun updatePosition() {
+        if (statusBar is MotionLayout && !splitShadeMode && visible) {
+            statusBar.setProgress(qsExpandedFraction)
         }
     }
 
