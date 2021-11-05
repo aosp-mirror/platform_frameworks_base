@@ -451,8 +451,8 @@ public class BluetoothGattCharacteristic implements Parcelable {
      * Set the write type for this characteristic
      *
      * <p>Setting the write type of a characteristic determines how the
-     * {@link BluetoothGatt#writeCharacteristic} function write this
-     * characteristic.
+     * {@link BluetoothGatt#writeCharacteristic(BluetoothGattCharacteristic, byte[], int)} function
+     * write this characteristic.
      *
      * @param writeType The write type to for this characteristic. Can be one of: {@link
      * #WRITE_TYPE_DEFAULT}, {@link #WRITE_TYPE_NO_RESPONSE} or {@link #WRITE_TYPE_SIGNED}.
@@ -504,7 +504,10 @@ public class BluetoothGattCharacteristic implements Parcelable {
      * operation or if a characteristic update notification has been received.
      *
      * @return Cached value of the characteristic
+     *
+     * @deprecated Use {@link BluetoothGatt#readCharacteristic(BluetoothGattCharacteristic)} instead
      */
+    @Deprecated
     public byte[] getValue() {
         return mValue;
     }
@@ -521,7 +524,11 @@ public class BluetoothGattCharacteristic implements Parcelable {
      * @param formatType The format type used to interpret the characteristic value.
      * @param offset Offset at which the integer value can be found.
      * @return Cached value of the characteristic or null of offset exceeds value size.
+     *
+     * @deprecated Use {@link BluetoothGatt#readCharacteristic(BluetoothGattCharacteristic)} to get
+     * the characteristic value
      */
+    @Deprecated
     public Integer getIntValue(int formatType, int offset) {
         if ((offset + getTypeLen(formatType)) > mValue.length) return null;
 
@@ -558,7 +565,11 @@ public class BluetoothGattCharacteristic implements Parcelable {
      * @param offset Offset at which the float value can be found.
      * @return Cached value of the characteristic at a given offset or null if the requested offset
      * exceeds the value size.
+     *
+     * @deprecated Use {@link BluetoothGatt#readCharacteristic(BluetoothGattCharacteristic)} to get
+     * the characteristic value
      */
+    @Deprecated
     public Float getFloatValue(int formatType, int offset) {
         if ((offset + getTypeLen(formatType)) > mValue.length) return null;
 
@@ -580,7 +591,11 @@ public class BluetoothGattCharacteristic implements Parcelable {
      *
      * @param offset Offset at which the string value can be found.
      * @return Cached value of the characteristic
+     *
+     * @deprecated Use {@link BluetoothGatt#readCharacteristic(BluetoothGattCharacteristic)} to get
+     * the characteristic value
      */
+    @Deprecated
     public String getStringValue(int offset) {
         if (mValue == null || offset > mValue.length) return null;
         byte[] strBytes = new byte[mValue.length - offset];
@@ -599,7 +614,11 @@ public class BluetoothGattCharacteristic implements Parcelable {
      * @param value New value for this characteristic
      * @return true if the locally stored value has been set, false if the requested value could not
      * be stored locally.
+     *
+     * @deprecated Pass the characteristic value directly into
+     * {@link BluetoothGatt#writeCharacteristic(BluetoothGattCharacteristic, byte[], int)}
      */
+    @Deprecated
     public boolean setValue(byte[] value) {
         mValue = value;
         return true;
@@ -613,7 +632,11 @@ public class BluetoothGattCharacteristic implements Parcelable {
      * @param formatType Integer format type used to transform the value parameter
      * @param offset Offset at which the value should be placed
      * @return true if the locally stored value has been set
+     *
+     * @deprecated Pass the characteristic value directly into
+     * {@link BluetoothGatt#writeCharacteristic(BluetoothGattCharacteristic, byte[], int)}
      */
+    @Deprecated
     public boolean setValue(int value, int formatType, int offset) {
         int len = offset + getTypeLen(formatType);
         if (mValue == null) mValue = new byte[len];
@@ -660,7 +683,11 @@ public class BluetoothGattCharacteristic implements Parcelable {
      * @param formatType Float format type used to transform the value parameter
      * @param offset Offset at which the value should be placed
      * @return true if the locally stored value has been set
+     *
+     * @deprecated Pass the characteristic value directly into
+     * {@link BluetoothGatt#writeCharacteristic(BluetoothGattCharacteristic, byte[], int)}
      */
+    @Deprecated
     public boolean setValue(int mantissa, int exponent, int formatType, int offset) {
         int len = offset + getTypeLen(formatType);
         if (mValue == null) mValue = new byte[len];
@@ -697,7 +724,11 @@ public class BluetoothGattCharacteristic implements Parcelable {
      *
      * @param value New value for this characteristic
      * @return true if the locally stored value has been set
+     *
+     * @deprecated Pass the characteristic value directly into
+     * {@link BluetoothGatt#writeCharacteristic(BluetoothGattCharacteristic, byte[], int)}
      */
+    @Deprecated
     public boolean setValue(String value) {
         mValue = value.getBytes();
         return true;

@@ -80,13 +80,31 @@ public abstract class BluetoothGattCallback {
     /**
      * Callback reporting the result of a characteristic read operation.
      *
-     * @param gatt GATT client invoked {@link BluetoothGatt#readCharacteristic}
+     * @param gatt           GATT client invoked
+     *                       {@link BluetoothGatt#readCharacteristic(BluetoothGattCharacteristic)}
      * @param characteristic Characteristic that was read from the associated remote device.
-     * @param status {@link BluetoothGatt#GATT_SUCCESS} if the read operation was completed
-     * successfully.
+     * @param status         {@link BluetoothGatt#GATT_SUCCESS} if the read operation was completed
+     *                       successfully.
+     * @deprecated Use {@link BluetoothGattCallback#onCharacteristicRead(BluetoothGatt,
+     * BluetoothGattCharacteristic, byte[], int)} as it is memory safe
      */
+    @Deprecated
     public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic,
             int status) {
+    }
+
+    /**
+     * Callback reporting the result of a characteristic read operation.
+     *
+     * @param gatt           GATT client invoked
+     *                       {@link BluetoothGatt#readCharacteristic(BluetoothGattCharacteristic)}
+     * @param characteristic Characteristic that was read from the associated remote device.
+     * @param value          the value of the characteristic
+     * @param status         {@link BluetoothGatt#GATT_SUCCESS} if the read operation was completed
+     *                       successfully.
+     */
+    public void onCharacteristicRead(@NonNull BluetoothGatt gatt, @NonNull
+            BluetoothGattCharacteristic characteristic, @NonNull byte[] value, int status) {
     }
 
     /**
@@ -98,10 +116,13 @@ public abstract class BluetoothGattCallback {
      * value to the desired value to be written. If the values don't match,
      * the application must abort the reliable write transaction.
      *
-     * @param gatt GATT client invoked {@link BluetoothGatt#writeCharacteristic}
+     * @param gatt           GATT client that invoked
+     *                       {@link BluetoothGatt#writeCharacteristic(BluetoothGattCharacteristic,
+     *                       byte[], int)}
      * @param characteristic Characteristic that was written to the associated remote device.
-     * @param status The result of the write operation {@link BluetoothGatt#GATT_SUCCESS} if the
-     * operation succeeds.
+     * @param status         The result of the write operation {@link BluetoothGatt#GATT_SUCCESS} if
+     *                       the
+     *                       operation succeeds.
      */
     public void onCharacteristicWrite(BluetoothGatt gatt,
             BluetoothGattCharacteristic characteristic, int status) {
@@ -110,33 +131,68 @@ public abstract class BluetoothGattCallback {
     /**
      * Callback triggered as a result of a remote characteristic notification.
      *
-     * @param gatt GATT client the characteristic is associated with
+     * @param gatt           GATT client the characteristic is associated with
      * @param characteristic Characteristic that has been updated as a result of a remote
-     * notification event.
+     *                       notification event.
+     * @deprecated Use {@link BluetoothGattCallback#onCharacteristicChanged(BluetoothGatt,
+     * BluetoothGattCharacteristic, byte[])} as it is memory safe by providing the characteristic
+     * value at the time of notification.
      */
+    @Deprecated
     public void onCharacteristicChanged(BluetoothGatt gatt,
             BluetoothGattCharacteristic characteristic) {
     }
 
     /**
+     * Callback triggered as a result of a remote characteristic notification. Note that the value
+     * within the characteristic object may have changed since receiving the remote characteristic
+     * notification, so check the parameter value for the value at the time of notification.
+     *
+     * @param gatt           GATT client the characteristic is associated with
+     * @param characteristic Characteristic that has been updated as a result of a remote
+     *                       notification event.
+     * @param value          notified characteristic value
+     */
+    public void onCharacteristicChanged(@NonNull BluetoothGatt gatt,
+            @NonNull BluetoothGattCharacteristic characteristic, @NonNull byte[] value) {
+    }
+
+    /**
      * Callback reporting the result of a descriptor read operation.
      *
-     * @param gatt GATT client invoked {@link BluetoothGatt#readDescriptor}
+     * @param gatt       GATT client invoked {@link BluetoothGatt#readDescriptor}
      * @param descriptor Descriptor that was read from the associated remote device.
-     * @param status {@link BluetoothGatt#GATT_SUCCESS} if the read operation was completed
-     * successfully
+     * @param status     {@link BluetoothGatt#GATT_SUCCESS} if the read operation was completed
+     *                   successfully
+     * @deprecated Use {@link BluetoothGattCallback#onDescriptorRead(BluetoothGatt,
+     * BluetoothGattDescriptor, int, byte[])} as it is memory safe by providing the descriptor
+     * value at the time it was read.
      */
+    @Deprecated
     public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor,
             int status) {
     }
 
     /**
+     * Callback reporting the result of a descriptor read operation.
+     *
+     * @param gatt       GATT client invoked {@link BluetoothGatt#readDescriptor}
+     * @param descriptor Descriptor that was read from the associated remote device.
+     * @param status     {@link BluetoothGatt#GATT_SUCCESS} if the read operation was completed
+     *                   successfully
+     * @param value      the descriptor value at the time of the read operation
+     */
+    public void onDescriptorRead(@NonNull BluetoothGatt gatt,
+            @NonNull BluetoothGattDescriptor descriptor, int status, @NonNull byte[] value) {
+    }
+
+    /**
      * Callback indicating the result of a descriptor write operation.
      *
-     * @param gatt GATT client invoked {@link BluetoothGatt#writeDescriptor}
+     * @param gatt       GATT client invoked {@link BluetoothGatt#writeDescriptor}
      * @param descriptor Descriptor that was writte to the associated remote device.
-     * @param status The result of the write operation {@link BluetoothGatt#GATT_SUCCESS} if the
-     * operation succeeds.
+     * @param status     The result of the write operation {@link BluetoothGatt#GATT_SUCCESS} if the
+     *                   operation succeeds.
      */
     public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor,
             int status) {
