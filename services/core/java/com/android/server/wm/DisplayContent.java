@@ -217,6 +217,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
+import android.window.DisplayWindowPolicyController;
 import android.window.IDisplayAreaOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -693,6 +694,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     // Used to indicate that the movement of child tasks to top will not move the display to top as
     // well and thus won't change the top resumed / focused record
     boolean mDontMoveToTop;
+
+    /**
+     * The policy controller of the windows that can be displayed on the virtual display.
+     *
+     * @see DisplayWindowPolicyController
+     */
+    @Nullable
+    DisplayWindowPolicyController mDisplayWindowPolicyController;
 
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
@@ -2737,6 +2746,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             if (newDisplayInfo != null) {
                 mDisplayInfo.copyFrom(newDisplayInfo);
             }
+
+            mDisplayWindowPolicyController =
+                    displayManagerInternal.getDisplayWindowPolicyController(mDisplayId);
         }
 
         updateBaseDisplayMetrics(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight,
@@ -3418,6 +3430,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mInputMonitor.dump(pw, "  ");
         pw.println();
         mInsetsStateController.dump(prefix, pw);
+        if (mDisplayWindowPolicyController != null) {
+            pw.println();
+            mDisplayWindowPolicyController.dump(prefix, pw);
+        }
     }
 
     @Override
