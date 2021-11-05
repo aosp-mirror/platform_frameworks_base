@@ -26,7 +26,7 @@ import java.util.Objects;
  * Immutable class holding information about where the request to install or update an app
  * came from.
  */
-final class InstallSource {
+public final class InstallSource {
     /**
      * An instance of InstallSource representing an absence of knowledge of the source of
      * a package. Used in preference to null.

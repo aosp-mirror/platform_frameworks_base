@@ -22,7 +22,7 @@ import android.content.pm.Signature
 import android.content.pm.SigningDetails
 import android.content.pm.parsing.component.ParsedActivityImpl
 import android.content.pm.parsing.component.ParsedIntentInfoImpl
-import android.content.pm.pkg.PackageUserStateInternal
+import com.android.server.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainOwner
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_MODIFIABLE_VERIFIED
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_NO_RESPONSE
@@ -37,10 +37,11 @@ import android.os.Build
 import android.os.PatternMatcher
 import android.os.Process
 import android.util.ArraySet
+import android.util.SparseArray
 import android.util.Xml
-import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
-import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageSettings
+import com.android.server.pm.pkg.PackageStateInternal
+import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageStates
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.testutils.mock
 import com.android.server.testutils.mockThrowOnUnmocked
@@ -52,7 +53,6 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito
 import org.mockito.Mockito.doReturn
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -80,8 +80,8 @@ class DomainVerificationPackageTest {
         private const val USER_ID = 0
     }
 
-    private val pkg1 = mockPkgSetting(PKG_ONE, UUID_ONE, SIGNATURE_ONE)
-    private val pkg2 = mockPkgSetting(PKG_TWO, UUID_TWO, SIGNATURE_TWO)
+    private val pkg1 = mockPkgState(PKG_ONE, UUID_ONE, SIGNATURE_ONE)
+    private val pkg2 = mockPkgState(PKG_TWO, UUID_TWO, SIGNATURE_TWO)
 
     @Test
     fun addPackageFirstTime() {
@@ -111,8 +111,8 @@ class DomainVerificationPackageTest {
 
     @Test
     fun addPackageSystemConfigured() {
-        val pkg1 = mockPkgSetting(PKG_ONE, UUID_ONE, SIGNATURE_ONE, isSystemApp = false)
-        val pkg2 = mockPkgSetting(PKG_TWO, UUID_TWO, SIGNATURE_TWO, isSystemApp = true)
+        val pkg1 = mockPkgState(PKG_ONE, UUID_ONE, SIGNATURE_ONE, isSystemApp = false)
+        val pkg2 = mockPkgState(PKG_TWO, UUID_TWO, SIGNATURE_TWO, isSystemApp = true)
 
         val service = makeService(
             systemConfiguredPackageNames = ArraySet(setOf(pkg1.packageName, pkg2.packageName)),
@@ -430,15 +430,15 @@ class DomainVerificationPackageTest {
     @Test
     fun migratePackageDropDomain() {
         val pkgName = PKG_ONE
-        val pkgBefore = mockPkgSetting(pkgName, UUID_ONE, SIGNATURE_ONE,
+        val pkgBefore = mockPkgState(pkgName, UUID_ONE, SIGNATURE_ONE,
             listOf(DOMAIN_1, DOMAIN_2, DOMAIN_3, DOMAIN_4))
-        val pkgAfter = mockPkgSetting(pkgName, UUID_TWO, SIGNATURE_TWO, listOf(DOMAIN_1, DOMAIN_2))
+        val pkgAfter = mockPkgState(pkgName, UUID_TWO, SIGNATURE_TWO, listOf(DOMAIN_1, DOMAIN_2))
 
         // Test 4 domains:
         // 1 will be approved and preserved, 2 will be selected and preserved,
         // 3 will be denied and dropped, 4 will be selected and dropped
 
-        val map = mutableMapOf<String, PackageSetting>()
+        val map = mutableMapOf<String, PackageStateInternal>()
         val service = makeService { map[it] }
         service.addPackage(pkgBefore)
 
@@ -491,10 +491,10 @@ class DomainVerificationPackageTest {
     @Test
     fun migratePackageDropAll() {
         val pkgName = PKG_ONE
-        val pkgBefore = mockPkgSetting(pkgName, UUID_ONE, SIGNATURE_ONE, listOf(DOMAIN_1, DOMAIN_2))
-        val pkgAfter = mockPkgSetting(pkgName, UUID_TWO, SIGNATURE_TWO, emptyList())
+        val pkgBefore = mockPkgState(pkgName, UUID_ONE, SIGNATURE_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        val pkgAfter = mockPkgState(pkgName, UUID_TWO, SIGNATURE_TWO, emptyList())
 
-        val map = mutableMapOf<String, PackageSetting>()
+        val map = mutableMapOf<String, PackageStateInternal>()
         val service = makeService { map[it] }
         service.addPackage(pkgBefore)
 
@@ -533,15 +533,15 @@ class DomainVerificationPackageTest {
     @Test
     fun migratePackageAddDomain() {
         val pkgName = PKG_ONE
-        val pkgBefore = mockPkgSetting(pkgName, UUID_ONE, SIGNATURE_ONE, listOf(DOMAIN_1, DOMAIN_2))
-        val pkgAfter = mockPkgSetting(pkgName, UUID_TWO, SIGNATURE_TWO,
+        val pkgBefore = mockPkgState(pkgName, UUID_ONE, SIGNATURE_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        val pkgAfter = mockPkgState(pkgName, UUID_TWO, SIGNATURE_TWO,
             listOf(DOMAIN_1, DOMAIN_2, DOMAIN_3))
 
         // Test 3 domains:
         // 1 will be verified and preserved, 2 will be selected and preserved,
         // 3 will be new and default
 
-        val map = mutableMapOf<String, PackageSetting>()
+        val map = mutableMapOf<String, PackageStateInternal>()
         val service = makeService { map[it] }
         service.addPackage(pkgBefore)
 
@@ -584,10 +584,10 @@ class DomainVerificationPackageTest {
     @Test
     fun migratePackageAddAll() {
         val pkgName = PKG_ONE
-        val pkgBefore = mockPkgSetting(pkgName, UUID_ONE, SIGNATURE_ONE, emptyList())
-        val pkgAfter = mockPkgSetting(pkgName, UUID_TWO, SIGNATURE_TWO, listOf(DOMAIN_1, DOMAIN_2))
+        val pkgBefore = mockPkgState(pkgName, UUID_ONE, SIGNATURE_ONE, emptyList())
+        val pkgAfter = mockPkgState(pkgName, UUID_TWO, SIGNATURE_TWO, listOf(DOMAIN_1, DOMAIN_2))
 
-        val map = mutableMapOf<String, PackageSetting>()
+        val map = mutableMapOf<String, PackageStateInternal>()
         val service = makeService { map[it] }
         service.addPackage(pkgBefore)
 
@@ -628,8 +628,8 @@ class DomainVerificationPackageTest {
         // This test acts as a proxy for true user restore through PackageManager,
         // as that's much harder to test for real.
 
-        val pkg1 = mockPkgSetting(PKG_ONE, UUID_ONE, SIGNATURE_ONE, listOf(DOMAIN_1, DOMAIN_2))
-        val pkg2 = mockPkgSetting(PKG_TWO, UUID_TWO, SIGNATURE_TWO,
+        val pkg1 = mockPkgState(PKG_ONE, UUID_ONE, SIGNATURE_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        val pkg2 = mockPkgState(PKG_TWO, UUID_TWO, SIGNATURE_TWO,
             listOf(DOMAIN_1, DOMAIN_2, DOMAIN_3))
         val serviceBefore = makeService(pkg1, pkg2)
         serviceBefore.addPackage(pkg1)
@@ -762,17 +762,17 @@ class DomainVerificationPackageTest {
 
     private fun makeService(
         systemConfiguredPackageNames: ArraySet<String> = ArraySet(),
-        vararg pkgSettings: PackageSetting
+        vararg pkgStates: PackageStateInternal
     ) = makeService(systemConfiguredPackageNames = systemConfiguredPackageNames) {
-        pkgName -> pkgSettings.find { pkgName == it.packageName }
+        pkgName -> pkgStates.find { pkgName == it.packageName }
     }
 
-    private fun makeService(vararg pkgSettings: PackageSetting) =
-        makeService { pkgName -> pkgSettings.find { pkgName == it.packageName } }
+    private fun makeService(vararg pkgStates: PackageStateInternal) =
+        makeService { pkgName -> pkgStates.find { pkgName == it.packageName } }
 
     private fun makeService(
         systemConfiguredPackageNames: ArraySet<String> = ArraySet(),
-        pkgSettingFunction: (String) -> PackageSetting? = { null }
+        pkgStateFunction: (String) -> PackageStateInternal? = { null }
     ) = DomainVerificationService(mockThrowOnUnmocked {
             // Assume the test has every permission necessary
             whenever(enforcePermission(anyString(), anyInt(), anyInt(), anyString()))
@@ -794,19 +794,19 @@ class DomainVerificationPackageTest {
                 whenever(callingUid) { Process.ROOT_UID }
                 whenever(callingUserId) { 0 }
 
-                mockPackageSettings {
-                    pkgSettingFunction(it)
+                mockPackageStates {
+                    pkgStateFunction(it)
                 }
             })
         }
 
-    private fun mockPkgSetting(
+    private fun mockPkgState(
         pkgName: String,
         domainSetId: UUID,
         signature: String,
         domains: List<String> = listOf(DOMAIN_1, DOMAIN_2),
         isSystemApp: Boolean = false
-    ) = mockThrowOnUnmocked<PackageSetting> {
+    ) = mockThrowOnUnmocked<PackageStateInternal> {
         val pkg = mockThrowOnUnmocked<AndroidPackage> {
             whenever(packageName) { pkgName }
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
@@ -839,10 +839,15 @@ class DomainVerificationPackageTest {
         whenever(this.pkg) { pkg }
         whenever(packageName) { pkgName }
         whenever(this.domainSetId) { domainSetId }
-        whenever(getInstantApp(anyInt())) { false }
         whenever(firstInstallTime) { 0L }
-        whenever(readUserState(0)) { PackageUserStateInternal.DEFAULT }
-        whenever(readUserState(10)) { PackageUserStateInternal.DEFAULT }
+        whenever(getUserStateOrDefault(0)) { PackageUserStateInternal.DEFAULT }
+        whenever(getUserStateOrDefault(10)) { PackageUserStateInternal.DEFAULT }
+        whenever(userStates) {
+            SparseArray<PackageUserStateInternal>().apply {
+                this[0] = PackageUserStateInternal.DEFAULT
+                this[1] = PackageUserStateInternal.DEFAULT
+            }
+        }
         whenever(isSystem) { isSystemApp }
 
         val mockSigningDetails = SigningDetails(arrayOf(spy(Signature(signature)) {
@@ -852,7 +857,7 @@ class DomainVerificationPackageTest {
     }
 
     private fun DomainVerificationService.assertState(
-        pkg: PackageSetting,
+        pkg: PackageStateInternal,
         userId: Int,
         linkHandingAllowed: Boolean = true,
         hostToStateMap: Map<String, Int>

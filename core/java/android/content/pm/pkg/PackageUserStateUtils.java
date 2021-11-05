@@ -22,7 +22,6 @@ import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPON
 import android.annotation.NonNull;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.ParsingPackageRead;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.os.Debug;
@@ -35,14 +34,14 @@ public class PackageUserStateUtils {
     private static final boolean DEBUG = false;
     private static final String TAG = "PackageUserStateUtils";
 
-    public static boolean isMatch(@NonNull PackageUserState state, ComponentInfo componentInfo,
+    public static boolean isMatch(@NonNull FrameworkPackageUserState state, ComponentInfo componentInfo,
             int flags) {
         return isMatch(state, componentInfo.applicationInfo.isSystemApp(),
                 componentInfo.applicationInfo.enabled, componentInfo.enabled,
                 componentInfo.directBootAware, componentInfo.name, flags);
     }
 
-    public static boolean isMatch(@NonNull PackageUserState state, boolean isSystem,
+    public static boolean isMatch(@NonNull FrameworkPackageUserState state, boolean isSystem,
             boolean isPackageEnabled, ParsedMainComponent component, int flags) {
         return isMatch(state, isSystem, isPackageEnabled, component.isEnabled(),
                 component.isDirectBootAware(), component.getName(), flags);
@@ -57,7 +56,7 @@ public class PackageUserStateUtils {
      * PackageManager#MATCH_DIRECT_BOOT_UNAWARE} are specified in {@code flags}.
      * </p>
      */
-    public static boolean isMatch(@NonNull PackageUserState state, boolean isSystem,
+    public static boolean isMatch(@NonNull FrameworkPackageUserState state, boolean isSystem,
             boolean isPackageEnabled, boolean isComponentEnabled,
             boolean isComponentDirectBootAware, String componentName, int flags) {
         final boolean matchUninstalled = (flags & PackageManager.MATCH_KNOWN_PACKAGES) != 0;
@@ -82,7 +81,7 @@ public class PackageUserStateUtils {
         return reportIfDebug(matchesUnaware || matchesAware, flags);
     }
 
-    public static boolean isAvailable(@NonNull PackageUserState state, int flags) {
+    public static boolean isAvailable(@NonNull FrameworkPackageUserState state, int flags) {
         // True if it is installed for this user and it is not hidden. If it is hidden,
         // still return true if the caller requested MATCH_UNINSTALLED_PACKAGES
         final boolean matchAnyUser = (flags & PackageManager.MATCH_ANY_USER) != 0;
@@ -101,13 +100,13 @@ public class PackageUserStateUtils {
         return result;
     }
 
-    public static boolean isEnabled(@NonNull PackageUserState state, ComponentInfo componentInfo,
+    public static boolean isEnabled(@NonNull FrameworkPackageUserState state, ComponentInfo componentInfo,
             int flags) {
         return isEnabled(state, componentInfo.applicationInfo.enabled, componentInfo.enabled,
                 componentInfo.name, flags);
     }
 
-    public static boolean isEnabled(@NonNull PackageUserState state, boolean isPackageEnabled,
+    public static boolean isEnabled(@NonNull FrameworkPackageUserState state, boolean isPackageEnabled,
             ParsedMainComponent parsedComponent, int flags) {
         return isEnabled(state, isPackageEnabled, parsedComponent.isEnabled(),
                 parsedComponent.getName(), flags);
@@ -116,7 +115,7 @@ public class PackageUserStateUtils {
     /**
      * Test if the given component is considered enabled.
      */
-    public static boolean isEnabled(@NonNull PackageUserState state, boolean isPackageEnabled,
+    public static boolean isEnabled(@NonNull FrameworkPackageUserState state, boolean isPackageEnabled,
             boolean isComponentEnabled, String componentName, int flags) {
         if ((flags & MATCH_DISABLED_COMPONENTS) != 0) {
             return true;
@@ -153,7 +152,7 @@ public class PackageUserStateUtils {
         return isComponentEnabled;
     }
 
-    public static boolean isPackageEnabled(@NonNull PackageUserState state,
+    public static boolean isPackageEnabled(@NonNull FrameworkPackageUserState state,
             @NonNull ParsingPackageRead pkg) {
         switch (state.getEnabledState()) {
             case PackageManager.COMPONENT_ENABLED_STATE_ENABLED:

@@ -154,6 +154,7 @@ import com.android.server.SystemConfig;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
@@ -1918,13 +1919,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     private static boolean isIncrementalInstallationAllowed(String packageName) {
         final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
-        final PackageSetting existingPkgSetting = pmi.getPackageSetting(packageName);
+        final PackageStateInternal existingPkgSetting = pmi.getPackageStateInternal(packageName);
         if (existingPkgSetting == null || existingPkgSetting.getPkg() == null) {
             return true;
         }
 
         return !existingPkgSetting.getPkg().isSystem()
-                && !existingPkgSetting.getPkgState().isUpdatedSystemApp();
+                && !existingPkgSetting.getTransientState().isUpdatedSystemApp();
     }
 
     /**
@@ -2718,7 +2719,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private long getApksSize(String packageName) {
         final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
-        final PackageSetting ps = pmi.getPackageSetting(packageName);
+        final PackageStateInternal ps = pmi.getPackageStateInternal(packageName);
         if (ps == null) {
             return 0;
         }

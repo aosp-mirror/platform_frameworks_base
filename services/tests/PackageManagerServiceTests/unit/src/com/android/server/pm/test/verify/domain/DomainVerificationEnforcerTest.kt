@@ -21,22 +21,22 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedActivityImpl
 import android.content.pm.parsing.component.ParsedIntentInfoImpl
-import android.content.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationState
 import android.os.Build
 import android.os.Process
 import android.util.ArraySet
+import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
-import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageSettings
+import com.android.server.pm.pkg.PackageStateInternal
+import com.android.server.pm.pkg.PackageUserStateInternal
+import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageStates
 import com.android.server.pm.verify.domain.DomainVerificationEnforcer
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy
 import com.android.server.testutils.mockThrowOnUnmocked
-import com.android.server.testutils.spyThrowOnUnmocked
 import com.android.server.testutils.whenever
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,7 +47,6 @@ import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.verifyNoMoreInteractions
-import java.io.File
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -73,9 +72,9 @@ class DomainVerificationEnforcerTest {
         @Parameterized.Parameters(name = "{0}")
         fun parameters(): Array<Any> {
             val visiblePkg = mockPkg(VISIBLE_PKG)
-            val visiblePkgSetting = mockPkgSetting(VISIBLE_PKG, VISIBLE_UUID)
+            val visiblePkgState = mockPkgState(VISIBLE_PKG, VISIBLE_UUID)
             val invisiblePkg = mockPkg(INVISIBLE_PKG)
-            val invisiblePkgSetting = mockPkgSetting(INVISIBLE_PKG, INVISIBLE_UUID)
+            val invisiblePkgState = mockPkgState(INVISIBLE_PKG, INVISIBLE_UUID)
 
             val makeEnforcer: (Context) -> DomainVerificationEnforcer = {
                 DomainVerificationEnforcer(it).apply {
@@ -98,10 +97,10 @@ class DomainVerificationEnforcerTest {
                     mockThrowOnUnmocked {
                         whenever(callingUid) { callingUidInt.get() }
                         whenever(callingUserId) { callingUserIdInt.get() }
-                        mockPackageSettings {
+                        mockPackageStates {
                             when (it) {
-                                VISIBLE_PKG -> visiblePkgSetting
-                                INVISIBLE_PKG -> invisiblePkgSetting
+                                VISIBLE_PKG -> visiblePkgState
+                                INVISIBLE_PKG -> invisiblePkgState
                                 else -> null
                             }
                         }
@@ -142,8 +141,8 @@ class DomainVerificationEnforcerTest {
                 callingUidInt.set(it.callingUid)
                 callingUserIdInt.set(it.callingUserId)
                 service.proxy = it.proxy
-                service.addPackage(visiblePkgSetting)
-                service.addPackage(invisiblePkgSetting)
+                service.addPackage(visiblePkgState)
+                service.addPackage(invisiblePkgState)
                 service.block(it)
             }
 
@@ -314,33 +313,21 @@ class DomainVerificationEnforcerTest {
             }
         }
 
-        fun mockPkgSetting(packageName: String, domainSetId: UUID) = spyThrowOnUnmocked(
-            PackageSetting(
-                packageName,
-                packageName,
-                File("/test"),
-                null,
-                null,
-                null,
-                null,
-                1,
-                0,
-                0,
-                0,
-                null,
-                null,
-                null,
-                domainSetId
-            )
-        ) {
-            whenever(this.packageName) { packageName }
-            whenever(pkg) { mockPkg(packageName) }
-            whenever(this.domainSetId) { domainSetId }
-            whenever(readUserState(0)) { PackageUserStateInternal.DEFAULT }
-            whenever(readUserState(1)) { PackageUserStateInternal.DEFAULT }
-            whenever(getInstantApp(anyInt())) { false }
-            whenever(isSystem) { false }
-        }
+        fun mockPkgState(packageName: String, domainSetId: UUID) =
+            mockThrowOnUnmocked<PackageStateInternal> {
+                whenever(this.packageName) { packageName }
+                whenever(pkg) { mockPkg(packageName) }
+                whenever(this.domainSetId) { domainSetId }
+                whenever(getUserStateOrDefault(0)) { PackageUserStateInternal.DEFAULT }
+                whenever(getUserStateOrDefault(1)) { PackageUserStateInternal.DEFAULT }
+                whenever(userStates) {
+                    SparseArray<PackageUserStateInternal>().apply {
+                        this[0] = PackageUserStateInternal.DEFAULT
+                        this[1] = PackageUserStateInternal.DEFAULT
+                    }
+                }
+                whenever(isSystem) { false }
+            }
     }
 
     @Parameterized.Parameter(0)

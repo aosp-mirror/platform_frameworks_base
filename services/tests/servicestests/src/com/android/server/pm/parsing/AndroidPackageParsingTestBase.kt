@@ -35,10 +35,10 @@ import android.os.Process
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.pm.PackageManagerService
-import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.pm.pkg.PackageStateUnserialized
-import com.android.server.pm.pkg.PackageUserStateInternalImpl
+import com.android.server.pm.pkg.PackageUserStateImpl
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import org.junit.BeforeClass
@@ -85,7 +85,8 @@ open class AndroidPackageParsingTestBase {
                 }
                 .distinct()
 
-        private val dummyUserState = PackageUserStateInternalImpl()
+        private val dummyUserState =
+            PackageUserStateImpl()
 
         val oldPackages = mutableListOf<PackageParser.Package>()
 
@@ -167,15 +168,16 @@ open class AndroidPackageParsingTestBase {
                     dummyUserState, 0, mockPkgSetting(pkg))
         }
 
-        private fun mockPkgSetting(aPkg: AndroidPackage) = mockThrowOnUnmocked<PackageSetting> {
-            this.pkg = aPkg
-            this.appId = aPkg.uid
-            whenever(pkgState) { PackageStateUnserialized() }
-            whenever(readUserState(anyInt())) { dummyUserState }
-            whenever(categoryOverride) { ApplicationInfo.CATEGORY_UNDEFINED }
-            whenever(primaryCpuAbi) { null }
-            whenever(secondaryCpuAbi) { null }
-        }
+        private fun mockPkgSetting(aPkg: AndroidPackage) =
+            mockThrowOnUnmocked<PackageStateInternal> {
+                whenever(pkg) { aPkg }
+                whenever(appId) { aPkg.uid }
+                whenever(transientState) { PackageStateUnserialized() }
+                whenever(getUserStateOrDefault(anyInt())) { dummyUserState }
+                whenever(categoryOverride) { ApplicationInfo.CATEGORY_UNDEFINED }
+                whenever(primaryCpuAbi) { null }
+                whenever(secondaryCpuAbi) { null }
+            }
     }
 
     // The following methods dump an exact set of fields from the object to compare, because

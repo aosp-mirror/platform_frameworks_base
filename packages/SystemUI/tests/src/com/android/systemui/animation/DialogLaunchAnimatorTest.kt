@@ -12,6 +12,7 @@ import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.DialogListener.DismissReason
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
@@ -62,10 +63,6 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         val hostDialogRoot = hostDialogContent.getChildAt(0) as ViewGroup
         assertEquals(1, hostDialogRoot.childCount)
         assertEquals(dialog.contentView, hostDialogRoot.getChildAt(0))
-
-        // If we are dozing, the host dialog window also fades out.
-        runOnMainThreadAndWaitForIdleSync { dialogLaunchAnimator.onDozeAmountChanged(0.5f) }
-        assertTrue(hostDialog.window!!.decorView.alpha < 1f)
 
         // Hiding/showing/dismissing the dialog should hide/show/dismiss the host dialog given that
         // it's a ListenableDialog.
@@ -164,7 +161,7 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
 
         override fun dismiss() {
             super.dismiss()
-            notifyListeners { onDismiss() }
+            notifyListeners { onDismiss(DismissReason.UNKNOWN) }
         }
 
         override fun hide() {

@@ -70,6 +70,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.rollback.RollbackManagerInternal;
 import com.android.server.utils.WatchedLongSparseArray;
 

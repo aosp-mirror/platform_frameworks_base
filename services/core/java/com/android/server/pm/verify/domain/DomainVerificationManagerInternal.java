@@ -40,6 +40,7 @@ import android.util.TypedXmlSerializer;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.Settings;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
 
@@ -134,7 +135,7 @@ public interface DomainVerificationManagerInternal {
 
     /**
      * Defines the possible values for
-     * {@link #approvalLevelForDomain(PackageSetting, Intent, List, int, int)} which sorts packages
+     * {@link #approvalLevelForDomain(PackageStateInternal, Intent, int, int)} which sorts packages
      * by approval priority. A higher numerical value means the package should override all lower
      * values. This means that comparison using less/greater than IS valid.
      *
@@ -236,11 +237,11 @@ public interface DomainVerificationManagerInternal {
      * This will NOT call {@link #writeSettings(TypedXmlSerializer, boolean, int)}. That must be
      * handled by the caller.
      */
-    void addPackage(@NonNull PackageSetting newPkgSetting);
+    void addPackage(@NonNull PackageStateInternal newPkgSetting);
 
     /**
      * Migrates verification state from a previous install to a new one. It is expected that the
-     * {@link PackageSetting#getDomainSetId()} already be set to the correct value, usually from
+     * {@link PackageStateInternal#getDomainSetId()} already be set to the correct value, usually from
      * {@link #generateNewId()}. This will preserve {@link DomainVerificationState#STATE_SUCCESS}
      * domains under the assumption that the new package will pass the same server side config as
      * the previous package, as they have matching signatures.
@@ -251,7 +252,8 @@ public interface DomainVerificationManagerInternal {
      * This will NOT call {@link #writeSettings(TypedXmlSerializer, boolean, int)}. That must be
      * handled by the caller.
      */
-    void migrateState(@NonNull PackageSetting oldPkgSetting, @NonNull PackageSetting newPkgSetting);
+    void migrateState(@NonNull PackageStateInternal oldPkgSetting,
+            @NonNull PackageStateInternal newPkgSetting);
 
     /**
      * Serializes the entire internal state. This is equivalent to a full backup of the existing
@@ -352,12 +354,12 @@ public interface DomainVerificationManagerInternal {
      * @param userId             the specific user to print, or null to skip printing user selection
      *                           states, supports {@link android.os.UserHandle#USER_ALL}
      * @param pkgSettingFunction the method by which to retrieve package data; if this is called
-     *                           from {@link PackageManagerService}, it is
-     *                           expected to pass in the snapshot of {@link PackageSetting} objects
+     *                           from {@link PackageManagerService}, it is expected to pass in the
+     *                           snapshot of {@link PackageStateInternal} objects
      */
     void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
             @Nullable @UserIdInt Integer userId,
-            @NonNull Function<String, PackageSetting> pkgSettingFunction)
+            @NonNull Function<String, PackageStateInternal> pkgSettingFunction)
             throws NameNotFoundException;
 
     @NonNull
@@ -376,7 +378,7 @@ public interface DomainVerificationManagerInternal {
     @NonNull
     Pair<List<ResolveInfo>, Integer> filterToApprovedApp(@NonNull Intent intent,
             @NonNull List<ResolveInfo> infos, @UserIdInt int userId,
-            @NonNull Function<String, PackageSetting> pkgSettingFunction);
+            @NonNull Function<String, PackageStateInternal> pkgSettingFunction);
 
     /**
      * Check at what precedence a package resolving a URI is approved to takeover the domain.
@@ -388,7 +390,7 @@ public interface DomainVerificationManagerInternal {
      * {@link #filterToApprovedApp(Intent, List, int, Function)} for that.
      */
     @ApprovalLevel
-    int approvalLevelForDomain(@NonNull PackageSetting pkgSetting, @NonNull Intent intent,
+    int approvalLevelForDomain(@NonNull PackageStateInternal pkgSetting, @NonNull Intent intent,
             @PackageManager.ResolveInfoFlags int resolveInfoFlags, @UserIdInt int userId);
 
     /**

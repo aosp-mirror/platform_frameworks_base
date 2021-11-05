@@ -123,6 +123,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.Permission;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import libcore.io.IoUtils;
 
@@ -1550,7 +1551,7 @@ final class InstallParams extends HandlerParams {
                 AndroidPackage oldPackage = mPm.mPackages.get(packageName);
 
                 // Set the update and install times
-                PackageSetting deletedPkgSetting = mPm.getPackageSetting(
+                PackageStateInternal deletedPkgSetting = mPm.getPackageStateInternal(
                         oldPackage.getPackageName());
                 reconciledPkg.mPkgSetting
                         .setFirstInstallTime(deletedPkgSetting.getFirstInstallTime())
@@ -1994,7 +1995,7 @@ final class InstallParams extends HandlerParams {
 
         PackageChangeEvent pkgChangeEvent = new PackageChangeEvent();
         pkgChangeEvent.packageName = pkgSetting.getPkg().getPackageName();
-        pkgChangeEvent.version = pkgSetting.getLongVersionCode();
+        pkgChangeEvent.version = pkgSetting.getVersionCode();
         pkgChangeEvent.lastUpdateTimeMillis = pkgSetting.getLastUpdateTime();
         pkgChangeEvent.newInstalled = (pkgRemovedInfo == null || !pkgRemovedInfo.mIsUpdate);
         pkgChangeEvent.dataRemoved = (pkgRemovedInfo != null && pkgRemovedInfo.mDataRemoved);

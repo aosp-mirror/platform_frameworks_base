@@ -44,7 +44,6 @@ import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedProviderImpl;
 import android.content.pm.parsing.component.ParsedService;
-import android.content.pm.pkg.PackageUserState;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -62,6 +61,8 @@ import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageInfoUtils.CachedApplicationInfoGenerator;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.WatchableImpl;
@@ -363,9 +364,8 @@ public class ComponentResolver
                     continue;
                 }
 
-                final PackageSetting ps =
-                        (PackageSetting) sPackageManagerInternal.getPackageSetting(
-                                p.getPackageName());
+                final PackageStateInternal ps =
+                        sPackageManagerInternal.getPackageStateInternal(p.getPackageName());
                 if (ps == null) {
                     continue;
                 }
@@ -387,7 +387,7 @@ public class ComponentResolver
                 if (appInfoGenerator == null) {
                     appInfoGenerator = new CachedApplicationInfoGenerator();
                 }
-                final PackageUserState state = ps.readUserState(userId);
+                final PackageUserState state = ps.getUserStateOrDefault(userId);
                 final ApplicationInfo appInfo =
                         appInfoGenerator.generate(pkg, flags, state, userId, ps);
                 if (appInfo == null) {
@@ -415,8 +415,8 @@ public class ComponentResolver
             if (p == null) {
                 return null;
             }
-            final PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
-                    p.getPackageName());
+            final PackageStateInternal ps =
+                    sPackageManagerInternal.getPackageStateInternal(p.getPackageName());
             if (ps == null) {
                 return null;
             }
@@ -424,7 +424,7 @@ public class ComponentResolver
             if (pkg == null) {
                 return null;
             }
-            final PackageUserState state = ps.readUserState(userId);
+            final PackageUserState state = ps.getUserStateOrDefault(userId);
             ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(
                     pkg, flags, state, userId, ps);
             if (appInfo == null) {
@@ -444,9 +444,8 @@ public class ComponentResolver
                     continue;
                 }
 
-                final PackageSetting ps =
-                        (PackageSetting) sPackageManagerInternal.getPackageSetting(
-                                p.getPackageName());
+                final PackageStateInternal ps =
+                        sPackageManagerInternal.getPackageStateInternal(p.getPackageName());
                 if (ps == null) {
                     continue;
                 }
@@ -462,7 +461,7 @@ public class ComponentResolver
                 if (appInfoGenerator == null) {
                     appInfoGenerator = new CachedApplicationInfoGenerator();
                 }
-                final PackageUserState state = ps.readUserState(userId);
+                final PackageUserState state = ps.getUserStateOrDefault(userId);
                 final ApplicationInfo appInfo =
                         appInfoGenerator.generate(pkg, 0, state, userId, ps);
                 if (appInfo == null) {
@@ -1530,15 +1529,15 @@ public class ComponentResolver
                 }
                 return null;
             }
-            PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
-                    activity.getPackageName());
+            PackageStateInternal ps =
+                    sPackageManagerInternal.getPackageStateInternal(activity.getPackageName());
             if (ps == null) {
                 if (DEBUG) {
                     log("info.activity.owner.mExtras == null", info, match, userId);
                 }
                 return null;
             }
-            final PackageUserState userState = ps.readUserState(userId);
+            final PackageUserState userState = ps.getUserStateOrDefault(userId);
             ActivityInfo ai = PackageInfoUtils.generateActivityInfo(pkg, activity, mFlags,
                     userState, userId, ps);
             if (ai == null) {
@@ -1850,12 +1849,12 @@ public class ComponentResolver
                 return null;
             }
 
-            PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
-                    provider.getPackageName());
+            PackageStateInternal ps =
+                    sPackageManagerInternal.getPackageStateInternal(provider.getPackageName());
             if (ps == null) {
                 return null;
             }
-            final PackageUserState userState = ps.readUserState(userId);
+            final PackageUserState userState = ps.getUserStateOrDefault(userId);
             final boolean matchVisibleToInstantApp = (mFlags
                     & PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY) != 0;
             final boolean isInstantApp = (mFlags & PackageManager.MATCH_INSTANT) != 0;
@@ -2095,12 +2094,12 @@ public class ComponentResolver
                 return null;
             }
 
-            PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
-                    service.getPackageName());
+            PackageStateInternal ps =
+                    sPackageManagerInternal.getPackageStateInternal(service.getPackageName());
             if (ps == null) {
                 return null;
             }
-            final PackageUserState userState = ps.readUserState(userId);
+            final PackageUserState userState = ps.getUserStateOrDefault(userId);
             ServiceInfo si = PackageInfoUtils.generateServiceInfo(pkg, service, mFlags,
                     userState, userId, ps);
             if (si == null) {
@@ -2294,8 +2293,8 @@ public class ComponentResolver
             return false;
         }
 
-        PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
-                pair.first.getPackageName());
+        PackageStateInternal ps =
+                sPackageManagerInternal.getPackageStateInternal(pair.first.getPackageName());
         if (ps == null) {
             return false;
         }
@@ -2303,7 +2302,7 @@ public class ComponentResolver
         // System apps are never considered stopped for purposes of
         // filtering, because there may be no way for the user to
         // actually re-launch them.
-        return !ps.isSystem() && ps.getStopped(userId);
+        return !ps.isSystem() && ps.getUserStateOrDefault(userId).isStopped();
     }
 
     /**

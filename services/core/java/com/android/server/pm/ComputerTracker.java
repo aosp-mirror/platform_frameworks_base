@@ -35,6 +35,7 @@ import android.content.pm.UserInfo;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -249,7 +250,7 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public PackageInfo generatePackageInfo(PackageSetting ps, int flags, int userId) {
+    public PackageInfo generatePackageInfo(PackageStateInternal ps, int flags, int userId) {
         ThreadComputer current = live();
         try {
             return current.mComputer.generatePackageInfo(ps, flags, userId);
@@ -275,28 +276,28 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public PackageSetting getPackageSetting(String packageName) {
+    public PackageStateInternal getPackageStateInternal(String packageName) {
         ThreadComputer current = snapshot();
         try {
-            return current.mComputer.getPackageSetting(packageName);
+            return current.mComputer.getPackageStateInternal(packageName);
         } finally {
             current.release();
         }
     }
-    public PackageSetting getPackageSettingInternal(String packageName, int callingUid) {
+    public PackageStateInternal getPackageStateInternal(String packageName, int callingUid) {
         ThreadComputer current = live();
         try {
-            return current.mComputer.getPackageSettingInternal(packageName, callingUid);
+            return current.mComputer.getPackageStateInternal(packageName, callingUid);
         } finally {
             current.release();
         }
     }
 
     @Nullable
-    public PackageState getPackageState(@NonNull String packageName) {
+    public PackageState getPackageStateCopied(@NonNull String packageName) {
         ThreadComputer current = live();
         try {
-            return current.mComputer.getPackageState(packageName);
+            return current.mComputer.getPackageStateCopied(packageName);
         } finally {
             current.release();
         }
@@ -424,7 +425,7 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public boolean filterSharedLibPackageLPr(@Nullable PackageSetting ps, int uid,
+    public boolean filterSharedLibPackageLPr(@Nullable PackageStateInternal ps, int uid,
             int userId, int flags) {
         ThreadComputer current = live();
         try {
@@ -503,7 +504,7 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public boolean shouldFilterApplicationLocked(@Nullable PackageSetting ps,
+    public boolean shouldFilterApplicationLocked(@Nullable PackageStateInternal ps,
             int callingUid, @Nullable ComponentName component,
             @PackageManager.ComponentType int componentType, int userId) {
         ThreadComputer current = live();
@@ -514,7 +515,7 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public boolean shouldFilterApplicationLocked(@Nullable PackageSetting ps,
+    public boolean shouldFilterApplicationLocked(@Nullable PackageStateInternal ps,
             int callingUid, int userId) {
         ThreadComputer current = live();
         try {

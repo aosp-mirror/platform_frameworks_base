@@ -15,6 +15,7 @@
  */
 package com.android.server.pm
 
+import android.app.PropertyInvalidatedCache
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -120,6 +121,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
     private val mSettingsMap = WatchedArrayMap<String, PackageSetting>()
 
     init {
+        PropertyInvalidatedCache.disableForTestMode()
         val apply = ExtendedMockito.mockitoSession()
                 .strictness(Strictness.LENIENT)
                 .mockStatic(SystemProperties::class.java)
@@ -160,6 +162,24 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         whenever(mocks.settings.readLPw(nullable())) {
             mSettingsMap.putAll(mPreExistingSettings)
             !mPreExistingSettings.isEmpty()
+        }
+        whenever(mocks.settings.setPackageStoppedStateLPw(any(), any(), anyBoolean(), anyInt())) {
+            val pm: PackageManagerService = getArgument(0)
+            val pkgSetting = mSettingsMap[getArgument(1)]!!
+            val stopped: Boolean = getArgument(2)
+            val userId: Int = getArgument(3)
+            return@whenever if (pkgSetting.getStopped(userId) != stopped) {
+                pkgSetting.setStopped(stopped, userId)
+                if (pkgSetting.getNotLaunched(userId)) {
+                    pkgSetting.installSource.installerPackageName?.let {
+                        pm.notifyFirstLaunch(pkgSetting.packageName, it, userId)
+                    }
+                    pkgSetting.setNotLaunched(false, userId)
+                }
+                true
+            } else {
+                false
+            }
         }
     }
 

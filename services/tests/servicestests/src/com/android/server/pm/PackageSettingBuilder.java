@@ -21,7 +21,7 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.pkg.PackageUserStateInternalImpl;
+import com.android.server.pm.pkg.PackageUserStateImpl;
 
 import java.io.File;
 import java.util.Map;
@@ -41,7 +41,7 @@ public class PackageSettingBuilder {
     private int mSharedUserId;
     private String mVolumeUuid;
     private int mAppId;
-    private SparseArray<PackageUserStateInternalImpl> mUserStates = new SparseArray<>();
+    private SparseArray<PackageUserStateImpl> mUserStates = new SparseArray<>();
     private AndroidPackage mPkg;
     private InstallSource mInstallSource;
     private String[] mUsesStaticLibraries;
@@ -139,7 +139,7 @@ public class PackageSettingBuilder {
 
     public PackageSettingBuilder setInstantAppUserState(int userId, boolean isInstant) {
         if (mUserStates.indexOfKey(userId) < 0) {
-            mUserStates.put(userId, new PackageUserStateInternalImpl());
+            mUserStates.put(userId, new PackageUserStateImpl());
         }
         mUserStates.get(userId).setInstantApp(isInstant);
         return this;
@@ -147,7 +147,7 @@ public class PackageSettingBuilder {
 
     public PackageSettingBuilder setInstallState(int userId, boolean installed) {
         if (mUserStates.indexOfKey(userId) < 0) {
-            mUserStates.put(userId, new PackageUserStateInternalImpl());
+            mUserStates.put(userId, new PackageUserStateImpl());
         }
         mUserStates.get(userId).setInstalled(installed);
         return this;

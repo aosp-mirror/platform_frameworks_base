@@ -38,6 +38,7 @@ filegroup {
     path: "src",
 }
 
+// Sources that have no dependencies that can be used directly downstream of this library
 filegroup {
     name: "wm_shell_util-sources",
     srcs: [
@@ -46,6 +47,7 @@ filegroup {
     path: "src",
 }
 
+// Aidls which can be used directly downstream of this library
 filegroup {
     name: "wm_shell-aidls",
     srcs: [

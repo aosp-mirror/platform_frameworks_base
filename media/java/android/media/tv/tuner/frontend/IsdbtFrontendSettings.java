@@ -19,12 +19,16 @@ package android.media.tv.tuner.frontend;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.FrontendIsdbtBandwidth;
 import android.hardware.tv.tuner.FrontendIsdbtMode;
 import android.hardware.tv.tuner.FrontendIsdbtModulation;
+import android.hardware.tv.tuner.FrontendIsdbtPartialReceptionFlag;
+import android.hardware.tv.tuner.FrontendIsdbtTimeInterleaveMode;
+import android.media.tv.tuner.TunerVersionChecker;
 import android.media.tv.tuner.frontend.DvbtFrontendSettings.CodeRate;
-
+import android.util.Log;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -127,30 +131,145 @@ public class IsdbtFrontendSettings extends FrontendSettings {
      */
     public static final int BANDWIDTH_6MHZ = FrontendIsdbtBandwidth.BANDWIDTH_6MHZ;
 
-    private final int mModulation;
+    /** @hide */
+    @IntDef(flag = true, prefix = "PARTIAL_RECEPTION_FLAG_",
+            value = {PARTIAL_RECEPTION_FLAG_UNDEFINED, PARTIAL_RECEPTION_FLAG_FALSE,
+                    PARTIAL_RECEPTION_FLAG_TRUE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PartialReceptionFlag {}
+
+    /**
+     * Partial Reception Flag undefined.
+     */
+    public static final int PARTIAL_RECEPTION_FLAG_UNDEFINED =
+            FrontendIsdbtPartialReceptionFlag.UNDEFINED;
+    /**
+     * Partial Reception Flag false.
+     */
+    public static final int PARTIAL_RECEPTION_FLAG_FALSE = FrontendIsdbtPartialReceptionFlag.FALSE;
+    /**
+     * Partial Reception Flag true.
+     */
+    public static final int PARTIAL_RECEPTION_FLAG_TRUE = FrontendIsdbtPartialReceptionFlag.TRUE;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = "TIME_INTERLEAVE_MODE_",
+            value = {TIME_INTERLEAVE_MODE_UNDEFINED, TIME_INTERLEAVE_MODE_AUTO,
+                    TIME_INTERLEAVE_MODE_1_0, TIME_INTERLEAVE_MODE_1_4, TIME_INTERLEAVE_MODE_1_8,
+                    TIME_INTERLEAVE_MODE_1_16, TIME_INTERLEAVE_MODE_2_0, TIME_INTERLEAVE_MODE_2_2,
+                    TIME_INTERLEAVE_MODE_2_4, TIME_INTERLEAVE_MODE_2_8, TIME_INTERLEAVE_MODE_3_0,
+                    TIME_INTERLEAVE_MODE_3_1, TIME_INTERLEAVE_MODE_3_2, TIME_INTERLEAVE_MODE_3_4})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TimeInterleaveMode {}
+
+    /**
+     * Time Interleave Mode undefined.
+     */
+    public static final int TIME_INTERLEAVE_MODE_UNDEFINED =
+            FrontendIsdbtTimeInterleaveMode.UNDEFINED;
+    /**
+     * Hardware is able to detect and set time interleave mode automatically
+     */
+    public static final int TIME_INTERLEAVE_MODE_AUTO = FrontendIsdbtTimeInterleaveMode.AUTO;
+    /**
+     * Time Interleave Mode 1: 0.
+     */
+    public static final int TIME_INTERLEAVE_MODE_1_0 =
+            FrontendIsdbtTimeInterleaveMode.INTERLEAVE_1_0;
+    /**
+     * Time Interleave Mode 1: 4.
+     */
+    public static final int TIME_INTERLEAVE_MODE_1_4 =
+            FrontendIsdbtTimeInterleaveMode.INTERLEAVE_1_4;
+    /**
+     * Time Interleave Mode 1: 8.
+     */
+    public static final int TIME_INTERLEAVE_MODE_1_8 =
+            FrontendIsdbtTimeInterleaveMode.INTERLEAVE_1_8;
+    /**
+     * Time Interleave Mode 1: 16.
+     */
+    public static final int TIME_INTERLEAVE_MODE_1_16 =
+            FrontendIsdbtTimeInterleaveMode.INTERLEAVE_1_16;
+    /**
+     * Time Interleave Mode 2: 0.
+     */
+    public static final int TIME_INTERLEAVE_MODE_2_0 =
+            FrontendIsdbtTimeInterleaveMode.INTERLEAVE_2_0;
+    /**
+     * Time Interleave Mode 2: 2.
+     */
+    public static final int TIME_INTERLEAVE_MODE_2_2 =
+            FrontendIsdbtTimeInterleaveMode.INTERLEAVE_2_2;
+    /**
+     * Time Interleave Mode 2: 4.
+     */
+    public static final int TIME_INTERLEAVE_MODE_2_4 =
+            FrontendIsdbtTimeInterleaveMode.INTERLEAVE_2_4;
+    /**
+     * Time Interleave Mode 2: 8.
+     */
+    public static final int TIME_INTERLEAVE_MODE_2_8 =
+            FrontendIsdbtTimeInterleaveMode.INTERLEAVE_2_8;
+    /**
+     * Time Interleave Mode 3: 0.
+     */
+    public static final int TIME_INTERLEAVE_MODE_3_0 =
+            FrontendIsdbtTimeInterleaveMode.INTERLEAVE_3_0;
+    /**
+     * Time Interleave Mode 3: 1.
+     */
+    public static final int TIME_INTERLEAVE_MODE_3_1 =
+            FrontendIsdbtTimeInterleaveMode.INTERLEAVE_3_1;
+    /**
+     * Time Interleave Mode 3: 2.
+     */
+    public static final int TIME_INTERLEAVE_MODE_3_2 =
+            FrontendIsdbtTimeInterleaveMode.INTERLEAVE_3_2;
+    /**
+     * Time Interleave Mode 3: 4.
+     */
+    public static final int TIME_INTERLEAVE_MODE_3_4 =
+            FrontendIsdbtTimeInterleaveMode.INTERLEAVE_3_4;
+
     private final int mBandwidth;
     private final int mMode;
-    private final int mCodeRate;
     private final int mGuardInterval;
     private final int mServiceAreaId;
+    private final IsdbtLayerSettings[] mLayerSettings;
+    private final int mPartialReceptionFlag;
+    private static final String TAG = "IsdbtFrontendSettings";
 
-    private IsdbtFrontendSettings(long frequency, int modulation, int bandwidth, int mode,
-            int codeRate, int guardInterval, int serviceAreaId) {
+    private IsdbtFrontendSettings(long frequency, int bandwidth, int mode, int guardInterval,
+            int serviceAreaId, IsdbtLayerSettings[] layerSettings, int partialReceptionFlag) {
         super(frequency);
-        mModulation = modulation;
         mBandwidth = bandwidth;
         mMode = mode;
-        mCodeRate = codeRate;
         mGuardInterval = guardInterval;
         mServiceAreaId = serviceAreaId;
+        mLayerSettings = new IsdbtLayerSettings[layerSettings.length];
+        for (int i = 0; i < layerSettings.length; i++) {
+            mLayerSettings[i] = layerSettings[i];
+        }
+        mPartialReceptionFlag = partialReceptionFlag;
     }
 
     /**
      * Gets Modulation.
+     *
+     * <p>This query is only supported in Tuner 1.1 or lowner version. Unsupported version will
+     * return {@link MODULATION_UNDEFINED}.
+     * Use {@link TunerVersionChecker#getTunerVersion()} to get the version information.
+     * @deprecated Use {@link #getLayerSettings()} and {@link IsdbtLayerSettings#getModulation()}
+     * instead.
      */
+    @Deprecated
     @Modulation
     public int getModulation() {
-        return mModulation;
+        if (TunerVersionChecker.isHigherOrEqualVersionTo(TunerVersionChecker.TUNER_VERSION_2_0)) {
+            return MODULATION_UNDEFINED;
+        }
+        return mLayerSettings.length > 0 ? mLayerSettings[0].getModulation() : MODULATION_UNDEFINED;
     }
     /**
      * Gets Bandwidth.
@@ -168,10 +287,21 @@ public class IsdbtFrontendSettings extends FrontendSettings {
     }
     /**
      * Gets Code rate.
+     *
+     * <p>This query is only supported in Tuner 1.1 or lowner version. Unsupported version will
+     * return {@link DvbtFrontendSettings#CODERATE_UNDEFINED}.
+     * Use {@link TunerVersionChecker#getTunerVersion()} to get the version information.
+     * @deprecated Use {@link #getLayerSettings()} and {@link IsdbtLayerSettings#getCodeRate()}
+     * instead.
      */
+    @Deprecated
     @CodeRate
     public int getCodeRate() {
-        return mCodeRate;
+        if (TunerVersionChecker.isHigherOrEqualVersionTo(TunerVersionChecker.TUNER_VERSION_2_0)) {
+            return DvbtFrontendSettings.CODERATE_UNDEFINED;
+        }
+        return mLayerSettings.length > 0 ? mLayerSettings[0].getCodeRate()
+                                         : DvbtFrontendSettings.CODERATE_UNDEFINED;
     }
     /**
      * Gets Guard Interval.
@@ -185,6 +315,29 @@ public class IsdbtFrontendSettings extends FrontendSettings {
      */
     public int getServiceAreaId() {
         return mServiceAreaId;
+    }
+    /**
+     * Gets ISDB-T Layer Settings.
+     *
+     * <p>This query is only supported in Tuner 2.0 or higher version. Unsupported version will
+     * return an empty array.
+     * Use {@link TunerVersionChecker#getTunerVersion()} to get the version information.
+     */
+    @SuppressLint("ArrayReturn")
+    @NonNull
+    public IsdbtLayerSettings[] getLayerSettings() {
+        return mLayerSettings;
+    }
+    /**
+     * Gets ISDB-T Partial Reception Flag.
+     *
+     * <p>This query is only supported in Tuner 2.0 or higher version. Unsupported version will
+     * return {@link PARTIALRECEPTIONFLAG_UNDEFINED}.
+     * Use {@link TunerVersionChecker#getTunerVersion()} to get the version information.
+     */
+    @PartialReceptionFlag
+    public int getPartialReceptionFlag() {
+        return mPartialReceptionFlag;
     }
 
     /**
@@ -200,12 +353,12 @@ public class IsdbtFrontendSettings extends FrontendSettings {
      */
     public static class Builder {
         private long mFrequency = 0;
-        private int mModulation = MODULATION_UNDEFINED;
         private int mBandwidth = BANDWIDTH_UNDEFINED;
         private int mMode = MODE_UNDEFINED;
-        private int mCodeRate = DvbtFrontendSettings.CODERATE_UNDEFINED;
         private int mGuardInterval = DvbtFrontendSettings.GUARD_INTERVAL_UNDEFINED;
         private int mServiceAreaId = 0;
+        private IsdbtLayerSettings[] mLayerSettings = {};
+        private int mPartialReceptionFlag = PARTIAL_RECEPTION_FLAG_UNDEFINED;
 
         private Builder() {
         }
@@ -238,11 +391,28 @@ public class IsdbtFrontendSettings extends FrontendSettings {
         /**
          * Sets Modulation.
          *
+         * <p>This configuration is only supported in Tuner 1.1 or lowner version. Unsupported
+         * version will cause no-op. Use {@link TunerVersionChecker#getTunerVersion()} to get the
+         * version information.
+         *
          * <p>Default value is {@link #MODULATION_UNDEFINED}.
          */
+        @Deprecated
         @NonNull
         public Builder setModulation(@Modulation int modulation) {
-            mModulation = modulation;
+            if (TunerVersionChecker.checkHigherOrEqualVersionTo(
+                        TunerVersionChecker.TUNER_VERSION_2_0, "setModulation")) {
+                Log.d(TAG, "Use IsdbtLayerSettings on HAL 2.0 or higher");
+            } else {
+                IsdbtLayerSettings.Builder layerBuilder = IsdbtLayerSettings.builder();
+                layerBuilder.setModulation(modulation);
+                if (mLayerSettings.length == 0) {
+                    mLayerSettings = new IsdbtLayerSettings[1];
+                } else {
+                    layerBuilder.setCodeRate(mLayerSettings[0].getCodeRate());
+                }
+                mLayerSettings[0] = layerBuilder.build();
+            }
             return this;
         }
         /**
@@ -268,11 +438,28 @@ public class IsdbtFrontendSettings extends FrontendSettings {
         /**
          * Sets Code rate.
          *
+         * <p>This configuration is only supported in Tuner 1.1 or lowner version. Unsupported
+         * version will cause no-op. Use {@link TunerVersionChecker#getTunerVersion()} to get the
+         * version information.
+         *
          * <p>Default value is {@link DvbtFrontendSettings#CODERATE_UNDEFINED}.
          */
+        @Deprecated
         @NonNull
         public Builder setCodeRate(@DvbtFrontendSettings.CodeRate int codeRate) {
-            mCodeRate = codeRate;
+            if (TunerVersionChecker.checkHigherOrEqualVersionTo(
+                        TunerVersionChecker.TUNER_VERSION_2_0, "setModulation")) {
+                Log.d(TAG, "Use IsdbtLayerSettings on HAL 2.0 or higher");
+            } else {
+                IsdbtLayerSettings.Builder layerBuilder = IsdbtLayerSettings.builder();
+                layerBuilder.setCodeRate(codeRate);
+                if (mLayerSettings.length == 0) {
+                    mLayerSettings = new IsdbtLayerSettings[1];
+                } else {
+                    layerBuilder.setModulation(mLayerSettings[0].getModulation());
+                }
+                mLayerSettings[0] = layerBuilder.build();
+            }
             return this;
         }
         /**
@@ -295,19 +482,176 @@ public class IsdbtFrontendSettings extends FrontendSettings {
             mServiceAreaId = serviceAreaId;
             return this;
         }
+        /**
+         * Sets ISDB-T Layer Settings.
+         *
+         * <p>This configuration is only supported in Tuner 2.0 or higher version. Unsupported
+         * version will cause no-op. Use {@link TunerVersionChecker#getTunerVersion()} to get the
+         * version information.
+         *
+         * <p>Default value is an empty array.
+         */
+        @NonNull
+        public Builder setLayerSettings(
+                @SuppressLint("ArrayReturn") @NonNull IsdbtLayerSettings[] layerSettings) {
+            if (TunerVersionChecker.checkHigherOrEqualVersionTo(
+                        TunerVersionChecker.TUNER_VERSION_2_0, "setLayerSettings")) {
+                mLayerSettings = new IsdbtLayerSettings[layerSettings.length];
+                for (int i = 0; i < layerSettings.length; i++) {
+                    mLayerSettings[i] = layerSettings[i];
+                }
+            }
+            return this;
+        }
+        /**
+         * Sets ISDB-T Partial Reception Flag.
+         *
+         * <p>This configuration is only supported in Tuner 2.0 or higher version. Unsupported
+         * version will cause no-op. Use {@link TunerVersionChecker#getTunerVersion()} to get the
+         * version information.
+         *
+         * <p>Default value is {@link PARTIALRECEPTIONFLAG_UNDEFINED}.
+         */
+        @NonNull
+        public Builder setPartialReceptionFlag(@PartialReceptionFlag int flag) {
+            if (TunerVersionChecker.checkHigherOrEqualVersionTo(
+                        TunerVersionChecker.TUNER_VERSION_2_0, "setPartialReceptionFlag")) {
+                mPartialReceptionFlag = flag;
+            }
+            return this;
+        }
 
         /**
          * Builds a {@link IsdbtFrontendSettings} object.
          */
         @NonNull
         public IsdbtFrontendSettings build() {
-            return new IsdbtFrontendSettings(mFrequency, mModulation, mBandwidth, mMode, mCodeRate,
-                    mGuardInterval, mServiceAreaId);
+            return new IsdbtFrontendSettings(mFrequency, mBandwidth, mMode, mGuardInterval,
+                    mServiceAreaId, mLayerSettings, mPartialReceptionFlag);
         }
     }
 
     @Override
     public int getType() {
         return FrontendSettings.TYPE_ISDBT;
+    }
+
+    /**
+     * Layer Settings for ISDB-T Frontend.
+     *
+     * <p>Layer Settings is only supported in Tuner 2.0 or higher version. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to get the version information.
+     */
+    public static final class IsdbtLayerSettings {
+        private final int mModulation;
+        private final int mTimeInterleaveMode;
+        private final int mCodeRate;
+        private final int mNumOfSegment;
+
+        private IsdbtLayerSettings(
+                int modulation, int timeInterleaveMode, int codeRate, int numOfSegment) {
+            mModulation = modulation;
+            mTimeInterleaveMode = timeInterleaveMode;
+            mCodeRate = codeRate;
+            mNumOfSegment = numOfSegment;
+        }
+
+        /**
+         * Gets Modulation.
+         */
+        @Modulation
+        public int getModulation() {
+            return mModulation;
+        }
+        /**
+         * Gets Time Interleave Mode.
+         */
+        @TimeInterleaveMode
+        public int getTimeInterleaveMode() {
+            return mTimeInterleaveMode;
+        }
+        /**
+         * Gets Code rate.
+         */
+        @CodeRate
+        public int getCodeRate() {
+            return mCodeRate;
+        }
+        /**
+         * Gets Number of Segment.
+         */
+        @IntRange(from = 0, to = 0xff)
+        public int getNumOfSegment() {
+            return mNumOfSegment;
+        }
+
+        /**
+         * Creates a builder for {@link IsdbtLayerSettings}.
+         */
+        @NonNull
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        /**
+         * Builder for {@link IsdbtLayerSettings}.
+         */
+        public static final class Builder {
+            private int mModulation = MODULATION_UNDEFINED;
+            private int mTimeInterleaveMode = TIME_INTERLEAVE_MODE_UNDEFINED;
+            private int mCodeRate = DvbtFrontendSettings.CODERATE_UNDEFINED;
+            private int mNumOfSegment = 0;
+
+            private Builder() {}
+
+            /**
+             * Sets modulation.
+             *
+             * <p>Default value is {@link #MODULATION_UNDEFINED}.
+             */
+            @NonNull
+            public Builder setModulation(@Modulation int modulation) {
+                mModulation = modulation;
+                return this;
+            }
+            /**
+             * Sets time interleave mode.
+             *
+             * <p>Default value is {@link #TIME_INTERLEAVE_MODE_UNDEFINED}.
+             */
+            @NonNull
+            public Builder setTimeInterleaveMode(@TimeInterleaveMode int mode) {
+                mTimeInterleaveMode = mode;
+                return this;
+            }
+            /**
+             * Sets code rate.
+             */
+            @NonNull
+            public Builder setCodeRate(@DvbtFrontendSettings.CodeRate int codeRate) {
+                mCodeRate = codeRate;
+                return this;
+            }
+            /**
+             * Sets number of segment.
+             *
+             * <p>Default value is 0.
+             */
+            @NonNull
+            @IntRange(from = 0, to = 0xff)
+            public Builder setNumOfSegment(int numOfSegment) {
+                mNumOfSegment = numOfSegment;
+                return this;
+            }
+
+            /**
+             * Builds a {@link IsdbtLayerSettings} object.
+             */
+            @NonNull
+            public IsdbtLayerSettings build() {
+                return new IsdbtLayerSettings(
+                        mModulation, mTimeInterleaveMode, mCodeRate, mNumOfSegment);
+            }
+        }
     }
 }

@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.phone
 
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.R
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
@@ -37,6 +39,7 @@ class SplitShadeHeaderController @Inject constructor(
     batteryMeterViewController: BatteryMeterViewController
 ) {
 
+    private val combinedHeaders = featureFlags.useCombinedQSHeaders()
     // TODO(b/194178072) Handle RSSI hiding when multi carrier
     private val iconManager: StatusBarIconController.IconManager
     private val qsCarrierGroupController: QSCarrierGroupController
@@ -75,6 +78,19 @@ class SplitShadeHeaderController @Inject constructor(
             }
         }
 
+    var qsExpandedFraction = -1f
+        set(value) {
+            if (visible && field != value) {
+                field = value
+                updateVisibility()
+            }
+        }
+
+    private val constraintSplit = ConstraintSet()
+            .apply { load(statusBar.context, R.xml.split_header) }
+    private val constraintQQS = ConstraintSet().apply { load(statusBar.context, R.xml.qqs_header) }
+    private val constraintQS = ConstraintSet().apply { load(statusBar.context, R.xml.qs_header) }
+
     init {
         batteryMeterViewController.init()
         val batteryIcon: BatteryMeterView = statusBar.findViewById(R.id.batteryRemainingIcon)
@@ -91,7 +107,7 @@ class SplitShadeHeaderController @Inject constructor(
     }
 
     private fun updateVisibility() {
-        val visibility = if (!splitShadeMode) {
+        val visibility = if (!splitShadeMode && !combinedHeaders) {
             View.GONE
         } else if (shadeExpanded) {
             View.VISIBLE
@@ -101,6 +117,21 @@ class SplitShadeHeaderController @Inject constructor(
         if (statusBar.visibility != visibility) {
             statusBar.visibility = visibility
             visible = visibility == View.VISIBLE
+        }
+        updateConstraints()
+    }
+
+    private fun updateConstraints() {
+        if (!combinedHeaders) {
+            return
+        }
+        statusBar as ConstraintLayout
+        if (splitShadeMode) {
+            constraintSplit.applyTo(statusBar)
+        } else if (qsExpandedFraction == 1f) {
+            constraintQS.applyTo(statusBar)
+        } else {
+            constraintQQS.applyTo(statusBar)
         }
     }
 

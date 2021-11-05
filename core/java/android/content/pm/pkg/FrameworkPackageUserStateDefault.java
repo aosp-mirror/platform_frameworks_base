@@ -25,7 +25,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-class PackageUserStateDefault implements PackageUserState {
+/** @hide */
+class FrameworkPackageUserStateDefault implements FrameworkPackageUserState {
 
     @Override
     public int getEnabledState() {
@@ -139,6 +140,7 @@ class PackageUserStateDefault implements PackageUserState {
         return false;
     }
 
+    @Nullable
     @Override
     public OverlayPaths getAllOverlayPaths() {
         return null;
