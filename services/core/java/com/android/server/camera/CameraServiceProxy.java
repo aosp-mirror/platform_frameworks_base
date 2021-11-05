@@ -108,9 +108,8 @@ public class CameraServiceProxy extends SystemService
 
     /**
      * When enabled this change id forces the packages it is applied to override the default
-     * camera rotate & crop behavior and always return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE .
-     * The default behavior along with all possible override combinations is discussed in the table
-     * below.
+     * camera rotate & crop behavior. The default behavior along with all possible override
+     * combinations is discussed in the table below.
      */
     @ChangeId
     @Overridable
@@ -122,7 +121,9 @@ public class CameraServiceProxy extends SystemService
      * When enabled this change id forces the packages it is applied to ignore the current value of
      * 'android:resizeableActivity' as well as target SDK equal to or below M and consider the
      * activity as non-resizeable. In this case, the value of camera rotate & crop will only depend
-     * on the needed compensation considering the current display rotation.
+     * on potential mismatches between the orientation of the camera and the fixed orientation of
+     * the activity. You can check the table below for further details on the possible override
+     * combinations.
      */
     @ChangeId
     @Overridable
@@ -131,30 +132,67 @@ public class CameraServiceProxy extends SystemService
     public static final long OVERRIDE_CAMERA_RESIZABLE_AND_SDK_CHECK = 191513214L; // buganizer id
 
     /**
+     * This change id forces the packages it is applied to override the default camera rotate & crop
+     * behavior. Enabling it will set the crop & rotate parameter to
+     * {@link android.hardware.camera2.CaptureRequest#SCALER_ROTATE_AND_CROP_90} and disabling it
+     * will reset the parameter to
+     * {@link android.hardware.camera2.CaptureRequest#SCALER_ROTATE_AND_CROP_NONE} as long as camera
+     * clients include {@link android.hardware.camera2.CaptureRequest#SCALER_ROTATE_AND_CROP_AUTO}
+     * in their capture requests.
+     *
+     * This treatment only takes effect if OVERRIDE_CAMERA_ROTATE_AND_CROP_DEFAULTS is also enabled.
+     * The table below includes further information about the possible override combinations.
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long OVERRIDE_CAMERA_ROTATE_AND_CROP = 190069291L; //buganizer id
+
+    /**
      * Possible override combinations
      *
-     *                             |OVERRIDE     |OVERRIDE_
-     *                             |CAMERA_      |CAMERA_
-     *                             |ROTATE_      |RESIZEABLE_
-     *                             |AND_CROP_    |AND_SDK_
-     *                             |DEFAULTS     |CHECK
-     * _________________________________________________
-     * Default Behavior            | D           |D
-     * _________________________________________________
-     * Ignore SDK&Resize           | D           |E
-     * _________________________________________________
-     * SCALER_ROTATE_AND_CROP_NONE | E           |D, E
-     * _________________________________________________
+     *            |OVERRIDE     |          |OVERRIDE_
+     *            |CAMERA_      |OVERRIDE  |CAMERA_
+     *            |ROTATE_      |CAMERA_   |RESIZEABLE_
+     *            |AND_CROP_    |ROTATE_   |AND_SDK_
+     *            |DEFAULTS     |AND_CROP  |CHECK
+     * ______________________________________________
+     * Default    |             |          |
+     * Behavior   | D           |D         |D
+     * ______________________________________________
+     * Ignore     |             |          |
+     * SDK&Resize | D           |D         |E
+     * ______________________________________________
+     * Default    |             |          |
+     * Behavior   | D           |E         |D
+     * ______________________________________________
+     * Ignore     |             |          |
+     * SDK&Resize | D           |E         |E
+     * ______________________________________________
+     * Rotate&Crop|             |          |
+     * disabled   | E           |D         |D
+     * ______________________________________________
+     * Rotate&Crop|             |          |
+     * disabled   | E           |D         |E
+     * ______________________________________________
+     * Rotate&Crop|             |          |
+     * enabled    | E           |E         |D
+     * ______________________________________________
+     * Rotate&Crop|             |          |
+     * enabled    | E           |E         |E
+     * ______________________________________________
      * Where:
-     * E                            -> Override enabled
-     * D                            -> Override disabled
-     * Default behavior             -> Rotate&crop will be calculated depending on the required
-     *                                 compensation necessary for the current display rotation.
-     *                                 Additionally the app must either target M (or below)
-     *                                 or is declared as non-resizeable.
-     * Ignore SDK&Resize            -> The Rotate&crop value will depend on the required
-     *                                 compensation for the current display rotation.
-     * SCALER_ROTATE_AND_CROP_NONE  -> Always return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE
+     * E -> Override enabled
+     * D -> Override disabled
+     * Default behavior ->  Rotate&crop will be enabled only in cases
+     *                      where the fixed app orientation mismatches
+     *                      with the orientation of the camera.
+     *                      Additionally the app must either target M (or below)
+     *                      or is declared as non-resizeable.
+     * Ignore SDK&Resize -> Rotate&crop will be enabled only in cases
+     *                      where the fixed app orientation mismatches
+     *                      with the orientation of the camera.
      */
 
     // Flags arguments to NFC adapter to enable/disable NFC
@@ -505,8 +543,14 @@ public class CameraServiceProxy extends SystemService
             if ((taskInfo != null) && (CompatChanges.isChangeEnabled(
                         OVERRIDE_CAMERA_ROTATE_AND_CROP_DEFAULTS, packageName,
                         UserHandle.getUserHandleForUid(taskInfo.userId)))) {
-                    Slog.v(TAG, "OVERRIDE_CAMERA_ROTATE_AND_CROP_DEFAULTS enabled!");
+                if (CompatChanges.isChangeEnabled(OVERRIDE_CAMERA_ROTATE_AND_CROP, packageName,
+                        UserHandle.getUserHandleForUid(taskInfo.userId))) {
+                    Slog.v(TAG, "OVERRIDE_CAMERA_ROTATE_AND_CROP enabled!");
                     return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+                } else {
+                    Slog.v(TAG, "OVERRIDE_CAMERA_ROTATE_AND_CROP disabled!");
+                    return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+                }
             }
             boolean ignoreResizableAndSdkCheck = false;
             if ((taskInfo != null) && (CompatChanges.isChangeEnabled(
