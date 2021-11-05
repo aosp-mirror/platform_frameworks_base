@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.statusbar.window;
 
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
@@ -47,7 +47,7 @@ import com.android.systemui.util.leak.RotationUtils;
 public class StatusBarWindowView extends FrameLayout {
 
     public static final String TAG = "PhoneStatusBarWindowView";
-    public static final boolean DEBUG = StatusBar.DEBUG;
+    public static final boolean DEBUG = false;
 
     private int mLeftInset = 0;
     private int mRightInset = 0;
