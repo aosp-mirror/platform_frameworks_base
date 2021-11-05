@@ -4076,6 +4076,56 @@ public class ActivityManager {
     }
 
     /**
+     * Uses the value defined by the platform.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int STOP_BG_USERS_ON_SWITCH_DEFAULT = -1;
+
+    /**
+     * Overrides value defined by the platform and stop background users on switch.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int STOP_BG_USERS_ON_SWITCH_TRUE = 1;
+
+    /**
+     * Overrides value defined by the platform and don't stop background users on switch.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int STOP_BG_USERS_ON_SWITCH_FALSE = 0;
+
+    /** @hide */
+    @IntDef(prefix = { "STOP_BG_USERS_ON_SWITCH_" }, value = {
+            STOP_BG_USERS_ON_SWITCH_DEFAULT,
+            STOP_BG_USERS_ON_SWITCH_TRUE,
+            STOP_BG_USERS_ON_SWITCH_FALSE
+    })
+    public @interface StopBgUsersOnSwitch {}
+
+    /**
+     * Sets whether background users should be stopped when the current user is switched.
+     *
+     * <p>Should only be used on tests.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    public void setStopBackgroundUsersOnSwitch(@StopBgUsersOnSwitch int value) {
+        try {
+            getService().setStopBackgroundUsersOnSwitch(value);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Starts a profile.
      * To be used with non-managed profiles, managed profiles should use
      * {@link UserManager#requestQuietModeEnabled}
