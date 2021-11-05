@@ -953,7 +953,7 @@ android_media_MediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
     Parcel* parcel = parcelForJavaObject(env, jAttributionSource);
     android::content::AttributionSourceState attributionSource;
     attributionSource.readFromParcel(parcel);
-    sp<MediaPlayer> mp = new MediaPlayer(attributionSource);
+    sp<MediaPlayer> mp = sp<MediaPlayer>::make(attributionSource);
     if (mp == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;
