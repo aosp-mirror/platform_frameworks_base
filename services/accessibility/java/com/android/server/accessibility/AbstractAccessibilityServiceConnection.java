@@ -256,6 +256,18 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         void setGestureDetectionPassthroughRegion(int displayId, Region region);
 
         void setTouchExplorationPassthroughRegion(int displayId, Region region);
+
+        void setServiceDetectsGesturesEnabled(int displayId, boolean mode);
+
+        void requestTouchExploration(int displayId);
+
+        void requestDragging(int displayId, int pointerId);
+
+        void requestDelegating(int displayId);
+
+        void onDoubleTap(int displayId);
+
+        void onDoubleTapAndHold(int displayId);
     }
 
     public AbstractAccessibilityServiceConnection(Context context, ComponentName componentName,
@@ -1650,7 +1662,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
-    private IAccessibilityServiceClient getServiceInterfaceSafely() {
+    protected IAccessibilityServiceClient getServiceInterfaceSafely() {
         synchronized (mLock) {
             return mServiceInterface;
         }
@@ -2047,5 +2059,29 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     protected void logTraceWM(String methodName, String params) {
         mTrace.logTrace(TRACE_WM + "." + methodName, FLAGS_WINDOW_MANAGER_INTERNAL, params);
+    }
+
+    public void setServiceDetectsGesturesEnabled(int displayId, boolean mode) {
+        mSystemSupport.setServiceDetectsGesturesEnabled(displayId, mode);
+    }
+
+    public void requestTouchExploration(int displayId) {
+        mSystemSupport.requestTouchExploration(displayId);
+    }
+
+    public void requestDragging(int displayId, int pointerId) {
+        mSystemSupport.requestDragging(displayId, pointerId);
+    }
+
+    public void requestDelegating(int displayId) {
+        mSystemSupport.requestDelegating(displayId);
+    }
+
+    public void onDoubleTap(int displayId) {
+        mSystemSupport.onDoubleTap(displayId);
+    }
+
+    public void onDoubleTapAndHold(int displayId) {
+        mSystemSupport.onDoubleTapAndHold(displayId);
     }
 }

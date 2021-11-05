@@ -893,6 +893,42 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
     }
 
+    public void setServiceDetectsGesturesEnabled(int displayId, boolean mode) {
+        if (mTouchExplorer.contains(displayId)) {
+            mTouchExplorer.get(displayId).setServiceDetectsGestures(mode);
+        }
+    }
+
+    public void requestTouchExploration(int displayId) {
+        if (mTouchExplorer.contains(displayId)) {
+            mTouchExplorer.get(displayId).requestTouchExploration();
+        }
+    }
+
+    public void requestDragging(int displayId, int pointerId) {
+        if (mTouchExplorer.contains(displayId)) {
+            mTouchExplorer.get(displayId).requestDragging(pointerId);
+        }
+    }
+
+    public void requestDelegating(int displayId) {
+        if (mTouchExplorer.contains(displayId)) {
+            mTouchExplorer.get(displayId).requestDelegating();
+        }
+    }
+
+    public void onDoubleTap(int displayId) {
+        if (mTouchExplorer.contains(displayId)) {
+            mTouchExplorer.get(displayId).onDoubleTap();
+        }
+    }
+
+    public void onDoubleTapAndHold(int displayId) {
+        if (mTouchExplorer.contains(displayId)) {
+            mTouchExplorer.get(displayId).onDoubleTapAndHold();
+        }
+    }
+
     /**
      * Dumps all {@link AccessibilityInputFilter}s here.
      */

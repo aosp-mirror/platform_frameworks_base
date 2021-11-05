@@ -160,14 +160,26 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public void takeScreenshot(int displayId, RemoteCallback callback) {}
 
-    public void setTouchExplorationPassthroughRegion(int displayId, Region region) {}
-
-    public void setGestureDetectionPassthroughRegion(int displayId, Region region) {}
-
     public void setFocusAppearance(int strokeWidth, int color) {}
 
     public void logTrace(long timestamp, String where, String callingParams, int processId,
             long threadId, int callingUid, Bundle callingStack) {}
+
+    public void setGestureDetectionPassthroughRegion(int displayId, Region region) {}
+
+    public void setTouchExplorationPassthroughRegion(int displayId, Region region) {}
+
+    public void setServiceDetectsGesturesEnabled(int displayId, boolean mode) {}
+
+    public void requestTouchExploration(int displayId) {}
+
+    public void requestDragging(int displayId, int pointerId) {}
+
+    public void requestDelegating(int displayId) {}
+
+    public void onDoubleTap(int displayId) {}
+
+    public void onDoubleTapAndHold(int displayId) {}
 
     public void logTrace(long timestamp, String where, long loggingTypes, String callingParams,
             int processId, long threadId, int callingUid, Bundle serializedCallingStackInBundle) {}
