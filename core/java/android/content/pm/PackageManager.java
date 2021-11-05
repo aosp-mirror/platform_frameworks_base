@@ -49,7 +49,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.dex.ArtManager;
-import android.content.pm.pkg.PackageUserState;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -4478,6 +4477,20 @@ public abstract class PackageManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
     public static final String SYSTEM_SHARED_LIBRARY_SHARED = "android.ext.shared";
+
+    /** @hide */
+    @IntDef({
+            NOTIFY_PACKAGE_USE_ACTIVITY,
+            NOTIFY_PACKAGE_USE_SERVICE,
+            NOTIFY_PACKAGE_USE_FOREGROUND_SERVICE,
+            NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER,
+            NOTIFY_PACKAGE_USE_CONTENT_PROVIDER,
+            NOTIFY_PACKAGE_USE_BACKUP,
+            NOTIFY_PACKAGE_USE_CROSS_PACKAGE,
+            NOTIFY_PACKAGE_USE_INSTRUMENTATION,
+    })
+    public @interface NotifyReason {
+    }
 
     /**
      * Used when starting a process for an Activity.

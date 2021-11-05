@@ -229,8 +229,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             );
         }
 
-        mView.onAttach(
-                mIconManager, mQSExpansionPathInterpolator, rssiIgnoredSlots, mInsetsProvider);
+        mView.onAttach(mIconManager, mQSExpansionPathInterpolator, rssiIgnoredSlots,
+                mInsetsProvider, mFeatureFlags.useCombinedQSHeaders());
 
         mDemoModeController.addCallback(mDemoModeReceiver);
 

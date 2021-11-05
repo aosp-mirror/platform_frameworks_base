@@ -39,6 +39,7 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -404,7 +405,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 continue;
             }
 
-            PackageSetting pkgSetting = pmInt.getPackageSetting(pkg.getPackageName());
+            PackageStateInternal pkgSetting = pmInt.getPackageStateInternal(pkg.getPackageName());
             final String[] instructionSets = getAppDexInstructionSets(
                     AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting),
                     AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting));

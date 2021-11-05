@@ -52,7 +52,8 @@ public class FrontendStatus {
             FRONTEND_STATUS_TYPE_ISDBT_SEGMENTS, FRONTEND_STATUS_TYPE_TS_DATA_RATES,
             FRONTEND_STATUS_TYPE_MODULATIONS_EXT, FRONTEND_STATUS_TYPE_ROLL_OFF,
             FRONTEND_STATUS_TYPE_IS_MISO_ENABLED, FRONTEND_STATUS_TYPE_IS_LINEAR,
-            FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES_ENABLED})
+            FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES_ENABLED, FRONTEND_STATUS_TYPE_ISDBT_MODE,
+            FRONTEND_STATUS_TYPE_ISDBT_PARTIAL_RECEPTION_FLAG})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendStatusType {}
 
@@ -242,6 +243,16 @@ public class FrontendStatus {
      */
     public static final int FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES_ENABLED =
             android.hardware.tv.tuner.FrontendStatusType.IS_SHORT_FRAMES;
+    /**
+     * ISDB-T mode. Only supported in Tuner HAL 2.0 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_ISDBT_MODE =
+            android.hardware.tv.tuner.FrontendStatusType.ISDBT_MODE;
+    /**
+     * ISDB-T partial reception flag. Only supported in Tuner HAL 2.0 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_ISDBT_PARTIAL_RECEPTION_FLAG =
+            android.hardware.tv.tuner.FrontendStatusType.ISDBT_PARTIAL_RECEPTION_FLAG;
 
     /** @hide */
     @IntDef(value = {
@@ -337,7 +348,21 @@ public class FrontendStatus {
             DvbcFrontendSettings.TIME_INTERLEAVE_MODE_8_16,
             DvbcFrontendSettings.TIME_INTERLEAVE_MODE_128_2,
             DvbcFrontendSettings.TIME_INTERLEAVE_MODE_128_3,
-            DvbcFrontendSettings.TIME_INTERLEAVE_MODE_128_4})
+            DvbcFrontendSettings.TIME_INTERLEAVE_MODE_128_4,
+            IsdbtFrontendSettings.TIME_INTERLEAVE_MODE_UNDEFINED,
+            IsdbtFrontendSettings.TIME_INTERLEAVE_MODE_AUTO,
+            IsdbtFrontendSettings.TIME_INTERLEAVE_MODE_1_0,
+            IsdbtFrontendSettings.TIME_INTERLEAVE_MODE_1_4,
+            IsdbtFrontendSettings.TIME_INTERLEAVE_MODE_1_8,
+            IsdbtFrontendSettings.TIME_INTERLEAVE_MODE_1_16,
+            IsdbtFrontendSettings.TIME_INTERLEAVE_MODE_2_0,
+            IsdbtFrontendSettings.TIME_INTERLEAVE_MODE_2_2,
+            IsdbtFrontendSettings.TIME_INTERLEAVE_MODE_2_4,
+            IsdbtFrontendSettings.TIME_INTERLEAVE_MODE_2_8,
+            IsdbtFrontendSettings.TIME_INTERLEAVE_MODE_3_0,
+            IsdbtFrontendSettings.TIME_INTERLEAVE_MODE_3_1,
+            IsdbtFrontendSettings.TIME_INTERLEAVE_MODE_3_2,
+            IsdbtFrontendSettings.TIME_INTERLEAVE_MODE_3_4})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendInterleaveMode {}
 
@@ -466,7 +491,8 @@ public class FrontendStatus {
     private Boolean mIsMisoEnabled;
     private Boolean mIsLinear;
     private Boolean mIsShortFrames;
-
+    private Integer mIsdbtMode;
+    private Integer mIsdbtPartialReceptionFlag;
 
     // Constructed and fields set by JNI code.
     private FrontendStatus() {
@@ -938,6 +964,40 @@ public class FrontendStatus {
             throw new IllegalStateException("isShortFramesEnabled status is empty");
         }
         return mIsShortFrames;
+    }
+
+    /**
+     * Gets ISDB-T mode.
+     *
+     * <p>This query is only supported by Tuner HAL 2.0 or higher. Unsupported version or if HAL
+     * doesn't return ISDB-T mode status will throw IllegalStateException. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    @IsdbtFrontendSettings.Mode
+    public int getIsdbtMode() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_2_0, "IsdbtMode status");
+        if (mIsdbtMode == null) {
+            throw new IllegalStateException("IsdbtMode status is empty");
+        }
+        return mIsdbtMode;
+    }
+
+    /**
+     * Gets ISDB-T partial reception flag.
+     *
+     * <p>This query is only supported by Tuner HAL 2.0 or higher. Unsupported version or if HAL
+     * doesn't return partial reception flag status will throw IllegalStateException. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    @IsdbtFrontendSettings.PartialReceptionFlag
+    public int getIsdbtPartialReceptionFlag() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_2_0, "IsdbtPartialReceptionFlag status");
+        if (mIsdbtPartialReceptionFlag == null) {
+            throw new IllegalStateException("IsdbtPartialReceptionFlag status is empty");
+        }
+        return mIsdbtPartialReceptionFlag;
     }
 
     /**

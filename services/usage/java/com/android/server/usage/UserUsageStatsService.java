@@ -29,6 +29,8 @@ import static android.app.usage.UsageStatsManager.INTERVAL_MONTHLY;
 import static android.app.usage.UsageStatsManager.INTERVAL_WEEKLY;
 import static android.app.usage.UsageStatsManager.INTERVAL_YEARLY;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.EventList;
 import android.app.usage.EventStats;
@@ -365,43 +367,46 @@ class UserUsageStatsService {
     private static final StatCombiner<UsageStats> sUsageStatsCombiner =
             new StatCombiner<UsageStats>() {
                 @Override
-                public void combine(IntervalStats stats, boolean mutable,
+                public boolean combine(IntervalStats stats, boolean mutable,
                                     List<UsageStats> accResult) {
                     if (!mutable) {
                         accResult.addAll(stats.packageStats.values());
-                        return;
+                        return true;
                     }
 
                     final int statCount = stats.packageStats.size();
                     for (int i = 0; i < statCount; i++) {
                         accResult.add(new UsageStats(stats.packageStats.valueAt(i)));
                     }
+                    return true;
                 }
             };
 
     private static final StatCombiner<ConfigurationStats> sConfigStatsCombiner =
             new StatCombiner<ConfigurationStats>() {
                 @Override
-                public void combine(IntervalStats stats, boolean mutable,
+                public boolean combine(IntervalStats stats, boolean mutable,
                                     List<ConfigurationStats> accResult) {
                     if (!mutable) {
                         accResult.addAll(stats.configurations.values());
-                        return;
+                        return true;
                     }
 
                     final int configCount = stats.configurations.size();
                     for (int i = 0; i < configCount; i++) {
                         accResult.add(new ConfigurationStats(stats.configurations.valueAt(i)));
                     }
+                    return true;
                 }
             };
 
     private static final StatCombiner<EventStats> sEventStatsCombiner =
             new StatCombiner<EventStats>() {
                 @Override
-                public void combine(IntervalStats stats, boolean mutable,
+                public boolean combine(IntervalStats stats, boolean mutable,
                         List<EventStats> accResult) {
                     stats.addEventStatsTo(accResult);
+                    return true;
                 }
             };
 
@@ -414,6 +419,7 @@ class UserUsageStatsService {
      * and bucket, then calls the {@link com.android.server.usage.UsageStatsDatabase.StatCombiner}
      * provided to select the stats to use from the IntervalStats object.
      */
+    @Nullable
     private <T> List<T> queryStats(int intervalType, final long beginTime, final long endTime,
             StatCombiner<T> combiner) {
         if (intervalType == INTERVAL_BEST) {
@@ -510,16 +516,16 @@ class UserUsageStatsService {
         List<Event> results = queryStats(INTERVAL_DAILY,
                 beginTime, endTime, new StatCombiner<Event>() {
                     @Override
-                    public void combine(IntervalStats stats, boolean mutable,
+                    public boolean combine(IntervalStats stats, boolean mutable,
                             List<Event> accumulatedResult) {
                         final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
                         final int size = stats.events.size();
                         for (int i = startIndex; i < size; i++) {
-                            if (stats.events.get(i).mTimeStamp >= endTime) {
-                                return;
+                            Event event = stats.events.get(i);
+                            if (event.mTimeStamp >= endTime) {
+                                return false;
                             }
 
-                            Event event = stats.events.get(i);
                             final int eventType = event.mEventType;
                             if (eventType == Event.SHORTCUT_INVOCATION
                                     && (flags & HIDE_SHORTCUT_EVENTS) == HIDE_SHORTCUT_EVENTS) {
@@ -552,6 +558,7 @@ class UserUsageStatsService {
                             }
                             accumulatedResult.add(event);
                         }
+                        return true;
                     }
                 });
 
@@ -564,6 +571,60 @@ class UserUsageStatsService {
         return new UsageEvents(results, table, true);
     }
 
+    /**
+     * Returns a {@link UsageEvents} object whose events list contains only the earliest event seen
+     * for each app as well as the earliest event of {@code eventType} seen for each app.
+     */
+    @Nullable
+    UsageEvents queryEarliestAppEvents(final long beginTime, final long endTime,
+            final int eventType) {
+        if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
+            return null;
+        }
+        final ArraySet<String> names = new ArraySet<>();
+        final ArraySet<String> eventSuccess = new ArraySet<>();
+        final List<Event> results = queryStats(INTERVAL_DAILY,
+                beginTime, endTime, (stats, mutable, accumulatedResult) -> {
+                    final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
+                    final int size = stats.events.size();
+                    for (int i = startIndex; i < size; i++) {
+                        final Event event = stats.events.get(i);
+                        if (event.getTimeStamp() >= endTime) {
+                            return false;
+                        }
+                        if (event.getPackageName() == null) {
+                            continue;
+                        }
+                        if (eventSuccess.contains(event.getPackageName())) {
+                            continue;
+                        }
+
+                        final boolean firstEvent = names.add(event.getPackageName());
+
+                        if (event.getEventType() == eventType) {
+                            accumulatedResult.add(event);
+                            eventSuccess.add(event.getPackageName());
+                        } else if (firstEvent) {
+                            // Save the earliest found event for the app, even if it doesn't match.
+                            accumulatedResult.add(event);
+                        }
+                    }
+                    return true;
+                });
+
+        if (results == null || results.isEmpty()) {
+            return null;
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "Found " + results.size() + " early events for " + names.size() + " apps");
+        }
+
+        String[] table = names.toArray(new String[names.size()]);
+        Arrays.sort(table);
+        return new UsageEvents(results, table, false);
+    }
+
+    @Nullable
     UsageEvents queryEventsForPackage(final long beginTime, final long endTime,
             final String packageName, boolean includeTaskRoot) {
         if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
@@ -576,11 +637,11 @@ class UserUsageStatsService {
                     final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
                     final int size = stats.events.size();
                     for (int i = startIndex; i < size; i++) {
-                        if (stats.events.get(i).mTimeStamp >= endTime) {
-                            return;
+                        final Event event = stats.events.get(i);
+                        if (event.mTimeStamp >= endTime) {
+                            return false;
                         }
 
-                        final Event event = stats.events.get(i);
                         if (!packageName.equals(event.mPackage)) {
                             continue;
                         }
@@ -595,6 +656,7 @@ class UserUsageStatsService {
                         }
                         accumulatedResult.add(event);
                     }
+                    return true;
                 });
 
         if (results == null || results.isEmpty()) {
@@ -604,6 +666,48 @@ class UserUsageStatsService {
         final String[] table = names.toArray(new String[names.size()]);
         Arrays.sort(table);
         return new UsageEvents(results, table, includeTaskRoot);
+    }
+
+    /**
+     * Returns a {@link UsageEvents} object whose events list contains only the earliest event seen
+     * for the package as well as the earliest event of {@code eventType} seen for the package.
+     */
+    @Nullable
+    UsageEvents queryEarliestEventsForPackage(final long beginTime, final long endTime,
+            @NonNull final String packageName, final int eventType) {
+        if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
+            return null;
+        }
+        final List<Event> results = queryStats(INTERVAL_DAILY,
+                beginTime, endTime, (stats, mutable, accumulatedResult) -> {
+                    final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
+                    final int size = stats.events.size();
+                    for (int i = startIndex; i < size; i++) {
+                        final Event event = stats.events.get(i);
+                        if (event.getTimeStamp() >= endTime) {
+                            return false;
+                        }
+
+                        if (!packageName.equals(event.getPackageName())) {
+                            continue;
+                        }
+                        if (event.getEventType() == eventType) {
+                            accumulatedResult.add(event);
+                            // We've found the earliest of eventType. No need to keep going.
+                            return false;
+                        } else if (accumulatedResult.size() == 0) {
+                            // Save the earliest found event, even if it doesn't match.
+                            accumulatedResult.add(event);
+                        }
+                    }
+                    return true;
+                });
+
+        if (results == null || results.isEmpty()) {
+            return null;
+        }
+
+        return new UsageEvents(results, new String[]{packageName}, false);
     }
 
     void persistActiveStats() {
@@ -876,7 +980,6 @@ class UserUsageStatsService {
         return Long.toString(elapsedTime);
     }
 
-
     void printEvent(IndentingPrintWriter pw, Event event, boolean prettyDates) {
         pw.printPair("time", formatDateTime(event.mTimeStamp, prettyDates));
         pw.printPair("type", eventToString(event.mEventType));
@@ -925,13 +1028,13 @@ class UserUsageStatsService {
         List<Event> events = queryStats(INTERVAL_DAILY,
                 beginTime, endTime, new StatCombiner<Event>() {
                     @Override
-                    public void combine(IntervalStats stats, boolean mutable,
+                    public boolean combine(IntervalStats stats, boolean mutable,
                             List<Event> accumulatedResult) {
                         final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
                         final int size = stats.events.size();
                         for (int i = startIndex; i < size; i++) {
                             if (stats.events.get(i).mTimeStamp >= endTime) {
-                                return;
+                                return false;
                             }
 
                             Event event = stats.events.get(i);
@@ -940,6 +1043,7 @@ class UserUsageStatsService {
                             }
                             accumulatedResult.add(event);
                         }
+                        return true;
                     }
                 });
 

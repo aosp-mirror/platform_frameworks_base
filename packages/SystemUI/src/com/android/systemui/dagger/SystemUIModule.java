@@ -41,6 +41,7 @@ import com.android.systemui.flags.FeatureFlagManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.FlagReader;
 import com.android.systemui.flags.FlagWriter;
+import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.model.SysUiState;
@@ -103,6 +104,7 @@ import dagger.Provides;
             ControlsModule.class,
             DemoModeModule.class,
             FalsingModule.class,
+            FlagsModule.class,
             LogModule.class,
             PeopleHubModule.class,
             PluginModule.class,

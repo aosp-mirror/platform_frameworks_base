@@ -84,6 +84,7 @@ import com.android.server.IntentResolver;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
 import dalvik.system.VMRuntime;
@@ -1037,9 +1038,9 @@ public class PackageManagerServiceUtils {
      * @return if the package is approved at any non-zero level for the domain in the intent
      */
     public static boolean hasAnyDomainApproval(
-            @NonNull DomainVerificationManagerInternal manager, @NonNull PackageSetting pkgSetting,
-            @NonNull Intent intent, @PackageManager.ResolveInfoFlags int resolveInfoFlags,
-            @UserIdInt int userId) {
+            @NonNull DomainVerificationManagerInternal manager,
+            @NonNull PackageStateInternal pkgSetting, @NonNull Intent intent,
+            @PackageManager.ResolveInfoFlags int resolveInfoFlags, @UserIdInt int userId) {
         return manager.approvalLevelForDomain(pkgSetting, intent, resolveInfoFlags, userId)
                 > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE;
     }

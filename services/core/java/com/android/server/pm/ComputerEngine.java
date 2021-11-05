@@ -78,9 +78,9 @@ import android.content.pm.UserInfo;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
+import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
-import android.content.pm.pkg.PackageUserState;
 import android.content.pm.pkg.PackageUserStateUtils;
 import android.os.Binder;
 import android.os.PatternMatcher;
@@ -110,6 +110,9 @@ import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateImpl;
+import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.PackageStateUtils;
+import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationUtils;
 import com.android.server.utils.WatchedArrayMap;
@@ -128,6 +131,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -138,6 +142,93 @@ import java.util.UUID;
  */
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
 public class ComputerEngine implements Computer {
+
+    // TODO: Move this to its own interface implemented by the pm.Settings implementation
+    protected class Settings {
+
+        @NonNull
+        private com.android.server.pm.Settings mSettings;
+
+        public Map<String, ? extends PackageStateInternal> getPackages() {
+            return mSettings.getPackagesLocked();
+        }
+
+        public Settings(@NonNull com.android.server.pm.Settings settings) {
+            mSettings = settings;
+        }
+
+        @Nullable
+        public PackageStateInternal getPackage(@NonNull String packageName) {
+            return mSettings.getPackageLPr(packageName);
+        }
+
+        @Nullable
+        public PackageStateInternal getDisabledSystemPkg(@NonNull String packageName) {
+            return mSettings.getDisabledSystemPkgLPr(packageName);
+        }
+
+        public boolean isEnabledAndMatch(ComponentInfo componentInfo, int flags, int userId) {
+            PackageStateInternal pkgState = getPackage(componentInfo.packageName);
+            if (pkgState == null) {
+                return false;
+            }
+
+            return PackageUserStateUtils.isMatch(pkgState.getUserStateOrDefault(userId),
+                    componentInfo, flags);
+        }
+
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public boolean isEnabledAndMatch(AndroidPackage pkg, ParsedMainComponent component,
+                int flags, int userId) {
+            PackageStateInternal pkgState = getPackage(component.getPackageName());
+            if (pkgState == null) {
+                return false;
+            }
+
+            return PackageUserStateUtils.isMatch(pkgState.getUserStateOrDefault(userId),
+                    pkg.isSystem(), pkg.isEnabled(), component, flags);
+        }
+
+        @Nullable
+        public CrossProfileIntentResolver getCrossProfileIntentResolver(@UserIdInt int userId) {
+            return mSettings.getCrossProfileIntentResolver(userId);
+        }
+
+        // TODO: Find replacement
+        @Nullable
+        public SettingBase getSettingBase(int appId) {
+            return mSettings.getSettingLPr(appId);
+        }
+
+        @Nullable
+        public String getRenamedPackageLPr(String packageName) {
+            return mSettings.getRenamedPackageLPr(packageName);
+        }
+
+        @Nullable
+        public PersistentPreferredIntentResolver getPersistentPreferredActivities(
+                @UserIdInt int userId) {
+            return mSettings.getPersistentPreferredActivities(userId);
+        }
+
+        public void dumpVersionLPr(@NonNull IndentingPrintWriter indentingPrintWriter) {
+            mSettings.dumpVersionLPr(indentingPrintWriter);
+        }
+
+        public void dumpPreferred(PrintWriter pw, DumpState dumpState, String packageName) {
+            mSettings.dumpPreferred(pw, dumpState, packageName);
+        }
+
+        // TODO: Move to separate utility
+        public void writePreferredActivitiesLPr(@NonNull TypedXmlSerializer serializer, int userId,
+                boolean full) throws IllegalArgumentException, IllegalStateException, IOException {
+            mSettings.writePreferredActivitiesLPr(serializer, userId, full);
+        }
+
+        public PreferredIntentResolver getPreferredActivities(@UserIdInt int userId) {
+            return mSettings.getPreferredActivities(userId);
+        }
+    }
 
     // The administrative use counter.
     private int mUsed = 0;
@@ -198,7 +289,7 @@ public class ComputerEngine implements Computer {
     }
 
     ComputerEngine(PackageManagerService.Snapshot args) {
-        mSettings = args.settings;
+        mSettings = new Settings(args.settings);
         mIsolatedOwners = args.isolatedOwners;
         mPackages = args.packages;
         mSharedLibraries = args.sharedLibs;
@@ -315,7 +406,7 @@ public class ComputerEngine implements Computer {
                 final boolean blockNormalResolution =
                         !resolveForStart && !isTargetInstantApp && !isCallerInstantApp
                                 && shouldFilterApplicationLocked(
-                                getPackageSettingInternal(ai.applicationInfo.packageName,
+                                getPackageStateInternal(ai.applicationInfo.packageName,
                                         Process.SYSTEM_UID), filterCallingUid, userId);
                 if (!blockInstantResolution && !blockNormalResolution) {
                     final ResolveInfo ri = new ResolveInfo();
@@ -419,7 +510,7 @@ public class ComputerEngine implements Computer {
 
                 final boolean blockNormalResolution = !isTargetInstantApp && !isCallerInstantApp
                         && shouldFilterApplicationLocked(
-                        getPackageSettingInternal(si.applicationInfo.packageName,
+                        getPackageStateInternal(si.applicationInfo.packageName,
                                 Process.SYSTEM_UID), callingUid, userId);
                 if (!blockInstantResolution && !blockNormalResolution) {
                     final ResolveInfo ri = new ResolveInfo();
@@ -556,14 +647,14 @@ public class ComputerEngine implements Computer {
                 }
             }
         } else {
-            final PackageSetting setting =
-                    getPackageSettingInternal(pkgName, Process.SYSTEM_UID);
+            final PackageStateInternal setting =
+                    getPackageStateInternal(pkgName, Process.SYSTEM_UID);
             result = null;
-            if (setting != null && setting.getPkg() != null && (resolveForStart
+            if (setting != null && setting.getAndroidPackage() != null && (resolveForStart
                     || !shouldFilterApplicationLocked(setting, filterCallingUid, userId))) {
                 result = filterIfNotSystemUser(mComponentResolver.queryActivities(
-                        intent, resolvedType, flags, setting.getPkg().getActivities(), userId),
-                        userId);
+                        intent, resolvedType, flags, setting.getAndroidPackage().getActivities(),
+                        userId), userId);
             }
             if (result == null || result.size() == 0) {
                 // the caller wants to resolve for a particular package; however, there
@@ -638,15 +729,15 @@ public class ComputerEngine implements Computer {
         if (DEBUG_PACKAGE_INFO) Log.v(TAG, "getActivityInfo " + component + ": " + a);
 
         AndroidPackage pkg = a == null ? null : mPackages.get(a.getPackageName());
-        if (pkg != null && mSettings.isEnabledAndMatchLPr(pkg, a, flags, userId)) {
-            PackageSetting ps = mSettings.getPackageLPr(component.getPackageName());
+        if (pkg != null && mSettings.isEnabledAndMatch(pkg, a, flags, userId)) {
+            PackageStateInternal ps = mSettings.getPackage(component.getPackageName());
             if (ps == null) return null;
             if (shouldFilterApplicationLocked(
                     ps, filterCallingUid, component, TYPE_ACTIVITY, userId)) {
                 return null;
             }
             return PackageInfoUtils.generateActivityInfo(pkg,
-                    a, flags, ps.readUserState(userId), userId, ps);
+                    a, flags, ps.getUserStateOrDefault(userId), userId, ps);
         }
         if (resolveComponentName().equals(component)) {
             return PackageInfoWithoutStateUtils.generateDelegateActivityInfo(mResolveActivity,
@@ -674,7 +765,7 @@ public class ComputerEngine implements Computer {
     public final ApplicationInfo generateApplicationInfoFromSettingsLPw(String packageName,
             int flags, int filterCallingUid, int userId) {
         if (!mUserManager.exists(userId)) return null;
-        PackageSetting ps = mSettings.getPackageLPr(packageName);
+        PackageStateInternal ps = mSettings.getPackage(packageName);
         if (ps != null) {
             if (filterSharedLibPackageLPr(ps, filterCallingUid, userId, flags)) {
                 return null;
@@ -682,15 +773,15 @@ public class ComputerEngine implements Computer {
             if (shouldFilterApplicationLocked(ps, filterCallingUid, userId)) {
                 return null;
             }
-            if (ps.getPkg() == null) {
+            if (ps.getAndroidPackage() == null) {
                 final PackageInfo pInfo = generatePackageInfo(ps, flags, userId);
                 if (pInfo != null) {
                     return pInfo.applicationInfo;
                 }
                 return null;
             }
-            ApplicationInfo ai = PackageInfoUtils.generateApplicationInfo(ps.getPkg(), flags,
-                    ps.readUserState(userId), userId, ps);
+            ApplicationInfo ai = PackageInfoUtils.generateApplicationInfo(ps.getPkg(),
+                    flags, ps.getUserStateOrDefault(userId), userId, ps);
             if (ai != null) {
                 ai.packageName = resolveExternalPackageNameLPr(ps.getPkg());
             }
@@ -737,7 +828,7 @@ public class ComputerEngine implements Computer {
                             + ": " + p);
         }
         if (p != null) {
-            PackageSetting ps = mSettings.getPackageLPr(packageName);
+            PackageStateInternal ps = mSettings.getPackage(packageName);
             if (ps == null) return null;
             if (filterSharedLibPackageLPr(ps, filterCallingUid, userId, flags)) {
                 return null;
@@ -747,7 +838,7 @@ public class ComputerEngine implements Computer {
             }
             // Note: isEnabledLP() does not apply here - always return info
             ApplicationInfo ai = PackageInfoUtils.generateApplicationInfo(
-                    p, flags, ps.readUserState(userId), userId, ps);
+                    p, flags, ps.getUserStateOrDefault(userId), userId, ps);
             if (ai != null) {
                 ai.packageName = resolveExternalPackageNameLPr(p);
             }
@@ -825,7 +916,7 @@ public class ComputerEngine implements Computer {
         } else {
             Pair<List<ResolveInfo>, Integer> infosAndLevel = mDomainVerificationManager
                     .filterToApprovedApp(intent, undefinedList, userId,
-                            mSettings::getPackageLPr);
+                            mSettings::getPackage);
             List<ResolveInfo> approvedInfos = infosAndLevel.first;
             Integer highestApproval = infosAndLevel.second;
 
@@ -1001,7 +1092,7 @@ public class ComputerEngine implements Computer {
                 continue;
             }
             String packageName = riTargetUser.activityInfo.packageName;
-            PackageSetting ps = mSettings.getPackageLPr(packageName);
+            PackageStateInternal ps = mSettings.getPackage(packageName);
             if (ps == null) {
                 continue;
             }
@@ -1111,9 +1202,9 @@ public class ComputerEngine implements Computer {
             if (ephemeralPkgName == null) {
                 // caller is a full app
                 SettingBase callingSetting =
-                        mSettings.getSettingLPr(UserHandle.getAppId(filterCallingUid));
-                PackageSetting resolvedSetting =
-                        getPackageSettingInternal(info.activityInfo.packageName, 0);
+                        mSettings.getSettingBase(UserHandle.getAppId(filterCallingUid));
+                PackageStateInternal resolvedSetting =
+                        getPackageStateInternal(info.activityInfo.packageName, 0);
                 if (resolveForStart
                         || !mAppsFilter.shouldFilterApplication(
                         filterCallingUid, callingSetting, resolvedSetting, userId)) {
@@ -1146,9 +1237,9 @@ public class ComputerEngine implements Computer {
             final ResolveInfo info = resolveInfos.get(i);
             if (instantAppPkgName == null) {
                 SettingBase callingSetting =
-                        mSettings.getSettingLPr(UserHandle.getAppId(filterCallingUid));
-                PackageSetting resolvedSetting =
-                        getPackageSettingInternal(info.serviceInfo.packageName, 0);
+                        mSettings.getSettingBase(UserHandle.getAppId(filterCallingUid));
+                PackageStateInternal resolvedSetting =
+                        getPackageStateInternal(info.serviceInfo.packageName, 0);
                 if (!mAppsFilter.shouldFilterApplication(
                         filterCallingUid, callingSetting, resolvedSetting, userId)) {
                     continue;
@@ -1262,8 +1353,8 @@ public class ComputerEngine implements Computer {
             for (int i = instantApps.size() - 1; i >= 0; --i) {
                 final ResolveInfo info = instantApps.get(i);
                 final String packageName = info.activityInfo.packageName;
-                final PackageSetting ps = mSettings.getPackageLPr(packageName);
-                if (ps.getInstantApp(userId)) {
+                final PackageStateInternal ps = mSettings.getPackage(packageName);
+                if (ps.getUserStateOrDefault(userId).isInstantApp()) {
                     if (PackageManagerServiceUtils.hasAnyDomainApproval(
                             mDomainVerificationManager, ps, intent, flags, userId)) {
                         if (DEBUG_INSTANT) {
@@ -1315,17 +1406,17 @@ public class ComputerEngine implements Computer {
         if (intent.isWebIntent() && auxiliaryResponse == null) {
             return result;
         }
-        final PackageSetting ps =
-                mSettings.getPackageLPr(instantAppInstallerActivity().packageName);
-        if (ps == null || !PackageUserStateUtils.isEnabled(ps.readUserState(userId),
+        final PackageStateInternal ps =
+                mSettings.getPackage(instantAppInstallerActivity().packageName);
+        if (ps == null || !PackageUserStateUtils.isEnabled(ps.getUserStateOrDefault(userId),
                 instantAppInstallerActivity(), 0)) {
             return result;
         }
         final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
         ephemeralInstaller.activityInfo =
                 PackageInfoWithoutStateUtils.generateDelegateActivityInfo(
-                        instantAppInstallerActivity(), 0 /*flags*/, ps.readUserState(userId),
-                        userId);
+                        instantAppInstallerActivity(), 0 /*flags*/,
+                        ps.getUserStateOrDefault(userId), userId);
         ephemeralInstaller.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
                 | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
         // add a non-generic filter
@@ -1349,7 +1440,7 @@ public class ComputerEngine implements Computer {
         return result;
     }
 
-    public final PackageInfo generatePackageInfo(PackageSetting ps, int flags, int userId) {
+    public final PackageInfo generatePackageInfo(PackageStateInternal ps, int flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
         if (ps == null) {
             return null;
@@ -1370,7 +1461,7 @@ public class ComputerEngine implements Computer {
             flags |= MATCH_ANY_USER;
         }
 
-        final PackageUserState state = ps.readUserState(userId);
+        final PackageUserState state = ps.getUserStateOrDefault(userId);
         AndroidPackage p = ps.getPkg();
         if (p != null) {
             // Compute GIDs only if requested
@@ -1408,8 +1499,8 @@ public class ComputerEngine implements Computer {
             ai.primaryCpuAbi = ps.getPrimaryCpuAbi();
             ai.secondaryCpuAbi = ps.getSecondaryCpuAbi();
             ai.setVersionCode(ps.getVersionCode());
-            ai.flags = ps.pkgFlags;
-            ai.privateFlags = ps.pkgPrivateFlags;
+            ai.flags = ps.getPkgFlags();
+            ai.privateFlags = ps.getPkgPrivateFlags();
             pi.applicationInfo = PackageInfoWithoutStateUtils.generateDelegateApplicationInfo(
                     ai, flags, state, userId);
 
@@ -1458,7 +1549,7 @@ public class ComputerEngine implements Computer {
                 return mApexManager.getPackageInfo(packageName,
                         ApexManager.MATCH_FACTORY_PACKAGE);
             }
-            final PackageSetting ps = mSettings.getDisabledSystemPkgLPr(packageName);
+            final PackageStateInternal ps = mSettings.getDisabledSystemPkg(packageName);
             if (ps != null) {
                 if (filterSharedLibPackageLPr(ps, filterCallingUid, userId, flags)) {
                     return null;
@@ -1478,7 +1569,7 @@ public class ComputerEngine implements Computer {
             Log.v(TAG, "getPackageInfo " + packageName + ": " + p);
         }
         if (p != null) {
-            final PackageSetting ps = getPackageSetting(p.getPackageName());
+            final PackageStateInternal ps = getPackageStateInternal(p.getPackageName());
             if (filterSharedLibPackageLPr(ps, filterCallingUid, userId, flags)) {
                 return null;
             }
@@ -1489,7 +1580,7 @@ public class ComputerEngine implements Computer {
             return generatePackageInfo(ps, flags, userId);
         }
         if (!matchFactoryOnly && (flags & MATCH_KNOWN_PACKAGES) != 0) {
-            final PackageSetting ps = mSettings.getPackageLPr(packageName);
+            final PackageStateInternal ps = mSettings.getPackage(packageName);
             if (ps == null) return null;
             if (filterSharedLibPackageLPr(ps, filterCallingUid, userId, flags)) {
                 return null;
@@ -1506,22 +1597,23 @@ public class ComputerEngine implements Computer {
     }
 
     @Nullable
-    public final PackageSetting getPackageSetting(String packageName) {
-        return getPackageSettingInternal(packageName, Binder.getCallingUid());
+    public final PackageStateInternal getPackageStateInternal(String packageName) {
+        return getPackageStateInternal(packageName, Binder.getCallingUid());
     }
 
-    public PackageSetting getPackageSettingInternal(String packageName, int callingUid) {
+    public PackageStateInternal getPackageStateInternal(String packageName,
+            int callingUid) {
         packageName = resolveInternalPackageNameInternalLocked(
                 packageName, PackageManager.VERSION_CODE_HIGHEST, callingUid);
-        return mSettings.getPackageLPr(packageName);
+        return mSettings.getPackage(packageName);
     }
 
     @Nullable
-    public PackageState getPackageState(@NonNull String packageName) {
+    public PackageState getPackageStateCopied(@NonNull String packageName) {
         int callingUid = Binder.getCallingUid();
         packageName = resolveInternalPackageNameInternalLocked(
                 packageName, PackageManager.VERSION_CODE_HIGHEST, callingUid);
-        PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);
+        PackageStateInternal pkgSetting = mSettings.getPackage(packageName);
         return pkgSetting == null ? null : PackageStateImpl.copy(pkgSetting);
     }
 
@@ -1548,13 +1640,14 @@ public class ComputerEngine implements Computer {
 
         ArrayList<PackageInfo> list;
         if (listUninstalled) {
-            list = new ArrayList<>(mSettings.getPackagesLocked().size());
-            for (PackageSetting ps : mSettings.getPackagesLocked().values()) {
+            list = new ArrayList<>(mSettings.getPackages().size());
+            for (PackageStateInternal ps : mSettings.getPackages().values()) {
                 if (listFactory) {
                     if (!ps.isSystem()) {
                         continue;
                     }
-                    PackageSetting psDisabled = mSettings.getDisabledSystemPkgLPr(ps);
+                    PackageStateInternal psDisabled =
+                            mSettings.getDisabledSystemPkg(ps.getPackageName());
                     if (psDisabled != null) {
                         ps = psDisabled;
                     }
@@ -1573,12 +1666,13 @@ public class ComputerEngine implements Computer {
         } else {
             list = new ArrayList<>(mPackages.size());
             for (AndroidPackage p : mPackages.values()) {
-                PackageSetting ps = getPackageSetting(p.getPackageName());
+                PackageStateInternal ps = getPackageStateInternal(p.getPackageName());
                 if (listFactory) {
                     if (!p.isSystem()) {
                         continue;
                     }
-                    PackageSetting psDisabled = mSettings.getDisabledSystemPkgLPr(ps);
+                    PackageStateInternal psDisabled =
+                            ps == null ? null : mSettings.getDisabledSystemPkg(ps.getPackageName());
                     if (psDisabled != null) {
                         ps = psDisabled;
                     }
@@ -1653,7 +1747,7 @@ public class ComputerEngine implements Computer {
                 continue;
             }
             String packageName = riTargetUser.activityInfo.packageName;
-            PackageSetting ps = mSettings.getPackageLPr(packageName);
+            PackageStateInternal ps = mSettings.getPackage(packageName);
             if (ps == null) {
                 continue;
             }
@@ -1798,15 +1892,15 @@ public class ComputerEngine implements Computer {
         }
 
         AndroidPackage pkg = mPackages.get(s.getPackageName());
-        if (mSettings.isEnabledAndMatchLPr(pkg, s, flags, userId)) {
-            PackageSetting ps = mSettings.getPackageLPr(component.getPackageName());
+        if (mSettings.isEnabledAndMatch(pkg, s, flags, userId)) {
+            PackageStateInternal ps = mSettings.getPackage(component.getPackageName());
             if (ps == null) return null;
             if (shouldFilterApplicationLocked(
                     ps, callingUid, component, TYPE_SERVICE, userId)) {
                 return null;
             }
             return PackageInfoUtils.generateServiceInfo(pkg,
-                    s, flags, ps.readUserState(userId), userId, ps);
+                    s, flags, ps.getUserStateOrDefault(userId), userId, ps);
         }
         return null;
     }
@@ -1827,10 +1921,11 @@ public class ComputerEngine implements Computer {
             callingUid = getIsolatedOwner(callingUid);
         }
         final int appId = UserHandle.getAppId(callingUid);
-        final Object obj = mSettings.getSettingLPr(appId);
-        if (obj instanceof PackageSetting) {
-            final PackageSetting ps = (PackageSetting) obj;
-            final boolean isInstantApp = ps.getInstantApp(UserHandle.getUserId(callingUid));
+        final Object obj = mSettings.getSettingBase(appId);
+        if (obj instanceof PackageStateInternal) {
+            final PackageStateInternal ps = (PackageStateInternal) obj;
+            final boolean isInstantApp = ps.getUserStateOrDefault(UserHandle.getUserId(callingUid))
+                    .isInstantApp();
             return isInstantApp ? ps.getPkg().getPackageName() : null;
         }
         return null;
@@ -1879,10 +1974,10 @@ public class ComputerEngine implements Computer {
             String[] uidPackages = getPackagesForUidInternal(callingUid, callingUid);
             if (uidPackages != null) {
                 for (String uidPackage : uidPackages) {
-                    PackageSetting ps = mSettings.getPackageLPr(uidPackage);
-                    final int libIdx = ArrayUtils.indexOf(ps.usesStaticLibraries, libName);
+                    PackageStateInternal ps = mSettings.getPackage(uidPackage);
+                    final int libIdx = ArrayUtils.indexOf(ps.getUsesStaticLibraries(), libName);
                     if (libIdx >= 0) {
-                        final long libVersion = ps.usesStaticLibrariesVersions[libIdx];
+                        final long libVersion = ps.getUsesStaticLibrariesVersions()[libIdx];
                         versionsCallerCanSee.append(libVersion, libVersion);
                     }
                 }
@@ -1958,7 +2053,7 @@ public class ComputerEngine implements Computer {
     protected String[] getPackagesForUidInternalBody(int callingUid, int userId, int appId,
             boolean isCallerInstantApp) {
         // reader
-        final Object obj = mSettings.getSettingLPr(appId);
+        final Object obj = mSettings.getSettingBase(appId);
         if (obj instanceof SharedUserSetting) {
             if (isCallerInstantApp) {
                 return null;
@@ -1968,16 +2063,16 @@ public class ComputerEngine implements Computer {
             String[] res = new String[n];
             int i = 0;
             for (int index = 0; index < n; index++) {
-                final PackageSetting ps = sus.packages.valueAt(index);
-                if (ps.getInstalled(userId)
+                final PackageStateInternal ps = sus.packages.valueAt(index);
+                if (ps.getUserStateOrDefault(userId).isInstalled()
                         && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
                     res[i++] = ps.getPackageName();
                 }
             }
             return ArrayUtils.trimToSize(res, i);
-        } else if (obj instanceof PackageSetting) {
-            final PackageSetting ps = (PackageSetting) obj;
-            if (ps.getInstalled(userId)
+        } else if (obj instanceof PackageStateInternal) {
+            final PackageStateInternal ps = (PackageStateInternal) obj;
+            if (ps.getUserStateOrDefault(userId).isInstalled()
                     && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
                 return new String[]{ps.getPackageName()};
             }
@@ -2037,7 +2132,7 @@ public class ComputerEngine implements Computer {
         return false;
     }
 
-    public final boolean filterSharedLibPackageLPr(@Nullable PackageSetting ps, int uid,
+    public final boolean filterSharedLibPackageLPr(@Nullable PackageStateInternal ps, int uid,
             int userId, int flags) {
         // Callers can access only the libs they depend on, otherwise they need to explicitly
         // ask for the shared libraries given the caller is allowed to access all static libs.
@@ -2076,9 +2171,9 @@ public class ComputerEngine implements Computer {
             if (ps.getPackageName().equals(uidPackageName)) {
                 return false;
             }
-            PackageSetting uidPs = mSettings.getPackageLPr(uidPackageName);
+            PackageStateInternal uidPs = mSettings.getPackage(uidPackageName);
             if (uidPs != null) {
-                final int index = ArrayUtils.indexOf(uidPs.usesStaticLibraries,
+                final int index = ArrayUtils.indexOf(uidPs.getUsesStaticLibraries(),
                         libraryInfo.getName());
                 if (index < 0) {
                     continue;
@@ -2212,7 +2307,7 @@ public class ComputerEngine implements Computer {
         if (Process.isIsolated(callingUid)) {
             callingUid = getIsolatedOwner(callingUid);
         }
-        final PackageSetting ps = mSettings.getPackageLPr(packageName);
+        final PackageStateInternal ps = mSettings.getPackage(packageName);
         final boolean returnAllowed =
                 ps != null
                         && (isCallerSameApp(packageName, callingUid)
@@ -2220,7 +2315,7 @@ public class ComputerEngine implements Computer {
                         || mInstantAppRegistry.isInstantAccessGranted(
                         userId, UserHandle.getAppId(callingUid), ps.getAppId()));
         if (returnAllowed) {
-            return ps.getInstantApp(userId);
+            return ps.getUserStateOrDefault(userId).isInstantApp();
         }
         return false;
     }
@@ -2272,7 +2367,7 @@ public class ComputerEngine implements Computer {
         for (int n = 0; n < count; n++) {
             final ResolveInfo info = resolvedActivities.get(n);
             final String packageName = info.activityInfo.packageName;
-            final PackageSetting ps = mSettings.getPackageLPr(packageName);
+            final PackageStateInternal ps = mSettings.getPackage(packageName);
             if (ps != null) {
                 // only check domain verification status if the app is not a browser
                 if (!info.handleAllWebDataURI) {
@@ -2285,7 +2380,7 @@ public class ComputerEngine implements Computer {
                         return false;
                     }
                 }
-                if (ps.getInstantApp(userId)) {
+                if (ps.getUserStateOrDefault(userId).isInstantApp()) {
                     if (DEBUG_INSTANT) {
                         Slog.v(TAG, "DENY instant app installed;"
                                 + " pkg: " + packageName);
@@ -2361,7 +2456,7 @@ public class ComputerEngine implements Computer {
      *
      * @see #canViewInstantApps(int, int)
      */
-    public final boolean shouldFilterApplicationLocked(@Nullable PackageSetting ps,
+    public final boolean shouldFilterApplicationLocked(@Nullable PackageStateInternal ps,
             int callingUid, @Nullable ComponentName component,
             @PackageManager.ComponentType int componentType, int userId) {
         // if we're in an isolated process, get the real calling UID
@@ -2380,7 +2475,7 @@ public class ComputerEngine implements Computer {
         }
         if (callerIsInstantApp) {
             // both caller and target are both instant, but, different applications, filter
-            if (ps.getInstantApp(userId)) {
+            if (ps.getUserStateOrDefault(userId).isInstantApp()) {
                 return true;
             }
             // request for a specific component; if it hasn't been explicitly exposed through
@@ -2397,7 +2492,7 @@ public class ComputerEngine implements Computer {
             // request for application; if no components have been explicitly exposed, filter
             return !ps.getPkg().isVisibleToInstantApps();
         }
-        if (ps.getInstantApp(userId)) {
+        if (ps.getUserStateOrDefault(userId).isInstantApp()) {
             // caller can see all components of all instant applications, don't filter
             if (canViewInstantApps(callingUid, userId)) {
                 return false;
@@ -2412,20 +2507,20 @@ public class ComputerEngine implements Computer {
                     userId, UserHandle.getAppId(callingUid), ps.getAppId());
         }
         int appId = UserHandle.getAppId(callingUid);
-        final SettingBase callingPs = mSettings.getSettingLPr(appId);
+        final SettingBase callingPs = mSettings.getSettingBase(appId);
         return mAppsFilter.shouldFilterApplication(callingUid, callingPs, ps, userId);
     }
 
     /**
-     * @see #shouldFilterApplicationLocked(PackageSetting, int, ComponentName, int, int)
+     * @see #shouldFilterApplicationLocked(PackageStateInternal, int, ComponentName, int, int)
      */
     public final boolean shouldFilterApplicationLocked(
-            @Nullable PackageSetting ps, int callingUid, int userId) {
+            @Nullable PackageStateInternal ps, int callingUid, int userId) {
         return shouldFilterApplicationLocked(ps, callingUid, null, TYPE_UNKNOWN, userId);
     }
 
     /**
-     * @see #shouldFilterApplicationLocked(PackageSetting, int, ComponentName, int, int)
+     * @see #shouldFilterApplicationLocked(PackageStateInternal, int, ComponentName, int, int)
      */
     public final boolean shouldFilterApplicationLocked(@NonNull SharedUserSetting sus,
             int callingUid, int userId) {
@@ -2461,15 +2556,15 @@ public class ComputerEngine implements Computer {
         // reader
         final AndroidPackage p = mPackages.get(packageName);
         if (p != null && AndroidPackageUtils.isMatchForSystemOnly(p, flags)) {
-            final PackageSetting ps = getPackageSettingInternal(p.getPackageName(), callingUid);
-            if (ps != null && ps.getInstalled(userId)
+            final PackageStateInternal ps = getPackageStateInternal(p.getPackageName(), callingUid);
+            if (ps != null && ps.getUserStateOrDefault(userId).isInstalled()
                     && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
                 return UserHandle.getUid(userId, p.getUid());
             }
         }
         if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
-            final PackageSetting ps = mSettings.getPackageLPr(packageName);
-            if (ps != null && ps.isMatch(flags)
+            final PackageStateInternal ps = mSettings.getPackage(packageName);
+            if (ps != null && PackageStateUtils.isMatch(ps, flags)
                     && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
                 return UserHandle.getUid(userId, ps.getAppId());
             }
@@ -2736,12 +2831,12 @@ public class ComputerEngine implements Computer {
 
     public SigningDetails getSigningDetails(int uid) {
         final int appId = UserHandle.getAppId(uid);
-        final Object obj = mSettings.getSettingLPr(appId);
+        final Object obj = mSettings.getSettingBase(appId);
         if (obj != null) {
             if (obj instanceof SharedUserSetting) {
                 return ((SharedUserSetting) obj).signatures.mSigningDetails;
-            } else if (obj instanceof PackageSetting) {
-                final PackageSetting ps = (PackageSetting) obj;
+            } else if (obj instanceof PackageStateInternal) {
+                final PackageStateInternal ps = (PackageStateInternal) obj;
                 return ps.getSigningDetails();
             }
         }
@@ -2749,13 +2844,13 @@ public class ComputerEngine implements Computer {
     }
 
     public boolean filterAppAccess(AndroidPackage pkg, int callingUid, int userId) {
-        PackageSetting ps = getPackageSetting(pkg.getPackageName());
+        PackageStateInternal ps = getPackageStateInternal(pkg.getPackageName());
         return shouldFilterApplicationLocked(ps, callingUid,
                 userId);
     }
 
     public boolean filterAppAccess(String packageName, int callingUid, int userId) {
-        PackageSetting ps = getPackageSetting(packageName);
+        PackageStateInternal ps = getPackageStateInternal(packageName);
         return shouldFilterApplicationLocked(ps, callingUid,
                 userId);
     }
@@ -2763,22 +2858,22 @@ public class ComputerEngine implements Computer {
     public boolean filterAppAccess(int uid, int callingUid) {
         final int userId = UserHandle.getUserId(uid);
         final int appId = UserHandle.getAppId(uid);
-        final Object setting = mSettings.getSettingLPr(appId);
+        final Object setting = mSettings.getSettingBase(appId);
 
         if (setting instanceof SharedUserSetting) {
             return shouldFilterApplicationLocked(
                     (SharedUserSetting) setting, callingUid, userId);
         } else if (setting == null
-                || setting instanceof PackageSetting) {
+                || setting instanceof PackageStateInternal) {
             return shouldFilterApplicationLocked(
-                    (PackageSetting) setting, callingUid, userId);
+                    (PackageStateInternal) setting, callingUid, userId);
         }
         return false;
     }
 
     public void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState) {
         final String packageName = dumpState.getTargetPackageName();
-        final PackageSetting setting = mSettings.getPackageLPr(packageName);
+        final PackageStateInternal setting = mSettings.getPackage(packageName);
         final boolean checkin = dumpState.isCheckIn();
 
         // Return if the package doesn't exist.
@@ -2896,7 +2991,7 @@ public class ComputerEngine implements Computer {
                 writer.increaseIndent();
                 try {
                     mDomainVerificationManager.printState(writer, packageName,
-                            UserHandle.USER_ALL, mSettings::getPackageLPr);
+                            UserHandle.USER_ALL, mSettings::getPackage);
                 } catch (PackageManager.NameNotFoundException e) {
                     pw.println("Failure printing domain verification information");
                     Slog.e(TAG, "Failure printing domain verification information", e);
@@ -2913,14 +3008,14 @@ public class ComputerEngine implements Computer {
                 }
                 ipw.println("Dexopt state:");
                 ipw.increaseIndent();
-                Collection<PackageSetting> pkgSettings;
+                Collection<? extends PackageStateInternal> pkgSettings;
                 if (setting != null) {
                     pkgSettings = Collections.singletonList(setting);
                 } else {
-                    pkgSettings = mSettings.getPackagesLocked().values();
+                    pkgSettings = mSettings.getPackages().values();
                 }
 
-                for (PackageSetting pkgSetting : pkgSettings) {
+                for (PackageStateInternal pkgSetting : pkgSettings) {
                     final AndroidPackage pkg = pkgSetting.getPkg();
                     if (pkg == null) {
                         continue;
@@ -2948,14 +3043,14 @@ public class ComputerEngine implements Computer {
                 }
                 ipw.println("Compiler stats:");
                 ipw.increaseIndent();
-                Collection<PackageSetting> pkgSettings;
+                Collection<? extends PackageStateInternal> pkgSettings;
                 if (setting != null) {
                     pkgSettings = Collections.singletonList(setting);
                 } else {
-                    pkgSettings = mSettings.getPackagesLocked().values();
+                    pkgSettings = mSettings.getPackages().values();
                 }
 
-                for (PackageSetting pkgSetting : pkgSettings) {
+                for (PackageStateInternal pkgSetting : pkgSettings) {
                     final AndroidPackage pkg = pkgSetting.getPkg();
                     if (pkg == null) {
                         continue;

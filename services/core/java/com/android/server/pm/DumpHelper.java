@@ -241,7 +241,7 @@ final class DumpHelper {
 
         // Return if the package doesn't exist.
         if (packageName != null
-                && mPm.getPackageSetting(packageName) == null
+                && mPm.getPackageStateInternal(packageName) == null
                 && !mPm.mApexManager.isApexPackage(packageName)) {
             pw.println("Unable to find package: " + packageName);
             return;

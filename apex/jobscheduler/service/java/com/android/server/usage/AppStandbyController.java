@@ -54,6 +54,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -1083,6 +1084,24 @@ public class AppStandbyController
         final long elapsedRealtime = mInjector.elapsedRealtime();
         synchronized (mAppIdleLock) {
             return mAppIdleHistory.getTimeSinceLastJobRun(packageName, userId, elapsedRealtime);
+        }
+    }
+
+    @Override
+    public void setEstimatedLaunchTime(String packageName, int userId,
+            @CurrentTimeMillisLong long launchTime) {
+        final long nowElapsed = mInjector.elapsedRealtime();
+        synchronized (mAppIdleLock) {
+            mAppIdleHistory.setEstimatedLaunchTime(packageName, userId, nowElapsed, launchTime);
+        }
+    }
+
+    @Override
+    @CurrentTimeMillisLong
+    public long getEstimatedLaunchTime(String packageName, int userId) {
+        final long elapsedRealtime = mInjector.elapsedRealtime();
+        synchronized (mAppIdleLock) {
+            return mAppIdleHistory.getEstimatedLaunchTime(packageName, userId, elapsedRealtime);
         }
     }
 

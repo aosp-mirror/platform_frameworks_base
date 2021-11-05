@@ -48,7 +48,6 @@ import android.content.pm.SigningInfo;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
-import android.content.pm.pkg.PackageUserState;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -70,6 +69,7 @@ import com.android.server.integrity.model.RuleMetadata;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.PackageUserState;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

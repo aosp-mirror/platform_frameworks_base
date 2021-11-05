@@ -38,7 +38,7 @@ import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
 import com.android.server.pm.PackageManagerException;
-import com.android.server.pm.PackageSetting;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -222,11 +222,11 @@ public class AndroidPackageUtils {
     }
 
     public static int getHiddenApiEnforcementPolicy(AndroidPackage pkg,
-            @NonNull PackageSetting pkgSetting) {
+            @NonNull PackageStateInternal pkgSetting) {
         boolean isAllowedToUseHiddenApis;
         if (pkg.isSignedWithPlatformKey()) {
             isAllowedToUseHiddenApis = true;
-        } else if (pkg.isSystem() || pkgSetting.getPkgState().isUpdatedSystemApp()) {
+        } else if (pkg.isSystem() || pkgSetting.getTransientState().isUpdatedSystemApp()) {
             isAllowedToUseHiddenApis = pkg.isUsesNonSdkApi()
                     || SystemConfig.getInstance().getHiddenApiWhitelistedApps().contains(
                     pkg.getPackageName());
@@ -263,7 +263,8 @@ public class AndroidPackageUtils {
         return true;
     }
 
-    public static String getPrimaryCpuAbi(AndroidPackage pkg, @Nullable PackageSetting pkgSetting) {
+    public static String getPrimaryCpuAbi(AndroidPackage pkg,
+            @Nullable PackageStateInternal pkgSetting) {
         if (pkgSetting == null || TextUtils.isEmpty(pkgSetting.getPrimaryCpuAbi())) {
             return getRawPrimaryCpuAbi(pkg);
         }
@@ -272,7 +273,7 @@ public class AndroidPackageUtils {
     }
 
     public static String getSecondaryCpuAbi(AndroidPackage pkg,
-            @Nullable PackageSetting pkgSetting) {
+            @Nullable PackageStateInternal pkgSetting) {
         if (pkgSetting == null || TextUtils.isEmpty(pkgSetting.getSecondaryCpuAbi())) {
             return getRawSecondaryCpuAbi(pkg);
         }
@@ -282,7 +283,7 @@ public class AndroidPackageUtils {
 
     /**
      * Returns the primary ABI as parsed from the package. Used only during parsing and derivation.
-     * Otherwise prefer {@link #getPrimaryCpuAbi(AndroidPackage, PackageSetting)}.
+     * Otherwise prefer {@link #getPrimaryCpuAbi(AndroidPackage, PackageStateInternal)}.
      */
     public static String getRawPrimaryCpuAbi(AndroidPackage pkg) {
         return ((AndroidPackageHidden) pkg).getPrimaryCpuAbi();
@@ -290,15 +291,16 @@ public class AndroidPackageUtils {
 
     /**
      * Returns the secondary ABI as parsed from the package. Used only during parsing and
-     * derivation. Otherwise prefer {@link #getSecondaryCpuAbi(AndroidPackage, PackageSetting)}.
+     * derivation. Otherwise prefer
+     * {@link #getSecondaryCpuAbi(AndroidPackage, PackageStateInternal)}.
      */
     public static String getRawSecondaryCpuAbi(AndroidPackage pkg) {
         return ((AndroidPackageHidden) pkg).getSecondaryCpuAbi();
     }
 
-    public static String getSeInfo(AndroidPackage pkg, @Nullable PackageSetting pkgSetting) {
+    public static String getSeInfo(AndroidPackage pkg, @Nullable PackageStateInternal pkgSetting) {
         if (pkgSetting != null) {
-            String overrideSeInfo = pkgSetting.getPkgState().getOverrideSeInfo();
+            String overrideSeInfo = pkgSetting.getTransientState().getOverrideSeInfo();
             if (!TextUtils.isEmpty(overrideSeInfo)) {
                 return overrideSeInfo;
             }

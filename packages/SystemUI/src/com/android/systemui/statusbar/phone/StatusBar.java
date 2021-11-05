@@ -136,7 +136,6 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
-import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.biometrics.AuthRippleController;
@@ -249,7 +248,6 @@ import com.android.wm.shell.startingsurface.StartingSurface;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -441,10 +439,6 @@ public class StatusBar extends SystemUI implements
         mCommandQueueCallbacks.animateCollapsePanels(flags, force);
     }
 
-    public interface ExpansionChangedListener {
-        void onExpansionChanged(float expansion, boolean expanded);
-    }
-
     /**
      * The {@link StatusBarState} of the status bar.
      */
@@ -556,8 +550,6 @@ public class StatusBar extends SystemUI implements
     private final WallpaperManager mWallpaperManager;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private final TunerService mTunerService;
-
-    private final List<ExpansionChangedListener> mExpansionChangedListeners;
 
     // Flags for disabling the status bar
     // Two variables becaseu the first one evidently ran out of room for new flags.
@@ -680,7 +672,6 @@ public class StatusBar extends SystemUI implements
 
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
     private NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
     protected StatusBarNotificationPresenter mPresenter;
     private NotificationActivityStarter mNotificationActivityStarter;
@@ -806,8 +797,7 @@ public class StatusBar extends SystemUI implements
             Optional<StartingSurface> startingSurfaceOptional,
             TunerService tunerService,
             DumpManager dumpManager,
-            ActivityLaunchAnimator activityLaunchAnimator,
-            DialogLaunchAnimator dialogLaunchAnimator) {
+            ActivityLaunchAnimator activityLaunchAnimator) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -908,7 +898,6 @@ public class StatusBar extends SystemUI implements
         mStartingSurfaceOptional = startingSurfaceOptional;
         lockscreenShadeTransitionController.setStatusbar(this);
 
-        mExpansionChangedListeners = new ArrayList<>();
         mPanelExpansionStateManager.addListener(this::onPanelExpansionChanged);
 
         mBubbleExpandListener =
@@ -919,7 +908,6 @@ public class StatusBar extends SystemUI implements
 
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         mActivityLaunchAnimator = activityLaunchAnimator;
-        mDialogLaunchAnimator = dialogLaunchAnimator;
 
         // The status bar background may need updating when the ongoing call status changes.
         mOngoingCallController.addCallback((animate) -> maybeUpdateBarMode());
@@ -1175,10 +1163,6 @@ public class StatusBar extends SystemUI implements
                     mStatusBarView.setPanelStateChangeListener(
                             mNotificationPanelViewController.getPanelStateChangeListener());
                     mStatusBarView.setScrimController(mScrimController);
-                    mStatusBarView.setExpansionChangedListeners(mExpansionChangedListeners);
-                    for (ExpansionChangedListener listener : mExpansionChangedListeners) {
-                        sendInitialExpansionAmount(listener);
-                    }
 
                     mNotificationPanelViewController.setBar(mStatusBarView);
 
@@ -1406,12 +1390,6 @@ public class StatusBar extends SystemUI implements
         // listen for USER_SETUP_COMPLETE setting (per-user)
         mDeviceProvisionedController.addCallback(mUserSetupObserver);
         mUserSetupObserver.onUserSetupChanged();
-
-        for (ExpansionChangedListener listener : mExpansionChangedListeners) {
-            // The initial expansion amount comes from mNotificationPanelViewController, so we
-            // should send the amount once we've fully set up that controller.
-            sendInitialExpansionAmount(listener);
-        }
 
         // disable profiling bars, since they overlap and clutter the output on app windows
         ThreadedRenderer.overrideProperty("disableProfileBars", "true");
@@ -4251,24 +4229,6 @@ public class StatusBar extends SystemUI implements
         return mTransientShown;
     }
 
-
-    public void addExpansionChangedListener(@NonNull ExpansionChangedListener listener) {
-        mExpansionChangedListeners.add(listener);
-        sendInitialExpansionAmount(listener);
-    }
-
-    private void sendInitialExpansionAmount(ExpansionChangedListener expansionChangedListener) {
-        if (mNotificationPanelViewController != null) {
-            expansionChangedListener.onExpansionChanged(
-                    mNotificationPanelViewController.getExpandedFraction(),
-                    mNotificationPanelViewController.isExpanded());
-        }
-    }
-
-    public void removeExpansionChangedListener(@NonNull ExpansionChangedListener listener) {
-        mExpansionChangedListeners.remove(listener);
-    }
-
     private void updateLightRevealScrimVisibility() {
         if (mLightRevealScrim == null) {
             // status bar may not be inflated yet
@@ -4480,8 +4440,6 @@ public class StatusBar extends SystemUI implements
                             && !mBiometricUnlockController.isWakeAndUnlock()) {
                         mLightRevealScrim.setRevealAmount(1f - linear);
                     }
-
-                    mDialogLaunchAnimator.onDozeAmountChanged(linear);
                 }
 
                 @Override

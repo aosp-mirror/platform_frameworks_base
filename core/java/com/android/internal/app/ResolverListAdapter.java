@@ -923,7 +923,7 @@ public class ResolverListAdapter extends BaseAdapter {
             return new BitmapDrawable(mCtx.getResources(), getIconBitmap(userHandle));
         }
 
-        public Bitmap getIconBitmap(UserHandle userHandle) {
+        public Bitmap getIconBitmap(@Nullable UserHandle userHandle) {
             Drawable dr = null;
             if (mHasSubstitutePermission) {
                 dr = getIconSubstituteInternal();

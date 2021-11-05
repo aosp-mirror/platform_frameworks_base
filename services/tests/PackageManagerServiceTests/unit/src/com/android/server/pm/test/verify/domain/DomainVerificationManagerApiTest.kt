@@ -21,7 +21,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedActivityImpl
 import android.content.pm.parsing.component.ParsedIntentInfoImpl
-import android.content.pm.pkg.PackageUserStateInternal
+import com.android.server.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainOwner
 import android.content.pm.verify.domain.DomainVerificationInfo
 import android.content.pm.verify.domain.DomainVerificationManager
@@ -31,9 +31,10 @@ import android.os.Build
 import android.os.PatternMatcher
 import android.os.Process
 import android.util.ArraySet
-import com.android.server.pm.PackageSetting
+import android.util.SparseArray
 import com.android.server.pm.parsing.pkg.AndroidPackage
-import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageSettings
+import com.android.server.pm.pkg.PackageStateInternal
+import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageStates
 import com.android.server.pm.verify.domain.DomainVerificationManagerStub
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.testutils.mockThrowOnUnmocked
@@ -69,8 +70,8 @@ class DomainVerificationManagerApiTest {
 
     @Test
     fun queryValidVerificationPackageNames() {
-        val pkgWithDomains = mockPkgSetting(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
-        val pkgWithoutDomains = mockPkgSetting(PKG_TWO, UUID_TWO, emptyList())
+        val pkgWithDomains = mockPkgState(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        val pkgWithoutDomains = mockPkgState(PKG_TWO, UUID_TWO, emptyList())
 
         val service = makeService(pkgWithDomains, pkgWithoutDomains).apply {
             addPackages(pkgWithDomains, pkgWithoutDomains)
@@ -82,8 +83,8 @@ class DomainVerificationManagerApiTest {
 
     @Test
     fun getDomainVerificationInfoId() {
-        val pkgWithDomains = mockPkgSetting(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
-        val pkgWithoutDomains = mockPkgSetting(PKG_TWO, UUID_TWO, emptyList())
+        val pkgWithDomains = mockPkgState(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        val pkgWithoutDomains = mockPkgState(PKG_TWO, UUID_TWO, emptyList())
 
         val service = makeService(pkgWithDomains, pkgWithoutDomains).apply {
             addPackages(pkgWithDomains, pkgWithoutDomains)
@@ -97,8 +98,8 @@ class DomainVerificationManagerApiTest {
 
     @Test
     fun getDomainVerificationInfo() {
-        val pkgWithDomains = mockPkgSetting(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
-        val pkgWithoutDomains = mockPkgSetting(PKG_TWO, UUID_TWO, emptyList())
+        val pkgWithDomains = mockPkgState(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        val pkgWithoutDomains = mockPkgState(PKG_TWO, UUID_TWO, emptyList())
 
         val service = makeService(pkgWithDomains, pkgWithoutDomains).apply {
             addPackages(pkgWithDomains, pkgWithoutDomains)
@@ -124,8 +125,8 @@ class DomainVerificationManagerApiTest {
 
     @Test
     fun setStatus() {
-        val pkg1 = mockPkgSetting(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
-        val pkg2 = mockPkgSetting(PKG_TWO, UUID_TWO, listOf(DOMAIN_3, DOMAIN_4))
+        val pkg1 = mockPkgState(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        val pkg2 = mockPkgState(PKG_TWO, UUID_TWO, listOf(DOMAIN_3, DOMAIN_4))
 
         val map = mutableMapOf(pkg1.packageName to pkg1, pkg2.packageName to pkg2)
         val service = makeService(map::get).apply { addPackages(pkg1, pkg2) }
@@ -166,8 +167,8 @@ class DomainVerificationManagerApiTest {
 
     @Test
     fun setDomainVerificationLinkHandlingAllowed() {
-        val pkg1 = mockPkgSetting(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
-        val pkg2 = mockPkgSetting(PKG_TWO, UUID_TWO, listOf(DOMAIN_3, DOMAIN_4))
+        val pkg1 = mockPkgState(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        val pkg2 = mockPkgState(PKG_TWO, UUID_TWO, listOf(DOMAIN_3, DOMAIN_4))
 
         val map = mutableMapOf(pkg1.packageName to pkg1, pkg2.packageName to pkg2)
         val service = makeService(map::get).apply { addPackages(pkg1, pkg2) }
@@ -199,9 +200,9 @@ class DomainVerificationManagerApiTest {
 
     @Test
     fun setUserSelection() {
-        val pkg1 = mockPkgSetting(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
-        val pkg2 = mockPkgSetting(PKG_TWO, UUID_TWO, listOf(DOMAIN_3, DOMAIN_4))
-        val pkg3 = mockPkgSetting(PKG_THREE, UUID_THREE, listOf(DOMAIN_1, DOMAIN_2))
+        val pkg1 = mockPkgState(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        val pkg2 = mockPkgState(PKG_TWO, UUID_TWO, listOf(DOMAIN_3, DOMAIN_4))
+        val pkg3 = mockPkgState(PKG_THREE, UUID_THREE, listOf(DOMAIN_1, DOMAIN_2))
 
         val map = mutableMapOf(
             pkg1.packageName to pkg1,
@@ -253,8 +254,8 @@ class DomainVerificationManagerApiTest {
 
     @Test
     fun getDomainVerificationUserState() {
-        val pkgWithDomains = mockPkgSetting(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
-        val pkgWithoutDomains = mockPkgSetting(PKG_TWO, UUID_TWO, emptyList())
+        val pkgWithDomains = mockPkgState(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        val pkgWithoutDomains = mockPkgState(PKG_TWO, UUID_TWO, emptyList())
 
         val service = makeService(pkgWithDomains, pkgWithoutDomains).apply {
             addPackages(pkgWithDomains, pkgWithoutDomains)
@@ -288,7 +289,7 @@ class DomainVerificationManagerApiTest {
     fun getOwnersForDomain() {
         val pkg1User0Enabled = AtomicBoolean(true)
 
-        val pkg1 = mockPkgSetting(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2), pkgUserState0 = {
+        val pkg1 = mockPkgState(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2), pkgUserState0 = {
             mockThrowOnUnmocked {
                 whenever(enabledState) {
                     if (pkg1User0Enabled.get()) {
@@ -299,9 +300,10 @@ class DomainVerificationManagerApiTest {
                 }
                 whenever(isInstalled) { true }
                 whenever(isSuspended) { false }
+                whenever(isInstantApp) { false }
             }
         })
-        val pkg2 = mockPkgSetting(PKG_TWO, UUID_TWO, listOf(DOMAIN_1, DOMAIN_2))
+        val pkg2 = mockPkgState(PKG_TWO, UUID_TWO, listOf(DOMAIN_1, DOMAIN_2))
 
         val service = makeService(pkg1, pkg2).apply {
             addPackages(pkg1, pkg2)
@@ -474,10 +476,10 @@ class DomainVerificationManagerApiTest {
         }
     }
 
-    private fun makeService(vararg pkgSettings: PackageSetting) =
-        makeService { pkgName -> pkgSettings.find { pkgName == it.packageName } }
+    private fun makeService(vararg pkgStates: PackageStateInternal) =
+        makeService { pkgName -> pkgStates.find { pkgName == it.packageName } }
 
-    private fun makeService(pkgSettingFunction: (String) -> PackageSetting? = { null }) =
+    private fun makeService(pkgStateFunction: (String) -> PackageStateInternal? = { null }) =
         DomainVerificationService(mockThrowOnUnmocked {
             // Assume the test has every permission necessary
             whenever(enforcePermission(anyString(), anyInt(), anyInt(), anyString()))
@@ -499,21 +501,21 @@ class DomainVerificationManagerApiTest {
                 whenever(callingUid) { Process.ROOT_UID }
                 whenever(callingUserId) { 0 }
 
-                mockPackageSettings {
-                    pkgSettingFunction(it)
+                mockPackageStates {
+                    pkgStateFunction(it)
                 }
             })
         }
 
-    private fun mockPkgSetting(
+    private fun mockPkgState(
         pkgName: String,
         domainSetId: UUID,
         domains: List<String> = listOf(DOMAIN_1, DOMAIN_2),
-        pkgUserState0: PackageSetting.() -> PackageUserStateInternal = {
+        pkgUserState0: PackageStateInternal.() -> PackageUserStateInternal = {
             PackageUserStateInternal.DEFAULT },
-        pkgUserState1: PackageSetting.() -> PackageUserStateInternal = {
+        pkgUserState1: PackageStateInternal.() -> PackageUserStateInternal = {
             PackageUserStateInternal.DEFAULT }
-    ) = mockThrowOnUnmocked<PackageSetting> {
+    ) = mockThrowOnUnmocked<PackageStateInternal> {
         val pkg = mockThrowOnUnmocked<AndroidPackage> {
             whenever(packageName) { pkgName }
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
@@ -546,15 +548,20 @@ class DomainVerificationManagerApiTest {
         whenever(getPkg()) { pkg }
         whenever(packageName) { pkgName }
         whenever(this.domainSetId) { domainSetId }
-        whenever(getInstantApp(anyInt())) { false }
         whenever(firstInstallTime) { 0L }
-        whenever(readUserState(0)) { pkgUserState0() }
-        whenever(readUserState(1)) { pkgUserState1() }
+        whenever(getUserStateOrDefault(0)) { pkgUserState0() }
+        whenever(getUserStateOrDefault(1)) { pkgUserState1() }
+        whenever(userStates) {
+            SparseArray<PackageUserStateInternal>().apply {
+                this[0] = pkgUserState0()
+                this[1] = pkgUserState1()
+            }
+        }
         whenever(isSystem) { false }
     }
 
-    private fun DomainVerificationService.addPackages(vararg pkgSettings: PackageSetting) =
-        pkgSettings.forEach(::addPackage)
+    private fun DomainVerificationService.addPackages(vararg pkgStates: PackageStateInternal) =
+        pkgStates.forEach(::addPackage)
 
     private fun makeManager(service: DomainVerificationService, userId: Int) =
         DomainVerificationManager(

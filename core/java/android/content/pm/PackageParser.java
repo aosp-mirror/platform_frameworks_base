@@ -56,9 +56,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.ParsingPackageUtils;
-import android.content.pm.pkg.PackageUserState;
+import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.pm.pkg.PackageUserStateUtils;
-import android.content.pm.split.SplitAssetLoader;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.ApkAssets;
@@ -645,7 +644,7 @@ public class PackageParser {
      * explicitly wanted all uninstalled and hidden packages as well.
      * @param appInfo The applicationInfo of the app being checked.
      */
-    private static boolean checkUseInstalledOrHidden(int flags, PackageUserState state,
+    private static boolean checkUseInstalledOrHidden(int flags, FrameworkPackageUserState state,
             ApplicationInfo appInfo) {
         // Returns false if the package is hidden system app until installed.
         if ((flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) == 0
@@ -662,7 +661,7 @@ public class PackageParser {
                         || (flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) != 0));
     }
 
-    public static boolean isAvailable(PackageUserState state) {
+    public static boolean isAvailable(FrameworkPackageUserState state) {
         return checkUseInstalledOrHidden(0, state, null);
     }
 
@@ -675,7 +674,7 @@ public class PackageParser {
     @UnsupportedAppUsage
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int[] gids, int flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, PackageUserState state) {
+            Set<String> grantedPermissions, FrameworkPackageUserState state) {
 
         return generatePackageInfo(p, gids, flags, firstInstallTime, lastUpdateTime,
                 grantedPermissions, state, UserHandle.getCallingUserId());
@@ -684,7 +683,7 @@ public class PackageParser {
     @UnsupportedAppUsage
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int[] gids, int flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, PackageUserState state, int userId) {
+            Set<String> grantedPermissions, FrameworkPackageUserState state, int userId) {
 
         return generatePackageInfo(p, null, gids, flags, firstInstallTime, lastUpdateTime,
                 grantedPermissions, state, userId);
@@ -701,12 +700,12 @@ public class PackageParser {
     public static PackageInfo generatePackageInfo(
             PackageParser.Package pkg, ApexInfo apexInfo, int flags) {
         return generatePackageInfo(pkg, apexInfo, EmptyArray.INT, flags, 0, 0,
-                Collections.emptySet(), PackageUserState.DEFAULT, UserHandle.getCallingUserId());
+                Collections.emptySet(), FrameworkPackageUserState.DEFAULT, UserHandle.getCallingUserId());
     }
 
     private static PackageInfo generatePackageInfo(PackageParser.Package p, ApexInfo apexInfo,
             int gids[], int flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, PackageUserState state, int userId) {
+            Set<String> grantedPermissions, FrameworkPackageUserState state, int userId) {
         if (!checkUseInstalledOrHidden(flags, state, p.applicationInfo) || !p.isMatch(flags)) {
             return null;
         }
@@ -7883,7 +7882,7 @@ public class PackageParser {
     }
 
     private static boolean copyNeeded(int flags, Package p,
-            PackageUserState state, Bundle metaData, int userId) {
+            FrameworkPackageUserState state, Bundle metaData, int userId) {
         if (userId != UserHandle.USER_SYSTEM) {
             // We always need to copy for other users, since we need
             // to fix up the uid.
@@ -7929,12 +7928,12 @@ public class PackageParser {
 
     @UnsupportedAppUsage
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,
-            PackageUserState state) {
+            FrameworkPackageUserState state) {
         return generateApplicationInfo(p, flags, state, UserHandle.getCallingUserId());
     }
 
     private static void updateApplicationInfo(ApplicationInfo ai, int flags,
-            PackageUserState state) {
+            FrameworkPackageUserState state) {
         // CompatibilityMode is global state.
         if (!sCompatibilityModeEnabled) {
             ai.disableCompatibilityMode();
@@ -7989,7 +7988,7 @@ public class PackageParser {
 
     @UnsupportedAppUsage
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,
-            PackageUserState state, int userId) {
+            FrameworkPackageUserState state, int userId) {
         if (p == null) return null;
         if (!checkUseInstalledOrHidden(flags, state, p.applicationInfo) || !p.isMatch(flags)) {
             return null;
@@ -8029,7 +8028,7 @@ public class PackageParser {
     }
 
     public static ApplicationInfo generateApplicationInfo(ApplicationInfo ai, int flags,
-            PackageUserState state, int userId) {
+            FrameworkPackageUserState state, int userId) {
         if (ai == null) return null;
         if (!checkUseInstalledOrHidden(flags, state, ai)) {
             return null;
@@ -8188,7 +8187,7 @@ public class PackageParser {
 
     @UnsupportedAppUsage
     public static final ActivityInfo generateActivityInfo(Activity a, int flags,
-            PackageUserState state, int userId) {
+            FrameworkPackageUserState state, int userId) {
         if (a == null) return null;
         if (!checkUseInstalledOrHidden(flags, state, a.owner.applicationInfo)) {
             return null;
@@ -8205,7 +8204,7 @@ public class PackageParser {
     }
 
     public static final ActivityInfo generateActivityInfo(ActivityInfo ai, int flags,
-            PackageUserState state, int userId) {
+            FrameworkPackageUserState state, int userId) {
         if (ai == null) return null;
         if (!checkUseInstalledOrHidden(flags, state, ai.applicationInfo)) {
             return null;
@@ -8280,7 +8279,7 @@ public class PackageParser {
 
     @UnsupportedAppUsage
     public static final ServiceInfo generateServiceInfo(Service s, int flags,
-            PackageUserState state, int userId) {
+            FrameworkPackageUserState state, int userId) {
         if (s == null) return null;
         if (!checkUseInstalledOrHidden(flags, state, s.owner.applicationInfo)) {
             return null;
@@ -8378,7 +8377,7 @@ public class PackageParser {
 
     @UnsupportedAppUsage
     public static final ProviderInfo generateProviderInfo(Provider p, int flags,
-            PackageUserState state, int userId) {
+            FrameworkPackageUserState state, int userId) {
         if (p == null) return null;
         if (!checkUseInstalledOrHidden(flags, state, p.owner.applicationInfo)) {
             return null;

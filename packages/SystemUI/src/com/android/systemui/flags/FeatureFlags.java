@@ -187,6 +187,13 @@ public class FeatureFlags {
         return isEnabled(Flags.NEW_USER_SWITCHER);
     }
 
+    /**
+     * Use the new single view QS headers
+     */
+    public boolean useCombinedQSHeaders() {
+        return isEnabled(Flags.COMBINED_QS_HEADERS);
+    }
+
     /** static method for the system setting */
     public static boolean isProviderModelSettingEnabled(Context context) {
         return FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);

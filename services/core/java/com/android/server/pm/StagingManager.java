@@ -61,6 +61,8 @@ import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.rollback.RollbackManagerInternal;
 import com.android.server.rollback.WatchdogRollbackLogger;
 
@@ -344,13 +346,13 @@ public class StagingManager {
 
         int appId = -1;
         long ceDataInode = -1;
-        final PackageSetting ps = mPmi.getPackageSetting(packageName);
+        final PackageStateInternal ps = mPmi.getPackageStateInternal(packageName);
         if (ps != null) {
             appId = ps.getAppId();
-            ceDataInode = ps.getCeDataInode(UserHandle.USER_SYSTEM);
+            ceDataInode = ps.getUserStateOrDefault(UserHandle.USER_SYSTEM).getCeDataInode();
             // NOTE: We ignore the user specified in the InstallParam because we know this is
             // an update, and hence need to restore data for all installed users.
-            final int[] installedUsers = ps.queryInstalledUsers(allUsers, true);
+            final int[] installedUsers = PackageStateUtils.queryInstalledUsers(ps, allUsers, true);
 
             final String seInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
             rm.snapshotAndRestoreUserData(packageName, UserHandle.toUserHandles(installedUsers),

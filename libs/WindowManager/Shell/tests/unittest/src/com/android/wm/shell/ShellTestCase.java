@@ -26,6 +26,7 @@ import androidx.test.InstrumentationRegistry;
 
 import org.junit.After;
 import org.junit.Before;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Base class that does shell test case setup.
@@ -36,6 +37,7 @@ public abstract class ShellTestCase {
 
     @Before
     public void shellSetup() {
+        MockitoAnnotations.initMocks(this);
         final Context context =
                 InstrumentationRegistry.getInstrumentation().getTargetContext();
         final DisplayManager dm = context.getSystemService(DisplayManager.class);
