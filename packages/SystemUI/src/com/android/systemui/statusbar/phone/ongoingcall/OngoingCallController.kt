@@ -39,8 +39,8 @@ import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
-import com.android.systemui.statusbar.phone.StatusBarWindowController
 import com.android.systemui.statusbar.policy.CallbackController
+import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.time.SystemClock
 import java.io.FileDescriptor
 import java.io.PrintWriter
