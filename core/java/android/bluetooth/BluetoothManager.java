@@ -62,15 +62,15 @@ public final class BluetoothManager {
     private static final String TAG = "BluetoothManager";
     private static final boolean DBG = false;
 
-    private static AttributionSource sAttributionSource = null;
+    private final AttributionSource mAttributionSource;
     private final BluetoothAdapter mAdapter;
 
     /**
      * @hide
      */
     public BluetoothManager(Context context) {
-        sAttributionSource = resolveAttributionSource(context);
-        mAdapter = BluetoothAdapter.createAdapter(sAttributionSource);
+        mAttributionSource = resolveAttributionSource(context);
+        mAdapter = BluetoothAdapter.createAdapter(mAttributionSource);
     }
 
     /** {@hide} */
@@ -78,9 +78,6 @@ public final class BluetoothManager {
         AttributionSource res = null;
         if (context != null) {
             res = context.getAttributionSource();
-        }
-        else if (sAttributionSource != null) {
-            return sAttributionSource;
         }
         if (res == null) {
             res = ActivityThread.currentAttributionSource();
@@ -201,8 +198,8 @@ public final class BluetoothManager {
             IBluetoothGatt iGatt = managerService.getBluetoothGatt();
             if (iGatt == null) return devices;
             devices = Attributable.setAttributionSource(
-                    iGatt.getDevicesMatchingConnectionStates(states, sAttributionSource),
-                    sAttributionSource);
+                    iGatt.getDevicesMatchingConnectionStates(states, mAttributionSource),
+                    mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }

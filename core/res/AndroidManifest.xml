@@ -252,6 +252,11 @@
         android:name="com.android.bluetooth.BluetoothMapContentObserver.action.MESSAGE_DELIVERY" />
     <protected-broadcast
         android:name="android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_ACTIVE_DEVICE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_CONF_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_GROUP_NODE_STATUS_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_GROUP_STATUS_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.action.TETHERING_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED" />
@@ -1976,6 +1981,14 @@
         android:label="@string/permlab_uwb_ranging"
         android:protectionLevel="dangerous" />
 
+    <!-- Required to be able to advertise and connect to nearby devices via Wi-Fi.
+         <p>Protection level: dangerous -->
+    <permission android:name="android.permission.NEARBY_WIFI_DEVICES"
+                android:permissionGroup="android.permission-group.UNDEFINED"
+                android:description="@string/permdesc_nearby_wifi_devices"
+                android:label="@string/permlab_nearby_wifi_devices"
+                android:protectionLevel="dangerous" />
+
     <!-- @SystemApi @TestApi Allows an application to suspend other apps, which will prevent the
          user from using them until they are unsuspended.
          @hide
@@ -2386,7 +2399,7 @@
     <permission android:name="android.permission.READ_ACTIVE_EMERGENCY_SESSION"
         android:protectionLevel="signature" />
 
-    <!-- Allows listen permission to always reported signal strength.
+    <!-- Allows listen permission to always reported system signal strength.
          @hide Used internally. -->
     <permission android:name="android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH"
         android:protectionLevel="signature" />

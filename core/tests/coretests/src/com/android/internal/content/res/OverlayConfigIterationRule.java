@@ -28,6 +28,7 @@ import android.util.ArrayMap;
 import com.android.internal.content.om.OverlayConfig.PackageProvider;
 import com.android.internal.content.om.OverlayScanner;
 import com.android.internal.content.om.OverlayScanner.ParsedOverlayInfo;
+import com.android.internal.util.function.TriConsumer;
 
 import org.junit.Assert;
 import org.junit.rules.TestRule;
@@ -39,7 +40,6 @@ import org.mockito.invocation.InvocationOnMock;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -73,7 +73,7 @@ public class OverlayConfigIterationRule implements TestRule {
             final File canonicalPath = new File(path.getCanonicalPath());
             mOverlayStubResults.put(canonicalPath, new ParsedOverlayInfo(
                     packageName, targetPackage, targetSdkVersion, isStatic, priority,
-                    canonicalPath));
+                    canonicalPath, null));
         } catch (IOException e) {
             Assert.fail("Failed to add overlay " + e);
         }
@@ -135,8 +135,8 @@ public class OverlayConfigIterationRule implements TestRule {
                 mIteration = Iteration.SYSTEM_SERVER;
                 doAnswer((InvocationOnMock invocation) -> {
                     final Object[] args = invocation.getArguments();
-                    final BiConsumer<ParsingPackageRead, Boolean> f =
-                            (BiConsumer<ParsingPackageRead, Boolean>) args[0];
+                    final TriConsumer<ParsingPackageRead, Boolean, File> f =
+                            (TriConsumer<ParsingPackageRead, Boolean, File>) args[0];
                     for (Map.Entry<File, ParsedOverlayInfo> overlay :
                             mOverlayStubResults.entrySet()) {
                         final ParsingPackageRead a = Mockito.mock(ParsingPackageRead.class);
@@ -147,7 +147,8 @@ public class OverlayConfigIterationRule implements TestRule {
                         when(a.isOverlayIsStatic()).thenReturn(info.isStatic);
                         when(a.getOverlayPriority()).thenReturn(info.priority);
                         when(a.getBaseApkPath()).thenReturn(info.path.getPath());
-                        f.accept(a, !info.path.getPath().contains("data/overlay"));
+                        f.accept(a, !info.path.getPath().contains("data/overlay"),
+                                /*preInstalledApexPath=*/null);
                     }
                     return null;
                 }).when(mPkgProvider).forEachPackage(any());
