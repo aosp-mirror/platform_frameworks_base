@@ -187,6 +187,12 @@ enum DebugLevel {
  */
 #define PROPERTY_WEBVIEW_OVERLAYS_ENABLED "debug.hwui.webview_overlays_enabled"
 
+/**
+ * Property for globally GL drawing state. Can be overridden per process with
+ * setDrawingEnabled.
+ */
+#define PROPERTY_DRAWING_ENABLED "debug.hwui.drawing_enabled"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -207,6 +213,8 @@ enum class StretchEffectBehavior {
     Shader,       // Stretch shader in both HWUI and SF
     UniformScale  // Uniform scale stretch everywhere
 };
+
+enum class OverrideDrawingEnabled { Default, On, Off };
 
 /**
  * Renderthread-only singleton which manages several static rendering properties. Most of these
@@ -301,6 +309,12 @@ public:
     static void setStretchEffectBehavior(StretchEffectBehavior behavior) {
         stretchEffectBehavior = behavior;
     }
+
+    // Represents if GL drawing is enabled. Should only be false in headless testing environments
+    static bool drawingEnabled;
+    static OverrideDrawingEnabled overrideDrawingEnabled;
+    static bool isDrawingEnabled();
+    static void setDrawingEnabled(bool enable);
 
 private:
     static StretchEffectBehavior stretchEffectBehavior;
