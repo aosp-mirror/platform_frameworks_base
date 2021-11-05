@@ -29,7 +29,6 @@ import com.android.systemui.statusbar.phone.SplitShadeHeaderController;
 import com.android.systemui.statusbar.phone.StatusBarCommandQueueCallbacks;
 import com.android.systemui.statusbar.phone.StatusBarDemoMode;
 import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener;
-import com.android.systemui.statusbar.phone.StatusBarWindowController;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -80,12 +79,6 @@ public interface StatusBarComponent {
      */
     @StatusBarScope
     NotificationShadeWindowViewController getNotificationShadeWindowViewController();
-
-    /**
-     * Creates a StatusBarWindowViewController.
-     */
-    @StatusBarScope
-    StatusBarWindowController getStatusBarWindowController();
 
     /**
      * Creates a NotificationPanelViewController.
