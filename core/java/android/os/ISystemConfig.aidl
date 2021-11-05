@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.content.ComponentName;
+
 /**
   * Binder interface to query SystemConfig in the system server.
   * {@hide}
@@ -44,5 +46,5 @@ interface ISystemConfig {
     /**
      * @see SystemConfigManager#getEnabledComponentOverrides
      */
-    List<String> getEnabledComponentOverrides(String packageName);
+    List<ComponentName> getEnabledComponentOverrides(String packageName);
 }
