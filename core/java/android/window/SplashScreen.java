@@ -92,6 +92,9 @@ public interface SplashScreen {
      * overrides and persists the theme used for the {@link SplashScreen} of this application.
      * <p>
      * To reset to the default theme, set this the themeId to {@link Resources#ID_NULL}.
+     * <p>
+     * <b>Note:</b> The theme name must be stable across versions, otherwise it won't be found
+     * after your application is updated.
      */
     void setSplashScreenTheme(@StyleRes int themeId);
 
