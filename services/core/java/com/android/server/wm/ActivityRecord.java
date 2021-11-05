@@ -5695,7 +5695,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     destroyImmediately("stop-config");
                     mRootWindowContainer.resumeFocusedTasksTopActivities();
                 } else {
-                    mRootWindowContainer.updatePreviousProcess(this);
+                    mAtmService.updatePreviousProcess(this);
                 }
             }
             mTaskSupervisor.checkReadyForSleepLocked(true /* allowDelay */);

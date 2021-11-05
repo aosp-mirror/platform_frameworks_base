@@ -398,7 +398,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     volatile WindowProcessController mPreviousProcess;
     /** The time at which the previous process was last visible. */
-    long mPreviousProcessVisibleTime;
+    private long mPreviousProcessVisibleTime;
 
     /** List of intents that were used to start the most recent tasks. */
     private RecentTasks mRecentTasks;
@@ -4632,6 +4632,23 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // If there is no resumed activity, it will choose the pausing or focused activity.
                 : mRootWindowContainer.getTopResumedActivity();
         mTopApp = top != null ? top.app : null;
+    }
+
+    /**
+     * The process state of previous activity is more important than the regular background to keep
+     * around in case the user wants to return to it.
+     */
+    void updatePreviousProcess(ActivityRecord stoppedActivity) {
+        if (stoppedActivity.app != null && mTopApp != null
+                // Don't replace the previous process if the stopped one is the top, e.g. sleeping.
+                && stoppedActivity.app != mTopApp
+                // The stopped activity must have been visible later than the previous.
+                && stoppedActivity.lastVisibleTime > mPreviousProcessVisibleTime
+                // Home has its own retained state, so don't let it occupy the previous.
+                && stoppedActivity.app != mHomeProcess) {
+            mPreviousProcess = stoppedActivity.app;
+            mPreviousProcessVisibleTime = stoppedActivity.lastVisibleTime;
+        }
     }
 
     void updateActivityUsageStats(ActivityRecord activity, int event) {
