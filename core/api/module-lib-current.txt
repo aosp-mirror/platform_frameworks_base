@@ -318,6 +318,10 @@ package android.os {
     method @Nullable public android.os.IBinder getOrThrow() throws android.os.StatsServiceManager.ServiceNotFoundException;
   }
 
+  public class SystemConfigManager {
+    method @NonNull public java.util.List<android.content.ComponentName> getEnabledComponentOverrides(@NonNull String);
+  }
+
 }
 
 package android.os.storage {
