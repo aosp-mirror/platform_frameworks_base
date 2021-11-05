@@ -2447,14 +2447,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mImeHiddenByDisplayPolicy = false;
 
         if (mCurClient != cs) {
-            // If the client is changing, we need to switch over to the new
-            // one.
-            unbindCurrentClientLocked(UnbindReason.SWITCH_CLIENT);
-            // If the screen is on, inform the new client it is active
-            if (mIsInteractive) {
-                scheduleSetActiveToClient(cs, true /* active */, false /* fullscreen */,
-                        false /* reportToImeController */);
-            }
+            prepareClientSwitchLocked(cs);
         }
 
         // Bump up the sequence for this client and attach it.
@@ -2521,6 +2514,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         setCurIntent(null);
         Slog.w(TAG, "Failure connecting to input method service: " + intent);
         return InputBindResult.IME_NOT_CONNECTED;
+    }
+
+    @GuardedBy("mMethodMap")
+    private void prepareClientSwitchLocked(ClientState cs) {
+        // If the client is changing, we need to switch over to the new
+        // one.
+        unbindCurrentClientLocked(UnbindReason.SWITCH_CLIENT);
+        // If the screen is on, inform the new client it is active
+        if (mIsInteractive) {
+            scheduleSetActiveToClient(cs, true /* active */, false /* fullscreen */,
+                    false /* reportToImeController */);
+        }
     }
 
     @NonNull
