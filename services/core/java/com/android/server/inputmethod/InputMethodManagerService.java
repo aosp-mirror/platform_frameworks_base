@@ -325,6 +325,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final UserManager mUserManager;
     private final UserManagerInternal mUserManagerInternal;
     private final InputMethodMenuController mMenuController;
+    private final InputMethodBindingController mBindingController;
 
     /**
      * Cache the result of {@code LocalServices.getService(AudioManagerInternal.class)}.
@@ -1725,6 +1726,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
                 mSettings, context);
         mMenuController = new InputMethodMenuController(this);
+        mBindingController = new InputMethodBindingController(this);
 
         // If configured, use low priority flags to make the IME killable by the lowmemorykiller
         final boolean lowerIMEPriority = mRes.getBoolean(
