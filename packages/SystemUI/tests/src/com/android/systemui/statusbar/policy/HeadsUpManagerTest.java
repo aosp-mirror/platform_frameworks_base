@@ -60,7 +60,7 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
 
     private final class TestableHeadsUpManager extends HeadsUpManager {
         TestableHeadsUpManager(Context context) {
-            super(context);
+            super(context, mock(HeadsUpManagerLogger.class));
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
         }

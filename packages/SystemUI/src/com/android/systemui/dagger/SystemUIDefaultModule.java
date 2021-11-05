@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.policy.SensorPrivacyController;
@@ -169,12 +170,19 @@ public abstract class SystemUIDefaultModule {
     @Provides
     static HeadsUpManagerPhone provideHeadsUpManagerPhone(
             Context context,
+            HeadsUpManagerLogger headsUpManagerLogger,
             StatusBarStateController statusBarStateController,
             KeyguardBypassController bypassController,
             GroupMembershipManager groupManager,
             ConfigurationController configurationController) {
-        return new HeadsUpManagerPhone(context, statusBarStateController, bypassController,
-                groupManager, configurationController);
+        return new HeadsUpManagerPhone(
+                context,
+                headsUpManagerLogger,
+                statusBarStateController,
+                bypassController,
+                groupManager,
+                configurationController
+        );
     }
 
     @Binds
