@@ -298,6 +298,17 @@ public final class ServiceManager {
     }
 
     /**
+     * Register callback for service registration notifications.
+     *
+     * @throws RemoteException for underlying error.
+     * @hide
+     */
+    public static void registerForNotifications(
+            @NonNull String name, @NonNull IServiceCallback callback) throws RemoteException {
+        getIServiceManager().registerForNotifications(name, callback);
+    }
+
+    /**
      * Return a list of all currently running services.
      * @return an array of all currently running services, or <code>null</code> in
      * case of an exception
