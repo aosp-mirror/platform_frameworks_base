@@ -789,6 +789,15 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="RenderEffectViewActivity"
+                  android:label="RenderEffect/View"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="com.android.test.hwui.TEST"/>
+            </intent-filter>
+        </activity>
+
         <activity android:name="StretchShaderActivity"
                   android:label="RenderEffect/Stretch"
                   android:exported="true">
