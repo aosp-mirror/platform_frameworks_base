@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics
 
+import android.animation.Animator
+import android.graphics.Insets
 import android.graphics.Rect
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_UNKNOWN
@@ -33,7 +35,9 @@ import android.view.Display
 import android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS
 import android.view.DisplayInfo
 import android.view.LayoutInflater
+import android.view.Surface
 import android.view.View
+import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowMetrics
@@ -41,6 +45,7 @@ import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Before
@@ -53,6 +58,8 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
+import org.mockito.Mockito.anyFloat
+import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
@@ -81,6 +88,8 @@ class SidefpsControllerTest : SysuiTestCase() {
     @Mock
     lateinit var displayManager: DisplayManager
     @Mock
+    lateinit var overviewProxyService: OverviewProxyService
+    @Mock
     lateinit var handler: Handler
     @Captor
     lateinit var overlayCaptor: ArgumentCaptor<View>
@@ -91,45 +100,62 @@ class SidefpsControllerTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        context.addMockSystemService(DisplayManager::class.java, displayManager)
+        context.addMockSystemService(WindowManager::class.java, windowManager)
+
         `when`(layoutInflater.inflate(R.layout.sidefps_view, null, false)).thenReturn(sidefpsView)
         `when`(sidefpsView.findViewById<LottieAnimationView>(eq(R.id.sidefps_animation)))
             .thenReturn(mock(LottieAnimationView::class.java))
+        with(mock(ViewPropertyAnimator::class.java)) {
+            `when`(sidefpsView.animate()).thenReturn(this)
+            `when`(alpha(anyFloat())).thenReturn(this)
+            `when`(setStartDelay(anyLong())).thenReturn(this)
+            `when`(setDuration(anyLong())).thenReturn(this)
+            `when`(setListener(any())).thenAnswer {
+                (it.arguments[0] as Animator.AnimatorListener)
+                    .onAnimationEnd(mock(Animator::class.java))
+                this
+            }
+        }
         `when`(fingerprintManager.sensorPropertiesInternal).thenReturn(
-                listOf(
-                        FingerprintSensorPropertiesInternal(
-                                SENSOR_ID,
-                                SensorProperties.STRENGTH_STRONG,
-                                5 /* maxEnrollmentsPerUser */,
-                                listOf() /* componentInfo */,
-                                FingerprintSensorProperties.TYPE_POWER_BUTTON,
-                                true /* resetLockoutRequiresHardwareAuthToken */
-                        )
+            listOf(
+                FingerprintSensorPropertiesInternal(
+                    SENSOR_ID,
+                    SensorProperties.STRENGTH_STRONG,
+                    5 /* maxEnrollmentsPerUser */,
+                    listOf() /* componentInfo */,
+                    FingerprintSensorProperties.TYPE_POWER_BUTTON,
+                    true /* resetLockoutRequiresHardwareAuthToken */
                 )
-        )
-        `when`(windowManager.defaultDisplay).thenReturn(
-                Display(
-                        DisplayManagerGlobal.getInstance(),
-                        DISPLAY_ID,
-                        DisplayInfo(),
-                        DEFAULT_DISPLAY_ADJUSTMENTS
-                )
+            )
         )
         `when`(windowManager.maximumWindowMetrics).thenReturn(
             WindowMetrics(Rect(0, 0, 800, 800), WindowInsets.CONSUMED)
         )
+    }
+
+    private fun testWithDisplay(initInfo: DisplayInfo.() -> Unit = {}, block: () -> Unit) {
+        val displayInfo = DisplayInfo()
+        displayInfo.initInfo()
+        val dmGlobal = mock(DisplayManagerGlobal::class.java)
+        val display = Display(dmGlobal, DISPLAY_ID, displayInfo, DEFAULT_DISPLAY_ADJUSTMENTS)
+        `when`(dmGlobal.getDisplayInfo(eq(DISPLAY_ID))).thenReturn(displayInfo)
+        `when`(windowManager.defaultDisplay).thenReturn(display)
 
         sideFpsController = SidefpsController(
-                mContext, layoutInflater, fingerprintManager, windowManager, executor,
-                displayManager, handler
+            context.createDisplayContext(display), layoutInflater, fingerprintManager,
+            windowManager, overviewProxyService, displayManager, executor, handler
         )
 
         overlayController = ArgumentCaptor.forClass(ISidefpsController::class.java).apply {
             verify(fingerprintManager).setSidefpsController(capture())
         }.value
+
+        block()
     }
 
     @Test
-    fun testSubscribesToOrientationChangesWhenShowingOverlay() {
+    fun testSubscribesToOrientationChangesWhenShowingOverlay() = testWithDisplay {
         overlayController.show(SENSOR_ID, REASON_UNKNOWN)
         executor.runAllReady()
 
@@ -141,7 +167,7 @@ class SidefpsControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testShowsAndHides() {
+    fun testShowsAndHides() = testWithDisplay {
         overlayController.show(SENSOR_ID, REASON_UNKNOWN)
         executor.runAllReady()
 
@@ -156,7 +182,7 @@ class SidefpsControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testShowsOnce() {
+    fun testShowsOnce() = testWithDisplay {
         repeat(5) {
             overlayController.show(SENSOR_ID, REASON_UNKNOWN)
             executor.runAllReady()
@@ -167,7 +193,7 @@ class SidefpsControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testHidesOnce() {
+    fun testHidesOnce() = testWithDisplay {
         overlayController.show(SENSOR_ID, REASON_UNKNOWN)
         executor.runAllReady()
 
@@ -181,10 +207,64 @@ class SidefpsControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testIgnoredForKeyguard() {
-        overlayController.show(SENSOR_ID, REASON_AUTH_KEYGUARD)
+    fun testIgnoredForKeyguard() = testWithDisplay {
+        testIgnoredFor(REASON_AUTH_KEYGUARD)
+    }
+
+    private fun testIgnoredFor(reason: Int) {
+        overlayController.show(SENSOR_ID, reason)
+
         executor.runAllReady()
 
         verify(windowManager, never()).addView(any(), any())
     }
+
+    @Test
+    fun showsWithTaskbar() = testWithDisplay({ rotation = Surface.ROTATION_0 }) {
+        hidesWithTaskbar(visible = true)
+    }
+
+    @Test
+    fun showsWithTaskbar90() = testWithDisplay({ rotation = Surface.ROTATION_90 }) {
+        hidesWithTaskbar(visible = true)
+    }
+
+    @Test
+    fun showsWithTaskbar180() = testWithDisplay({ rotation = Surface.ROTATION_180 }) {
+        hidesWithTaskbar(visible = true)
+    }
+
+    @Test
+    fun showsWithTaskbarCollapsedDown() = testWithDisplay({ rotation = Surface.ROTATION_270 }) {
+        `when`(windowManager.currentWindowMetrics).thenReturn(
+            WindowMetrics(Rect(0, 0, 800, 800), insetsForSmallNavbar())
+        )
+        hidesWithTaskbar(visible = true)
+    }
+
+    @Test
+    fun hidesWithTaskbarDown() = testWithDisplay({ rotation = Surface.ROTATION_270 }) {
+        `when`(windowManager.currentWindowMetrics).thenReturn(
+            WindowMetrics(Rect(0, 0, 800, 800), insetsForLargeNavbar())
+        )
+        hidesWithTaskbar(visible = false)
+    }
+
+    private fun hidesWithTaskbar(visible: Boolean) {
+        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+        executor.runAllReady()
+
+        sideFpsController.overviewProxyListener.onTaskbarStatusUpdated(true, false)
+        executor.runAllReady()
+
+        verify(windowManager).addView(any(), any())
+        verify(windowManager, never()).removeView(any())
+        verify(sidefpsView).visibility = if (visible) View.VISIBLE else View.GONE
+    }
 }
+
+private fun insetsForSmallNavbar() = insetsWithBottom(60)
+private fun insetsForLargeNavbar() = insetsWithBottom(100)
+private fun insetsWithBottom(bottom: Int) = WindowInsets.Builder()
+    .setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, bottom))
+    .build()
