@@ -2206,10 +2206,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 task.mTaskId, reason, topActivity.info.applicationInfo.packageName);
     }
 
-    void logRootTaskState() {
-        mActivityMetricsLogger.logWindowState();
-    }
-
     void scheduleUpdateMultiWindowMode(Task task) {
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 ActivityTaskSupervisor::addToMultiWindowModeChangedList, this,
