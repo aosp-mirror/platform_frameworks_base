@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
@@ -36,6 +37,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 
@@ -263,6 +265,30 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
                 callingUid, display.getDisplayId(), activityInfo);
 
         assertThat(allowedOnUntrusted).isFalse();
+    }
+
+    /**
+     * Verifies that process state will be updated with pending top without activity state change.
+     * E.g. switch focus between resumed activities in multi-window mode.
+     */
+    @Test
+    public void testUpdatePendingTopForTopResumed() {
+        final Task task1 = new TaskBuilder(mSupervisor)
+                .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW).build();
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm)
+                .setTask(task1).setUid(ActivityBuilder.DEFAULT_FAKE_UID + 1).build();
+        task1.setResumedActivity(activity1, "test");
+
+        final ActivityRecord activity2 = new TaskBuilder(mSupervisor)
+                .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW)
+                .setCreateActivity(true).build().getTopMostActivity();
+        activity2.getTask().setResumedActivity(activity2, "test");
+
+        mAtm.mAmInternal.deletePendingTopUid(activity1.getUid());
+        clearInvocations(mAtm);
+        activity1.moveFocusableActivityToTop("test");
+        assertTrue(mAtm.mAmInternal.isPendingTopUid(activity1.getUid()));
+        verify(mAtm).updateOomAdj();
     }
 
     /**
