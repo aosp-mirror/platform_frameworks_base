@@ -102,6 +102,18 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /**
+     * Constructs a {@link Bundle} containing a copy of {@code from}.
+     *
+     * @param from The bundle to be copied.
+     * @param deep Whether is a deep or shallow copy.
+     *
+     * @hide
+     */
+    Bundle(Bundle from, boolean deep) {
+        super(from, deep);
+    }
+
+    /**
      * If {@link #mParcelledData} is not null, copy the HAS FDS bit from it because it's fast.
      * Otherwise (if {@link #mParcelledData} is already null), leave {@link #FLAG_HAS_FDS_KNOWN}
      * unset, because scanning a map is slower.  We'll do it lazily in
@@ -164,13 +176,6 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     public Bundle(PersistableBundle b) {
         super(b);
         mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
-    }
-
-    /**
-     * Constructs a Bundle without initializing it.
-     */
-    Bundle(boolean doInit) {
-        super(doInit);
     }
 
     /**
@@ -260,9 +265,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * are referenced as-is and not copied in any way.
      */
     public Bundle deepCopy() {
-        Bundle b = new Bundle(false);
-        b.copyInternal(this, true);
-        return b;
+        return new Bundle(this, /* deep */ true);
     }
 
     /**

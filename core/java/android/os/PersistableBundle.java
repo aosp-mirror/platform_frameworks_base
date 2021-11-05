@@ -156,10 +156,15 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
     }
 
     /**
-     * Constructs a PersistableBundle without initializing it.
+     * Constructs a {@link PersistableBundle} containing a copy of {@code from}.
+     *
+     * @param from The bundle to be copied.
+     * @param deep Whether is a deep or shallow copy.
+     *
+     * @hide
      */
-    PersistableBundle(boolean doInit) {
-        super(doInit);
+    PersistableBundle(PersistableBundle from, boolean deep) {
+        super(from, deep);
     }
 
     /**
@@ -190,9 +195,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      * are referenced as-is and not copied in any way.
      */
     public PersistableBundle deepCopy() {
-        PersistableBundle b = new PersistableBundle(false);
-        b.copyInternal(this, true);
-        return b;
+        return new PersistableBundle(this, /* deep */ true);
     }
 
     /**
