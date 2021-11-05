@@ -1003,11 +1003,6 @@ interface ITelephony {
      boolean isManualNetworkSelectionAllowed(int subId);
 
     /**
-     * Enable or disable always reporting signal strength changes from radio.
-     */
-     void setAlwaysReportSignalStrength(int subId, boolean isEnable);
-
-    /**
      * Get P-CSCF address from PCO after data connection is established or modified.
      * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
      * @param callingPackage The package making the call.
