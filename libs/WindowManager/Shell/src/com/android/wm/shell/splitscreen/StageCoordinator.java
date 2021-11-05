@@ -271,6 +271,11 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
             @SplitPosition int sideStagePosition) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        return moveToSideStage(task, sideStagePosition, wct);
+    }
+
+    boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
+            @SplitPosition int sideStagePosition, WindowContainerTransaction wct) {
         final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         setSideStagePosition(sideStagePosition, wct);
         mSideStage.evictAllChildren(evictWct);

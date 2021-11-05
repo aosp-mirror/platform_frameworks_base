@@ -57,6 +57,7 @@ import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingWindowTypeAlgorithm;
 import com.android.wm.shell.startingsurface.phone.PhoneStartingWindowTypeAlgorithm;
 import com.android.wm.shell.transition.Transitions;
@@ -217,14 +218,15 @@ public class WMShellModule {
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             PipTransitionController pipTransitionController,
             Optional<LegacySplitScreenController> splitScreenOptional,
+            Optional<SplitScreenController> newSplitScreenOptional,
             DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskOrganizer(context,
                 syncTransactionQueue, pipTransitionState, pipBoundsState, pipBoundsAlgorithm,
                 menuPhoneController, pipAnimationController, pipSurfaceTransactionHelper,
-                pipTransitionController, splitScreenOptional, displayController, pipUiEventLogger,
-                shellTaskOrganizer, mainExecutor);
+                pipTransitionController, splitScreenOptional, newSplitScreenOptional,
+                displayController, pipUiEventLogger, shellTaskOrganizer, mainExecutor);
     }
 
     @WMSingleton

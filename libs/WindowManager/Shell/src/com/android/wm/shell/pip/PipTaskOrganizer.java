@@ -77,6 +77,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
@@ -126,7 +127,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final int mExitAnimationDuration;
     private final int mCrossFadeAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
-    private final Optional<LegacySplitScreenController> mSplitScreenOptional;
+    private final Optional<LegacySplitScreenController> mLegacySplitScreenOptional;
+    private final Optional<SplitScreenController> mSplitScreenOptional;
     protected final ShellTaskOrganizer mTaskOrganizer;
     protected final ShellExecutor mMainExecutor;
 
@@ -252,7 +254,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             @NonNull PipAnimationController pipAnimationController,
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper,
             @NonNull PipTransitionController pipTransitionController,
-            Optional<LegacySplitScreenController> splitScreenOptional,
+            Optional<LegacySplitScreenController> legacySplitScreenOptional,
+            Optional<SplitScreenController> splitScreenOptional,
             @NonNull DisplayController displayController,
             @NonNull PipUiEventLogger pipUiEventLogger,
             @NonNull ShellTaskOrganizer shellTaskOrganizer,
@@ -274,6 +277,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipAnimationController = pipAnimationController;
         mPipUiEventLoggerLogger = pipUiEventLogger;
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
+        mLegacySplitScreenOptional = legacySplitScreenOptional;
         mSplitScreenOptional = splitScreenOptional;
         mTaskOrganizer = shellTaskOrganizer;
         mMainExecutor = mainExecutor;
@@ -373,8 +377,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      *   activity render it's final configuration while the Task is still in PiP.
      * - setWindowingMode to undefined at the end of transition
      * @param animationDurationMs duration in millisecond for the exiting PiP transition
+     * @param requestEnterSplit whether the enterSplit button is pressed on PiP or not.
+     *                             Indicate the user wishes to directly put PiP into split screen
+     *                             mode.
      */
-    public void exitPip(int animationDurationMs) {
+    public void exitPip(int animationDurationMs, boolean requestEnterSplit) {
         if (!mPipTransitionState.isInPip()
                 || mPipTransitionState.getTransitionState() == PipTransitionState.EXITING_PIP
                 || mToken == null) {
@@ -387,7 +394,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_EXPAND_TO_FULLSCREEN);
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         final Rect destinationBounds = mPipBoundsState.getDisplayBounds();
-        final int direction = syncWithSplitScreenBounds(destinationBounds)
+        final int direction = syncWithSplitScreenBounds(destinationBounds, requestEnterSplit)
                 ? TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN
                 : TRANSITION_DIRECTION_LEAVE_PIP;
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
@@ -396,7 +403,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         // We set to fullscreen here for now, but later it will be set to UNDEFINED for
         // the proper windowing mode to take place. See #applyWindowingModeChangeOnExit.
         wct.setActivityWindowingMode(mToken,
-                direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN
+                direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN && !requestEnterSplit
                         ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                         : WINDOWING_MODE_FULLSCREEN);
         wct.setBounds(mToken, destinationBounds);
@@ -435,7 +442,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         wct.setWindowingMode(mToken, getOutPipWindowingMode());
         // Simply reset the activity mode set prior to the animation running.
         wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
-        mSplitScreenOptional.ifPresent(splitScreen -> {
+        mLegacySplitScreenOptional.ifPresent(splitScreen -> {
             if (direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN) {
                 wct.reparent(mToken, splitScreen.getSecondaryRoot(), true /* onTop */);
             }
@@ -1165,6 +1172,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             @PipAnimationController.TransitionDirection int direction,
             @PipAnimationController.AnimationType int type) {
         final Rect preResizeBounds = new Rect(mPipBoundsState.getBounds());
+        final boolean isPipTopLeft = isPipTopLeft();
         mPipBoundsState.setBounds(destinationBounds);
         if (direction == TRANSITION_DIRECTION_REMOVE_STACK) {
             removePipImmediately();
@@ -1210,10 +1218,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                             null /* callback */, false /* withStartDelay */);
                 });
             } else {
-                applyFinishBoundsResize(wct, direction);
+                applyFinishBoundsResize(wct, direction, isPipTopLeft);
             }
         } else {
-            applyFinishBoundsResize(wct, direction);
+            applyFinishBoundsResize(wct, direction, isPipTopLeft);
         }
 
         finishResizeForMenu(destinationBounds);
@@ -1241,7 +1249,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         } else if (isOutPipDirection(direction)) {
             // If we are animating to fullscreen or split screen, then we need to reset the
             // override bounds on the task to ensure that the task "matches" the parent's bounds.
-            taskBounds = null;
+            if (direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN) {
+                taskBounds = destinationBounds;
+            } else {
+                taskBounds = null;
+            }
             applyWindowingModeChangeOnExit(wct, direction);
         } else {
             // Just a resize in PIP
@@ -1261,8 +1273,20 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * applying it.
      */
     public void applyFinishBoundsResize(@NonNull WindowContainerTransaction wct,
-            @PipAnimationController.TransitionDirection int direction) {
-        mTaskOrganizer.applyTransaction(wct);
+            @PipAnimationController.TransitionDirection int direction, boolean wasPipTopLeft) {
+        if (direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN) {
+            mSplitScreenOptional.get().enterSplitScreen(mTaskInfo.taskId, wasPipTopLeft, wct);
+        } else {
+            mTaskOrganizer.applyTransaction(wct);
+        }
+    }
+
+    private boolean isPipTopLeft() {
+        final Rect topLeft = new Rect();
+        final Rect bottomRight = new Rect();
+        mSplitScreenOptional.get().getStageBounds(topLeft, bottomRight);
+
+        return topLeft.contains(mPipBoundsState.getBounds());
     }
 
     /**
@@ -1347,18 +1371,27 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     /**
-     * Sync with {@link LegacySplitScreenController} on destination bounds if PiP is going to split
-     * screen.
+     * Sync with {@link LegacySplitScreenController} or {@link SplitScreenController} on destination
+     * bounds if PiP is going to split screen.
      *
      * @param destinationBoundsOut contain the updated destination bounds if applicable
      * @return {@code true} if destinationBounds is altered for split screen
      */
-    private boolean syncWithSplitScreenBounds(Rect destinationBoundsOut) {
-        if (!mSplitScreenOptional.isPresent()) {
+    private boolean syncWithSplitScreenBounds(Rect destinationBoundsOut, boolean enterSplit) {
+        if (enterSplit && mSplitScreenOptional.isPresent()) {
+            final Rect topLeft = new Rect();
+            final Rect bottomRight = new Rect();
+            mSplitScreenOptional.get().getStageBounds(topLeft, bottomRight);
+            final boolean isPipTopLeft = isPipTopLeft();
+            destinationBoundsOut.set(isPipTopLeft ? topLeft : bottomRight);
+            return true;
+        }
+
+        if (!mLegacySplitScreenOptional.isPresent()) {
             return false;
         }
 
-        LegacySplitScreenController legacySplitScreen = mSplitScreenOptional.get();
+        LegacySplitScreenController legacySplitScreen = mLegacySplitScreenOptional.get();
         if (!legacySplitScreen.isDividerVisible()) {
             // fail early if system is not in split screen mode
             return false;
