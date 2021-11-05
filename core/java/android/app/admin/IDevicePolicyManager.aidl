@@ -243,7 +243,7 @@ interface IDevicePolicyManager {
 
     boolean setPermittedInputMethods(in ComponentName admin,in List<String> packageList, boolean parent);
     List<String> getPermittedInputMethods(in ComponentName admin, boolean parent);
-    List<String> getPermittedInputMethodsForCurrentUser();
+    List<String> getPermittedInputMethodsAsUser(int userId);
     boolean isInputMethodPermittedByAdmin(in ComponentName admin, String packageName, int userId, boolean parent);
 
     boolean setPermittedCrossProfileNotificationListeners(in ComponentName admin, in List<String> packageList);

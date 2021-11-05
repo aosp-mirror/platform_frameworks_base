@@ -10352,14 +10352,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public List<String> getPermittedInputMethodsForCurrentUser() {
+    public @Nullable List<String> getPermittedInputMethodsAsUser(@UserIdInt int userId) {
         final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userId));
         Preconditions.checkCallAuthorization(canManageUsers(caller));
+        final long callingIdentity = Binder.clearCallingIdentity();
+        try {
+            return getPermittedInputMethodsUnchecked(userId);
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
+        }
+    }
 
+    private @Nullable List<String> getPermittedInputMethodsUnchecked(@UserIdInt int userId) {
         synchronized (getLockObject()) {
             List<String> result = null;
             // Only device or profile owners can have permitted lists set.
-            List<ActiveAdmin> admins = getActiveAdminsForAffectedUserLocked(caller.getUserId());
+            List<ActiveAdmin> admins = getActiveAdminsForAffectedUserLocked(userId);
             for (ActiveAdmin admin: admins) {
                 List<String> fromAdmin = admin.permittedInputMethods;
                 if (fromAdmin != null) {
@@ -10374,7 +10383,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // If we have a permitted list add all system input methods.
             if (result != null) {
                 List<InputMethodInfo> imes = InputMethodManagerInternal
-                        .get().getInputMethodListAsUser(caller.getUserId());
+                        .get().getInputMethodListAsUser(userId);
                 if (imes != null) {
                     for (InputMethodInfo ime : imes) {
                         ServiceInfo serviceInfo = ime.getServiceInfo();

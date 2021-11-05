@@ -9246,12 +9246,40 @@ public class DevicePolicyManager {
         throwIfParentInstance("getPermittedInputMethodsForCurrentUser");
         if (mService != null) {
             try {
-                return mService.getPermittedInputMethodsForCurrentUser();
+                return mService.getPermittedInputMethodsAsUser(UserHandle.myUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
         return null;
+    }
+
+    /**
+     * Returns the list of input methods permitted.
+     *
+     * <p>When this method returns empty list means all input methods are allowed, if a non-empty
+     * list is returned it will contain the intersection of the permitted lists for any device or
+     * profile owners that apply to this user. It will also include any system input methods.
+     *
+     * @return List of input method package names.
+     * @hide
+     */
+    @UserHandleAware
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            android.Manifest.permission.MANAGE_USERS
+            }, conditional = true)
+    public @NonNull List<String> getPermittedInputMethods() {
+        throwIfParentInstance("getPermittedInputMethods");
+        List<String> result = null;
+        if (mService != null) {
+            try {
+                result = mService.getPermittedInputMethodsAsUser(myUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return result != null ? result : Collections.emptyList();
     }
 
     /**
