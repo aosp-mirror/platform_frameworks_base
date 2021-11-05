@@ -62,7 +62,7 @@ import java.util.concurrent.TimeUnit;
  * Tests for {@link ViewRootImpl}
  *
  * Build/Install/Run:
- * atest FrameworksCoreTests:ViewRootImplTest
+ *  atest FrameworksCoreTests:ViewRootImplTest
  */
 @Presubmit
 @SmallTest
@@ -300,7 +300,7 @@ public class ViewRootImplTest {
     @Test
     public void whenWindowDoesNotHaveFocus_keysAreDropped() {
         checkKeyEvent(() -> {
-            mViewRootImpl.windowFocusChanged(false /*hasFocus*/, true /*inTouchMode*/);
+            mViewRootImpl.windowFocusChanged(false /*hasFocus*/);
         }, false /*shouldReceiveKey*/);
     }
 
@@ -310,7 +310,7 @@ public class ViewRootImplTest {
     @Test
     public void whenWindowHasFocus_keysAreReceived() {
         checkKeyEvent(() -> {
-            mViewRootImpl.windowFocusChanged(true /*hasFocus*/, true /*inTouchMode*/);
+            mViewRootImpl.windowFocusChanged(true /*hasFocus*/);
         }, true /*shouldReceiveKey*/);
     }
 
