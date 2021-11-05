@@ -4930,6 +4930,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (imeTarget != null && !(imeTarget.mActivityRecord != null
                 && imeTarget.mActivityRecord.hasStartingWindow())) {
             final boolean canImeTargetSetRelativeLayer = imeTarget.getSurfaceControl() != null
+                    && imeTarget == mImeControlTarget
                     && !imeTarget.inMultiWindowMode()
                     && imeTarget.mToken.getActivity(app -> app.isAnimating(TRANSITION | PARENTS,
                             ANIMATION_TYPE_ALL & ~ANIMATION_TYPE_RECENTS)) == null;
