@@ -747,57 +747,70 @@ public final class Parcel {
     }
 
     /**
-     * Check if the object used in {@link #readValue(ClassLoader)} / {@link #writeValue(Object)}
-     * has file descriptors.
+     * Check if the object has file descriptors.
+     *
+     * <p>Objects supported are {@link Parcel} and objects that can be passed to {@link
+     * #writeValue(Object)}}
      *
      * <p>For most cases, it will use the self-reported {@link Parcelable#describeContents()} method
      * for that.
      *
-     * @throws IllegalArgumentException if you provide any object not supported by above methods.
-     *         Most notably, if you pass {@link Parcel}, this method will throw, for that check
-     *         {@link Parcel#hasFileDescriptors()}
+     * @throws IllegalArgumentException if you provide any object not supported by above methods
+     *     (including if the unsupported object is inside a nested container).
      *
      * @hide
      */
     public static boolean hasFileDescriptors(Object value) {
-        if (value instanceof LazyValue) {
-            return ((LazyValue) value).hasFileDescriptors();
-        } else if (value instanceof Parcelable) {
-            if ((((Parcelable) value).describeContents()
-                    & Parcelable.CONTENTS_FILE_DESCRIPTOR) != 0) {
+        if (value instanceof Parcel) {
+            Parcel parcel = (Parcel) value;
+            if (parcel.hasFileDescriptors()) {
                 return true;
             }
-        } else if (value instanceof Parcelable[]) {
-            Parcelable[] array = (Parcelable[]) value;
-            for (int n = array.length - 1; n >= 0; n--) {
-                Parcelable p = array[n];
-                if (p != null && ((p.describeContents()
-                        & Parcelable.CONTENTS_FILE_DESCRIPTOR) != 0)) {
+        } else if (value instanceof LazyValue) {
+            LazyValue lazy = (LazyValue) value;
+            if (lazy.hasFileDescriptors()) {
+                return true;
+            }
+        } else if (value instanceof Parcelable) {
+            Parcelable parcelable = (Parcelable) value;
+            if ((parcelable.describeContents() & Parcelable.CONTENTS_FILE_DESCRIPTOR) != 0) {
+                return true;
+            }
+        } else if (value instanceof ArrayMap<?, ?>) {
+            ArrayMap<?, ?> map = (ArrayMap<?, ?>) value;
+            for (int i = 0, n = map.size(); i < n; i++) {
+                if (hasFileDescriptors(map.keyAt(i))
+                        || hasFileDescriptors(map.valueAt(i))) {
+                    return true;
+                }
+            }
+        } else if (value instanceof Map<?, ?>) {
+            Map<?, ?> map = (Map<?, ?>) value;
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                if (hasFileDescriptors(entry.getKey())
+                        || hasFileDescriptors(entry.getValue())) {
+                    return true;
+                }
+            }
+        } else if (value instanceof List<?>) {
+            List<?> list = (List<?>) value;
+            for (int i = 0, n = list.size(); i < n; i++) {
+                if (hasFileDescriptors(list.get(i))) {
                     return true;
                 }
             }
         } else if (value instanceof SparseArray<?>) {
             SparseArray<?> array = (SparseArray<?>) value;
-            for (int n = array.size() - 1; n >= 0; n--) {
-                Object object = array.valueAt(n);
-                if (object instanceof Parcelable) {
-                    Parcelable p = (Parcelable) object;
-                    if (p != null && (p.describeContents()
-                            & Parcelable.CONTENTS_FILE_DESCRIPTOR) != 0) {
-                        return true;
-                    }
+            for (int i = 0, n = array.size(); i < n; i++) {
+                if (hasFileDescriptors(array.valueAt(i))) {
+                    return true;
                 }
             }
-        } else if (value instanceof ArrayList<?>) {
-            ArrayList<?> array = (ArrayList<?>) value;
-            for (int n = array.size() - 1; n >= 0; n--) {
-                Object object = array.get(n);
-                if (object instanceof Parcelable) {
-                    Parcelable p = (Parcelable) object;
-                    if (p != null && ((p.describeContents()
-                            & Parcelable.CONTENTS_FILE_DESCRIPTOR) != 0)) {
-                        return true;
-                    }
+        } else if (value instanceof Object[]) {
+            Object[] array = (Object[]) value;
+            for (int i = 0, n = array.length; i < n; i++) {
+                if (hasFileDescriptors(array[i])) {
+                    return true;
                 }
             }
         } else {
