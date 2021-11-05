@@ -67,6 +67,7 @@ import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IBooleanConsumer;
 import com.android.internal.telephony.ICallForwardingInfoCallback;
+import com.android.internal.telephony.IImsStateCallback;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.OperatorInfo;
@@ -2497,4 +2498,14 @@ interface ITelephony {
      * NSSAIs (configured, allowed and rejected).
      */
     void getSlicingConfig(in ResultReceiver callback);
+
+    /**
+     * Register an IMS connection state callback
+     */
+    void registerImsStateCallback(int subId, int feature, in IImsStateCallback cb);
+
+    /**
+     * Unregister an IMS connection state callback
+     */
+    void unregisterImsStateCallback(in IImsStateCallback cb);
 }
