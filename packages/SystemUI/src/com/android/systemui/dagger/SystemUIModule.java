@@ -36,6 +36,7 @@ import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.dagger.DemoModeModule;
 import com.android.systemui.doze.dagger.DozeComponent;
+import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagManager;
 import com.android.systemui.flags.FeatureFlags;
@@ -101,6 +102,7 @@ import dagger.Provides;
             AssistModule.class,
             ClockModule.class,
             CommunalModule.class,
+            DreamModule.class,
             ControlsModule.class,
             DemoModeModule.class,
             FalsingModule.class,
