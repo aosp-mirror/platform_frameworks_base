@@ -313,6 +313,10 @@ public class QuickStatusBarHeader extends FrameLayout {
     }
 
     private void updateAnimators() {
+        if (mUseCombinedQSHeader) {
+            mTranslationAnimator = null;
+            return;
+        }
         updateAlphaAnimator();
         int offset = mTopViewMeasureHeight;
 
@@ -325,6 +329,10 @@ public class QuickStatusBarHeader extends FrameLayout {
     }
 
     private void updateAlphaAnimator() {
+        if (mUseCombinedQSHeader) {
+            mAlphaAnimator = null;
+            return;
+        }
         TouchAnimator.Builder builder = new TouchAnimator.Builder()
                 .addFloat(mSecurityHeaderView, "alpha", 0, 1)
                 // These views appear on expanding down
