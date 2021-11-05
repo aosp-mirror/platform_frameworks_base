@@ -55,6 +55,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @VisibleForTesting
     final List<Integer> mVirtualDisplayIds = new ArrayList<>();
     private final OnDeviceCloseListener mListener;
+    private final IBinder mAppToken;
 
     VirtualDeviceImpl(Context context, AssociationInfo associationInfo,
             IBinder token, int ownerUid, OnDeviceCloseListener listener) {
@@ -69,6 +70,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mGenericWindowPolicyController = new GenericWindowPolicyController(FLAG_SECURE,
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
         mOwnerUid = ownerUid;
+        mAppToken = token;
         if (inputController == null) {
             mInputController = new InputController(mVirtualDeviceLock);
         } else {
@@ -90,6 +92,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @Override // Binder call
     public void close() {
         mListener.onClose(mAssociationInfo.getId());
+        mAppToken.unlinkToDeath(this, 0);
         mInputController.close();
     }
 
