@@ -140,6 +140,7 @@ import static com.android.server.wm.ActivityRecordProto.IS_ANIMATING;
 import static com.android.server.wm.ActivityRecordProto.IS_WAITING_FOR_TRANSITION_START;
 import static com.android.server.wm.ActivityRecordProto.LAST_ALL_DRAWN;
 import static com.android.server.wm.ActivityRecordProto.LAST_SURFACE_SHOWING;
+import static com.android.server.wm.ActivityRecordProto.MIN_ASPECT_RATIO;
 import static com.android.server.wm.ActivityRecordProto.NAME;
 import static com.android.server.wm.ActivityRecordProto.NUM_DRAWN_WINDOWS;
 import static com.android.server.wm.ActivityRecordProto.NUM_INTERESTING_WINDOWS;
@@ -654,6 +655,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /** Whether the IME is showing when transitioning away from this activity. */
     boolean mLastImeShown;
+
+    /**
+     * When set to true, the IME insets will be frozen until the next app becomes IME input target.
+     * @see InsetsPolicy#adjustVisibilityForIme
+     */
+    boolean mImeInsetsFrozenUntilStartInput;
 
     /**
      * A flag to determine if this AR is in the process of closing or entering PIP. This is needed
@@ -1343,13 +1350,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         final Task rootTask = getRootTask();
 
-        // If we reparent, make sure to remove ourselves from the old animation registry.
-        if (mAnimatingActivityRegistry != null) {
-            mAnimatingActivityRegistry.notifyFinished(this);
-        }
-        mAnimatingActivityRegistry = rootTask != null
-                ? rootTask.getAnimatingActivityRegistry()
-                : null;
+        updateAnimatingActivityRegistry();
 
         if (task == mLastParentBeforePip) {
             // Activity's reparented back from pip, clear the links once established
@@ -1363,6 +1364,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         if (newTask != null && isState(RESUMED)) {
             newTask.setResumedActivity(this, "onParentChanged");
+            mImeInsetsFrozenUntilStartInput = false;
         }
 
         if (rootTask != null && rootTask.topRunningActivity() == this) {
@@ -1371,6 +1373,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 rootTask.setHasBeenVisible(true);
             }
         }
+    }
+
+    void updateAnimatingActivityRegistry() {
+        final Task rootTask = getRootTask();
+        final AnimatingActivityRegistry registry = rootTask != null
+                ? rootTask.getAnimatingActivityRegistry()
+                : null;
+
+        // If we reparent, make sure to remove ourselves from the old animation registry.
+        if (mAnimatingActivityRegistry != null && mAnimatingActivityRegistry != registry) {
+            mAnimatingActivityRegistry.notifyFinished(this);
+        }
+
+        mAnimatingActivityRegistry = registry;
     }
 
     /**
@@ -4759,6 +4775,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     && imeInputTarget.getWindow().mActivityRecord == this
                     && mDisplayContent.mInputMethodWindow != null
                     && mDisplayContent.mInputMethodWindow.isVisible();
+            mImeInsetsFrozenUntilStartInput = true;
         }
 
         final DisplayContent displayContent = getDisplayContent();
@@ -5877,6 +5894,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // closing activity having to wait until idle timeout to be stopped or destroyed if the
             // next activity won't report idle (e.g. repeated view animation).
             mTaskSupervisor.scheduleProcessStoppingAndFinishingActivitiesIfNeeded();
+
+            // If the activity is visible, but no windows are eligible to start input, unfreeze
+            // to avoid permanently frozen IME insets.
+            if (mImeInsetsFrozenUntilStartInput && getWindow(
+                    win -> WindowManager.LayoutParams.mayUseInputMethod(win.mAttrs.flags))
+                    == null) {
+                mImeInsetsFrozenUntilStartInput = false;
+            }
         }
     }
 
@@ -7792,6 +7817,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    @Override
+    void onResize() {
+        // Reset freezing IME insets flag when the activity resized.
+        mImeInsetsFrozenUntilStartInput = false;
+        super.onResize();
+    }
+
     /** Returns true if the configuration is compatible with this activity. */
     boolean isConfigurationCompatible(Configuration config) {
         final int orientation = getRequestedOrientation();
@@ -8641,6 +8673,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         proto.write(PIP_AUTO_ENTER_ENABLED, pictureInPictureArgs.isAutoEnterEnabled());
         proto.write(IN_SIZE_COMPAT_MODE, inSizeCompatMode());
+        proto.write(MIN_ASPECT_RATIO, info.getMinAspectRatio());
     }
 
     @Override

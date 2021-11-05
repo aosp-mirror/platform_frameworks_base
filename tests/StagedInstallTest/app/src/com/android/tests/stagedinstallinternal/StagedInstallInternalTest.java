@@ -74,6 +74,11 @@ public class StagedInstallInternalTest {
             "ApexV2", SHIM_APEX_PACKAGE_NAME, 2, /* isApex= */ true,
             "com.android.apex.cts.shim.v2.apex");
 
+    private static final String TEST_APEX_PACKAGE_NAME = "com.android.apex.test_package";
+    private static final TestApp TEST_APEX_CLASSPATH = new TestApp("TestApex",
+            TEST_APEX_PACKAGE_NAME, 1, /*isApex=*/true,
+            "apex.apexd_test_classpath.apex");
+
     private File mTestStateFile = new File(
             InstrumentationRegistry.getInstrumentation().getContext().getFilesDir(),
             "stagedinstall_state");
@@ -439,11 +444,13 @@ public class StagedInstallInternalTest {
         StagedApexInfo result = getPackageManagerNative().getStagedApexInfo("not found");
         assertThat(result).isNull();
         // Stage an apex
-        int sessionId = Install.single(APEX_V2).setStaged().commit();
+        int sessionId = Install.single(TEST_APEX_CLASSPATH).setStaged().commit();
         waitForSessionReady(sessionId);
         // Query proper module name
-        result = getPackageManagerNative().getStagedApexInfo(SHIM_APEX_PACKAGE_NAME);
-        assertThat(result.moduleName).isEqualTo(SHIM_APEX_PACKAGE_NAME);
+        result = getPackageManagerNative().getStagedApexInfo(TEST_APEX_PACKAGE_NAME);
+        assertThat(result.moduleName).isEqualTo(TEST_APEX_PACKAGE_NAME);
+        assertThat(result.hasBootClassPathJars).isTrue();
+        assertThat(result.hasSystemServerClassPathJars).isTrue();
         InstallUtils.openPackageInstallerSession(sessionId).abandon();
     }
 

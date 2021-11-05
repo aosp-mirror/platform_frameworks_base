@@ -29,6 +29,7 @@ import static android.net.NetworkIdentity.OEM_PAID;
 import static android.net.NetworkIdentity.OEM_PRIVATE;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.METERED_ALL;
+import static android.net.NetworkStats.METERED_YES;
 import static android.net.NetworkStats.ROAMING_ALL;
 import static android.net.NetworkTemplate.MATCH_ETHERNET;
 import static android.net.NetworkTemplate.MATCH_MOBILE_WILDCARD;
@@ -1340,7 +1341,7 @@ public class StatsPullAtomService extends SystemService {
     @Nullable private NetworkStats getUidNetworkStatsSnapshotForTransport(int transport) {
         final NetworkTemplate template = (transport == TRANSPORT_CELLULAR)
                 ? NetworkTemplate.buildTemplateMobileWithRatType(
-                /*subscriptionId=*/null, NETWORK_TYPE_ALL)
+                /*subscriptionId=*/null, NETWORK_TYPE_ALL, METERED_YES)
                 : NetworkTemplate.buildTemplateWifiWildcard();
         return getUidNetworkStatsSnapshotForTemplate(template, /*includeTags=*/false);
     }
@@ -1380,7 +1381,8 @@ public class StatsPullAtomService extends SystemService {
         final List<NetworkStatsExt> ret = new ArrayList<>();
         for (final int ratType : getAllCollapsedRatTypes()) {
             final NetworkTemplate template =
-                    buildTemplateMobileWithRatType(subInfo.subscriberId, ratType);
+                    buildTemplateMobileWithRatType(subInfo.subscriberId, ratType,
+                    METERED_YES);
             final NetworkStats stats =
                     getUidNetworkStatsSnapshotForTemplate(template, /*includeTags=*/false);
             if (stats != null) {
@@ -1601,7 +1603,7 @@ public class StatsPullAtomService extends SystemService {
 
     int pullBluetoothBytesTransferLocked(int atomTag, List<StatsEvent> pulledData) {
         BluetoothActivityEnergyInfo info = fetchBluetoothData();
-        if (info == null || info.getUidTraffic() == null) {
+        if (info == null) {
             return StatsManager.PULL_SKIP;
         }
         for (UidTraffic traffic : info.getUidTraffic()) {
@@ -2059,7 +2061,7 @@ public class StatsPullAtomService extends SystemService {
         if (info == null) {
             return StatsManager.PULL_SKIP;
         }
-        pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, info.getTimeStamp(),
+        pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, info.getTimestampMillis(),
                 info.getBluetoothStackState(), info.getControllerTxTimeMillis(),
                 info.getControllerRxTimeMillis(), info.getControllerIdleTimeMillis(),
                 info.getControllerEnergyUsed()));

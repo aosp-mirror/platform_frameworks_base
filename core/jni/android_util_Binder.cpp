@@ -959,8 +959,7 @@ static jint android_os_Binder_getCallingUid()
     return IPCThreadState::self()->getCallingUid();
 }
 
-static jboolean android_os_Binder_isHandlingTransaction()
-{
+static jboolean android_os_Binder_isDirectlyHandlingTransaction() {
     return getCurrentServingCall() == BinderCallType::BINDER;
 }
 
@@ -1056,6 +1055,7 @@ static void android_os_Binder_setExtension(JNIEnv* env, jobject obj, jobject ext
 
 // ----------------------------------------------------------------------------
 
+// clang-format off
 static const JNINativeMethod gBinderMethods[] = {
      /* name, signature, funcPtr */
     // @CriticalNative
@@ -1063,7 +1063,7 @@ static const JNINativeMethod gBinderMethods[] = {
     // @CriticalNative
     { "getCallingUid", "()I", (void*)android_os_Binder_getCallingUid },
     // @CriticalNative
-    { "isHandlingTransaction", "()Z", (void*)android_os_Binder_isHandlingTransaction },
+    { "isDirectlyHandlingTransaction", "()Z", (void*)android_os_Binder_isDirectlyHandlingTransaction },
     // @CriticalNative
     { "clearCallingIdentity", "()J", (void*)android_os_Binder_clearCallingIdentity },
     // @CriticalNative
@@ -1088,6 +1088,7 @@ static const JNINativeMethod gBinderMethods[] = {
     { "getExtension", "()Landroid/os/IBinder;", (void*)android_os_Binder_getExtension },
     { "setExtension", "(Landroid/os/IBinder;)V", (void*)android_os_Binder_setExtension },
 };
+// clang-format on
 
 const char* const kBinderPathName = "android/os/Binder";
 

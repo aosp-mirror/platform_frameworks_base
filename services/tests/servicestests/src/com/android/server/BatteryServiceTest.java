@@ -47,7 +47,6 @@ public class BatteryServiceTest extends AndroidTestCase {
     @Mock BatteryService.HealthServiceWrapper.IHealthSupplier mHealthServiceSupplier;
     BatteryService.HealthServiceWrapper mWrapper;
 
-    private static final String HEALTHD = BatteryService.HealthServiceWrapper.INSTANCE_HEALTHD;
     private static final String VENDOR = BatteryService.HealthServiceWrapper.INSTANCE_VENDOR;
 
     @Override
@@ -117,22 +116,12 @@ public class BatteryServiceTest extends AndroidTestCase {
 
     @SmallTest
     public void testWrapPreferVendor() throws Exception {
-        initForInstances(VENDOR, HEALTHD);
+        initForInstances(VENDOR);
         mWrapper.init(mCallback, mManagerSupplier, mHealthServiceSupplier);
         waitHandlerThreadFinish();
         verify(mCallback, times(1)).onRegistration(same(null), same(mMockedHal), eq(VENDOR));
         verify(mCallback, never()).onRegistration(same(mMockedHal), same(mMockedHal), anyString());
         verify(mCallback, times(1)).onRegistration(same(mMockedHal), same(mMockedHal2), eq(VENDOR));
-    }
-
-    @SmallTest
-    public void testUseHealthd() throws Exception {
-        initForInstances(HEALTHD);
-        mWrapper.init(mCallback, mManagerSupplier, mHealthServiceSupplier);
-        waitHandlerThreadFinish();
-        verify(mCallback, times(1)).onRegistration(same(null), same(mMockedHal), eq(HEALTHD));
-        verify(mCallback, never()).onRegistration(same(mMockedHal), same(mMockedHal), anyString());
-        verify(mCallback, times(1)).onRegistration(same(mMockedHal), same(mMockedHal2), eq(HEALTHD));
     }
 
     @SmallTest

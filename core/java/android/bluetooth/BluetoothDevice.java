@@ -1186,6 +1186,11 @@ public final class BluetoothDevice implements Parcelable, Attributable {
         mAttributionSource = attributionSource;
     }
 
+    /** {@hide} */
+    public void prepareToEnterProcess(@NonNull AttributionSource attributionSource) {
+        setAttributionSource(attributionSource);
+    }
+
     @Override
     public boolean equals(@Nullable Object o) {
         if (o instanceof BluetoothDevice) {
@@ -1335,7 +1340,10 @@ public final class BluetoothDevice implements Parcelable, Attributable {
             if (alias == null) {
                 return getName();
             }
-            return alias;
+            return alias
+                    .replace('\t', ' ')
+                    .replace('\n', ' ')
+                    .replace('\r', ' ');
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
