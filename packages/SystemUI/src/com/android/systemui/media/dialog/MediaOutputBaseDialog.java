@@ -20,6 +20,7 @@ import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -64,6 +65,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private TextView mHeaderTitle;
     private TextView mHeaderSubtitle;
     private ImageView mHeaderIcon;
+    private ImageView mAppResourceIcon;
     private RecyclerView mDevicesRecyclerView;
     private LinearLayout mDeviceListLayout;
     private Button mDoneButton;
@@ -112,6 +114,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mDeviceListLayout = mDialogView.requireViewById(R.id.device_list);
         mDoneButton = mDialogView.requireViewById(R.id.done);
         mStopButton = mDialogView.requireViewById(R.id.stop);
+        mAppResourceIcon = mDialogView.requireViewById(R.id.app_source_icon);
 
         mDeviceListLayout.getViewTreeObserver().addOnGlobalLayoutListener(
                 mDeviceListLayoutListener);
@@ -145,6 +148,12 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         // Update header icon
         final int iconRes = getHeaderIconRes();
         final IconCompat iconCompat = getHeaderIcon();
+        final Drawable appSourceDrawable = getAppSourceIcon();
+        if (appSourceDrawable != null) {
+            mAppResourceIcon.setImageDrawable(appSourceDrawable);
+        } else {
+            mAppResourceIcon.setVisibility(View.GONE);
+        }
         if (iconRes != 0) {
             mHeaderIcon.setVisibility(View.VISIBLE);
             mHeaderIcon.setImageResource(iconRes);
@@ -182,6 +191,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         // Show when remote media session is available
         mStopButton.setVisibility(getStopButtonVisibility());
     }
+
+    abstract Drawable getAppSourceIcon();
 
     abstract int getHeaderIconRes();
 
