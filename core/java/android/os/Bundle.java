@@ -324,28 +324,10 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public boolean hasFileDescriptors() {
         if ((mFlags & FLAG_HAS_FDS_KNOWN) == 0) {
-            boolean fdFound = false;    // keep going until we find one or run out of data
-
-            if (mParcelledData != null) {
-                if (mParcelledData.hasFileDescriptors()) {
-                    fdFound = true;
-                }
-            } else {
-                // It's been unparcelled, so we need to walk the map
-                for (int i=mMap.size()-1; i>=0; i--) {
-                    Object obj = mMap.valueAt(i);
-                    if (Parcel.hasFileDescriptors(obj)) {
-                        fdFound = true;
-                        break;
-                    }
-                }
-            }
-
-            if (fdFound) {
-                mFlags |= FLAG_HAS_FDS;
-            } else {
-                mFlags &= ~FLAG_HAS_FDS;
-            }
+            Parcel p = mParcelledData;
+            mFlags = (Parcel.hasFileDescriptors((p != null) ? p : mMap))
+                    ? mFlags | FLAG_HAS_FDS
+                    : mFlags & ~FLAG_HAS_FDS;
             mFlags |= FLAG_HAS_FDS_KNOWN;
         }
         return (mFlags & FLAG_HAS_FDS) != 0;
