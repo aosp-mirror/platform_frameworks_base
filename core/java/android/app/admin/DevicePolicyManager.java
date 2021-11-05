@@ -9565,7 +9565,14 @@ public class DevicePolicyManager {
 
     /**
      * Called by a profile owner of secondary user that is affiliated with the device to stop the
-     * calling user and switch back to primary.
+     * calling user and switch back to primary user.
+     *
+     * <p>Notice that on devices running with
+     * {@link UserManager#isHeadlessSystemUserMode() headless system user mode}, there is no primary
+     * user, so it switches back to the user that was in the foreground before the first call to
+     * {@link #switchUser(ComponentName, UserHandle)} (or fails with
+     * {@link UserManager#USER_OPERATION_ERROR_UNKNOWN} if that method was not called prior to this
+     * call).
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return one of the following result codes:
