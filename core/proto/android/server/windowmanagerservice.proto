@@ -351,6 +351,7 @@ message ActivityRecordProto {
     optional bool translucent = 30;
     optional bool pip_auto_enter_enabled = 31;
     optional bool in_size_compat_mode = 32;
+    optional float min_aspect_ratio = 33;
 }
 
 /* represents WindowToken */
