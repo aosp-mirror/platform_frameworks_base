@@ -156,9 +156,10 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static SizeCompatUIController provideSizeCompatUIController(Context context,
-            DisplayController displayController, DisplayImeController imeController,
-            SyncTransactionQueue syncQueue) {
-        return new SizeCompatUIController(context, displayController, imeController, syncQueue);
+            DisplayController displayController, DisplayInsetsController displayInsetsController,
+            DisplayImeController imeController, SyncTransactionQueue syncQueue) {
+        return new SizeCompatUIController(context, displayController, displayInsetsController,
+                imeController, syncQueue);
     }
 
     @WMSingleton
