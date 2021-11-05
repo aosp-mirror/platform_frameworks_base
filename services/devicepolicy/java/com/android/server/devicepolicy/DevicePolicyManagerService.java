@@ -699,6 +699,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private DevicePolicyConstants mConstants;
 
+    /**
+     * User to be switched to on {@code logoutUser()}.
+     *
+     * <p>Only used on devices with headless system user mode
+     */
+    @GuardedBy("getLockObject()")
+    private @UserIdInt int mLogoutUserId = UserHandle.USER_NULL;
+
     private static final boolean ENABLE_LOCK_GUARD = true;
 
     /**
@@ -9670,6 +9678,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mStatLogger.dump(pw);
                 pw.println();
                 pw.println("Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
+                pw.println("Logout user: " + getLogoutUserId());
                 pw.println();
 
                 if (mPendingUserCreatedCallbackTokens.isEmpty()) {
@@ -10780,6 +10789,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SWITCH_USER);
 
+        boolean switched = false;
+        // Save previous logout user id in case of failure
+        int logoutUserId = getLogoutUserId();
         synchronized (getLockObject()) {
             long id = mInjector.binderClearCallingIdentity();
             try {
@@ -10787,14 +10799,53 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (userHandle != null) {
                     userId = userHandle.getIdentifier();
                 }
-                return mInjector.getIActivityManager().switchUser(userId);
+                Slogf.i(LOG_TAG, "Switching to user %d (logout user is %d)", userId, logoutUserId);
+                setLogoutUserIdLocked(UserHandle.USER_CURRENT);
+                switched = mInjector.getIActivityManager().switchUser(userId);
+                if (!switched) {
+                    Slogf.w(LOG_TAG, "Failed to switch to user %d", userId);
+                }
+                return switched;
             } catch (RemoteException e) {
                 Slogf.e(LOG_TAG, "Couldn't switch user", e);
                 return false;
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
+                if (!switched) {
+                    setLogoutUserIdLocked(logoutUserId);
+                }
             }
         }
+    }
+
+    private @UserIdInt int getLogoutUserId() {
+        if (!mInjector.userManagerIsHeadlessSystemUserMode()) {
+            // mLogoutUserId is USER_SYSTEM as well, but there's no need to acquire the lock
+            return UserHandle.USER_SYSTEM;
+        }
+        synchronized (getLockObject()) {
+            return mLogoutUserId;
+        }
+    }
+
+    private void setLogoutUserId(@UserIdInt int userId) {
+        if (!mInjector.userManagerIsHeadlessSystemUserMode()) return; // ignore
+
+        synchronized (getLockObject()) {
+            setLogoutUserIdLocked(userId);
+        }
+    }
+
+    @GuardedBy("getLockObject()")
+    private void setLogoutUserIdLocked(@UserIdInt int userId) {
+        if (!mInjector.userManagerIsHeadlessSystemUserMode()) return; // ignore
+
+        if (userId == UserHandle.USER_CURRENT) {
+            userId = getCurrentForegroundUserId();
+        }
+
+        Slogf.d(LOG_TAG, "setLogoutUserId(): %d -> %d", mLogoutUserId, userId);
+        mLogoutUserId = userId;
     }
 
     @Override
@@ -10818,10 +10869,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return UserManager.USER_OPERATION_ERROR_MAX_RUNNING_USERS;
             }
 
+            Slogf.i(LOG_TAG, "Starting user %d in background", userId);
             if (mInjector.getIActivityManager().startUserInBackground(userId)) {
-                Slogf.i(LOG_TAG, "Started used %d in background", userId);
                 return UserManager.USER_OPERATION_SUCCESS;
             } else {
+                Slogf.w(LOG_TAG, "failed to start user %d in background", userId);
                 return UserManager.USER_OPERATION_ERROR_UNKNOWN;
             }
         } catch (RemoteException e) {
@@ -10869,13 +10921,30 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return UserManager.USER_OPERATION_ERROR_MANAGED_PROFILE;
         }
 
+        // TODO(b/204585343): remove the headless system user check?
+        if (mInjector.userManagerIsHeadlessSystemUserMode() && callingUserId != mInjector
+                .binderWithCleanCallingIdentity(() -> getCurrentForegroundUserId())) {
+            Slogf.d(LOG_TAG, "logoutUser(): user %d is in background, just stopping, not switching",
+                    callingUserId);
+            return stopUserUnchecked(callingUserId);
+        }
+
+        int logoutUserId = getLogoutUserId();
+        if (logoutUserId == UserHandle.USER_NULL) {
+            // Could happen on devices using headless system user mode when called before calling
+            // switchUser() or startUserInBackground() first
+            Slogf.w(LOG_TAG, "logoutUser(): could not determine which user to switch to");
+            return UserManager.USER_OPERATION_ERROR_UNKNOWN;
+        }
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            if (!mInjector.getIActivityManager().switchUser(UserHandle.USER_SYSTEM)) {
-                Slogf.w(LOG_TAG, "Failed to switch to primary user");
-                // This should never happen as target user is UserHandle.USER_SYSTEM
+            Slogf.i(LOG_TAG, "logoutUser(): switching to user %d", logoutUserId);
+            if (!mInjector.getIActivityManager().switchUser(logoutUserId)) {
+                Slogf.w(LOG_TAG, "Failed to switch to user %d", logoutUserId);
+                // This should never happen as target user is determined by getPreviousUserId()
                 return UserManager.USER_OPERATION_ERROR_UNKNOWN;
             }
+            setLogoutUserId(UserHandle.USER_CURRENT);
         } catch (RemoteException e) {
             // Same process, should not happen.
             return UserManager.USER_OPERATION_ERROR_UNKNOWN;
@@ -10886,7 +10955,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return stopUserUnchecked(callingUserId);
     }
 
-    private int stopUserUnchecked(int userId) {
+    private int stopUserUnchecked(@UserIdInt int userId) {
+        Slogf.i(LOG_TAG, "Stopping user %d", userId);
         final long id = mInjector.binderClearCallingIdentity();
         try {
             switch (mInjector.getIActivityManager().stopUser(userId, true /*force*/, null)) {
