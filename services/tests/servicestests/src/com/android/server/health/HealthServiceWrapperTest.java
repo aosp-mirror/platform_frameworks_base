@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.health;
 
 import static junit.framework.Assert.*;
 
@@ -36,7 +36,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
-public class BatteryServiceTest extends AndroidTestCase {
+public class HealthServiceWrapperTest extends AndroidTestCase {
 
     @Mock IServiceManager mMockedManager;
     @Mock IHealth mMockedHal;
