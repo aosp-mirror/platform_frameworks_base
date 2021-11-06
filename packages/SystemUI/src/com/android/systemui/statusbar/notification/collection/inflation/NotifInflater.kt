@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.collection.inflation;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.coordinator.PreparationCoordinator;
+package com.android.systemui.statusbar.notification.collection.inflation
+
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 
 /**
- * Used by the {@link PreparationCoordinator}.  When notifications are added or updated, the
+ * Used by the [PreparationCoordinator].  When notifications are added or updated, the
  * NotifInflater is asked to (re)inflated and prepare their views.  This inflation occurs off the
  * main thread. When the inflation is finished, NotifInflater will trigger its InflationCallback.
  */
-public interface NotifInflater {
+interface NotifInflater {
     /**
      * Called to rebind the entry's views.
      *
      * @param callback callback called after inflation finishes
      */
-    void rebindViews(NotificationEntry entry, InflationCallback callback);
+    fun rebindViews(entry: NotificationEntry, params: Params, callback: InflationCallback)
 
     /**
      * Called to inflate the views of an entry.  Views are not considered inflated until all of its
@@ -37,18 +37,23 @@ public interface NotifInflater {
      *
      * @param callback callback called after inflation finishes
      */
-    void inflateViews(NotificationEntry entry, InflationCallback callback);
+    fun inflateViews(entry: NotificationEntry, params: Params, callback: InflationCallback)
 
     /**
      * Request to stop the inflation of an entry.  For example, called when a notification is
      * removed and no longer needs to be inflated.
      */
-    void abortInflation(NotificationEntry entry);
+    fun abortInflation(entry: NotificationEntry)
 
     /**
      * Callback once all the views are inflated and bound for a given NotificationEntry.
      */
     interface InflationCallback {
-        void onInflationFinished(NotificationEntry entry);
+        fun onInflationFinished(entry: NotificationEntry)
     }
+
+    /**
+     * A class holding parameters used when inflating the notification row
+     */
+    class Params(val isLowPriority: Boolean, val reason: String)
 }

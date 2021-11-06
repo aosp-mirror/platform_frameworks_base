@@ -1041,8 +1041,11 @@ public class ShadeListBuilder implements Dumpable {
     private void setEntrySection(ListEntry entry, NotifSection finalSection) {
         entry.getAttachState().setSection(finalSection);
         NotificationEntry representativeEntry = entry.getRepresentativeEntry();
-        if (representativeEntry != null && finalSection != null) {
-            representativeEntry.setBucket(finalSection.getBucket());
+        if (representativeEntry != null) {
+            representativeEntry.getAttachState().setSection(finalSection);
+            if (finalSection != null) {
+                representativeEntry.setBucket(finalSection.getBucket());
+            }
         }
     }
 
