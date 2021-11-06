@@ -158,7 +158,7 @@ interface IAudioService {
 
     int getMode();
 
-    oneway void playSoundEffect(int effectType);
+    oneway void playSoundEffect(int effectType, int userId);
 
     oneway void playSoundEffectVolume(int effectType, float volume);
 
