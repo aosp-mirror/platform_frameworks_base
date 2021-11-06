@@ -155,6 +155,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -178,9 +179,11 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
+import android.view.InsetsState;
 import android.view.RemoteAnimationAdapter;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.TaskTransitionSpec;
 import android.view.WindowManager;
 import android.view.WindowManager.TransitionOldType;
 import android.window.ITaskOrganizer;
@@ -2817,6 +2820,30 @@ class Task extends TaskFragment {
             out.set(getBounds());
         }
         return;
+    }
+
+    /**
+     * Account for specified insets to crop the animation bounds by to avoid the animation
+     * occurring over "out of bounds" regions
+     *
+     * For example this is used to make sure the tasks are cropped to be fully above the
+     * taskbar when animating.
+     *
+     * @param animationBounds The animations bounds to adjust to account for the custom spec insets.
+     */
+    void adjustAnimationBoundsForTransition(Rect animationBounds) {
+        TaskTransitionSpec spec = mWmService.mTaskTransitionSpec;
+        if (spec != null) {
+            for (@InsetsState.InternalInsetsType int insetType : spec.animationBoundInsets) {
+                InsetsSourceProvider insetProvider = getDisplayContent()
+                        .getInsetsStateController()
+                        .getSourceProvider(insetType);
+
+                Insets insets = insetProvider.getSource().calculateVisibleInsets(
+                        animationBounds);
+                animationBounds.inset(insets);
+            }
+        }
     }
 
     void setDragResizing(boolean dragResizing, int dragResizeMode) {

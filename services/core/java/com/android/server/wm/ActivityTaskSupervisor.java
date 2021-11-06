@@ -2049,6 +2049,16 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
         // Update the current top activity.
         mTopResumedActivity = topRootTask.getTopResumedActivity();
+        // Update process state if there is no activity state change (e.g. focus change between
+        // multi-window mode activities) to make sure that the current top has top oom-adj.
+        // If the previous top is null, there should be activity state change from it, Then the
+        // process state should also have been updated so no need to update again.
+        if (mTopResumedActivity != null && prevTopActivity != null) {
+            if (mTopResumedActivity.app != null) {
+                mTopResumedActivity.app.addToPendingTop();
+            }
+            mService.updateOomAdj();
+        }
         scheduleTopResumedActivityStateIfNeeded();
 
         mService.updateTopApp(mTopResumedActivity);

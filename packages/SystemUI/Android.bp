@@ -83,8 +83,7 @@ android_library {
         "src/**/*.kt",
         "src/**/*.java",
         "src/**/I*.aidl",
-        "src-release/**/*.kt",
-        "src-release/**/*.java",
+        ":ReleaseJavaFiles",
     ],
     product_variables: {
         debuggable: {

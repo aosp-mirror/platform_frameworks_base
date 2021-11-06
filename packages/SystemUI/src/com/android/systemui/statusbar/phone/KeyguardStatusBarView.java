@@ -47,6 +47,7 @@ import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.window.StatusBarWindowView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

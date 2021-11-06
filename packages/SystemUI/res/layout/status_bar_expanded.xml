@@ -75,7 +75,11 @@
         android:clipToPadding="false"
         android:clipChildren="false">
 
-        <include layout="@layout/split_shade_header"/>
+        <ViewStub
+            android:id="@+id/qs_header_stub"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+        />
 
         <include
             layout="@layout/keyguard_status_view"

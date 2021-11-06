@@ -108,6 +108,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -2731,6 +2732,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Separate position and size for use in animators.
         final Rect screenBounds = getAnimationBounds(appRootTaskClipMode);
         mTmpRect.set(screenBounds);
+        if (this.asTask() != null && isTaskTransitOld(transit)) {
+            this.asTask().adjustAnimationBoundsForTransition(mTmpRect);
+        }
         getAnimationPosition(mTmpPoint);
         mTmpRect.offsetTo(0, 0);
 
@@ -2826,6 +2830,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
             if (isTaskTransitOld(transit)) {
                 animationRunnerBuilder.setTaskBackgroundColor(getTaskAnimationBackgroundColor());
+                // TODO: Remove when we migrate to shell (b/202383002)
+                if (mWmService.mTaskTransitionSpec != null) {
+                    animationRunnerBuilder.hideInsetSourceViewOverflows(
+                            mWmService.mTaskTransitionSpec.animationBoundInsets);
+                }
             }
 
             animationRunnerBuilder.build()
@@ -3567,6 +3576,26 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 // animation but and so the surface is still animating)
                 mOnAnimationFinished.add(clearBackgroundColorHandler);
                 mOnAnimationCancelled.add(clearBackgroundColorHandler);
+            }
+        }
+
+        private void hideInsetSourceViewOverflows(Set<Integer> insetTypes) {
+            final ArrayList<SurfaceControl> surfaceControls =
+                    new ArrayList<>(insetTypes.size());
+
+            for (int insetType : insetTypes) {
+                InsetsSourceProvider insetProvider = getDisplayContent().getInsetsStateController()
+                        .getSourceProvider(insetType);
+
+                // Will apply it immediately to current leash and to all future inset animations
+                // until we disable it.
+                insetProvider.setCropToProvidingInsetsBounds(getPendingTransaction());
+
+                // Only clear the size restriction of the inset once the surface animation is over
+                // and not if it's canceled to be replace by another animation.
+                mOnAnimationFinished.add(() -> {
+                    insetProvider.removeCropToProvidingInsetsBounds(getPendingTransaction());
+                });
             }
         }
 

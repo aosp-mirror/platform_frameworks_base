@@ -50,6 +50,7 @@ import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
+import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -247,7 +248,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         controller.init()
 
         val captor = argumentCaptor<List<String>>()
-        verify(view).onAttach(any(), any(), capture(captor))
+        verify(view).onAttach(any(), any(), capture(captor), anyBoolean())
 
         assertThat(captor.value).containsExactly(
             mContext.getString(com.android.internal.R.string.status_bar_mobile)
@@ -260,7 +261,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         controller.init()
 
         val captor = argumentCaptor<List<String>>()
-        verify(view).onAttach(any(), any(), capture(captor))
+        verify(view).onAttach(any(), any(), capture(captor), anyBoolean())
 
         assertThat(captor.value).containsExactly(
             mContext.getString(com.android.internal.R.string.status_bar_no_calling),

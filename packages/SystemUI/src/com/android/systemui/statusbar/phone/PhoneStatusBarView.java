@@ -40,6 +40,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.window.StatusBarWindowView;
 import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.Objects;

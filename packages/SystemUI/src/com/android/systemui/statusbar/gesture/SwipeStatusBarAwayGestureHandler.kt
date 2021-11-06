@@ -26,7 +26,7 @@ import android.view.MotionEvent.*
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shared.system.InputChannelCompat
 import com.android.systemui.shared.system.InputMonitorCompat
-import com.android.systemui.statusbar.phone.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowController
 import javax.inject.Inject
 
 /**

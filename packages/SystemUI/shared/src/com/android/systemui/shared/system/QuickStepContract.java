@@ -57,6 +57,8 @@ public class QuickStepContract {
             "extra_shell_starting_window";
     // See ISmartspaceTransitionController.aidl
     public static final String KEY_EXTRA_SMARTSPACE_TRANSITION_CONTROLLER = "smartspace_transition";
+    // See IRecentTasks.aidl
+    public static final String KEY_EXTRA_RECENT_TASKS = "recent_tasks";
 
     public static final String NAV_BAR_MODE_2BUTTON_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY;

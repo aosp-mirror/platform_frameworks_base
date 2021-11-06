@@ -129,10 +129,14 @@ public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
     }
 
     @Override
-    public void addListener(Listener run) {}
+    public void addListener(Listener run) {
+        mFlagManager.addListener(run);
+    }
 
     @Override
-    public void removeListener(Listener run) {}
+    public void removeListener(Listener run) {
+        mFlagManager.removeListener(run);
+    }
 
     private void restartSystemUI() {
         Log.i(TAG, "Restarting SystemUI");

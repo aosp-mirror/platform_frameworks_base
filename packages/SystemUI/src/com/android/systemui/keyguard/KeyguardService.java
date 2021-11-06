@@ -118,6 +118,7 @@ public class KeyguardService extends Service {
 
     private final KeyguardViewMediator mKeyguardViewMediator;
     private final KeyguardLifecyclesDispatcher mKeyguardLifecyclesDispatcher;
+    private final ShellTransitions mShellTransitions;
 
     private static int newModeToLegacyMode(int newMode) {
         switch (newMode) {
@@ -231,56 +232,10 @@ public class KeyguardService extends Service {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
+        mShellTransitions = shellTransitions;
 
         if (shellTransitions != null && Transitions.ENABLE_SHELL_TRANSITIONS) {
-            if (sEnableRemoteKeyguardGoingAwayAnimation) {
-                Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_GOING_AWAY");
-                TransitionFilter f = new TransitionFilter();
-                f.mFlags = TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
-                shellTransitions.registerRemote(f,
-                        new RemoteTransition(wrap(mExitAnimationRunner), getIApplicationThread()));
-            }
-            if (sEnableRemoteKeyguardOccludeAnimation) {
-                Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_(UN)OCCLUDE");
-                // Register for occluding
-                TransitionFilter f = new TransitionFilter();
-                f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
-                f.mRequirements = new TransitionFilter.Requirement[]{
-                        new TransitionFilter.Requirement(), new TransitionFilter.Requirement()};
-                // First require at-least one app showing that occludes.
-                f.mRequirements[0].mMustBeIndependent = false;
-                f.mRequirements[0].mFlags = FLAG_OCCLUDES_KEYGUARD;
-                f.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
-                // Then require that we aren't closing any occludes (because this would mean a
-                // regular task->task or activity->activity animation not involving keyguard).
-                f.mRequirements[1].mNot = true;
-                f.mRequirements[1].mMustBeIndependent = false;
-                f.mRequirements[1].mFlags = FLAG_OCCLUDES_KEYGUARD;
-                f.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
-                shellTransitions.registerRemote(f,
-                        new RemoteTransition(mOccludeAnimation, getIApplicationThread()));
-
-                // Now register for un-occlude.
-                f = new TransitionFilter();
-                f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
-                f.mRequirements = new TransitionFilter.Requirement[]{
-                        new TransitionFilter.Requirement(), new TransitionFilter.Requirement()};
-                // First require at-least one app going-away (doesn't need occlude flag
-                // as that is implicit by it having been visible and we don't want to exclude
-                // cases where we are un-occluding because the app removed its showWhenLocked
-                // capability at runtime).
-                f.mRequirements[1].mMustBeIndependent = false;
-                f.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
-                f.mRequirements[1].mMustBeTask = true;
-                // Then require that we aren't opening any occludes (otherwise we'd remain
-                // occluded).
-                f.mRequirements[0].mNot = true;
-                f.mRequirements[0].mMustBeIndependent = false;
-                f.mRequirements[0].mFlags = FLAG_OCCLUDES_KEYGUARD;
-                f.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
-                shellTransitions.registerRemote(f,
-                        new RemoteTransition(mUnoccludeAnimation, getIApplicationThread()));
-            }
+            // Nothing here. Initialization for this happens in onCreate.
         } else {
             RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
             if (sEnableRemoteKeyguardGoingAwayAnimation) {
@@ -307,6 +262,58 @@ public class KeyguardService extends Service {
     @Override
     public void onCreate() {
         ((SystemUIApplication) getApplication()).startServicesIfNeeded();
+
+        if (mShellTransitions == null || !Transitions.ENABLE_SHELL_TRANSITIONS) {
+            return;
+        }
+        if (sEnableRemoteKeyguardGoingAwayAnimation) {
+            Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_GOING_AWAY");
+            TransitionFilter f = new TransitionFilter();
+            f.mFlags = TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
+            mShellTransitions.registerRemote(f,
+                    new RemoteTransition(wrap(mExitAnimationRunner), getIApplicationThread()));
+        }
+        if (sEnableRemoteKeyguardOccludeAnimation) {
+            Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_(UN)OCCLUDE");
+            // Register for occluding
+            TransitionFilter f = new TransitionFilter();
+            f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
+            f.mRequirements = new TransitionFilter.Requirement[]{
+                    new TransitionFilter.Requirement(), new TransitionFilter.Requirement()};
+            // First require at-least one app showing that occludes.
+            f.mRequirements[0].mMustBeIndependent = false;
+            f.mRequirements[0].mFlags = FLAG_OCCLUDES_KEYGUARD;
+            f.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+            // Then require that we aren't closing any occludes (because this would mean a
+            // regular task->task or activity->activity animation not involving keyguard).
+            f.mRequirements[1].mNot = true;
+            f.mRequirements[1].mMustBeIndependent = false;
+            f.mRequirements[1].mFlags = FLAG_OCCLUDES_KEYGUARD;
+            f.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
+            mShellTransitions.registerRemote(f,
+                    new RemoteTransition(mOccludeAnimation, getIApplicationThread()));
+
+            // Now register for un-occlude.
+            f = new TransitionFilter();
+            f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
+            f.mRequirements = new TransitionFilter.Requirement[]{
+                    new TransitionFilter.Requirement(), new TransitionFilter.Requirement()};
+            // First require at-least one app going-away (doesn't need occlude flag
+            // as that is implicit by it having been visible and we don't want to exclude
+            // cases where we are un-occluding because the app removed its showWhenLocked
+            // capability at runtime).
+            f.mRequirements[1].mMustBeIndependent = false;
+            f.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
+            f.mRequirements[1].mMustBeTask = true;
+            // Then require that we aren't opening any occludes (otherwise we'd remain
+            // occluded).
+            f.mRequirements[0].mNot = true;
+            f.mRequirements[0].mMustBeIndependent = false;
+            f.mRequirements[0].mFlags = FLAG_OCCLUDES_KEYGUARD;
+            f.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+            mShellTransitions.registerRemote(f,
+                    new RemoteTransition(mUnoccludeAnimation, getIApplicationThread()));
+        }
     }
 
     @Override

@@ -1,8 +1,7 @@
 package com.android.systemui.statusbar.phone
 
-import android.content.Context
-import android.content.res.Resources
 import android.test.suitebuilder.annotation.SmallTest
+import android.testing.AndroidTestingRunner
 import android.view.View
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -15,14 +14,16 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
+@RunWith(AndroidTestingRunner::class)
 class SplitShadeHeaderControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var view: View
@@ -33,8 +34,7 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
     @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var batteryMeterView: BatteryMeterView
     @Mock private lateinit var batteryMeterViewController: BatteryMeterViewController
-    @Mock private lateinit var resources: Resources
-    @Mock private lateinit var context: Context
+
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
     var viewVisibility = View.GONE
 
@@ -45,8 +45,8 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
         whenever<BatteryMeterView>(view.findViewById(R.id.batteryRemainingIcon))
                 .thenReturn(batteryMeterView)
         whenever<StatusIconContainer>(view.findViewById(R.id.statusIcons)).thenReturn(statusIcons)
+        whenever(view.context).thenReturn(context)
         whenever(statusIcons.context).thenReturn(context)
-        whenever(context.resources).thenReturn(resources)
         whenever(qsCarrierGroupControllerBuilder.setQSCarrierGroup(any()))
                 .thenReturn(qsCarrierGroupControllerBuilder)
         whenever(qsCarrierGroupControllerBuilder.build()).thenReturn(qsCarrierGroupController)
@@ -55,6 +55,7 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
             null
         }
         whenever(view.visibility).thenAnswer { _ -> viewVisibility }
+        whenever(featureFlags.useCombinedQSHeaders()).thenReturn(false)
         splitShadeHeaderController = SplitShadeHeaderController(view, statusBarIconController,
         qsCarrierGroupControllerBuilder, featureFlags, batteryMeterViewController)
     }

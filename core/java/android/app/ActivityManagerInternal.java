@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.app.ActivityManager.StopBgUsersOnSwitch;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -659,6 +661,11 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void setVoiceInteractionManagerProvider(
             @Nullable VoiceInteractionManagerProvider provider);
+
+    /**
+     * Sets whether background users should be stopped when the current user is switched.
+     */
+    public abstract void setStopBackgroundUsersOnSwitch(@StopBgUsersOnSwitch int value);
 
     /**
      * Provides the interface to communicate between voice interaction manager service and

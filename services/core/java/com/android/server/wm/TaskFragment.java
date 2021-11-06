@@ -778,6 +778,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         boolean gotOpaqueSplitScreenPrimary = false;
         boolean gotOpaqueSplitScreenSecondary = false;
         boolean gotTranslucentFullscreen = false;
+        boolean gotTranslucentAdjacent = false;
         boolean gotTranslucentSplitScreenPrimary = false;
         boolean gotTranslucentSplitScreenSecondary = false;
         boolean shouldBeVisible = true;
@@ -806,6 +807,18 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
             final boolean hasRunningActivities = hasRunningActivity(other);
             if (other == this) {
+                if (!adjacentTaskFragments.isEmpty() && !gotTranslucentAdjacent) {
+                    // The z-order of this TaskFragment is in middle of two adjacent TaskFragments
+                    // and it cannot be visible if the TaskFragment on top is not translucent and
+                    // is fully occluding this one.
+                    for (int j = adjacentTaskFragments.size() - 1; j >= 0; --j) {
+                        final TaskFragment taskFragment = adjacentTaskFragments.get(j);
+                        if (!taskFragment.isTranslucent(starting)
+                                && taskFragment.getBounds().contains(this.getBounds())) {
+                            return TASK_FRAGMENT_VISIBILITY_INVISIBLE;
+                        }
+                    }
+                }
                 // Should be visible if there is no other fragment occluding it, unless it doesn't
                 // have any running activities, not starting one and not home stack.
                 shouldBeVisible = hasRunningActivities
@@ -875,6 +888,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                             || otherTaskFrag.mAdjacentTaskFragment.isTranslucent(starting)) {
                         // Can be visible behind a translucent adjacent TaskFragments.
                         gotTranslucentFullscreen = true;
+                        gotTranslucentAdjacent = true;
                         continue;
                     }
                     // Can not be visible behind adjacent TaskFragments.

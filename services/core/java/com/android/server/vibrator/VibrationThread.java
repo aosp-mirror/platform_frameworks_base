@@ -47,6 +47,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -110,6 +111,8 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
     private volatile boolean mStop;
     private volatile boolean mForceStop;
+    // Variable only set and read in main thread.
+    private boolean mCalledVibrationCompleteCallback = false;
 
     VibrationThread(Vibration vib, VibrationSettings vibrationSettings,
             DeviceVibrationEffectAdapter effectAdapter,
@@ -150,18 +153,53 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
     @Override
     public void run() {
-        Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
+        // Structured to guarantee the vibrators completed and released callbacks at the end of
+        // thread execution. Both of these callbacks are exclusively called from this thread.
+        try {
+            try {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
+                runWithWakeLock();
+            } finally {
+                clientVibrationCompleteIfNotAlready(Vibration.Status.FINISHED_UNEXPECTED);
+            }
+        } finally {
+            mCallbacks.onVibratorsReleased();
+        }
+    }
+
+    /** Runs the VibrationThread ensuring that the wake lock is acquired and released. */
+    private void runWithWakeLock() {
         mWakeLock.setWorkSource(mWorkSource);
         mWakeLock.acquire();
         try {
+            runWithWakeLockAndDeathLink();
+        } finally {
+            mWakeLock.release();
+        }
+    }
+
+    /**
+     * Runs the VibrationThread with the binder death link, handling link/unlink failures.
+     * Called from within runWithWakeLock.
+     */
+    private void runWithWakeLockAndDeathLink() {
+        try {
             mVibration.token.linkToDeath(this, 0);
-            playVibration();
-            mCallbacks.onVibratorsReleased();
         } catch (RemoteException e) {
             Slog.e(TAG, "Error linking vibration to token death", e);
+            clientVibrationCompleteIfNotAlready(Vibration.Status.IGNORED_ERROR_TOKEN);
+            return;
+        }
+        // Ensure that the unlink always occurs now.
+        try {
+            // This is the actual execution of the vibration.
+            playVibration();
         } finally {
-            mVibration.token.unlinkToDeath(this, 0);
-            mWakeLock.release();
+            try {
+                mVibration.token.unlinkToDeath(this, 0);
+            } catch (NoSuchElementException e) {
+                Slog.wtf(TAG, "Failed to unlink token", e);
+            }
         }
     }
 
@@ -219,6 +257,16 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         }
     }
 
+    // Indicate that the vibration is complete. This can be called multiple times only for
+    // convenience of handling error conditions - an error after the client is complete won't
+    // affect the status.
+    private void clientVibrationCompleteIfNotAlready(Vibration.Status completedStatus) {
+        if (!mCalledVibrationCompleteCallback) {
+            mCalledVibrationCompleteCallback = true;
+            mCallbacks.onVibrationCompleted(mVibration.id, completedStatus);
+        }
+    }
+
     private void playVibration() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "playVibration");
         try {
@@ -226,7 +274,6 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             final int sequentialEffectSize = sequentialEffect.getEffects().size();
             mStepQueue.offer(new StartVibrateStep(sequentialEffect));
 
-            Vibration.Status status = null;
             while (!mStepQueue.isEmpty()) {
                 long waitTime;
                 synchronized (mLock) {
@@ -242,13 +289,12 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                 if (waitTime <= 0) {
                     mStepQueue.consumeNext();
                 }
-                Vibration.Status currentStatus = mStop ? Vibration.Status.CANCELLED
+                Vibration.Status status = mStop ? Vibration.Status.CANCELLED
                         : mStepQueue.calculateVibrationStatus(sequentialEffectSize);
-                if (status == null && currentStatus != Vibration.Status.RUNNING) {
+                if (status != Vibration.Status.RUNNING && !mCalledVibrationCompleteCallback) {
                     // First time vibration stopped running, start clean-up tasks and notify
                     // callback immediately.
-                    status = currentStatus;
-                    mCallbacks.onVibrationCompleted(mVibration.id, status);
+                    clientVibrationCompleteIfNotAlready(status);
                     if (status == Vibration.Status.CANCELLED) {
                         mStepQueue.cancel();
                     }
@@ -256,18 +302,9 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                 if (mForceStop) {
                     // Cancel every step and stop playing them right away, even clean-up steps.
                     mStepQueue.cancelImmediately();
+                    clientVibrationCompleteIfNotAlready(Vibration.Status.CANCELLED);
                     break;
                 }
-            }
-
-            if (status == null) {
-                status = mStepQueue.calculateVibrationStatus(sequentialEffectSize);
-                if (status == Vibration.Status.RUNNING) {
-                    Slog.w(TAG, "Something went wrong, step queue completed but vibration status"
-                            + " is still RUNNING for vibration " + mVibration.id);
-                    status = Vibration.Status.FINISHED;
-                }
-                mCallbacks.onVibrationCompleted(mVibration.id, status);
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
