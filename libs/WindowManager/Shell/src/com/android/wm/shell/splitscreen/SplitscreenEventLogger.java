@@ -17,13 +17,34 @@
 package com.android.wm.shell.splitscreen;
 
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__ENTER_REASON__OVERVIEW;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__APP_DOES_NOT_SUPPORT_MULTIWINDOW;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__APP_FINISHED;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__DEVICE_FOLDED;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__DRAG_DIVIDER;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__ROOT_TASK_VANISHED;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__SCREEN_LOCKED;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__SCREEN_LOCKED_SHOW_ON_TOP;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__UNKNOWN_EXIT;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_FINISHED;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DEVICE_FOLDED;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DRAG_DIVIDER;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RETURN_HOME;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_ROOT_TASK_VANISHED;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_SCREEN_LOCKED;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_UNKNOWN;
+
+import android.util.Slog;
 
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
+import com.android.wm.shell.splitscreen.SplitScreenController.ExitReason;
 
 /**
  * Helper class that to log Drag & Drop UIEvents for a single session, see also go/uievent
@@ -96,10 +117,40 @@ public class SplitscreenEventLogger {
     }
 
     /**
+     * Returns the framework logging constant given a splitscreen exit reason.
+     */
+    private int getLoggerExitReason(@ExitReason int exitReason) {
+        switch (exitReason) {
+            case EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW:
+                return SPLITSCREEN_UICHANGED__EXIT_REASON__APP_DOES_NOT_SUPPORT_MULTIWINDOW;
+            case EXIT_REASON_APP_FINISHED:
+                return SPLITSCREEN_UICHANGED__EXIT_REASON__APP_FINISHED;
+            case EXIT_REASON_DEVICE_FOLDED:
+                return SPLITSCREEN_UICHANGED__EXIT_REASON__DEVICE_FOLDED;
+            case EXIT_REASON_DRAG_DIVIDER:
+                return SPLITSCREEN_UICHANGED__EXIT_REASON__DRAG_DIVIDER;
+            case EXIT_REASON_RETURN_HOME:
+                return SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME;
+            case EXIT_REASON_ROOT_TASK_VANISHED:
+                return SPLITSCREEN_UICHANGED__EXIT_REASON__ROOT_TASK_VANISHED;
+            case EXIT_REASON_SCREEN_LOCKED:
+                return SPLITSCREEN_UICHANGED__EXIT_REASON__SCREEN_LOCKED;
+            case EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP:
+                return SPLITSCREEN_UICHANGED__EXIT_REASON__SCREEN_LOCKED_SHOW_ON_TOP;
+            case EXIT_REASON_UNKNOWN:
+                // Fall through
+            default:
+                Slog.e("SplitscreenEventLogger", "Unknown exit reason: " + exitReason);
+                return SPLITSCREEN_UICHANGED__EXIT_REASON__UNKNOWN_EXIT;
+        }
+    }
+
+    /**
      * Logs when the user exits splitscreen.  Only one of the main or side stages should be
      * specified to indicate which position was focused as a part of exiting (both can be unset).
      */
-    public void logExit(int exitReason, @SplitPosition int mainStagePosition, int mainStageUid,
+    public void logExit(@ExitReason int exitReason,
+            @SplitPosition int mainStagePosition, int mainStageUid,
             @SplitPosition int sideStagePosition, int sideStageUid, boolean isLandscape) {
         if (mLoggerSessionId == null) {
             // Ignore changes until we've started logging the session
@@ -113,7 +164,7 @@ public class SplitscreenEventLogger {
         FrameworkStatsLog.write(FrameworkStatsLog.SPLITSCREEN_UI_CHANGED,
                 FrameworkStatsLog.SPLITSCREEN_UICHANGED__ACTION__EXIT,
                 0 /* enterReason */,
-                exitReason,
+                getLoggerExitReason(exitReason),
                 0f /* splitRatio */,
                 getMainStagePositionFromSplitPosition(mainStagePosition, isLandscape),
                 mainStageUid,

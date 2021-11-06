@@ -147,6 +147,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.UserState;
+import com.android.server.utils.Slogf;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
 
 import java.io.FileDescriptor;
@@ -1322,8 +1323,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // us, we can now deliver.
             r.idle = true;
 
-            //Slog.i(TAG, "IDLE: mBooted=" + mBooted + ", fromTimeout=" + fromTimeout);
-
             // Check if able to finish booting when device is booting and all resumed activities
             // are idle.
             if ((mService.isBooting() && mRootWindowContainer.allResumedActivitiesIdle())
@@ -1356,14 +1355,21 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         // Atomically retrieve all of the other things to do.
         processStoppingAndFinishingActivities(r, processPausingActivities, "idle");
 
+        if (DEBUG_IDLE) {
+            Slogf.i(TAG, "activityIdleInternal(): r=%s, booting=%b, mStartingUsers=%s", r, booting,
+                    mStartingUsers);
+        }
+
         if (!mStartingUsers.isEmpty()) {
             final ArrayList<UserState> startingUsers = new ArrayList<>(mStartingUsers);
             mStartingUsers.clear();
-
-            if (!booting) {
+            // TODO(b/190854171): remove the isHeadlessSystemUserMode() check on master
+            if (!booting || UserManager.isHeadlessSystemUserMode()) {
                 // Complete user switch.
                 for (int i = 0; i < startingUsers.size(); i++) {
-                    mService.mAmInternal.finishUserSwitch(startingUsers.get(i));
+                    UserState userState = startingUsers.get(i);
+                    Slogf.i(TAG, "finishing switch of user %d", userState.mHandle.getIdentifier());
+                    mService.mAmInternal.finishUserSwitch(userState);
                 }
             }
         }
@@ -2012,6 +2018,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
     final void scheduleIdle() {
         if (!mHandler.hasMessages(IDLE_NOW_MSG)) {
+            if (DEBUG_IDLE) Slog.d(TAG_IDLE, "scheduleIdle: Callers=" + Debug.getCallers(4));
             mHandler.sendEmptyMessage(IDLE_NOW_MSG);
         }
     }
