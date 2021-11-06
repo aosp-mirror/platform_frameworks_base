@@ -75,6 +75,7 @@ class SurfaceFreezer {
      */
     void freeze(SurfaceControl.Transaction t, Rect startBounds, Point relativePosition,
             @Nullable SurfaceControl freezeTarget) {
+        reset(t);
         mFreezeBounds.set(startBounds);
 
         mLeash = SurfaceAnimator.createAnimationLeash(mAnimatable, mAnimatable.getSurfaceControl(),
@@ -136,6 +137,22 @@ class SurfaceFreezer {
                 true /* destroy */);
         if (scheduleAnim) {
             mWmService.scheduleAnimationLocked();
+        }
+    }
+
+    /** Resets the snapshot before taking another one if the animation hasn't been started yet. */
+    private void reset(SurfaceControl.Transaction t) {
+        // Those would have been taken by the SurfaceAnimator if the animation has been started, so
+        // we can remove the leash directly.
+        // No need to reset the mAnimatable leash, as this is called before a new animation leash is
+        // created, so another #onAnimationLeashCreated will be called.
+        if (mSnapshot != null) {
+            mSnapshot.destroy(t);
+            mSnapshot = null;
+        }
+        if (mLeash != null) {
+            t.remove(mLeash);
+            mLeash = null;
         }
     }
 
