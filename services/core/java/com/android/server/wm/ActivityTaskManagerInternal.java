@@ -342,8 +342,8 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onProcessMapped(int pid, WindowProcessController proc);
     public abstract void onProcessUnMapped(int pid);
 
-    public abstract void onPackageDataCleared(String name);
-    public abstract void onPackageUninstalled(String name);
+    public abstract void onPackageDataCleared(String name, int userId);
+    public abstract void onPackageUninstalled(String name, int userId);
     public abstract void onPackageAdded(String name, boolean replacing);
     public abstract void onPackageReplaced(ApplicationInfo aInfo);
 

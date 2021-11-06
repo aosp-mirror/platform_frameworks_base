@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconMa
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.VariableDateView;
+import com.android.systemui.statusbar.window.StatusBarWindowView;
 
 import java.util.List;
 
@@ -312,6 +313,10 @@ public class QuickStatusBarHeader extends FrameLayout {
     }
 
     private void updateAnimators() {
+        if (mUseCombinedQSHeader) {
+            mTranslationAnimator = null;
+            return;
+        }
         updateAlphaAnimator();
         int offset = mTopViewMeasureHeight;
 
@@ -324,6 +329,10 @@ public class QuickStatusBarHeader extends FrameLayout {
     }
 
     private void updateAlphaAnimator() {
+        if (mUseCombinedQSHeader) {
+            mAlphaAnimator = null;
+            return;
+        }
         TouchAnimator.Builder builder = new TouchAnimator.Builder()
                 .addFloat(mSecurityHeaderView, "alpha", 0, 1)
                 // These views appear on expanding down

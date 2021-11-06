@@ -102,6 +102,18 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /**
+     * Constructs a {@link Bundle} containing a copy of {@code from}.
+     *
+     * @param from The bundle to be copied.
+     * @param deep Whether is a deep or shallow copy.
+     *
+     * @hide
+     */
+    Bundle(Bundle from, boolean deep) {
+        super(from, deep);
+    }
+
+    /**
      * If {@link #mParcelledData} is not null, copy the HAS FDS bit from it because it's fast.
      * Otherwise (if {@link #mParcelledData} is already null), leave {@link #FLAG_HAS_FDS_KNOWN}
      * unset, because scanning a map is slower.  We'll do it lazily in
@@ -164,13 +176,6 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     public Bundle(PersistableBundle b) {
         super(b);
         mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
-    }
-
-    /**
-     * Constructs a Bundle without initializing it.
-     */
-    Bundle(boolean doInit) {
-        super(doInit);
     }
 
     /**
@@ -260,9 +265,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * are referenced as-is and not copied in any way.
      */
     public Bundle deepCopy() {
-        Bundle b = new Bundle(false);
-        b.copyInternal(this, true);
-        return b;
+        return new Bundle(this, /* deep */ true);
     }
 
     /**
@@ -324,28 +327,10 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public boolean hasFileDescriptors() {
         if ((mFlags & FLAG_HAS_FDS_KNOWN) == 0) {
-            boolean fdFound = false;    // keep going until we find one or run out of data
-
-            if (mParcelledData != null) {
-                if (mParcelledData.hasFileDescriptors()) {
-                    fdFound = true;
-                }
-            } else {
-                // It's been unparcelled, so we need to walk the map
-                for (int i=mMap.size()-1; i>=0; i--) {
-                    Object obj = mMap.valueAt(i);
-                    if (Parcel.hasFileDescriptors(obj)) {
-                        fdFound = true;
-                        break;
-                    }
-                }
-            }
-
-            if (fdFound) {
-                mFlags |= FLAG_HAS_FDS;
-            } else {
-                mFlags &= ~FLAG_HAS_FDS;
-            }
+            Parcel p = mParcelledData;
+            mFlags = (Parcel.hasFileDescriptors((p != null) ? p : mMap))
+                    ? mFlags | FLAG_HAS_FDS
+                    : mFlags & ~FLAG_HAS_FDS;
             mFlags |= FLAG_HAS_FDS_KNOWN;
         }
         return (mFlags & FLAG_HAS_FDS) != 0;

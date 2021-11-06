@@ -114,6 +114,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.RESET_APP_ERRORS) public void resetAppErrors();
     method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void setStopBackgroundUsersOnSwitch(int);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean stopUser(int, boolean);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.DUMP) public void waitForBroadcastIdle();
@@ -128,6 +129,9 @@ package android.app {
     field public static final int PROCESS_CAPABILITY_NONE = 0; // 0x0
     field public static final int PROCESS_STATE_FOREGROUND_SERVICE = 4; // 0x4
     field public static final int PROCESS_STATE_TOP = 2; // 0x2
+    field public static final int STOP_BG_USERS_ON_SWITCH_DEFAULT = -1; // 0xffffffff
+    field public static final int STOP_BG_USERS_ON_SWITCH_FALSE = 0; // 0x0
+    field public static final int STOP_BG_USERS_ON_SWITCH_TRUE = 1; // 0x1
   }
 
   public static class ActivityManager.RunningAppProcessInfo implements android.os.Parcelable {
@@ -257,7 +261,8 @@ package android.app {
 
   public class DreamManager {
     method @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE) public boolean isDreaming();
-    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setActiveDream(@NonNull android.content.ComponentName);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setActiveDream(@Nullable android.content.ComponentName);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setDreamOverlay(@Nullable android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void startDream(@NonNull android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void stopDream();
   }
@@ -2360,6 +2365,17 @@ package android.service.autofill.augmented {
     method @Nullable public android.view.inputmethod.InlineSuggestionsRequest getInlineSuggestionsRequest();
     method @Nullable public android.service.autofill.augmented.PresentationParams getPresentationParams();
     method public int getTaskId();
+  }
+
+}
+
+package android.service.dreams {
+
+  public abstract class DreamOverlayService extends android.app.Service {
+    ctor public DreamOverlayService();
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onStartDream(@NonNull android.view.WindowManager.LayoutParams);
+    method public final void requestExit();
   }
 
 }

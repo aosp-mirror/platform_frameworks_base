@@ -203,7 +203,6 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mCanDoze;
     private boolean mDozing;
     private boolean mWindowless;
-    private boolean mOverlayServiceBound;
     private int mDozeScreenState = Display.STATE_UNKNOWN;
     private int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
@@ -220,8 +219,32 @@ public class DreamService extends Service implements Window.Callback {
         // A Queue of pending requests to execute on the overlay.
         private ArrayDeque<Consumer<IDreamOverlay>> mRequests;
 
+        private boolean mBound;
+
         OverlayConnection() {
             mRequests = new ArrayDeque<>();
+        }
+
+        public void bind(Context context, @Nullable ComponentName overlayService) {
+            if (overlayService == null) {
+                return;
+            }
+
+            final Intent overlayIntent = new Intent();
+            overlayIntent.setComponent(overlayService);
+
+            context.bindService(overlayIntent,
+                    this, Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE);
+            mBound = true;
+        }
+
+        public void unbind(Context context) {
+            if (!mBound) {
+                return;
+            }
+
+            context.unbindService(this);
+            mBound = false;
         }
 
         public void request(Consumer<IDreamOverlay> request) {
@@ -930,14 +953,8 @@ public class DreamService extends Service implements Window.Callback {
         mDreamServiceWrapper = new DreamServiceWrapper();
 
         // Connect to the overlay service if present.
-        final ComponentName overlayComponent =
-                intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT);
-        if (overlayComponent != null && !mWindowless) {
-            final Intent overlayIntent = new Intent();
-            overlayIntent.setComponent(overlayComponent);
-
-            mOverlayServiceBound = getApplicationContext().bindService(overlayIntent,
-                    mOverlayConnection, Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE);
+        if (!mWindowless) {
+            mOverlayConnection.bind(this, intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT));
         }
 
         return mDreamServiceWrapper;
@@ -973,10 +990,7 @@ public class DreamService extends Service implements Window.Callback {
             return;
         }
 
-        if (!mWindowless && mOverlayServiceBound) {
-            unbindService(mOverlayConnection);
-            mOverlayServiceBound = false;
-        }
+        mOverlayConnection.unbind(this);
 
         try {
             // finishSelf will unbind the dream controller from the dream service. This will
@@ -1173,6 +1187,16 @@ public class DreamService extends Service implements Window.Callback {
                     @Override
                     public void onViewAttachedToWindow(View v) {
                         mDispatchAfterOnAttachedToWindow.run();
+
+                        // Request the DreamOverlay be told to dream with dream's window parameters
+                        // once the window has been attached.
+                        mOverlayConnection.request(overlay -> {
+                            try {
+                                overlay.startDream(mWindow.getAttributes(), mOverlayCallback);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "could not send window attributes:" + e);
+                            }
+                        });
                     }
 
                     @Override
@@ -1185,16 +1209,6 @@ public class DreamService extends Service implements Window.Callback {
                         }
                     }
                 });
-
-        // Request the DreamOverlay be told to dream with dream's window parameters once the service
-        // has connected.
-        mOverlayConnection.request(overlay -> {
-            try {
-                overlay.startDream(mWindow.getAttributes(), mOverlayCallback);
-            } catch (RemoteException e) {
-                Log.e(TAG, "could not send window attributes:" + e);
-            }
-        });
     }
 
     private boolean getWindowFlagValue(int flag, boolean defaultValue) {

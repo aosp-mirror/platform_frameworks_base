@@ -16,11 +16,14 @@
 
 package com.android.wm.shell.sizecompatui;
 
+import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -28,6 +31,8 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.testing.AndroidTestingRunner;
+import android.view.InsetsSource;
+import android.view.InsetsState;
 
 import androidx.test.filters.SmallTest;
 
@@ -35,12 +40,16 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.DisplayInsetsController.OnInsetsChangedListener;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -58,11 +67,15 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
 
     private SizeCompatUIController mController;
     private @Mock DisplayController mMockDisplayController;
+    private @Mock DisplayInsetsController mMockDisplayInsetsController;
     private @Mock DisplayLayout mMockDisplayLayout;
     private @Mock DisplayImeController mMockImeController;
     private @Mock ShellTaskOrganizer.TaskListener mMockTaskListener;
     private @Mock SyncTransactionQueue mMockSyncQueue;
     private @Mock SizeCompatUILayout mMockLayout;
+
+    @Captor
+    ArgumentCaptor<OnInsetsChangedListener> mOnInsetsChangedListenerCaptor;
 
     @Before
     public void setUp() {
@@ -72,7 +85,7 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
         doReturn(DISPLAY_ID).when(mMockLayout).getDisplayId();
         doReturn(TASK_ID).when(mMockLayout).getTaskId();
         mController = new SizeCompatUIController(mContext, mMockDisplayController,
-                mMockImeController, mMockSyncQueue) {
+                mMockDisplayInsetsController, mMockImeController, mMockSyncQueue) {
             @Override
             SizeCompatUILayout createLayout(Context context, int displayId, int taskId,
                     Configuration taskConfig, ShellTaskOrganizer.TaskListener taskListener) {
@@ -114,7 +127,17 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void testOnDisplayAdded() {
+        mController.onDisplayAdded(DISPLAY_ID);
+        mController.onDisplayAdded(DISPLAY_ID + 1);
+
+        verify(mMockDisplayInsetsController).addInsetsChangedListener(eq(DISPLAY_ID), any());
+        verify(mMockDisplayInsetsController).addInsetsChangedListener(eq(DISPLAY_ID + 1), any());
+    }
+
+    @Test
     public void testOnDisplayRemoved() {
+        mController.onDisplayAdded(DISPLAY_ID);
         final Configuration taskConfig = new Configuration();
         mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig,
                 mMockTaskListener);
@@ -122,9 +145,12 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
         mController.onDisplayRemoved(DISPLAY_ID + 1);
 
         verify(mMockLayout, never()).release();
+        verify(mMockDisplayInsetsController, never()).removeInsetsChangedListener(eq(DISPLAY_ID),
+                any());
 
         mController.onDisplayRemoved(DISPLAY_ID);
 
+        verify(mMockDisplayInsetsController).removeInsetsChangedListener(eq(DISPLAY_ID), any());
         verify(mMockLayout).release();
     }
 
@@ -142,6 +168,29 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
         mController.onDisplayConfigurationChanged(DISPLAY_ID, newTaskConfig);
 
         verify(mMockLayout).updateDisplayLayout(mMockDisplayLayout);
+    }
+
+    @Test
+    public void testInsetsChanged() {
+        mController.onDisplayAdded(DISPLAY_ID);
+        final Configuration taskConfig = new Configuration();
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig,
+                mMockTaskListener);
+        InsetsState insetsState = new InsetsState();
+        InsetsSource insetsSource = new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR);
+        insetsSource.setFrame(0, 0, 1000, 1000);
+        insetsState.addSource(insetsSource);
+
+        verify(mMockDisplayInsetsController).addInsetsChangedListener(eq(DISPLAY_ID),
+                mOnInsetsChangedListenerCaptor.capture());
+        mOnInsetsChangedListenerCaptor.getValue().insetsChanged(insetsState);
+
+        verify(mMockLayout).updateDisplayLayout(mMockDisplayLayout);
+
+        // No update if the insets state is the same.
+        clearInvocations(mMockLayout);
+        mOnInsetsChangedListenerCaptor.getValue().insetsChanged(new InsetsState(insetsState));
+        verify(mMockLayout, never()).updateDisplayLayout(mMockDisplayLayout);
     }
 
     @Test

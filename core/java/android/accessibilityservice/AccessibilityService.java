@@ -53,6 +53,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
@@ -65,6 +66,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -582,6 +584,10 @@ public abstract class AccessibilityService extends Service {
         /** Magnification changed callbacks for different displays */
         void onMagnificationChanged(int displayId, @NonNull Region region,
                 float scale, float centerX, float centerY);
+        /** Callbacks for receiving motion events. */
+        void onMotionEvent(MotionEvent event);
+        /** Callback for tuch state changes. */
+        void onTouchStateChanged(int displayId, int state);
         void onSoftKeyboardShowModeChanged(int showMode);
         void onPerformGestureResult(int sequence, boolean completedSuccessfully);
         void onFingerprintCapturingGesturesChanged(boolean active);
@@ -720,6 +726,12 @@ public abstract class AccessibilityService extends Service {
     /** List of magnification controllers, mapping from displayId -> MagnificationController. */
     private final SparseArray<MagnificationController> mMagnificationControllers =
             new SparseArray<>(0);
+    /**
+     * List of touch interaction controllers, mapping from displayId -> TouchInteractionController.
+     */
+    private final SparseArray<TouchInteractionController> mTouchInteractionControllers =
+            new SparseArray<>(0);
+
     private SoftKeyboardController mSoftKeyboardController;
     private final SparseArray<AccessibilityButtonController> mAccessibilityButtonControllers =
             new SparseArray<>(0);
@@ -1192,6 +1204,10 @@ public abstract class AccessibilityService extends Service {
      */
     private void onFingerprintGesture(int gesture) {
         getFingerprintGestureController().onGesture(gesture);
+    }
+
+    int getConnectionId() {
+        return mConnectionId;
     }
 
     /**
@@ -2210,6 +2226,16 @@ public abstract class AccessibilityService extends Service {
             }
 
             @Override
+            public void onMotionEvent(MotionEvent event) {
+                AccessibilityService.this.onMotionEvent(event);
+            }
+
+            @Override
+            public void onTouchStateChanged(int displayId, int state) {
+                AccessibilityService.this.onTouchStateChanged(displayId, state);
+            }
+
+            @Override
             public void onSoftKeyboardShowModeChanged(int showMode) {
                 AccessibilityService.this.onSoftKeyboardShowModeChanged(showMode);
             }
@@ -2372,6 +2398,21 @@ public abstract class AccessibilityService extends Service {
         }
 
         @Override
+        public void onMotionEvent(MotionEvent event) {
+            final Message message = PooledLambda.obtainMessage(
+                            Callbacks::onMotionEvent, mCallback, event);
+            mCaller.sendMessage(message);
+        }
+
+        @Override
+        public void onTouchStateChanged(int displayId, int state) {
+            final Message message = PooledLambda.obtainMessage(Callbacks::onTouchStateChanged,
+                    mCallback,
+                    displayId, state);
+            mCaller.sendMessage(message);
+        }
+
+        @Override
         public void executeMessage(Message message) {
             switch (message.what) {
                 case DO_ON_ACCESSIBILITY_EVENT: {
@@ -2523,7 +2564,7 @@ public abstract class AccessibilityService extends Service {
                     }
                     return;
                 }
-                default :
+                default:
                     Log.w(LOG_TAG, "Unknown message type " + message.what);
             }
         }
@@ -2746,6 +2787,49 @@ public abstract class AccessibilityService extends Service {
                 }
                 wm.setDefaultToken(token);
             }
+        }
+    }
+
+    /**
+     * Returns the touch interaction controller for the specified logical display, which may be used
+     * to detect gestures and otherwise control touch interactions. If
+     * {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is disabled the
+     * controller's methods will have no effect.
+     *
+     * @param displayId The logical display id, use {@link Display#DEFAULT_DISPLAY} for default
+     *                      display.
+     * @return the TouchExploration controller
+     */
+    @NonNull
+    public final TouchInteractionController getTouchInteractionController(int displayId) {
+        synchronized (mLock) {
+            TouchInteractionController controller = mTouchInteractionControllers.get(displayId);
+            if (controller == null) {
+                controller = new TouchInteractionController(this, mLock, displayId);
+                mTouchInteractionControllers.put(displayId, controller);
+            }
+            return controller;
+        }
+    }
+
+    void onMotionEvent(MotionEvent event) {
+        TouchInteractionController controller;
+        synchronized (mLock) {
+            int displayId = event.getDisplayId();
+            controller = mTouchInteractionControllers.get(displayId);
+        }
+        if (controller != null) {
+            controller.onMotionEvent(event);
+        }
+    }
+
+    void onTouchStateChanged(int displayId, int state) {
+        TouchInteractionController controller;
+        synchronized (mLock) {
+            controller = mTouchInteractionControllers.get(displayId);
+        }
+        if (controller != null) {
+            controller.onStateChanged(state);
         }
     }
 }

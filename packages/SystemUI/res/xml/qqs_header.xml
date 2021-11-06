@@ -17,66 +17,45 @@
 
 <ConstraintSet
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/qqs_header_constraint"
+>
 
     <Constraint
-        android:id="@+id/clock"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/date"
-        app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintHorizontal_chainStyle="packed"
-    />
+        android:id="@+id/clock">
+        <Layout
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/date"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintHorizontal_chainStyle="packed"
+        />
+    </Constraint>
 
     <Constraint
-        android:id="@+id/date"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        app:layout_constraintStart_toEndOf="@id/clock"
-        app:layout_constraintEnd_toStartOf="@id/carrier_group"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0"
-    />
+        android:id="@+id/date">
+        <Layout
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toEndOf="@id/clock"
+            app:layout_constraintEnd_toStartOf="@id/carrier_group"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0"
+        />
+    </Constraint>
 
     <Constraint
-        android:id="@+id/carrier_group"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constrainedWidth="true"
-        android:layout_gravity="end|center_vertical"
-        android:layout_marginStart="8dp"
-        app:layout_constraintStart_toEndOf="@id/date"
-        app:layout_constraintEnd_toStartOf="@id/statusIcons"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:visibility="invisible"
-        app:layout_constraintHorizontal_bias="1"
-    />
+        android:id="@+id/carrier_group">
+        <CustomAttribute
+            app:attributeName="alpha"
+            app:customFloatValue="0"
+        />
+    </Constraint>
 
-    <Constraint
-        android:id="@+id/statusIcons"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        app:layout_constraintStart_toEndOf="@id/carrier_group"
-        app:layout_constraintEnd_toStartOf="@id/batteryRemainingIcon"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="1"
-    />
 
-    <Constraint
-        android:id="@+id/batteryRemainingIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        app:layout_constraintStart_toEndOf="@id/statusIcons"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="1"
-    />
 
 </ConstraintSet>

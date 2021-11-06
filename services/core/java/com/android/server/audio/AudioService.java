@@ -7656,7 +7656,7 @@ public class AudioService extends IAudioService.Stub
                     break;
 
                 case MSG_INIT_HEADTRACKING_SENSORS:
-                    mSpatializerHelper.onInitSensors(/*init*/ msg.arg1 == 1);
+                    mSpatializerHelper.onInitSensors();
                     break;
 
                 case MSG_CHECK_MUSIC_ACTIVE:
@@ -8590,14 +8590,13 @@ public class AudioService extends IAudioService.Stub
 
     /**
      * post a message to schedule init/release of head tracking sensors
-     * @param init initialization if true, release if false
+     * whether to initialize or release sensors is based on the state of spatializer
      */
-    void postInitSpatializerHeadTrackingSensors(boolean init) {
+    void postInitSpatializerHeadTrackingSensors() {
         sendMsg(mAudioHandler,
                 MSG_INIT_HEADTRACKING_SENSORS,
                 SENDMSG_REPLACE,
-                /*arg1*/ init ? 1 : 0,
-                0, TAG, /*delay*/ 0);
+                /*arg1*/ 0, /*arg2*/ 0, TAG, /*delay*/ 0);
     }
 
     //==========================================================================================

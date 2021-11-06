@@ -24,6 +24,7 @@ import static android.app.usage.NetworkStatsManager.FLAG_POLL_ON_OPEN;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkIdentity.OEM_PAID;
 import static android.net.NetworkIdentity.OEM_PRIVATE;
@@ -158,6 +159,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.StatsEvent;
@@ -1316,25 +1318,30 @@ public class StatsPullAtomService extends SystemService {
     }
 
     @NonNull private List<NetworkStatsExt> getDataUsageBytesTransferSnapshotForOemManaged() {
-        final int[] transports = new int[] {MATCH_ETHERNET, MATCH_MOBILE_WILDCARD,
-                MATCH_WIFI_WILDCARD};
+        final List<Pair<Integer, Integer>> matchRulesAndTransports = List.of(
+                new Pair(MATCH_ETHERNET, TRANSPORT_ETHERNET),
+                new Pair(MATCH_MOBILE_WILDCARD, TRANSPORT_CELLULAR),
+                new Pair(MATCH_WIFI_WILDCARD, TRANSPORT_WIFI)
+        );
         final int[] oemManagedTypes = new int[] {OEM_PAID | OEM_PRIVATE, OEM_PAID, OEM_PRIVATE};
 
         final List<NetworkStatsExt> ret = new ArrayList<>();
 
-        for (final int transport : transports) {
+        for (Pair<Integer, Integer> ruleAndTransport : matchRulesAndTransports) {
+            final Integer matchRule = ruleAndTransport.first;
             for (final int oemManaged : oemManagedTypes) {
                 /* A null subscriberId will set wildcard=true, since we aren't trying to select a
                    specific ssid or subscriber. */
-                final NetworkTemplate template = new NetworkTemplate(transport,
+                final NetworkTemplate template = new NetworkTemplate(matchRule,
                         /*subscriberId=*/null, /*matchSubscriberIds=*/null, /*networkId=*/null,
                         METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, NETWORK_TYPE_ALL,
                         oemManaged);
-                final NetworkStats stats = getUidNetworkStatsSnapshotForTemplate(template, true);
+                final NetworkStats stats = getUidNetworkStatsSnapshotForTemplate(template, false);
+                final Integer transport = ruleAndTransport.second;
                 if (stats != null) {
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidTagAndMetered(stats),
-                            new int[] {transport}, /*slicedByFgbg=*/true, /*slicedByTag=*/true,
-                            /*slicedByMetered=*/true, TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
+                            new int[] {transport}, /*slicedByFgbg=*/true, /*slicedByTag=*/false,
+                            /*slicedByMetered=*/false, TelephonyManager.NETWORK_TYPE_UNKNOWN,
                             /*subInfo=*/null, oemManaged));
                 }
             }

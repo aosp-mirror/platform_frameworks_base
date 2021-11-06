@@ -24,4 +24,5 @@ package android.media.tv.interactive;
 oneway interface ITvIAppClient {
     void onSessionCreated(in String iAppServiceId, IBinder token, int seq);
     void onSessionReleased(int seq);
+    void onLayoutSurface(int left, int top, int right, int bottom, int seq);
 }

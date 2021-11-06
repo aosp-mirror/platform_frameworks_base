@@ -3452,6 +3452,9 @@ public class DevicePolicyManager {
      * set on the primary {@link DevicePolicyManager} must be cleared first by calling
      * {@link #setRequiredPasswordComplexity} with {@link #PASSWORD_COMPLEXITY_NONE) first.
      *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
+     *
      * @deprecated Prefer using {@link #setRequiredPasswordComplexity(int)}, to require a password
      * that satisfies a complexity level defined by the platform, rather than specifying custom
      * password requirement.
@@ -3542,11 +3545,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3625,11 +3630,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3715,11 +3722,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3805,11 +3814,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3894,11 +3905,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3983,11 +3996,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -4071,11 +4086,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -9556,7 +9573,14 @@ public class DevicePolicyManager {
 
     /**
      * Called by a profile owner of secondary user that is affiliated with the device to stop the
-     * calling user and switch back to primary.
+     * calling user and switch back to primary user.
+     *
+     * <p>Notice that on devices running with
+     * {@link UserManager#isHeadlessSystemUserMode() headless system user mode}, there is no primary
+     * user, so it switches back to the user that was in the foreground before the first call to
+     * {@link #switchUser(ComponentName, UserHandle)} (or fails with
+     * {@link UserManager#USER_OPERATION_ERROR_UNKNOWN} if that method was not called prior to this
+     * call).
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return one of the following result codes:

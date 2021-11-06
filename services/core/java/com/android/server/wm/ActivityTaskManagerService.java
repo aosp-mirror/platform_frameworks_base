@@ -956,7 +956,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mActivityClientController = new ActivityClientController(this);
 
         mTaskChangeNotificationController =
-                new TaskChangeNotificationController(mGlobalLock, mTaskSupervisor, mH);
+                new TaskChangeNotificationController(mTaskSupervisor, mH);
         mLockTaskController = new LockTaskController(mContext, mTaskSupervisor, mH,
                 mTaskChangeNotificationController);
         mActivityStartController = new ActivityStartController(this);
@@ -5656,19 +5656,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void onPackageDataCleared(String name) {
+        public void onPackageDataCleared(String name, int userId) {
             synchronized (mGlobalLock) {
                 mCompatModePackages.handlePackageDataClearedLocked(name);
                 mAppWarnings.onPackageDataCleared(name);
+                mPackageConfigPersister.onPackageDataCleared(name, userId);
             }
         }
 
         @Override
-        public void onPackageUninstalled(String name) {
+        public void onPackageUninstalled(String name, int userId) {
             synchronized (mGlobalLock) {
                 mAppWarnings.onPackageUninstalled(name);
                 mCompatModePackages.handlePackageUninstalledLocked(name);
-                mPackageConfigPersister.onPackageUninstall(name);
+                mPackageConfigPersister.onPackageUninstall(name, userId);
             }
         }
 

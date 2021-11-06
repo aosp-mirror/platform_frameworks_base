@@ -2994,6 +2994,7 @@ package android.accessibilityservice {
   }
 
   public final class AccessibilityGestureEvent implements android.os.Parcelable {
+    ctor public AccessibilityGestureEvent(int, int, @NonNull java.util.List<android.view.MotionEvent>);
     method public int describeContents();
     method @NonNull public static String gestureIdToString(int);
     method public int getDisplayId();
@@ -3016,6 +3017,7 @@ package android.accessibilityservice {
     method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
     method @NonNull public final android.accessibilityservice.AccessibilityService.SoftKeyboardController getSoftKeyboardController();
     method @NonNull public final java.util.List<android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction> getSystemActions();
+    method @NonNull public final android.accessibilityservice.TouchInteractionController getTouchInteractionController(int);
     method public java.util.List<android.view.accessibility.AccessibilityWindowInfo> getWindows();
     method @NonNull public final android.util.SparseArray<java.util.List<android.view.accessibility.AccessibilityWindowInfo>> getWindowsOnAllDisplays();
     method public abstract void onAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
@@ -3248,6 +3250,31 @@ package android.accessibilityservice {
     method public android.graphics.Path getPath();
     method public long getStartTime();
     method public boolean willContinue();
+  }
+
+  public final class TouchInteractionController {
+    method public void addListener(@Nullable java.util.concurrent.Executor, @NonNull android.accessibilityservice.TouchInteractionController.Listener);
+    method public int getDisplayId();
+    method public int getMaxPointerCount();
+    method public int getState();
+    method public void performClick();
+    method public void performLongClickAndStartDrag();
+    method public void removeAllListeners();
+    method public boolean removeListener(@NonNull android.accessibilityservice.TouchInteractionController.Listener);
+    method public void requestDelegating();
+    method public void requestDragging(int);
+    method public void requestTouchExploration();
+    method @NonNull public static String stateToString(int);
+    field public static final int STATE_CLEAR = 0; // 0x0
+    field public static final int STATE_DELEGATING = 4; // 0x4
+    field public static final int STATE_DRAGGING = 3; // 0x3
+    field public static final int STATE_TOUCH_EXPLORING = 2; // 0x2
+    field public static final int STATE_TOUCH_INTERACTING = 1; // 0x1
+  }
+
+  public static interface TouchInteractionController.Listener {
+    method public void onMotionEvent(@NonNull android.view.MotionEvent);
+    method public void onStateChanged(int);
   }
 
 }
@@ -9170,8 +9197,10 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean requestMtu(int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean setCharacteristicNotification(android.bluetooth.BluetoothGattCharacteristic, boolean);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public void setPreferredPhy(int, int, int);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean writeCharacteristic(android.bluetooth.BluetoothGattCharacteristic);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean writeDescriptor(android.bluetooth.BluetoothGattDescriptor);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean writeCharacteristic(android.bluetooth.BluetoothGattCharacteristic);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int writeCharacteristic(@NonNull android.bluetooth.BluetoothGattCharacteristic, @NonNull byte[], int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean writeDescriptor(android.bluetooth.BluetoothGattDescriptor);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int writeDescriptor(@NonNull android.bluetooth.BluetoothGattDescriptor, @NonNull byte[]);
     field public static final int CONNECTION_PRIORITY_BALANCED = 0; // 0x0
     field public static final int CONNECTION_PRIORITY_HIGH = 1; // 0x1
     field public static final int CONNECTION_PRIORITY_LOW_POWER = 2; // 0x2
@@ -9190,11 +9219,14 @@ package android.bluetooth {
 
   public abstract class BluetoothGattCallback {
     ctor public BluetoothGattCallback();
-    method public void onCharacteristicChanged(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic);
-    method public void onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int);
+    method @Deprecated public void onCharacteristicChanged(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic);
+    method public void onCharacteristicChanged(@NonNull android.bluetooth.BluetoothGatt, @NonNull android.bluetooth.BluetoothGattCharacteristic, @NonNull byte[]);
+    method @Deprecated public void onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int);
+    method public void onCharacteristicRead(@NonNull android.bluetooth.BluetoothGatt, @NonNull android.bluetooth.BluetoothGattCharacteristic, @NonNull byte[], int);
     method public void onCharacteristicWrite(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int);
     method public void onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int);
-    method public void onDescriptorRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattDescriptor, int);
+    method @Deprecated public void onDescriptorRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattDescriptor, int);
+    method public void onDescriptorRead(@NonNull android.bluetooth.BluetoothGatt, @NonNull android.bluetooth.BluetoothGattDescriptor, int, @NonNull byte[]);
     method public void onDescriptorWrite(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattDescriptor, int);
     method public void onMtuChanged(android.bluetooth.BluetoothGatt, int, int);
     method public void onPhyRead(android.bluetooth.BluetoothGatt, int, int, int);
@@ -9211,20 +9243,20 @@ package android.bluetooth {
     method public int describeContents();
     method public android.bluetooth.BluetoothGattDescriptor getDescriptor(java.util.UUID);
     method public java.util.List<android.bluetooth.BluetoothGattDescriptor> getDescriptors();
-    method public Float getFloatValue(int, int);
+    method @Deprecated public Float getFloatValue(int, int);
     method public int getInstanceId();
-    method public Integer getIntValue(int, int);
+    method @Deprecated public Integer getIntValue(int, int);
     method public int getPermissions();
     method public int getProperties();
     method public android.bluetooth.BluetoothGattService getService();
-    method public String getStringValue(int);
+    method @Deprecated public String getStringValue(int);
     method public java.util.UUID getUuid();
-    method public byte[] getValue();
+    method @Deprecated public byte[] getValue();
     method public int getWriteType();
-    method public boolean setValue(byte[]);
-    method public boolean setValue(int, int, int);
-    method public boolean setValue(int, int, int, int);
-    method public boolean setValue(String);
+    method @Deprecated public boolean setValue(byte[]);
+    method @Deprecated public boolean setValue(int, int, int);
+    method @Deprecated public boolean setValue(int, int, int, int);
+    method @Deprecated public boolean setValue(String);
     method public void setWriteType(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothGattCharacteristic> CREATOR;
@@ -9264,8 +9296,8 @@ package android.bluetooth {
     method public android.bluetooth.BluetoothGattCharacteristic getCharacteristic();
     method public int getPermissions();
     method public java.util.UUID getUuid();
-    method public byte[] getValue();
-    method public boolean setValue(byte[]);
+    method @Deprecated public byte[] getValue();
+    method @Deprecated public boolean setValue(byte[]);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothGattDescriptor> CREATOR;
     field public static final byte[] DISABLE_NOTIFICATION_VALUE;
@@ -9553,8 +9585,12 @@ package android.bluetooth {
     field public static final int ERROR_BLUETOOTH_NOT_ALLOWED = 2; // 0x2
     field public static final int ERROR_BLUETOOTH_NOT_ENABLED = 1; // 0x1
     field public static final int ERROR_DEVICE_NOT_BONDED = 3; // 0x3
-    field public static final int ERROR_FEATURE_NOT_SUPPORTED = 8; // 0x8
+    field public static final int ERROR_FEATURE_NOT_SUPPORTED = 10; // 0xa
+    field public static final int ERROR_GATT_WRITE_NOT_ALLOWED = 101; // 0x65
+    field public static final int ERROR_GATT_WRITE_REQUEST_BUSY = 102; // 0x66
     field public static final int ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION = 6; // 0x6
+    field public static final int ERROR_MISSING_BLUETOOTH_PRIVILEGED_PERMISSION = 8; // 0x8
+    field public static final int ERROR_PROFILE_SERVICE_NOT_BOUND = 9; // 0x9
     field public static final int ERROR_UNKNOWN = 2147483647; // 0x7fffffff
     field public static final int SUCCESS = 0; // 0x0
   }
@@ -18339,6 +18375,7 @@ package android.hardware.camera2 {
     field public static final int CONTROL_SCENE_MODE_THEATRE = 7; // 0x7
     field public static final int CONTROL_VIDEO_STABILIZATION_MODE_OFF = 0; // 0x0
     field public static final int CONTROL_VIDEO_STABILIZATION_MODE_ON = 1; // 0x1
+    field public static final int CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION = 2; // 0x2
     field public static final int DISTORTION_CORRECTION_MODE_FAST = 1; // 0x1
     field public static final int DISTORTION_CORRECTION_MODE_HIGH_QUALITY = 2; // 0x2
     field public static final int DISTORTION_CORRECTION_MODE_OFF = 0; // 0x0
@@ -43648,8 +43685,10 @@ package android.telephony.ims {
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public boolean isVoWiFiSettingEnabled();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public boolean isVtSettingEnabled();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RegistrationManager.RegistrationCallback) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public void registerImsStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsStateCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public void registerMmTelCapabilityCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsMmTelManager.CapabilityCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.RegistrationManager.RegistrationCallback);
+    method public void unregisterImsStateCallback(@NonNull android.telephony.ims.ImsStateCallback);
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public void unregisterMmTelCapabilityCallback(@NonNull android.telephony.ims.ImsMmTelManager.CapabilityCallback);
     field public static final int WIFI_MODE_CELLULAR_PREFERRED = 1; // 0x1
     field public static final int WIFI_MODE_WIFI_ONLY = 0; // 0x0
@@ -43666,7 +43705,9 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void getRegistrationTransportType(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @NonNull public android.telephony.ims.RcsUceAdapter getUceAdapter();
     method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RegistrationManager.RegistrationCallback) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE", "android.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE"}) public void registerImsStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsStateCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.RegistrationManager.RegistrationCallback);
+    method public void unregisterImsStateCallback(@NonNull android.telephony.ims.ImsStateCallback);
     field public static final String ACTION_SHOW_CAPABILITY_DISCOVERY_OPT_IN = "android.telephony.ims.action.SHOW_CAPABILITY_DISCOVERY_OPT_IN";
   }
 
@@ -43863,6 +43904,19 @@ package android.telephony.ims {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int ATTR_EPDG_OVER_CELL_INTERNET = 1; // 0x1
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsRegistrationAttributes> CREATOR;
+  }
+
+  public abstract class ImsStateCallback {
+    ctor public ImsStateCallback();
+    method public abstract void onAvailable();
+    method public abstract void onError();
+    method public abstract void onUnavailable(int);
+    field public static final int REASON_IMS_SERVICE_DISCONNECTED = 3; // 0x3
+    field public static final int REASON_IMS_SERVICE_NOT_READY = 6; // 0x6
+    field public static final int REASON_NO_IMS_SERVICE_CONFIGURED = 4; // 0x4
+    field public static final int REASON_SUBSCRIPTION_INACTIVE = 5; // 0x5
+    field public static final int REASON_UNKNOWN_PERMANENT_ERROR = 2; // 0x2
+    field public static final int REASON_UNKNOWN_TEMPORARY_ERROR = 1; // 0x1
   }
 
   public class RcsUceAdapter {

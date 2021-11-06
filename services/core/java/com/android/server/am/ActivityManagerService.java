@@ -31,6 +31,7 @@ import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
+import static android.app.ActivityManager.StopBgUsersOnSwitch;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.AppOpsManager.OP_NONE;
@@ -4931,6 +4932,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void bootAnimationComplete() {
+        if (DEBUG_ALL) Slog.d(TAG, "bootAnimationComplete: Callers=" + Debug.getCallers(4));
+
         final boolean callFinishBooting;
         synchronized (this) {
             callFinishBooting = mCallFinishBooting;
@@ -7764,7 +7767,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // On Automotive, at this point the system user has already been started and unlocked,
         // and some of the tasks we do here have already been done. So skip those in that case.
-        // TODO(b/132262830): this workdound shouldn't be necessary once we move the
+        // TODO(b/132262830, b/203885241): this workdound shouldn't be necessary once we move the
         // headless-user start logic to UserManager-land
         final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
 
@@ -13302,7 +13305,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                         mAtmInternal.removeRecentTasksByPackageName(ssp, userId);
 
                                         mServices.forceStopPackageLocked(ssp, userId);
-                                        mAtmInternal.onPackageUninstalled(ssp);
+                                        mAtmInternal.onPackageUninstalled(ssp, userId);
                                         mBatteryStatsService.notePackageUninstalled(ssp);
                                     }
                                 } else {
@@ -13387,7 +13390,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Uri data = intent.getData();
                     String ssp;
                     if (data != null && (ssp = data.getSchemeSpecificPart()) != null) {
-                        mAtmInternal.onPackageDataCleared(ssp);
+                        mAtmInternal.onPackageDataCleared(ssp, userId);
                     }
                     break;
                 }
@@ -15330,6 +15333,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public void setStopBackgroundUsersOnSwitch(@StopBgUsersOnSwitch int value) {
+        mUserController.setStopBackgroundUsersOnSwitch(value);
+    }
+
+    @Override
     public int stopUser(final int userId, boolean force, final IStopUserCallback callback) {
         return mUserController.stopUser(userId, force, /* allowDelayedLocking= */ false,
                 /* callback= */ callback, /* keyEvictedCallback= */ null);
@@ -16651,6 +16659,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void setVoiceInteractionManagerProvider(
                 @Nullable ActivityManagerInternal.VoiceInteractionManagerProvider provider) {
             ActivityManagerService.this.setVoiceInteractionManagerProvider(provider);
+        }
+
+        @Override
+        public void setStopBackgroundUsersOnSwitch(int value) {
+            ActivityManagerService.this.setStopBackgroundUsersOnSwitch(value);
         }
     }
 

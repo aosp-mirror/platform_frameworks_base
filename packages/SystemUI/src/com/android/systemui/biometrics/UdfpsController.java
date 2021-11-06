@@ -583,7 +583,7 @@ public class UdfpsController implements DozeReceiver {
 
         mCoreLayoutParams = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
-                getCoreLayoutParamFlags(),
+                Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS,
                 PixelFormat.TRANSLUCENT);
         mCoreLayoutParams.setTitle(TAG);
         mCoreLayoutParams.setFitInsetsTypes(0);
@@ -614,13 +614,6 @@ public class UdfpsController implements DozeReceiver {
                     "udfps-onStart",
                     VIBRATION_SONIFICATION_ATTRIBUTES);
         }
-    }
-
-    private int getCoreLayoutParamFlags() {
-        return WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
     }
 
     @Nullable
@@ -685,7 +678,7 @@ public class UdfpsController implements DozeReceiver {
         final int paddingX = animation != null ? animation.getPaddingX() : 0;
         final int paddingY = animation != null ? animation.getPaddingY() : 0;
 
-        mCoreLayoutParams.flags = getCoreLayoutParamFlags();
+        mCoreLayoutParams.flags = Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS;
         if (animation != null && animation.listenForTouchesOutsideView()) {
             mCoreLayoutParams.flags |= WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
         }

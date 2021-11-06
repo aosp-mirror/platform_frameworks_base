@@ -108,6 +108,16 @@ class InsetsSourceProvider {
 
     private final boolean mControllable;
 
+    /**
+     * Whether to forced the dimensions of the source window to the inset frame and crop out any
+     * overflow.
+     * Used to crop the taskbar inset source when a task animation is occurring to hide the taskbar
+     * rounded corners overlays.
+     *
+     * TODO: Remove when we enable shell transitions (b/202383002)
+     */
+    private boolean mCropToProvidingInsets = false;
+
     InsetsSourceProvider(InsetsSource source, InsetsStateController stateController,
             DisplayContent displayContent) {
         mClientVisible = InsetsState.getDefaultVisibility(source.getType());
@@ -301,6 +311,62 @@ class InsetsSourceProvider {
             return;
         }
         mFakeControlTarget = fakeTarget;
+    }
+
+    /**
+     * Ensures that the inset source window is cropped so that anything that doesn't fit within the
+     * inset frame is cropped out until removeCropToProvidingInsetsBounds is called.
+     *
+     * The inset source surface will get cropped to the be of the size of the insets it's providing.
+     *
+     * For example, for the taskbar window which serves as the ITYPE_EXTRA_NAVIGATION_BAR inset
+     * source, the window is larger than the insets because of the rounded corners overlay, but
+     * during task animations we want to make sure that the overlay is cropped out of the window so
+     * that they don't hide the window animations.
+     *
+     * @param t The transaction to use to apply immediate overflow cropping operations.
+     *
+     * NOTE: The relies on the inset source window to have a leash (usually this would be a leash
+     * for the ANIMATION_TYPE_INSETS_CONTROL animation if the inset is controlled by the client)
+     *
+     * TODO: Remove when we migrate over to shell transitions (b/202383002)
+     */
+    void setCropToProvidingInsetsBounds(Transaction t) {
+        mCropToProvidingInsets = true;
+
+        if (mWin != null && mWin.mSurfaceAnimator.hasLeash()) {
+            // apply to existing leash
+            t.setWindowCrop(mWin.mSurfaceAnimator.mLeash, getProvidingInsetsBoundsCropRect());
+        }
+    }
+
+    /**
+     * Removes any overflow cropping and future cropping to the inset source window's leash that may
+     * have been set with a call to setCropToProvidingInsetsBounds().
+     * @param t The transaction to use to apply immediate removal of overflow cropping.
+     *
+     * TODO: Remove when we migrate over to shell transitions (b/202383002)
+     */
+    void removeCropToProvidingInsetsBounds(Transaction t) {
+        mCropToProvidingInsets = false;
+
+        // apply to existing leash
+        if (mWin != null && mWin.mSurfaceAnimator.hasLeash()) {
+            t.setWindowCrop(mWin.mSurfaceAnimator.mLeash, null);
+        }
+    }
+
+    private Rect getProvidingInsetsBoundsCropRect() {
+        Rect sourceWindowFrame = mWin.getFrame();
+        Rect insetFrame = getSource().getFrame();
+
+        // The rectangle in buffer space we want to crop to
+        return new Rect(
+                insetFrame.left - sourceWindowFrame.left,
+                insetFrame.top - sourceWindowFrame.top,
+                insetFrame.right - sourceWindowFrame.left,
+                insetFrame.bottom - sourceWindowFrame.top
+        );
     }
 
     void updateControlForTarget(@Nullable InsetsControlTarget target, boolean force) {
@@ -548,6 +614,11 @@ class InsetsSourceProvider {
 
             mCapturedLeash = animationLeash;
             t.setPosition(mCapturedLeash, mSurfacePosition.x, mSurfacePosition.y);
+
+            if (mCropToProvidingInsets) {
+                // Apply crop to hide overflow
+                t.setWindowCrop(mCapturedLeash, getProvidingInsetsBoundsCropRect());
+            }
         }
 
         @Override

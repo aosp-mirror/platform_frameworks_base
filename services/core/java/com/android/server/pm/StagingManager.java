@@ -527,26 +527,6 @@ public class StagingManager {
         }
     }
 
-    /**
-     * Returns id of a committed and non-finalized stated session that contains same
-     * {@code packageName}, or {@code -1} if no sessions have this {@code packageName} staged.
-     */
-    int getSessionIdByPackageName(@NonNull String packageName) {
-        synchronized (mStagedSessions) {
-            for (int i = 0; i < mStagedSessions.size(); i++) {
-                StagedSession stagedSession = mStagedSessions.valueAt(i);
-                if (!stagedSession.isCommitted() || stagedSession.isDestroyed()
-                        || stagedSession.isInTerminalState()) {
-                    continue;
-                }
-                if (stagedSession.getPackageName().equals(packageName)) {
-                    return stagedSession.sessionId();
-                }
-            }
-        }
-        return -1;
-    }
-
     @VisibleForTesting
     void createSession(@NonNull StagedSession sessionInfo) {
         synchronized (mStagedSessions) {

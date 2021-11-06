@@ -119,7 +119,7 @@ public class ImsManager {
             throw new IllegalArgumentException("Invalid subscription ID: " + subscriptionId);
         }
 
-        return new ImsRcsManager(mContext, subscriptionId, sRcsCache);
+        return new ImsRcsManager(mContext, subscriptionId, sRcsCache, sTelephonyCache);
     }
 
     /**
@@ -157,7 +157,7 @@ public class ImsManager {
             throw new IllegalArgumentException("Invalid subscription ID: " + subscriptionId);
         }
 
-        return new SipDelegateManager(mContext, subscriptionId, sRcsCache);
+        return new SipDelegateManager(mContext, subscriptionId, sRcsCache, sTelephonyCache);
     }
 
     private static IImsRcsController getIImsRcsControllerInterface() {

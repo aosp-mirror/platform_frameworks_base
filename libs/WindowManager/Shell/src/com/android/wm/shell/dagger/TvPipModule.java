@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.wmshell;
+package com.android.wm.shell.dagger;
 
 import android.content.Context;
 import android.os.Handler;
 
-import com.android.systemui.dagger.WMSingleton;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
@@ -44,6 +43,7 @@ import com.android.wm.shell.pip.tv.TvPipController;
 import com.android.wm.shell.pip.tv.TvPipMenuController;
 import com.android.wm.shell.pip.tv.TvPipNotificationController;
 import com.android.wm.shell.pip.tv.TvPipTransition;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -161,13 +161,14 @@ public abstract class TvPipModule {
             PipTransitionController pipTransitionController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<LegacySplitScreenController> splitScreenOptional,
+            Optional<SplitScreenController> newSplitScreenOptional,
             DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskOrganizer(context,
                 syncTransactionQueue, pipTransitionState, pipBoundsState, pipBoundsAlgorithm,
                 tvPipMenuController, pipAnimationController, pipSurfaceTransactionHelper,
-                pipTransitionController, splitScreenOptional, displayController, pipUiEventLogger,
-                shellTaskOrganizer, mainExecutor);
+                pipTransitionController, splitScreenOptional, newSplitScreenOptional,
+                displayController, pipUiEventLogger, shellTaskOrganizer, mainExecutor);
     }
 }

@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.sizecompatui;
 
+import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertFalse;
@@ -33,6 +35,8 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.view.DisplayInfo;
+import android.view.InsetsSource;
+import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.View;
 
@@ -77,7 +81,7 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
         mTaskConfig = new Configuration();
 
         mLayout = new SizeCompatUILayout(mSyncTransactionQueue, mCallback, mContext,
-                new Configuration(), TASK_ID, mTaskListener, mDisplayLayout,
+                new Configuration(), TASK_ID, mTaskListener, new DisplayLayout(),
                 false /* hasShownHint */);
 
         spyOn(mLayout);
@@ -176,7 +180,7 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
         displayInfo.logicalWidth = 1000;
         displayInfo.logicalHeight = 2000;
         final DisplayLayout displayLayout1 = new DisplayLayout(displayInfo,
-                mContext.getResources(), false, false);
+                mContext.getResources(), /* hasNavigationBar= */ false, /* hasStatusBar= */ false);
 
         mLayout.updateDisplayLayout(displayLayout1);
         verify(mLayout).updateButtonSurfacePosition();
@@ -185,10 +189,34 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
         // No update if the display bounds is the same.
         clearInvocations(mLayout);
         final DisplayLayout displayLayout2 = new DisplayLayout(displayInfo,
-                mContext.getResources(), false, false);
+                mContext.getResources(), /* hasNavigationBar= */ false, /* hasStatusBar= */ false);
         mLayout.updateDisplayLayout(displayLayout2);
         verify(mLayout, never()).updateButtonSurfacePosition();
         verify(mLayout, never()).updateHintSurfacePosition();
+    }
+
+    @Test
+    public void testUpdateDisplayLayoutInsets() {
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.logicalWidth = 1000;
+        displayInfo.logicalHeight = 2000;
+        final DisplayLayout displayLayout = new DisplayLayout(displayInfo,
+                mContext.getResources(), /* hasNavigationBar= */ true, /* hasStatusBar= */ false);
+
+        mLayout.updateDisplayLayout(displayLayout);
+        verify(mLayout).updateButtonSurfacePosition();
+        verify(mLayout).updateHintSurfacePosition();
+
+        // Update if the insets change on the existing display layout
+        clearInvocations(mLayout);
+        InsetsState insetsState = new InsetsState();
+        InsetsSource insetsSource = new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR);
+        insetsSource.setFrame(0, 0, 1000, 1000);
+        insetsState.addSource(insetsSource);
+        displayLayout.setInsets(mContext.getResources(), insetsState);
+        mLayout.updateDisplayLayout(displayLayout);
+        verify(mLayout).updateButtonSurfacePosition();
+        verify(mLayout).updateHintSurfacePosition();
     }
 
     @Test

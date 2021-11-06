@@ -2583,26 +2583,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mDisplayManagerInternal.setDisplayAccessUIDs(mDisplayAccessUIDs);
     }
 
-    Task findRootTaskBehind(Task rootTask) {
-        final TaskDisplayArea taskDisplayArea = rootTask.getDisplayArea();
-        if (taskDisplayArea != null) {
-            final boolean[] hasFound = new boolean[1];
-            // TODO(b/175136051): should this be only the direct child root task?
-            final Task rootTaskBehind = taskDisplayArea.getRootTask(task -> {
-                if (hasFound[0]) {
-                    return true;
-                }
-                hasFound[0] = task == rootTask;
-                return false;
-            });
-            if (rootTaskBehind != null) {
-                return rootTaskBehind;
-            }
-        }
-        throw new IllegalStateException("Failed to find a root task behind root task =" + rootTask
-                + " in=" + taskDisplayArea);
-    }
-
     Configuration getDisplayOverrideConfiguration(int displayId) {
         final DisplayContent displayContent = getDisplayContentOrCreate(displayId);
         if (displayContent == null) {

@@ -387,7 +387,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 final ShortcutServiceInternal shortcutService =
                         LocalServices.getService(ShortcutServiceInternal.class);
                 final Intent[] shortcutIntents = shortcutService.createShortcutIntents(
-                        callingUid, callingPackage, packageName, shortcutId,
+                        UserHandle.getUserId(callingUid), callingPackage, packageName, shortcutId,
                         user.getIdentifier(), callingPid, callingUid);
                 if (shortcutIntents == null || shortcutIntents.length == 0) {
                     throw new IllegalArgumentException("Invalid shortcut id");

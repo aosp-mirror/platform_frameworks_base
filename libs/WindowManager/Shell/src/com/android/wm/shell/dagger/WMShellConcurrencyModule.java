@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.wmshell;
+package com.android.wm.shell.dagger;
 
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
@@ -24,18 +24,18 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Trace;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.systemui.R;
-import com.android.systemui.dagger.WMSingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
+import com.android.wm.shell.common.annotations.ExternalMainThread;
 import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
+import com.android.wm.shell.R;
 
 import dagger.Module;
 import dagger.Provides;
@@ -61,13 +61,26 @@ public abstract class WMShellConcurrencyModule {
     // Shell Concurrency - Components used for managing threading in the Shell and SysUI
     //
 
+
+    /**
+     * Provide a SysUI main-thread Handler.
+     *
+     * Prefer the Main Executor when possible.
+     */
+    @Provides
+    @ExternalMainThread
+    public static Handler provideMainHandler() {
+        return new Handler(Looper.getMainLooper());
+    }
+
     /**
      * Provide a SysUI main-thread Executor.
      */
     @WMSingleton
     @Provides
-    @Main
-    public static ShellExecutor provideSysUIMainExecutor(@Main Handler sysuiMainHandler) {
+    @ExternalMainThread
+    public static ShellExecutor provideSysUIMainExecutor(
+            @ExternalMainThread Handler sysuiMainHandler) {
         return new HandlerExecutor(sysuiMainHandler);
     }
 
@@ -78,7 +91,8 @@ public abstract class WMShellConcurrencyModule {
     @WMSingleton
     @Provides
     @ShellMainThread
-    public static Handler provideShellMainHandler(Context context, @Main Handler sysuiMainHandler) {
+    public static Handler provideShellMainHandler(Context context,
+            @ExternalMainThread Handler sysuiMainHandler) {
         if (enableShellMainThread(context)) {
              HandlerThread mainThread = new HandlerThread("wmshell.main", THREAD_PRIORITY_DISPLAY);
              mainThread.start();
@@ -99,7 +113,8 @@ public abstract class WMShellConcurrencyModule {
     @Provides
     @ShellMainThread
     public static ShellExecutor provideShellMainExecutor(Context context,
-            @ShellMainThread Handler mainHandler, @Main ShellExecutor sysuiMainExecutor) {
+            @ShellMainThread Handler mainHandler,
+            @ExternalMainThread ShellExecutor sysuiMainExecutor) {
         if (enableShellMainThread(context)) {
             return new HandlerExecutor(mainHandler);
         }

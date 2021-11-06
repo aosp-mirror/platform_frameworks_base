@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -91,10 +92,30 @@ public class DreamManager {
     @TestApi
     @UserHandleAware
     @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
-    public void setActiveDream(@NonNull ComponentName dreamComponent) {
+    public void setActiveDream(@Nullable ComponentName dreamComponent) {
         ComponentName[] dreams = {dreamComponent};
+
         try {
-            mService.setDreamComponentsForUser(mContext.getUserId(), dreams);
+            mService.setDreamComponentsForUser(mContext.getUserId(),
+                    dreamComponent != null ? dreams : null);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the active dream on the device to be "dreamComponent".
+     *
+     * <p>This is only used for testing the dream service APIs.
+     *
+     * @hide
+     */
+    @TestApi
+    @UserHandleAware
+    @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
+    public void setDreamOverlay(@Nullable ComponentName dreamOverlayComponent) {
+        try {
+            mService.registerDreamOverlayService(dreamOverlayComponent);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

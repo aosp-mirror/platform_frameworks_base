@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.wmshell;
+package com.android.wm.shell.dagger;
 
 import android.app.ActivityTaskManager;
 import android.content.Context;
@@ -27,8 +27,6 @@ import android.view.WindowManager;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.IconProvider;
-import com.android.systemui.dagger.WMComponent;
-import com.android.systemui.dagger.WMSingleton;
 import com.android.wm.shell.RootDisplayAreaOrganizer;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellCommandHandler;
@@ -156,9 +154,10 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static SizeCompatUIController provideSizeCompatUIController(Context context,
-            DisplayController displayController, DisplayImeController imeController,
-            SyncTransactionQueue syncQueue) {
-        return new SizeCompatUIController(context, displayController, imeController, syncQueue);
+            DisplayController displayController, DisplayInsetsController displayInsetsController,
+            DisplayImeController imeController, SyncTransactionQueue syncQueue) {
+        return new SizeCompatUIController(context, displayController, displayInsetsController,
+                imeController, syncQueue);
     }
 
     @WMSingleton
