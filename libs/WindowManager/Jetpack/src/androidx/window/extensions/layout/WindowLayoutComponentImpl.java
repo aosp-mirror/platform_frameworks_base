@@ -122,8 +122,19 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private int getFeatureState(DisplayFeature feature) {
         Integer featureState = feature.getState();
         Optional<Integer> posture = mDevicePostureProducer.getData();
-        int fallbackPosture = posture.orElse(FoldingFeature.STATE_FLAT);
-        return featureState == null ? fallbackPosture : featureState;
+        int fallbackPosture = posture.orElse(DisplayFeature.COMMON_STATE_FLAT);
+        int displayFeatureState = featureState == null ? fallbackPosture : featureState;
+        return convertToExtensionState(displayFeatureState);
+    }
+
+    private int convertToExtensionState(int state) {
+        switch (state) {
+            case DisplayFeature.COMMON_STATE_FLAT:
+                return FoldingFeature.STATE_FLAT;
+            case DisplayFeature.COMMON_STATE_HALF_OPENED:
+                return FoldingFeature.STATE_HALF_OPENED;
+        }
+        return FoldingFeature.STATE_FLAT;
     }
 
     private void onDisplayFeaturesChanged() {

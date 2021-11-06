@@ -242,6 +242,11 @@ public final class PhysicalChannelConfig implements Parcelable {
     }
 
     /**
+     * The physical cell ID which differentiates cells using the same radio channel.
+     *
+     * In GERAN, this value is the BSIC. The range is [0-63].
+     * Reference: 3GPP TS 3.03 section 4.2.2.
+     *
      * In UTRAN, this value is primary scrambling code. The range is [0, 511].
      * Reference: 3GPP TS 25.213 section 5.2.2.
      *

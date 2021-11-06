@@ -36,6 +36,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.SparseArray;
+import android.view.Surface;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
@@ -136,6 +137,16 @@ public class TvIAppManagerService extends SystemService {
         return sessionState;
     }
 
+    @GuardedBy("mLock")
+    private ITvIAppSession getSessionLocked(SessionState sessionState) {
+        ITvIAppSession session = sessionState.mSession;
+        if (session == null) {
+            throw new IllegalStateException("Session not yet created for token "
+                    + sessionState.mSessionToken);
+        }
+        return session;
+    }
+
     private final class BinderService extends ITvIAppManager.Stub {
 
         @Override
@@ -232,6 +243,55 @@ public class TvIAppManagerService extends SystemService {
                 }
             } catch (RemoteException e) {
                 Slogf.e(TAG, "error in start", e);
+            }
+        }
+
+        @Override
+        public void setSurface(IBinder sessionToken, Surface surface, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "setSurface");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).setSurface(surface);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in setSurface", e);
+                    }
+                }
+            } finally {
+                if (surface != null) {
+                    // surface is not used in TvIAppManagerService.
+                    surface.release();
+                }
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void dispatchSurfaceChanged(IBinder sessionToken, int format, int width,
+                int height, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "dispatchSurfaceChanged");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).dispatchSurfaceChanged(format, width,
+                                height);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in dispatchSurfaceChanged", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }
@@ -612,6 +672,25 @@ public class TvIAppManagerService extends SystemService {
                     removeSessionStateLocked(mSessionState.mSessionToken, mSessionState.mUserId);
                     sendSessionTokenToClientLocked(mSessionState.mClient,
                             mSessionState.mIAppServiceId, null, mSessionState.mSeq);
+                }
+            }
+        }
+
+        @Override
+        public void onLayoutSurface(int left, int top, int right, int bottom) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onLayoutSurface (left=" + left + ", top=" + top
+                            + ", right=" + right + ", bottom=" + bottom + ",)");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onLayoutSurface(left, top, right, bottom,
+                            mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onLayoutSurface", e);
                 }
             }
         }

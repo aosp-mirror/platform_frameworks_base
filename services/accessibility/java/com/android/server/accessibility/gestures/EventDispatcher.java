@@ -382,18 +382,21 @@ class EventDispatcher {
     }
 
     public boolean longPressWithTouchEvents(MotionEvent event, int policyFlags) {
-        final int pointerIndex = event.getActionIndex();
-        final int pointerId = event.getPointerId(pointerIndex);
         Point clickLocation = mTempPoint;
         final int result = computeClickLocation(clickLocation);
         if (result == CLICK_LOCATION_NONE) {
             return false;
         }
-        mLongPressingPointerId = pointerId;
-        mLongPressingPointerDeltaX = (int) event.getX(pointerIndex) - clickLocation.x;
-        mLongPressingPointerDeltaY = (int) event.getY(pointerIndex) - clickLocation.y;
-        sendDownForAllNotInjectedPointers(event, policyFlags);
-        return true;
+        if (event != null) {
+            final int pointerIndex = event.getActionIndex();
+            final int pointerId = event.getPointerId(pointerIndex);
+            mLongPressingPointerId = pointerId;
+            mLongPressingPointerDeltaX = (int) event.getX(pointerIndex) - clickLocation.x;
+            mLongPressingPointerDeltaY = (int) event.getY(pointerIndex) - clickLocation.y;
+            sendDownForAllNotInjectedPointers(event, policyFlags);
+            return true;
+        }
+        return false;
     }
 
     void clear() {

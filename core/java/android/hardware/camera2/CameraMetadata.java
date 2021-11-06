@@ -2657,6 +2657,18 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int CONTROL_VIDEO_STABILIZATION_MODE_ON = 1;
 
+    /**
+     * <p>Preview stabilization, where the preview in addition to all other non-RAW streams are
+     * stabilized with the same quality of stabilization, is enabled. This mode aims to give
+     * clients a 'what you see is what you get' effect. In this mode, the FoV reduction will
+     * be a maximum of 20 % both horizontally and vertically
+     * (10% from left, right, top, bottom) for the given zoom ratio / crop region.
+     * The resultant FoV will also be the same across all processed streams
+     * (that have the same aspect ratio).</p>
+     * @see CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
+     */
+    public static final int CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION = 2;
+
     //
     // Enumeration values for CaptureRequest#CONTROL_EXTENDED_SCENE_MODE
     //

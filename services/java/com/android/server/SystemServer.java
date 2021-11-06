@@ -73,6 +73,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.storage.IStorageManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -2768,7 +2769,9 @@ public final class SystemServer implements Dumpable {
                 }, WEBVIEW_PREPARATION);
             }
 
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+            boolean isAutomotive = mPackageManager
+                    .hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+            if (isAutomotive) {
                 t.traceBegin("StartCarServiceHelperService");
                 final SystemService cshs = mSystemServiceManager
                         .startService(CAR_SERVICE_HELPER_SERVICE_CLASS);
@@ -2876,6 +2879,13 @@ public final class SystemServer implements Dumpable {
             }
             mSystemServiceManager.startBootPhase(t, SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
             t.traceEnd();
+
+            if (UserManager.isHeadlessSystemUserMode() && !isAutomotive) {
+                // TODO(b/204091126): remove isAutomotive check once the workflow is finalized
+                t.traceBegin("BootUserInitializer");
+                new BootUserInitializer(mActivityManagerService, mContentResolver).init(t);
+                t.traceEnd();
+            }
 
             t.traceBegin("StartNetworkStack");
             try {

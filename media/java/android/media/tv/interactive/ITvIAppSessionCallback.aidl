@@ -25,4 +25,5 @@ import android.media.tv.interactive.ITvIAppSession;
  */
 oneway interface ITvIAppSessionCallback {
     void onSessionCreated(in ITvIAppSession session);
+    void onLayoutSurface(int left, int top, int right, int bottom);
 }

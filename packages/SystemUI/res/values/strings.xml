@@ -183,6 +183,9 @@
     <!-- Label for UI element which allows editing the screenshot [CHAR LIMIT=30] -->
     <string name="screenshot_edit_label">Edit</string>
     <!-- Content description indicating that tapping the element will allow editing the screenshot [CHAR LIMIT=NONE] -->
+    <string name="screenshot_edit_description">Edit screenshot</string>
+    <!-- Content description indicating that tapping the element will allow sharing the screenshot [CHAR LIMIT=NONE] -->
+    <string name="screenshot_share_description">Share screenshot</string>
     <!-- Label for UI element which allows the user to capture additional off-screen content in a screenshot. [CHAR LIMIT=30] -->
     <string name="screenshot_scroll_label">Capture more</string>
     <!-- Content description indicating that tapping a button will dismiss the screenshots UI [CHAR LIMIT=NONE] -->

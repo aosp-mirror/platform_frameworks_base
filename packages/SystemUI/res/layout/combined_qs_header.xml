@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.constraintlayout.motion.widget.MotionLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/split_shade_status_bar"
@@ -26,7 +26,8 @@
     android:paddingLeft="@dimen/qs_panel_padding"
     android:paddingRight="@dimen/qs_panel_padding"
     android:visibility="gone"
-    android:theme="@style/Theme.SystemUI.QuickSettings.Header">
+    android:theme="@style/Theme.SystemUI.QuickSettings.Header"
+    app:layoutDescription="@xml/combined_qs_header_scene">
 
     <androidx.constraintlayout.widget.Guideline
         android:layout_width="wrap_content"
@@ -39,76 +40,65 @@
         android:id="@+id/clock"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        app:layout_constraintHeight_min="@dimen/split_shade_header_min_height"
         android:gravity="start|center_vertical"
         android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
         android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.QS.Status"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/date"
     />
 
     <com.android.systemui.statusbar.policy.DateView
         android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        app:layout_constraintHeight_min="@dimen/split_shade_header_min_height"
         android:layout_gravity="start|center_vertical"
         android:gravity="center_vertical"
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.QS.Status"
         app:datePattern="@string/abbrev_wday_month_day_no_year_alarm"
-        app:layout_constraintStart_toEndOf="@id/clock"
-        app:layout_constraintEnd_toStartOf="@id/carrier_group"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0"
     />
 
     <include
         android:id="@+id/carrier_group"
         layout="@layout/qs_carrier_group"
+        app:layout_constraintHeight_min="@dimen/split_shade_header_min_height"
+        android:minHeight="@dimen/split_shade_header_min_height"
+        app:layout_constraintWidth_min="48dp"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintHeight_min="@dimen/split_shade_header_min_height"
         app:layout_constrainedWidth="true"
         android:layout_gravity="end|center_vertical"
         android:layout_marginStart="8dp"
-        android:focusable="false"
-        android:minHeight="@dimen/split_shade_header_min_height"
-        android:minWidth="48dp"
         app:layout_constraintStart_toEndOf="@id/date"
         app:layout_constraintEnd_toStartOf="@id/statusIcons"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@id/clock"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="1"
     />
 
     <com.android.systemui.statusbar.phone.StatusIconContainer
         android:id="@+id/statusIcons"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
         app:layout_constraintHeight_min="@dimen/split_shade_header_min_height"
         android:paddingEnd="@dimen/signal_cluster_battery_padding"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
         app:layout_constraintStart_toEndOf="@id/carrier_group"
         app:layout_constraintEnd_toStartOf="@id/batteryRemainingIcon"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@id/clock"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="1"
     />
 
     <com.android.systemui.battery.BatteryMeterView
         android:id="@+id/batteryRemainingIcon"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
+        android:layout_height="48dp"
         app:layout_constraintHeight_min="@dimen/split_shade_header_min_height"
         app:textAppearance="@style/TextAppearance.QS.Status"
         app:layout_constraintStart_toEndOf="@id/statusIcons"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@id/clock"
         app:layout_constraintBottom_toBottomOf="parent"
     />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.motion.widget.MotionLayout>

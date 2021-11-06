@@ -437,7 +437,7 @@
         </activity>
 
         <activity android:name=".PenStylusActivity"
-                  android:label="Pen (BUGGED)/Draw"
+                  android:label="Pen/Draw"
                   android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

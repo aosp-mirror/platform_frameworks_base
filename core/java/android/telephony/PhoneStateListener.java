@@ -191,20 +191,6 @@ public class PhoneStateListener {
     public static final int LISTEN_SIGNAL_STRENGTHS                         = 0x00000100;
 
     /**
-     * Listen for changes of the network signal strengths (cellular) always reported from modem,
-     * even in some situations such as the screen of the device is off.
-     *
-     * @see #onSignalStrengthsChanged
-     *
-     * @hide
-     * @deprecated Use TelephonyManager#setSignalStrengthUpdateRequest
-     * instead.
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH)
-    public static final int LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH          = 0x00000200;
-
-    /**
      * Listen for changes to observed cell info.
      *
      * Listening to this event requires the {@link Manifest.permission#READ_PHONE_STATE} and

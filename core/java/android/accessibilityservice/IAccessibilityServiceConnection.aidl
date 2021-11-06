@@ -122,4 +122,16 @@ interface IAccessibilityServiceConnection {
 
     oneway void logTrace(long timestamp, String where, long loggingTypes, String callingParams,
         int processId, long threadId, int callingUid, in Bundle serializedCallingStackInBundle);
+
+    void setServiceDetectsGesturesEnabled(int displayId, boolean mode);
+
+    void requestTouchExploration(int displayId);
+
+    void requestDragging(int displayId, int pointerId);
+
+    void requestDelegating(int displayId);
+
+    void onDoubleTap(int displayId);
+
+    void onDoubleTapAndHold(int displayId);
 }

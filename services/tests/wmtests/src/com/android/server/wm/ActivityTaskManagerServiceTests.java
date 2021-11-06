@@ -623,7 +623,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 wpcAfterConfigChange1.getConfiguration().getLocales());
         assertTrue(wpcAfterConfigChange1.getConfiguration().isNightModeActive());
 
-        mAtm.mInternal.onPackageUninstalled(DEFAULT_PACKAGE_NAME);
+        mAtm.mInternal.onPackageUninstalled(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
 
         WindowProcessController wpcAfterConfigChange2 = createWindowProcessController(
                 DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);

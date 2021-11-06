@@ -260,7 +260,10 @@ public class BluetoothGattDescriptor implements Parcelable {
      * operation.
      *
      * @return Cached value of the descriptor
+     *
+     * @deprecated  Use {@link BluetoothGatt#readDescriptor(BluetoothGattDescriptor)} instead
      */
+    @Deprecated
     public byte[] getValue() {
         return mValue;
     }
@@ -276,7 +279,11 @@ public class BluetoothGattDescriptor implements Parcelable {
      * @param value New value for this descriptor
      * @return true if the locally stored value has been set, false if the requested value could not
      * be stored locally.
+     *
+     * @deprecated Pass the descriptor value directly into
+     * {@link BluetoothGatt#writeDescriptor(BluetoothGattDescriptor, byte[])}
      */
+    @Deprecated
     public boolean setValue(byte[] value) {
         mValue = value;
         return true;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.statusbar.window;
 
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
@@ -34,7 +34,6 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.IWindowManager;
-import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +46,7 @@ import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 
 import java.util.Optional;
 
@@ -78,6 +78,7 @@ public class StatusBarWindowController {
     @Inject
     public StatusBarWindowController(
             Context context,
+            @StatusBarWindowModule.InternalWindowView StatusBarWindowView statusBarWindowView,
             WindowManager windowManager,
             IWindowManager iWindowManager,
             StatusBarContentInsetsProvider contentInsetsProvider,
@@ -86,7 +87,7 @@ public class StatusBarWindowController {
         mWindowManager = windowManager;
         mIWindowManager = iWindowManager;
         mContentInsetsProvider = contentInsetsProvider;
-        mStatusBarWindowView = createWindowView(mContext);
+        mStatusBarWindowView = statusBarWindowView;
         mLaunchAnimationContainer = mStatusBarWindowView.findViewById(
                 R.id.status_bar_launch_animation_container);
         mLpChanged = new WindowManager.LayoutParams();
@@ -293,15 +294,5 @@ public class StatusBarWindowController {
         } else {
             mLpChanged.privateFlags &= ~PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
         }
-    }
-
-    private ViewGroup createWindowView(Context context) {
-        ViewGroup view = (ViewGroup) LayoutInflater.from(context).inflate(
-                R.layout.super_status_bar, /* root= */ null);
-        if (view == null) {
-            throw new IllegalStateException(
-                    "R.layout.super_status_bar could not be properly inflated");
-        }
-        return view;
     }
 }

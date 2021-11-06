@@ -26,7 +26,7 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import com.android.systemui.R
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher
-import com.android.systemui.statusbar.phone.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowController
 import javax.inject.Inject
 
 /**

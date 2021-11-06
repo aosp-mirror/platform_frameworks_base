@@ -79,9 +79,31 @@ public final class BluetoothStatusCodes {
     public static final int ERROR_MISSING_BLUETOOTH_SCAN_PERMISSION = 7;
 
     /**
+     * Error code indicating that the caller does not have the
+     * {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED} permission
+     */
+    public static final int ERROR_MISSING_BLUETOOTH_PRIVILEGED_PERMISSION = 8;
+
+    /**
+     * Error code indicating that the profile service is not bound. You can bind a profile service
+     * by calling {@link BluetoothAdapter#getProfileProxy}
+     */
+    public static final int ERROR_PROFILE_SERVICE_NOT_BOUND = 9;
+
+    /**
      * Error code indicating that the feature is not supported.
      */
-    public static final int ERROR_FEATURE_NOT_SUPPORTED = 8;
+    public static final int ERROR_FEATURE_NOT_SUPPORTED = 10;
+
+    /**
+     * A GATT writeCharacteristic request is not permitted on the remote device.
+     */
+    public static final int ERROR_GATT_WRITE_NOT_ALLOWED = 101;
+
+    /**
+     * A GATT writeCharacteristic request is issued to a busy remote device.
+     */
+    public static final int ERROR_GATT_WRITE_REQUEST_BUSY = 102;
 
     /**
      * If another application has already requested {@link OobData} then another fetch will be

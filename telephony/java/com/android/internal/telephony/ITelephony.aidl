@@ -67,6 +67,7 @@ import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IBooleanConsumer;
 import com.android.internal.telephony.ICallForwardingInfoCallback;
+import com.android.internal.telephony.IImsStateCallback;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.OperatorInfo;
@@ -1000,11 +1001,6 @@ interface ITelephony {
      * @return {@code true} if manual network selection is allowed, otherwise return {@code false}.
      */
      boolean isManualNetworkSelectionAllowed(int subId);
-
-    /**
-     * Enable or disable always reporting signal strength changes from radio.
-     */
-     void setAlwaysReportSignalStrength(int subId, boolean isEnable);
 
     /**
      * Get P-CSCF address from PCO after data connection is established or modified.
@@ -2497,4 +2493,14 @@ interface ITelephony {
      * NSSAIs (configured, allowed and rejected).
      */
     void getSlicingConfig(in ResultReceiver callback);
+
+    /**
+     * Register an IMS connection state callback
+     */
+    void registerImsStateCallback(int subId, int feature, in IImsStateCallback cb);
+
+    /**
+     * Unregister an IMS connection state callback
+     */
+    void unregisterImsStateCallback(in IImsStateCallback cb);
 }

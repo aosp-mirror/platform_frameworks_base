@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dagger;
+package com.android.systemui.dreams.dagger;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-
-import javax.inject.Scope;
+import dagger.Module;
 
 /**
- * Scope annotation for singleton items within the WMComponent.
+ * Dagger Module providing Communal-related functionality.
  */
-@Documented
-@Retention(RUNTIME)
-@Scope
-public @interface WMSingleton {
+@Module(subcomponents = {
+        AppWidgetOverlayComponent.class,
+})
+public interface DreamModule {
 }

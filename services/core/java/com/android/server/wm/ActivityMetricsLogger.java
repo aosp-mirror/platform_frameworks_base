@@ -11,7 +11,6 @@ import static android.app.WaitResult.LAUNCH_STATE_WARM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -448,33 +447,31 @@ class ActivityMetricsLogger {
         mLaunchObserver = new LaunchObserverRegistryImpl(looper);
     }
 
+    private void logWindowState(String state, int durationSecs) {
+        mMetricsLogger.count(state, durationSecs);
+    }
+
     void logWindowState() {
         final long now = SystemClock.elapsedRealtime() / 1000;
         if (mWindowState != WINDOW_STATE_INVALID) {
             // We log even if the window state hasn't changed, because the user might remain in
             // home/fullscreen move forever and we would like to track this kind of behavior
             // too.
-            mMetricsLogger.count(TRON_WINDOW_STATE_VARZ_STRINGS[mWindowState],
-                    (int) (now - mLastLogTimeSecs));
+            mLoggerHandler.sendMessage(PooledLambda.obtainMessage(
+                    ActivityMetricsLogger::logWindowState, this,
+                    TRON_WINDOW_STATE_VARZ_STRINGS[mWindowState], (int) (now - mLastLogTimeSecs)));
         }
         mLastLogTimeSecs = now;
 
         mWindowState = WINDOW_STATE_INVALID;
-        Task rootTask = mSupervisor.mRootWindowContainer.getTopDisplayFocusedRootTask();
-        if (rootTask == null) {
-            return;
-        }
-
-        if (rootTask.isActivityTypeAssistant()) {
+        final Task focusedTask = mSupervisor.mRootWindowContainer.getTopDisplayFocusedRootTask();
+        if (focusedTask == null)  return;
+        if (focusedTask.isActivityTypeAssistant()) {
             mWindowState = WINDOW_STATE_ASSISTANT;
             return;
         }
 
-        @WindowingMode int windowingMode = rootTask.getWindowingMode();
-        if (windowingMode == WINDOWING_MODE_PINNED) {
-            rootTask = mSupervisor.mRootWindowContainer.findRootTaskBehind(rootTask);
-            windowingMode = rootTask.getWindowingMode();
-        }
+        @WindowingMode final int windowingMode = focusedTask.getWindowingMode();
         switch (windowingMode) {
             case WINDOWING_MODE_FULLSCREEN:
                 mWindowState = WINDOW_STATE_STANDARD;
@@ -491,7 +488,7 @@ class ActivityMetricsLogger {
                 break;
             default:
                 if (windowingMode != WINDOWING_MODE_UNDEFINED) {
-                    throw new IllegalStateException("Unknown windowing mode for task=" + rootTask
+                    Slog.wtf(TAG, "Unknown windowing mode for task=" + focusedTask
                             + " windowingMode=" + windowingMode);
                 }
         }

@@ -1203,7 +1203,7 @@ public class JobInfo implements Parcelable {
 
         /**
          * Indicate the priority for this job. The priority set here will be used to sort jobs
-         * for a single app and apply slightly different policies based on the priority.
+         * for the calling app and apply slightly different policies based on the priority.
          * The priority will <b>NOT</b> be used as a global sorting value to sort between
          * different app's jobs. Use this to inform the system about which jobs it should try
          * to run before other jobs. Giving the same priority to all of your jobs will result
