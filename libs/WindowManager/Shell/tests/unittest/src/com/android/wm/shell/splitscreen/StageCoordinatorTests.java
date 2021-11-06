@@ -22,6 +22,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RETURN_HOME;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -162,8 +163,7 @@ public class StageCoordinatorTests extends ShellTestCase {
     @Test
     public void testExitSplitScreen() {
         when(mMainStage.isActive()).thenReturn(true);
-        mStageCoordinator.exitSplitScreen(INVALID_TASK_ID,
-                SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME);
+        mStageCoordinator.exitSplitScreen(INVALID_TASK_ID, EXIT_REASON_RETURN_HOME);
         verify(mSideStage).removeAllTasks(any(WindowContainerTransaction.class), eq(false));
         verify(mMainStage).deactivate(any(WindowContainerTransaction.class), eq(false));
     }
@@ -174,8 +174,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         final int testTaskId = 12345;
         when(mMainStage.containsTask(eq(testTaskId))).thenReturn(true);
         when(mSideStage.containsTask(eq(testTaskId))).thenReturn(false);
-        mStageCoordinator.exitSplitScreen(testTaskId,
-                SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME);
+        mStageCoordinator.exitSplitScreen(testTaskId, EXIT_REASON_RETURN_HOME);
         verify(mMainStage).reorderChild(eq(testTaskId), eq(true),
                 any(WindowContainerTransaction.class));
         verify(mSideStage).removeAllTasks(any(WindowContainerTransaction.class), eq(false));
@@ -188,8 +187,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         final int testTaskId = 12345;
         when(mMainStage.containsTask(eq(testTaskId))).thenReturn(false);
         when(mSideStage.containsTask(eq(testTaskId))).thenReturn(true);
-        mStageCoordinator.exitSplitScreen(testTaskId,
-                SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME);
+        mStageCoordinator.exitSplitScreen(testTaskId, EXIT_REASON_RETURN_HOME);
         verify(mSideStage).reorderChild(eq(testTaskId), eq(true),
                 any(WindowContainerTransaction.class));
         verify(mSideStage).removeAllTasks(any(WindowContainerTransaction.class), eq(true));
