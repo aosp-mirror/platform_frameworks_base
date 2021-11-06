@@ -46,6 +46,7 @@ import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.SharedLibraryInfo;
@@ -65,6 +66,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.content.F2fsUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
@@ -141,6 +143,7 @@ public class PackageDexOptimizer {
     private final Injector mInjector;
 
 
+    private final Context mContext;
     private static final Random sRandom = new Random();
 
     PackageDexOptimizer(Installer installer, Object installLock, Context context,
@@ -159,6 +162,7 @@ public class PackageDexOptimizer {
     }
 
     protected PackageDexOptimizer(PackageDexOptimizer from) {
+        this.mContext = from.mContext;
         this.mInstaller = from.mInstaller;
         this.mInstallLock = from.mInstallLock;
         this.mDexoptWakeLock = from.mDexoptWakeLock;
@@ -169,6 +173,7 @@ public class PackageDexOptimizer {
     @VisibleForTesting
     PackageDexOptimizer(@NonNull Injector injector, Installer installer, Object installLock,
             Context context, String wakeLockTag) {
+        this.mContext = context;
         this.mInstaller = installer;
         this.mInstallLock = installLock;
 
@@ -433,6 +438,13 @@ public class PackageDexOptimizer {
             if (packageStats != null) {
                 long endTime = System.currentTimeMillis();
                 packageStats.setCompileTime(path, (int)(endTime - startTime));
+            }
+            if (oatDir != null) {
+                // Release odex/vdex compressed blocks to save user space.
+                // Compression support will be checked in F2fsUtils.
+                // The system app may be dexed, oatDir may be null, skip this situation.
+                final ContentResolver resolver = mContext.getContentResolver();
+                F2fsUtils.releaseCompressedBlocks(resolver, new File(oatDir));
             }
             return DEX_OPT_PERFORMED;
         } catch (InstallerException e) {
