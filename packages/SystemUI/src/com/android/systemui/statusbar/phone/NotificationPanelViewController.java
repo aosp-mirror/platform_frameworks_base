@@ -22,6 +22,7 @@ import static androidx.constraintlayout.widget.ConstraintSet.END;
 import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
 import static androidx.constraintlayout.widget.ConstraintSet.START;
 import static androidx.constraintlayout.widget.ConstraintSet.TOP;
+import static androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
@@ -116,6 +117,7 @@ import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.media.KeyguardMediaController;
@@ -420,6 +422,9 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mIsFullWidth;
     private boolean mBlockingExpansionForCurrentTouch;
 
+    // TODO (b/204204226): no longer needed once refactor is complete
+    private final boolean mUseCombinedQSHeaders;
+
     /**
      * Following variables maintain state of events when input focus transfer may occur.
      */
@@ -689,7 +694,8 @@ public class NotificationPanelViewController extends PanelViewController {
             LockscreenGestureLogger lockscreenGestureLogger,
             PanelExpansionStateManager panelExpansionStateManager,
             NotificationRemoteInputManager remoteInputManager,
-            ControlsComponent controlsComponent) {
+            ControlsComponent controlsComponent,
+            FeatureFlags featureFlags) {
         super(view,
                 falsingManager,
                 dozeLog,
@@ -805,6 +811,8 @@ public class NotificationPanelViewController extends PanelViewController {
         mMaxKeyguardNotifications = resources.getInteger(R.integer.keyguard_max_notification_count);
         updateUserSwitcherFlags();
         onFinishInflate();
+
+        mUseCombinedQSHeaders = featureFlags.useCombinedQSHeaders();
     }
 
     private void onFinishInflate() {
@@ -1004,6 +1012,9 @@ public class NotificationPanelViewController extends PanelViewController {
         } else {
             constraintSet.connect(R.id.qs_frame, END, PARENT_ID, END);
             constraintSet.connect(R.id.notification_stack_scroller, START, PARENT_ID, START);
+            if (mUseCombinedQSHeaders) {
+                constraintSet.constrainHeight(R.id.split_shade_status_bar, WRAP_CONTENT);
+            }
         }
         constraintSet.getConstraint(R.id.notification_stack_scroller).layout.mWidth = panelWidth;
         constraintSet.getConstraint(R.id.qs_frame).layout.mWidth = qsWidth;
@@ -2218,6 +2229,7 @@ public class NotificationPanelViewController extends PanelViewController {
         float qsExpansionFraction = computeQsExpansionFraction();
         mQs.setQsExpansion(qsExpansionFraction, getExpandedFraction(), getHeaderTranslation(),
                 mNotificationStackScrollLayoutController.getNotificationSquishinessFraction());
+        mSplitShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
         mMediaHierarchyManager.setQsExpansion(qsExpansionFraction);
         int qsPanelBottomY = calculateQsBottomPosition(qsExpansionFraction);
         mScrimController.setQsPosition(qsExpansionFraction, qsPanelBottomY);

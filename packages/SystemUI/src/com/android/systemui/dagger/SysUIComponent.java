@@ -34,6 +34,7 @@ import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelper;
@@ -100,6 +101,9 @@ public interface SysUIComponent {
 
         @BindsInstance
         Builder setTaskSurfaceHelper(Optional<TaskSurfaceHelper> t);
+
+        @BindsInstance
+        Builder setRecentTasks(Optional<RecentTasks> r);
 
         SysUIComponent build();
     }

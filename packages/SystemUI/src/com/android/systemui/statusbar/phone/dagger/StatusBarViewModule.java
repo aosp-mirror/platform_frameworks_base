@@ -19,11 +19,13 @@ package com.android.systemui.statusbar.phone.dagger;
 import android.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewStub;
 
 import com.android.keyguard.LockIconView;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.biometrics.AuthRippleView;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
@@ -126,9 +128,16 @@ public abstract class StatusBarViewModule {
     @Provides
     @Named(SPLIT_SHADE_HEADER)
     @StatusBarComponent.StatusBarScope
-    public static View getSlitShadeStatusBarView(
-            NotificationShadeWindowView notificationShadeWindowView) {
-        return notificationShadeWindowView.findViewById(R.id.split_shade_status_bar);
+    public static View getSplitShadeStatusBarView(
+            NotificationShadeWindowView notificationShadeWindowView,
+            FeatureFlags featureFlags) {
+        ViewStub stub = notificationShadeWindowView.findViewById(R.id.qs_header_stub);
+        int layoutId = featureFlags.useCombinedQSHeaders()
+                ? R.layout.combined_qs_header
+                : R.layout.split_shade_header;
+        stub.setLayoutResource(layoutId);
+        View v = stub.inflate();
+        return v;
     }
 
     /** */

@@ -75,7 +75,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_PROVIDER_MODEL, "true");
         DEFAULT_FLAGS.put(SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SECURITY_HUB, "true");
-        DEFAULT_FLAGS.put(SETTINGS_SUPPORT_LARGE_SCREEN, "false");
+        DEFAULT_FLAGS.put(SETTINGS_SUPPORT_LARGE_SCREEN, "true");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;

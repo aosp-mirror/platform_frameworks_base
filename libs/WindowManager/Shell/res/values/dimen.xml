@@ -115,6 +115,8 @@
     <dimen name="bubble_spacing">3dp</dimen>
     <!-- Size of the bubble. -->
     <dimen name="bubble_size">60dp</dimen>
+    <!-- Width of bubble name view -->
+    <dimen name="bubble_name_width">90dp</dimen>
     <!-- Size of the badge shown on the bubble. -->
     <dimen name="bubble_badge_size">24dp</dimen>
     <!-- Extra padding added to the touchable rect for bubbles so they are easier to grab. -->

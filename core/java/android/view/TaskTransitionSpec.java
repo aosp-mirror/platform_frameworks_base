@@ -39,6 +39,7 @@ public class TaskTransitionSpec implements Parcelable {
     /**
      * TEMPORARY FIELD (b/202383002)
      * TODO: Remove once we use surfaceflinger rounded corners on tasks rather than taskbar overlays
+     *  or when shell transitions are fully enabled
      *
      * A set of {@InsetsState.InternalInsetsType}s we want to use as the source to set the bounds
      * of the task during the animation. Used to make sure that task animate above the taskbar.

@@ -161,6 +161,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
     @Test
     public void testExitSplitScreen() {
+        when(mMainStage.isActive()).thenReturn(true);
         mStageCoordinator.exitSplitScreen(INVALID_TASK_ID,
                 SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME);
         verify(mSideStage).removeAllTasks(any(WindowContainerTransaction.class), eq(false));
@@ -169,6 +170,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
     @Test
     public void testExitSplitScreenToMainStage() {
+        when(mMainStage.isActive()).thenReturn(true);
         final int testTaskId = 12345;
         when(mMainStage.containsTask(eq(testTaskId))).thenReturn(true);
         when(mSideStage.containsTask(eq(testTaskId))).thenReturn(false);
@@ -182,6 +184,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
     @Test
     public void testExitSplitScreenToSideStage() {
+        when(mMainStage.isActive()).thenReturn(true);
         final int testTaskId = 12345;
         when(mMainStage.containsTask(eq(testTaskId))).thenReturn(false);
         when(mSideStage.containsTask(eq(testTaskId))).thenReturn(true);

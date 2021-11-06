@@ -74,6 +74,8 @@ import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
+import com.android.wm.shell.recents.RecentTasks;
+import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.sizecompatui.SizeCompatUIController;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -144,16 +146,20 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static ShellTaskOrganizer provideShellTaskOrganizer(@ShellMainThread ShellExecutor mainExecutor,
-            Context context, SizeCompatUIController sizeCompatUI) {
-        return new ShellTaskOrganizer(mainExecutor, context, sizeCompatUI);
+            Context context,
+            SizeCompatUIController sizeCompatUI,
+            Optional<RecentTasksController> recentTasksOptional
+    ) {
+        return new ShellTaskOrganizer(mainExecutor, context, sizeCompatUI, recentTasksOptional);
     }
 
     @WMSingleton
     @Provides
     static SizeCompatUIController provideSizeCompatUIController(Context context,
-            DisplayController displayController, DisplayImeController imeController,
-            SyncTransactionQueue syncQueue) {
-        return new SizeCompatUIController(context, displayController, imeController, syncQueue);
+            DisplayController displayController, DisplayInsetsController displayInsetsController,
+            DisplayImeController imeController, SyncTransactionQueue syncQueue) {
+        return new SizeCompatUIController(context, displayController, displayInsetsController,
+                imeController, syncQueue);
     }
 
     @WMSingleton
@@ -410,6 +416,28 @@ public abstract class WMShellBaseModule {
     abstract PipTouchHandler optionalPipTouchHandler();
 
     //
+    // Recent tasks
+    //
+
+    @WMSingleton
+    @Provides
+    static Optional<RecentTasks> provideRecentTasks(
+            Optional<RecentTasksController> recentTasksController) {
+        return recentTasksController.map((controller) -> controller.asRecentTasks());
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<RecentTasksController> provideRecentTasksController(
+            Context context,
+            TaskStackListenerImpl taskStackListener,
+            @ShellMainThread ShellExecutor mainExecutor
+    ) {
+        return Optional.ofNullable(
+                RecentTasksController.create(context, taskStackListener, mainExecutor));
+    }
+
+    //
     // Shell transitions
     //
 
@@ -555,13 +583,13 @@ public abstract class WMShellBaseModule {
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<BubbleController> bubblesOptional,
-            Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<AppPairsController> appPairsOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Optional<FullscreenUnfoldController> appUnfoldTransitionController,
             Optional<Optional<FreeformTaskListener>> freeformTaskListener,
+            Optional<RecentTasksController> recentTasksOptional,
             Transitions transitions,
             StartingWindowController startingWindow,
             @ShellMainThread ShellExecutor mainExecutor) {
@@ -571,13 +599,13 @@ public abstract class WMShellBaseModule {
                 dragAndDropController,
                 shellTaskOrganizer,
                 bubblesOptional,
-                legacySplitScreenOptional,
                 splitScreenOptional,
                 appPairsOptional,
                 pipTouchHandlerOptional,
                 fullscreenTaskListener,
                 appUnfoldTransitionController,
                 freeformTaskListener,
+                recentTasksOptional,
                 transitions,
                 startingWindow,
                 mainExecutor);
@@ -603,9 +631,10 @@ public abstract class WMShellBaseModule {
             Optional<OneHandedController> oneHandedOptional,
             Optional<HideDisplayCutoutController> hideDisplayCutout,
             Optional<AppPairsController> appPairsOptional,
+            Optional<RecentTasksController> recentTasksOptional,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new ShellCommandHandlerImpl(shellTaskOrganizer,
                 legacySplitScreenOptional, splitScreenOptional, pipOptional, oneHandedOptional,
-                hideDisplayCutout, appPairsOptional, mainExecutor);
+                hideDisplayCutout, appPairsOptional, recentTasksOptional, mainExecutor);
     }
 }

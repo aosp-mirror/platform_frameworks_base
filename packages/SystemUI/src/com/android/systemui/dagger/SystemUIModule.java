@@ -71,6 +71,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.dagger.SmartRepliesInflationModule;
 import com.android.systemui.statusbar.policy.dagger.StatusBarPolicyModule;
+import com.android.systemui.statusbar.window.StatusBarWindowModule;
 import com.android.systemui.tuner.dagger.TunerModule;
 import com.android.systemui.user.UserModule;
 import com.android.systemui.util.concurrency.SysUIConcurrencyModule;
@@ -112,6 +113,7 @@ import dagger.Provides;
             SettingsUtilModule.class,
             SmartRepliesInflationModule.class,
             StatusBarPolicyModule.class,
+            StatusBarWindowModule.class,
             SysUIConcurrencyModule.class,
             TunerModule.class,
             UserModule.class,
