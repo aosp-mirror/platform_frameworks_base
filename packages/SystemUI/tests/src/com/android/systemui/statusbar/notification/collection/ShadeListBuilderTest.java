@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.collection;
 
 import static com.android.systemui.statusbar.notification.collection.ListDumper.dumpTree;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -33,7 +35,6 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import static java.util.Arrays.asList;
@@ -44,7 +45,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
 
-import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -82,7 +82,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @SmallTest
@@ -618,26 +617,53 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
     @Test
     public void testNotifSectionsChildrenUpdated() {
-        AtomicBoolean validChildren = new AtomicBoolean(false);
+        ArrayList<ListEntry> pkg1Entries = new ArrayList<>();
+        ArrayList<ListEntry> pkg2Entries = new ArrayList<>();
+        ArrayList<ListEntry> pkg3Entries = new ArrayList<>();
         final NotifSectioner pkg1Sectioner = spy(new PackageSectioner(PACKAGE_1) {
-            @Nullable
             @Override
             public void onEntriesUpdated(List<ListEntry> entries) {
                 super.onEntriesUpdated(entries);
-                validChildren.set(entries.size() == 2);
+                pkg1Entries.addAll(entries);
             }
         });
-        mListBuilder.setSectioners(asList(pkg1Sectioner));
+        final NotifSectioner pkg2Sectioner = spy(new PackageSectioner(PACKAGE_2) {
+            @Override
+            public void onEntriesUpdated(List<ListEntry> entries) {
+                super.onEntriesUpdated(entries);
+                pkg2Entries.addAll(entries);
+            }
+        });
+        final NotifSectioner pkg3Sectioner = spy(new PackageSectioner(PACKAGE_3) {
+            @Override
+            public void onEntriesUpdated(List<ListEntry> entries) {
+                super.onEntriesUpdated(entries);
+                pkg3Entries.addAll(entries);
+            }
+        });
+        mListBuilder.setSectioners(asList(pkg1Sectioner, pkg2Sectioner, pkg3Sectioner));
 
-        addNotif(0, PACKAGE_4);
+        addNotif(0, PACKAGE_1);
         addNotif(1, PACKAGE_1);
-        addNotif(2, PACKAGE_1);
+        addNotif(2, PACKAGE_3);
         addNotif(3, PACKAGE_3);
+        addNotif(4, PACKAGE_3);
 
         dispatchBuild();
 
-        verify(pkg1Sectioner, times(1)).onEntriesUpdated(any());
-        assertTrue(validChildren.get());
+        verify(pkg1Sectioner).onEntriesUpdated(any());
+        verify(pkg2Sectioner).onEntriesUpdated(any());
+        verify(pkg3Sectioner).onEntriesUpdated(any());
+        assertThat(pkg1Entries).containsExactly(
+                mEntrySet.get(0),
+                mEntrySet.get(1)
+        ).inOrder();
+        assertThat(pkg2Entries).isEmpty();
+        assertThat(pkg3Entries).containsExactly(
+                mEntrySet.get(2),
+                mEntrySet.get(3),
+                mEntrySet.get(4)
+        ).inOrder();
     }
 
     @Test

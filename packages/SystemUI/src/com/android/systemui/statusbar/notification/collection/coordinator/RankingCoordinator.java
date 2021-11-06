@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -76,7 +75,6 @@ public class RankingCoordinator implements Coordinator {
 
         pipeline.addPreGroupFilter(mSuspendedFilter);
         pipeline.addPreGroupFilter(mDndVisualEffectsFilter);
-        pipeline.addOnBeforeSortListener(entries -> resetClearAllFlags());
     }
 
     public NotifSectioner getAlertingSectioner() {
@@ -126,6 +124,7 @@ public class RankingCoordinator implements Coordinator {
         @Nullable
         @Override
         public void onEntriesUpdated(@NonNull List<ListEntry> entries) {
+            mHasSilentEntries = false;
             for (int i = 0; i < entries.size(); i++) {
                 if (entries.get(i).getRepresentativeEntry().getSbn().isClearable()) {
                     mHasSilentEntries = true;
@@ -154,6 +153,7 @@ public class RankingCoordinator implements Coordinator {
         @Nullable
         @Override
         public void onEntriesUpdated(@NonNull List<ListEntry> entries) {
+            mHasMinimizedEntries = false;
             for (int i = 0; i < entries.size(); i++) {
                 if (entries.get(i).getRepresentativeEntry().getSbn().isClearable()) {
                     mHasMinimizedEntries = true;
@@ -188,12 +188,6 @@ public class RankingCoordinator implements Coordinator {
             return !mStatusBarStateController.isDozing() && entry.shouldSuppressNotificationList();
         }
     };
-
-    @VisibleForTesting
-    protected void resetClearAllFlags() {
-        mHasSilentEntries = false;
-        mHasMinimizedEntries = false;
-    }
 
     private final StatusBarStateController.StateListener mStatusBarStateCallback =
             new StatusBarStateController.StateListener() {

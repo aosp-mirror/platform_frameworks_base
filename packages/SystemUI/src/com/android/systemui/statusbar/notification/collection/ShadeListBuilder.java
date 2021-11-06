@@ -28,6 +28,8 @@ import static com.android.systemui.statusbar.notification.collection.listbuilder
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_SORTING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_TRANSFORMING;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.os.Trace;
@@ -372,12 +374,14 @@ public class ShadeListBuilder implements Dumpable {
         applyNewNotifList();
         pruneIncompleteGroups(mNotifList);
 
-        // Step 6: Sort
-        // Assign each top-level entry a section, then sort the list by section and then within
-        // section by our list of custom comparators
+        // Step 6: Section & Sort
+        // Assign each top-level entry a section, and copy to all of its children
         dispatchOnBeforeSort(mReadOnlyNotifList);
         mPipelineState.incrementTo(STATE_SORTING);
-        sortListAndNotifySections();
+        assignSections();
+        notifySectionEntriesUpdated();
+        // Sort the list by section and then within section by our list of custom comparators
+        sortListAndGroups();
 
         // Step 7: Lock in our group structure and log anything that's changed since the last run
         mPipelineState.incrementTo(STATE_FINALIZING);
@@ -408,18 +412,15 @@ public class ShadeListBuilder implements Dumpable {
 
     private void notifySectionEntriesUpdated() {
         Trace.beginSection("ShadeListBuilder.notifySectionEntriesUpdated");
-        NotifSection currentSection = null;
         mTempSectionMembers.clear();
-        for (int i = 0; i < mNotifList.size(); i++) {
-            ListEntry currentEntry = mNotifList.get(i);
-            if (currentSection != currentEntry.getSection()) {
-                if (currentSection != null) {
-                    currentSection.getSectioner().onEntriesUpdated(mTempSectionMembers);
-                    mTempSectionMembers.clear();
+        for (NotifSection section : mNotifSections) {
+            for (ListEntry entry : mNotifList) {
+                if (section == entry.getSection()) {
+                    mTempSectionMembers.add(entry);
                 }
-                currentSection = currentEntry.getSection();
             }
-            mTempSectionMembers.add(currentEntry);
+            section.getSectioner().onEntriesUpdated(mTempSectionMembers);
+            mTempSectionMembers.clear();
         }
         Trace.endSection();
     }
@@ -765,9 +766,9 @@ public class ShadeListBuilder implements Dumpable {
         }
     }
 
-    private void sortListAndNotifySections() {
-        Trace.beginSection("ShadeListBuilder.sortListAndNotifySections");
-        // Assign sections to top-level elements and sort their children
+    private void assignSections() {
+        Trace.beginSection("ShadeListBuilder.assignSections");
+        // Assign sections to top-level elements and their children
         for (ListEntry entry : mNotifList) {
             NotifSection section = applySections(entry);
             if (entry instanceof GroupEntry) {
@@ -775,27 +776,35 @@ public class ShadeListBuilder implements Dumpable {
                 for (NotificationEntry child : parent.getChildren()) {
                     setEntrySection(child, section);
                 }
+            }
+        }
+        Trace.endSection();
+    }
+
+    private void sortListAndGroups() {
+        Trace.beginSection("ShadeListBuilder.sortListAndGroups");
+        // Assign sections to top-level elements and sort their children
+        for (ListEntry entry : mNotifList) {
+            if (entry instanceof GroupEntry) {
+                GroupEntry parent = (GroupEntry) entry;
                 parent.sortChildren(mGroupChildrenComparator);
             }
         }
         mNotifList.sort(mTopLevelComparator);
         assignIndexes(mNotifList);
-
-        notifySectionEntriesUpdated();
         Trace.endSection();
     }
 
     /**
      * Assign the index of each notification relative to the total order
-     * @param notifList
      */
-    private void assignIndexes(List<ListEntry> notifList) {
+    private static void assignIndexes(List<ListEntry> notifList) {
         if (notifList.size() == 0) return;
-        NotifSection currentSection = notifList.get(0).getSection();
+        NotifSection currentSection = requireNonNull(notifList.get(0).getSection());
         int sectionMemberIndex = 0;
         for (int i = 0; i < notifList.size(); i++) {
             ListEntry entry = notifList.get(i);
-            NotifSection section = entry.getSection();
+            NotifSection section = requireNonNull(entry.getSection());
             if (section.getIndex() != currentSection.getIndex()) {
                 sectionMemberIndex = 0;
                 currentSection = section;
