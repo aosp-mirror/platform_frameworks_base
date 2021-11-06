@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
 import static android.text.TextUtils.formatSimple;
@@ -316,7 +317,11 @@ public final class BroadcastQueue {
         final ProcessReceiverRecord prr = app.mReceivers;
         prr.addCurReceiver(r);
         app.mState.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_RECEIVER);
-        mService.updateLruProcessLocked(app, false, null);
+        // Don't bump its LRU position if it's in the background restricted.
+        if (mService.mInternal.getRestrictionLevel(app.info.packageName, app.userId)
+                < RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
+            mService.updateLruProcessLocked(app, false, null);
+        }
         // Make sure the oom adj score is updated before delivering the broadcast.
         // Force an update, even if there are other pending requests, overall it still saves time,
         // because time(updateOomAdj(N apps)) <= N * time(updateOomAdj(1 app)).
