@@ -69,6 +69,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     private static final int UNSTASH_DURATION = 250;
     private static final int LEAVE_PIP_DURATION = 300;
     private static final int SHIFT_DURATION = 300;
+    private static final int ANIMATE_PIP_RESIZE_ANIMATION = 250;
 
     /** Friction to use for PIP when it moves via physics fling animations. */
     private static final float DEFAULT_FRICTION = 1.9f;
@@ -545,6 +546,14 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      */
     void animateToUnStashedBounds(Rect unstashedBounds) {
         resizeAndAnimatePipUnchecked(unstashedBounds, UNSTASH_DURATION);
+    }
+
+    /**
+     * Animates the PiP from an old bound to a new bound. This is mostly used when display
+     * has changed and PiP bounds needs to be changed.
+     */
+    void animateResizedBounds(Rect newBounds) {
+        resizeAndAnimatePipUnchecked(newBounds, ANIMATE_PIP_RESIZE_ANIMATION);
     }
 
     /**
