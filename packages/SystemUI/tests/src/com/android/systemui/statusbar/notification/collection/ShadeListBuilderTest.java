@@ -45,6 +45,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -861,13 +862,13 @@ public class ShadeListBuilderTest extends SysuiTestCase {
                 .onBeforeTransformGroups(anyList());
         inOrder.verify(promoter, atLeastOnce())
                 .shouldPromoteToTopLevel(any(NotificationEntry.class));
-        inOrder.verify(mOnBeforeFinalizeFilterListener).onBeforeFinalizeFilter(anyList());
-        inOrder.verify(preRenderFilter, atLeastOnce())
-                .shouldFilterOut(any(NotificationEntry.class), anyLong());
         inOrder.verify(mOnBeforeSortListener).onBeforeSort(anyList());
         inOrder.verify(section, atLeastOnce()).isInSection(any(ListEntry.class));
         inOrder.verify(comparator, atLeastOnce())
                 .compare(any(ListEntry.class), any(ListEntry.class));
+        inOrder.verify(mOnBeforeFinalizeFilterListener).onBeforeFinalizeFilter(anyList());
+        inOrder.verify(preRenderFilter, atLeastOnce())
+                .shouldFilterOut(any(NotificationEntry.class), anyLong());
         inOrder.verify(mOnBeforeRenderListListener).onBeforeRenderList(anyList());
         inOrder.verify(mOnRenderListListener).onRenderList(anyList());
     }
@@ -973,13 +974,11 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         );
 
         // THEN all the new notifs, including the new GroupEntry, are passed to the listener
-        assertEquals(
-                asList(
-                        mEntrySet.get(0),
-                        mBuiltList.get(1),
-                        mEntrySet.get(4)),
-                listener.mEntriesReceived
-        );
+        assertThat(listener.mEntriesReceived).containsExactly(
+                mEntrySet.get(0),
+                mBuiltList.get(1),
+                mEntrySet.get(4)
+        ).inOrder(); // Order is a bonus because this listener is before sort
     }
 
     @Test
@@ -1019,14 +1018,12 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         );
 
         // THEN all the new notifs, including the new GroupEntry, are passed to the listener
-        assertEquals(
-                asList(
-                        mEntrySet.get(0),
-                        mBuiltList.get(2),
-                        mEntrySet.get(7),
-                        mEntrySet.get(1)),
-                listener.mEntriesReceived
-        );
+        assertThat(listener.mEntriesReceived).containsExactly(
+                mEntrySet.get(0),
+                mEntrySet.get(1),
+                mBuiltList.get(2),
+                mEntrySet.get(7)
+        ).inOrder(); // Order is a bonus because this listener is before sort
     }
 
     @Test
@@ -1117,9 +1114,93 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testFinalizeFilteringGroupSummaryDoesNotBreakSort() {
+        // GIVEN children from 3 packages, with one in the middle of the sort order being a group
+        addNotif(0, PACKAGE_1);
+        addNotif(1, PACKAGE_2);
+        addNotif(2, PACKAGE_3);
+        addNotif(3, PACKAGE_1);
+        addNotif(4, PACKAGE_2);
+        addNotif(5, PACKAGE_3);
+        addGroupSummary(6, PACKAGE_2, GROUP_1);
+        addGroupChild(7, PACKAGE_2, GROUP_1);
+        addGroupChild(8, PACKAGE_2, GROUP_1);
+
+        // GIVEN that they should be sorted by package
+        mListBuilder.setComparators(asList(
+                new HypeComparator(PACKAGE_1),
+                new HypeComparator(PACKAGE_2),
+                new HypeComparator(PACKAGE_3)
+        ));
+
+        // WHEN a finalize filter removes the summary
+        mListBuilder.addFinalizeFilter(new NotifFilter("Test") {
+            @Override
+            public boolean shouldFilterOut(@NonNull NotificationEntry entry, long now) {
+                return entry == notif(6).entry;
+            }
+        });
+
+        dispatchBuild();
+
+        // THEN the notifications remain ordered by package, even though the children were promoted
+        verifyBuiltList(
+                notif(0),
+                notif(3),
+                notif(1),
+                notif(4),
+                notif(7),  // promoted child
+                notif(8),  // promoted child
+                notif(2),
+                notif(5)
+        );
+    }
+
+    @Test
+    public void testFinalizeFilteringGroupChildDoesNotBreakSort() {
+        // GIVEN children from 3 packages, with one in the middle of the sort order being a group
+        addNotif(0, PACKAGE_1);
+        addNotif(1, PACKAGE_2);
+        addNotif(2, PACKAGE_3);
+        addNotif(3, PACKAGE_1);
+        addNotif(4, PACKAGE_2);
+        addNotif(5, PACKAGE_3);
+        addGroupSummary(6, PACKAGE_2, GROUP_1);
+        addGroupChild(7, PACKAGE_2, GROUP_1);
+        addGroupChild(8, PACKAGE_2, GROUP_1);
+
+        // GIVEN that they should be sorted by package
+        mListBuilder.setComparators(asList(
+                new HypeComparator(PACKAGE_1),
+                new HypeComparator(PACKAGE_2),
+                new HypeComparator(PACKAGE_3)
+        ));
+
+        // WHEN a finalize filter one of the 2 children from a group
+        mListBuilder.addFinalizeFilter(new NotifFilter("Test") {
+            @Override
+            public boolean shouldFilterOut(@NonNull NotificationEntry entry, long now) {
+                return entry == notif(7).entry;
+            }
+        });
+
+        dispatchBuild();
+
+        // THEN the notifications remain ordered by package, even though the children were promoted
+        verifyBuiltList(
+                notif(0),
+                notif(3),
+                notif(1),
+                notif(4),
+                notif(8),  // promoted child
+                notif(2),
+                notif(5)
+        );
+    }
+
+    @Test
     public void testBrokenGroupNotificationOrdering() {
         // GIVEN two group children with different sections & without a summary yet
-
         addGroupChild(0, PACKAGE_2, GROUP_1);
         addNotif(1, PACKAGE_1);
         addGroupChild(2, PACKAGE_2, GROUP_1);
@@ -1250,13 +1331,11 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         dispatchBuild();
 
         // THEN all the new notifs are passed to the listener out of order
-        assertEquals(
-                asList(
-                        mEntrySet.get(0),
-                        mEntrySet.get(1),
-                        mEntrySet.get(2)),
-                listener.mEntriesReceived
-        );
+        assertThat(listener.mEntriesReceived).containsExactly(
+                mEntrySet.get(0),
+                mEntrySet.get(1),
+                mEntrySet.get(2)
+        ).inOrder();  // Checking out-of-order input to validate sorted output
 
         // THEN the final list is in order
         verifyBuiltList(
@@ -1282,13 +1361,11 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         dispatchBuild();
 
         // THEN all the new notifs are passed to the listener
-        assertEquals(
-                asList(
-                        mEntrySet.get(0),
-                        mEntrySet.get(1),
-                        mEntrySet.get(2)),
-                listener.mEntriesReceived
-        );
+        assertThat(listener.mEntriesReceived).containsExactly(
+                mEntrySet.get(0),
+                mEntrySet.get(1),
+                mEntrySet.get(2)
+        ).inOrder();
     }
 
     @Test

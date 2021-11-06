@@ -365,16 +365,7 @@ public class ShadeListBuilder implements Dumpable {
         mPipelineState.incrementTo(STATE_GROUP_STABILIZING);
         stabilizeGroupingNotifs(mNotifList);
 
-
-        // Step 5: Filter out entries after pre-group filtering, grouping and promoting
-        // Now filters can see grouping information to determine whether to filter or not.
-        dispatchOnBeforeFinalizeFilter(mReadOnlyNotifList);
-        mPipelineState.incrementTo(STATE_FINALIZE_FILTERING);
-        filterNotifs(mNotifList, mNewNotifList, mNotifFinalizeFilters);
-        applyNewNotifList();
-        pruneIncompleteGroups(mNotifList);
-
-        // Step 6: Section & Sort
+        // Step 5: Section & Sort
         // Assign each top-level entry a section, and copy to all of its children
         dispatchOnBeforeSort(mReadOnlyNotifList);
         mPipelineState.incrementTo(STATE_SORTING);
@@ -382,6 +373,15 @@ public class ShadeListBuilder implements Dumpable {
         notifySectionEntriesUpdated();
         // Sort the list by section and then within section by our list of custom comparators
         sortListAndGroups();
+
+        // Step 6: Filter out entries after pre-group filtering, grouping, promoting, and sorting
+        // Now filters can see grouping, sectioning, and order information to determine whether
+        // to filter or not.
+        dispatchOnBeforeFinalizeFilter(mReadOnlyNotifList);
+        mPipelineState.incrementTo(STATE_FINALIZE_FILTERING);
+        filterNotifs(mNotifList, mNewNotifList, mNotifFinalizeFilters);
+        applyNewNotifList();
+        pruneIncompleteGroups(mNotifList);
 
         // Step 7: Lock in our group structure and log anything that's changed since the last run
         mPipelineState.incrementTo(STATE_FINALIZING);
@@ -654,16 +654,15 @@ public class ShadeListBuilder implements Dumpable {
                 final List<NotificationEntry> children = group.getRawChildren();
 
                 if (group.getSummary() != null && children.size() == 0) {
-                    shadeList.remove(i);
-                    i--;
-
                     NotificationEntry summary = group.getSummary();
                     summary.setParent(ROOT_ENTRY);
-                    shadeList.add(summary);
+                    // The list may be sorted; replace the group with the summary, in its place
+                    shadeList.set(i, summary);
 
                     group.setSummary(null);
                     annulAddition(group, shadeList);
 
+                    i--;  // The node we visited is gone, so be sure to visit this index again.
                 } else if (group.getSummary() == null
                         || children.size() < MIN_CHILDREN_FOR_GROUP) {
 
@@ -681,7 +680,6 @@ public class ShadeListBuilder implements Dumpable {
                     // its children (if any) directly to top-level.
 
                     shadeList.remove(i);
-                    i--;
 
                     if (group.getSummary() != null) {
                         final NotificationEntry summary = group.getSummary();
@@ -692,11 +690,14 @@ public class ShadeListBuilder implements Dumpable {
                     for (int j = 0; j < children.size(); j++) {
                         final NotificationEntry child = children.get(j);
                         child.setParent(ROOT_ENTRY);
-                        shadeList.add(child);
+                        // The list may be sorted, so add the children in order where the group was.
+                        shadeList.add(i + j, child);
                     }
                     children.clear();
 
                     annulAddition(group, shadeList);
+
+                    i--;  // The node we visited is gone, so be sure to visit this index again.
                 }
             }
         }
