@@ -4833,6 +4833,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void bootAnimationComplete() {
+        if (DEBUG_ALL) Slog.d(TAG, "bootAnimationComplete: Callers=" + Debug.getCallers(4));
+
         final boolean callFinishBooting;
         synchronized (this) {
             callFinishBooting = mCallFinishBooting;
@@ -7656,7 +7658,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // On Automotive, at this point the system user has already been started and unlocked,
         // and some of the tasks we do here have already been done. So skip those in that case.
-        // TODO(b/132262830): this workdound shouldn't be necessary once we move the
+        // TODO(b/132262830, b/203885241): this workdound shouldn't be necessary once we move the
         // headless-user start logic to UserManager-land
         final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
 
