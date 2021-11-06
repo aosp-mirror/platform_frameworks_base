@@ -377,7 +377,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private void playTouchFeedback() {
         if (System.currentTimeMillis() - mLastToggledRingerOn < TOUCH_FEEDBACK_TIMEOUT_MS) {
             try {
-                mAudioService.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD);
+                mAudioService.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD,
+                        UserHandle.USER_CURRENT);
             } catch (RemoteException e) {
                 // ignore
             }

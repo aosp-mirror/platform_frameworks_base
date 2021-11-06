@@ -490,12 +490,25 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         if (mPipTaskOrganizer.isInPip() && saveRestoreSnapFraction) {
             // Calculate the snap fraction of the current stack along the old movement bounds
             final PipSnapAlgorithm pipSnapAlgorithm = mPipBoundsAlgorithm.getSnapAlgorithm();
-            final Rect postChangeStackBounds = new Rect(mPipBoundsState.getBounds());
-            final float snapFraction = pipSnapAlgorithm.getSnapFraction(postChangeStackBounds,
-                    mPipBoundsAlgorithm.getMovementBounds(postChangeStackBounds),
+            final float snapFraction = pipSnapAlgorithm.getSnapFraction(mPipBoundsState.getBounds(),
+                    mPipBoundsAlgorithm.getMovementBounds(mPipBoundsState.getBounds()),
                     mPipBoundsState.getStashedState());
 
             updateDisplayLayout.run();
+            final Rect postChangeStackBounds;
+            if (mPipBoundsState.getBounds() != null
+                    && (mPipBoundsState.getBounds().width() > mPipBoundsState.getMaxSize().x
+                    || mPipBoundsState.getBounds().height() > mPipBoundsState.getMaxSize().y)) {
+                postChangeStackBounds = new Rect(0, 0, mPipBoundsState.getMaxSize().x,
+                        mPipBoundsState.getMaxSize().y);
+            } else if (mPipBoundsState.getBounds() != null
+                    && (mPipBoundsState.getBounds().width() < mPipBoundsState.getMinSize().x
+                    || mPipBoundsState.getBounds().height() < mPipBoundsState.getMinSize().y)) {
+                postChangeStackBounds = new Rect(0, 0, mPipBoundsState.getMinSize().x,
+                        mPipBoundsState.getMinSize().y);
+            } else {
+                postChangeStackBounds = new Rect(mPipBoundsState.getBounds());
+            }
 
             // Calculate the stack bounds in the new orientation based on same fraction along the
             // rotated movement bounds.
@@ -507,7 +520,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     mPipBoundsState.getDisplayBounds(),
                     mPipBoundsState.getDisplayLayout().stableInsets());
 
-            mTouchHandler.getMotionHelper().movePip(postChangeStackBounds);
+            mTouchHandler.getMotionHelper().animateResizedBounds(postChangeStackBounds);
         } else {
             updateDisplayLayout.run();
         }

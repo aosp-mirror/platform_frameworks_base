@@ -654,6 +654,15 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".ProfcollectUploadReceiver"
+            android:exported="true"
+            android:permission="android.permission.TRIGGER_SHELL_PROFCOLLECT_UPLOAD" >
+            <intent-filter>
+                <action android:name="com.android.shell.action.UPLOAD_REPORT" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".BugreportProgressService"
             android:exported="false"/>
