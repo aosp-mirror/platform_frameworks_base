@@ -1174,6 +1174,33 @@ public class WindowContainerTests extends WindowTestsBase {
         assertNull(surfaceAnimator.mSnapshot);
     }
 
+    @Test
+    public void testRemoveUnstartedFreezeSurfaceWhenFreezeAgain() {
+        final WindowContainer container = createTaskFragmentWithParentTask(
+                createTask(mDisplayContent), false);
+        container.mSurfaceControl = mock(SurfaceControl.class);
+        final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        spyOn(container);
+        doReturn(t).when(container).getPendingTransaction();
+        doReturn(t).when(container).getSyncTransaction();
+
+        // Leash and snapshot created for change transition.
+        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
+
+        assertNotNull(surfaceFreezer.mLeash);
+
+        // Can't really take a snapshot, manually set one.
+        final SurfaceFreezer.Snapshot snapshot = mock(SurfaceFreezer.Snapshot.class);
+        surfaceFreezer.mSnapshot = snapshot;
+        final SurfaceControl prevLeash = surfaceFreezer.mLeash;
+
+        container.initializeChangeTransition(new Rect(0, 0, 1500, 2500));
+
+        verify(t).remove(prevLeash);
+        verify(snapshot).destroy(t);
+    }
+
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
     private static class TestWindowContainer extends WindowContainer<TestWindowContainer> {
         private final int mLayer;
