@@ -26,6 +26,7 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.any
@@ -39,6 +40,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import java.util.Optional
 
 @SmallTest
 class PhoneStatusBarViewControllerTest : SysuiTestCase() {
@@ -51,9 +53,10 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     private lateinit var panelView: ViewGroup
     @Mock
     private lateinit var scrimController: ScrimController
-
     @Mock
     private lateinit var moveFromCenterAnimation: StatusBarMoveFromCenterAnimationController
+    @Mock
+    private lateinit var sysuiUnfoldComponent: SysUIUnfoldComponent
     @Mock
     private lateinit var progressProvider: ScopedUnfoldTransitionProgressProvider
 
@@ -66,7 +69,8 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         `when`(panelViewController.view).thenReturn(panelView)
-
+        `when`(sysuiUnfoldComponent.getStatusBarMoveFromCenterAnimationController())
+            .thenReturn(moveFromCenterAnimation)
         // create the view on main thread as it requires main looper
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             val parent = FrameLayout(mContext) // add parent to keep layout params
@@ -112,9 +116,8 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     private fun createController(view: PhoneStatusBarView): PhoneStatusBarViewController {
         return PhoneStatusBarViewController.Factory(
-            { progressProvider },
-            { moveFromCenterAnimation },
-            unfoldConfig
+            Optional.of(sysuiUnfoldComponent),
+            Optional.of(progressProvider)
         ).create(view, touchEventHandler)
     }
 

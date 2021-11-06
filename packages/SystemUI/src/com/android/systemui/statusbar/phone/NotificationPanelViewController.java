@@ -99,6 +99,7 @@ import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
+import com.android.keyguard.KeyguardUnfoldTransition;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
@@ -178,6 +179,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
@@ -188,6 +190,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -605,6 +608,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private boolean mStatusViewCentered = true;
 
+    private Optional<KeyguardUnfoldTransition> mKeyguardUnfoldTransition;
+
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
         @Override
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
@@ -694,6 +699,7 @@ public class NotificationPanelViewController extends PanelViewController {
             LockscreenGestureLogger lockscreenGestureLogger,
             PanelExpansionStateManager panelExpansionStateManager,
             NotificationRemoteInputManager remoteInputManager,
+            Optional<SysUIUnfoldComponent> unfoldComponent,
             ControlsComponent controlsComponent,
             FeatureFlags featureFlags) {
         super(view,
@@ -809,6 +815,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
 
         mMaxKeyguardNotifications = resources.getInteger(R.integer.keyguard_max_notification_count);
+        mKeyguardUnfoldTransition = unfoldComponent.map(c -> c.getKeyguardUnfoldTransition());
         updateUserSwitcherFlags();
         onFinishInflate();
 
@@ -839,11 +846,12 @@ public class NotificationPanelViewController extends PanelViewController {
                         .getKeyguardStatusBarViewController();
         mKeyguardStatusBarViewController.init();
 
+        mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
         updateViewControllers(
                 mView.findViewById(R.id.keyguard_status_view),
                 userAvatarContainer,
                 keyguardUserSwitcherView);
-        mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
+
         NotificationStackScrollLayout stackScrollLayout = mView.findViewById(
                 R.id.notification_stack_scroller);
         mNotificationStackScrollLayoutController.attach(stackScrollLayout);
@@ -894,6 +902,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
 
         mTapAgainViewController.init();
+        mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mNotificationContainerParent));
     }
 
     @Override
@@ -1137,6 +1146,8 @@ public class NotificationPanelViewController extends PanelViewController {
                     mBarState);
         }
         setKeyguardBottomAreaVisibility(mBarState, false);
+
+        mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mNotificationContainerParent));
     }
 
     private void attachSplitShadeMediaPlayerContainer(FrameLayout container) {
