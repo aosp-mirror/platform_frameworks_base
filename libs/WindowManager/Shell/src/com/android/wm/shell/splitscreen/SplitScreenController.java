@@ -48,11 +48,11 @@ import android.window.RemoteTransition;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.BinderThread;
+import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.InstanceId;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -70,6 +70,8 @@ import com.android.wm.shell.transition.LegacyTransitions;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -86,6 +88,29 @@ import javax.inject.Provider;
 public class SplitScreenController implements DragAndDropPolicy.Starter,
         RemoteCallable<SplitScreenController> {
     private static final String TAG = SplitScreenController.class.getSimpleName();
+
+    static final int EXIT_REASON_UNKNOWN = 0;
+    static final int EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW = 1;
+    static final int EXIT_REASON_APP_FINISHED = 2;
+    static final int EXIT_REASON_DEVICE_FOLDED = 3;
+    static final int EXIT_REASON_DRAG_DIVIDER = 4;
+    static final int EXIT_REASON_RETURN_HOME = 5;
+    static final int EXIT_REASON_ROOT_TASK_VANISHED = 6;
+    static final int EXIT_REASON_SCREEN_LOCKED = 7;
+    static final int EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP = 8;
+    @IntDef(value = {
+            EXIT_REASON_UNKNOWN,
+            EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW,
+            EXIT_REASON_APP_FINISHED,
+            EXIT_REASON_DEVICE_FOLDED,
+            EXIT_REASON_DRAG_DIVIDER,
+            EXIT_REASON_RETURN_HOME,
+            EXIT_REASON_ROOT_TASK_VANISHED,
+            EXIT_REASON_SCREEN_LOCKED,
+            EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ExitReason{}
 
     private final ShellTaskOrganizer mTaskOrganizer;
     private final SyncTransactionQueue mSyncQueue;
@@ -201,7 +226,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 leftOrTop ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
     }
 
-    public void exitSplitScreen(int toTopTaskId, int exitReason) {
+    public void exitSplitScreen(int toTopTaskId, @ExitReason int exitReason) {
         mStageCoordinator.exitSplitScreen(toTopTaskId, exitReason);
     }
 
@@ -346,6 +371,34 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      */
     public void logOnDroppedToSplit(@SplitPosition int position, InstanceId dragSessionId) {
         mStageCoordinator.logOnDroppedToSplit(position, dragSessionId);
+    }
+
+    /**
+     * Return the {@param exitReason} as a string.
+     */
+    public static String exitReasonToString(int exitReason) {
+        switch (exitReason) {
+            case EXIT_REASON_UNKNOWN:
+                return "UNKNOWN_EXIT";
+            case EXIT_REASON_DRAG_DIVIDER:
+                return "DRAG_DIVIDER";
+            case EXIT_REASON_RETURN_HOME:
+                return "RETURN_HOME";
+            case EXIT_REASON_SCREEN_LOCKED:
+                return "SCREEN_LOCKED";
+            case EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP:
+                return "SCREEN_LOCKED_SHOW_ON_TOP";
+            case EXIT_REASON_DEVICE_FOLDED:
+                return "DEVICE_FOLDED";
+            case EXIT_REASON_ROOT_TASK_VANISHED:
+                return "ROOT_TASK_VANISHED";
+            case EXIT_REASON_APP_FINISHED:
+                return "APP_FINISHED";
+            case EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW:
+                return "APP_DOES_NOT_SUPPORT_MULTIWINDOW";
+            default:
+                return "unknown reason, reason int = " + exitReason;
+        }
     }
 
     public void dump(@NonNull PrintWriter pw, String prefix) {
@@ -497,8 +550,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         public void exitSplitScreen(int toTopTaskId) {
             executeRemoteCallWithTaskPermission(mController, "exitSplitScreen",
                     (controller) -> {
-                        controller.exitSplitScreen(toTopTaskId,
-                                FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__UNKNOWN_EXIT);
+                        controller.exitSplitScreen(toTopTaskId, EXIT_REASON_UNKNOWN);
                     });
         }
 
