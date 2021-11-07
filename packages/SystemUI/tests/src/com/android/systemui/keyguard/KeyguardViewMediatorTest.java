@@ -57,17 +57,21 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
-import com.android.systemui.unfold.config.UnfoldTransitionConfig;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -90,7 +94,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock NavigationModeController mNavigationModeController;
     private @Mock KeyguardDisplayManager mKeyguardDisplayManager;
     private @Mock DozeParameters mDozeParameters;
-    private @Mock UnfoldTransitionConfig mUnfoldTransitionConfig;
+    private @Mock Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent;
+    private @Mock Optional<UnfoldLightRevealOverlayAnimation> mUnfoldAnimationOptional;
     private @Mock UnfoldLightRevealOverlayAnimation mUnfoldAnimation;
     private @Mock SysuiStatusBarStateController mStatusBarStateController;
     private @Mock KeyguardStateController mKeyguardStateController;
@@ -110,6 +115,12 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         when(mLockPatternUtils.getDevicePolicyManager()).thenReturn(mDevicePolicyManager);
         when(mPowerManager.newWakeLock(anyInt(), any())).thenReturn(mock(WakeLock.class));
+        when(mSysUIUnfoldComponent.map(
+                ArgumentMatchers.<Function<SysUIUnfoldComponent, UnfoldLightRevealOverlayAnimation>>
+                        any()))
+            .thenReturn(mUnfoldAnimationOptional);
+        when(mUnfoldAnimationOptional.isPresent()).thenReturn(true);
+        when(mUnfoldAnimationOptional.get()).thenReturn(mUnfoldAnimation);
 
         mViewMediator = new KeyguardViewMediator(
                 mContext,
@@ -128,8 +139,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mNavigationModeController,
                 mKeyguardDisplayManager,
                 mDozeParameters,
-                mUnfoldTransitionConfig,
-                () -> mUnfoldAnimation,
+                mSysUIUnfoldComponent,
                 mStatusBarStateController,
                 mKeyguardStateController,
                 () -> mKeyguardUnlockAnimationController,
@@ -161,8 +171,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void testUnfoldTransitionEnabledDrawnTasksReady_onScreenTurningOn_callsDrawnCallback()
             throws RemoteException {
-        when(mUnfoldTransitionConfig.isEnabled()).thenReturn(true);
-
         mViewMediator.onScreenTurningOn(mKeyguardDrawnCallback);
         TestableLooper.get(this).processAllMessages();
         onUnfoldOverlayReady();
@@ -175,7 +183,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void testUnfoldTransitionDisabledDrawnTasksReady_onScreenTurningOn_callsDrawnCallback()
             throws RemoteException {
-        when(mUnfoldTransitionConfig.isEnabled()).thenReturn(false);
+        when(mUnfoldAnimationOptional.isPresent()).thenReturn(false);
 
         mViewMediator.onScreenTurningOn(mKeyguardDrawnCallback);
         TestableLooper.get(this).processAllMessages();

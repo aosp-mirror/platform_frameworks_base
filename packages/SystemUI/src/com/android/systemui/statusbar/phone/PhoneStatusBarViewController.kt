@@ -21,21 +21,21 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import com.android.systemui.R
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
-import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.UNFOLD_STATUS_BAR
-import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.util.ViewController
+import com.android.systemui.util.kotlin.getOrNull
+import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Named
-import dagger.Lazy
 
 /** Controller for [PhoneStatusBarView].  */
 class PhoneStatusBarViewController private constructor(
     view: PhoneStatusBarView,
     @Named(UNFOLD_STATUS_BAR) private val progressProvider: ScopedUnfoldTransitionProgressProvider?,
     private val moveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
-    touchEventHandler: PhoneStatusBarView.TouchEventHandler,
+    touchEventHandler: PhoneStatusBarView.TouchEventHandler
 ) : ViewController<PhoneStatusBarView>(view) {
 
     override fun onViewAttached() {
@@ -115,21 +115,21 @@ class PhoneStatusBarViewController private constructor(
     }
 
     class Factory @Inject constructor(
+        private val unfoldComponent: Optional<SysUIUnfoldComponent>,
         @Named(UNFOLD_STATUS_BAR)
-        private val progressProvider: Lazy<ScopedUnfoldTransitionProgressProvider>,
-        private val moveFromCenterController: Lazy<StatusBarMoveFromCenterAnimationController>,
-        private val unfoldConfig: UnfoldTransitionConfig,
+        private val progressProvider: Optional<ScopedUnfoldTransitionProgressProvider>
     ) {
         fun create(
             view: PhoneStatusBarView,
             touchEventHandler: PhoneStatusBarView.TouchEventHandler
-        ): PhoneStatusBarViewController {
-            return PhoneStatusBarViewController(
+        ) =
+            PhoneStatusBarViewController(
                 view,
-                if (unfoldConfig.isEnabled) progressProvider.get() else null,
-                if (unfoldConfig.isEnabled) moveFromCenterController.get() else null,
+                progressProvider.getOrNull(),
+                unfoldComponent.map {
+                    it.getStatusBarMoveFromCenterAnimationController()
+                }.getOrNull(),
                 touchEventHandler
             )
-        }
     }
 }

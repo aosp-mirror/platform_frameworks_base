@@ -125,6 +125,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -140,6 +141,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
 import java.util.List;
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -306,7 +308,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private NotificationsQSContainerController mNotificationsQSContainerController;
     @Mock
     private FeatureFlags mFeatureFlags;
-
+    private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent;
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
     private View.AccessibilityDelegate mAccessibiltyDelegate;
@@ -450,6 +452,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mLockscreenGestureLogger,
                 new PanelExpansionStateManager(),
                 mNotificationRemoteInputManager,
+                mSysUIUnfoldComponent,
                 mControlsComponent,
                 mFeatureFlags);
         mNotificationPanelViewController.initDependencies(

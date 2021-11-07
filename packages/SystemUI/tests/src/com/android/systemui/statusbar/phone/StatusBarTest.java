@@ -143,10 +143,6 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.tuner.TunerService;
-import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
-import com.android.systemui.unfold.UnfoldTransitionWallpaperController;
-import com.android.systemui.unfold.config.UnfoldTransitionConfig;
-import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider;
 import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.MessageRouterImpl;
@@ -261,10 +257,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private DemoModeController mDemoModeController;
     @Mock private Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
     @Mock private BrightnessSliderController.Factory mBrightnessSliderFactory;
-    @Mock private UnfoldTransitionConfig mUnfoldTransitionConfig;
-    @Mock private Lazy<UnfoldLightRevealOverlayAnimation> mUnfoldLightRevealOverlayAnimationLazy;
-    @Mock private Lazy<NaturalRotationUnfoldProgressProvider> mNaturalRotationProgressProvider;
-    @Mock private Lazy<UnfoldTransitionWallpaperController> mUnfoldWallpaperController;
     @Mock private WallpaperController mWallpaperController;
     @Mock private OngoingCallController mOngoingCallController;
     @Mock private SystemStatusAnimationScheduler mAnimationScheduler;
@@ -443,10 +435,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mStatusBarTouchableRegionManager,
                 mNotificationIconAreaController,
                 mBrightnessSliderFactory,
-                mUnfoldTransitionConfig,
-                mUnfoldLightRevealOverlayAnimationLazy,
-                mUnfoldWallpaperController,
-                mNaturalRotationProgressProvider,
                 mWallpaperController,
                 mOngoingCallController,
                 mAnimationScheduler,

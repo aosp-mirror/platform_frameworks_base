@@ -66,6 +66,7 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
+import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.transition.LegacyTransitions;
 import com.android.wm.shell.transition.Transitions;
 
@@ -124,9 +125,23 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final TransactionPool mTransactionPool;
     private final SplitscreenEventLogger mLogger;
     private final IconProvider mIconProvider;
+    private final Optional<RecentTasksController> mRecentTasksOptional;
     private final Provider<Optional<StageTaskUnfoldController>> mUnfoldControllerProvider;
 
     private StageCoordinator mStageCoordinator;
+
+    // TODO(b/205019015): Remove after we clean up downstream modules
+    public SplitScreenController(ShellTaskOrganizer shellTaskOrganizer,
+            SyncTransactionQueue syncQueue, Context context,
+            RootTaskDisplayAreaOrganizer rootTDAOrganizer,
+            ShellExecutor mainExecutor, DisplayImeController displayImeController,
+            DisplayInsetsController displayInsetsController,
+            Transitions transitions, TransactionPool transactionPool, IconProvider iconProvider,
+            Provider<Optional<StageTaskUnfoldController>> unfoldControllerProvider) {
+        this(shellTaskOrganizer, syncQueue, context, rootTDAOrganizer, mainExecutor,
+                displayImeController, displayInsetsController, transitions, transactionPool,
+                iconProvider, Optional.empty(), unfoldControllerProvider);
+    }
 
     public SplitScreenController(ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, Context context,
@@ -134,6 +149,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             ShellExecutor mainExecutor, DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
             Transitions transitions, TransactionPool transactionPool, IconProvider iconProvider,
+            Optional<RecentTasksController> recentTasks,
             Provider<Optional<StageTaskUnfoldController>> unfoldControllerProvider) {
         mTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
@@ -147,6 +163,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mUnfoldControllerProvider = unfoldControllerProvider;
         mLogger = new SplitscreenEventLogger();
         mIconProvider = iconProvider;
+        mRecentTasksOptional = recentTasks;
     }
 
     public SplitScreen asSplitScreen() {
@@ -169,7 +186,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             mStageCoordinator = new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                     mRootTDAOrganizer, mTaskOrganizer, mDisplayImeController,
                     mDisplayInsetsController, mTransitions, mTransactionPool, mLogger,
-                    mIconProvider, mUnfoldControllerProvider);
+                    mIconProvider, mRecentTasksOptional, mUnfoldControllerProvider);
         }
     }
 
