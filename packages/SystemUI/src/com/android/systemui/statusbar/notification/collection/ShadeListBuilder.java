@@ -36,6 +36,7 @@ import android.os.Trace;
 import android.util.ArrayMap;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
@@ -66,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -793,7 +795,36 @@ public class ShadeListBuilder implements Dumpable {
         }
         mNotifList.sort(mTopLevelComparator);
         assignIndexes(mNotifList);
+
+        // Check for suppressed order changes
+        if (!mNotifStabilityManager.isEveryChangeAllowed()) {
+            mForceReorderable = true;
+            boolean isSorted = isSorted(mNotifList, mTopLevelComparator);
+            mForceReorderable = false;
+            if (!isSorted) {
+                mNotifStabilityManager.onEntryReorderSuppressed();
+            }
+        }
         Trace.endSection();
+    }
+
+    /** Determine whether the items in the list are sorted according to the comparator */
+    @VisibleForTesting
+    public static <T> boolean isSorted(List<T> items, Comparator<T> comparator) {
+        if (items.size() <= 1) {
+            return true;
+        }
+        Iterator<T> iterator = items.iterator();
+        T previous = iterator.next();
+        T current;
+        while (iterator.hasNext()) {
+            current = iterator.next();
+            if (comparator.compare(previous, current) > 0) {
+                return false;
+            }
+            previous = current;
+        }
+        return true;
     }
 
     /**
@@ -970,8 +1001,14 @@ public class ShadeListBuilder implements Dumpable {
         return cmp;
     };
 
+    /**
+     * A flag that is set to true when we want to run the comparators as if all reordering is
+     * allowed.  This is used to check if the list is "out of order" after the sort is complete.
+     */
+    private boolean mForceReorderable = false;
+
     private boolean canReorder(ListEntry entry) {
-        return mNotifStabilityManager.isEntryReorderingAllowed(entry);
+        return mForceReorderable || mNotifStabilityManager.isEntryReorderingAllowed(entry);
     }
 
     private boolean applyFilters(NotificationEntry entry, long now, List<NotifFilter> filters) {

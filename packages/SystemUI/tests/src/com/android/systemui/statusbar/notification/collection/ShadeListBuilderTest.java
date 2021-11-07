@@ -35,6 +35,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import static java.util.Arrays.asList;
@@ -80,6 +81,8 @@ import org.mockito.Spy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -124,7 +127,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         mListBuilder.attach(mNotifCollection);
 
-        mStabilityManager = new TestableStabilityManager();
+        mStabilityManager = spy(new TestableStabilityManager());
         mListBuilder.setNotifStabilityManager(mStabilityManager);
 
         Mockito.verify(mNotifCollection).setBuildListener(mBuildListenerCaptor.capture());
@@ -1468,6 +1471,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         assertOrder("ABCDEFG", "ACDEFBG", "ABCDEFG"); // no change
         assertOrder("ABCDEFG", "ACDEFBXZG", "XZABCDEFG"); // Z and X
         assertOrder("ABCDEFG", "AXCDEZFBG", "XZABCDEFG"); // Z and X + gap
+        verify(mStabilityManager, times(4)).onEntryReorderSuppressed();
     }
 
     @Test
@@ -1476,6 +1480,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         assertOrder("ABCDEFG", "ACDEFBG", "ACDEFBG"); // no change
         assertOrder("ABCDEFG", "ACDEFBXZG", "ACDEFBXZG"); // Z and X
         assertOrder("ABCDEFG", "AXCDEZFBG", "AXCDEZFBG"); // Z and X + gap
+        verify(mStabilityManager, never()).onEntryReorderSuppressed();
     }
 
     @Test
@@ -1511,6 +1516,26 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         dispatchBuild();
 
         // THEN no exception thrown
+    }
+
+    @Test
+    public void testIsSorted() {
+        Comparator<Integer> intCmp = Integer::compare;
+        assertTrue(ShadeListBuilder.isSorted(Collections.emptyList(), intCmp));
+        assertTrue(ShadeListBuilder.isSorted(Collections.singletonList(1), intCmp));
+        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 2), intCmp));
+        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 3), intCmp));
+        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 3, 4), intCmp));
+        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 3, 4, 5), intCmp));
+        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 1, 1, 1, 1), intCmp));
+        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 1, 2, 2, 3, 3), intCmp));
+
+        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(2, 1), intCmp));
+        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(2, 1, 2), intCmp));
+        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 1), intCmp));
+        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 3, 2, 5), intCmp));
+        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(5, 2, 3, 4, 5), intCmp));
+        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 3, 4, 1), intCmp));
     }
 
     /**
@@ -1917,6 +1942,15 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         @Override
         public boolean isEntryReorderingAllowed(ListEntry entry) {
             return mAllowEntryReodering;
+        }
+
+        @Override
+        public boolean isEveryChangeAllowed() {
+            return mAllowEntryReodering && mAllowGroupChanges && mAllowSectionChanges;
+        }
+
+        @Override
+        public void onEntryReorderSuppressed() {
         }
     }
 

@@ -19,11 +19,12 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
 
-import android.annotation.NonNull;
-
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
@@ -34,6 +35,8 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -53,7 +56,7 @@ import javax.inject.Inject;
  */
 // TODO(b/204468557): Move to @CoordinatorScope
 @SysUISingleton
-public class VisualStabilityCoordinator implements Coordinator {
+public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     private final DelayableExecutor mDelayableExecutor;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final StatusBarStateController mStatusBarStateController;
@@ -66,6 +69,7 @@ public class VisualStabilityCoordinator implements Coordinator {
     private boolean mReorderingAllowed;
     private boolean mIsSuppressingGroupChange = false;
     private final Set<String> mEntriesWithSuppressedSectionChange = new HashSet<>();
+    private boolean mIsSuppressingEntryReorder = false;
 
     // key: notification key that can temporarily change its section
     // value: runnable that when run removes its associated RemoveOverrideSuppressionRunnable
@@ -77,6 +81,7 @@ public class VisualStabilityCoordinator implements Coordinator {
 
     @Inject
     public VisualStabilityCoordinator(
+            DumpManager dumpManager,
             HeadsUpManager headsUpManager,
             WakefulnessLifecycle wakefulnessLifecycle,
             StatusBarStateController statusBarStateController,
@@ -86,6 +91,8 @@ public class VisualStabilityCoordinator implements Coordinator {
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mStatusBarStateController = statusBarStateController;
         mDelayableExecutor = delayableExecutor;
+
+        dumpManager.registerDumpable(this);
     }
 
     @Override
@@ -99,7 +106,6 @@ public class VisualStabilityCoordinator implements Coordinator {
 
         pipeline.setVisualStabilityManager(mNotifStabilityManager);
     }
-    // TODO(b/203828145): Ensure stability manager handles minimized state changes
     // TODO(b/203826051): Ensure stability manager can allow reordering off-screen
     //  HUNs to the top of the shade
     private final NotifStabilityManager mNotifStabilityManager =
@@ -108,6 +114,7 @@ public class VisualStabilityCoordinator implements Coordinator {
                 public void onBeginRun() {
                     mIsSuppressingGroupChange = false;
                     mEntriesWithSuppressedSectionChange.clear();
+                    mIsSuppressingEntryReorder = false;
                 }
 
                 @Override
@@ -124,7 +131,7 @@ public class VisualStabilityCoordinator implements Coordinator {
                             mReorderingAllowed
                                     || mHeadsUpManager.isAlerting(entry.getKey())
                                     || mEntriesThatCanChangeSection.containsKey(entry.getKey());
-                    if (isSectionChangeAllowedForEntry) {
+                    if (!isSectionChangeAllowedForEntry) {
                         mEntriesWithSuppressedSectionChange.add(entry.getKey());
                     }
                     return isSectionChangeAllowedForEntry;
@@ -134,11 +141,22 @@ public class VisualStabilityCoordinator implements Coordinator {
                 public boolean isEntryReorderingAllowed(ListEntry section) {
                     return mReorderingAllowed;
                 }
+
+                @Override
+                public boolean isEveryChangeAllowed() {
+                    return mReorderingAllowed;
+                }
+
+                @Override
+                public void onEntryReorderSuppressed() {
+                    mIsSuppressingEntryReorder = true;
+                }
             };
 
     private void updateAllowedStates() {
         mReorderingAllowed = isReorderingAllowed();
-        if (mReorderingAllowed && (mIsSuppressingGroupChange || isSuppressingSectionChange())) {
+        if (mReorderingAllowed && (mIsSuppressingGroupChange || isSuppressingSectionChange()
+                || mIsSuppressingEntryReorder)) {
             mNotifStabilityManager.invalidateList();
         }
     }
@@ -211,4 +229,23 @@ public class VisualStabilityCoordinator implements Coordinator {
             updateAllowedStates();
         }
     };
+
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("reorderingAllowed: " + mReorderingAllowed);
+        pw.println("  screenOn: " + mScreenOn);
+        pw.println("  panelExpanded: " + mPanelExpanded);
+        pw.println("  pulsing: " + mPulsing);
+        pw.println("isSuppressingGroupChange: " + mIsSuppressingGroupChange);
+        pw.println("isSuppressingEntryReorder: " + mIsSuppressingEntryReorder);
+        pw.println("entriesWithSuppressedSectionChange: "
+                + mEntriesWithSuppressedSectionChange.size());
+        for (String key : mEntriesWithSuppressedSectionChange) {
+            pw.println("  " + key);
+        }
+        pw.println("entriesThatCanChangeSection: " + mEntriesThatCanChangeSection.size());
+        for (String key : mEntriesThatCanChangeSection.keySet()) {
+            pw.println("  " + key);
+        }
+    }
 }
