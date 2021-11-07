@@ -72,6 +72,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.platform.test.annotations.Presubmit;
 import android.util.IntArray;
 
 import androidx.test.filters.MediumTest;
@@ -109,6 +110,7 @@ import java.util.function.Function;
  * Build/Install/Run:
  *  atest FrameworksServicesTests:ActivityManagerServiceTest
  */
+@Presubmit
 @SmallTest
 public class ActivityManagerServiceTest {
     private static final String TAG = ActivityManagerServiceTest.class.getSimpleName();
