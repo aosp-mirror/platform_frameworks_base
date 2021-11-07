@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.splitscreen;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
@@ -110,6 +111,19 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     boolean containsTask(int taskId) {
         return mChildrenTaskInfo.contains(taskId);
+    }
+
+    /**
+     * Returns the top visible child task's id.
+     */
+    int getTopVisibleChildTaskId() {
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
+            final ActivityManager.RunningTaskInfo info = mChildrenTaskInfo.valueAt(i);
+            if (info.isVisible) {
+                return info.taskId;
+            }
+        }
+        return INVALID_TASK_ID;
     }
 
     /**

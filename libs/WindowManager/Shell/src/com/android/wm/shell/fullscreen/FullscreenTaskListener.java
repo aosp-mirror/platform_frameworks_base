@@ -35,6 +35,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
@@ -47,15 +48,23 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = "FullscreenTaskListener";
 
     private final SyncTransactionQueue mSyncQueue;
+    private final FullscreenUnfoldController mFullscreenUnfoldController;
+    private final Optional<RecentTasksController> mRecentTasksOptional;
 
     private final SparseArray<TaskData> mDataByTaskId = new SparseArray<>();
     private final AnimatableTasksListener mAnimatableTasksListener = new AnimatableTasksListener();
-    private final FullscreenUnfoldController mFullscreenUnfoldController;
 
     public FullscreenTaskListener(SyncTransactionQueue syncQueue,
             Optional<FullscreenUnfoldController> unfoldController) {
+        this(syncQueue, unfoldController, Optional.empty());
+    }
+
+    public FullscreenTaskListener(SyncTransactionQueue syncQueue,
+            Optional<FullscreenUnfoldController> unfoldController,
+            Optional<RecentTasksController> recentTasks) {
         mSyncQueue = syncQueue;
         mFullscreenUnfoldController = unfoldController.orElse(null);
+        mRecentTasksOptional = recentTasks;
     }
 
     @Override
@@ -79,6 +88,7 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
         });
 
         mAnimatableTasksListener.onTaskAppeared(taskInfo);
+        updateRecentsForVisibleFullscreenTask(taskInfo);
     }
 
     @Override
@@ -86,6 +96,7 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
 
         mAnimatableTasksListener.onTaskInfoChanged(taskInfo);
+        updateRecentsForVisibleFullscreenTask(taskInfo);
 
         final TaskData data = mDataByTaskId.get(taskInfo.taskId);
         final Point positionInParent = taskInfo.positionInParent;
@@ -109,6 +120,15 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Vanished: #%d",
                 taskInfo.taskId);
+    }
+
+    private void updateRecentsForVisibleFullscreenTask(RunningTaskInfo taskInfo) {
+        mRecentTasksOptional.ifPresent(recentTasks -> {
+            if (taskInfo.isVisible) {
+                // Remove any persisted splits if either tasks are now made fullscreen and visible
+                recentTasks.removeSplitPair(taskInfo.taskId);
+            }
+        });
     }
 
     @Override
