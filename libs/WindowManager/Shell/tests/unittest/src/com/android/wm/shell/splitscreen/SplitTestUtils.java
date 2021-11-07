@@ -36,6 +36,7 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
+import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -72,10 +73,11 @@ public class SplitTestUtils {
                 DisplayInsetsController insetsController, SplitLayout splitLayout,
                 Transitions transitions, TransactionPool transactionPool,
                 SplitscreenEventLogger logger,
+                Optional<RecentTasksController> recentTasks,
                 Provider<Optional<StageTaskUnfoldController>> unfoldController) {
             super(context, displayId, syncQueue, rootTDAOrganizer, taskOrganizer, mainStage,
                     sideStage, imeController, insetsController, splitLayout, transitions,
-                    transactionPool, logger, unfoldController);
+                    transactionPool, logger, recentTasks, unfoldController);
 
             // Prepare default TaskDisplayArea for testing.
             mDisplayAreaInfo = new DisplayAreaInfo(
