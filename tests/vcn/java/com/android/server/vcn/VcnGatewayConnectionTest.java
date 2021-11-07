@@ -61,6 +61,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -116,8 +117,9 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
         capBuilder.setLinkUpstreamBandwidthKbps(TEST_UPSTREAM_BANDWIDTH);
         capBuilder.setLinkDownstreamBandwidthKbps(TEST_DOWNSTREAM_BANDWIDTH);
         capBuilder.setAdministratorUids(new int[] {TEST_UID});
+        final Network underlyingNetwork = mock(Network.class, CALLS_REAL_METHODS);
         UnderlyingNetworkRecord record = new UnderlyingNetworkRecord(
-                mock(Network.class, CALLS_REAL_METHODS),
+                underlyingNetwork,
                 capBuilder.build(), new LinkProperties(), false);
         final NetworkCapabilities vcnCaps =
                 VcnGatewayConnection.buildNetworkCapabilities(
@@ -128,6 +130,7 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
         assertTrue(vcnCaps.hasTransport(TRANSPORT_CELLULAR));
         assertTrue(vcnCaps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertTrue(vcnCaps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(vcnCaps.getUnderlyingNetworks().equals(List.of(underlyingNetwork)));
 
         for (int cap : VcnGatewayConnectionConfigTest.EXPOSED_CAPS) {
             if (cap == NET_CAPABILITY_INTERNET || cap == NET_CAPABILITY_DUN) {
