@@ -240,8 +240,12 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static FullscreenTaskListener provideFullscreenTaskListener(
-            SyncTransactionQueue syncQueue, Optional<FullscreenUnfoldController> controller) {
-        return new FullscreenTaskListener(syncQueue, controller);
+            SyncTransactionQueue syncQueue,
+            Optional<FullscreenUnfoldController> optionalFullscreenUnfoldController,
+            Optional<RecentTasksController> recentTasksOptional
+    ) {
+        return new FullscreenTaskListener(syncQueue, optionalFullscreenUnfoldController,
+                recentTasksOptional);
     }
 
     //
@@ -490,12 +494,13 @@ public abstract class WMShellBaseModule {
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController, Transitions transitions,
             TransactionPool transactionPool, IconProvider iconProvider,
+            Optional<RecentTasksController> recentTasks,
             Provider<Optional<StageTaskUnfoldController>> stageTaskUnfoldControllerProvider) {
         if (ActivityTaskManager.supportsSplitScreenMultiWindow(context)) {
             return Optional.of(new SplitScreenController(shellTaskOrganizer, syncQueue, context,
                     rootTaskDisplayAreaOrganizer, mainExecutor, displayImeController,
                     displayInsetsController, transitions, transactionPool, iconProvider,
-                    stageTaskUnfoldControllerProvider));
+                    recentTasks, stageTaskUnfoldControllerProvider));
         } else {
             return Optional.empty();
         }
