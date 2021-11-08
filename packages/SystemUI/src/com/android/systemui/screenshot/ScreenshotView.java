@@ -163,6 +163,7 @@ public class ScreenshotView extends FrameLayout implements
     private SwipeDismissHandler mSwipeDismissHandler;
     private InputMonitorCompat mInputMonitor;
     private boolean mShowScrollablePreview;
+    private String mPackageName = "";
 
     private final ArrayList<ScreenshotActionChip> mSmartChips = new ArrayList<>();
     private PendingInteraction mPendingInteraction;
@@ -409,6 +410,10 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotPreview.setImageDrawable(createScreenDrawable(mResources, bitmap, screenInsets));
     }
 
+    void setPackageName(String packageName) {
+        mPackageName = packageName;
+    }
+
     void updateInsets(WindowInsets insets) {
         int orientation = mContext.getResources().getConfiguration().orientation;
         mOrientationPortrait = (orientation == ORIENTATION_PORTRAIT);
@@ -585,7 +590,8 @@ public class ScreenshotView extends FrameLayout implements
                     if (DEBUG_INPUT) {
                         Log.d(TAG, "dismiss button clicked");
                     }
-                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EXPLICIT_DISMISSAL);
+                    mUiEventLogger.log(
+                            ScreenshotEvent.SCREENSHOT_EXPLICIT_DISMISSAL, 0, mPackageName);
                     animateDismissal();
                 });
                 mDismissButton.setAlpha(1);
@@ -698,24 +704,25 @@ public class ScreenshotView extends FrameLayout implements
 
     void setChipIntents(ScreenshotController.SavedImageData imageData) {
         mShareChip.setOnClickListener(v -> {
-            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED);
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED, 0, mPackageName);
             startSharedTransition(
                     imageData.shareTransition.get());
         });
         mEditChip.setOnClickListener(v -> {
-            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED);
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED, 0, mPackageName);
             startSharedTransition(
                     imageData.editTransition.get());
         });
         mScreenshotPreview.setOnClickListener(v -> {
-            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED);
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED, 0, mPackageName);
             startSharedTransition(
                     imageData.editTransition.get());
         });
         if (mQuickShareChip != null) {
             mQuickShareChip.setPendingIntent(imageData.quickShareAction.actionIntent,
                     () -> {
-                        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SMART_ACTION_TAPPED);
+                        mUiEventLogger.log(
+                                ScreenshotEvent.SCREENSHOT_SMART_ACTION_TAPPED, 0, mPackageName);
                         animateDismissal();
                     });
         }
@@ -745,7 +752,8 @@ public class ScreenshotView extends FrameLayout implements
                 actionChip.setIcon(smartAction.getIcon(), false);
                 actionChip.setPendingIntent(smartAction.actionIntent,
                         () -> {
-                            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SMART_ACTION_TAPPED);
+                            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SMART_ACTION_TAPPED,
+                                    0, mPackageName);
                             animateDismissal();
                         });
                 actionChip.setAlpha(1);
@@ -1121,7 +1129,7 @@ public class ScreenshotView extends FrameLayout implements
                     if (DEBUG_INPUT) {
                         Log.d(TAG, "dismiss triggered via swipe gesture");
                     }
-                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SWIPE_DISMISSED);
+                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SWIPE_DISMISSED, 0, mPackageName);
                     animateDismissal(createSwipeDismissAnimation());
                 } else {
                     // if we've moved, but not past the threshold, start the return animation
