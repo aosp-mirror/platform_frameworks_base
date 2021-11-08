@@ -54,6 +54,7 @@ import com.android.server.wm.utils.InsetUtils;
 import com.google.android.collect.Sets;
 
 import java.io.PrintWriter;
+import java.util.Set;
 
 /**
  * When an app token becomes invisible, we take a snapshot (bitmap) of the corresponding task and
@@ -174,7 +175,7 @@ class TaskSnapshotController {
      * calling {@link #snapshotTasks} to ensure that the task has an up-to-date snapshot.
      */
     @VisibleForTesting
-    void addSkipClosingAppSnapshotTasks(ArraySet<Task> tasks) {
+    void addSkipClosingAppSnapshotTasks(Set<Task> tasks) {
         if (shouldDisableSnapshots()) {
             return;
         }
