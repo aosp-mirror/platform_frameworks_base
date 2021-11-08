@@ -469,28 +469,26 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * <p>This can be transiently {@code null} when the system is re-initializing input method
      * settings, e.g., the system locale is just changed.</p>
      *
-     * <p>Note that {@link #getCurId()} is used to track which IME is being connected to
-     * {@link InputMethodManagerService}.</p>
+     * <p>Note that {@link InputMethodBindingController#getCurId()} is used to track which IME is
+     * being connected to {@link InputMethodManagerService}.</p>
      *
-     * @see #getCurId()
+     * @see InputMethodBindingController#getCurId()
      */
     @Nullable
     private String getSelectedMethodId() {
-        return mSelectedMethodId;
+        return mBindingController.getSelectedMethodId();
     }
 
     private void setSelectedMethodId(@Nullable String selectedMethodId) {
-        mSelectedMethodId = selectedMethodId;
+        mBindingController.setSelectedMethodId(selectedMethodId);
     }
-    @Nullable
-    private String mSelectedMethodId;
 
     /**
      * The current binding sequence number, incremented every time there is
      * a new bind performed.
      */
     private int getSequenceNumber() {
-        return mCurSeq;
+        return mBindingController.getSequenceNumber();
     }
 
     /**
@@ -498,13 +496,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * Reset to 1 on overflow.
      */
     private void advanceSequenceNumber() {
-        mCurSeq += 1;
-        if (mCurSeq <= 0) {
-            mCurSeq = 1;
-        }
+        mBindingController.advanceSequenceNumber();
     }
-
-    private int mCurSeq;
 
     /**
      * {@code true} if the Ime policy has been set to {@link WindowManager#DISPLAY_IME_POLICY_HIDE}.
@@ -565,15 +558,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @Nullable
     private String getCurId() {
-        return mCurId;
+        return mBindingController.getCurId();
     }
 
     private void setCurId(@Nullable String curId) {
-        mCurId = curId;
+        mBindingController.setCurId(curId);
     }
-
-    @Nullable
-    private String mCurId;
 
     /**
      * The current subtype of the current input method.
@@ -590,13 +580,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * a service (whether or not we have gotten its IBinder back yet).
      */
     private boolean hasConnection() {
-        return mHasConnection;
+        return mBindingController.hasConnection();
     }
 
     private void setHasConnection(boolean hasConnection) {
-        mHasConnection = hasConnection;
+        mBindingController.setHasConnection(hasConnection);
     }
-    private boolean mHasConnection;
 
     /**
      * Set if the client has asked for the input method to be shown.
@@ -628,29 +617,24 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @Nullable
     private Intent getCurIntent() {
-        return mCurIntent;
+        return mBindingController.getCurIntent();
     }
 
     private void setCurIntent(@Nullable Intent curIntent) {
-        mCurIntent = curIntent;
+        mBindingController.setCurIntent(curIntent);
     }
-
-    @Nullable
-    private Intent mCurIntent;
 
     /**
      * The token we have made for the currently active input method, to
      * identify it in the future.
      */
     private IBinder getCurToken() {
-        return mCurToken;
+        return mBindingController.getCurToken();
     }
 
     private void setCurToken(IBinder curToken) {
-        mCurToken = curToken;
+        mBindingController.setCurToken(curToken);
     }
-
-    private IBinder mCurToken;
 
     /**
      * The displayId of current active input method.
@@ -688,14 +672,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * if we should try to disconnect and reconnect to it.
      */
     private long getLastBindTime() {
-        return mLastBindTime;
+        return mBindingController.getLastBindTime();
     }
 
     private void setLastBindTime(long lastBindTime) {
-        mLastBindTime = lastBindTime;
+        mBindingController.setLastBindTime(lastBindTime);
     }
-
-    private long mLastBindTime;
 
     /**
      * Have we called mCurMethod.bindInput()?
