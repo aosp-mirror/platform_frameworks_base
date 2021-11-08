@@ -53,9 +53,9 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.dagger.StatusBarDependenciesModule;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -104,7 +104,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
 
     protected final Context mContext;
-    protected final FeatureFlags mFeatureFlags;
+    protected final NotifPipelineFlags mNotifPipelineFlags;
     private final UserManager mUserManager;
     private final KeyguardManager mKeyguardManager;
     private final RemoteInputNotificationRebuilder mRebuilder;
@@ -255,7 +255,7 @@ public class NotificationRemoteInputManager implements Dumpable {
      */
     public NotificationRemoteInputManager(
             Context context,
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationVisibilityProvider visibilityProvider,
@@ -269,7 +269,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             ActionClickLogger logger,
             DumpManager dumpManager) {
         mContext = context;
-        mFeatureFlags = featureFlags;
+        mNotifPipelineFlags = notifPipelineFlags;
         mLockscreenUserManager = lockscreenUserManager;
         mSmartReplyController = smartReplyController;
         mVisibilityProvider = visibilityProvider;
@@ -281,7 +281,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mRebuilder = rebuilder;
-        if (!featureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
             mRemoteInputListener = createLegacyRemoteInputLifetimeExtender(mainHandler,
                     notificationEntryManager, smartReplyController);
         }
@@ -318,7 +318,7 @@ public class NotificationRemoteInputManager implements Dumpable {
 
     /** Add a listener for various remote input events.  Works with NEW pipeline only. */
     public void setRemoteInputListener(@NonNull RemoteInputListener remoteInputListener) {
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
             if (mRemoteInputListener != null) {
                 throw new IllegalStateException("mRemoteInputListener is already set");
             }
@@ -376,7 +376,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                 }
             }
         });
-        if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
             mSmartReplyController.setCallback((entry, reply) -> {
                 StatusBarNotification newSbn = mRebuilder.rebuildForSendingSmartReply(entry, reply);
                 mEntryManager.updateNotification(newSbn, null /* ranking */);

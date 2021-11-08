@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 
 import com.android.systemui.R;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.FooterActionsView;
@@ -53,7 +54,7 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
                 return;
             }
 
-            if (mFeatureFlags.useNewUserSwitcher()) {
+            if (mFeatureFlags.isEnabled(Flags.NEW_USER_SWITCHER)) {
                 mUserSwitchDialogController.showDialog(v);
             } else {
                 View center = mView.getChildCount() > 0 ? mView.getChildAt(0) : mView;

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.FeatureFlagUtils;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.flags.FeatureFlags;
 
 import javax.inject.Inject;
 

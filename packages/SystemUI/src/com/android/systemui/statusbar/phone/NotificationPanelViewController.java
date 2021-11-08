@@ -126,6 +126,7 @@ import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.idle.IdleHostView;
@@ -4159,7 +4160,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 com.android.internal.R.bool.config_keyguardUserSwitcher);
         mKeyguardQsUserSwitchEnabled =
                 mKeyguardUserSwitcherEnabled
-                        && mFeatureFlags.isKeyguardQsUserDetailsShortcutEnabled();
+                        && mFeatureFlags.isEnabled(Flags.QS_USER_DETAIL_SHORTCUT);
     }
 
     private void registerSettingsChangeListener() {

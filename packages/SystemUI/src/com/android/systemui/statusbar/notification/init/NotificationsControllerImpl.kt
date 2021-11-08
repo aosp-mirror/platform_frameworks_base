@@ -20,10 +20,10 @@ import android.service.notification.StatusBarNotification
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.NotificationListener
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.AnimatedImageNotificationManager
+import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.NotificationClicker
 import com.android.systemui.statusbar.notification.NotificationEntryManager
@@ -47,7 +47,7 @@ import com.android.wm.shell.bubbles.Bubbles
 import dagger.Lazy
 import java.io.FileDescriptor
 import java.io.PrintWriter
-import java.util.Optional
+import java.util.*
 import javax.inject.Inject
 
 /**
@@ -59,7 +59,7 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class NotificationsControllerImpl @Inject constructor(
-    private val featureFlags: FeatureFlags,
+    private val notifPipelineFlags: NotifPipelineFlags,
     private val notificationListener: NotificationListener,
     private val entryManager: NotificationEntryManager,
     private val legacyRanker: NotificationRankingManager,
@@ -115,7 +115,7 @@ class NotificationsControllerImpl @Inject constructor(
                     listContainer)
         }
 
-        if (featureFlags.isNewNotifPipelineRenderingEnabled) {
+        if (notifPipelineFlags.isNewPipelineEnabled()) {
             targetSdkResolver.initialize(notifPipeline.get())
             // TODO
         } else {

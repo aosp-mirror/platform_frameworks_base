@@ -42,6 +42,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
@@ -219,7 +220,7 @@ public class QSCarrierGroupController {
             CarrierConfigTracker carrierConfigTracker, FeatureFlags featureFlags,
             SlotIndexResolver slotIndexResolver) {
 
-        if (featureFlags.isCombinedStatusBarSignalIconsEnabled()) {
+        if (featureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)) {
             mProviderModel = true;
         } else {
             mProviderModel = false;

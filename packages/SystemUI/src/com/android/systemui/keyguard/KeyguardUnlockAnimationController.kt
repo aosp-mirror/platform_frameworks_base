@@ -31,6 +31,7 @@ import com.android.keyguard.KeyguardViewController
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
@@ -354,7 +355,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * keyguard visible.
      */
     private fun updateKeyguardViewMediatorIfThresholdsReached() {
-        if (!featureFlags.isNewKeyguardSwipeAnimationEnabled) {
+        if (!featureFlags.isEnabled(Flags.NEW_UNLOCK_SWIPE_ANIMATION)) {
             return
         }
 
@@ -410,7 +411,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * know if it needs to do something as a result.
      */
     private fun updateSmartSpaceTransition() {
-        if (!featureFlags.isSmartSpaceSharedElementTransitionEnabled) {
+        if (!featureFlags.isEnabled(Flags.SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED)) {
             return
         }
 

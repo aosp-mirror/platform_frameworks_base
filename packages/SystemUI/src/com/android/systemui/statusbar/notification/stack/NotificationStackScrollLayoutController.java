@@ -67,7 +67,6 @@ import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -85,6 +84,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -159,7 +159,7 @@ public class NotificationStackScrollLayoutController {
     private final Resources mResources;
     private final NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
     private final ScrimController mScrimController;
-    private final FeatureFlags mFeatureFlags;
+    private final NotifPipelineFlags mNotifPipelineFlags;
     private final NotifPipeline mNotifPipeline;
     private final NotifCollection mNotifCollection;
     private final NotificationEntryManager mNotificationEntryManager;
@@ -642,7 +642,7 @@ public class NotificationStackScrollLayoutController {
             NotificationGroupManagerLegacy legacyGroupManager,
             GroupExpansionManager groupManager,
             @SilentHeader SectionHeaderController silentHeaderController,
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
             NotificationEntryManager notificationEntryManager,
@@ -690,10 +690,10 @@ public class NotificationStackScrollLayoutController {
                 mStatusBar.requestNotificationUpdate("onGroupsChanged");
             }
         });
-        mLegacyGroupManager = featureFlags.isNewNotifPipelineRenderingEnabled()
+        mNotifPipelineFlags = notifPipelineFlags;
+        mLegacyGroupManager = mNotifPipelineFlags.isNewPipelineEnabled()
                 ? null : legacyGroupManager;
         mSilentHeaderController = silentHeaderController;
-        mFeatureFlags = featureFlags;
         mNotifPipeline = notifPipeline;
         mNotifCollection = notifCollection;
         mNotificationEntryManager = notificationEntryManager;
@@ -744,7 +744,7 @@ public class NotificationStackScrollLayoutController {
                 .setOnMenuEventListener(mMenuEventListener)
                 .build();
 
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
             mNotifPipeline.addCollectionListener(new NotifCollectionListener() {
                 @Override
                 public void onEntryUpdated(NotificationEntry entry) {
@@ -1309,7 +1309,7 @@ public class NotificationStackScrollLayoutController {
     }
 
     public void updateSectionBoundaries(String reason) {
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
             return;
         }
         mView.updateSectionBoundaries(reason);
@@ -1398,7 +1398,7 @@ public class NotificationStackScrollLayoutController {
      * @return if the shade has currently any active notifications.
      */
     public boolean hasActiveNotifications() {
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
             return !mNotifPipeline.getShadeList().isEmpty();
         } else {
             return mNotificationEntryManager.hasActiveNotifications();
@@ -1435,7 +1435,7 @@ public class NotificationStackScrollLayoutController {
 
     private void onAnimationEnd(List<ExpandableNotificationRow> viewsToRemove,
             @SelectedRows int selectedRows) {
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
             if (selectedRows == ROWS_ALL) {
                 mNotifCollection.dismissAllNotifications(
                         mLockscreenUserManager.getCurrentUserId());

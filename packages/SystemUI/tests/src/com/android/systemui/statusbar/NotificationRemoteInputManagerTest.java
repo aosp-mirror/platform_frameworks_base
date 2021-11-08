@@ -39,11 +39,11 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.LegacyRemoteInputLifetimeExtender.RemoteInputActiveExtender;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.LegacyRemoteInputLifetimeExtender.RemoteInputHistoryExtender;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.LegacyRemoteInputLifetimeExtender.SmartReplyHistoryExtender;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -99,7 +99,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mRemoteInputManager = new TestableNotificationRemoteInputManager(mContext,
-                mock(FeatureFlags.class),
+                mock(NotifPipelineFlags.class),
                 mLockscreenUserManager,
                 mSmartReplyController,
                 mVisibilityProvider,
@@ -190,7 +190,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
 
         TestableNotificationRemoteInputManager(
                 Context context,
-                FeatureFlags featureFlags,
+                NotifPipelineFlags notifPipelineFlags,
                 NotificationLockscreenUserManager lockscreenUserManager,
                 SmartReplyController smartReplyController,
                 NotificationVisibilityProvider visibilityProvider,
@@ -205,7 +205,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 DumpManager dumpManager) {
             super(
                     context,
-                    featureFlags,
+                    notifPipelineFlags,
                     lockscreenUserManager,
                     smartReplyController,
                     visibilityProvider,

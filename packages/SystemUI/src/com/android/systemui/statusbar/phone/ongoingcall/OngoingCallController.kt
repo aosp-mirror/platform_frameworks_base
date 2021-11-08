@@ -33,7 +33,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -44,7 +43,7 @@ import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.time.SystemClock
 import java.io.FileDescriptor
 import java.io.PrintWriter
-import java.util.Optional
+import java.util.*
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -54,7 +53,7 @@ import javax.inject.Inject
 @SysUISingleton
 class OngoingCallController @Inject constructor(
     private val notifCollection: CommonNotifCollection,
-    private val featureFlags: FeatureFlags,
+    private val ongoingCallFlags: OngoingCallFlags,
     private val systemClock: SystemClock,
     private val activityStarter: ActivityStarter,
     @Main private val mainExecutor: Executor,
@@ -65,7 +64,6 @@ class OngoingCallController @Inject constructor(
     private val swipeStatusBarAwayGestureHandler: Optional<SwipeStatusBarAwayGestureHandler>,
     private val statusBarStateController: StatusBarStateController,
 ) : CallbackController<OngoingCallListener>, Dumpable {
-
     private var isFullscreen: Boolean = false
     /** Non-null if there's an active call notification. */
     private var callNotificationInfo: CallNotificationInfo? = null
@@ -126,7 +124,7 @@ class OngoingCallController @Inject constructor(
 
     fun init() {
         dumpManager.registerDumpable(this)
-        if (featureFlags.isOngoingCallStatusBarChipEnabled) {
+        if (ongoingCallFlags.isStatusBarChipEnabled()) {
             notifCollection.addCollectionListener(notifListener)
             statusBarStateController.addCallback(statusBarStateListener)
         }
@@ -218,7 +216,7 @@ class OngoingCallController @Inject constructor(
 
     private fun updateChipClickListener() {
         if (callNotificationInfo == null) { return }
-        if (isFullscreen && !featureFlags.isOngoingCallInImmersiveChipTapEnabled) {
+        if (isFullscreen && !ongoingCallFlags.isInImmersiveChipTapEnabled()) {
             chipView?.setOnClickListener(null)
         } else {
             val currentChipView = chipView

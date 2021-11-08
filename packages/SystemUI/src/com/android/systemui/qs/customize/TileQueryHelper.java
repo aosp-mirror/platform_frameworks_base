@@ -34,7 +34,6 @@ import android.widget.Button;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.QSTileHost;
@@ -64,7 +63,6 @@ public class TileQueryHelper {
     private final Executor mBgExecutor;
     private final Context mContext;
     private final UserTracker mUserTracker;
-    private final FeatureFlags mFeatureFlags;
     private final StatusBarFlags mStatusBarFlags;
     private TileStateListener mListener;
 
@@ -76,14 +74,12 @@ public class TileQueryHelper {
             UserTracker userTracker,
             @Main Executor mainExecutor,
             @Background Executor bgExecutor,
-            FeatureFlags featureFlags,
             StatusBarFlags statusBarFlags
     ) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
         mUserTracker = userTracker;
-        mFeatureFlags = featureFlags;
         mStatusBarFlags = statusBarFlags;
     }
 

@@ -70,8 +70,8 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.LogBufferEulogizer;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.RankingBuilder;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator.NotifEvent;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
 import com.android.systemui.statusbar.notification.collection.coalescer.CoalescedEvent;
@@ -107,7 +107,7 @@ import java.util.Map;
 public class NotifCollectionTest extends SysuiTestCase {
 
     @Mock private IStatusBarService mStatusBarService;
-    @Mock private FeatureFlags mFeatureFlags;
+    @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private NotifCollectionLogger mLogger;
     @Mock private LogBufferEulogizer mEulogizer;
     @Mock private Handler mMainHandler;
@@ -144,7 +144,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         allowTestableLooperAsMainThread();
 
-        when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(true);
+        when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(true);
 
         when(mEulogizer.record(any(Exception.class))).thenAnswer(i -> i.getArguments()[0]);
 
@@ -153,7 +153,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         mCollection = new NotifCollection(
                 mStatusBarService,
                 mClock,
-                mFeatureFlags,
+                mNotifPipelineFlags,
                 mLogger,
                 mMainHandler,
                 mEulogizer,

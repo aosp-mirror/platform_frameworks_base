@@ -17,13 +17,12 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import com.android.systemui.Dumpable
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import java.io.FileDescriptor
 import java.io.PrintWriter
-import java.util.ArrayList
 import javax.inject.Inject
 
 /**
@@ -35,7 +34,7 @@ interface NotifCoordinators : Coordinator, Dumpable
 @CoordinatorScope
 class NotifCoordinatorsImpl @Inject constructor(
     dumpManager: DumpManager,
-    featureFlags: FeatureFlags,
+    notifPipelineFlags: NotifPipelineFlags,
     hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
     hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
     keyguardCoordinator: KeyguardCoordinator,
@@ -80,10 +79,10 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(visualStabilityCoordinator)
         mCoordinators.add(communalCoordinator)
         mCoordinators.add(sensitiveContentCoordinator)
-        if (featureFlags.isSmartspaceDedupingEnabled) {
+        if (notifPipelineFlags.isSmartspaceDedupingEnabled()) {
             mCoordinators.add(smartspaceDedupingCoordinator)
         }
-        if (featureFlags.isNewNotifPipelineRenderingEnabled) {
+        if (notifPipelineFlags.isNewPipelineEnabled()) {
             mCoordinators.add(headsUpCoordinator)
             mCoordinators.add(gutsCoordinator)
             mCoordinators.add(preparationCoordinator)
@@ -91,7 +90,7 @@ class NotifCoordinatorsImpl @Inject constructor(
 
         // Manually add Ordered Sections
         // HeadsUp > FGS > People > Alerting > Silent > Unknown/Default
-        if (featureFlags.isNewNotifPipelineRenderingEnabled) {
+        if (notifPipelineFlags.isNewPipelineEnabled()) {
             mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
         }
         mOrderedSections.add(appOpsCoordinator.sectioner) // ForegroundService
