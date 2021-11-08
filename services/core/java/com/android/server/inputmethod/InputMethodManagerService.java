@@ -2513,20 +2513,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         setCurIntent(intent);
 
         if (bindCurrentInputMethodServiceLocked(intent, this, mImeConnectionBindFlags)) {
-            setLastBindTime(SystemClock.uptimeMillis());
-            setHasConnection(true);
-            setCurId(info.getId());
-            setCurToken(new Binder());
-            mCurTokenDisplayId = displayIdToShowIme;
-            try {
-                if (DEBUG) {
-                    Slog.v(TAG, "Adding window token: " + getCurToken() + " for display: "
-                            + mCurTokenDisplayId);
-                }
-                mIWindowManager.addWindowToken(getCurToken(), LayoutParams.TYPE_INPUT_METHOD,
-                        mCurTokenDisplayId, null /* options */);
-            } catch (RemoteException e) {
-            }
+            addFreshWindowTokenLocked(displayIdToShowIme, info.getId());
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
                     null, null, getCurId(), getSequenceNumber(), false);
@@ -2546,6 +2533,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS),
                 PendingIntent.FLAG_IMMUTABLE));
         return intent;
+    }
+
+    @GuardedBy("mMethodMap")
+    private void addFreshWindowTokenLocked(int displayIdToShowIme, String methodId) {
+        Binder token = new Binder();
+        setCurToken(token);
+        setLastBindTime(SystemClock.uptimeMillis());
+        setHasConnection(true);
+        setCurId(methodId);
+        mCurTokenDisplayId = displayIdToShowIme;
+        try {
+            if (DEBUG) {
+                Slog.v(TAG, "Adding window token: " + token + " for display: "
+                        + displayIdToShowIme);
+            }
+            mIWindowManager.addWindowToken(token, LayoutParams.TYPE_INPUT_METHOD,
+                    displayIdToShowIme, null /* options */);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Could not add window token " + token + " for display "
+                    + displayIdToShowIme, e);
+        }
     }
 
     @FunctionalInterface
