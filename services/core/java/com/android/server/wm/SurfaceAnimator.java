@@ -188,6 +188,10 @@ class SurfaceAnimator {
         mAnimation.startAnimation(mLeash, t, type, mInnerAnimationFinishedCallback);
         if (snapshotAnim != null) {
             mSnapshot = freezer.takeSnapshotForAnimation();
+            if (mSnapshot == null) {
+                Slog.e(TAG, "No snapshot target to start animation on for " + mAnimatable);
+                return;
+            }
             mSnapshot.startAnimation(t, snapshotAnim, type);
         }
     }
