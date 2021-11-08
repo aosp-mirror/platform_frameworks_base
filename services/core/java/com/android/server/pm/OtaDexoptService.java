@@ -388,7 +388,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             }
 
             // Does the package have code? If not, there won't be any artifacts.
-            if (!PackageDexOptimizer.canOptimizePackage(pkg)) {
+            if (!mPackageManagerService.mPackageDexOptimizer.canOptimizePackage(pkg)) {
                 continue;
             }
             if (pkg.getPath() == null) {
