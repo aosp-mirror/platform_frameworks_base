@@ -18,8 +18,12 @@ package com.android.systemui.biometrics
 
 import android.animation.Animator
 import android.graphics.Insets
+import android.app.ActivityManager
+import android.app.ActivityTaskManager
+import android.content.ComponentName
 import android.graphics.Rect
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_UNKNOWN
 import android.hardware.biometrics.SensorProperties
 import android.hardware.display.DisplayManager
@@ -60,9 +64,11 @@ import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyFloat
 import org.mockito.Mockito.anyLong
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
@@ -83,6 +89,8 @@ class SidefpsControllerTest : SysuiTestCase() {
     lateinit var fingerprintManager: FingerprintManager
     @Mock
     lateinit var windowManager: WindowManager
+    @Mock
+    lateinit var activityTaskManager: ActivityTaskManager
     @Mock
     lateinit var sidefpsView: View
     @Mock
@@ -144,7 +152,8 @@ class SidefpsControllerTest : SysuiTestCase() {
 
         sideFpsController = SidefpsController(
             context.createDisplayContext(display), layoutInflater, fingerprintManager,
-            windowManager, overviewProxyService, displayManager, executor, handler
+            windowManager, activityTaskManager, overviewProxyService, displayManager, executor,
+            handler
         )
 
         overlayController = ArgumentCaptor.forClass(ISidefpsController::class.java).apply {
@@ -211,12 +220,23 @@ class SidefpsControllerTest : SysuiTestCase() {
         testIgnoredFor(REASON_AUTH_KEYGUARD)
     }
 
-    private fun testIgnoredFor(reason: Int) {
-        overlayController.show(SENSOR_ID, reason)
+    @Test
+    fun testShowsForMostSettings() = testWithDisplay {
+        `when`(activityTaskManager.getTasks(anyInt())).thenReturn(listOf(fpEnrollTask()))
+        testIgnoredFor(REASON_AUTH_SETTINGS, ignored = false)
+    }
 
+    @Test
+    fun testIgnoredForVerySpecificSettings() = testWithDisplay {
+        `when`(activityTaskManager.getTasks(anyInt())).thenReturn(listOf(fpSettingsTask()))
+        testIgnoredFor(REASON_AUTH_SETTINGS)
+    }
+
+    private fun testIgnoredFor(reason: Int, ignored: Boolean = true) {
+        overlayController.show(SENSOR_ID, reason)
         executor.runAllReady()
 
-        verify(windowManager, never()).addView(any(), any())
+        verify(windowManager, if (ignored) never() else times(1)).addView(any(), any())
     }
 
     @Test
@@ -268,3 +288,8 @@ private fun insetsForLargeNavbar() = insetsWithBottom(100)
 private fun insetsWithBottom(bottom: Int) = WindowInsets.Builder()
     .setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, bottom))
     .build()
+private fun fpEnrollTask() = settingsTask(".biometrics.fingerprint.FingerprintEnrollEnrolling")
+private fun fpSettingsTask() = settingsTask(".biometrics.fingerprint.FingerprintSettings")
+private fun settingsTask(cls: String) = ActivityManager.RunningTaskInfo().apply {
+    topActivity = ComponentName.createRelative("com.android.settings", cls)
+}

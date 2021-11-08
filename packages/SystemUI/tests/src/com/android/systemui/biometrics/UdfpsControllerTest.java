@@ -405,15 +405,75 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void showUdfpsOverlay_addsViewToWindow() throws RemoteException {
-        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+    public void showUdfpsOverlay_addsViewToWindow_bp() throws RemoteException {
+        showUdfpsOverlay_addsViewToWindow(BiometricOverlayConstants.REASON_AUTH_BP);
+    }
+
+    @Test
+    public void showUdfpsOverlay_addsViewToWindow_keyguard() throws RemoteException {
+        showUdfpsOverlay_addsViewToWindow(BiometricOverlayConstants.REASON_AUTH_KEYGUARD);
+    }
+
+    @Test
+    public void showUdfpsOverlay_addsViewToWindow_settings() throws RemoteException {
+        showUdfpsOverlay_addsViewToWindow(BiometricOverlayConstants.REASON_AUTH_SETTINGS);
+    }
+
+    @Test
+    public void showUdfpsOverlay_addsViewToWindow_enroll_locate() throws RemoteException {
+        showUdfpsOverlay_addsViewToWindow(BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR);
+    }
+
+    @Test
+    public void showUdfpsOverlay_addsViewToWindow_enroll() throws RemoteException {
+        showUdfpsOverlay_addsViewToWindow(BiometricOverlayConstants.REASON_ENROLL_ENROLLING);
+    }
+
+    @Test
+    public void showUdfpsOverlay_addsViewToWindow_other() throws RemoteException {
+        showUdfpsOverlay_addsViewToWindow(BiometricOverlayConstants.REASON_AUTH_OTHER);
+    }
+
+    private void showUdfpsOverlay_addsViewToWindow(
+            @BiometricOverlayConstants.ShowReason int reason) throws RemoteException {
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID, reason,
+                mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
         verify(mWindowManager).addView(eq(mUdfpsView), any());
     }
 
     @Test
-    public void hideUdfpsOverlay_removesViewFromWindow() throws RemoteException {
+    public void hideUdfpsOverlay_removesViewFromWindow_bp() throws RemoteException {
+        hideUdfpsOverlay_removesViewFromWindow(BiometricOverlayConstants.REASON_AUTH_BP);
+    }
+
+    @Test
+    public void hideUdfpsOverlay_removesViewFromWindow_keyguard() throws RemoteException {
+        hideUdfpsOverlay_removesViewFromWindow(BiometricOverlayConstants.REASON_AUTH_KEYGUARD);
+    }
+
+    @Test
+    public void hideUdfpsOverlay_removesViewFromWindow_settings() throws RemoteException {
+        hideUdfpsOverlay_removesViewFromWindow(BiometricOverlayConstants.REASON_AUTH_SETTINGS);
+    }
+
+    @Test
+    public void hideUdfpsOverlay_removesViewFromWindow_enroll_locate() throws RemoteException {
+        hideUdfpsOverlay_removesViewFromWindow(BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR);
+    }
+
+    @Test
+    public void hideUdfpsOverlay_removesViewFromWindow_enroll() throws RemoteException {
+        hideUdfpsOverlay_removesViewFromWindow(BiometricOverlayConstants.REASON_ENROLL_ENROLLING);
+    }
+
+    @Test
+    public void hideUdfpsOverlay_removesViewFromWindow_other() throws RemoteException {
+        hideUdfpsOverlay_removesViewFromWindow(BiometricOverlayConstants.REASON_AUTH_OTHER);
+    }
+
+    private void hideUdfpsOverlay_removesViewFromWindow(
+            @BiometricOverlayConstants.ShowReason int reason) throws RemoteException {
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mOverlayController.hideUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
