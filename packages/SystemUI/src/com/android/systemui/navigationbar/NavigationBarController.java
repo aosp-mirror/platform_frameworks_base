@@ -222,13 +222,12 @@ public class NavigationBarController implements
      */
     public void createNavigationBars(final boolean includeDefaultDisplay,
             RegisterStatusBarResult result) {
-        if (initializeTaskbarIfNecessary()) {
-            return;
-        }
-
+        // Don't need to create nav bar on the default display if we initialize TaskBar.
+        final boolean shouldCreateDefaultNavbar = includeDefaultDisplay
+                && !initializeTaskbarIfNecessary();
         Display[] displays = mDisplayManager.getDisplays();
         for (Display display : displays) {
-            if (includeDefaultDisplay || display.getDisplayId() != DEFAULT_DISPLAY) {
+            if (shouldCreateDefaultNavbar || display.getDisplayId() != DEFAULT_DISPLAY) {
                 createNavigationBar(display, null /* savedState */, result);
             }
         }
@@ -246,12 +245,15 @@ public class NavigationBarController implements
             return;
         }
 
-        if (mIsTablet) {
+        final int displayId = display.getDisplayId();
+        final boolean isOnDefaultDisplay = displayId == DEFAULT_DISPLAY;
+
+        // We may show TaskBar on the default display for large screen device. Don't need to create
+        // navigation bar for this case.
+        if (mIsTablet && isOnDefaultDisplay) {
             return;
         }
 
-        final int displayId = display.getDisplayId();
-        final boolean isOnDefaultDisplay = displayId == DEFAULT_DISPLAY;
         final IWindowManager wms = WindowManagerGlobal.getWindowManagerService();
 
         try {
