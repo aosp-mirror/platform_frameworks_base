@@ -315,7 +315,7 @@ public final class ProfcollectForwardingService extends SystemService {
                 // Upload the report
                 Intent intent = new Intent()
                         .setPackage("com.android.shell")
-                        .setAction("com.android.shell.action.UPLOAD_REPORT")
+                        .setAction("com.android.shell.action.PROFCOLLECT_UPLOAD")
                         .putExtra("filename", reportName);
                 context.sendBroadcast(intent);
             } catch (RemoteException e) {
