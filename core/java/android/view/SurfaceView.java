@@ -162,8 +162,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     boolean mIsCreating = false;
-    private volatile boolean mRtHandlingPositionUpdates = false;
-    private volatile boolean mRtReleaseSurfaces = false;
 
     private final ViewTreeObserver.OnScrollChangedListener mScrollChangedListener =
             this::updateSurface;
@@ -909,13 +907,14 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 mBlastBufferQueue = null;
             }
 
-            if (mRtHandlingPositionUpdates) {
-                mRtReleaseSurfaces = true;
-                return;
+            ViewRootImpl viewRoot = getViewRootImpl();
+            Transaction transaction = new Transaction();
+            releaseSurfaces(transaction);
+            if (viewRoot != null) {
+                viewRoot.applyTransactionOnDraw(transaction);
+            } else {
+                transaction.apply();
             }
-
-            releaseSurfaces(mTmpTransaction);
-            mTmpTransaction.apply();
         }
     }
 
@@ -1468,15 +1467,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 if (mSurfaceControl == null) {
                     return;
                 }
-                // TODO: This is teensy bit racey in that a brand new SurfaceView moving on
-                // its 2nd frame if RenderThread is running slowly could potentially see
-                // this as false, enter the branch, get pre-empted, then this comes along
-                // and reports a new position, then the UI thread resumes and reports
-                // its position. This could therefore be de-sync'd in that interval, but
-                // the synchronization would violate the rule that RT must never block
-                // on the UI thread which would open up potential deadlocks. The risk of
-                // a single-frame desync is therefore preferable for now.
-                mRtHandlingPositionUpdates = true;
             }
             if (mRTLastReportedPosition.left == left
                     && mRTLastReportedPosition.top == top
@@ -1552,12 +1542,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     return;
                 }
                 mRtTransaction.hide(mSurfaceControl);
-                if (mRtReleaseSurfaces) {
-                    mRtReleaseSurfaces = false;
-                    releaseSurfaces(mRtTransaction);
-                }
                 applyOrMergeTransaction(mRtTransaction, frameNumber);
-                mRtHandlingPositionUpdates = false;
             }
         }
     }
