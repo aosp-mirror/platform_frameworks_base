@@ -534,6 +534,9 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS
                 | WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 
+        // FLAG_SLIPPERY can only be set by trusted overlays
+        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
+
         if (!DEBUG_SCREENSHOT_ROUNDED_CORNERS) {
             lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
         }
