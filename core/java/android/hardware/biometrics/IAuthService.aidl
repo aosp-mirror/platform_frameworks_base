@@ -41,13 +41,14 @@ interface IAuthService {
     // Retrieve the package where BIometricOrompt's UI is implemented
     String getUiPackage();
 
-    // Requests authentication. The service choose the appropriate biometric to use, and show
-    // the corresponding BiometricDialog.
-    void authenticate(IBinder token, long sessionId, int userId,
+    // Requests authentication. The service chooses the appropriate biometric to use, and shows
+    // the corresponding BiometricDialog. A requestId is returned that can be used to cancel
+    // this operation.
+    long authenticate(IBinder token, long sessionId, int userId,
             IBiometricServiceReceiver receiver, String opPackageName, in PromptInfo promptInfo);
 
-    // Cancel authentication for the given sessionId
-    void cancelAuthentication(IBinder token, String opPackageName);
+    // Cancel authentication for the given requestId.
+    void cancelAuthentication(IBinder token, String opPackageName, long requestId);
 
     // TODO(b/141025588): Make userId the first arg to be consistent with hasEnrolledBiometrics.
     // Checks if biometrics can be used.

@@ -2721,10 +2721,13 @@ class ContextImpl extends Context {
         // need to override their display in ResourcesManager.
         baseContext.mForceDisplayOverrideInResources = false;
         baseContext.mContextType = CONTEXT_TYPE_WINDOW_CONTEXT;
-        baseContext.mDisplay = display;
 
         final Resources windowContextResources = createWindowContextResources(baseContext);
         baseContext.setResources(windowContextResources);
+        // Associate the display with window context resources so that configuration update from
+        // the server side will also apply to the display's metrics.
+        baseContext.mDisplay = ResourcesManager.getInstance()
+                .getAdjustedDisplay(display.getDisplayId(), windowContextResources);
 
         return baseContext;
     }

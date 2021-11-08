@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Зумирај на целом екрану"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Развуци на цео екран"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Снимак екрана"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock је онемогућен"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"је послао/ла слику"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Чување снимка екрана..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Чување снимка екрана..."</string>
@@ -436,7 +437,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Овим ће се одблокирати приступ за све апликације и услуге које имају дозволу за коришћење микрофона."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Овим ће се одблокирати приступ за све апликације и услуге које имају дозволу за коришћење камере."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Овим ће се одблокирати приступ за све апликације и услуге које имају дозволу за коришћење камере или микрофона."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Уређај"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Други уређај"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Укључи/искључи преглед"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Напуњена је"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Пуни се"</string>
@@ -712,6 +713,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Напредне контроле за обавештења"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Укључено"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Искључено"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Укључено – на основу лица"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Помоћу напредних контрола за обавештења можете да подесите ниво важности од 0. до 5. за обавештења апликације. \n\n"<b>"5. ниво"</b>" \n– Приказују се у врху листе обавештења \n- Дозволи прекид режима целог екрана \n– Увек завируј \n\n"<b>"4. ниво"</b>" \n– Спречи прекид режима целог екрана \n– Увек завируј \n\n"<b>"3. ниво"</b>" \n– Спречи прекид режима целог екрана \n– Никада не завируј \n\n"<b>"2. ниво"</b>" \n– Спречи прекид режима целог екрана \n– Никада не завируј \n– Никада не производи звук или вибрацију \n\n"<b>"1. ниво"</b>" \n– Спречи прекид режима целог екрана \n– Никада не завируј \n– Никада не производи звук или вибрацију \n– Сакриј на закључаном екрану и статусној траци \n– Приказују се у дну листе обавештења \n\n"<b>"0. ниво"</b>" \n– Блокирај сва обавештења из апликације"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Обавештења"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Више нећете видети ова обавештења"</string>
@@ -1013,7 +1015,7 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Апликације користе <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" и "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Користи <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Користи: <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Недавно користио/ла <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(посао)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Телефонски позив"</string>
@@ -1167,4 +1169,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Отворите помоћу отиска прста"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Потребна је потврда идентитета. Додирните сензор за отисак прста да бисте потврдили идентитет."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Актуелни телефонски позив"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"Мобилни подаци"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Повезано"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Није успело аутом. повезивање преко моб. података"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"Веза није успостављена"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Није доступна ниједна друга мрежа"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"Нема доступних мрежа"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"WiFi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"Детаљи о мрежи"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Додирните мрежу да бисте се повезали"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"Откључајте да бисте видели мреже"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Траже се мреже…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Повезивање са мрежом није успело"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"WiFi тренутно не може да се аутоматски повеже"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Погледајте све"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Да бисте променили мрежу, прекините етернет везу"</string>
 </resources>

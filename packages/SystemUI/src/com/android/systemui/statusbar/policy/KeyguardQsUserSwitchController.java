@@ -27,6 +27,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.FrameLayout;
 
 import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardVisibilityHelper;
@@ -56,7 +57,7 @@ import javax.inject.Provider;
  * Manages the user switch on the Keyguard that is used for opening the QS user panel.
  */
 @KeyguardUserSwitcherScope
-public class KeyguardQsUserSwitchController extends ViewController<UserAvatarView> {
+public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> {
 
     private static final String TAG = "KeyguardQsUserSwitchController";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -76,6 +77,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
     private final KeyguardUserDetailAdapter mUserDetailAdapter;
     private NotificationPanelViewController mNotificationPanelViewController;
+    private UserAvatarView mUserAvatarView;
     UserSwitcherController.UserRecord mCurrentUser;
 
     // State info for the user switch and keyguard
@@ -111,7 +113,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
 
     @Inject
     public KeyguardQsUserSwitchController(
-            UserAvatarView view,
+            FrameLayout view,
             Context context,
             @Main Resources resources,
             ScreenLifecycle screenLifecycle,
@@ -143,6 +145,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
     protected void onInit() {
         super.onInit();
         if (DEBUG) Log.d(TAG, "onInit");
+        mUserAvatarView = mView.findViewById(R.id.kg_multi_user_avatar);
         mAdapter = new UserSwitcherController.BaseUserAdapter(mUserSwitcherController) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -150,11 +153,10 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
             }
         };
 
-        mView.setOnClickListener(v -> {
+        mUserAvatarView.setOnClickListener(v -> {
             if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                 return;
             }
-
             if (isListAnimating()) {
                 return;
             }
@@ -163,7 +165,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
             openQsUserPanel();
         });
 
-        mView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+        mUserAvatarView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
             public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
                 info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
@@ -237,12 +239,12 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
                     R.string.accessibility_multi_user_switch_switcher);
         }
 
-        if (!TextUtils.equals(mView.getContentDescription(), contentDescription)) {
-            mView.setContentDescription(contentDescription);
+        if (!TextUtils.equals(mUserAvatarView.getContentDescription(), contentDescription)) {
+            mUserAvatarView.setContentDescription(contentDescription);
         }
 
         int userId = mCurrentUser != null ? mCurrentUser.resolveId() : UserHandle.USER_NULL;
-        mView.setDrawableWithBadge(getCurrentUserIcon().mutate(), userId);
+        mUserAvatarView.setDrawableWithBadge(getCurrentUserIcon().mutate(), userId);
     }
 
     Drawable getCurrentUserIcon() {
@@ -269,7 +271,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
      * Get the height of the keyguard user switcher view when closed.
      */
     public int getUserIconHeight() {
-        return mView.getHeight();
+        return mUserAvatarView.getHeight();
     }
 
     /**

@@ -1565,6 +1565,12 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.mFixedRotationTransitionListener.onFinishRecentsAnimation();
         assertTrue(displayRotation.updateRotationUnchecked(false));
 
+        // Rotation can be updated if the policy is not ok to animate (e.g. going to sleep).
+        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
+        displayRotation.setRotation((displayRotation.getRotation() + 1) % 4);
+        ((TestWindowManagerPolicy) mWm.mPolicy).mOkToAnimate = false;
+        assertTrue(displayRotation.updateRotationUnchecked(false));
+
         // Rotation can be updated if the recents animation is animating but it is not on top, e.g.
         // switching activities in different orientations by quickstep gesture.
         mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
@@ -2163,6 +2169,21 @@ public class DisplayContentTests extends WindowTestsBase {
     private static void assertTopRunningActivity(ActivityRecord top, DisplayContent display) {
         assertEquals(top, display.topRunningActivity());
         assertEquals(top, display.topRunningActivity(true /* considerKeyguardState */));
+    }
+
+    @Test
+    public void testKeyguardGoingAwayWhileAodShown() {
+        mDisplayContent.getDisplayPolicy().setAwake(true);
+
+        final WindowState appWin = createWindow(null, TYPE_APPLICATION, mDisplayContent, "appWin");
+        final ActivityRecord activity = appWin.mActivityRecord;
+
+        mAtm.mKeyguardController.setKeyguardShown(true /* keyguardShowing */,
+                true /* aodShowing */);
+        assertFalse(activity.isVisibleRequested());
+
+        mAtm.mKeyguardController.keyguardGoingAway(0 /* flags */);
+        assertTrue(activity.isVisibleRequested());
     }
 
     @Test

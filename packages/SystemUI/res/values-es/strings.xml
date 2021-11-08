@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom para ajustar"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Expandir para ajustar"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Captura de pantalla"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock inhabilitado"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ha enviado una imagen"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Guardando captura..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Guardando captura..."</string>
@@ -123,8 +124,8 @@
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"No se han podido obtener los permisos"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"No se ha podido empezar a grabar la pantalla"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"Opciones de transferencia de archivos por USB"</string>
-    <string name="use_mtp_button_title" msgid="5036082897886518086">"Activar como reproductor de medios (MTP)"</string>
-    <string name="use_ptp_button_title" msgid="7676427598943446826">"Activar como cámara (PTP)"</string>
+    <string name="use_mtp_button_title" msgid="5036082897886518086">"Montar como reproductor de medios (MTP)"</string>
+    <string name="use_ptp_button_title" msgid="7676427598943446826">"Montar como cámara (PTP)"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Instalar Android File Transfer para Mac"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Atrás"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Inicio"</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Si lo haces, todas las aplicaciones y servicios que tengan permiso podrán usar tu micrófono."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Si lo haces, todas las aplicaciones y servicios que tengan permiso podrán usar tu cámara."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Si lo haces, todas las aplicaciones y servicios que tengan permiso podrán usar tu cámara o tu micrófono."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Dispositivo"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Otro dispositivo"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Mostrar u ocultar aplicaciones recientes"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Cargada"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Cargando"</string>
@@ -677,12 +678,12 @@
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Ajustes de pantalla de bloqueo"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de trabajo"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Modo avión"</string>
-    <string name="add_tile" msgid="6239678623873086686">"Añadir icono"</string>
-    <string name="broadcast_tile" msgid="5224010633596487481">"Icono de emisión"</string>
+    <string name="add_tile" msgid="6239678623873086686">"Añadir recuadro"</string>
+    <string name="broadcast_tile" msgid="5224010633596487481">"Recuadro de emisión"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"No oirás la próxima alarma (<xliff:g id="WHEN">%1$s</xliff:g>) a menos que desactives esta opción antes"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"No oirás la próxima alarma (<xliff:g id="WHEN">%1$s</xliff:g>)"</string>
     <string name="alarm_template" msgid="2234991538018805736">"a las <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="alarm_template_far" msgid="3561752195856839456">"el <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Ajustes rápidos, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Compartir Internet"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabajo"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Controles de energía de las notificaciones"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Activado"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Desactivado"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Activado: basado en caras"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Los controles de energía de las notificaciones permiten establecer un nivel de importancia de 0 a 5 para las notificaciones de las aplicaciones. \n\n"<b>"Nivel 5"</b>" \n- Mostrar en la parte superior de la lista de notificaciones \n- Permitir interrumpir en el modo de pantalla completa \n- Mostrar siempre \n\n"<b>"Nivel 4"</b>" \n- Evitar interrumpir en el modo de pantalla completa \n- Mostrar siempre \n\n"<b>"Nivel 3"</b>" \n- Evitar interrumpir en el modo de pantalla completa \n- No mostrar nunca \n\n"<b>"Nivel 2"</b>" \n- Evitar interrumpir en el modo de pantalla completa\n- No mostrar nunca \n- No emitir sonido ni vibrar nunca \n\n"<b>"Nivel 1"</b>" \n- Evitar interrumpir en el modo de pantalla completa \n- No mostrar nunca \n- No emitir sonido ni vibrar nunca \n- Ocultar de la pantalla de bloqueo y de la barra de estado \n- Mostrar en la parte inferior de la lista de notificaciones \n\n"<b>"Nivel 0"</b>" \n- Bloquear todas las notificaciones de la aplicación"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Notificaciones"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"No volverás a ver estas notificaciones"</string>
@@ -892,10 +894,10 @@
     <string name="right_keycode" msgid="2480715509844798438">"Código de teclado a la derecha"</string>
     <string name="left_icon" msgid="5036278531966897006">"Icono a la izquierda"</string>
     <string name="right_icon" msgid="1103955040645237425">"Icono a la derecha"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Pulsa y arrastra para añadir funciones"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén pulsado un icono y arrástralo para reubicarlo"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Pulsa y arrastra para añadir recuadros"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén pulsado un recuadro y arrástralo para reubicarlo"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arrastra aquí para quitar una función"</string>
-    <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necesitas al menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> iconos"</string>
+    <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necesitas al menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> recuadros"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Editar"</string>
     <string name="tuner_time" msgid="2450785840990529997">"Hora"</string>
   <string-array name="clock_options">
@@ -910,15 +912,15 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Mostrar iconos de notificaciones con prioridad baja"</string>
     <string name="other" msgid="429768510980739978">"Otros"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"quitar icono"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"añadir icono al final"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Mover icono"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Añadir icono"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"quitar recuadro"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"añadir recuadro al final"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Mover recuadro"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Añadir recuadro"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Mover a <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Añadir a la posición <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Posición <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Tarjeta añadida"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Tarjeta quitada"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Recuadro añadido"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Recuadro quitado"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor de ajustes rápidos."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Notificación de <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Abrir ajustes."</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Usa la huella digital para abrir"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autenticación obligatoria. Toca el sensor de huellas digitales para autenticarte."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Llamada en curso"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"Datos móviles"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Conectado"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Los datos móviles no se conectarán automáticamente"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"Sin conexión"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"No hay otras redes disponibles"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"No hay redes disponibles"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"Detalles de la red"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Toca una red para conectarte"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"Desbloquea para ver redes"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Buscando redes…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"No se ha podido conectar a la red"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Por ahora no se conectará automáticamente a redes Wi-Fi"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Ver todo"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para cambiar de red, desconecta el cable Ethernet"</string>
 </resources>

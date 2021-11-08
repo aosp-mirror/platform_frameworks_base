@@ -30,6 +30,7 @@ import android.os.Process;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.permission.ILegacyPermissionManager;
+import android.util.EventLog;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -187,10 +188,25 @@ public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stu
     private void verifyCallerCanCheckAccess(String packageName, String message, int pid, int uid) {
         // If the check is being requested by an app then only allow the app to query its own
         // access status.
+        boolean reportError = false;
         int callingUid = mInjector.getCallingUid();
         int callingPid = mInjector.getCallingPid();
         if (UserHandle.getAppId(callingUid) >= Process.FIRST_APPLICATION_UID && (callingUid != uid
                 || callingPid != pid)) {
+            reportError = true;
+        }
+        // If the query is against an app on the device, then the check should only be allowed if
+        // the provided uid matches that of the specified package.
+        if (packageName != null && UserHandle.getAppId(uid) >= Process.FIRST_APPLICATION_UID) {
+            int packageUid = mInjector.getPackageUidForUser(packageName, UserHandle.getUserId(uid));
+            if (uid != packageUid) {
+                EventLog.writeEvent(0x534e4554, "193441322",
+                        UserHandle.getAppId(callingUid) >= Process.FIRST_APPLICATION_UID
+                                ? callingUid : uid, "Package uid mismatch");
+                reportError = true;
+            }
+        }
+        if (reportError) {
             String response = String.format(
                     "Calling uid %d, pid %d cannot access for package %s (uid=%d, pid=%d): %s",
                     callingUid, callingPid, packageName, uid, pid, message);
@@ -385,12 +401,14 @@ public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stu
     @VisibleForTesting
     public static class Injector {
         private final Context mContext;
+        private final PackageManagerInternal mPackageManagerInternal;
 
         /**
          * Public constructor that accepts a {@code context} within which to operate.
          */
         public Injector(@NonNull Context context) {
             mContext = context;
+            mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         }
 
         /**
@@ -452,6 +470,13 @@ public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stu
 
             return mContext.getPackageManager().getApplicationInfoAsUser(packageName, 0,
                     UserHandle.getUserHandleForUid(uid));
+        }
+
+        /**
+         * Returns the uid for the specified {@code packageName} under the provided {@code userId}.
+         */
+        public int getPackageUidForUser(String packageName, int userId) {
+            return mPackageManagerInternal.getPackageUid(packageName, 0, userId);
         }
     }
 }

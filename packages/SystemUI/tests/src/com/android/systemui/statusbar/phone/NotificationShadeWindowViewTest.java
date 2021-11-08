@@ -16,6 +16,11 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +32,7 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.LockIconViewController;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
@@ -55,6 +61,8 @@ import com.android.systemui.util.InjectionInflationController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -90,6 +98,11 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
+    @Mock private LockIconViewController mLockIconViewController;
+
+    @Captor private ArgumentCaptor<NotificationShadeWindowView.InteractionEventHandler>
+            mInteractionEventHandlerCaptor;
+    private NotificationShadeWindowView.InteractionEventHandler mInteractionEventHandler;
 
     @Before
     public void setUp() {
@@ -131,7 +144,8 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mNotificationPanelViewController,
                 mStatusBarViewFactory,
                 mNotificationStackScrollLayoutController,
-                mStatusBarKeyguardViewManager);
+                mStatusBarKeyguardViewManager,
+                mLockIconViewController);
         mController.setupExpandedStatusBar();
         mController.setService(mStatusBar, mNotificationShadeWindowController);
         mController.setDragDownHelper(mDragDownHelper);
@@ -146,5 +160,50 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
         mView.onTouchEvent(ev);
         verify(mDragDownHelper).onTouchEvent(ev);
         ev.recycle();
+    }
+
+    @Test
+    public void testInterceptTouchWhenShowingAltAuth() {
+        captureInteractionEventHandler();
+
+        // WHEN showing alt auth, not dozing, drag down helper doesn't want to intercept
+        when(mStatusBarStateController.isDozing()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()).thenReturn(true);
+        when(mDragDownHelper.onInterceptTouchEvent(any())).thenReturn(false);
+
+        // THEN we should intercept touch
+        assertTrue(mInteractionEventHandler.shouldInterceptTouchEvent(mock(MotionEvent.class)));
+    }
+
+    @Test
+    public void testNoInterceptTouch() {
+        captureInteractionEventHandler();
+
+        // WHEN not showing alt auth, not dozing, drag down helper doesn't want to intercept
+        when(mStatusBarStateController.isDozing()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()).thenReturn(false);
+        when(mDragDownHelper.onInterceptTouchEvent(any())).thenReturn(false);
+
+        // THEN we shouldn't intercept touch
+        assertFalse(mInteractionEventHandler.shouldInterceptTouchEvent(mock(MotionEvent.class)));
+    }
+
+    @Test
+    public void testHandleTouchEventWhenShowingAltAuth() {
+        captureInteractionEventHandler();
+
+        // WHEN showing alt auth, not dozing, drag down helper doesn't want to intercept
+        when(mStatusBarStateController.isDozing()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()).thenReturn(true);
+        when(mDragDownHelper.onInterceptTouchEvent(any())).thenReturn(false);
+
+        // THEN we should handle the touch
+        assertTrue(mInteractionEventHandler.handleTouchEvent(mock(MotionEvent.class)));
+    }
+
+    private void captureInteractionEventHandler() {
+        verify(mView).setInteractionEventHandler(mInteractionEventHandlerCaptor.capture());
+        mInteractionEventHandler = mInteractionEventHandlerCaptor.getValue();
+
     }
 }

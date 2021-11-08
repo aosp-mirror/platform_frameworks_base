@@ -72,8 +72,9 @@ public class SettingsHelper {
      * {@hide}
      */
     private static final ArraySet<String> sBroadcastOnRestore;
+    private static final ArraySet<String> sBroadcastOnRestoreSystemUI;
     static {
-        sBroadcastOnRestore = new ArraySet<String>(4);
+        sBroadcastOnRestore = new ArraySet<String>(9);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_VR_LISTENERS);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
@@ -83,6 +84,9 @@ public class SettingsHelper {
         sBroadcastOnRestore.add(Settings.Secure.DARK_THEME_CUSTOM_END_TIME);
         sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
         sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS);
+        sBroadcastOnRestoreSystemUI = new ArraySet<String>(2);
+        sBroadcastOnRestoreSystemUI.add(Settings.Secure.QS_TILES);
+        sBroadcastOnRestoreSystemUI.add(Settings.Secure.QS_AUTO_ADDED_TILES);
     }
 
     private interface SettingsLookup {
@@ -133,6 +137,7 @@ public class SettingsHelper {
         // Will we need a post-restore broadcast for this element?
         String oldValue = null;
         boolean sendBroadcast = false;
+        boolean sendBroadcastSystemUI = false;
         final SettingsLookup table;
 
         if (destination.equals(Settings.Secure.CONTENT_URI)) {
@@ -143,10 +148,12 @@ public class SettingsHelper {
             table = sGlobalLookup;
         }
 
-        if (sBroadcastOnRestore.contains(name)) {
+        sendBroadcast = sBroadcastOnRestore.contains(name);
+        sendBroadcastSystemUI = sBroadcastOnRestoreSystemUI.contains(name);
+
+        if (sendBroadcast || sendBroadcastSystemUI) {
             // TODO: http://b/22388012
             oldValue = table.lookup(cr, name, UserHandle.USER_SYSTEM);
-            sendBroadcast = true;
         }
 
         try {
@@ -193,18 +200,28 @@ public class SettingsHelper {
         } catch (Exception e) {
             // If we fail to apply the setting, by definition nothing happened
             sendBroadcast = false;
+            sendBroadcastSystemUI = false;
         } finally {
             // If this was an element of interest, send the "we just restored it"
             // broadcast with the historical value now that the new value has
             // been committed and observers kicked off.
-            if (sendBroadcast) {
+            if (sendBroadcast || sendBroadcastSystemUI) {
                 Intent intent = new Intent(Intent.ACTION_SETTING_RESTORED)
-                        .setPackage("android").addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
+                        .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
                         .putExtra(Intent.EXTRA_SETTING_NAME, name)
                         .putExtra(Intent.EXTRA_SETTING_NEW_VALUE, value)
                         .putExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE, oldValue)
                         .putExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT, restoredFromSdkInt);
-                context.sendBroadcastAsUser(intent, UserHandle.SYSTEM, null);
+
+                if (sendBroadcast) {
+                    intent.setPackage("android");
+                    context.sendBroadcastAsUser(intent, UserHandle.SYSTEM, null);
+                }
+                if (sendBroadcastSystemUI) {
+                    intent.setPackage(
+                            context.getString(com.android.internal.R.string.config_systemUi));
+                    context.sendBroadcastAsUser(intent, UserHandle.SYSTEM, null);
+                }
             }
         }
     }

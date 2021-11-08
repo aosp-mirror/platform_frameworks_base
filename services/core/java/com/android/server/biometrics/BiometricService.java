@@ -83,6 +83,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * System service that arbitrates the modality for BiometricPrompt to use.
@@ -115,6 +116,7 @@ public class BiometricService extends SystemService {
     final SettingObserver mSettingObserver;
     private final List<EnabledOnKeyguardCallback> mEnabledOnKeyguardCallbacks;
     private final Random mRandom = new Random();
+    @NonNull private final AtomicLong mRequestCounter;
 
     @VisibleForTesting
     IStatusBarService mStatusBarService;
@@ -194,6 +196,7 @@ public class BiometricService extends SystemService {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleAuthenticate(
                             (IBinder) args.arg1 /* token */,
+                            (long) args.arg6 /* requestId */,
                             (long) args.arg2 /* operationId */,
                             args.argi1 /* userid */,
                             (IBiometricServiceReceiver) args.arg3 /* receiver */,
@@ -204,7 +207,9 @@ public class BiometricService extends SystemService {
                 }
 
                 case MSG_CANCEL_AUTHENTICATION: {
-                    handleCancelAuthentication();
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    handleCancelAuthentication((long) args.arg3 /* requestId */);
+                    args.recycle();
                     break;
                 }
 
@@ -683,13 +688,13 @@ public class BiometricService extends SystemService {
         }
 
         @Override // Binder call
-        public void authenticate(IBinder token, long operationId, int userId,
+        public long authenticate(IBinder token, long operationId, int userId,
                 IBiometricServiceReceiver receiver, String opPackageName, PromptInfo promptInfo) {
             checkInternalPermission();
 
             if (token == null || receiver == null || opPackageName == null || promptInfo == null) {
                 Slog.e(TAG, "Unable to authenticate, one or more null arguments");
-                return;
+                return -1;
             }
 
             if (!Utils.isValidAuthenticatorConfig(promptInfo)) {
@@ -706,6 +711,8 @@ public class BiometricService extends SystemService {
                 }
             }
 
+            final long requestId = mRequestCounter.incrementAndGet();
+
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = token;
             args.arg2 = operationId;
@@ -713,15 +720,23 @@ public class BiometricService extends SystemService {
             args.arg3 = receiver;
             args.arg4 = opPackageName;
             args.arg5 = promptInfo;
+            args.arg6 = requestId;
 
             mHandler.obtainMessage(MSG_AUTHENTICATE, args).sendToTarget();
+
+            return requestId;
         }
 
         @Override // Binder call
-        public void cancelAuthentication(IBinder token, String opPackageName) {
+        public void cancelAuthentication(IBinder token, String opPackageName, long requestId) {
             checkInternalPermission();
 
-            mHandler.obtainMessage(MSG_CANCEL_AUTHENTICATION).sendToTarget();
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = token;
+            args.arg2 = opPackageName;
+            args.arg3 = requestId;
+
+            mHandler.obtainMessage(MSG_CANCEL_AUTHENTICATION, args).sendToTarget();
         }
 
         @Override // Binder call
@@ -1111,6 +1126,10 @@ public class BiometricService extends SystemService {
             return Settings.Secure.getInt(context.getContentResolver(),
                     CoexCoordinator.FACE_HAPTIC_DISABLE, 1) != 0;
         }
+
+        public AtomicLong getRequestGenerator() {
+            return new AtomicLong(0);
+        }
     }
 
     /**
@@ -1136,6 +1155,7 @@ public class BiometricService extends SystemService {
         mEnabledOnKeyguardCallbacks = new ArrayList<>();
         mSettingObserver = mInjector.getSettingObserver(context, mHandler,
                 mEnabledOnKeyguardCallbacks);
+        mRequestCounter = mInjector.getRequestGenerator();
 
         // TODO(b/193089985) This logic lives here (outside of CoexCoordinator) so that it doesn't
         //  need to depend on context. We can remove this code once the advanced logic is enabled
@@ -1349,7 +1369,7 @@ public class BiometricService extends SystemService {
         mCurrentAuthSession.onCookieReceived(cookie);
     }
 
-    private void handleAuthenticate(IBinder token, long operationId, int userId,
+    private void handleAuthenticate(IBinder token, long requestId, long operationId, int userId,
             IBiometricServiceReceiver receiver, String opPackageName, PromptInfo promptInfo) {
         mHandler.post(() -> {
             try {
@@ -1360,7 +1380,8 @@ public class BiometricService extends SystemService {
                 final Pair<Integer, Integer> preAuthStatus = preAuthInfo.getPreAuthenticateStatus();
 
                 Slog.d(TAG, "handleAuthenticate: modality(" + preAuthStatus.first
-                        + "), status(" + preAuthStatus.second + "), preAuthInfo: " + preAuthInfo);
+                        + "), status(" + preAuthStatus.second + "), preAuthInfo: " + preAuthInfo
+                        + " requestId: " + requestId);
 
                 if (preAuthStatus.second == BiometricConstants.BIOMETRIC_SUCCESS) {
                     // If BIOMETRIC_WEAK or BIOMETRIC_STRONG are allowed, but not enrolled, but
@@ -1372,8 +1393,8 @@ public class BiometricService extends SystemService {
                         promptInfo.setAuthenticators(Authenticators.DEVICE_CREDENTIAL);
                     }
 
-                    authenticateInternal(token, operationId, userId, receiver, opPackageName,
-                            promptInfo, preAuthInfo);
+                    authenticateInternal(token, requestId, operationId, userId, receiver,
+                            opPackageName, promptInfo, preAuthInfo);
                 } else {
                     receiver.onError(preAuthStatus.first /* modality */,
                             preAuthStatus.second /* errorCode */,
@@ -1394,7 +1415,7 @@ public class BiometricService extends SystemService {
      * Note that this path is NOT invoked when the BiometricPrompt "Try again" button is pressed.
      * In that case, see {@link #handleOnTryAgainPressed()}.
      */
-    private void authenticateInternal(IBinder token, long operationId, int userId,
+    private void authenticateInternal(IBinder token, long requestId, long operationId, int userId,
             IBiometricServiceReceiver receiver, String opPackageName, PromptInfo promptInfo,
             PreAuthInfo preAuthInfo) {
         Slog.d(TAG, "Creating authSession with authRequest: " + preAuthInfo);
@@ -1412,9 +1433,9 @@ public class BiometricService extends SystemService {
 
         final boolean debugEnabled = mInjector.isDebugEnabled(getContext(), userId);
         mCurrentAuthSession = new AuthSession(getContext(), mStatusBarService, mSysuiReceiver,
-                mKeyStore, mRandom, mClientDeathReceiver, preAuthInfo, token, operationId, userId,
-                mBiometricSensorReceiver, receiver, opPackageName, promptInfo, debugEnabled,
-                mInjector.getFingerprintSensorProperties(getContext()));
+                mKeyStore, mRandom, mClientDeathReceiver, preAuthInfo, token, requestId,
+                operationId, userId, mBiometricSensorReceiver, receiver, opPackageName, promptInfo,
+                debugEnabled, mInjector.getFingerprintSensorProperties(getContext()));
         try {
             mCurrentAuthSession.goToInitialState();
         } catch (RemoteException e) {
@@ -1422,9 +1443,19 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private void handleCancelAuthentication() {
+    private void handleCancelAuthentication(long requestId) {
         if (mCurrentAuthSession == null) {
             Slog.e(TAG, "handleCancelAuthentication: AuthSession is null");
+            return;
+        }
+        if (mCurrentAuthSession.getRequestId() != requestId) {
+            // TODO: actually cancel the operation
+            // This can happen if the operation has been queued, but is cancelled before
+            // it reaches the head of the scheduler. Consider it a programming error for now
+            // and ignore it.
+            Slog.e(TAG, "handleCancelAuthentication: AuthSession mismatch current requestId: "
+                    + mCurrentAuthSession.getRequestId() + " cancel for: " + requestId
+                    + " (ignoring cancellation)");
             return;
         }
 

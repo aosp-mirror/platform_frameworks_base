@@ -116,6 +116,9 @@ public class QSIconViewImpl extends QSIconView {
                     : icon.getInvisibleDrawable(mContext) : null;
             int padding = icon != null ? icon.getPadding() : 0;
             if (d != null) {
+                if (d.getConstantState() != null) {
+                    d = d.getConstantState().newDrawable();
+                }
                 d.setAutoMirrored(false);
                 d.setLayoutDirection(getLayoutDirection());
             }

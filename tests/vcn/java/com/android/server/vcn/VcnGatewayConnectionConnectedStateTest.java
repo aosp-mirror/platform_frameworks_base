@@ -322,6 +322,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         triggerValidation(NetworkAgent.VALIDATION_STATUS_VALID);
         verify(mSafeModeTimeoutAlarm).cancel();
         assertFalse(mGatewayConnection.isInSafeMode());
+        verifySafeModeStateAndCallbackFired(1 /* invocationCount */, false /* isInSafeMode */);
     }
 
     @Test
@@ -391,6 +392,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
         triggerValidation(NetworkAgent.VALIDATION_STATUS_VALID);
 
+        verifySafeModeStateAndCallbackFired(2 /* invocationCount */, false /* isInSafeMode */);
         assertFalse(mGatewayConnection.isInSafeMode());
     }
 
@@ -400,7 +402,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         mTestLooper.dispatchAll();
 
         triggerValidation(NetworkAgent.VALIDATION_STATUS_VALID);
-        assertFalse(mGatewayConnection.isInSafeMode());
+        verifySafeModeStateAndCallbackFired(1 /* invocationCount */, false /* isInSafeMode */);
 
         // Trigger a failed validation, and the subsequent safemode timeout.
         triggerValidation(NetworkAgent.VALIDATION_STATUS_NOT_VALID);
@@ -416,7 +418,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         runnableCaptor.getValue().run();
         mTestLooper.dispatchAll();
 
-        assertTrue(mGatewayConnection.isInSafeMode());
+        verifySafeModeStateAndCallbackFired(2 /* invocationCount */, true /* isInSafeMode */);
     }
 
     private Consumer<VcnNetworkAgent> setupNetworkAndGetUnwantedCallback() {

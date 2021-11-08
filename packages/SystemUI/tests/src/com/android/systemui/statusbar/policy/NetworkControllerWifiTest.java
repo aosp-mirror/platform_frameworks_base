@@ -238,7 +238,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         mNetworkController.setNoNetworksAvailable(false);
         setWifiStateForVcn(true, testSsid);
         setWifiLevelForVcn(0);
-        verifyLastWifiIcon(true, WifiIcons.WIFI_SIGNAL_STRENGTH[0][0]);
+        verifyLastMobileDataIndicatorsForVcn(true, 0, TelephonyIcons.ICON_CWF, false);
 
         mNetworkController.setNoNetworksAvailable(true);
         for (int testLevel = 0; testLevel < WifiIcons.WIFI_LEVEL_COUNT; testLevel++) {
@@ -246,11 +246,11 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
 
             setConnectivityViaCallbackInNetworkControllerForVcn(
                     NetworkCapabilities.TRANSPORT_CELLULAR, true, true, mVcnTransportInfo);
-            verifyLastWifiIcon(true, WifiIcons.WIFI_SIGNAL_STRENGTH[1][testLevel]);
+            verifyLastMobileDataIndicatorsForVcn(true, testLevel, TelephonyIcons.ICON_CWF, true);
 
             setConnectivityViaCallbackInNetworkControllerForVcn(
                     NetworkCapabilities.TRANSPORT_CELLULAR, false, true, mVcnTransportInfo);
-            verifyLastWifiIcon(true, WifiIcons.WIFI_SIGNAL_STRENGTH[0][testLevel]);
+            verifyLastMobileDataIndicatorsForVcn(true, testLevel, TelephonyIcons.ICON_CWF, false);
         }
     }
 

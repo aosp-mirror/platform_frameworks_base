@@ -116,11 +116,18 @@ public class DozeScrimController implements StateListener {
 
         if (!mDozing || mPulseCallback != null) {
             if (DEBUG) {
-                Log.d(TAG, "Pulse supressed. Dozing: " + mDozeParameters + " had callback? "
+                Log.d(TAG, "Pulse suppressed. Dozing: " + mDozeParameters + " had callback? "
                         + (mPulseCallback != null));
             }
             // Pulse suppressed.
             callback.onPulseFinished();
+            if (!mDozing) {
+                mDozeLog.tracePulseDropped("device isn't dozing");
+            } else {
+                mDozeLog.tracePulseDropped("already has pulse callback mPulseCallback="
+                        + mPulseCallback);
+            }
+
             return;
         }
 

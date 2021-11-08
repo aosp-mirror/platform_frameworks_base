@@ -59,11 +59,30 @@ class SurfaceAnimator {
     @VisibleForTesting
     final Animatable mAnimatable;
     private final OnAnimationFinishedCallback mInnerAnimationFinishedCallback;
+
+    /**
+     * Static callback to run on all animations started through this SurfaceAnimator
+     * when an animation on a Surface is finished or cancelled without restart.
+     */
     @VisibleForTesting
     @Nullable
     final OnAnimationFinishedCallback mStaticAnimationFinishedCallback;
+
+    /**
+     * Callback unique to each animation (i.e. AnimationAdapter). To be run when an animation on a
+     * Surface is finished or cancelled without restart.
+     */
     @Nullable
-    private OnAnimationFinishedCallback mAnimationFinishedCallback;
+    private OnAnimationFinishedCallback mSurfaceAnimationFinishedCallback;
+
+    /**
+     * The callback is triggered after the SurfaceAnimator sends a cancel call to the underlying
+     * AnimationAdapter.
+     * NOTE: Must be called wherever we call onAnimationCancelled on mAnimation.
+     */
+    @Nullable
+    private Runnable mAnimationCancelledCallback;
+
     private boolean mAnimationStartDelayed;
 
     /**
@@ -100,7 +119,7 @@ class SurfaceAnimator {
                         return;
                     }
                     final OnAnimationFinishedCallback animationFinishCallback =
-                            mAnimationFinishedCallback;
+                            mSurfaceAnimationFinishedCallback;
                     reset(mAnimatable.getPendingTransaction(), true /* destroyLeash */);
                     if (staticAnimationFinishedCallback != null) {
                         staticAnimationFinishedCallback.onAnimationFinished(type, anim);
@@ -130,15 +149,19 @@ class SurfaceAnimator {
      *               This is important as it will start with the leash hidden or visible before
      *               handing it to the component that is responsible to run the animation.
      * @param animationFinishedCallback The callback being triggered when the animation finishes.
+     * @param animationCancelledCallback The callback is triggered after the SurfaceAnimator sends a
+     *                                   cancel call to the underlying AnimationAdapter.
      */
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
             @AnimationType int type,
             @Nullable OnAnimationFinishedCallback animationFinishedCallback,
+            @Nullable Runnable animationCancelledCallback,
             @Nullable SurfaceFreezer freezer) {
         cancelAnimation(t, true /* restarting */, true /* forwardCancel */);
         mAnimation = anim;
         mAnimationType = type;
-        mAnimationFinishedCallback = animationFinishedCallback;
+        mSurfaceAnimationFinishedCallback = animationFinishedCallback;
+        mAnimationCancelledCallback = animationCancelledCallback;
         final SurfaceControl surface = mAnimatable.getSurfaceControl();
         if (surface == null) {
             Slog.w(TAG, "Unable to start animation, surface is null or no children.");
@@ -161,14 +184,9 @@ class SurfaceAnimator {
     }
 
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
-            @AnimationType int type,
-            @Nullable OnAnimationFinishedCallback animationFinishedCallback) {
-        startAnimation(t, anim, hidden, type, animationFinishedCallback, null /* freezer */);
-    }
-
-    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
             @AnimationType int type) {
-        startAnimation(t, anim, hidden, type, null /* animationFinishedCallback */);
+        startAnimation(t, anim, hidden, type, null /* animationFinishedCallback */,
+                null /* animationCancelledCallback */, null /* freezer */);
     }
 
     /**
@@ -278,7 +296,8 @@ class SurfaceAnimator {
         mLeash = from.mLeash;
         mAnimation = from.mAnimation;
         mAnimationType = from.mAnimationType;
-        mAnimationFinishedCallback = from.mAnimationFinishedCallback;
+        mSurfaceAnimationFinishedCallback = from.mSurfaceAnimationFinishedCallback;
+        mAnimationCancelledCallback = from.mAnimationCancelledCallback;
 
         // Cancel source animation, but don't let animation runner cancel the animation.
         from.cancelAnimation(t, false /* restarting */, false /* forwardCancel */);
@@ -306,11 +325,16 @@ class SurfaceAnimator {
         final SurfaceControl leash = mLeash;
         final AnimationAdapter animation = mAnimation;
         final @AnimationType int animationType = mAnimationType;
-        final OnAnimationFinishedCallback animationFinishedCallback = mAnimationFinishedCallback;
+        final OnAnimationFinishedCallback animationFinishedCallback =
+                mSurfaceAnimationFinishedCallback;
+        final Runnable animationCancelledCallback = mAnimationCancelledCallback;
         reset(t, false);
         if (animation != null) {
             if (!mAnimationStartDelayed && forwardCancel) {
                 animation.onAnimationCancelled(leash);
+                if (animationCancelledCallback != null) {
+                    animationCancelledCallback.run();
+                }
             }
             if (!restarting) {
                 if (mStaticAnimationFinishedCallback != null) {
@@ -335,7 +359,7 @@ class SurfaceAnimator {
     private void reset(Transaction t, boolean destroyLeash) {
         mService.mAnimationTransferMap.remove(mAnimation);
         mAnimation = null;
-        mAnimationFinishedCallback = null;
+        mSurfaceAnimationFinishedCallback = null;
         mAnimationType = ANIMATION_TYPE_NONE;
         if (mLeash == null) {
             return;

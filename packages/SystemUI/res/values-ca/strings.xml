@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom per omplir pantalla"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Estira per omplir pant."</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Captura de pantalla"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock desactivat"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ha enviat una imatge"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"S\'està desant captura de pantalla..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"S\'està desant la captura de pantalla..."</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Aquesta opció desbloqueja l\'accés de tots els serveis i aplicacions que tenen permís per utilitzar el micròfon."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Aquesta opció desbloqueja l\'accés de tots els serveis i aplicacions que tenen permís per utilitzar la càmera."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Aquesta opció desbloqueja l\'accés de tots els serveis i aplicacions que tenen permís per utilitzar la càmera o el micròfon."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Dispositiu"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Un altre dispositiu"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activa o desactiva Aplicacions recents"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Carregada"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"S\'està carregant"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Controls millorats per a notificacions"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Activat"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Desactivat"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Activat: basat en cares"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Amb els controls de notificació millorats, pots establir un nivell d\'importància d\'entre 0 i 5 per a les notificacions d\'una aplicació. \n\n"<b>"Nivell 5"</b>" \n- Mostra les notificacions a la part superior de la llista \n- Permet la interrupció de la pantalla completa \n- Permet sempre la previsualització \n\n"<b>"Nivell 4"</b>" \n- No permet la interrupció de la pantalla completa \n- Permet sempre la previsualització \n\n"<b>"Nivell 3"</b>" \n- No permet la interrupció de la pantalla completa \n- No permet mai la previsualització \n\n"<b>"Nivell 2"</b>" \n- No permet la interrupció de la pantalla completa \n- No permet mai la previsualització \n- Les notificacions no poden emetre sons ni vibracions \n\n"<b>"Nivell 1"</b>" \n- No permet la interrupció de la pantalla completa \n- No permet mai la previsualització \n- No activa mai el so ni la vibració \n- Amaga les notificacions de la pantalla de bloqueig i de la barra d\'estat \n- Mostra les notificacions a la part inferior de la llista \n\n"<b>"Nivell 0"</b>" \n- Bloqueja totes les notificacions de l\'aplicació"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Notificacions"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Ja no veuràs aquestes notificacions"</string>
@@ -1008,7 +1010,7 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Algunes aplicacions estan fent servir el següent: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" i "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"En ús per <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ho està utilitzant"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Utilitzat recentment per <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(feina)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Trucada"</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Utilitza l\'empremta digital per obrir"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autenticació necessària. Toca el sensor d\'empremtes digitals per autenticar-te."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Trucada en curs"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"Dades mòbils"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Connectat"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Les dades mòbils no es connectaran automàticament"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"Sense connexió"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"No hi ha cap altra xarxa disponible"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"No hi ha cap xarxa disponible"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wi‑Fi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"Detalls de la xarxa"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Toca una xarxa per connectar-te"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"Desbloqueja per veure xarxes"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"S\'estan cercant xarxes…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"No s\'ha pogut connectar a la xarxa"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Per ara la Wi‑Fi no es connectarà automàticament"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Mostra-ho tot"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Per canviar de xarxa, desconnecta la connexió Ethernet"</string>
 </resources>

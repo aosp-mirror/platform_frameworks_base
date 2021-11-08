@@ -33,6 +33,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.view.View;
 import android.view.autofill.AutofillId;
+import android.widget.TextView;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -42,11 +43,50 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
-// TODO(b/178044703): Describe what UI Translation is.
 /**
- * The {@link UiTranslationManager} class provides ways for apps to use the ui translation
+ * <p>The {@link UiTranslationManager} class provides ways for apps to use the ui translation
  * function in framework.
+ *
+ * <p> The UI translation provides ways for apps to support inline translation for the views. For
+ * example the system supports text translation for {@link TextView}. To support UI translation for
+ * your views, you should override the following methods to provide the content to be translated
+ * and deal with the translated result. Here is an example for {@link TextView}-like views:
+ *
+ * <pre><code>
+ * public class MyTextView extends View {
+ *     public MyTextView(...) {
+ *         // implements how to show the translated result in your View in
+ *         // ViewTranslationCallback and set it by setViewTranslationCallback()
+ *         setViewTranslationCallback(new MyViewTranslationCallback());
+ *     }
+ *
+ *     public void onCreateViewTranslationRequest(int[] supportedFormats,
+ *             Consumer<ViewTranslationRequest> requestsCollector) {
+ *        // collect the information that needs to be translated
+ *        ViewTranslationRequest.Builder requestBuilder =
+ *                     new ViewTranslationRequest.Builder(getAutofillId());
+ *        requestBuilder.setValue(ViewTranslationRequest.ID_TEXT,
+ *                         TranslationRequestValue.forText(etText()));
+ *        requestsCollector.accept(requestBuilder.build());
+ *     }
+ *
+ *     public void onProvideContentCaptureStructure(
+ *             ViewStructure structure, int flags) {
+ *         // set ViewTranslationResponse
+ *         super.onViewTranslationResponse(response);
+ *     }
+ * }
+ * </code></pre>
+ *
+ * <p>If your view provides its own virtual hierarchy (for example, if it's a browser that draws the
+ * HTML using {@link android.graphics.Canvas} or native libraries in a different render process),
+ * you must override {@link View#onCreateVirtualViewTranslationRequests(long[], int[], Consumer)} to
+ * provide the content to be translated and implement
+ * {@link View#onVirtualViewTranslationResponses(android.util.LongSparseArray)} for the translated
+ * result. You also need to implement {@link android.view.translation.ViewTranslationCallback} to
+ * handle the translated information show or hide in your {@link View}.
  */
 public final class UiTranslationManager {
 
@@ -248,14 +288,14 @@ public final class UiTranslationManager {
         }
     }
 
-    // TODO(b/178044703): Fix the View API link when it becomes public.
     /**
      * Register for notifications of UI Translation state changes on the foreground activity. This
      * is available to the owning application itself and also the current input method.
      * <p>
      * The application whose UI is being translated can use this to customize the UI Translation
      * behavior in ways that aren't made easy by methods like
-     * View#onCreateTranslationRequest().
+     * {@link View#onCreateViewTranslationRequest(int[], Consumer)}.
+     *
      * <p>
      * Input methods can use this to offer complementary features to UI Translation; for example,
      * enabling outgoing message translation when the system is translating incoming messages in a

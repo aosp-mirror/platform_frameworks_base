@@ -366,6 +366,20 @@ public class StackScrollAlgorithm {
         return stackHeight / stackEndHeight;
     }
 
+    public boolean hasOngoingNotifs(StackScrollAlgorithmState algorithmState) {
+        for (int i = 0; i < algorithmState.visibleChildren.size(); i++) {
+            View child = algorithmState.visibleChildren.get(i);
+            if (!(child instanceof ExpandableNotificationRow)) {
+                continue;
+            }
+            final ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            if (!row.canViewBeDismissed()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // TODO(b/172289889) polish shade open from HUN
     /**
      * Populates the {@link ExpandableViewState} for a single child.
@@ -430,7 +444,9 @@ public class StackScrollAlgorithm {
                         + view.getIntrinsicHeight();
                 final boolean noSpaceForFooter = footerEnd > ambientState.getStackEndHeight();
                 ((FooterView.FooterViewState) viewState).hideContent =
-                        isShelfShowing || noSpaceForFooter;
+                        isShelfShowing || noSpaceForFooter
+                                || (ambientState.isDismissAllInProgress()
+                                && !hasOngoingNotifs(algorithmState));
             }
         } else {
             if (view != ambientState.getTrackedHeadsUpRow()) {
@@ -467,7 +483,6 @@ public class StackScrollAlgorithm {
                     }
                 }
             }
-
             // Clip height of view right before shelf.
             viewState.height = (int) (getMaxAllowedChildHeight(view) * expansionFraction);
         }

@@ -16,9 +16,11 @@
 
 package android.app;
 
-import static androidx.core.graphics.ColorUtils.calculateContrast;
+import static android.app.Notification.Builder.ensureColorSpanContrast;
 
 import static com.android.compatibility.common.util.SystemUtil.runShellCommand;
+import static com.android.internal.util.ContrastColorUtilTest.assertContrastIsAtLeast;
+import static com.android.internal.util.ContrastColorUtilTest.assertContrastIsWithinRange;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -35,6 +37,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.LocusId;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -42,11 +45,20 @@ import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.TextAppearanceSpan;
 import android.widget.RemoteViews;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.internal.R;
+import com.android.internal.util.ContrastColorUtil;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -334,6 +346,163 @@ public class NotificationTest {
     }
 
     @Test
+    public void testBuilder_getFullLengthSpanColor_returnsNullForString() {
+        assertThat(Notification.Builder.getFullLengthSpanColor("String")).isNull();
+    }
+
+    @Test
+    public void testBuilder_getFullLengthSpanColor_returnsNullWithPartialSpan() {
+        CharSequence text = new SpannableStringBuilder()
+                .append("text with ")
+                .append("some red", new ForegroundColorSpan(Color.RED),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        assertThat(Notification.Builder.getFullLengthSpanColor(text)).isNull();
+    }
+
+    @Test
+    public void testBuilder_getFullLengthSpanColor_worksWithSingleSpan() {
+        CharSequence text = new SpannableStringBuilder()
+                .append("text that is all red", new ForegroundColorSpan(Color.RED),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        assertThat(Notification.Builder.getFullLengthSpanColor(text)).isEqualTo(Color.RED);
+    }
+
+    @Test
+    public void testBuilder_getFullLengthSpanColor_worksWithFullAndPartialSpans() {
+        Spannable text = new SpannableString("blue text with yellow and green");
+        text.setSpan(new ForegroundColorSpan(Color.YELLOW), 15, 21,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(new ForegroundColorSpan(Color.BLUE), 0, text.length(),
+                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        text.setSpan(new ForegroundColorSpan(Color.GREEN), 26, 31,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        assertThat(Notification.Builder.getFullLengthSpanColor(text)).isEqualTo(Color.BLUE);
+    }
+
+    @Test
+    public void testBuilder_getFullLengthSpanColor_worksWithTextAppearance() {
+        Spannable text = new SpannableString("title text with yellow and green");
+        text.setSpan(new ForegroundColorSpan(Color.YELLOW), 15, 21,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        TextAppearanceSpan textAppearanceSpan = new TextAppearanceSpan(mContext,
+                R.style.TextAppearance_DeviceDefault_Notification_Title);
+        int expectedTextColor = textAppearanceSpan.getTextColor().getDefaultColor();
+        text.setSpan(textAppearanceSpan, 0, text.length(),
+                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        text.setSpan(new ForegroundColorSpan(Color.GREEN), 26, 31,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        assertThat(Notification.Builder.getFullLengthSpanColor(text)).isEqualTo(expectedTextColor);
+    }
+
+    @Test
+    public void testBuilder_ensureColorSpanContrast_removesAllFullLengthColorSpans() {
+        Spannable text = new SpannableString("blue text with yellow and green");
+        text.setSpan(new ForegroundColorSpan(Color.YELLOW), 15, 21,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(new ForegroundColorSpan(Color.BLUE), 0, text.length(),
+                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        TextAppearanceSpan taSpan = new TextAppearanceSpan(mContext,
+                R.style.TextAppearance_DeviceDefault_Notification_Title);
+        assertThat(taSpan.getTextColor()).isNotNull();  // it must be set to prove it is cleared.
+        text.setSpan(taSpan, 0, text.length(),
+                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        text.setSpan(new ForegroundColorSpan(Color.GREEN), 26, 31,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        Spannable result = (Spannable) ensureColorSpanContrast(text, Color.BLACK);
+        Object[] spans = result.getSpans(0, result.length(), Object.class);
+        assertThat(spans).hasLength(3);
+
+        assertThat(result.getSpanStart(spans[0])).isEqualTo(15);
+        assertThat(result.getSpanEnd(spans[0])).isEqualTo(21);
+        assertThat(((ForegroundColorSpan) spans[0]).getForegroundColor()).isEqualTo(Color.YELLOW);
+
+        assertThat(result.getSpanStart(spans[1])).isEqualTo(0);
+        assertThat(result.getSpanEnd(spans[1])).isEqualTo(31);
+        assertThat(spans[1]).isNotSameInstanceAs(taSpan);  // don't mutate the existing span
+        assertThat(((TextAppearanceSpan) spans[1]).getFamily()).isEqualTo(taSpan.getFamily());
+        assertThat(((TextAppearanceSpan) spans[1]).getTextColor()).isNull();
+
+        assertThat(result.getSpanStart(spans[2])).isEqualTo(26);
+        assertThat(result.getSpanEnd(spans[2])).isEqualTo(31);
+        assertThat(((ForegroundColorSpan) spans[2]).getForegroundColor()).isEqualTo(Color.GREEN);
+    }
+
+    @Test
+    public void testBuilder_ensureColorSpanContrast_partialLength_adjusted() {
+        int background = 0xFFFF0101;  // Slightly lighter red
+        CharSequence text = new SpannableStringBuilder()
+                .append("text with ")
+                .append("some red", new ForegroundColorSpan(Color.RED),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        CharSequence result = ensureColorSpanContrast(text, background);
+
+        // ensure the span has been updated to have > 1.3:1 contrast ratio with fill color
+        Object[] spans = ((Spannable) result).getSpans(0, result.length(), Object.class);
+        assertThat(spans).hasLength(1);
+        int foregroundColor = ((ForegroundColorSpan) spans[0]).getForegroundColor();
+        assertContrastIsWithinRange(foregroundColor, background, 3, 3.2);
+    }
+
+    @Test
+    public void testBuilder_ensureColorSpanContrast_worksWithComplexInput() {
+        Spannable text = new SpannableString("blue text with yellow and green and cyan");
+        text.setSpan(new ForegroundColorSpan(Color.YELLOW), 15, 21,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(new ForegroundColorSpan(Color.BLUE), 0, text.length(),
+                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        // cyan TextAppearanceSpan
+        TextAppearanceSpan taSpan = new TextAppearanceSpan(mContext,
+                R.style.TextAppearance_DeviceDefault_Notification_Title);
+        taSpan = new TextAppearanceSpan(taSpan.getFamily(), taSpan.getTextStyle(),
+                taSpan.getTextSize(), ColorStateList.valueOf(Color.CYAN), null);
+        text.setSpan(taSpan, 36, 40,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(new ForegroundColorSpan(Color.GREEN), 26, 31,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        Spannable result = (Spannable) ensureColorSpanContrast(text, Color.GRAY);
+        Object[] spans = result.getSpans(0, result.length(), Object.class);
+        assertThat(spans).hasLength(3);
+
+        assertThat(result.getSpanStart(spans[0])).isEqualTo(15);
+        assertThat(result.getSpanEnd(spans[0])).isEqualTo(21);
+        assertThat(((ForegroundColorSpan) spans[0]).getForegroundColor()).isEqualTo(Color.YELLOW);
+
+        assertThat(result.getSpanStart(spans[1])).isEqualTo(36);
+        assertThat(result.getSpanEnd(spans[1])).isEqualTo(40);
+        assertThat(spans[1]).isNotSameInstanceAs(taSpan);  // don't mutate the existing span
+        assertThat(((TextAppearanceSpan) spans[1]).getFamily()).isEqualTo(taSpan.getFamily());
+        ColorStateList newCyanList = ((TextAppearanceSpan) spans[1]).getTextColor();
+        assertThat(newCyanList).isNotNull();
+        assertContrastIsWithinRange(newCyanList.getDefaultColor(), Color.GRAY, 3, 3.2);
+
+        assertThat(result.getSpanStart(spans[2])).isEqualTo(26);
+        assertThat(result.getSpanEnd(spans[2])).isEqualTo(31);
+        int newGreen = ((ForegroundColorSpan) spans[2]).getForegroundColor();
+        assertThat(newGreen).isNotEqualTo(Color.GREEN);
+        assertContrastIsWithinRange(newGreen, Color.GRAY, 3, 3.2);
+    }
+
+    @Test
+    public void testBuilder_ensureButtonFillContrast_adjustsDarker() {
+        int background = Color.LTGRAY;
+        int foreground = Color.LTGRAY;
+        int result = Notification.Builder.ensureButtonFillContrast(foreground, background);
+        assertContrastIsWithinRange(result, background, 1.3, 1.5);
+        assertThat(ContrastColorUtil.calculateLuminance(result))
+                .isLessThan(ContrastColorUtil.calculateLuminance(background));
+    }
+
+    @Test
+    public void testBuilder_ensureButtonFillContrast_adjustsLighter() {
+        int background = Color.DKGRAY;
+        int foreground = Color.DKGRAY;
+        int result = Notification.Builder.ensureButtonFillContrast(foreground, background);
+        assertContrastIsWithinRange(result, background, 1.3, 1.5);
+        assertThat(ContrastColorUtil.calculateLuminance(result))
+                .isGreaterThan(ContrastColorUtil.calculateLuminance(background));
+    }
+
+    @Test
     public void testColors_ensureColors_dayMode_producesValidPalette() {
         Notification.Colors c = new Notification.Colors();
         boolean colorized = false;
@@ -399,6 +568,8 @@ public class NotificationTest {
             assertEquals(cDay.getSecondaryTextColor(), cNight.getSecondaryTextColor());
             assertEquals(cDay.getPrimaryAccentColor(), cNight.getPrimaryAccentColor());
             assertEquals(cDay.getSecondaryAccentColor(), cNight.getSecondaryAccentColor());
+            assertEquals(cDay.getTertiaryAccentColor(), cNight.getTertiaryAccentColor());
+            assertEquals(cDay.getOnAccentTextColor(), cNight.getOnAccentTextColor());
             assertEquals(cDay.getProtectionColor(), cNight.getProtectionColor());
             assertEquals(cDay.getContrastColor(), cNight.getContrastColor());
             assertEquals(cDay.getRippleAlpha(), cNight.getRippleAlpha());
@@ -413,30 +584,26 @@ public class NotificationTest {
         assertThat(c.getSecondaryTextColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getPrimaryAccentColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getSecondaryAccentColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getTertiaryAccentColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getOnAccentTextColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getErrorColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getContrastColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getRippleAlpha()).isAtLeast(0x00);
         assertThat(c.getRippleAlpha()).isAtMost(0xff);
 
-        // Assert that various colors have sufficient contrast
+        // Assert that various colors have sufficient contrast with the background
         assertContrastIsAtLeast(c.getPrimaryTextColor(), c.getBackgroundColor(), 4.5);
         assertContrastIsAtLeast(c.getSecondaryTextColor(), c.getBackgroundColor(), 4.5);
         assertContrastIsAtLeast(c.getPrimaryAccentColor(), c.getBackgroundColor(), 4.5);
         assertContrastIsAtLeast(c.getErrorColor(), c.getBackgroundColor(), 4.5);
         assertContrastIsAtLeast(c.getContrastColor(), c.getBackgroundColor(), 4.5);
 
-        // This accent color is only used for emphasized buttons
+        // These colors are only used for emphasized buttons; they do not need contrast
         assertContrastIsAtLeast(c.getSecondaryAccentColor(), c.getBackgroundColor(), 1);
-    }
+        assertContrastIsAtLeast(c.getTertiaryAccentColor(), c.getBackgroundColor(), 1);
 
-    private void assertContrastIsAtLeast(int foreground, int background, double minContrast) {
-        try {
-            assertThat(calculateContrast(foreground, background)).isAtLeast(minContrast);
-        } catch (AssertionError e) {
-            throw new AssertionError(
-                    String.format("Insufficient contrast: foreground=#%08x background=#%08x",
-                            foreground, background), e);
-        }
+        // The text that is used within the accent color DOES need to have contrast
+        assertContrastIsAtLeast(c.getOnAccentTextColor(), c.getTertiaryAccentColor(), 4.5);
     }
 
     private void resolveColorsInNightMode(boolean nightMode, Notification.Colors c, int rawColor,

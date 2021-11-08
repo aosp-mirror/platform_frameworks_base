@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Fylla skjá með aðdrætti"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Teygja yfir allan skjáinn"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skjámynd"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Slökkt á Smart Lock"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"sendi mynd"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Vistar skjámynd…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Vistar skjámynd…"</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Þetta veitir öllum forritum og þjónustum aðgang að hljóðnemanum þínum."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Þetta veitir öllum forritum og þjónustum aðgang að myndavélinni þinni."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Þetta veitir öllum forritum og þjónustum aðgang að myndavélinni og hljóðnemanum þínum."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Tæki"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Annað tæki"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Kveikja/slökkva á yfirliti"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Fullhlaðin"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Í hleðslu"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Orkustillingar tilkynninga"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Kveikt"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Slökkt"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Kveikt – út frá andliti"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Með orkutilkynningastýringum geturðu stillt mikilvægi frá 0 upp í 5 fyrir tilkynningar forrita. \n\n"<b>"Stig 5"</b>" \n- Sýna efst á tilkynningalista \n- Leyfa truflun þegar birt er á öllum skjánum \n- Kíkja alltaf \n\n"<b>"Stig 4"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja alltaf \n\n"<b>"Stig 3"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja aldrei \n\n"<b>"Stig 2"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja aldrei \n- Slökkva á hljóði og titringi \n\n"<b>"Stig 1"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja aldrei \n- Slökkva á hljóði og titringi \n- Fela á lásskjá og stöðustiku \n- Sýna neðst á tilkynningalista \n\n"<b>"Stig 0"</b>" \n- Setja allar tilkynningar frá forriti á bannlista"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Tilkynningar"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Þú munt ekki sjá þessar tilkynningar aftur"</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Opna með fingrafari"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Auðkenningar krafist. Auðkenndu með því að snerta fingrafaralesarann."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Símtal í gangi"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"Farsímagögn"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Tengt"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Farsímagögn tengjast ekki sjálfkrafa"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"Engin tenging"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Engin önnur net í boði"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"Ekkert net í boði"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"Upplýsingar um net"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Ýttu á net til að tengjast"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"Taktu úr lás til að skoða netkerfi"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Leitar að netum…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Ekki tókst að tengjast neti"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi tengist ekki sjálfkrafa eins og er"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Sjá allt"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Aftengdu ethernet til að skipta um net"</string>
 </resources>

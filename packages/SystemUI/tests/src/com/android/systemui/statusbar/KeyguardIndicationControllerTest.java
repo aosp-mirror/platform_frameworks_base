@@ -23,6 +23,7 @@ import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_DISCLOSURE;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_OWNER_INFO;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_RESTING;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRANSIENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRUST;
@@ -111,6 +112,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private static final ComponentName DEVICE_OWNER_COMPONENT = new ComponentName("com.android.foo",
             "bar");
 
+    private String mKeyguardTryFingerprintMsg;
     private String mDisclosureWithOrganization;
     private String mDisclosureGeneric;
     private String mFinancedDisclosureWithOrganization;
@@ -182,6 +184,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mContext.addMockSystemService(UserManager.class, mUserManager);
         mContext.addMockSystemService(Context.TRUST_SERVICE, mock(TrustManager.class));
         mContext.addMockSystemService(Context.FINGERPRINT_SERVICE, mock(FingerprintManager.class));
+        mKeyguardTryFingerprintMsg = mContext.getString(R.string.keyguard_try_fingerprint);
         mDisclosureWithOrganization = mContext.getString(R.string.do_disclosure_with_name,
                 ORGANIZATION_NAME);
         mDisclosureGeneric = mContext.getString(R.string.do_disclosure_generic);
@@ -637,11 +640,29 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onRefreshBatteryInfo_fullChargedWithOverheat_presentCharged() {
+    public void onRefreshBatteryInfo_fullChargedWithOverheat_presentChargingLimited() {
         createController();
         BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_CHARGING,
                 100 /* level */, BatteryManager.BATTERY_PLUGGED_AC,
                 BatteryManager.BATTERY_HEALTH_OVERHEAT, 0 /* maxChargingWattage */,
+                true /* present */);
+
+        mController.getKeyguardCallback().onRefreshBatteryInfo(status);
+        mController.setVisible(true);
+
+        verifyIndicationMessage(
+                INDICATION_TYPE_BATTERY,
+                mContext.getString(
+                        R.string.keyguard_plugged_in_charging_limited,
+                        NumberFormat.getPercentInstance().format(100 / 100f)));
+    }
+
+    @Test
+    public void onRefreshBatteryInfo_fullChargedWithoutOverheat_presentCharged() {
+        createController();
+        BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_CHARGING,
+                100 /* level */, BatteryManager.BATTERY_PLUGGED_AC,
+                BatteryManager.BATTERY_HEALTH_GOOD, 0 /* maxChargingWattage */,
                 true /* present */);
 
         mController.getKeyguardCallback().onRefreshBatteryInfo(status);
@@ -675,6 +696,48 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.setVisible(true);
 
         verifyTransientMessage(message);
+    }
+
+    @Test
+    public void faceAuthMessageSuppressed() {
+        createController();
+        String faceHelpMsg = "Face auth help message";
+
+        // GIVEN state of showing message when keyguard screen is on
+        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.isScreenOn()).thenReturn(true);
+
+        // GIVEN fingerprint is also running (not udfps)
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUdfpsAvailable()).thenReturn(false);
+
+        mController.setVisible(true);
+
+        // WHEN a face help message comes in
+        mController.getKeyguardCallback().onBiometricHelp(
+                KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED, faceHelpMsg,
+                BiometricSourceType.FACE);
+
+        // THEN "try fingerprint" message appears (and not the face help message)
+        verifyTransientMessage(mKeyguardTryFingerprintMsg);
+
+        // THEN the face help message is still announced for a11y
+        verify(mIndicationAreaBottom).announceForAccessibility(eq(faceHelpMsg));
+    }
+
+    @Test
+    public void testEmptyOwnerInfoHidesIndicationArea() {
+        createController();
+
+        // GIVEN the owner info is set to an empty string
+        when(mLockPatternUtils.getDeviceOwnerInfo()).thenReturn("");
+
+        // WHEN asked to update the indication area
+        mController.setVisible(true);
+
+        // THEN the owner info should be hidden
+        verifyHideIndication(INDICATION_TYPE_OWNER_INFO);
     }
 
     private void sendUpdateDisclosureBroadcast() {

@@ -306,7 +306,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ਆਪਣੇ ਸੰਪਰਕਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ਟਿਕਾਣਾ"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ਇਸ ਡੀਵਾਈਸ ਦੇ ਨਿਰਧਾਰਤ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚੋ"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"ਕੈਲੰਡਰ"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS ਸੁਨੇਹੇ ਭੇਜੋ ਅਤੇ ਦੇਖੋ"</string>
@@ -609,6 +609,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"ਜਾਰੀ ਰੱਖਣ ਲਈ ਆਪਣਾ ਫਿੰਗਰਪ੍ਰਿੰਟ ਜਾਂ ਸਕ੍ਰੀਨ ਲਾਕ ਵਰਤੋ"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"ਕੋਈ ਗੜਬੜ ਹੋ ਗਈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਪ੍ਰਤੀਕ"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ਫ਼ੇਸ ਅਣਲਾਕ"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ਫ਼ੇਸ ਅਣਲਾਕ ਨਾਲ ਸਮੱਸਿਆ"</string>
@@ -661,6 +662,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ਜਾਰੀ ਰੱਖਣ ਲਈ ਆਪਣਾ ਚਿਹਰਾ ਜਾਂ ਸਕ੍ਰੀਨ ਲਾਕ ਵਰਤੋ"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"ਕੋਈ ਗੜਬੜ ਹੋ ਗਈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"ਚਿਹਰਾ ਪ੍ਰਤੀਕ"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"ਸਿੰਕ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"ਐਪ ਨੂੰ ਕਿਸੇ ਖਾਤੇ ਲਈ ਸਮਕਾਲੀਕਰਨ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹਨ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਹ ਪਤਾ ਕਰ ਸਕਦਾ ਹੈ ਕਿ People ਐਪ ਦਾ ਕਿਸੇ ਖਾਤੇ ਨਾਲ ਸਮਕਾਲੀਕਿਰਤ ਕੀਤਾ ਗਿਆ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
@@ -815,7 +817,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"ਕੰਮ ਦਾ ਮੋਬਾਈਲ"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"ਦਫ਼ਤਰ ਦਾ ਪੇਜਰ"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"ਸਹਾਇਕ"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"ਵਿਉਂਂਤੀ"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"ਜਨਮਦਿਨ"</string>
@@ -2008,7 +2010,7 @@
     <string name="app_category_image" msgid="7307840291864213007">"ਫ਼ੋਟੋਆਂ ਅਤੇ ਚਿੱਤਰ"</string>
     <string name="app_category_social" msgid="2278269325488344054">"ਸਮਾਜਕ ਅਤੇ ਸੰਚਾਰ"</string>
     <string name="app_category_news" msgid="1172762719574964544">"ਖਬਰਾਂ ਅਤੇ ਰਸਾਲੇ"</string>
-    <string name="app_category_maps" msgid="6395725487922533156">"ਨਕਸ਼ੇ ਅਤੇ ਆਵਾਗੌਣ"</string>
+    <string name="app_category_maps" msgid="6395725487922533156">"Maps ਅਤੇ ਨੈਵੀਗੇਸ਼ਨ"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"ਉਤਪਾਦਕਤਾ"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"ਪਹੁੰਚਯੋਗਤਾ"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"ਡੀਵਾਈਸ ਸਟੋਰੇਜ"</string>

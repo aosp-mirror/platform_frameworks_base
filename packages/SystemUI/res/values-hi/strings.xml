@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"स्‍क्रीन भरने के लिए ज़ूम करें"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"स्‍क्रीन भरने के लिए खींचें"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"स्क्रीनशॉट"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock की सुविधा बंद कर दी गई है"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"एक इमेज भेजी गई"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ऐसा करने से, माइक्रोफ़ोन का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें माइक्रोफ़ोन का इस्तेमाल करने की अनुमति दी गई है."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ऐसा करने से, कैमरे का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें कैमरे का इस्तेमाल करने की अनुमति दी गई है."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ऐसा करने से, कैमरा या माइक्रोफ़ोन का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें ये इस्तेमाल करने की अनुमति है."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"डिवाइस"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"अन्य डिवाइस"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"खास जानकारी टॉगल करें"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"चार्ज हो गई है"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"चार्ज हो रही है"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"पावर सूचना नियंत्रण"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"चालू"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"बंद"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"चालू है - चेहरे की गतिविधि के हिसाब से कैमरे को घुमाने की सुविधा"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"पावर सूचना नियंत्रण के ज़रिये, आप किसी ऐप की सूचना को उसकी अहमियत के हिसाब से 0 से 5 के लेवल पर सेट कर सकते हैं.\n\n"<b>"लेवल 5"</b>" \n- सूचना सूची में सबसे ऊपर दिखाएं \n- पूरे स्क्रीन को ढंकने की अनुमति दें \n- लगातार देखते रहें \n\n"<b>" लेवल 4"</b>" \n- पूरे स्क्रीन को ढंकें \n- लगातार देखते रहें \n\n"<b>"लेवल 3"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n-कभी भी न देखें \n\n"<b>"लेवल 2"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी देखें \n- कभी भी आवाज़ या कंपन (वाइब्रेशन) न करें \n\n"<b>"लेवल 1"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी न देखें \n- कभी भी आवाज़ या कंपन (वाइब्रेशन) न करें \n- लॉक स्क्रीन और स्टेटस बार से छिपाएं \n- सूचना सूची के नीचे दिखाएं \n\n"<b>"लेवल 0"</b>" \n- ऐप्लिकेशन की सभी सूचनाएं रोक दें"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"सूचनाएं"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"अब आपको ये सूचनाएं दिखाई नहीं देंगी"</string>
@@ -847,7 +849,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"मैसेज (एसएमएस) करें"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"संगीत"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"कैलेंडर"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"वॉल्यूम नियंत्रणों के साथ दिखाएं"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"परेशान न करें"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"वॉल्यूम बटन का शॉर्टकट"</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"खोलने के लिए, फ़िंगरप्रिंट का इस्तेमाल करें"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"पुष्टि करना ज़रूरी है. पुष्टि करने के लिए, फ़िंगरप्रिंट सेंसर को छुएं."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"फ़ोन कॉल चल रहा है"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"मोबाइल डेटा"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"कनेक्ट हो गया"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"मोबाइल डेटा अपने-आप कनेक्ट नहीं होगा"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"इंटरनेट कनेक्शन नहीं है"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"कोई दूसरा नेटवर्क उपलब्ध नहीं है"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"कोई नेटवर्क उपलब्ध नहीं है"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"वाई-फ़ाई"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"नेटवर्क की जानकारी"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"इंटरनेट से कनेक्ट करने के लिए, किसी नेटवर्क पर टैप करें"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"वाई-फ़ाई नेटवर्क देखने के लिए, स्क्रीन को अनलॉक करें"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"नेटवर्क खोजे जा रहे हैं…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"नेटवर्क से कनेक्ट नहीं किया जा सका"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"फ़िलहाल, वाई-फ़ाई अपने-आप कनेक्ट नहीं होगा"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"सभी देखें"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"नेटवर्क बदलने के लिए, पहले ईथरनेट को डिसकनेक्ट करें"</string>
 </resources>

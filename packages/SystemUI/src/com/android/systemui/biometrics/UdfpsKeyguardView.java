@@ -155,6 +155,13 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         updateAlpha();
     }
 
+    /**
+     * @return alpha between 0 and 255
+     */
+    int getUnpausedAlpha() {
+        return mAlpha;
+    }
+
     @Override
     protected int updateAlpha() {
         int alpha = super.updateAlpha();
