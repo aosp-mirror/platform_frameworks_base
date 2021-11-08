@@ -392,6 +392,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private int mParentSessionId;
 
+    @GuardedBy("mLock")
+    private boolean mHasDeviceAdminReceiver;
+
     static class FileEntry {
         private final int mIndex;
         private final InstallationFile mFile;
@@ -927,11 +930,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @UserActionRequirement
     private int computeUserActionRequirement() {
         final String packageName;
+        final boolean hasDeviceAdminReceiver;
         synchronized (mLock) {
             if (mPermissionsManuallyAccepted) {
                 return USER_ACTION_NOT_NEEDED;
             }
             packageName = mPackageName;
+            hasDeviceAdminReceiver = mHasDeviceAdminReceiver;
         }
 
         final boolean forcePermissionPrompt =
@@ -954,6 +959,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isUpdateWithoutUserActionPermissionGranted = (mPm.checkUidPermission(
                 android.Manifest.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION, mInstallerUid)
                 == PackageManager.PERMISSION_GRANTED);
+        final boolean isInstallDpcPackagesPermissionGranted = (mPm.checkUidPermission(
+                android.Manifest.permission.INSTALL_DPC_PACKAGES, mInstallerUid)
+                == PackageManager.PERMISSION_GRANTED);
         final int targetPackageUid = mPm.getPackageUid(packageName, 0, userId);
         final boolean isUpdate = targetPackageUid != -1 || isApexSession();
         final InstallSourceInfo existingInstallSourceInfo = isUpdate
@@ -967,7 +975,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isSelfUpdate = targetPackageUid == mInstallerUid;
         final boolean isPermissionGranted = isInstallPermissionGranted
                 || (isUpdatePermissionGranted && isUpdate)
-                || (isSelfUpdatePermissionGranted && isSelfUpdate);
+                || (isSelfUpdatePermissionGranted && isSelfUpdate)
+                || (isInstallDpcPackagesPermissionGranted && hasDeviceAdminReceiver);
         final boolean isInstallerRoot = (mInstallerUid == Process.ROOT_UID);
         final boolean isInstallerSystem = (mInstallerUid == Process.SYSTEM_UID);
 
@@ -2854,6 +2863,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         mSigningDetails = apk.getSigningDetails();
+        mHasDeviceAdminReceiver = apk.isHasDeviceAdminReceiver();
     }
 
     /**
@@ -2944,6 +2954,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (mSigningDetails == SigningDetails.UNKNOWN) {
                 mSigningDetails = apk.getSigningDetails();
             }
+            mHasDeviceAdminReceiver = apk.isHasDeviceAdminReceiver();
 
             assertApkConsistentLocked(String.valueOf(addedFile), apk);
 
