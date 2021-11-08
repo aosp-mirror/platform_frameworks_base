@@ -35,15 +35,17 @@ oneway interface IRecentsAnimationRunner {
      * wallpaper not drawing in time, or the handler not finishing the animation within a predefined
      * amount of time.
      *
-     * @param taskSnapshot If the snapshot is null, the animation will be cancelled and the leash
-     *                     will be inactive immediately. Otherwise, the contents of the task will be
-     *                     replaced with {@param taskSnapshot}, such that the runner's leash is
-     *                     still active. As soon as the runner doesn't need the leash anymore, it
-     *                     must call {@link IRecentsAnimationController#cleanupScreenshot).
+     * @param taskIds Indicates tasks with cancelling snapshot.
+     * @param taskSnapshots If the snapshots is null, the animation will be cancelled and the leash
+     *                      will be inactive immediately. Otherwise, the contents of the tasks will
+     *                      be replaced with {@param taskSnapshots}, such that the runner's leash is
+     *                      still active. As soon as the runner doesn't need the leash anymore, it
+     *                      must call {@link IRecentsAnimationController#cleanupScreenshot).
      *
      * @see {@link RecentsAnimationController#cleanupScreenshot}
      */
-    void onAnimationCanceled(in @nullable TaskSnapshot taskSnapshot) = 1;
+    void onAnimationCanceled(in @nullable int[] taskIds,
+            in @nullable TaskSnapshot[] taskSnapshots) = 1;
 
     /**
      * Called when the system is ready for the handler to start animating all the visible tasks.
