@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.statusbar.phone.fragment
 
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
