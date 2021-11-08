@@ -2509,15 +2509,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         unbindCurrentMethodLocked();
 
-        setCurIntent(new Intent(InputMethod.SERVICE_INTERFACE));
-        getCurIntent().setComponent(info.getComponent());
-        getCurIntent().putExtra(Intent.EXTRA_CLIENT_LABEL,
-                com.android.internal.R.string.input_method_binding_label);
-        getCurIntent().putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
-                mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS),
-                PendingIntent.FLAG_IMMUTABLE));
+        Intent intent = createImeBindingIntent(info.getComponent());
+        setCurIntent(intent);
 
-        if (bindCurrentInputMethodServiceLocked(getCurIntent(), this, mImeConnectionBindFlags)) {
+        if (bindCurrentInputMethodServiceLocked(intent, this, mImeConnectionBindFlags)) {
             setLastBindTime(SystemClock.uptimeMillis());
             setHasConnection(true);
             setCurId(info.getId());
@@ -2537,8 +2532,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     null, null, getCurId(), getSequenceNumber(), false);
         }
         setCurIntent(null);
-        Slog.w(TAG, "Failure connecting to input method service: " + getCurIntent());
+        Slog.w(TAG, "Failure connecting to input method service: " + intent);
         return InputBindResult.IME_NOT_CONNECTED;
+    }
+
+    @NonNull
+    private Intent createImeBindingIntent(ComponentName component) {
+        Intent intent = new Intent(InputMethod.SERVICE_INTERFACE);
+        intent.setComponent(component);
+        intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
+                com.android.internal.R.string.input_method_binding_label);
+        intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
+                mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS),
+                PendingIntent.FLAG_IMMUTABLE));
+        return intent;
     }
 
     @FunctionalInterface
