@@ -1609,13 +1609,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
-        mImeDisplayValidator = displayId -> mWindowManagerInternal.getDisplayImePolicy(displayId);
-        mCaller = new HandlerCaller(context, thread.getLooper(), new HandlerCaller.Callback() {
-            @Override
-            public void executeMessage(Message msg) {
-                handleMessage(msg);
-            }
-        }, true /*asyncHandler*/);
+        mImeDisplayValidator = mWindowManagerInternal::getDisplayImePolicy;
+        mCaller = new HandlerCaller(context, thread.getLooper(), this::handleMessage,
+                true /*asyncHandler*/);
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mUserManager = mContext.getSystemService(UserManager.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
