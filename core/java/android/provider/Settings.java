@@ -7158,6 +7158,13 @@ public final class Settings {
         public static final String ACCESSIBILITY_ENABLED = "accessibility_enabled";
 
         /**
+         * Whether select sound track with audio description by default.
+         * @hide
+         */
+        public static final String ENABLED_ACCESSIBILITY_AUDIO_DESCRIPTION_BY_DEFAULT =
+                "enabled_accessibility_audio_description_by_default";
+
+        /**
          * Setting specifying if the accessibility shortcut is enabled.
          * @hide
          */
@@ -10413,14 +10420,6 @@ public final class Settings {
         @Readable
         public static final String ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED =
                 "enable_accessibility_global_gesture_enabled";
-
-        /**
-         * Whether select sound track with audio description by default.
-         * @hide
-         */
-        @Readable
-        public static final String ENABLE_ACCESSIBILITY_AUDIO_DESCRIPTION_BY_DEFAULT =
-                "enable_accessibility_audio_description_by_default";
 
         /**
          * Whether Airplane Mode is on.
