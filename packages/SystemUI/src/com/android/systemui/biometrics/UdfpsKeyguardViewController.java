@@ -126,7 +126,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mInputBouncerHiddenAmount = KeyguardBouncer.EXPANSION_HIDDEN;
         mIsBouncerVisible = mKeyguardViewManager.bouncerIsOrWillBeShowing();
         mConfigurationController.addCallback(mConfigurationListener);
-        mPanelExpansionStateManager.addListener(mPanelExpansionListener);
+        mPanelExpansionStateManager.addExpansionListener(mPanelExpansionListener);
         updateAlpha();
         updatePauseAuth();
 
@@ -145,7 +145,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mKeyguardViewManager.removeAlternateAuthInterceptor(mAlternateAuthInterceptor);
         mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
         mConfigurationController.removeCallback(mConfigurationListener);
-        mPanelExpansionStateManager.removeListener(mPanelExpansionListener);
+        mPanelExpansionStateManager.removeExpansionListener(mPanelExpansionListener);
         if (mLockScreenShadeTransitionController.getUdfpsKeyguardViewController() == this) {
             mLockScreenShadeTransitionController.setUdfpsKeyguardViewController(null);
         }
