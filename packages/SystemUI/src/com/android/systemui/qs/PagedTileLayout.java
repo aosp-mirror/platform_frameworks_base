@@ -178,7 +178,10 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     @Override
     public void setSquishinessFraction(float squishinessFraction) {
-        // No-op, paged layouts are not squishy.
+        int nPages = mPages.size();
+        for (int i = 0; i < nPages; i++) {
+            mPages.get(i).setSquishinessFraction(squishinessFraction);
+        }
     }
 
     private void updateListening() {
