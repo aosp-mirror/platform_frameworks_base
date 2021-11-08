@@ -49,6 +49,7 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
+import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -198,7 +199,8 @@ public class StageCoordinatorTests extends ShellTestCase {
         return new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
                 mSyncQueue, mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage,
                 mDisplayImeController, mDisplayInsetsController, splitLayout,
-                mTransitions, mTransactionPool, mLogger, new UnfoldControllerProvider());
+                mTransitions, mTransactionPool, mLogger, Optional.empty(),
+                new UnfoldControllerProvider());
     }
 
     private class UnfoldControllerProvider implements
