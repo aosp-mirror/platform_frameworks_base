@@ -22,7 +22,6 @@ import static android.graphics.Bitmap.Config.ARGB_8888;
 
 import static com.android.systemui.shared.system.WindowManagerWrapper.WINDOWING_MODE_UNDEFINED;
 
-import android.window.TaskSnapshot;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -30,6 +29,9 @@ import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.util.Log;
 import android.view.WindowInsetsController.Appearance;
+import android.window.TaskSnapshot;
+
+import java.util.HashMap;
 
 /**
  * Data for a single thumbnail.
@@ -78,6 +80,18 @@ public class ThumbnailData {
             thumbnail.eraseColor(Color.BLACK);
         }
         return thumbnail;
+    }
+
+    public static HashMap<Integer, ThumbnailData> wrap(int[] taskIds, TaskSnapshot[] snapshots) {
+        HashMap<Integer, ThumbnailData> temp = new HashMap<>();
+        if (taskIds == null || snapshots == null || taskIds.length != snapshots.length) {
+            return temp;
+        }
+
+        for (int i = snapshots.length - 1; i >= 0; i--) {
+            temp.put(taskIds[i], new ThumbnailData(snapshots[i]));
+        }
+        return temp;
     }
 
     public ThumbnailData(TaskSnapshot snapshot) {
