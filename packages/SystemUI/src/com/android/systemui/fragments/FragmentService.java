@@ -24,7 +24,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.qs.QSFragment;
-import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
+import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.io.FileDescriptor;
