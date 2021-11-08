@@ -1894,34 +1894,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return task != null && task == getTopDisplayFocusedRootTask();
     }
 
-    void updatePreviousProcess(ActivityRecord r) {
-        // Now that this process has stopped, we may want to consider it to be the previous app to
-        // try to keep around in case the user wants to return to it.
-
-        // First, found out what is currently the foreground app, so that we don't blow away the
-        // previous app if this activity is being hosted by the process that is actually still the
-        // foreground.
-        WindowProcessController fgApp = getItemFromRootTasks(rootTask -> {
-            if (isTopDisplayFocusedRootTask(rootTask)) {
-                final ActivityRecord resumedActivity = rootTask.getTopResumedActivity();
-                if (resumedActivity != null) {
-                    return resumedActivity.app;
-                } else if (rootTask.getTopPausingActivity() != null) {
-                    return rootTask.getTopPausingActivity().app;
-                }
-            }
-            return null;
-        });
-
-        // Now set this one as the previous process, only if that really makes sense to.
-        if (r.hasProcess() && fgApp != null && r.app != fgApp
-                && r.lastVisibleTime > mService.mPreviousProcessVisibleTime
-                && r.app != mService.mHomeProcess) {
-            mService.mPreviousProcess = r.app;
-            mService.mPreviousProcessVisibleTime = r.lastVisibleTime;
-        }
-    }
-
     boolean attachApplication(WindowProcessController app) throws RemoteException {
         try {
             return mAttachApplicationHelper.process(app);

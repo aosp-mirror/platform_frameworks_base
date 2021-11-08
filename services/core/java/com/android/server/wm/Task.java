@@ -217,7 +217,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -3224,12 +3223,6 @@ class Task extends TaskFragment {
     @Override
     Task getRootTask(Predicate<Task> callback, boolean traverseTopToBottom) {
         return isRootTask() && callback.test(this) ? this : null;
-    }
-
-    @Nullable
-    @Override
-    <R> R getItemFromRootTasks(Function<Task, R> callback, boolean traverseTopToBottom) {
-        return isRootTask() ? callback.apply(this) : null;
     }
 
     /**
