@@ -510,10 +510,10 @@ public class Tuner implements AutoCloseable  {
                     if (res != Tuner.RESULT_SUCCESS) {
                         TunerUtils.throwExceptionForResult(res, "failed to close frontend");
                     }
+                    mTunerResourceManager.releaseFrontend(mFrontendHandle, mClientId);
                 }
                 mIsSharedFrontend = false;
             }
-            mTunerResourceManager.releaseFrontend(mFrontendHandle, mClientId);
             FrameworkStatsLog
                     .write(FrameworkStatsLog.TV_TUNER_STATE_CHANGED, mUserId,
                     FrameworkStatsLog.TV_TUNER_STATE_CHANGED__STATE__UNKNOWN);
