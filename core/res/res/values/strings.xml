@@ -5374,6 +5374,8 @@
     <string name="user_creation_account_exists">Allow <xliff:g id="app" example="Gmail">%1$s</xliff:g> to create a new User with <xliff:g id="account" example="foobar@gmail.com">%2$s</xliff:g> (a User with this account already exists) ?</string>
     <!-- Message to user that app is trying to create user for a specified account. [CHAR LIMIT=none] -->
     <string name="user_creation_adding">Allow <xliff:g id="app" example="Gmail">%1$s</xliff:g> to create a new User with <xliff:g id="account" example="foobar@gmail.com">%2$s</xliff:g> ?</string>
+    <!-- String label displayed on buttons that trigger the flow for creating supervised users. [CHAR LIMIT=35] -->
+    <string name="supervised_user_creation_label">Add supervised user</string>
 
     <!-- Locale picker strings -->
 
