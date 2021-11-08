@@ -200,6 +200,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
@@ -669,6 +670,7 @@ public class StatusBar extends CoreStartable implements
     private final Optional<Bubbles> mBubblesOptional;
     private final Bubbles.BubbleExpandListener mBubbleExpandListener;
     private final Optional<StartingSurface> mStartingSurfaceOptional;
+    private final NotifPipelineFlags mNotifPipelineFlags;
 
     private final ActivityIntentHelper mActivityIntentHelper;
     private NotificationStackScrollLayoutController mStackScrollerController;
@@ -784,7 +786,8 @@ public class StatusBar extends CoreStartable implements
             Optional<StartingSurface> startingSurfaceOptional,
             TunerService tunerService,
             DumpManager dumpManager,
-            ActivityLaunchAnimator activityLaunchAnimator) {
+            ActivityLaunchAnimator activityLaunchAnimator,
+            NotifPipelineFlags notifPipelineFlags) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -881,6 +884,7 @@ public class StatusBar extends CoreStartable implements
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
+        mNotifPipelineFlags = notifPipelineFlags;
         lockscreenShadeTransitionController.setStatusbar(this);
 
         mPanelExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged);
@@ -1478,7 +1482,8 @@ public class StatusBar extends CoreStartable implements
                 mInitController,
                 mNotificationInterruptStateProvider,
                 mRemoteInputManager,
-                mConfigurationController);
+                mConfigurationController,
+                mNotifPipelineFlags);
 
         mNotificationShelfController.setOnActivatedListener(mPresenter);
         mRemoteInputManager.addControllerCallback(mNotificationShadeWindowController);

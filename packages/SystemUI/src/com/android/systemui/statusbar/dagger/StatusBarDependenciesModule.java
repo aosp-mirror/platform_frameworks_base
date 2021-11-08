@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.DynamicChildBindController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -211,7 +212,8 @@ public interface StatusBarDependenciesModule {
             ForegroundServiceSectionController fgsSectionController,
             DynamicChildBindController dynamicChildBindController,
             LowPriorityInflationHelper lowPriorityInflationHelper,
-            AssistantFeedbackController assistantFeedbackController) {
+            AssistantFeedbackController assistantFeedbackController,
+            NotifPipelineFlags notifPipelineFlags) {
         return new NotificationViewHierarchyManager(
                 context,
                 mainHandler,
@@ -227,7 +229,8 @@ public interface StatusBarDependenciesModule {
                 fgsSectionController,
                 dynamicChildBindController,
                 lowPriorityInflationHelper,
-                assistantFeedbackController);
+                assistantFeedbackController,
+                notifPipelineFlags);
     }
 
     /**

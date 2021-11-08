@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.legacy;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.RowContentBindParams;
@@ -31,18 +31,18 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class LowPriorityInflationHelper {
-    private final FeatureFlags mFeatureFlags;
     private final NotificationGroupManagerLegacy mGroupManager;
     private final RowContentBindStage mRowContentBindStage;
+    private final NotifPipelineFlags mNotifPipelineFlags;
 
     @Inject
     LowPriorityInflationHelper(
-            FeatureFlags featureFlags,
             NotificationGroupManagerLegacy groupManager,
-            RowContentBindStage rowContentBindStage) {
-        mFeatureFlags = featureFlags;
+            RowContentBindStage rowContentBindStage,
+            NotifPipelineFlags notifPipelineFlags) {
         mGroupManager = groupManager;
         mRowContentBindStage = rowContentBindStage;
+        mNotifPipelineFlags = notifPipelineFlags;
     }
 
     /**
@@ -59,7 +59,7 @@ public class LowPriorityInflationHelper {
     public void recheckLowPriorityViewAndInflate(
             NotificationEntry entry,
             ExpandableNotificationRow row) {
-        mFeatureFlags.checkLegacyPipelineEnabled();
+        mNotifPipelineFlags.checkLegacyPipelineEnabled();
         RowContentBindParams params = mRowContentBindStage.getStageParams(entry);
         final boolean shouldBeLowPriority = shouldUseLowPriorityView(entry);
         if (!row.isRemoved() && row.isLowPriority() != shouldBeLowPriority) {
@@ -73,7 +73,7 @@ public class LowPriorityInflationHelper {
      * Whether the notification should inflate a low priority version of its content views.
      */
     public boolean shouldUseLowPriorityView(NotificationEntry entry) {
-        mFeatureFlags.checkLegacyPipelineEnabled();
+        mNotifPipelineFlags.checkLegacyPipelineEnabled();
         return entry.isAmbient() && !mGroupManager.isChildInGroup(entry);
     }
 }

@@ -25,12 +25,12 @@ import android.view.ViewGroup;
 
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.notification.InflationException;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.LowPriorityInflationHelper;
@@ -55,7 +55,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private static final String TAG = "NotificationViewManager";
 
     private final Context mContext;
-    private final FeatureFlags mFeatureFlags;
     private final NotificationMessagingUtil mMessagingUtil;
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
     private final NotificationLockscreenUserManager mNotificationLockscreenUserManager;
@@ -66,6 +65,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             mExpandableNotificationRowComponentBuilder;
     private final IconManager mIconManager;
     private final LowPriorityInflationHelper mLowPriorityInflationHelper;
+    private final NotifPipelineFlags mNotifPipelineFlags;
 
     private NotificationPresenter mPresenter;
     private NotificationListContainer mListContainer;
@@ -75,7 +75,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     @Inject
     public NotificationRowBinderImpl(
             Context context,
-            FeatureFlags featureFlags,
             NotificationMessagingUtil notificationMessagingUtil,
             NotificationRemoteInputManager notificationRemoteInputManager,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
@@ -84,9 +83,9 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             Provider<RowInflaterTask> rowInflaterTaskProvider,
             ExpandableNotificationRowComponent.Builder expandableNotificationRowComponentBuilder,
             IconManager iconManager,
-            LowPriorityInflationHelper lowPriorityInflationHelper) {
+            LowPriorityInflationHelper lowPriorityInflationHelper,
+            NotifPipelineFlags notifPipelineFlags) {
         mContext = context;
-        mFeatureFlags = featureFlags;
         mNotifBindPipeline = notifBindPipeline;
         mRowContentBindStage = rowContentBindStage;
         mMessagingUtil = notificationMessagingUtil;
@@ -96,6 +95,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mExpandableNotificationRowComponentBuilder = expandableNotificationRowComponentBuilder;
         mIconManager = iconManager;
         mLowPriorityInflationHelper = lowPriorityInflationHelper;
+        mNotifPipelineFlags = notifPipelineFlags;
     }
 
     /**
@@ -126,7 +126,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             throws InflationException {
         if (params == null) {
             // weak assert that the params should always be passed in the new pipeline
-            mFeatureFlags.checkLegacyPipelineEnabled();
+            mNotifPipelineFlags.checkLegacyPipelineEnabled();
         }
         ViewGroup parent = mListContainer.getViewParentForNotification(entry);
 
@@ -187,7 +187,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             NotificationUiAdjustment oldAdjustment,
             NotificationUiAdjustment newAdjustment,
             NotificationRowContentBinder.InflationCallback callback) {
-        mFeatureFlags.checkLegacyPipelineEnabled();
+        mNotifPipelineFlags.checkLegacyPipelineEnabled();
         if (NotificationUiAdjustment.needReinflate(oldAdjustment, newAdjustment)) {
             if (entry.rowExists()) {
                 ExpandableNotificationRow row = entry.getRow();
@@ -238,7 +238,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             isLowPriority = inflaterParams.isLowPriority();
         } else {
             // LEGACY pipeline
-            mFeatureFlags.checkLegacyPipelineEnabled();
+            mNotifPipelineFlags.checkLegacyPipelineEnabled();
             // If this is our first time inflating, we don't actually know the groupings for real
             // yet, so we might actually inflate a low priority content view incorrectly here and
             // have to correct it later in the pipeline. On subsequent inflations (i.e. updates),

@@ -442,7 +442,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         mDemoModeController.addCallback(this);
         mProviderModelBehavior = mFeatureFlags.isCombinedStatusBarSignalIconsEnabled();
-        mProviderModelSetting = mFeatureFlags.isProviderModelSettingEnabled();
+        mProviderModelSetting = mFeatureFlags.isProviderModelSettingEnabled(mContext);
 
         mDumpManager.registerDumpable(TAG, this);
     }

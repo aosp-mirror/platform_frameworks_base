@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -237,7 +238,8 @@ public interface StatusBarPhoneModule {
             Optional<StartingSurface> startingSurfaceOptional,
             TunerService tunerService,
             DumpManager dumpManager,
-            ActivityLaunchAnimator activityLaunchAnimator) {
+            ActivityLaunchAnimator activityLaunchAnimator,
+            NotifPipelineFlags notifPipelineFlags) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -336,7 +338,8 @@ public interface StatusBarPhoneModule {
                 startingSurfaceOptional,
                 tunerService,
                 dumpManager,
-                activityLaunchAnimator
+                activityLaunchAnimator,
+                notifPipelineFlags
         );
     }
 }
