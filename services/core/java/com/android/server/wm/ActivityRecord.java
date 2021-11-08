@@ -2710,7 +2710,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final ActivityInfo.WindowLayout windowLayout = info.windowLayout;
         return windowLayout == null
                 || tda.supportsActivityMinWidthHeightMultiWindow(windowLayout.minWidth,
-                windowLayout.minHeight);
+                windowLayout.minHeight, info);
     }
 
     /**
