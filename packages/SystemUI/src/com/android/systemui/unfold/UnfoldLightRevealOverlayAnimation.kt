@@ -31,7 +31,6 @@ import android.view.SurfaceControlViewHost
 import android.view.SurfaceSession
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dagger.qualifiers.UiBackground
 import com.android.systemui.statusbar.LightRevealEffect
@@ -44,7 +43,7 @@ import java.util.concurrent.Executor
 import java.util.function.Consumer
 import javax.inject.Inject
 
-@SysUISingleton
+@SysUIUnfoldScope
 class UnfoldLightRevealOverlayAnimation @Inject constructor(
     private val context: Context,
     private val deviceStateManager: DeviceStateManager,

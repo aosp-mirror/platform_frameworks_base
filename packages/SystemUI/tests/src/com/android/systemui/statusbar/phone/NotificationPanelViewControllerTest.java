@@ -137,6 +137,7 @@ import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
+import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -153,6 +154,7 @@ import org.mockito.stubbing.Answer;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -346,7 +348,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private DumpManager mDumpManager;
     @Mock
     private NotificationsQSContainerController mNotificationsQSContainerController;
-
+    private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
     private View.AccessibilityDelegate mAccessibiltyDelegate;
@@ -512,6 +514,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mLockscreenGestureLogger,
                 new PanelExpansionStateManager(),
                 mNotificationRemoteInputManager,
+                mSysUIUnfoldComponent,
                 mControlsComponent);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
