@@ -257,12 +257,8 @@ public class CompanionDeviceDiscoveryService extends Service {
         if (!mIsScanning) return;
         mIsScanning = false;
 
-        CompanionDeviceActivity activity = mActivity;
-        if (activity != null) {
-            if (activity.mDeviceListView != null) {
-                activity.mDeviceListView.removeFooterView(activity.mLoadingIndicator);
-            }
-            mActivity = null;
+        if (mActivity != null && mActivity.mDeviceListView != null) {
+            mActivity.mDeviceListView.removeFooterView(mActivity.mLoadingIndicator);
         }
 
         mBluetoothAdapter.cancelDiscovery();
@@ -334,6 +330,7 @@ public class CompanionDeviceDiscoveryService extends Service {
 
     void onCancel() {
         if (DEBUG) Log.i(LOG_TAG, "onCancel()");
+        mActivity = null;
         mServiceCallback.cancel(true);
     }
 
