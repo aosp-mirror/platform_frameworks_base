@@ -17,6 +17,7 @@ package com.android.systemui.biometrics
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.app.ActivityTaskManager
 import android.content.Context
 import android.graphics.PixelFormat
 import android.graphics.PorterDuff
@@ -24,6 +25,7 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.hardware.biometrics.BiometricOverlayConstants
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
 import android.hardware.display.DisplayManager
 import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
@@ -61,6 +63,7 @@ class SidefpsController @Inject constructor(
     private val layoutInflater: LayoutInflater,
     fingerprintManager: FingerprintManager?,
     private val windowManager: WindowManager,
+    private val activityTaskManager: ActivityTaskManager,
     overviewProxyService: OverviewProxyService,
     displayManager: DisplayManager,
     @Main mainExecutor: DelayableExecutor,
@@ -130,7 +133,7 @@ class SidefpsController @Inject constructor(
             override fun show(
                 sensorId: Int,
                 @BiometricOverlayConstants.ShowReason reason: Int
-            ) = if (reason.isReasonToShow()) doShow() else hide(sensorId)
+            ) = if (reason.isReasonToShow(activityTaskManager)) doShow() else hide(sensorId)
 
             private fun doShow() = mainExecutor.execute {
                 if (overlayView == null) {
@@ -228,10 +231,18 @@ class SidefpsController @Inject constructor(
 }
 
 @BiometricOverlayConstants.ShowReason
-private fun Int.isReasonToShow(): Boolean = when (this) {
+private fun Int.isReasonToShow(activityTaskManager: ActivityTaskManager): Boolean = when (this) {
     REASON_AUTH_KEYGUARD -> false
+    REASON_AUTH_SETTINGS -> when (activityTaskManager.topClass()) {
+        // TODO(b/186176653): exclude fingerprint overlays from this list view
+        "com.android.settings.biometrics.fingerprint.FingerprintSettings" -> false
+        else -> true
+    }
     else -> true
 }
+
+private fun ActivityTaskManager.topClass(): String =
+    getTasks(1).firstOrNull()?.topActivity?.className ?: ""
 
 @RawRes
 private fun Display.asSideFpsAnimation(): Int = when (rotation) {
