@@ -208,11 +208,6 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
     lateinit var isScrimOpaqueChangedListener: Consumer<Boolean>
 
     /**
-     * A runnable to call when the scrim has been fully revealed. This is only invoked once
-     */
-    var fullyRevealedRunnable: Runnable? = null
-
-    /**
      * How much of the underlying views are revealed, in percent. 0 means they will be completely
      * obscured and 1 means they'll be fully visible.
      */
@@ -223,19 +218,9 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
 
                 revealEffect.setRevealAmountOnScrim(value, this)
                 updateScrimOpaque()
-                maybeTriggerFullyRevealedRunnable()
                 invalidate()
             }
         }
-
-    private fun maybeTriggerFullyRevealedRunnable() {
-        if (revealAmount == 1.0f) {
-            fullyRevealedRunnable?.let {
-                it.run()
-                fullyRevealedRunnable = null
-            }
-        }
-    }
 
     /**
      * The [LightRevealEffect] used to manipulate the radial gradient whenever [revealAmount]
