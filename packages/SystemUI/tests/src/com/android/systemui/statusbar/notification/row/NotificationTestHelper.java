@@ -68,6 +68,7 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
 import com.android.systemui.statusbar.policy.SmartReplyStateInflater;
@@ -129,9 +130,14 @@ public class NotificationTestHelper {
                 Optional.of((mock(Bubbles.class))),
                 mock(DumpManager.class));
         mGroupExpansionManager = mGroupMembershipManager;
-        mHeadsUpManager = new HeadsUpManagerPhone(mContext, mStatusBarStateController,
-                mock(KeyguardBypassController.class), mock(NotificationGroupManagerLegacy.class),
-                mock(ConfigurationControllerImpl.class));
+        mHeadsUpManager = new HeadsUpManagerPhone(
+                mContext,
+                mock(HeadsUpManagerLogger.class),
+                mStatusBarStateController,
+                mock(KeyguardBypassController.class),
+                mock(NotificationGroupManagerLegacy.class),
+                mock(ConfigurationControllerImpl.class)
+        );
         mGroupMembershipManager.setHeadsUpManager(mHeadsUpManager);
         mIconManager = new IconManager(
                 mock(CommonNotifCollection.class),

@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.io.FileDescriptor;
@@ -101,11 +102,12 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     //  Constructor:
 
     public HeadsUpManagerPhone(@NonNull final Context context,
+            HeadsUpManagerLogger logger,
             StatusBarStateController statusBarStateController,
             KeyguardBypassController bypassController,
             GroupMembershipManager groupMembershipManager,
             ConfigurationController configurationController) {
-        super(context);
+        super(context, logger);
         Resources resources = mContext.getResources();
         mExtensionTime = resources.getInteger(R.integer.ambient_notification_extension_time);
         mAutoHeadsUpNotificationDecay = resources.getInteger(
