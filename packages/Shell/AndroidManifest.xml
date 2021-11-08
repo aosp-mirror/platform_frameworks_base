@@ -646,7 +646,7 @@
             android:exported="true"
             android:permission="android.permission.TRIGGER_SHELL_PROFCOLLECT_UPLOAD" >
             <intent-filter>
-                <action android:name="com.android.shell.action.UPLOAD_REPORT" />
+                <action android:name="com.android.shell.action.PROFCOLLECT_UPLOAD" />
             </intent-filter>
         </receiver>
 
