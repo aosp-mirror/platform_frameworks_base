@@ -60,7 +60,7 @@ import javax.inject.Inject;
  * To restore a flag back to its default, leave the `--ez value <0|1>` off of the command.
  */
 @SysUISingleton
-public class FeatureFlagsDebug implements FeatureFlags, FlagWriter, Dumpable {
+public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     private static final String TAG = "SysUIFlags";
 
     private final FlagManager mFlagManager;
@@ -126,7 +126,6 @@ public class FeatureFlagsDebug implements FeatureFlags, FlagWriter, Dumpable {
     }
 
     /** Set whether a given {@link BooleanFlag} is enabled or not. */
-    @Override
     public void setEnabled(int id, boolean value) {
         Boolean currentValue = isEnabledInternal(id);
         if (currentValue != null && currentValue == value) {

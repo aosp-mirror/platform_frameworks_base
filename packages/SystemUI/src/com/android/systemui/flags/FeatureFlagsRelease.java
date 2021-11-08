@@ -36,7 +36,7 @@ import javax.inject.Inject;
  * how to set flags.
  */
 @SysUISingleton
-public class FeatureFlagsRelease implements FeatureFlags, FlagWriter, Dumpable {
+public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
     SparseBooleanArray mAccessedFlags = new SparseBooleanArray();
     @Inject
     public FeatureFlagsRelease(DumpManager dumpManager) {
@@ -59,8 +59,6 @@ public class FeatureFlagsRelease implements FeatureFlags, FlagWriter, Dumpable {
         mAccessedFlags.append(key, defaultValue);
         return defaultValue;
     }
-    @Override
-    public void setEnabled(int key, boolean value) {}
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {

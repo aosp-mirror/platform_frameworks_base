@@ -51,7 +51,6 @@ import java.io.StringWriter;
 public class FeatureFlagsReleaseTest extends SysuiTestCase {
     FeatureFlagsRelease mFeatureFlagsRelease;
 
-    @Mock private Context mContext;
     @Mock private DumpManager mDumpManager;
 
     @Before
@@ -69,23 +68,10 @@ public class FeatureFlagsReleaseTest extends SysuiTestCase {
     }
 
     @Test
-    public void testIsEnabled() {
-        mFeatureFlagsRelease.setEnabled(1, true);
-        // Again, nothing changes.
-        assertThat(mFeatureFlagsRelease.isEnabled(1, false)).isFalse();
-    }
-
-    @Test
     public void testDump() {
-        // Even if a flag is set before
-        mFeatureFlagsRelease.setEnabled(1, true);
-
         // WHEN the flags have been accessed
         assertFalse(mFeatureFlagsRelease.isEnabled(1, false));
         assertTrue(mFeatureFlagsRelease.isEnabled(2, true));
-
-        // Even if a flag is set after
-        mFeatureFlagsRelease.setEnabled(2, false);
 
         // THEN the dump contains the flags and the default values
         String dump = dumpToString();
