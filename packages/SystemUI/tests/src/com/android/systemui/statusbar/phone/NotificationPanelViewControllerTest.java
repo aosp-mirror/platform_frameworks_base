@@ -308,7 +308,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private NotificationsQSContainerController mNotificationsQSContainerController;
     @Mock
     private FeatureFlags mFeatureFlags;
-    private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent;
+    private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
     private View.AccessibilityDelegate mAccessibiltyDelegate;
