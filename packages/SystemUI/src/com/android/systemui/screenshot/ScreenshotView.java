@@ -315,7 +315,7 @@ public class ScreenshotView extends FrameLayout implements
                 });
     }
 
-    private void stopInputListening() {
+    void stopInputListening() {
         if (mInputMonitor != null) {
             mInputMonitor.dispose();
             mInputMonitor = null;
