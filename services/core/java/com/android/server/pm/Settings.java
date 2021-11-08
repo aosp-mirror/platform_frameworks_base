@@ -55,11 +55,7 @@ import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedProcess;
-
-import com.android.server.pm.pkg.PackageUserState;
-import com.android.server.pm.pkg.PackageUserStateInternal;
 import android.content.pm.pkg.PackageUserStateUtils;
-import com.android.server.pm.pkg.SuspendParams;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -117,6 +113,9 @@ import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.permission.LegacyPermissionSettings;
 import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.permission.LegacyPermissionState.PermissionState;
+import com.android.server.pm.pkg.PackageUserState;
+import com.android.server.pm.pkg.PackageUserStateInternal;
+import com.android.server.pm.pkg.SuspendParams;
 import com.android.server.pm.verify.domain.DomainVerificationLegacySettings;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationPersistence;
@@ -3292,7 +3291,7 @@ public final class Settings implements Watchable, Snappable {
         int systemMatch = 0;
         int thirdPartyMatch = 0;
         final int numMatches = (ri == null ? 0 : ri.size());
-        if (numMatches <= 1) {
+        if (numMatches < 1) {
             Slog.w(TAG, "No potential matches found for " + intent
                     + " while setting preferred " + cn.flattenToShortString());
             return;
@@ -4764,7 +4763,9 @@ public final class Settings implements Watchable, Snappable {
             pw.print(" instant=");
             pw.print(ps.getInstantApp(user.id));
             pw.print(" virtual=");
-            pw.println(ps.getVirtualPreload(user.id));
+            pw.print(ps.getVirtualPreload(user.id));
+            pw.print(" installReason=");
+            pw.println(ps.getInstallReason(user.id));
 
             if (ps.getSuspended(user.id)) {
                 pw.print(prefix);

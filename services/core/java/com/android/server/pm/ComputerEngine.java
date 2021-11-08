@@ -3121,7 +3121,7 @@ public class ComputerEngine implements Computer {
                 final ResolveInfo ri = query.get(j);
                 if (DEBUG_PREFERRED || debug) {
                     Slog.v(TAG, "Match for " + ri.activityInfo
-                            + ": 0x" + Integer.toHexString(match));
+                            + ": 0x" + Integer.toHexString(ri.match));
                 }
                 if (ri.match > match) {
                     match = ri.match;
@@ -3213,7 +3213,8 @@ public class ComputerEngine implements Computer {
                     // clear it and re-ask the user their preference, if we're looking for
                     // an "always" type entry.
 
-                    if (always && !pa.mPref.sameSet(query, excludeSetupWizardHomeActivity)) {
+                    if (always
+                            && !pa.mPref.sameSet(query, excludeSetupWizardHomeActivity, userId)) {
                         if (pa.mPref.isSuperset(query, excludeSetupWizardHomeActivity)) {
                             if (allowSetMutation) {
                                 // some components of the set are no longer present in
