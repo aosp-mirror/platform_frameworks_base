@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
+import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
@@ -94,6 +95,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private PhoneStatusBarView mStatusBar;
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardStateController mKeyguardStateController;
+    private final NotificationPanelViewController mNotificationPanelViewController;
     private final NetworkController mNetworkController;
     private LinearLayout mSystemIconArea;
     private View mClockView;
@@ -147,6 +149,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             StatusBarIconController statusBarIconController,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
+            NotificationPanelViewController notificationPanelViewController,
             NetworkController networkController,
             StatusBarStateController statusBarStateController,
             CommandQueue commandQueue,
@@ -164,6 +167,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mStatusBarIconController = statusBarIconController;
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mKeyguardStateController = keyguardStateController;
+        mNotificationPanelViewController = notificationPanelViewController;
         mNetworkController = networkController;
         mStatusBarStateController = statusBarStateController;
         mCommandQueue = commandQueue;
@@ -354,8 +358,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         // The shelf will be hidden when dozing with a custom clock, we must show notification
         // icons in this occasion.
         if (mStatusBarStateController.isDozing()
-                && mStatusBarOptionalLazy.get().map(
-                        sb -> sb.getPanelController().hasCustomClock()).orElse(false)) {
+                && mNotificationPanelViewController.hasCustomClock()) {
             state |= DISABLE_CLOCK | DISABLE_SYSTEM_INFO;
         }
 
