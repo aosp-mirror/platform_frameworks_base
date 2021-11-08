@@ -99,7 +99,8 @@ public class InternetDialogTest extends SysuiTestCase {
                 mInternetDialogController, true, true, true, mock(UiEventLogger.class), mHandler,
                 mBgExecutor);
         mInternetDialog.mAdapter = mInternetAdapter;
-        mInternetDialog.onAccessPointsChanged(mWifiEntries, mInternetWifiEntry);
+        mInternetDialog.mConnectedWifiEntry = mInternetWifiEntry;
+        mInternetDialog.mWifiEntriesCount = mWifiEntries.size();
         mInternetDialog.show();
 
         mDialogView = mInternetDialog.mDialogView;
@@ -209,7 +210,7 @@ public class InternetDialogTest extends SysuiTestCase {
     @Test
     public void updateDialog_wifiOnAndNoConnectedWifi_hideConnectedWifi() {
         // The precondition WiFi ON is already in setUp()
-        mInternetDialog.onAccessPointsChanged(mWifiEntries, null /* connectedEntry*/);
+        mInternetDialog.mConnectedWifiEntry = null;
         doReturn(false).when(mInternetDialogController).activeNetworkIsCellular();
 
         mInternetDialog.updateDialog(false);
@@ -220,7 +221,7 @@ public class InternetDialogTest extends SysuiTestCase {
     @Test
     public void updateDialog_wifiOnAndNoWifiList_hideWifiListAndSeeAll() {
         // The precondition WiFi ON is already in setUp()
-        mInternetDialog.onAccessPointsChanged(null /* wifiEntries */, mInternetWifiEntry);
+        mInternetDialog.mWifiEntriesCount = 0;
 
         mInternetDialog.updateDialog(false);
 
@@ -366,7 +367,8 @@ public class InternetDialogTest extends SysuiTestCase {
     public void showProgressBar_wifiEnabledWithoutWifiEntries_showProgressBarThenHideSearch() {
         Mockito.reset(mHandler);
         when(mWifiManager.isWifiEnabled()).thenReturn(true);
-        mInternetDialog.onAccessPointsChanged(null /* wifiEntries */, null /* connectedEntry*/);
+        mInternetDialog.mConnectedWifiEntry = null;
+        mInternetDialog.mWifiEntriesCount = 0;
 
         mInternetDialog.showProgressBar();
 
