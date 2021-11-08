@@ -2545,6 +2545,11 @@ public final class SmsManager {
      */
     public static final int RESULT_RIL_BLOCKED_DUE_TO_CALL = 123;
 
+    /**
+     * A RIL error occurred during the SMS send.
+     */
+    public static final int RESULT_RIL_GENERIC_ERROR = 124;
+
     // SMS receiving results sent as a "result" extra in {@link Intents.SMS_REJECTED_ACTION}
 
     /**

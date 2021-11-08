@@ -42513,6 +42513,7 @@ package android.telephony {
     field public static final int RESULT_RIL_BLOCKED_DUE_TO_CALL = 123; // 0x7b
     field public static final int RESULT_RIL_CANCELLED = 119; // 0x77
     field public static final int RESULT_RIL_ENCODING_ERR = 109; // 0x6d
+    field public static final int RESULT_RIL_GENERIC_ERROR = 124; // 0x7c
     field public static final int RESULT_RIL_INTERNAL_ERR = 113; // 0x71
     field public static final int RESULT_RIL_INVALID_ARGUMENTS = 104; // 0x68
     field public static final int RESULT_RIL_INVALID_MODEM_STATE = 115; // 0x73
