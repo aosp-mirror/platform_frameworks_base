@@ -86,6 +86,7 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -135,7 +136,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -246,8 +246,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private CollapsedStatusBarFragmentLogger mCollapsedStatusBarFragmentLogger;
     @Mock private StatusBarComponent.Factory mStatusBarComponentFactory;
     @Mock private StatusBarComponent mStatusBarComponent;
-    @Mock private StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
-    @Mock private StatusBarFragmentComponent mStatusBarFragmentComponent;
     @Mock private PluginManager mPluginManager;
     @Mock private LegacySplitScreen mLegacySplitScreen;
     @Mock private LightsOutNotifController mLightsOutNotifController;
@@ -362,8 +360,6 @@ public class StatusBarTest extends SysuiTestCase {
         when(mBiometricUnlockControllerLazy.get()).thenReturn(mBiometricUnlockController);
 
         when(mStatusBarComponentFactory.create()).thenReturn(mStatusBarComponent);
-        when(mStatusBarFragmentComponentFactory.create(any()))
-                .thenReturn(mStatusBarFragmentComponent);
         when(mStatusBarComponent.getNotificationShadeWindowViewController()).thenReturn(
                 mNotificationShadeWindowViewController);
 
@@ -378,6 +374,7 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar = new StatusBar(
                 mContext,
                 mNotificationsController,
+                mock(FragmentService.class),
                 mLightBarController,
                 mAutoHideController,
                 mStatusBarWindowController,
@@ -433,7 +430,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mCommandQueue,
                 mCollapsedStatusBarFragmentLogger,
                 mStatusBarComponentFactory,
-                mStatusBarFragmentComponentFactory,
                 mPluginManager,
                 Optional.of(mLegacySplitScreen),
                 mLightsOutNotifController,
