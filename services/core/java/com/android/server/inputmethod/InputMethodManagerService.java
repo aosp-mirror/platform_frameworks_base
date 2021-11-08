@@ -373,8 +373,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private NotificationManager mNotificationManager;
     KeyguardManager mKeyguardManager;
     private @Nullable StatusBarManagerService mStatusBar;
-    private Notification.Builder mImeSwitcherNotification;
-    private PendingIntent mImeSwitchPendingIntent;
+    private final Notification.Builder mImeSwitcherNotification;
+    private final PendingIntent mImeSwitchPendingIntent;
     private boolean mShowOngoingImeSwitcherForPhones;
     private boolean mNotificationShown;
 
@@ -647,7 +647,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     boolean mIsInteractive = true;
 
-    private IPlatformCompat mPlatformCompat;
+    private final IPlatformCompat mPlatformCompat;
 
     int mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
 
@@ -757,7 +757,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final WeakHashMap<IBinder, IBinder> mImeTargetWindowMap = new WeakHashMap<>();
 
     private static final class SoftInputShowHideHistory {
-        private Entry[] mEntries = new Entry[16];
+        private final Entry[] mEntries = new Entry[16];
         private int mNextIndex = 0;
         private static final AtomicInteger sSequenceNumber = new AtomicInteger(0);
 
@@ -1511,7 +1511,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private UserSwitchHandlerTask mUserSwitchHandlerTask;
 
     public static final class Lifecycle extends SystemService {
-        private InputMethodManagerService mService;
+        private final InputMethodManagerService mService;
 
         public Lifecycle(Context context) {
             super(context);
