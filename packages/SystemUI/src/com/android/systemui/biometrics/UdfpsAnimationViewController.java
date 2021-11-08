@@ -63,13 +63,13 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
 
     @Override
     protected void onViewAttached() {
-        mPanelExpansionStateManager.addListener(mPanelExpansionListener);
+        mPanelExpansionStateManager.addExpansionListener(mPanelExpansionListener);
         mDumpManger.registerDumpable(getDumpTag(), this);
     }
 
     @Override
     protected void onViewDetached() {
-        mPanelExpansionStateManager.removeListener(mPanelExpansionListener);
+        mPanelExpansionStateManager.removeExpansionListener(mPanelExpansionListener);
         mDumpManger.unregisterDumpable(getDumpTag());
     }
 

@@ -33,9 +33,9 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onPanelExpansionChanged_listenersNotified() {
+    fun onPanelExpansionChanged_listenerNotified() {
         val listener = TestPanelExpansionListener()
-        panelExpansionStateManager.addListener(listener)
+        panelExpansionStateManager.addExpansionListener(listener)
         val fraction = 0.6f
         val expanded = true
         val tracking = true
@@ -48,19 +48,142 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun addPanelExpansionListener_listenerNotifiedOfCurrentValues() {
+    fun addExpansionListener_listenerNotifiedOfCurrentValues() {
         val fraction = 0.6f
         val expanded = true
         val tracking = true
         panelExpansionStateManager.onPanelExpansionChanged(fraction, expanded, tracking)
         val listener = TestPanelExpansionListener()
 
-        panelExpansionStateManager.addListener(listener)
+        panelExpansionStateManager.addExpansionListener(listener)
 
         assertThat(listener.fraction).isEqualTo(fraction)
         assertThat(listener.expanded).isEqualTo(expanded)
         assertThat(listener.tracking).isEqualTo(tracking)
     }
+
+    @Test
+    fun updateState_listenerNotified() {
+        val listener = TestPanelStateListener()
+        panelExpansionStateManager.addStateListener(listener)
+
+        panelExpansionStateManager.updateState(STATE_OPEN)
+
+        assertThat(listener.state).isEqualTo(STATE_OPEN)
+    }
+
+    /* ***** [PanelExpansionStateManager.onPanelExpansionChanged] test cases *******/
+
+    /* Fraction < 1 test cases */
+
+    @Test
+    fun onPEC_fractionLessThanOne_expandedTrue_trackingFalse_becomesStateOpening() {
+        val listener = TestPanelStateListener()
+        panelExpansionStateManager.addStateListener(listener)
+
+        panelExpansionStateManager.onPanelExpansionChanged(
+            fraction = 0.5f, expanded = true, tracking = false
+        )
+
+        assertThat(listener.state).isEqualTo(STATE_OPENING)
+    }
+
+    @Test
+    fun onPEC_fractionLessThanOne_expandedTrue_trackingTrue_becomesStateOpening() {
+        val listener = TestPanelStateListener()
+        panelExpansionStateManager.addStateListener(listener)
+
+        panelExpansionStateManager.onPanelExpansionChanged(
+            fraction = 0.5f, expanded = true, tracking = true
+        )
+
+        assertThat(listener.state).isEqualTo(STATE_OPENING)
+    }
+
+    @Test
+    fun onPEC_fractionLessThanOne_expandedFalse_trackingFalse_becomesStateClosed() {
+        val listener = TestPanelStateListener()
+        panelExpansionStateManager.addStateListener(listener)
+        // Start out on a different state
+        panelExpansionStateManager.updateState(STATE_OPEN)
+
+        panelExpansionStateManager.onPanelExpansionChanged(
+            fraction = 0.5f, expanded = false, tracking = false
+        )
+
+        assertThat(listener.state).isEqualTo(STATE_CLOSED)
+    }
+
+    @Test
+    fun onPEC_fractionLessThanOne_expandedFalse_trackingTrue_doesNotBecomeStateClosed() {
+        val listener = TestPanelStateListener()
+        panelExpansionStateManager.addStateListener(listener)
+        // Start out on a different state
+        panelExpansionStateManager.updateState(STATE_OPEN)
+
+        panelExpansionStateManager.onPanelExpansionChanged(
+            fraction = 0.5f, expanded = false, tracking = true
+        )
+
+        assertThat(listener.state).isEqualTo(STATE_OPEN)
+    }
+
+    /* Fraction = 1 test cases */
+
+    @Test
+    fun onPEC_fractionOne_expandedTrue_trackingFalse_becomesStateOpeningThenStateOpen() {
+        val listener = TestPanelStateListener()
+        panelExpansionStateManager.addStateListener(listener)
+
+        panelExpansionStateManager.onPanelExpansionChanged(
+            fraction = 1f, expanded = true, tracking = false
+        )
+
+        assertThat(listener.previousState).isEqualTo(STATE_OPENING)
+        assertThat(listener.state).isEqualTo(STATE_OPEN)
+    }
+
+    @Test
+    fun onPEC_fractionOne_expandedTrue_trackingTrue_becomesStateOpening() {
+        val listener = TestPanelStateListener()
+        panelExpansionStateManager.addStateListener(listener)
+
+        panelExpansionStateManager.onPanelExpansionChanged(
+            fraction = 1f, expanded = true, tracking = true
+        )
+
+        assertThat(listener.state).isEqualTo(STATE_OPENING)
+    }
+
+    @Test
+    fun onPEC_fractionOne_expandedFalse_trackingFalse_becomesStateClosed() {
+        val listener = TestPanelStateListener()
+        panelExpansionStateManager.addStateListener(listener)
+        // Start out on a different state
+        panelExpansionStateManager.updateState(STATE_OPEN)
+
+        panelExpansionStateManager.onPanelExpansionChanged(
+            fraction = 1f, expanded = false, tracking = false
+        )
+
+        assertThat(listener.state).isEqualTo(STATE_CLOSED)
+    }
+
+    @Test
+    fun onPEC_fractionOne_expandedFalse_trackingTrue_doesNotBecomeStateClosed() {
+        val listener = TestPanelStateListener()
+        panelExpansionStateManager.addStateListener(listener)
+        // Start out on a different state
+        panelExpansionStateManager.updateState(STATE_OPEN)
+
+        panelExpansionStateManager.onPanelExpansionChanged(
+            fraction = 1f, expanded = false, tracking = true
+        )
+
+        assertThat(listener.state).isEqualTo(STATE_OPEN)
+    }
+
+    /* ***** end [PanelExpansionStateManager.onPanelExpansionChanged] test cases ******/
 
     class TestPanelExpansionListener : PanelExpansionListener {
         var fraction: Float = 0f
@@ -75,6 +198,16 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
             this.fraction = fraction
             this.expanded = expanded
             this.tracking = tracking
+        }
+    }
+
+    class TestPanelStateListener : PanelStateListener {
+        @PanelState var previousState: Int = STATE_CLOSED
+        @PanelState var state: Int = STATE_CLOSED
+
+        override fun onPanelStateChanged(state: Int) {
+            this.previousState = this.state
+            this.state = state
         }
     }
 }

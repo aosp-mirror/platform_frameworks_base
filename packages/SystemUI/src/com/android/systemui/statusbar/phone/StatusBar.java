@@ -902,7 +902,7 @@ public class StatusBar extends SystemUI implements
         mStartingSurfaceOptional = startingSurfaceOptional;
         lockscreenShadeTransitionController.setStatusbar(this);
 
-        mPanelExpansionStateManager.addListener(this::onPanelExpansionChanged);
+        mPanelExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged);
 
         mBubbleExpandListener =
                 (isExpanding, key) -> mContext.getMainExecutor().execute(() -> {
@@ -1149,7 +1149,7 @@ public class StatusBar extends SystemUI implements
         mNotificationLogger.setUpWithContainer(notifListContainer);
 
         mNotificationIconAreaController.setupShelf(mNotificationShelfController);
-        mPanelExpansionStateManager.addListener(mWakeUpCoordinator);
+        mPanelExpansionStateManager.addExpansionListener(mWakeUpCoordinator);
 
         mUserSwitcherController.init(mNotificationShadeWindowView);
 
@@ -1164,11 +1164,7 @@ public class StatusBar extends SystemUI implements
                     PhoneStatusBarView oldStatusBarView = mStatusBarView;
                     mStatusBarView = (PhoneStatusBarView) statusBarFragment.getView();
                     mStatusBarView.setBar(this);
-                    mStatusBarView.setPanelStateChangeListener(
-                            mNotificationPanelViewController.getPanelStateChangeListener());
                     mStatusBarView.setScrimController(mScrimController);
-
-                    mNotificationPanelViewController.setBar(mStatusBarView);
 
                     mPhoneStatusBarViewController = mPhoneStatusBarViewControllerFactory
                             .create(mStatusBarView, mNotificationPanelViewController
@@ -1221,6 +1217,7 @@ public class StatusBar extends SystemUI implements
                                 mAnimationScheduler,
                                 mStatusBarLocationPublisher,
                                 mNotificationIconAreaController,
+                                mPanelExpansionStateManager,
                                 mFeatureFlags,
                                 mStatusBarIconController,
                                 mKeyguardStateController,
