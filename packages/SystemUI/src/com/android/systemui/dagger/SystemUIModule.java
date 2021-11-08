@@ -38,10 +38,7 @@ import com.android.systemui.demomode.dagger.DemoModeModule;
 import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlagManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.FlagReader;
-import com.android.systemui.flags.FlagWriter;
 import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.log.dagger.LogModule;
@@ -160,12 +157,6 @@ public abstract class SystemUIModule {
         dumpManager.registerDumpable(state);
         return state;
     }
-
-    @Binds
-    abstract FlagReader provideFlagReader(FeatureFlagManager impl);
-
-    @Binds
-    abstract FlagWriter provideFlagWriter(FeatureFlagManager impl);
 
     @BindsOptionalOf
     abstract CommandQueue optionalCommandQueue();

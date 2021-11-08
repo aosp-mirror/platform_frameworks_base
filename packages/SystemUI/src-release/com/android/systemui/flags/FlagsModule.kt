@@ -16,7 +16,11 @@
 
 package com.android.systemui.flags
 
+import dagger.Binds
 import dagger.Module
 
 @Module
-object FlagsModule
+abstract class FlagsModule {
+    @Binds
+    abstract fun bindsFeatureFlagRelease(impl: FeatureFlagsRelease): FeatureFlags
+}

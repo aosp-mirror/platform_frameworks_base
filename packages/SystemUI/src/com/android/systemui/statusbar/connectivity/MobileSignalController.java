@@ -192,7 +192,8 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
             SubscriptionDefaults defaults,
             Looper receiverLooper,
             CarrierConfigTracker carrierConfigTracker,
-            FeatureFlags featureFlags
+            FeatureFlags featureFlags,
+            StatusBarFlags statusBarFlags
     ) {
         super("MobileSignalController(" + info.getSubscriptionId() + ")", context,
                 NetworkCapabilities.TRANSPORT_CELLULAR, callbackHandler,
@@ -227,7 +228,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         mMobileStatusTracker = new MobileStatusTracker(mPhone, receiverLooper,
                 info, mDefaults, mMobileCallback);
         mProviderModelBehavior = featureFlags.isCombinedStatusBarSignalIconsEnabled();
-        mProviderModelSetting = featureFlags.isProviderModelSettingEnabled(mContext);
+        mProviderModelSetting = statusBarFlags.isProviderModelSettingEnabled();
     }
 
     void setConfiguration(Config config) {

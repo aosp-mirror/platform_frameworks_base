@@ -42,6 +42,7 @@ import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.connectivity.StatusBarFlags;
 import com.android.systemui.util.leak.GarbageMonitor;
 
 import java.util.ArrayList;
@@ -64,6 +65,7 @@ public class TileQueryHelper {
     private final Context mContext;
     private final UserTracker mUserTracker;
     private final FeatureFlags mFeatureFlags;
+    private final StatusBarFlags mStatusBarFlags;
     private TileStateListener mListener;
 
     private boolean mFinished;
@@ -74,13 +76,15 @@ public class TileQueryHelper {
             UserTracker userTracker,
             @Main Executor mainExecutor,
             @Background Executor bgExecutor,
-            FeatureFlags featureFlags
+            FeatureFlags featureFlags,
+            StatusBarFlags statusBarFlags
     ) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
         mUserTracker = userTracker;
         mFeatureFlags = featureFlags;
+        mStatusBarFlags = statusBarFlags;
     }
 
     public void setListener(TileStateListener listener) {
@@ -121,7 +125,7 @@ public class TileQueryHelper {
         }
 
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
-        if (mFeatureFlags.isProviderModelSettingEnabled(mContext)) {
+        if (mStatusBarFlags.isProviderModelSettingEnabled()) {
             possibleTiles.remove("cell");
             possibleTiles.remove("wifi");
         }

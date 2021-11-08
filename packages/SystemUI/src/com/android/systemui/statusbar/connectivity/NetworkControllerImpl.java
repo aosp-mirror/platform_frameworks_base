@@ -135,6 +135,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private Config mConfig;
     private final CarrierConfigTracker mCarrierConfigTracker;
     private final FeatureFlags mFeatureFlags;
+    private final StatusBarFlags mStatusBarFlags;
     private final DumpManager mDumpManager;
 
     private TelephonyCallback.ActiveDataSubscriptionIdListener mPhoneStateListener;
@@ -210,6 +211,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     mReceiverHandler.post(() -> handleConfigurationChanged());
                 }
             };
+
     /**
      * Construct this controller object and register for updates.
      */
@@ -233,6 +235,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             @Main Handler handler,
             InternetDialogFactory internetDialogFactory,
             FeatureFlags featureFlags,
+            StatusBarFlags statusBarFlags,
             DumpManager dumpManager) {
         this(context, connectivityManager,
                 telephonyManager,
@@ -252,6 +255,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 demoModeController,
                 carrierConfigTracker,
                 featureFlags,
+                statusBarFlags,
                 dumpManager);
         mReceiverHandler.post(mRegisterListeners);
         mMainHandler = handler;
@@ -275,6 +279,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             DemoModeController demoModeController,
             CarrierConfigTracker carrierConfigTracker,
             FeatureFlags featureFlags,
+            StatusBarFlags statusBarFlags,
             DumpManager dumpManager
     ) {
         mContext = context;
@@ -294,6 +299,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mDemoModeController = demoModeController;
         mCarrierConfigTracker = carrierConfigTracker;
         mFeatureFlags = featureFlags;
+        mStatusBarFlags = statusBarFlags;
         mDumpManager = dumpManager;
 
         // telephony
@@ -316,7 +322,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         });
         mWifiSignalController = new WifiSignalController(mContext, mHasMobileDataFeature,
                 mCallbackHandler, this, mWifiManager, mConnectivityManager, networkScoreManager,
-                mFeatureFlags);
+                mStatusBarFlags);
 
         mEthernetSignalController = new EthernetSignalController(mContext, mCallbackHandler, this);
 
@@ -442,7 +448,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         mDemoModeController.addCallback(this);
         mProviderModelBehavior = mFeatureFlags.isCombinedStatusBarSignalIconsEnabled();
-        mProviderModelSetting = mFeatureFlags.isProviderModelSettingEnabled(mContext);
+        mProviderModelSetting = mStatusBarFlags.isProviderModelSettingEnabled();
 
         mDumpManager.registerDumpable(TAG, this);
     }
@@ -958,7 +964,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         mHasMobileDataFeature, mPhone.createForSubscriptionId(subId),
                         mCallbackHandler, this, subscriptions.get(i),
                         mSubDefaults, mReceiverHandler.getLooper(), mCarrierConfigTracker,
-                        mFeatureFlags);
+                        mFeatureFlags, mStatusBarFlags);
                 controller.setUserSetupComplete(mUserSetup);
                 mMobileSignalControllers.put(subId, controller);
                 if (subscriptions.get(i).getSimSlotIndex() == 0) {
@@ -1436,7 +1442,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mConfig, mHasMobileDataFeature,
                 mPhone.createForSubscriptionId(info.getSubscriptionId()), mCallbackHandler, this,
                 info, mSubDefaults, mReceiverHandler.getLooper(), mCarrierConfigTracker,
-                mFeatureFlags);
+                mFeatureFlags, mStatusBarFlags);
         mMobileSignalControllers.put(id, controller);
         controller.getState().userSetup = true;
         return info;
