@@ -5646,6 +5646,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         synchronized (mLock) {
                             mInstantAppRegistry.deleteInstantApplicationMetadataLPw(
                                     packageName, userId);
+                            if (succeeded) {
+                                resetComponentEnabledSettingsIfNeededLPw(packageName, userId);
+                            }
                         }
                     }
                     if (succeeded) {
@@ -5719,6 +5722,62 @@ public class PackageManagerService extends IPackageManager.Stub
         mAppDataHelper.prepareAppDataContentsLIF(pkg, ps, userId, flags);
 
         return true;
+    }
+
+    /**
+     * Update component enabled settings to {@link PackageManager#COMPONENT_ENABLED_STATE_DEFAULT}
+     * if the resetEnabledSettingsOnAppDataCleared is {@code true}.
+     */
+    private void resetComponentEnabledSettingsIfNeededLPw(String packageName, int userId) {
+        final AndroidPackage pkg = packageName != null ? mPackages.get(packageName) : null;
+        if (pkg == null || !pkg.isResetEnabledSettingsOnAppDataCleared()) {
+            return;
+        }
+        final PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);
+        if (pkgSetting == null) {
+            return;
+        }
+        final ArrayList<String> updatedComponents = new ArrayList<>();
+        final Consumer<? super ParsedMainComponent> resetSettings = (component) -> {
+            if (pkgSetting.restoreComponentLPw(component.getClassName(), userId)) {
+                updatedComponents.add(component.getClassName());
+            }
+        };
+        for (int i = 0; i < pkg.getActivities().size(); i++) {
+            resetSettings.accept(pkg.getActivities().get(i));
+        }
+        for (int i = 0; i < pkg.getReceivers().size(); i++) {
+            resetSettings.accept(pkg.getReceivers().get(i));
+        }
+        for (int i = 0; i < pkg.getServices().size(); i++) {
+            resetSettings.accept(pkg.getServices().get(i));
+        }
+        for (int i = 0; i < pkg.getProviders().size(); i++) {
+            resetSettings.accept(pkg.getProviders().get(i));
+        }
+        if (ArrayUtils.isEmpty(updatedComponents)) {
+            // nothing changed
+            return;
+        }
+
+        updateSequenceNumberLP(pkgSetting, new int[] { userId });
+        updateInstantAppInstallerLocked(packageName);
+        scheduleWritePackageRestrictionsLocked(userId);
+
+        final ArrayList<String> pendingComponents = mPendingBroadcasts.get(userId, packageName);
+        if (pendingComponents == null) {
+            mPendingBroadcasts.put(userId, packageName, updatedComponents);
+        } else {
+            for (int i = 0; i < updatedComponents.size(); i++) {
+                final String updatedComponent = updatedComponents.get(i);
+                if (!pendingComponents.contains(updatedComponent)) {
+                    pendingComponents.add(updatedComponent);
+                }
+            }
+        }
+        if (!mHandler.hasMessages(SEND_PENDING_BROADCAST)) {
+            mHandler.sendEmptyMessageDelayed(SEND_PENDING_BROADCAST, BROADCAST_DELAY);
+        }
     }
 
     /**

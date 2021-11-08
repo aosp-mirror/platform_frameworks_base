@@ -223,6 +223,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::isVendor,
         AndroidPackage::isVisibleToInstantApps,
         AndroidPackage::isVmSafeMode,
+        AndroidPackage::isResetEnabledSettingsOnAppDataCleared,
         AndroidPackage::getMaxAspectRatio,
         AndroidPackage::getMinAspectRatio,
         AndroidPackage::hasPreserveLegacyExternalStorage,

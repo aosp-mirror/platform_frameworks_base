@@ -517,6 +517,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         private static final long DISALLOW_PROFILING = 1L << 45;
         private static final long REQUEST_FOREGROUND_SERVICE_EXEMPTION = 1L << 46;
         private static final long ATTRIBUTIONS_ARE_USER_VISIBLE = 1L << 47;
+        private static final long RESET_ENABLED_SETTINGS_ON_APP_DATA_CLEARED = 1L << 48;
     }
 
     private ParsingPackageImpl setBoolean(@Booleans.Values long flag, boolean value) {
@@ -2216,6 +2217,11 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     }
 
     @Override
+    public boolean isResetEnabledSettingsOnAppDataCleared() {
+        return getBoolean(Booleans.RESET_ENABLED_SETTINGS_ON_APP_DATA_CLEARED);
+    }
+
+    @Override
     public ParsingPackageImpl setBaseRevisionCode(int value) {
         baseRevisionCode = value;
         return this;
@@ -2769,6 +2775,14 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     @Override
     public ParsingPackage setAttributionsAreUserVisible(boolean attributionsAreUserVisible) {
         setBoolean(Booleans.ATTRIBUTIONS_ARE_USER_VISIBLE, attributionsAreUserVisible);
+        return this;
+    }
+
+    @Override
+    public ParsingPackage setResetEnabledSettingsOnAppDataCleared(
+            boolean resetEnabledSettingsOnAppDataCleared) {
+        setBoolean(Booleans.RESET_ENABLED_SETTINGS_ON_APP_DATA_CLEARED,
+                resetEnabledSettingsOnAppDataCleared);
         return this;
     }
 }

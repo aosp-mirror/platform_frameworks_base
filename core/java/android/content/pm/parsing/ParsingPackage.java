@@ -362,6 +362,9 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setAttributionsAreUserVisible(boolean attributionsAreUserVisible);
 
+    ParsingPackage setResetEnabledSettingsOnAppDataCleared(
+            boolean resetEnabledSettingsOnAppDataCleared);
+
     // TODO(b/135203078): This class no longer has access to ParsedPackage, find a replacement
     //  for moving to the next step
     @CallSuper
