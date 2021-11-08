@@ -13,6 +13,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
+import com.android.systemui.qs.tileimpl.HeightOverrideable;
 
 import java.util.ArrayList;
 
@@ -285,5 +286,11 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         }
         mSquishinessFraction = squishinessFraction;
         layoutTileRecords(mRecords.size(), false /* forLayout */);
+
+        for (TileRecord record : mRecords) {
+            if (record.tileView instanceof HeightOverrideable) {
+                ((HeightOverrideable) record.tileView).setSquishinessFraction(mSquishinessFraction);
+            }
+        }
     }
 }

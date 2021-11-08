@@ -2241,8 +2241,10 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updateQsExpansion() {
         if (mQs == null) return;
         float qsExpansionFraction = computeQsExpansionFraction();
+        float squishiness = mNotificationStackScrollLayoutController
+                .getNotificationSquishinessFraction();
         mQs.setQsExpansion(qsExpansionFraction, getExpandedFraction(), getHeaderTranslation(),
-                mNotificationStackScrollLayoutController.getNotificationSquishinessFraction());
+                mQsExpandImmediate || mQsExpanded ? 1f : squishiness);
         mSplitShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
         mMediaHierarchyManager.setQsExpansion(qsExpansionFraction);
         int qsPanelBottomY = calculateQsBottomPosition(qsExpansionFraction);
