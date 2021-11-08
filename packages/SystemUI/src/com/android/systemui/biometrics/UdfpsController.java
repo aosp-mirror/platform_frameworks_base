@@ -760,10 +760,12 @@ public class UdfpsController implements DozeReceiver {
                 mOnFingerDown = false;
                 mView.setSensorProperties(mSensorProps);
                 mView.setHbmProvider(mHbmProvider);
-                UdfpsAnimationViewController animation = inflateUdfpsAnimation(reason);
+                UdfpsAnimationViewController<?> animation = inflateUdfpsAnimation(reason);
                 mAttemptedToDismissKeyguard = false;
-                animation.init();
-                mView.setAnimationViewController(animation);
+                if (animation != null) {
+                    animation.init();
+                    mView.setAnimationViewController(animation);
+                }
                 mOrientationListener.enable();
 
                 // This view overlaps the sensor area, so prevent it from being selectable
@@ -786,7 +788,8 @@ public class UdfpsController implements DozeReceiver {
         }
     }
 
-    private UdfpsAnimationViewController inflateUdfpsAnimation(int reason) {
+    @Nullable
+    private UdfpsAnimationViewController<?> inflateUdfpsAnimation(int reason) {
         switch (reason) {
             case BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR:
             case BiometricOverlayConstants.REASON_ENROLL_ENROLLING:
@@ -830,6 +833,7 @@ public class UdfpsController implements DozeReceiver {
                         mDumpManager
                 );
             case BiometricOverlayConstants.REASON_AUTH_OTHER:
+            case BiometricOverlayConstants.REASON_AUTH_SETTINGS:
                 UdfpsFpmOtherView authOtherView = (UdfpsFpmOtherView)
                         mInflater.inflate(R.layout.udfps_fpm_other_view, null);
                 mView.addView(authOtherView);
@@ -840,7 +844,7 @@ public class UdfpsController implements DozeReceiver {
                         mDumpManager
                 );
             default:
-                Log.d(TAG, "Animation for reason " + reason + " not supported yet");
+                Log.e(TAG, "Animation for reason " + reason + " not supported yet");
                 return null;
         }
     }
