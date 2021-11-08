@@ -447,7 +447,7 @@ public class NotificationShadeWindowViewController {
         setDragDownHelper(mLockscreenShadeTransitionController.getTouchHelper());
 
         mDepthController.setRoot(mView);
-        mPanelExpansionStateManager.addListener(mDepthController);
+        mPanelExpansionStateManager.addExpansionListener(mDepthController);
     }
 
     public NotificationShadeWindowView getView() {

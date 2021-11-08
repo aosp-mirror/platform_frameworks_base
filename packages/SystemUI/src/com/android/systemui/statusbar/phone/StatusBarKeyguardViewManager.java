@@ -279,7 +279,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mBouncer = mKeyguardBouncerFactory.create(container, mExpansionCallback);
         mNotificationPanelViewController = notificationPanelViewController;
         if (panelExpansionStateManager != null) {
-            panelExpansionStateManager.addListener(this);
+            panelExpansionStateManager.addExpansionListener(this);
         }
         mBypassController = bypassController;
         mNotificationContainer = notificationContainer;
