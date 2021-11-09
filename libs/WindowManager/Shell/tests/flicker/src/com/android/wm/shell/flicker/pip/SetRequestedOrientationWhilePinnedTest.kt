@@ -50,9 +50,9 @@ class SetRequestedOrientationWhilePinnedTest(
     private val startingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_0)
     private val endingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_90)
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
-            setupAndTeardown(this, configuration)
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
+            setupAndTeardown(this)
 
             setup {
                 eachRun {

@@ -43,7 +43,7 @@ import org.junit.runners.Parameterized
 @Group4
 class MultiBubblesScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
                 test {

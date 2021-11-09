@@ -25,7 +25,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.wm.shell.flicker.appPairsDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.appPairsPrimaryBoundsIsVisibleAtEnd
@@ -50,11 +49,11 @@ import org.junit.runners.Parameterized
 class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
     testSpec: FlickerTestParameter
 ) : RotateTwoLaunchedAppsTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this, it)
+            super.transition(this)
             transitions {
-                this.setRotation(testSpec.config.endRotation)
+                this.setRotation(testSpec.endRotation)
                 executeShellCommand(
                     composePairsCommand(primaryTaskId, secondaryTaskId, pair = true))
                 waitAppsShown(primaryApp, secondaryApp)
@@ -93,13 +92,13 @@ class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
     @FlakyTest(bugId = 172776659)
     @Test
     fun appPairsPrimaryBoundsIsVisibleAtEnd() =
-        testSpec.appPairsPrimaryBoundsIsVisibleAtEnd(testSpec.config.endRotation,
+        testSpec.appPairsPrimaryBoundsIsVisibleAtEnd(testSpec.endRotation,
             primaryApp.component)
 
     @FlakyTest(bugId = 172776659)
     @Test
     fun appPairsSecondaryBoundsIsVisibleAtEnd() =
-        testSpec.appPairsSecondaryBoundsIsVisibleAtEnd(testSpec.config.endRotation,
+        testSpec.appPairsSecondaryBoundsIsVisibleAtEnd(testSpec.endRotation,
             secondaryApp.component)
 
     companion object {

@@ -25,7 +25,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.exitSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
@@ -61,8 +60,8 @@ class LegacySplitScreenToLauncher(
 ) : LegacySplitScreenTransition(testSpec) {
     private val testApp = SimpleAppHelper(instrumentation)
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
             setup {
                 test {
                     device.wakeUpAndGoToHomeScreen()
@@ -70,7 +69,7 @@ class LegacySplitScreenToLauncher(
                 }
                 eachRun {
                     testApp.launchViaIntent(wmHelper)
-                    this.setRotation(configuration.endRotation)
+                    this.setRotation(testSpec.endRotation)
                     device.launchSplitScreen(wmHelper)
                     device.waitForIdle()
                 }

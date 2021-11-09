@@ -66,9 +66,9 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     /**
      * Defines the transition used to run the test
      */
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { args ->
-            super.transition(this, args)
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
+            super.transition(this)
             setup {
                 eachRun {
                     device.sleep()
