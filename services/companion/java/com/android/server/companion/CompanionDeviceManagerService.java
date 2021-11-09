@@ -757,7 +757,12 @@ public class CompanionDeviceManagerService extends SystemService {
                 android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND)) {
             mPowerWhitelistManager.addToWhitelist(packageInfo.packageName);
         } else {
-            mPowerWhitelistManager.removeFromWhitelist(packageInfo.packageName);
+            try {
+                mPowerWhitelistManager.removeFromWhitelist(packageInfo.packageName);
+            } catch (UnsupportedOperationException e) {
+                Slog.w(LOG_TAG, packageInfo.packageName + " can't be removed from power save"
+                        + " whitelist. It might due to the package is whitelisted by the system.");
+            }
         }
 
         NetworkPolicyManager networkPolicyManager = NetworkPolicyManager.from(getContext());
