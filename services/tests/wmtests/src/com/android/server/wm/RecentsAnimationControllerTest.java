@@ -124,7 +124,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // Verify that the finish callback to reparent the leash is called
         verify(mFinishedCallback).onAnimationFinished(eq(ANIMATION_TYPE_RECENTS), eq(adapter));
         // Verify the animation canceled callback to the app was made
-        verify(mMockRunner).onAnimationCanceled(null /* taskSnapshot */);
+        verify(mMockRunner).onAnimationCanceled(null /* taskIds */, null /* taskSnapshots */);
         verifyNoMoreInteractionsExceptAsBinder(mMockRunner);
     }
 
@@ -207,7 +207,8 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         wallpaperWindowToken.cancelAnimation();
         assertTrue(mController.isAnimatingTask(activity.getTask()));
         assertFalse(mController.isAnimatingWallpaper(wallpaperWindowToken));
-        verify(mMockRunner, never()).onAnimationCanceled(null /* taskSnapshot */);
+        verify(mMockRunner, never()).onAnimationCanceled(null /* taskIds */,
+                null /* taskSnapshots */);
     }
 
     @Test
@@ -254,7 +255,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
         mController.setDeferredCancel(true /* deferred */, false /* screenshot */);
         mController.cancelAnimationWithScreenshot(false /* screenshot */);
-        verify(mMockRunner).onAnimationCanceled(null /* taskSnapshot */);
+        verify(mMockRunner).onAnimationCanceled(null /* taskIds */, null /* taskSnapshots */);
 
         // Simulate the app transition finishing
         mController.mAppTransitionListener.onAppTransitionStartingLocked(false, false, 0, 0, 0);
@@ -281,7 +282,8 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 anyInt(), eq(false) /* restoreFromDisk */, eq(false) /* isLowResolution */);
         mController.setDeferredCancel(true /* deferred */, true /* screenshot */);
         mController.cancelAnimationWithScreenshot(true /* screenshot */);
-        verify(mMockRunner).onAnimationCanceled(mMockTaskSnapshot /* taskSnapshot */);
+        verify(mMockRunner).onAnimationCanceled(any(int[].class) /* taskIds */,
+                any(TaskSnapshot[].class) /* taskSnapshots */);
 
         // Continue the animation (simulating a call to cleanupScreenshot())
         mController.continueDeferredCancelAnimation();
@@ -322,7 +324,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         doReturn(mMockTaskSnapshot).when(mWm.mTaskSnapshotController).getSnapshot(anyInt(),
                 anyInt(), eq(false) /* restoreFromDisk */, eq(false) /* isLowResolution */);
         mController.cancelAnimationWithScreenshot(true /* screenshot */);
-        verify(mMockRunner).onAnimationCanceled(any());
+        verify(mMockRunner).onAnimationCanceled(any(), any());
 
         // Simulate process crashing and ensure the animation is still canceled
         mController.binderDied();
@@ -700,7 +702,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mController.setWillFinishToHome(true);
         mController.cancelAnimationForDisplayChange();
 
-        verify(mMockRunner).onAnimationCanceled(any());
+        verify(mMockRunner).onAnimationCanceled(any(), any());
         verify(mAnimationCallbacks).onAnimationFinished(REORDER_MOVE_TO_TOP, false);
     }
 
@@ -715,7 +717,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mController.setWillFinishToHome(false);
         mController.cancelAnimationForDisplayChange();
 
-        verify(mMockRunner).onAnimationCanceled(any());
+        verify(mMockRunner).onAnimationCanceled(any(), any());
         verify(mAnimationCallbacks).onAnimationFinished(REORDER_MOVE_TO_ORIGINAL_POSITION, false);
     }
 
@@ -735,7 +737,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         doReturn(mMockTaskSnapshot).when(mWm.mTaskSnapshotController).getSnapshot(anyInt(),
                 anyInt(), eq(false) /* restoreFromDisk */, eq(false) /* isLowResolution */);
         mController.cancelAnimationForHomeStart();
-        verify(mMockRunner).onAnimationCanceled(any());
+        verify(mMockRunner).onAnimationCanceled(any(), any());
 
         // Continue the animation (simulating a call to cleanupScreenshot())
         mController.continueDeferredCancelAnimation();

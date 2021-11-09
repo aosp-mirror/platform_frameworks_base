@@ -35,9 +35,9 @@ import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
-import static com.android.systemui.statusbar.phone.PanelBar.STATE_CLOSED;
-import static com.android.systemui.statusbar.phone.PanelBar.STATE_OPEN;
-import static com.android.systemui.statusbar.phone.PanelBar.STATE_OPENING;
+import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_CLOSED;
+import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_OPEN;
+import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_OPENING;
 
 import static java.lang.Float.isNaN;
 
@@ -173,6 +173,7 @@ import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
+import com.android.systemui.statusbar.phone.panelstate.PanelState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -781,6 +782,8 @@ public class NotificationPanelViewController extends PanelViewController {
                 dynamicPrivacyControlListener =
                 new DynamicPrivacyControlListener();
         dynamicPrivacyController.addListener(dynamicPrivacyControlListener);
+
+        panelExpansionStateManager.addStateListener(this::onPanelStateChanged);
 
         mBottomAreaShadeAlphaAnimator = ValueAnimator.ofFloat(1f, 0);
         mBottomAreaShadeAlphaAnimator.addUpdateListener(animation -> {
@@ -1561,7 +1564,7 @@ public class NotificationPanelViewController extends PanelViewController {
             // it's possible that nothing animated, so we replicate the termination
             // conditions of panelExpansionChanged here
             // TODO(b/200063118): This can likely go away in a future refactor CL.
-            mBar.updateState(STATE_CLOSED);
+            getPanelExpansionStateManager().updateState(STATE_CLOSED);
         }
     }
 
@@ -1646,7 +1649,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     @Override
     public void fling(float vel, boolean expand) {
-        GestureRecorder gr = ((PhoneStatusBarView) mBar).mBar.getGestureRecorder();
+        GestureRecorder gr = mStatusBar.getGestureRecorder();
         if (gr != null) {
             gr.tag("fling " + ((vel > 0) ? "open" : "closed"), "notifications,v=" + vel);
         }
@@ -2238,8 +2241,10 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updateQsExpansion() {
         if (mQs == null) return;
         float qsExpansionFraction = computeQsExpansionFraction();
+        float squishiness = mNotificationStackScrollLayoutController
+                .getNotificationSquishinessFraction();
         mQs.setQsExpansion(qsExpansionFraction, getExpandedFraction(), getHeaderTranslation(),
-                mNotificationStackScrollLayoutController.getNotificationSquishinessFraction());
+                mQsExpandImmediate || mQsExpanded ? 1f : squishiness);
         mSplitShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
         mMediaHierarchyManager.setQsExpansion(qsExpansionFraction);
         int qsPanelBottomY = calculateQsBottomPosition(qsExpansionFraction);
@@ -4672,36 +4677,26 @@ public class NotificationPanelViewController extends PanelViewController {
         mView.removeCallbacks(mMaybeHideExpandedRunnable);
     }
 
-    private final PanelBar.PanelStateChangeListener mPanelStateChangeListener =
-            new PanelBar.PanelStateChangeListener() {
+    @PanelState
+    private int mCurrentPanelState = STATE_CLOSED;
 
-                @PanelBar.PanelState
-                private int mCurrentState = STATE_CLOSED;
+    private void onPanelStateChanged(@PanelState int state) {
+        mAmbientState.setIsShadeOpening(state == STATE_OPENING);
+        updateQSExpansionEnabledAmbient();
 
-                @Override
-                public void onStateChanged(@PanelBar.PanelState int state) {
-                    mAmbientState.setIsShadeOpening(state == STATE_OPENING);
-                    updateQSExpansionEnabledAmbient();
-
-                    if (state == STATE_OPEN && mCurrentState != state) {
-                        mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-                    }
-                    if (state == STATE_OPENING) {
-                        mStatusBar.makeExpandedVisible(false);
-                    }
-                    if (state == STATE_CLOSED) {
-                        // Close the status bar in the next frame so we can show the end of the
-                        // animation.
-                        mView.post(mMaybeHideExpandedRunnable);
-                    }
-                    mCurrentState = state;
-                }
-            };
-
-    public PanelBar.PanelStateChangeListener getPanelStateChangeListener() {
-        return mPanelStateChangeListener;
+        if (state == STATE_OPEN && mCurrentPanelState != state) {
+            mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+        }
+        if (state == STATE_OPENING) {
+            mStatusBar.makeExpandedVisible(false);
+        }
+        if (state == STATE_CLOSED) {
+            // Close the status bar in the next frame so we can show the end of the
+            // animation.
+            mView.post(mMaybeHideExpandedRunnable);
+        }
+        mCurrentPanelState = state;
     }
-
 
     /** Returns the handler that the status bar should forward touches to. */
     public PhoneStatusBarView.TouchEventHandler getStatusBarTouchEventHandler() {

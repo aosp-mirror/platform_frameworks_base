@@ -171,7 +171,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
 
         verify(mStatusBarStateController).removeCallback(mStatusBarStateListener);
         for (PanelExpansionListener listener : mExpansionListeners) {
-            verify(mPanelExpansionStateManager).removeListener(listener);
+            verify(mPanelExpansionStateManager).removeExpansionListener(listener);
         }
         verify(mKeyguardStateController).removeCallback(mKeyguardStateControllerCallback);
     }
@@ -435,7 +435,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
 
     private void captureExpansionListeners() {
         verify(mPanelExpansionStateManager, times(2))
-                .addListener(mExpansionListenerCaptor.capture());
+                .addExpansionListener(mExpansionListenerCaptor.capture());
         // first (index=0) is from super class, UdfpsAnimationViewController.
         // second (index=1) is from UdfpsKeyguardViewController
         mExpansionListeners = mExpansionListenerCaptor.getAllValues();

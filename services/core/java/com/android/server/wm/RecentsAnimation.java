@@ -473,7 +473,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
      */
     static void notifyAnimationCancelBeforeStart(IRecentsAnimationRunner recentsAnimationRunner) {
         try {
-            recentsAnimationRunner.onAnimationCanceled(null /* taskSnapshot */);
+            recentsAnimationRunner.onAnimationCanceled(null /* taskIds */,
+                    null /* taskSnapshots */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to cancel recents animation before start", e);
         }
