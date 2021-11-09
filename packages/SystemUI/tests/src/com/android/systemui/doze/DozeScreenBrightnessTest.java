@@ -475,7 +475,7 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     }
 
     @Test
-    public void transitionToDoze_duringScreenOff_afterTimeout_clampsToDim() {
+    public void transitionToDoze_duringUnlockedScreenOff_afterTimeout_clampsToDim() {
         when(mWakefulnessLifecycle.getLastSleepReason()).thenReturn(
                 PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
         when(mDozeParameters.shouldControlUnlockedScreenOff()).thenReturn(true);
@@ -490,7 +490,7 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     }
 
     @Test
-    public void transitionToDoze_duringScreenOff_notAfterTimeout_doesNotClampToDim() {
+    public void transitionToDoze_duringUnlockedScreenOff_notAfterTimeout_doesNotClampToDim() {
         when(mWakefulnessLifecycle.getLastSleepReason()).thenReturn(
                 PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON);
         when(mDozeParameters.shouldControlUnlockedScreenOff()).thenReturn(true);
@@ -505,7 +505,7 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     }
 
     @Test
-    public void transitionToDoze_duringScreenOff_afterTimeout_noScreenOff_doesNotClampToDim() {
+    public void transitionToDoze_duringUnlockedScreenOff_afterTimeout_noScreenOff_doesNotClampToDim() {
         when(mWakefulnessLifecycle.getLastSleepReason()).thenReturn(
                 PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
         when(mDozeParameters.shouldControlUnlockedScreenOff()).thenReturn(false);
@@ -515,6 +515,36 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         mScreen.transitionTo(INITIALIZED, DOZE);
 
         // If we aren't controlling the screen off animation, we should leave the brightness alone.
+        assertEquals(mServiceFake.screenBrightness, DEFAULT_BRIGHTNESS);
+    }
+
+    @Test
+    public void transitionToDoze_duringLockedScreenOff_afterTimeout_clampsToDim() {
+        when(mWakefulnessLifecycle.getLastSleepReason()).thenReturn(
+                PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+        when(mWakefulnessLifecycle.getWakefulness()).thenReturn(
+                WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP);
+        when(mDozeParameters.shouldControlUnlockedScreenOff()).thenReturn(false);
+        when(mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()).thenReturn(false);
+
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE);
+
+        assertTrue(mServiceFake.screenBrightness <= DIM_BRIGHTNESS);
+    }
+
+    @Test
+    public void transitionToDoze_duringLockedScreenOff_notAfterTimeout_doesNotClampToDim() {
+        when(mWakefulnessLifecycle.getLastSleepReason()).thenReturn(
+                PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON);
+        when(mWakefulnessLifecycle.getWakefulness()).thenReturn(
+                WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP);
+        when(mDozeParameters.shouldControlUnlockedScreenOff()).thenReturn(false);
+        when(mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()).thenReturn(false);
+
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE);
+
         assertEquals(mServiceFake.screenBrightness, DEFAULT_BRIGHTNESS);
     }
 

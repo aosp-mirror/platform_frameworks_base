@@ -16,6 +16,10 @@
 
 package com.android.systemui.doze;
 
+import static android.os.PowerManager.GO_TO_SLEEP_REASON_TIMEOUT;
+
+import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -262,9 +266,11 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
      * animation.
      */
     private int clampToDimBrightnessForScreenOff(int brightness) {
-        if (mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
-                && mWakefulnessLifecycle.getLastSleepReason()
-                == PowerManager.GO_TO_SLEEP_REASON_TIMEOUT) {
+        final boolean screenTurningOff =
+                mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
+                        || mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_GOING_TO_SLEEP;
+        if (screenTurningOff
+                && mWakefulnessLifecycle.getLastSleepReason() == GO_TO_SLEEP_REASON_TIMEOUT) {
             return Math.max(
                     PowerManager.BRIGHTNESS_OFF,
                     // Use the lower of either the dim brightness, or the current brightness reduced
