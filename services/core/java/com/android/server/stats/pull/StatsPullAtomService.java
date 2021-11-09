@@ -92,7 +92,6 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.health.V2_0.IHealth;
 import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.INetworkStatsSession;
@@ -190,13 +189,13 @@ import com.android.internal.os.SystemServerCpuThreadReader.SystemServiceCpuThrea
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.role.RoleManagerLocal;
-import com.android.server.BatteryService;
 import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
+import com.android.server.health.HealthServiceWrapper;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
@@ -226,6 +225,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -354,7 +354,7 @@ public class StatsPullAtomService extends SystemService {
     private File mBaseDir;
 
     @GuardedBy("mHealthHalLock")
-    private BatteryService.HealthServiceWrapper mHealthService;
+    private HealthServiceWrapper mHealthService;
 
     @Nullable
     @GuardedBy("mCpuTimePerThreadFreqLock")
@@ -799,10 +799,9 @@ public class StatsPullAtomService extends SystemService {
                 KernelCpuThreadReaderSettingsObserver.getSettingsModifiedReader(mContext);
 
         // Initialize HealthService
-        mHealthService = new BatteryService.HealthServiceWrapper();
         try {
-            mHealthService.init();
-        } catch (RemoteException e) {
+            mHealthService = HealthServiceWrapper.create(null);
+        } catch (RemoteException | NoSuchElementException e) {
             Slog.e(TAG, "failed to initialize healthHalWrapper");
         }
 
@@ -3975,38 +3974,40 @@ public class StatsPullAtomService extends SystemService {
     }
 
     int pullHealthHalLocked(int atomTag, List<StatsEvent> pulledData) {
-        IHealth healthService = mHealthService.getLastService();
-        if (healthService == null) {
+        if (mHealthService == null) {
             return StatsManager.PULL_SKIP;
         }
+        android.hardware.health.V1_0.HealthInfo healthInfo;
         try {
-            healthService.getHealthInfo((result, value) -> {
-                int pulledValue;
-                switch(atomTag) {
-                    case FrameworkStatsLog.BATTERY_LEVEL:
-                        pulledValue = value.legacy.batteryLevel;
-                        break;
-                    case FrameworkStatsLog.REMAINING_BATTERY_CAPACITY:
-                        pulledValue = value.legacy.batteryChargeCounter;
-                        break;
-                    case FrameworkStatsLog.FULL_BATTERY_CAPACITY:
-                        pulledValue = value.legacy.batteryFullCharge;
-                        break;
-                    case FrameworkStatsLog.BATTERY_VOLTAGE:
-                        pulledValue = value.legacy.batteryVoltage;
-                        break;
-                    case FrameworkStatsLog.BATTERY_CYCLE_COUNT:
-                        pulledValue = value.legacy.batteryCycleCount;
-                        break;
-                    default:
-                        throw new IllegalStateException("Invalid atomTag in healthHal puller: "
-                                + atomTag);
-                }
-                pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, pulledValue));
-            });
+            healthInfo = mHealthService.getHealthInfo();
         } catch (RemoteException | IllegalStateException e) {
             return StatsManager.PULL_SKIP;
         }
+        if (healthInfo == null) {
+            return StatsManager.PULL_SKIP;
+        }
+
+        int pulledValue;
+        switch (atomTag) {
+            case FrameworkStatsLog.BATTERY_LEVEL:
+                pulledValue = healthInfo.batteryLevel;
+                break;
+            case FrameworkStatsLog.REMAINING_BATTERY_CAPACITY:
+                pulledValue = healthInfo.batteryChargeCounter;
+                break;
+            case FrameworkStatsLog.FULL_BATTERY_CAPACITY:
+                pulledValue = healthInfo.batteryFullCharge;
+                break;
+            case FrameworkStatsLog.BATTERY_VOLTAGE:
+                pulledValue = healthInfo.batteryVoltage;
+                break;
+            case FrameworkStatsLog.BATTERY_CYCLE_COUNT:
+                pulledValue = healthInfo.batteryCycleCount;
+                break;
+            default:
+                return StatsManager.PULL_SKIP;
+        }
+        pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, pulledValue));
         return StatsManager.PULL_SUCCESS;
     }
 
