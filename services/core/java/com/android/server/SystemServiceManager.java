@@ -73,7 +73,7 @@ public final class SystemServiceManager implements Dumpable {
     private static final String USER_STOPPED = "Cleanup"; // Logged as onCleanupUser
 
     // Whether to use multiple threads to run user lifecycle phases in parallel.
-    private static boolean sUseLifecycleThreadPool = false;
+    private static boolean sUseLifecycleThreadPool = true;
     // The default number of threads to use if lifecycle thread pool is enabled.
     private static final int DEFAULT_MAX_USER_POOL_THREADS = 3;
     // The number of threads to use if lifecycle thread pool is enabled, dependent on the number of
