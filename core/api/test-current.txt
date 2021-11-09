@@ -1198,7 +1198,7 @@ package android.hardware.display {
 
   public final class DisplayManager {
     method public boolean areUserDisabledHdrTypesAllowed();
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void clearUserPreferredDisplayMode();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void clearUserPreferredDisplayMode();
     method @NonNull public int[] getUserDisabledHdrTypes();
     method @Nullable public android.view.Display.Mode getUserPreferredDisplayMode();
     method public boolean isMinimalPostProcessingRequested(int);
@@ -1206,7 +1206,7 @@ package android.hardware.display {
     method @RequiresPermission(android.Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE) public void setRefreshRateSwitchingType(int);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public void setShouldAlwaysRespectAppRequestedMode(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setUserDisabledHdrTypes(@NonNull int[]);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setUserPreferredDisplayMode(@NonNull android.view.Display.Mode);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void setUserPreferredDisplayMode(@NonNull android.view.Display.Mode);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public boolean shouldAlwaysRespectAppRequestedMode();
     field public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2; // 0x2
     field public static final int SWITCHING_TYPE_NONE = 0; // 0x0
