@@ -896,7 +896,7 @@ public class DomainVerificationService extends SystemService
                     oldPkgState.getUserStates();
             int oldUserStatesSize = oldUserStates.size();
             if (oldUserStatesSize > 0) {
-                ArraySet<String> newWebDomains = mCollector.collectValidAutoVerifyDomains(newPkg);
+                ArraySet<String> newWebDomains = mCollector.collectAllWebDomains(newPkg);
                 for (int oldUserStatesIndex = 0; oldUserStatesIndex < oldUserStatesSize;
                         oldUserStatesIndex++) {
                     int userId = oldUserStates.keyAt(oldUserStatesIndex);
