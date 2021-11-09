@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -52,11 +53,11 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.connectivity.NetworkController;
-import com.android.systemui.statusbar.connectivity.NetworkController.AccessPointController;
-import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
-import com.android.systemui.statusbar.connectivity.NetworkController.WifiIndicators;
+import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.statusbar.connectivity.WifiIcons;
+import com.android.systemui.statusbar.connectivity.WifiIndicators;
 import com.android.wifitrackerlib.WifiEntry;
 
 import java.util.List;
@@ -310,7 +311,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
         final CallbackInfo mInfo = new CallbackInfo();
 
         @Override
-        public void setWifiIndicators(WifiIndicators indicators) {
+        public void setWifiIndicators(@NonNull WifiIndicators indicators) {
             if (DEBUG) Log.d(TAG, "onWifiSignalChanged enabled=" + indicators.enabled);
             if (indicators.qsIcon == null) {
                 return;
@@ -332,7 +333,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
     }
 
     protected class WifiDetailAdapter implements DetailAdapter,
-            NetworkController.AccessPointController.AccessPointCallback, QSDetailItems.Callback {
+            AccessPointController.AccessPointCallback, QSDetailItems.Callback {
 
         private QSDetailItems mItems;
         private WifiEntry[] mAccessPoints;

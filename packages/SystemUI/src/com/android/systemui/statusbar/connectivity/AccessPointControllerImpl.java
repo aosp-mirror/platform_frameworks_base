@@ -56,9 +56,9 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 
 /** */
-public class AccessPointControllerImpl
-        implements NetworkController.AccessPointController,
-        WifiPickerTracker.WifiPickerTrackerCallback, LifecycleOwner {
+public class AccessPointControllerImpl implements AccessPointController,
+        WifiPickerTracker.WifiPickerTrackerCallback,
+        LifecycleOwner {
     private static final String TAG = "AccessPointController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -117,13 +117,11 @@ public class AccessPointControllerImpl
         super.finalize();
     }
 
-    /** */
     public boolean canConfigWifi() {
         return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_WIFI,
                 new UserHandle(mCurrentUser));
     }
 
-    /** */
     public boolean canConfigMobileData() {
         return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
                 UserHandle.of(mCurrentUser)) && mUserTracker.getUserInfo().isAdmin();
@@ -156,7 +154,7 @@ public class AccessPointControllerImpl
     @Override
     public void scanForAccessPoints() {
         if (mWifiPickerTracker == null) {
-            fireAcccessPointsCallback(Collections.emptyList());
+            fireAccessPointsCallback(Collections.emptyList());
             return;
         }
         List<WifiEntry> entries = mWifiPickerTracker.getWifiEntries();
@@ -164,13 +162,13 @@ public class AccessPointControllerImpl
         if (connectedEntry != null) {
             entries.add(0, connectedEntry);
         }
-        fireAcccessPointsCallback(entries);
+        fireAccessPointsCallback(entries);
     }
 
     @Override
     public MergedCarrierEntry getMergedCarrierEntry() {
         if (mWifiPickerTracker == null) {
-            fireAcccessPointsCallback(Collections.emptyList());
+            fireAccessPointsCallback(Collections.emptyList());
             return null;
         }
         return mWifiPickerTracker.getMergedCarrierEntry();
@@ -190,7 +188,7 @@ public class AccessPointControllerImpl
      * @param ap
      * @return {@code true} if {@link AccessPointCallback#onSettingsActivityTriggered} is triggered
      */
-    public boolean connect(WifiEntry ap) {
+    public boolean connect(@Nullable WifiEntry ap) {
         if (ap == null) return false;
         if (DEBUG) {
             if (ap.getWifiConfiguration() != null) {
@@ -222,7 +220,7 @@ public class AccessPointControllerImpl
         }
     }
 
-    private void fireAcccessPointsCallback(List<WifiEntry> aps) {
+    private void fireAccessPointsCallback(List<WifiEntry> aps) {
         for (AccessPointCallback callback : mCallbacks) {
             callback.onAccessPointsChanged(aps);
         }
