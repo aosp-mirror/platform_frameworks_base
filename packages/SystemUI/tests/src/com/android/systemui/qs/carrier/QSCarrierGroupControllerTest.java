@@ -39,8 +39,10 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.CarrierTextManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.connectivity.IconState;
+import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
 import com.android.systemui.statusbar.connectivity.NetworkController;
-import com.android.systemui.statusbar.connectivity.NetworkController.MobileDataIndicators;
+import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 import com.android.systemui.utils.os.FakeHandler;
@@ -57,7 +59,7 @@ import org.mockito.MockitoAnnotations;
 public class QSCarrierGroupControllerTest extends LeakCheckedTest {
 
     private QSCarrierGroupController mQSCarrierGroupController;
-    private NetworkController.SignalCallback mSignalCallback;
+    private SignalCallback mSignalCallback;
     private CarrierTextManager.CarrierTextCallback mCallback;
     @Mock
     private QSCarrierGroup mQSCarrierGroup;
@@ -94,7 +96,7 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         when(mNetworkController.hasVoiceCallingFeature()).thenReturn(true);
         doAnswer(invocation -> mSignalCallback = invocation.getArgument(0))
                 .when(mNetworkController)
-                .addCallback(any(NetworkController.SignalCallback.class));
+                .addCallback(any(SignalCallback.class));
 
         when(mCarrierTextControllerBuilder.setShowAirplaneMode(anyBoolean()))
                 .thenReturn(mCarrierTextControllerBuilder);
@@ -230,8 +232,8 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         mSlotIndexResolver.overrideInvalid = true;
 
         MobileDataIndicators indicators = new MobileDataIndicators(
-                mock(NetworkController.IconState.class),
-                mock(NetworkController.IconState.class),
+                mock(IconState.class),
+                mock(IconState.class),
                 0, 0, true, true, "", "", "", 0, true, true);
         mSignalCallback.setMobileDataIndicators(indicators);
     }

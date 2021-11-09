@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.annotation.NonNull;
 import android.os.Bundle;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
@@ -26,7 +27,9 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.NetworkController;
+import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.ViewController;
 
@@ -135,10 +138,9 @@ public class OperatorNameViewController extends ViewController<OperatorNameView>
             (area, darkIntensity, tint) ->
                     mView.setTextColor(DarkIconDispatcher.getTint(area, mView, tint));
 
-    private final NetworkController.SignalCallback mSignalCallback =
-            new NetworkController.SignalCallback() {
+    private final SignalCallback mSignalCallback = new SignalCallback() {
         @Override
-        public void setIsAirplaneMode(NetworkController.IconState icon) {
+        public void setIsAirplaneMode(@NonNull IconState icon) {
             update();
         }
     };
