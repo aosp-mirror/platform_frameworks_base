@@ -60,9 +60,20 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         assertEquals(0, dialog.findViewById<ViewGroup>(android.R.id.content).childCount)
         assertEquals(1, hostDialogContent.childCount)
 
+        // The original dialog content is added to another view that is the same size as the
+        // original dialog window.
         val hostDialogRoot = hostDialogContent.getChildAt(0) as ViewGroup
         assertEquals(1, hostDialogRoot.childCount)
-        assertEquals(dialog.contentView, hostDialogRoot.getChildAt(0))
+
+        val dialogContentParent = hostDialogRoot.getChildAt(0) as ViewGroup
+        assertEquals(1, dialogContentParent.childCount)
+        assertEquals(TestDialog.DIALOG_WIDTH, dialogContentParent.layoutParams.width)
+        assertEquals(TestDialog.DIALOG_HEIGHT, dialogContentParent.layoutParams.height)
+
+        val dialogContent = dialogContentParent.getChildAt(0)
+        assertEquals(dialog.contentView, dialogContent)
+        assertEquals(ViewGroup.LayoutParams.MATCH_PARENT, dialogContent.layoutParams.width)
+        assertEquals(ViewGroup.LayoutParams.MATCH_PARENT, dialogContent.layoutParams.height)
 
         // Hiding/showing/dismissing the dialog should hide/show/dismiss the host dialog given that
         // it's a ListenableDialog.
@@ -126,6 +137,11 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
     }
 
     private class TestDialog(context: Context) : Dialog(context), ListenableDialog {
+        companion object {
+            const val DIALOG_WIDTH = 100
+            const val DIALOG_HEIGHT = 200
+        }
+
         private val listeners = hashSetOf<DialogListener>()
         val contentView = View(context)
         var onStartCalled = false
@@ -138,6 +154,7 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
+            window.setLayout(DIALOG_WIDTH, DIALOG_HEIGHT)
             setContentView(contentView)
         }
 
