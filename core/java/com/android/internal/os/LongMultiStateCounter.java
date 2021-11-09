@@ -109,12 +109,14 @@ public final class LongMultiStateCounter implements Parcelable {
     }
 
     /**
-     * Sets the new values.  The delta between the previously set values and these values
+     * Sets the new values.  The delta between the previously set value and this value
      * is distributed among the state according to the time the object spent in those states
-     * since the previous call to updateValues.
+     * since the previous call to updateValue.
+     *
+     * @return The delta between the previous value and the new value.
      */
-    public void updateValue(long value, long timestampMs) {
-        native_updateValue(mNativeObject, value, timestampMs);
+    public long updateValue(long value, long timestampMs) {
+        return native_updateValue(mNativeObject, value, timestampMs);
     }
 
     /**
@@ -185,7 +187,7 @@ public final class LongMultiStateCounter implements Parcelable {
     private static native void native_setState(long nativeObject, int state, long timestampMs);
 
     @CriticalNative
-    private static native void native_updateValue(long nativeObject, long value, long timestampMs);
+    private static native long native_updateValue(long nativeObject, long value, long timestampMs);
 
     @CriticalNative
     private static native void native_addCount(long nativeObject, long count);
