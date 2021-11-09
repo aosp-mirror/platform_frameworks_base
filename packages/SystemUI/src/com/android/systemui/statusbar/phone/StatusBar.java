@@ -230,12 +230,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
-import com.android.systemui.statusbar.window.StatusBarWindowView;
 import com.android.systemui.tuner.TunerService;
-import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
-import com.android.systemui.unfold.UnfoldTransitionWallpaperController;
-import com.android.systemui.unfold.config.UnfoldTransitionConfig;
-import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -541,10 +536,7 @@ public class StatusBar extends SystemUI implements
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final BrightnessSliderController.Factory mBrightnessSliderFactory;
     private final FeatureFlags mFeatureFlags;
-    private final UnfoldTransitionConfig mUnfoldTransitionConfig;
-    private final Lazy<UnfoldLightRevealOverlayAnimation> mUnfoldLightRevealOverlayAnimation;
-    private final Lazy<NaturalRotationUnfoldProgressProvider> mNaturalUnfoldProgressProvider;
-    private final Lazy<UnfoldTransitionWallpaperController> mUnfoldWallpaperController;
+
     private final WallpaperController mWallpaperController;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final MessageRouter mMessageRouter;
@@ -779,10 +771,6 @@ public class StatusBar extends SystemUI implements
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             NotificationIconAreaController notificationIconAreaController,
             BrightnessSliderController.Factory brightnessSliderFactory,
-            UnfoldTransitionConfig unfoldTransitionConfig,
-            Lazy<UnfoldLightRevealOverlayAnimation> unfoldLightRevealOverlayAnimation,
-            Lazy<UnfoldTransitionWallpaperController> unfoldTransitionWallpaperController,
-            Lazy<NaturalRotationUnfoldProgressProvider> naturalRotationUnfoldProgressProvider,
             WallpaperController wallpaperController,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
@@ -879,10 +867,6 @@ public class StatusBar extends SystemUI implements
         mDemoModeController = demoModeController;
         mNotificationIconAreaController = notificationIconAreaController;
         mBrightnessSliderFactory = brightnessSliderFactory;
-        mUnfoldTransitionConfig = unfoldTransitionConfig;
-        mUnfoldLightRevealOverlayAnimation = unfoldLightRevealOverlayAnimation;
-        mNaturalUnfoldProgressProvider = naturalRotationUnfoldProgressProvider;
-        mUnfoldWallpaperController = unfoldTransitionWallpaperController;
         mWallpaperController = wallpaperController;
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
@@ -1069,12 +1053,6 @@ public class StatusBar extends SystemUI implements
                 () -> setUpDisableFlags(disabledFlags1, disabledFlags2));
 
         mFalsingManager.addFalsingBeliefListener(mFalsingBeliefListener);
-
-        if (mUnfoldTransitionConfig.isEnabled()) {
-            mUnfoldLightRevealOverlayAnimation.get().init();
-            mUnfoldWallpaperController.get().init();
-            mNaturalUnfoldProgressProvider.get().init();
-        }
 
         mPluginManager.addPluginListener(
                 new PluginListener<OverlayPlugin>() {
@@ -4501,5 +4479,4 @@ public class StatusBar extends SystemUI implements
                     return mStartingSurfaceOptional.get().getBackgroundColor(task);
                 }
             };
-
 }
