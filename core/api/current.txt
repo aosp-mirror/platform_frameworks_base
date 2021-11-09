@@ -20732,7 +20732,9 @@ package android.media {
     field public static final int GET_DEVICES_ALL = 3; // 0x3
     field public static final int GET_DEVICES_INPUTS = 1; // 0x1
     field public static final int GET_DEVICES_OUTPUTS = 2; // 0x2
+    field public static final int MODE_CALL_REDIRECT = 5; // 0x5
     field public static final int MODE_CALL_SCREENING = 4; // 0x4
+    field public static final int MODE_COMMUNICATION_REDIRECT = 6; // 0x6
     field public static final int MODE_CURRENT = -1; // 0xffffffff
     field public static final int MODE_INVALID = -2; // 0xfffffffe
     field public static final int MODE_IN_CALL = 2; // 0x2

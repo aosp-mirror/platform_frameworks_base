@@ -45,4 +45,8 @@ enum AudioMode {
     IN_COMMUNICATION = 3,
     /** Call screening in progress. */
     CALL_SCREEN = 4,
+    /** PSTN Call redirection  in progress. */
+    SYS_RESERVED_CALL_REDIRECT = 5,
+    /** VoIP Call redirection  in progress. */
+    SYS_RESERVED_COMMUNICATION_REDIRECT = 6,
 }
