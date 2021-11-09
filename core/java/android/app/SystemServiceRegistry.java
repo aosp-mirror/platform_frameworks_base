@@ -1393,6 +1393,14 @@ public final class SystemServiceRegistry {
                     throws ServiceNotFoundException {
                     return new SystemLightsManager(ctx);
                 }});
+        registerService(Context.LOCALE_SERVICE, LocaleManager.class,
+                new CachedServiceFetcher<LocaleManager>() {
+                    @Override
+                    public LocaleManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new LocaleManager(ctx, ILocaleManager.Stub.asInterface(
+                                ServiceManager.getServiceOrThrow(Context.LOCALE_SERVICE)));
+                    }});
         registerService(Context.INCREMENTAL_SERVICE, IncrementalManager.class,
                 new CachedServiceFetcher<IncrementalManager>() {
                     @Override
