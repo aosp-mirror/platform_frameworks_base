@@ -19,6 +19,9 @@ package android.app.communal;
 import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.Overridable;
 import android.content.Context;
 import android.os.RemoteException;
 
@@ -31,6 +34,27 @@ import android.os.RemoteException;
 @SystemService(Context.COMMUNAL_MANAGER_SERVICE)
 public final class CommunalManager {
     private final ICommunalManager mService;
+
+    /**
+     * This change id is used to annotate packages which can run in communal mode by default,
+     * without requiring user opt-in.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long ALLOW_COMMUNAL_MODE_BY_DEFAULT = 203673428L;
+
+    /**
+     * This change id is used to annotate packages which are allowed to run in communal mode.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT = 200324021L;
 
     public CommunalManager(ICommunalManager service) {
         mService = service;

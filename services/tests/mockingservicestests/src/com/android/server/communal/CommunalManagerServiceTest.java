@@ -16,6 +16,7 @@
 
 package com.android.server.communal;
 
+import static android.app.communal.CommunalManager.ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
 
@@ -23,7 +24,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-import static com.android.server.communal.CommunalManagerService.ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT;
 import static com.android.server.wm.ActivityInterceptorCallback.COMMUNAL_MODE_ORDERED_ID;
 
 import static com.google.common.truth.Truth.assertThat;
