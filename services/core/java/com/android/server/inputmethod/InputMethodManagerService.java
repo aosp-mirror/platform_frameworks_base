@@ -2467,31 +2467,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return attachNewInputLocked(startInputReason,
                         (startInputFlags & StartInputFlags.INITIAL_CONNECTION) != 0);
             }
-            if (hasConnection()) {
-                if (mCurMethod != null) {
-                    // Return to client, and we will get back with it when
-                    // we have had a session made for it.
-                    requestClientSessionLocked(cs);
-                    return new InputBindResult(
-                            InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
-                            null, null, getCurId(), getSequenceNumber(), false);
-                } else if (SystemClock.uptimeMillis()
-                        < (getLastBindTime() + TIME_TO_RECONNECT)) {
-                    // In this case we have connected to the service, but
-                    // don't yet have its interface.  If it hasn't been too
-                    // long since we did the connection, we'll return to
-                    // the client and wait to get the service interface so
-                    // we can report back.  If it has been too long, we want
-                    // to fall through so we can try a disconnect/reconnect
-                    // to see if we can get back in touch with the service.
-                    return new InputBindResult(
-                            InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
-                            null, null, getCurId(), getSequenceNumber(), false);
-                } else {
-                    EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME,
-                            getSelectedMethodId(), SystemClock.uptimeMillis() - getLastBindTime(),
-                            0);
-                }
+
+            InputBindResult bindResult = tryReuseConnectionLocked(cs);
+            if (bindResult != null) {
+                return bindResult;
             }
         }
 
@@ -2526,6 +2505,37 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             scheduleSetActiveToClient(cs, true /* active */, false /* fullscreen */,
                     false /* reportToImeController */);
         }
+    }
+
+    @GuardedBy("mMethodMap")
+    @Nullable
+    private InputBindResult tryReuseConnectionLocked(@NonNull ClientState cs) {
+        if (hasConnection()) {
+            if (mCurMethod != null) {
+                // Return to client, and we will get back with it when
+                // we have had a session made for it.
+                requestClientSessionLocked(cs);
+                return new InputBindResult(
+                        InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
+                        null, null, getCurId(), getSequenceNumber(), false);
+            } else if (SystemClock.uptimeMillis()
+                    < (getLastBindTime() + TIME_TO_RECONNECT)) {
+                // In this case we have connected to the service, but
+                // don't yet have its interface.  If it hasn't been too
+                // long since we did the connection, we'll return to
+                // the client and wait to get the service interface so
+                // we can report back.  If it has been too long, we want
+                // to fall through so we can try a disconnect/reconnect
+                // to see if we can get back in touch with the service.
+                return new InputBindResult(
+                        InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
+                        null, null, getCurId(), getSequenceNumber(), false);
+            } else {
+                EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME,
+                        getSelectedMethodId(), SystemClock.uptimeMillis() - getLastBindTime(), 0);
+            }
+        }
+        return null;
     }
 
     @NonNull
