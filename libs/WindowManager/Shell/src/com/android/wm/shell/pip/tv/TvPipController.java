@@ -219,7 +219,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     public void movePipToFullscreen() {
         if (DEBUG) Log.d(TAG, "movePipToFullscreen(), state=" + stateToName(mState));
 
-        mPipTaskOrganizer.exitPip(mResizeAnimationDuration, false /* requestEnterSplit */);
+        mPipTaskOrganizer.exitPip(mResizeAnimationDuration);
         onPipDisappeared();
     }
 
