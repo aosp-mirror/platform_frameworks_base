@@ -295,6 +295,9 @@ class WindowToken extends WindowContainer<WindowState> {
         // surface for this token.
         if (mSurfaceControl == null) {
             createSurfaceControl(true /* force */);
+
+            // Layers could have been assigned before the surface was created, update them again
+            reassignLayer(getSyncTransaction());
         }
         if (!mChildren.contains(win)) {
             ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Adding %s to %s", win, this);
