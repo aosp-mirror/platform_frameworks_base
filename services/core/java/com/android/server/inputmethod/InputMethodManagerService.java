@@ -2459,8 +2459,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // Check if the input method is changing.
         // We expect the caller has already verified that the client is allowed to access this
         // display ID.
-        if (getCurId() != null && getCurId().equals(getSelectedMethodId())
-                && displayIdToShowIme == mCurTokenDisplayId) {
+        if (isSelectedMethodBound(displayIdToShowIme)) {
             if (cs.curSession != null) {
                 // Fast case: if we are already connected to the input method,
                 // then just return it.
@@ -2493,6 +2492,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         setCurIntent(null);
         Slog.w(TAG, "Failure connecting to input method service: " + intent);
         return InputBindResult.IME_NOT_CONNECTED;
+    }
+
+    private boolean isSelectedMethodBound(int displayIdToShowIme) {
+        String curId = getCurId();
+        return curId != null && curId.equals(getSelectedMethodId())
+                && displayIdToShowIme == mCurTokenDisplayId;
     }
 
     @GuardedBy("mMethodMap")
