@@ -1140,8 +1140,6 @@ public class StatusBar extends SystemUI implements
 
                     PhoneStatusBarView oldStatusBarView = mStatusBarView;
                     mStatusBarView = (PhoneStatusBarView) statusBarFragment.getView();
-                    mStatusBarView.setBar(this);
-                    mStatusBarView.setScrimController(mScrimController);
 
                     mPhoneStatusBarViewController = mPhoneStatusBarViewControllerFactory
                             .create(mStatusBarView, mNotificationPanelViewController
