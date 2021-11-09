@@ -32,6 +32,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.server.notification.NotificationManagerService.DumpFilter;
+import com.android.server.pm.PackageManagerService;
 
 import java.io.PrintWriter;
 
@@ -114,11 +115,7 @@ public class CountdownConditionProvider extends SystemConditionProviderService {
         mIsAlarm = ZenModeConfig.isValidCountdownToAlarmConditionId(conditionId);
         final AlarmManager alarms = (AlarmManager)
                 mContext.getSystemService(Context.ALARM_SERVICE);
-        final Intent intent = new Intent(ACTION)
-                .putExtra(EXTRA_CONDITION_ID, conditionId)
-                .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        final PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, REQUEST_CODE,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        final PendingIntent pendingIntent = getPendingIntent(conditionId);
         alarms.cancel(pendingIntent);
         if (mTime > 0) {
             final long now = System.currentTimeMillis();
@@ -136,6 +133,16 @@ public class CountdownConditionProvider extends SystemConditionProviderService {
                     (mTime <= now ? "Not scheduling" : "Scheduling"),
                     ACTION, ts(mTime), mTime - now, span, ts(now)));
         }
+    }
+
+    PendingIntent getPendingIntent(Uri conditionId) {
+        final Intent intent = new Intent(ACTION)
+                .setPackage(PackageManagerService.PLATFORM_PACKAGE_NAME)
+                .putExtra(EXTRA_CONDITION_ID, conditionId)
+                .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        final PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, REQUEST_CODE,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        return pendingIntent;
     }
 
     @Override
