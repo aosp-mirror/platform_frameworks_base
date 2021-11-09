@@ -59,7 +59,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.compat.CompatibilityOverrideConfig;
 import com.android.internal.compat.CompatibilityOverridesToRemoveConfig;
 import com.android.internal.compat.IPlatformCompat;
-import com.android.server.testables.TestableDeviceConfig.TestableDeviceConfigRule;
+import com.android.modules.utils.testing.TestableDeviceConfig.TestableDeviceConfigRule;
 
 import org.junit.Before;
 import org.junit.Rule;

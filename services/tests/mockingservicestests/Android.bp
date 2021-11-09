@@ -29,7 +29,10 @@ package {
 
 android_test {
     name: "FrameworksMockingServicesTests",
-    defaults: ["FrameworkMockingServicesTests-jni-defaults"],
+    defaults: [
+        "FrameworkMockingServicesTests-jni-defaults",
+        "modules-utils-testable-device-config-defaults",
+    ],
 
     srcs: [
         "src/**/*.java",
@@ -67,9 +70,7 @@ android_test {
     ],
 
     jni_libs: [
-        "libdexmakerjvmtiagent",
         "libpsi",
-        "libstaticjvmtiagent",
     ],
 
     certificate: "platform",
