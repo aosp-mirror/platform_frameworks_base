@@ -1373,7 +1373,7 @@ class UserController implements Handler.Callback {
             @Nullable IProgressListener unlockListener) {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
 
-        t.traceBegin("startUser-" + userId + "-" + (foreground ? "fg" : "bg"));
+        t.traceBegin("UserController.startUser-" + userId + "-" + (foreground ? "fg" : "bg"));
         try {
             return startUserInternal(userId, foreground, unlockListener, t);
         } finally {

@@ -85,6 +85,7 @@ import android.os.ShellCommand;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
@@ -1880,16 +1881,21 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         int userId = Integer.parseInt(getNextArgRequired());
         boolean switched;
-        if (wait) {
-            switched = switchUserAndWaitForComplete(userId);
-        } else {
-            switched = mInterface.switchUser(userId);
-        }
-        if (switched) {
-            return 0;
-        } else {
-            pw.printf("Error: Failed to switch to user %d\n", userId);
-            return 1;
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "shell_runSwitchUser");
+        try {
+            if (wait) {
+                switched = switchUserAndWaitForComplete(userId);
+            } else {
+                switched = mInterface.switchUser(userId);
+            }
+            if (switched) {
+                return 0;
+            } else {
+                pw.printf("Error: Failed to switch to user %d\n", userId);
+                return 1;
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
