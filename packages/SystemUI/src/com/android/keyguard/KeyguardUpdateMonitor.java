@@ -102,7 +102,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -323,7 +322,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mLockIconPressed;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private final Executor mBackgroundExecutor;
-    private int mLockScreenMode;
 
     /**
      * Short delay before restarting fingerprint authentication after a successful try. This should
@@ -1736,11 +1734,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             DumpManager dumpManager,
             RingerModeTracker ringerModeTracker,
             @Background Executor backgroundExecutor,
+            @Main Executor mainExecutor,
             StatusBarStateController statusBarStateController,
             LockPatternUtils lockPatternUtils,
             AuthController authController,
             TelephonyListenerManager telephonyListenerManager,
-            FeatureFlags featureFlags,
             InteractionJankMonitor interactionJankMonitor,
             LatencyTracker latencyTracker) {
         mContext = context;
@@ -1966,6 +1964,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             mBiometricManager.registerEnabledOnKeyguardCallback(mBiometricEnabledCallback);
         }
 
+        // in case authenticators aren't registered yet at this point:
+        mAuthController.addCallback(new AuthController.Callback() {
+            @Override
+            public void onAllAuthenticatorsRegistered() {
+            }
+
+            @Override
+            public void onEnrollmentsChanged() {
+                mainExecutor.execute(() -> updateBiometricListeningState());
+            }
+        });
         updateBiometricListeningState();
         if (mFpm != null) {
             mFpm.addLockoutResetCallback(mFingerprintLockoutResetCallback);
@@ -2043,7 +2052,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     /**
      * @return if udfps is available on this device. will return true even if the user hasn't
-     * enrolled udfps.
+     * enrolled udfps. This may be false if called before onAllAuthenticatorsRegistered.
      */
     public boolean isUdfpsAvailable() {
         return mAuthController.getUdfpsProps() != null
@@ -2092,7 +2101,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             return;
         }
 
-        // TODO: Add support for multiple fingerprint sensors, b/173730729
         updateUdfpsEnrolled(getCurrentUser());
         final boolean shouldListenForFingerprint = shouldListenForFingerprint(isUdfpsEnrolled());
         final boolean runningOrRestarting = mFingerprintRunningState == BIOMETRIC_STATE_RUNNING
