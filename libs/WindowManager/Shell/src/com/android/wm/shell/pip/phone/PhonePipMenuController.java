@@ -95,11 +95,6 @@ public class PhonePipMenuController implements PipMenuController {
          * Called when the PIP requested to show the menu.
          */
         void onPipShowMenu();
-
-        /**
-         * Called when the PIP requested to enter Split.
-         */
-        void onEnterSplit();
     }
 
     private final Matrix mMoveTransform = new Matrix();
@@ -461,10 +456,6 @@ public class PhonePipMenuController implements PipMenuController {
 
     void onPipDismiss() {
         mListeners.forEach(Listener::onPipDismiss);
-    }
-
-    void onEnterSplit() {
-        mListeners.forEach(Listener::onEnterSplit);
     }
 
     /**
