@@ -1772,7 +1772,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return false;
         }
 
-        return tda.supportsActivityMinWidthHeightMultiWindow(mMinWidth, mMinHeight);
+        final ActivityRecord rootActivity = getTask().getRootActivity();
+        return tda.supportsActivityMinWidthHeightMultiWindow(mMinWidth, mMinHeight,
+                rootActivity != null ? rootActivity.info : null);
     }
 
     private int getTaskId() {

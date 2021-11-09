@@ -614,7 +614,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         final DisplayContent dc = getDisplayContent();
         if (dc != null) {
             mSurfaceFreezer.unfreeze(getSyncTransaction());
-            dc.mChangingContainers.remove(this);
         }
         while (!mChildren.isEmpty()) {
             final E child = mChildren.peekLast();
@@ -1067,9 +1066,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // part of a change transition.
         if (!visible) {
             mSurfaceFreezer.unfreeze(getSyncTransaction());
-            if (mDisplayContent != null) {
-                mDisplayContent.mChangingContainers.remove(this);
-            }
         }
         WindowContainer parent = getParent();
         if (parent != null) {
@@ -2645,6 +2641,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             return null;
         }
         return getSurfaceControl();
+    }
+
+    @Override
+    public void onUnfrozen() {
+        if (mDisplayContent != null) {
+            mDisplayContent.mChangingContainers.remove(this);
+        }
     }
 
     @Override

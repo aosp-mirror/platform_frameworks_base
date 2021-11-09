@@ -67,7 +67,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 public abstract class PanelViewController {
-    public static final boolean DEBUG = PanelBar.DEBUG;
+    public static final boolean DEBUG = PanelView.DEBUG;
     public static final String TAG = PanelView.class.getSimpleName();
     private static final int NO_FIXED_DURATION = -1;
     private static final long SHADE_OPEN_SPRING_OUT_DURATION = 350L;
@@ -152,8 +152,6 @@ public abstract class PanelViewController {
     private boolean mInstantExpanding;
     private boolean mAnimateAfterExpanding;
     private boolean mIsFlinging;
-
-    PanelBar mBar;
 
     private String mViewName;
     private float mInitialTouchY;
@@ -462,7 +460,6 @@ public abstract class PanelViewController {
 
     protected void onTrackingStopped(boolean expand) {
         mTracking = false;
-        mBar.onTrackingStopped(expand);
         mStatusBar.onTrackingStopped(expand);
         updatePanelExpansionAndVisibility();
     }
@@ -470,7 +467,6 @@ public abstract class PanelViewController {
     protected void onTrackingStarted() {
         endClosing();
         mTracking = true;
-        mBar.onTrackingStarted();
         mStatusBar.onTrackingStarted();
         notifyExpandingStarted();
         updatePanelExpansionAndVisibility();
@@ -848,10 +844,6 @@ public abstract class PanelViewController {
         return mTracking;
     }
 
-    public void setBar(PanelBar panelBar) {
-        mBar = panelBar;
-    }
-
     public void collapse(boolean delayed, float speedUpFactor) {
         if (DEBUG) logf("collapse: " + this);
         if (canPanelBeCollapsed()) {
@@ -1089,12 +1081,9 @@ public abstract class PanelViewController {
      *   {@link #updateVisibility()}? That would allow us to make this method private.
      */
     public void updatePanelExpansionAndVisibility() {
-        if (mBar != null) {
-            mBar.panelExpansionChanged(mExpandedFraction, isExpanded());
-        }
-        updateVisibility();
         mPanelExpansionStateManager.onPanelExpansionChanged(
                 mExpandedFraction, isExpanded(), mTracking);
+        updateVisibility();
     }
 
     public boolean isExpanded() {
@@ -1452,5 +1441,9 @@ public abstract class PanelViewController {
 
     protected float getExpansionFraction() {
         return mExpandedFraction;
+    }
+
+    protected PanelExpansionStateManager getPanelExpansionStateManager() {
+        return mPanelExpansionStateManager;
     }
 }
