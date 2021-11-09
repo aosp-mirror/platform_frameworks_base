@@ -3140,9 +3140,8 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast Action: The receiver's effective locale has changed.
      *
-     * This happens when the device locale, or the
-     *  {(TODO: will only compile after ag/15518063) @link LocaleManager#setApplicationLocales}
-     *  receiving app's locale changed.
+     * This happens when the device locale, or the receiving app's locale
+     * (set via {@link android.app.LocaleManager#setApplicationLocales}) changed.
      *
      * Can be received by manifest-declared receivers.
      *
