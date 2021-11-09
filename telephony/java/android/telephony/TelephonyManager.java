@@ -12411,16 +12411,19 @@ public class TelephonyManager {
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies
      *      to the given subId. Otherwise, applies to
      * {@link SubscriptionManager#getDefaultDataSubscriptionId()}
-     *
      * @param reason the reason the data enable change is taking place
      * @return whether data is enabled for a reason.
      * <p>Requires Permission:
+     * The calling app has carrier privileges (see {@link #hasCarrierPrivileges}) or
      * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} or
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} or
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE}
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_NETWORK_STATE,
-            android.Manifest.permission.READ_PHONE_STATE})
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.MODIFY_PHONE_STATE
+    })
     public boolean isDataEnabledForReason(@DataEnabledReason int reason) {
         return isDataEnabledForReason(getSubId(), reason);
     }
