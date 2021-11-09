@@ -77,6 +77,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_ST
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
@@ -99,7 +100,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
-import static android.view.WindowManager.LayoutParams.TYPE_TRUSTED_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
@@ -997,6 +997,11 @@ public class DisplayPolicy {
                     android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
                     "DisplayPolicy");
         }
+        if ((attrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0) {
+            mContext.enforcePermission(
+                    android.Manifest.permission.INTERNAL_SYSTEM_WINDOW, callingPid, callingUid,
+                    "DisplayPolicy");
+        }
 
         switch (attrs.type) {
             case TYPE_STATUS_BAR:
@@ -1040,11 +1045,6 @@ public class DisplayPolicy {
             case TYPE_VOICE_INTERACTION_STARTING:
                 mContext.enforcePermission(
                         android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
-                        "DisplayPolicy");
-                break;
-            case TYPE_TRUSTED_APPLICATION_OVERLAY:
-                mContext.enforcePermission(
-                        android.Manifest.permission.INTERNAL_SYSTEM_WINDOW, callingPid, callingUid,
                         "DisplayPolicy");
                 break;
             case TYPE_STATUS_BAR_PANEL:
