@@ -139,12 +139,7 @@ public class PipTouchHandler {
 
         @Override
         public void onPipExpand() {
-            mMotionHelper.expandLeavePip(false /* skipAnimation */);
-        }
-
-        @Override
-        public void onEnterSplit() {
-            mMotionHelper.expandIntoSplit();
+            mMotionHelper.expandLeavePip();
         }
 
         @Override
@@ -904,7 +899,7 @@ public class PipTouchHandler {
                     // Expand to fullscreen if this is a double tap
                     // the PiP should be frozen until the transition ends
                     setTouchEnabled(false);
-                    mMotionHelper.expandLeavePip(false /* skipAnimation */);
+                    mMotionHelper.expandLeavePip();
                 }
             } else if (mMenuState != MENU_STATE_FULL) {
                 if (mPipBoundsState.isStashed()) {
