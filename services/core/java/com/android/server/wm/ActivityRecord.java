@@ -2732,7 +2732,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (windowingMode == WINDOWING_MODE_PINNED && info.supportsPictureInPicture()) {
             return false;
         }
-        if (WindowConfiguration.inMultiWindowMode(windowingMode) && supportsMultiWindow()
+        // Activity should be resizable if the task is.
+        final boolean supportsMultiWindow = task != null
+                ? task.supportsMultiWindow() || supportsMultiWindow()
+                : supportsMultiWindow();
+        if (WindowConfiguration.inMultiWindowMode(windowingMode) && supportsMultiWindow
                 && !mAtmService.mForceResizableActivities) {
             // The non resizable app will be letterboxed instead of being forced resizable.
             return false;
@@ -7295,7 +7299,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return false;
             }
         }
-        return !isResizeable() && (info.isFixedOrientation() || hasFixedAspectRatio())
+        // Activity should be resizable if the task is.
+        final boolean isResizeable = task != null
+                ? task.isResizeable() || isResizeable()
+                : isResizeable();
+        return !isResizeable && (info.isFixedOrientation() || hasFixedAspectRatio())
                 // The configuration of non-standard type should be enforced by system.
                 // {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD} is set when this activity is
                 // added to a task, but this function is called when resolving the launch params, at
@@ -7665,7 +7673,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // orientation with insets applied.
             return;
         }
-        if (WindowConfiguration.inMultiWindowMode(windowingMode) && isResizeable()) {
+        // Activity should be resizable if the task is.
+        final boolean isResizeable = task != null
+                ? task.isResizeable() || isResizeable()
+                : isResizeable();
+        if (WindowConfiguration.inMultiWindowMode(windowingMode) && isResizeable) {
             // Ignore orientation request for resizable apps in multi window.
             return;
         }
