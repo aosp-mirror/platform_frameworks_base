@@ -183,7 +183,7 @@ public class LocationManager {
      * <p>Locations returned from this provider are with respect to the primary GNSS antenna
      * position within the device. {@link #getGnssAntennaInfos()} may be used to determine the GNSS
      * antenna position with respect to the Android Coordinate System, and convert between them if
-     * necessary. This is generally only necessary if working with high accuracy GNSS results.
+     * necessary. This is generally only necessary for high accuracy applications.
      *
      * <p>The extras Bundle for locations derived by this location provider may contain the
      * following key/value pairs:
@@ -1459,7 +1459,7 @@ public class LocationManager {
      * <p>Locations returned from {@link #GPS_PROVIDER} are with respect to the primary GNSS antenna
      * position within the device. {@link #getGnssAntennaInfos()} may be used to determine the GNSS
      * antenna position with respect to the Android Coordinate System, and convert between them if
-     * necessary. This is generally only necessary if working with high accuracy GNSS results.
+     * necessary. This is generally only necessary for high accuracy applications.
      *
      * <p>When location callbacks are invoked, the system will hold a wakelock on your
      * application's behalf for some period of time, but not indefinitely. If your application
