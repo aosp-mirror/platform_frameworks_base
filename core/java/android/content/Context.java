@@ -3813,6 +3813,7 @@ public abstract class Context {
             //@hide: SPEECH_RECOGNITION_SERVICE,
             UWB_SERVICE,
             MEDIA_METRICS_SERVICE,
+            SUPPLEMENTAL_PROCESS_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -5827,6 +5828,13 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String LOCALE_SERVICE = "locale";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a Supplemental Process Manager.
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String SUPPLEMENTAL_PROCESS_SERVICE = "supplemental_process";
 
     /**
      * Determine whether the given permission is allowed for a particular
