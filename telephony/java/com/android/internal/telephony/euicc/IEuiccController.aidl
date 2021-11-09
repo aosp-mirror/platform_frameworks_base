@@ -21,6 +21,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.euicc.DownloadableSubscription;
 import android.telephony.euicc.EuiccInfo;
+
+import com.android.internal.telephony.euicc.IResultCallback;
+
 import java.util.List;
 
 /** @hide */
@@ -42,6 +45,8 @@ interface IEuiccController {
         in PendingIntent callbackIntent);
     oneway void switchToSubscription(int cardId, int subscriptionId, String callingPackage,
         in PendingIntent callbackIntent);
+    oneway void switchToSubscriptionWithPort(int cardId, int portIndex, int subscriptionId,
+        String callingPackage, in IResultCallback callback);
     oneway void updateSubscriptionNickname(int cardId, int subscriptionId, String nickname,
         String callingPackage, in PendingIntent callbackIntent);
     oneway void eraseSubscriptions(int cardId, in PendingIntent callbackIntent);
