@@ -51,7 +51,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
-import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.VerifierInfo;
 import android.content.pm.parsing.PackageLite;
@@ -62,7 +61,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.ArraySet;
@@ -70,13 +68,9 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.server.DeviceIdleInternal;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.File;
-import java.security.PublicKey;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -90,10 +84,6 @@ final class VerificationParams extends HandlerParams {
      * milliseconds.
      */
     private static final long DEFAULT_INTEGRITY_VERIFICATION_TIMEOUT = 30 * 1000;
-    /**
-     * Whether verification is enabled by default.
-     */
-    private static final boolean DEFAULT_VERIFY_ENABLE = true;
     /**
      * Timeout duration in milliseconds for enabling package rollback. If we fail to enable
      * rollback within that period, the install will proceed without rollback enabled.
@@ -166,7 +156,7 @@ final class VerificationParams extends HandlerParams {
         PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mPm.mContext,
                 mPackageLite, mOriginInfo.mResolvedPath, mInstallFlags, mPackageAbiOverride);
 
-        Pair<Integer, String> ret = verifyReplacingVersionCode(
+        Pair<Integer, String> ret = mInstallPackageHelper.verifyReplacingVersionCode(
                 pkgLite, mRequiredInstalledVersionCode, mInstallFlags);
         setReturnCode(ret.first, ret.second);
         if (mRet != INSTALL_SUCCEEDED) {
@@ -186,7 +176,7 @@ final class VerificationParams extends HandlerParams {
         }
     }
 
-    void sendApkVerificationRequest(PackageInfoLite pkgLite) {
+    private void sendApkVerificationRequest(PackageInfoLite pkgLite) {
         final int verificationId = mPm.mPendingVerificationToken++;
 
         PackageVerificationState verificationState =
@@ -332,7 +322,7 @@ final class VerificationParams extends HandlerParams {
     /**
      * Send a request to verifier(s) to verify the package if necessary.
      */
-    void sendPackageVerificationRequest(
+    private void sendPackageVerificationRequest(
             int verificationId,
             PackageInfoLite pkgLite,
             PackageVerificationState verificationState) {
@@ -354,7 +344,7 @@ final class VerificationParams extends HandlerParams {
         verificationState.setRequiredVerifierUid(requiredUid);
         final int installerUid =
                 mVerificationInfo == null ? -1 : mVerificationInfo.mInstallerUid;
-        final boolean isVerificationEnabled = isVerificationEnabled(
+        final boolean isVerificationEnabled = mInstallPackageHelper.isVerificationEnabled(
                 pkgLite, verifierUser.getIdentifier(), mInstallFlags, installerUid);
         final boolean isV4Signed =
                 (mSigningDetails.getSignatureSchemeVersion() == SIGNING_BLOCK_V4);
@@ -416,7 +406,7 @@ final class VerificationParams extends HandlerParams {
 
             DeviceIdleInternal idleController =
                     mPm.mInjector.getLocalService(DeviceIdleInternal.class);
-            final long idleDuration = mVerificationHelper.getVerificationTimeout();
+            final long idleDuration = VerificationUtils.getVerificationTimeout(mPm.mContext);
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setTemporaryAppAllowlist(idleDuration,
                     TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
@@ -473,7 +463,7 @@ final class VerificationParams extends HandlerParams {
                                         .obtainMessage(CHECK_PENDING_VERIFICATION);
                                 msg.arg1 = verificationId;
                                 mPm.mHandler.sendMessageDelayed(msg,
-                                        mVerificationHelper.getVerificationTimeout());
+                                        VerificationUtils.getVerificationTimeout(mPm.mContext));
                             }
                         }, null, 0, null, null);
 
@@ -510,7 +500,7 @@ final class VerificationParams extends HandlerParams {
                 continue;
             }
 
-            final int verifierUid = getUidForVerifier(verifierInfo);
+            final int verifierUid = mInstallPackageHelper.getUidForVerifier(verifierInfo);
             if (verifierUid == -1) {
                 continue;
             }
@@ -524,44 +514,6 @@ final class VerificationParams extends HandlerParams {
         }
 
         return sufficientVerifiers;
-    }
-
-    private int getUidForVerifier(VerifierInfo verifierInfo) {
-        synchronized (mPm.mLock) {
-            final AndroidPackage pkg = mPm.mPackages.get(verifierInfo.packageName);
-            if (pkg == null) {
-                return -1;
-            } else if (pkg.getSigningDetails().getSignatures().length != 1) {
-                Slog.i(TAG, "Verifier package " + verifierInfo.packageName
-                        + " has more than one signature; ignoring");
-                return -1;
-            }
-
-            /*
-             * If the public key of the package's signature does not match
-             * our expected public key, then this is a different package and
-             * we should skip.
-             */
-
-            final byte[] expectedPublicKey;
-            try {
-                final Signature verifierSig = pkg.getSigningDetails().getSignatures()[0];
-                final PublicKey publicKey = verifierSig.getPublicKey();
-                expectedPublicKey = publicKey.getEncoded();
-            } catch (CertificateException e) {
-                return -1;
-            }
-
-            final byte[] actualPublicKey = verifierInfo.publicKey.getEncoded();
-
-            if (!Arrays.equals(actualPublicKey, expectedPublicKey)) {
-                Slog.i(TAG, "Verifier package " + verifierInfo.packageName
-                        + " does not have the expected public key; ignoring");
-                return -1;
-            }
-
-            return pkg.getUid();
-        }
     }
 
     private static ComponentName matchComponentForVerifier(String packageName,
@@ -586,56 +538,6 @@ final class VerificationParams extends HandlerParams {
         }
 
         return new ComponentName(targetReceiver.packageName, targetReceiver.name);
-    }
-
-    /**
-     * Check whether or not package verification has been enabled.
-     *
-     * @return true if verification should be performed
-     */
-    private boolean isVerificationEnabled(
-            PackageInfoLite pkgInfoLite, int userId, int installFlags, int installerUid) {
-        if (!DEFAULT_VERIFY_ENABLE) {
-            return false;
-        }
-
-        // Check if installing from ADB
-        if ((installFlags & PackageManager.INSTALL_FROM_ADB) != 0) {
-            if (mPm.isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS)) {
-                return true;
-            }
-            // Check if the developer wants to skip verification for ADB installs
-            if ((installFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0) {
-                synchronized (mPm.mLock) {
-                    if (mPm.mSettings.getPackageLPr(pkgInfoLite.packageName) == null) {
-                        // Always verify fresh install
-                        return true;
-                    }
-                }
-                // Only skip when apk is debuggable
-                return !pkgInfoLite.debuggable;
-            }
-            return Settings.Global.getInt(mPm.mContext.getContentResolver(),
-                    Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0;
-        }
-
-        // only when not installed from ADB, skip verification for instant apps when
-        // the installer and verifier are the same.
-        if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
-            if (mPm.mInstantAppInstallerActivity != null
-                    && mPm.mInstantAppInstallerActivity.packageName.equals(
-                    mPm.mRequiredVerifierPackage)) {
-                try {
-                    mPm.mInjector.getSystemService(AppOpsManager.class)
-                            .checkPackage(installerUid, mPm.mRequiredVerifierPackage);
-                    if (DEBUG_VERIFY) {
-                        Slog.i(TAG, "disable verification for instant app");
-                    }
-                    return false;
-                } catch (SecurityException ignore) { }
-            }
-        }
-        return true;
     }
 
     void populateInstallerExtras(Intent intent) {

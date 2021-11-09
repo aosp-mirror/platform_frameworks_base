@@ -644,6 +644,35 @@ public class PackageManagerServiceUtils {
         return compatMatch;
     }
 
+    /**
+     * Decompress files stored in codePath to dstCodePath for a certain package.
+     */
+    public static int decompressFiles(String codePath, File dstCodePath, String packageName) {
+        final File[] compressedFiles = getCompressedFiles(codePath);
+        int ret = PackageManager.INSTALL_SUCCEEDED;
+        try {
+            makeDirRecursive(dstCodePath, 0755);
+            for (File srcFile : compressedFiles) {
+                final String srcFileName = srcFile.getName();
+                final String dstFileName = srcFileName.substring(
+                        0, srcFileName.length() - COMPRESSED_EXTENSION.length());
+                final File dstFile = new File(dstCodePath, dstFileName);
+                ret = decompressFile(srcFile, dstFile);
+                if (ret != PackageManager.INSTALL_SUCCEEDED) {
+                    logCriticalInfo(Log.ERROR, "Failed to decompress"
+                            + "; pkg: " + packageName
+                            + ", file: " + dstFileName);
+                    break;
+                }
+            }
+        } catch (ErrnoException e) {
+            logCriticalInfo(Log.ERROR, "Failed to decompress"
+                    + "; pkg: " + packageName
+                    + ", err: " + e.errno);
+        }
+        return ret;
+    }
+
     public static int decompressFile(File srcFile, File dstFile) throws ErrnoException {
         if (DEBUG_COMPRESSION) {
             Slog.i(TAG, "Decompress file"
