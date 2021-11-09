@@ -275,6 +275,9 @@
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SWIPE_DOWN}. -->
   <item type="id" name="accessibilityActionSwipeDown" />
 
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_SUGGESTIONS}. -->
+  <item type="id" name="accessibilityActionShowSuggestions" />
+
   <!-- View tag for remote views to store the index of the next child when adding nested remote views dynamically. -->
   <item type="id" name="remote_views_next_child" />
 
