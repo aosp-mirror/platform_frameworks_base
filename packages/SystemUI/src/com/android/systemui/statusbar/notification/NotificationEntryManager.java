@@ -721,8 +721,12 @@ public class NotificationEntryManager implements
      * @param reason why the notifications are updating
      */
     public void updateNotifications(String reason) {
+        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            mLogger.logUseWhileNewPipelineActive("updateNotifications", reason);
+            return;
+        }
         reapplyFilterAndSort(reason);
-        if (mPresenter != null && !mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (mPresenter != null) {
             mPresenter.updateNotificationViews(reason);
         }
     }
@@ -808,11 +812,11 @@ public class NotificationEntryManager implements
      * notification doesn't exist.
      */
     public NotificationEntry getPendingOrActiveNotif(String key) {
-        if (mPendingNotifications.containsKey(key)) {
-            return mPendingNotifications.get(key);
-        } else {
-            return mActiveNotifications.get(key);
+        NotificationEntry entry = mPendingNotifications.get(key);
+        if (entry != null) {
+            return entry;
         }
+        return mActiveNotifications.get(key);
     }
 
     private void extendLifetime(NotificationEntry entry, NotificationLifetimeExtender extender) {
@@ -880,11 +884,19 @@ public class NotificationEntryManager implements
 
     /** Resorts / filters the current notification set with the current RankingMap */
     public void reapplyFilterAndSort(String reason) {
+        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            mLogger.logUseWhileNewPipelineActive("reapplyFilterAndSort", reason);
+            return;
+        }
         updateRankingAndSort(mRanker.getRankingMap(), reason);
     }
 
     /** Calls to NotificationRankingManager and updates mSortedAndFiltered */
     private void updateRankingAndSort(@NonNull RankingMap rankingMap, String reason) {
+        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            mLogger.logUseWhileNewPipelineActive("updateRankingAndSort", reason);
+            return;
+        }
         mSortedAndFiltered.clear();
         mSortedAndFiltered.addAll(mRanker.updateRanking(
                 rankingMap, mActiveNotifications.values(), reason));
@@ -892,7 +904,7 @@ public class NotificationEntryManager implements
 
     /** dump the current active notification list. Called from StatusBar */
     public void dump(PrintWriter pw, String indent) {
-        pw.println("NotificationEntryManager");
+        pw.println("NotificationEntryManager (Legacy)");
         int filteredLen = mSortedAndFiltered.size();
         pw.print(indent);
         pw.println("active notifications: " + filteredLen);
@@ -944,6 +956,12 @@ public class NotificationEntryManager implements
     @Override
     public Collection<NotificationEntry> getAllNotifs() {
         return mReadOnlyAllNotifications;
+    }
+
+    @Nullable
+    @Override
+    public NotificationEntry getEntry(String key) {
+        return getPendingOrActiveNotif(key);
     }
 
     /** @return A count of the active notifications */

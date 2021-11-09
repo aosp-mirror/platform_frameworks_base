@@ -22,6 +22,7 @@ import static org.mockito.AdditionalAnswers.answerVoid;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
@@ -68,6 +69,7 @@ import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorCon
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -123,6 +125,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private FeatureFlags mFeatureFlags;
     @Mock
     private NotifPipeline mNotifPipeline;
+    @Mock
+    private NotificationVisibilityProvider mVisibilityProvider;
 
     @Mock
     private ActivityIntentHelper mActivityIntentHelper;
@@ -179,6 +183,11 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
         when(mOnUserInteractionCallback.getGroupSummaryToDismiss(mNotificationRow.getEntry()))
                 .thenReturn(null);
+        when(mVisibilityProvider.obtain(anyString(), anyBoolean())).thenAnswer(
+                invocation-> NotificationVisibility.obtain(invocation.getArgument(0), 0, 1, false));
+        when(mVisibilityProvider.obtain(any(NotificationEntry.class), anyBoolean())).thenAnswer(
+                invocation-> NotificationVisibility.obtain(
+                        invocation.<NotificationEntry>getArgument(0).getKey(), 0, 1, false));
 
         HeadsUpManagerPhone headsUpManager = mock(HeadsUpManagerPhone.class);
         NotificationLaunchAnimatorControllerProvider notificationAnimationProvider =
@@ -195,6 +204,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mUiBgExecutor,
                         mEntryManager,
                         mNotifPipeline,
+                        mVisibilityProvider,
                         headsUpManager,
                         mActivityStarter,
                         mClickNotifier,

@@ -29,12 +29,12 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.render.NodeController
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_PERSON
+import com.android.systemui.util.mockito.withArgCaptor
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -65,9 +65,9 @@ class ConversationCoordinatorTest : SysuiTestCase() {
         coordinator.attach(pipeline)
 
         // capture arguments:
-        val notifPromoterCaptor = ArgumentCaptor.forClass(NotifPromoter::class.java)
-        verify(pipeline).addPromoter(notifPromoterCaptor.capture())
-        promoter = notifPromoterCaptor.value
+        promoter = withArgCaptor {
+            verify(pipeline).addPromoter(capture())
+        }
 
         peopleSectioner = coordinator.sectioner
 

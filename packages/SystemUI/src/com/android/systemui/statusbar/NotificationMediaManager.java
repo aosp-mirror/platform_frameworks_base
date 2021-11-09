@@ -66,7 +66,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
-import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
@@ -113,6 +113,7 @@ public class NotificationMediaManager implements Dumpable {
         PAUSED_MEDIA_STATES.add(PlaybackState.STATE_CONNECTING);
     }
 
+    private final NotificationVisibilityProvider mVisibilityProvider;
     private final NotificationEntryManager mEntryManager;
     private final MediaDataManager mMediaDataManager;
     private final NotifPipeline mNotifPipeline;
@@ -181,6 +182,7 @@ public class NotificationMediaManager implements Dumpable {
             Context context,
             Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
+            NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager notificationEntryManager,
             MediaArtworkProcessor mediaArtworkProcessor,
             KeyguardBypassController keyguardBypassController,
@@ -201,6 +203,7 @@ public class NotificationMediaManager implements Dumpable {
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mNotificationShadeWindowController = notificationShadeWindowController;
+        mVisibilityProvider = visibilityProvider;
         mEntryManager = notificationEntryManager;
         mMainExecutor = mainExecutor;
         mMediaDataManager = mediaDataManager;
@@ -351,21 +354,10 @@ public class NotificationMediaManager implements Dumpable {
     }
 
     private DismissedByUserStats getDismissedByUserStats(NotificationEntry entry) {
-        final int activeNotificationsCount;
-        if (mUsingNotifPipeline) {
-            activeNotificationsCount = mNotifPipeline.getShadeListCount();
-        } else {
-            activeNotificationsCount = mEntryManager.getActiveNotificationsCount();
-        }
         return new DismissedByUserStats(
                 NotificationStats.DISMISSAL_SHADE, // Add DISMISSAL_MEDIA?
                 NotificationStats.DISMISS_SENTIMENT_NEUTRAL,
-                NotificationVisibility.obtain(
-                        entry.getKey(),
-                        entry.getRanking().getRank(),
-                        activeNotificationsCount,
-                        /* visible= */ true,
-                        NotificationLogger.getNotificationLocation(entry)));
+                mVisibilityProvider.obtain(entry, /* visible= */ true));
     }
 
     private void removeEntry(NotificationEntry entry) {
@@ -406,10 +398,7 @@ public class NotificationMediaManager implements Dumpable {
             return null;
         }
         if (mUsingNotifPipeline) {
-            // TODO(b/169655596): Either add O(1) lookup, or cache this icon?
-            return mNotifPipeline.getAllNotifs().stream()
-                .filter(entry -> Objects.equals(entry.getKey(), mMediaNotificationKey))
-                .findAny()
+            return Optional.ofNullable(mNotifPipeline.getEntry(mMediaNotificationKey))
                 .map(entry -> entry.getIcons().getShelfIcon())
                 .map(StatusBarIconView::getSourceIcon)
                 .orElse(null);
