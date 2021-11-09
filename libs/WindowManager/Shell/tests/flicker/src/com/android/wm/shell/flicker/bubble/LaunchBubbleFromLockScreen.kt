@@ -48,9 +48,11 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
                 eachRun {
                     val addBubbleBtn = waitAndGetAddBubbleBtn()
                     addBubbleBtn?.click() ?: error("Bubble widget not found")
+                    device.sleep()
                     wmHelper.waitFor("noAppWindowsOnTop") {
                         it.wmState.topVisibleAppWindow.isEmpty()
                     }
+                    device.wakeUp()
                 }
             }
             transitions {
