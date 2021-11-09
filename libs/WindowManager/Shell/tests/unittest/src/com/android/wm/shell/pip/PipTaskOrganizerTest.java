@@ -50,7 +50,6 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
-import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -76,8 +75,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     @Mock private PipTransitionController mMockPipTransitionController;
     @Mock private PipSurfaceTransactionHelper mMockPipSurfaceTransactionHelper;
     @Mock private PipUiEventLogger mMockPipUiEventLogger;
-    @Mock private Optional<LegacySplitScreenController> mMockOptionalLegacySplitScreen;
-    @Mock private Optional<SplitScreenController> mMockOptionalSplitScreen;
+    @Mock private Optional<LegacySplitScreenController> mMockOptionalSplitScreen;
     @Mock private ShellTaskOrganizer mMockShellTaskOrganizer;
     private TestShellExecutor mMainExecutor;
     private PipBoundsState mPipBoundsState;
@@ -101,9 +99,8 @@ public class PipTaskOrganizerTest extends ShellTestCase {
                 mMockSyncTransactionQueue, mPipTransitionState, mPipBoundsState,
                 mPipBoundsAlgorithm, mMockPhonePipMenuController,
                 mMockPipAnimationController, mMockPipSurfaceTransactionHelper,
-                mMockPipTransitionController, mMockOptionalLegacySplitScreen,
-                mMockOptionalSplitScreen, mMockDisplayController, mMockPipUiEventLogger,
-                mMockShellTaskOrganizer, mMainExecutor));
+                mMockPipTransitionController, mMockOptionalSplitScreen, mMockDisplayController,
+                mMockPipUiEventLogger, mMockShellTaskOrganizer, mMainExecutor));
         mMainExecutor.flushAll();
         preparePipTaskOrg();
     }
