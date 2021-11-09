@@ -106,6 +106,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final NotificationIconAreaController mNotificationIconAreaController;
     private final PanelExpansionStateManager mPanelExpansionStateManager;
     private final StatusBarIconController mStatusBarIconController;
+    private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
 
     private List<String> mBlockedIcons = new ArrayList<>();
 
@@ -133,6 +134,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             PanelExpansionStateManager panelExpansionStateManager,
             FeatureFlags featureFlags,
             StatusBarIconController statusBarIconController,
+            StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
             NetworkController networkController,
             StatusBarStateController statusBarStateController,
@@ -148,6 +150,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mPanelExpansionStateManager = panelExpansionStateManager;
         mFeatureFlags = featureFlags;
         mStatusBarIconController = statusBarIconController;
+        mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mKeyguardStateController = keyguardStateController;
         mNetworkController = networkController;
         mStatusBarStateController = statusBarStateController;
@@ -374,10 +377,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                         StatusBar::hideStatusBarIconsWhenExpanded).orElse(false)) {
             return true;
         }
-        if (statusBarOptional.map(StatusBar::hideStatusBarIconsForBouncer).orElse(false)) {
-            return true;
-        }
-        return false;
+        return mStatusBarHideIconsForBouncerManager.getShouldHideStatusBarIconsForBouncer();
     }
 
     private void hideSystemIconArea(boolean animate) {

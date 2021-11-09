@@ -38,6 +38,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogcatEchoTracker;
@@ -50,6 +51,8 @@ import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -265,6 +268,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 new PanelExpansionStateManager(),
                 mock(FeatureFlags.class),
                 mStatusBarIconController,
+                new StatusBarHideIconsForBouncerManager(
+                        mCommandQueue, new FakeExecutor(new FakeSystemClock()), new DumpManager()),
                 mKeyguardStateController,
                 mNetworkController,
                 mStatusBarStateController,
