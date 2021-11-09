@@ -853,7 +853,7 @@ public final class ActiveServices {
                 final ServiceState stracker = r.getTracker();
                 if (stracker != null) {
                     stracker.setForeground(true, mAm.mProcessStats.getMemFactorLocked(),
-                            r.lastActivity);
+                            SystemClock.uptimeMillis()); // Use current time, not lastActivity.
                 }
             }
             mAm.mAppOpsService.startOperation(AppOpsManager.getToken(mAm.mAppOpsService),
@@ -1129,7 +1129,8 @@ public final class ActiveServices {
         synchronized (mAm.mProcessStats.mLock) {
             final ServiceState stracker = r.getTracker();
             if (stracker != null) {
-                stracker.setStarted(true, mAm.mProcessStats.getMemFactorLocked(), r.lastActivity);
+                stracker.setStarted(true, mAm.mProcessStats.getMemFactorLocked(),
+                        SystemClock.uptimeMillis()); // Use current time, not lastActivity.
             }
         }
         r.callStart = false;
@@ -1961,7 +1962,8 @@ public final class ActiveServices {
                                 final ServiceState stracker = r.getTracker();
                                 if (stracker != null) {
                                     stracker.setForeground(true,
-                                            mAm.mProcessStats.getMemFactorLocked(), r.lastActivity);
+                                            mAm.mProcessStats.getMemFactorLocked(),
+                                            SystemClock.uptimeMillis());
                                 }
                             }
                         } else {
@@ -2828,7 +2830,7 @@ public final class ActiveServices {
                         final ServiceState stracker = s.getTracker();
                         if (stracker != null) {
                             stracker.setBound(true, mAm.mProcessStats.getMemFactorLocked(),
-                                    s.lastActivity);
+                                    SystemClock.uptimeMillis());
                         }
                     }
                 }
@@ -3494,14 +3496,14 @@ public final class ActiveServices {
             timeoutNeeded = false;
         }
 
-        long now = SystemClock.uptimeMillis();
         ProcessServiceRecord psr;
         if (r.executeNesting == 0) {
             r.executeFg = fg;
             synchronized (mAm.mProcessStats.mLock) {
                 final ServiceState stracker = r.getTracker();
                 if (stracker != null) {
-                    stracker.setExecuting(true, mAm.mProcessStats.getMemFactorLocked(), now);
+                    stracker.setExecuting(true, mAm.mProcessStats.getMemFactorLocked(),
+                            SystemClock.uptimeMillis());
                 }
             }
             if (r.app != null) {
@@ -3532,7 +3534,7 @@ public final class ActiveServices {
         }
         r.executeFg |= fg;
         r.executeNesting++;
-        r.executingStart = now;
+        r.executingStart = SystemClock.uptimeMillis();
         return oomAdjusted;
     }
 
@@ -3719,7 +3721,8 @@ public final class ActiveServices {
             if (oldPosInRestarting == -1) {
                 r.createdFromFg = false;
                 synchronized (mAm.mProcessStats.mLock) {
-                    r.makeRestarting(mAm.mProcessStats.getMemFactorLocked(), now);
+                    r.makeRestarting(mAm.mProcessStats.getMemFactorLocked(),
+                            SystemClock.uptimeMillis());
                 }
             }
             boolean added = false;
@@ -4485,7 +4488,6 @@ public final class ActiveServices {
             }
         }
 
-        final long now = SystemClock.uptimeMillis();
         // Check to see if the service had been started as foreground, but being
         // brought down before actually showing a notification.  That is not allowed.
         if (r.fgRequired) {
@@ -4496,7 +4498,8 @@ public final class ActiveServices {
             synchronized (mAm.mProcessStats.mLock) {
                 ServiceState stracker = r.getTracker();
                 if (stracker != null) {
-                    stracker.setForeground(false, mAm.mProcessStats.getMemFactorLocked(), now);
+                    stracker.setForeground(false, mAm.mProcessStats.getMemFactorLocked(),
+                            SystemClock.uptimeMillis());
                 }
             }
             mAm.mAppOpsService.finishOperation(AppOpsManager.getToken(mAm.mAppOpsService),
@@ -4557,7 +4560,8 @@ public final class ActiveServices {
             synchronized (mAm.mProcessStats.mLock) {
                 ServiceState stracker = r.getTracker();
                 if (stracker != null) {
-                    stracker.setForeground(false, mAm.mProcessStats.getMemFactorLocked(), now);
+                    stracker.setForeground(false, mAm.mProcessStats.getMemFactorLocked(),
+                            SystemClock.uptimeMillis());
                 }
             }
             mAm.mAppOpsService.finishOperation(
@@ -4629,6 +4633,7 @@ public final class ActiveServices {
         synchronized (mAm.mProcessStats.mLock) {
             final int memFactor = mAm.mProcessStats.getMemFactorLocked();
             if (r.tracker != null) {
+                final long now = SystemClock.uptimeMillis();
                 r.tracker.setStarted(false, memFactor, now);
                 r.tracker.setBound(false, memFactor, now);
                 if (r.executeNesting == 0) {
