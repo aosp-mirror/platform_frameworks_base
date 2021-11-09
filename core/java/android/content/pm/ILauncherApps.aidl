@@ -38,6 +38,8 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.ParcelFileDescriptor;
 
+import com.android.internal.infra.AndroidFuture;
+
 import java.util.List;
 
 /**
@@ -73,6 +75,8 @@ interface ILauncherApps {
 
     ParceledListSlice getShortcuts(String callingPackage, in ShortcutQueryWrapper query,
             in UserHandle user);
+    void getShortcutsAsync(String callingPackage, in ShortcutQueryWrapper query,
+            in UserHandle user, in AndroidFuture<List<ShortcutInfo>> cb);
     void pinShortcuts(String callingPackage, String packageName, in List<String> shortcutIds,
             in UserHandle user);
     boolean startShortcut(String callingPackage, String packageName, String featureId, String id,

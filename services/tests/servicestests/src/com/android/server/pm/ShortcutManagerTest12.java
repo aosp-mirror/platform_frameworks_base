@@ -147,6 +147,11 @@ public class ShortcutManagerTest12 extends BaseShortcutManagerTest {
         // Verifies pushDynamicShortcuts further persists shortcuts into AppSearch without
         // removing previous shortcuts when max number of shortcuts is reached.
         mManager.pushDynamicShortcut(makeShortcut("s6"));
+        // Increasing the max number of shortcuts since number of results per page in AppSearch
+        // is set to match the former.
+        mService.updateConfigurationLocked(
+                ShortcutService.ConfigConstants.KEY_MAX_SHORTCUTS + "=10,"
+                        + ShortcutService.ConfigConstants.KEY_SAVE_DELAY_MILLIS + "=1");
         shortcuts = getAllPersistedShortcuts();
         assertNotNull(shortcuts);
         assertEquals(6, shortcuts.size());
@@ -281,7 +286,7 @@ public class ShortcutManagerTest12 extends BaseShortcutManagerTest {
 
     private List<ShortcutInfo> getAllPersistedShortcuts() {
         try {
-            SystemClock.sleep(500);
+            SystemClock.sleep(5000);
             final AndroidFuture<List<ShortcutInfo>> future = new AndroidFuture<>();
             getPersistedShortcut(future);
             return future.get(10, TimeUnit.SECONDS);
