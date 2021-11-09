@@ -107,6 +107,11 @@ public class DozeScreenState implements DozeMachine.Part {
                 public void onAllAuthenticatorsRegistered() {
                     updateUdfpsController();
                 }
+
+                @Override
+                public void onEnrollmentsChanged() {
+                    updateUdfpsController();
+                }
             });
         }
     }
