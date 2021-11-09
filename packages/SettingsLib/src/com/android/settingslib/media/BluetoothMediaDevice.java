@@ -62,7 +62,7 @@ public class BluetoothMediaDevice extends MediaDevice {
         if (!(drawable instanceof BitmapDrawable)) {
             setColorFilter(drawable);
         }
-        return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
+        return drawable;
     }
 
     @Override
