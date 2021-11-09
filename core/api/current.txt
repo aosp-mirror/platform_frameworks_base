@@ -16510,11 +16510,13 @@ package android.graphics.drawable {
 
   public class AdaptiveIconDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
     ctor public AdaptiveIconDrawable(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
+    ctor public AdaptiveIconDrawable(@Nullable android.graphics.drawable.Drawable, @Nullable android.graphics.drawable.Drawable, @Nullable android.graphics.drawable.Drawable);
     method public void draw(android.graphics.Canvas);
     method public android.graphics.drawable.Drawable getBackground();
     method public static float getExtraInsetFraction();
     method public android.graphics.drawable.Drawable getForeground();
     method public android.graphics.Path getIconMask();
+    method @Nullable public android.graphics.drawable.Drawable getMonochrome();
     method public int getOpacity();
     method public void invalidateDrawable(@NonNull android.graphics.drawable.Drawable);
     method public void scheduleDrawable(@NonNull android.graphics.drawable.Drawable, @NonNull Runnable, long);
