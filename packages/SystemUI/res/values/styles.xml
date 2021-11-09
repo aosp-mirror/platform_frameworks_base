@@ -952,6 +952,7 @@
         <item name="android:lineHeight">20sp</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:stateListAnimator">@null</item>
+        <item name="android:layout_marginHorizontal">4dp</item>
     </style>
 
     <style name="Widget.QSDialog.Button.BorderButton">
