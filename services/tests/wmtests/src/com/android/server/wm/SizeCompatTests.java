@@ -158,46 +158,6 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    public void testKeepBoundsWhenChangingFromFreeformToFullscreen() {
-        removeGlobalMinSizeRestriction();
-        // Create landscape freeform display and a freeform app.
-        DisplayContent display = new TestDisplayContent.Builder(mAtm, 2000, 1000)
-                .setCanRotate(false)
-                .setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM).build();
-        setUpApp(display);
-
-        // Put app window into portrait freeform and then make it a compat app.
-        final Rect bounds = new Rect(100, 100, 400, 600);
-        mTask.setBounds(bounds);
-        prepareUnresizable(mActivity, -1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
-        assertEquals(bounds, mActivity.getBounds());
-        // Activity is not yet in size compat mode; it is filling the freeform task window.
-        assertActivityMaxBoundsSandboxed();
-
-        // The activity should be able to accept negative x position [-150, 100 - 150, 600].
-        final int dx = bounds.left + bounds.width() / 2;
-        final int dy = bounds.top + bounds.height() / 2;
-        mTask.setBounds(bounds.left - dx, bounds.top - dy, bounds.right - dx, bounds.bottom - dy);
-        // expected:<Rect(-150, 100 - 150, 600)> but was:<Rect(-150, 0 - 150, 500)>
-        assertEquals(mTask.getBounds(), mActivity.getBounds());
-
-        final int density = mActivity.getConfiguration().densityDpi;
-
-        // Change display configuration to fullscreen.
-        Configuration c = new Configuration(display.getRequestedOverrideConfiguration());
-        c.windowConfiguration.setWindowingMode(WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
-        display.onRequestedOverrideConfigurationChanged(c);
-
-        // Check if dimensions on screen stay the same by scaling.
-        assertScaled();
-        assertEquals(bounds.width(), mActivity.getBounds().width());
-        assertEquals(bounds.height(), mActivity.getBounds().height());
-        assertEquals(density, mActivity.getConfiguration().densityDpi);
-        // Size compat mode is sandboxed at the activity level.
-        assertActivityMaxBoundsSandboxed();
-    }
-
-    @Test
     public void testFixedAspectRatioBoundsWithDecorInSquareDisplay() {
         final int notchHeight = 100;
         setUpApp(new TestDisplayContent.Builder(mAtm, 600, 800).setNotch(notchHeight).build());
@@ -687,7 +647,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
                 .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
                 .build();
-        assertTrue(activity.shouldCreateCompatDisplayInsets());
+        assertFalse(activity.shouldCreateCompatDisplayInsets());
 
         // The non-resizable activity should not be size compat because it is on a resizable task
         // in multi-window mode.
@@ -719,7 +679,7 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    public void testShouldCreateCompatDisplayInsetsWhenUnresizeableAndSupportsSizeChangesFalse() {
+    public void testShouldNotCreateCompatDisplayInsetsWhenRootActivityIsResizeable() {
         setUpDisplaySizeWithApp(1000, 2500);
 
         // Make the task root resizable.
@@ -728,7 +688,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Create an activity on the same task.
         final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */false,
                 RESIZE_MODE_UNRESIZEABLE, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        assertTrue(activity.shouldCreateCompatDisplayInsets());
+        assertFalse(activity.shouldCreateCompatDisplayInsets());
     }
 
     @Test
@@ -2269,6 +2229,12 @@ public class SizeCompatTests extends WindowTestsBase {
         activity.info.resizeMode = isUnresizable
                 ? RESIZE_MODE_UNRESIZEABLE
                 : RESIZE_MODE_RESIZEABLE;
+        final Task task = activity.getTask();
+        if (task != null) {
+            // Update the Task resize value as activity will follow the task.
+            task.mResizeMode = activity.info.resizeMode;
+            task.getRootActivity().info.resizeMode = activity.info.resizeMode;
+        }
         activity.mVisibleRequested = true;
         if (maxAspect >= 0) {
             activity.info.setMaxAspectRatio(maxAspect);
