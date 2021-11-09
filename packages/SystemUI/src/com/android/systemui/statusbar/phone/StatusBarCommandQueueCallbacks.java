@@ -95,6 +95,7 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final NotificationShadeWindowView mNotificationShadeWindowView;
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
+    private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     private final PowerManager mPowerManager;
     private final VibratorHelper mVibratorHelper;
     private final Optional<Vibrator> mVibratorOptional;
@@ -132,6 +133,7 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
             SysuiStatusBarStateController statusBarStateController,
             NotificationShadeWindowView notificationShadeWindowView,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
+            StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             PowerManager powerManager,
             VibratorHelper vibratorHelper,
             Optional<Vibrator> vibratorOptional,
@@ -158,6 +160,7 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
         mStatusBarStateController = statusBarStateController;
         mNotificationShadeWindowView = notificationShadeWindowView;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
+        mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mPowerManager = powerManager;
         mVibratorHelper = vibratorHelper;
         mVibratorOptional = vibratorOptional;
@@ -509,14 +512,8 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
 
     @Override
     public void setTopAppHidesStatusBar(boolean topAppHidesStatusBar) {
-        mStatusBar.setTopHidesStatusBar(topAppHidesStatusBar);
-        if (!topAppHidesStatusBar && mStatusBar.getWereIconsJustHidden()) {
-            // Immediately update the icon hidden state, since that should only apply if we're
-            // staying fullscreen.
-            mStatusBar.setWereIconsJustHidden(false);
-            mCommandQueue.recomputeDisableFlags(mDisplayId, true);
-        }
-        mStatusBar.updateHideIconsForBouncer(true /* animate */);
+        mStatusBarHideIconsForBouncerManager
+                .setTopAppHidesStatusBarAndTriggerUpdate(topAppHidesStatusBar);
     }
 
     @Override
@@ -534,13 +531,11 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
             if (StatusBar.DEBUG_WINDOW_STATE) {
                 Log.d(StatusBar.TAG, "Status bar " + windowStateToString(state));
             }
-            if (mStatusBar.getStatusBarView() != null) {
-                if (!showing && mStatusBarStateController.getState() == StatusBarState.SHADE) {
+            if (mStatusBar.getStatusBarView() != null
+                    && !showing
+                    && mStatusBarStateController.getState() == StatusBarState.SHADE) {
                     mNotificationPanelViewController.collapsePanel(
                             false /* animate */, false /* delayed */, 1.0f /* speedUpFactor */);
-                }
-
-                mStatusBar.updateHideIconsForBouncer(false /* animate */);
             }
         }
 
