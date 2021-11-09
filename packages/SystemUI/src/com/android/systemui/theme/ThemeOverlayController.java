@@ -53,8 +53,8 @@ import android.util.TypedValue;
 import androidx.annotation.NonNull;
 
 import com.android.internal.graphics.ColorUtils;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.Dumpable;
-import com.android.systemui.SystemUI;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -93,7 +93,7 @@ import javax.inject.Inject;
  * associated work profiles
  */
 @SysUISingleton
-public class ThemeOverlayController extends SystemUI implements Dumpable {
+public class ThemeOverlayController extends CoreStartable implements Dumpable {
     protected static final String TAG = "ThemeOverlayController";
     private static final boolean DEBUG = true;
 

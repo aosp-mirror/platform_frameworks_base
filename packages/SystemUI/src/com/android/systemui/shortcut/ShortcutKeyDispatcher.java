@@ -24,7 +24,7 @@ import android.view.KeyEvent;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.wm.shell.legacysplitscreen.DividerView;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
@@ -37,7 +37,7 @@ import javax.inject.Inject;
  * Dispatches shortcut to System UI components
  */
 @SysUISingleton
-public class ShortcutKeyDispatcher extends SystemUI
+public class ShortcutKeyDispatcher extends CoreStartable
         implements ShortcutKeyServiceProxy.Callbacks {
 
     private static final String TAG = "ShortcutKeyDispatcher";

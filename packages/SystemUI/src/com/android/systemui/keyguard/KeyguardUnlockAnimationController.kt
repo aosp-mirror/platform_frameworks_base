@@ -30,8 +30,8 @@ import com.android.keyguard.KeyguardClockSwitchController
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
 import javax.inject.Inject
@@ -88,7 +88,8 @@ const val DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD = 0.4f
 class KeyguardUnlockAnimationController @Inject constructor(
     context: Context,
     private val keyguardStateController: KeyguardStateController,
-    private val keyguardViewMediator: Lazy<KeyguardViewMediator>,
+    private val
+    keyguardViewMediator: Lazy<KeyguardViewMediator>,
     private val keyguardViewController: KeyguardViewController,
     private val smartspaceTransitionController: SmartspaceTransitionController,
     private val featureFlags: FeatureFlags

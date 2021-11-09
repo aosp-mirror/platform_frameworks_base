@@ -23,8 +23,8 @@ import android.view.Gravity;
 
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.OverlayHostView;
@@ -36,7 +36,7 @@ import javax.inject.Inject;
  * {@link AppWidgetOverlayPrimer} reads the configured App Widget Overlay from resources on start
  * and populates them into the {@link DreamOverlayStateController}.
  */
-public class AppWidgetOverlayPrimer extends SystemUI {
+public class AppWidgetOverlayPrimer extends CoreStartable {
     private final Resources mResources;
     private final DreamOverlayStateController mDreamOverlayStateController;
     private final AppWidgetOverlayComponent.Factory mComponentFactory;

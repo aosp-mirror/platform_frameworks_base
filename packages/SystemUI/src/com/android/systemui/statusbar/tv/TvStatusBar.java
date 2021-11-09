@@ -22,7 +22,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
@@ -36,7 +36,7 @@ import dagger.Lazy;
  * Serves as a collection of UI components, rather than showing its own UI.
  */
 @SysUISingleton
-public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
+public class TvStatusBar extends CoreStartable implements CommandQueue.Callbacks {
 
     private final CommandQueue mCommandQueue;
     private final Lazy<AssistManager> mAssistManagerLazy;

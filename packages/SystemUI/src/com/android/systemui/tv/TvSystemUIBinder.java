@@ -16,7 +16,7 @@
 
 package com.android.systemui.tv;
 
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationHandler;
 
@@ -33,5 +33,5 @@ interface TvSystemUIBinder {
     @Binds
     @IntoMap
     @ClassKey(TvNotificationHandler.class)
-    SystemUI bindTvNotificationHandler(TvNotificationHandler systemui);
+    CoreStartable bindTvNotificationHandler(TvNotificationHandler systemui);
 }

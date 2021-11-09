@@ -107,7 +107,7 @@ import javax.inject.Inject;
  * for antialiasing and emulation purposes.
  */
 @SysUISingleton
-public class ScreenDecorations extends SystemUI implements Tunable {
+public class ScreenDecorations extends CoreStartable implements Tunable {
     private static final boolean DEBUG = false;
     private static final String TAG = "ScreenDecorations";
 

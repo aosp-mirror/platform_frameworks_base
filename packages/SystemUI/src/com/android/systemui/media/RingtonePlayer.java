@@ -37,7 +37,7 @@ import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -48,7 +48,7 @@ import java.util.HashMap;
  * Service that offers to play ringtones by {@link Uri}, since our process has
  * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}.
  */
-public class RingtonePlayer extends SystemUI {
+public class RingtonePlayer extends CoreStartable {
     private static final String TAG = "RingtonePlayer";
     private static final boolean LOGD = false;
 

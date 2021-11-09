@@ -5,8 +5,8 @@
 -keep class com.android.systemui.car.CarSystemUIFactory
 -keep class com.android.systemui.SystemUIFactory
 -keep class com.android.systemui.tv.TvSystemUIFactory
--keep class * extends com.android.systemui.SystemUI
--keep class * implements com.android.systemui.SystemUI$Injector
+-keep class * extends com.android.systemui.CoreStartable
+-keep class * implements com.android.systemui.CoreStartable$Injector
 
 -keepclasseswithmembers class * {
     public <init>(android.content.Context, android.util.AttributeSet);
@@ -22,7 +22,7 @@
 }
 -keep class androidx.core.app.CoreComponentFactory
 
--keep public class * extends com.android.systemui.SystemUI {
+-keep public class * extends com.android.systemui.CoreStartable {
     public <init>(android.content.Context);
 }
 
