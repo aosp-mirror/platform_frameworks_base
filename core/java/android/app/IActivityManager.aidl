@@ -26,6 +26,7 @@ import android.app.GrantedUriPermission;
 import android.app.IApplicationThread;
 import android.app.IActivityController;
 import android.app.IAppTask;
+import android.app.IForegroundServiceObserver;
 import android.app.IInstrumentationWatcher;
 import android.app.IProcessObserver;
 import android.app.IServiceConnection;
@@ -279,6 +280,8 @@ interface IActivityManager {
     boolean clearApplicationUserData(in String packageName, boolean keepState,
             in IPackageDataObserver observer, int userId);
     void makeServicesNonForeground(in String packageName, int userId);
+    /** Returns {@code false} if the callback could not be registered, {@true} otherwise. */
+    boolean registerForegroundServiceObserver(in IForegroundServiceObserver callback);
     @UnsupportedAppUsage
     void forceStopPackage(in String packageName, int userId);
     boolean killPids(in int[] pids, in String reason, boolean secure);
