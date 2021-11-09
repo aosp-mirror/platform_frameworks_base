@@ -2523,21 +2523,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return new InputBindResult(
                         InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
                         null, null, getCurId(), getSequenceNumber(), false);
-            } else if (SystemClock.uptimeMillis()
-                    < (getLastBindTime() + TIME_TO_RECONNECT)) {
-                // In this case we have connected to the service, but
-                // don't yet have its interface.  If it hasn't been too
-                // long since we did the connection, we'll return to
-                // the client and wait to get the service interface so
-                // we can report back.  If it has been too long, we want
-                // to fall through so we can try a disconnect/reconnect
-                // to see if we can get back in touch with the service.
-                return new InputBindResult(
-                        InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
-                        null, null, getCurId(), getSequenceNumber(), false);
             } else {
-                EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME,
-                        getSelectedMethodId(), SystemClock.uptimeMillis() - getLastBindTime(), 0);
+                long bindingDuration = SystemClock.uptimeMillis() - getLastBindTime();
+                if (bindingDuration < TIME_TO_RECONNECT) {
+                    // In this case we have connected to the service, but
+                    // don't yet have its interface.  If it hasn't been too
+                    // long since we did the connection, we'll return to
+                    // the client and wait to get the service interface so
+                    // we can report back.  If it has been too long, we want
+                    // to fall through so we can try a disconnect/reconnect
+                    // to see if we can get back in touch with the service.
+                    return new InputBindResult(
+                            InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
+                            null, null, getCurId(), getSequenceNumber(), false);
+                } else {
+                    EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME,
+                            getSelectedMethodId(), bindingDuration, 0);
+                }
             }
         }
         return null;
@@ -3260,21 +3262,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mVisibleBound = true;
             }
             res = true;
-        } else if (hasConnection() && SystemClock.uptimeMillis()
-                >= (getLastBindTime() + TIME_TO_RECONNECT)) {
-            // The client has asked to have the input method shown, but
-            // we have been sitting here too long with a connection to the
-            // service and no interface received, so let's disconnect/connect
-            // to try to prod things along.
-            EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME, getSelectedMethodId(),
-                    SystemClock.uptimeMillis() - getLastBindTime(), 1);
-            Slog.w(TAG, "Force disconnect/connect to the IME in showCurrentInputLocked()");
-            mContext.unbindService(this);
-            bindCurrentInputMethodServiceLocked(getCurIntent(), this, mImeConnectionBindFlags);
         } else {
-            if (DEBUG) {
-                Slog.d(TAG, "Can't show input: connection = " + hasConnection() + ", time = "
-                        + ((getLastBindTime() + TIME_TO_RECONNECT) - SystemClock.uptimeMillis()));
+            long bindingDuration = SystemClock.uptimeMillis() - getLastBindTime();
+            if (hasConnection() && bindingDuration >= TIME_TO_RECONNECT) {
+                // The client has asked to have the input method shown, but
+                // we have been sitting here too long with a connection to the
+                // service and no interface received, so let's disconnect/connect
+                // to try to prod things along.
+                EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME, getSelectedMethodId(),
+                        bindingDuration, 1);
+                Slog.w(TAG, "Force disconnect/connect to the IME in showCurrentInputLocked()");
+                mContext.unbindService(this);
+                bindCurrentInputMethodServiceLocked(getCurIntent(), this, mImeConnectionBindFlags);
+            } else {
+                if (DEBUG) {
+                    Slog.d(TAG, "Can't show input: connection = " + hasConnection() + ", time = "
+                            + (TIME_TO_RECONNECT - bindingDuration));
+                }
             }
         }
 
