@@ -57,21 +57,6 @@ public class KeyguardClockPositionAlgorithm {
     private int mUserSwitchPreferredY;
 
     /**
-     * Whether or not there is a custom clock face on keyguard.
-     */
-    private boolean mHasCustomClock;
-
-    /**
-     * Whether or not the NSSL contains any visible notifications.
-     */
-    private boolean mHasVisibleNotifs;
-
-    /**
-     * Height of notification stack: Sum of height of each notification.
-     */
-    private int mNotificationStackHeight;
-
-    /**
      * Minimum top margin to avoid overlap with status bar, lock icon, or multi-user switcher
      * avatar.
      */
@@ -86,6 +71,16 @@ public class KeyguardClockPositionAlgorithm {
      * Recommended distance from the status bar.
      */
     private int mContainerTopPadding;
+
+    /**
+     * Top margin of notifications introduced by presence of split shade header / status bar
+     */
+    private int mSplitShadeTopNotificationsMargin;
+
+    /**
+     * Target margin for notifications and clock from the top of the screen in split shade
+     */
+    private int mSplitShadeTargetTopMargin;
 
     /**
      * @see NotificationPanelViewController#getExpandedFraction()
@@ -152,6 +147,10 @@ public class KeyguardClockPositionAlgorithm {
     public void loadDimens(Resources res) {
         mStatusViewBottomMargin = res.getDimensionPixelSize(
                 R.dimen.keyguard_status_view_bottom_margin);
+        mSplitShadeTopNotificationsMargin =
+                res.getDimensionPixelSize(R.dimen.split_shade_header_height);
+        mSplitShadeTargetTopMargin =
+                res.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin);
 
         mContainerTopPadding =
                 res.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin);
@@ -214,7 +213,7 @@ public class KeyguardClockPositionAlgorithm {
         if (mBypassEnabled) {
             return (int) (mUnlockedStackScrollerPadding + mOverStretchAmount);
         } else if (mIsSplitShade) {
-            return clockYPosition;
+            return Math.max(0, clockYPosition - mSplitShadeTopNotificationsMargin);
         } else {
             return clockYPosition + mKeyguardStatusHeight;
         }
@@ -224,14 +223,18 @@ public class KeyguardClockPositionAlgorithm {
         if (mBypassEnabled) {
             return mUnlockedStackScrollerPadding;
         } else if (mIsSplitShade) {
-            return mMinTopMargin;
+            return Math.max(mSplitShadeTargetTopMargin, mMinTopMargin);
         } else {
             return mMinTopMargin + mKeyguardStatusHeight;
         }
     }
 
     private int getExpandedPreferredClockY() {
-        return mMinTopMargin + mUserSwitchHeight;
+        if (mIsSplitShade) {
+            return Math.max(mSplitShadeTargetTopMargin, mMinTopMargin);
+        } else {
+            return mMinTopMargin;
+        }
     }
 
     public int getLockscreenStatusViewHeight() {
