@@ -7,6 +7,9 @@
           "include-filter": "com.android.server.locales."
         }
       ]
+    },
+    {
+      "name": "CtsLocaleManagerTestCases"
     }
   ]
 }
