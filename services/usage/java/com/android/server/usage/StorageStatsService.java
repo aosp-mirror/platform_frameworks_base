@@ -94,7 +94,8 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     private static final String PROP_DISABLE_QUOTA = "fw.disable_quota";
     private static final String PROP_VERIFY_STORAGE = "fw.verify_storage";
 
-    private static final long DELAY_IN_MILLIS = 30 * DateUtils.SECOND_IN_MILLIS;
+    private static final long DELAY_CHECK_STORAGE_DELTA = 30 * DateUtils.SECOND_IN_MILLIS;
+    private static final long DELAY_RECALCULATE_QUOTAS = 10 * DateUtils.HOUR_IN_MILLIS;
     private static final long DEFAULT_QUOTA = DataUnit.MEBIBYTES.toBytes(64);
 
     public static class Lifecycle extends SystemService {
@@ -529,6 +530,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     private class H extends Handler {
         private static final int MSG_CHECK_STORAGE_DELTA = 100;
         private static final int MSG_LOAD_CACHED_QUOTAS_FROM_FILE = 101;
+        private static final int MSG_RECALCULATE_QUOTAS = 102;
         /**
          * By only triggering a re-calculation after the storage has changed sizes, we can avoid
          * recalculating quotas too often. Minimum change delta defines the percentage of change
@@ -568,7 +570,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                         recalculateQuotas(getInitializedStrategy());
                         notifySignificantDelta();
                     }
-                    sendEmptyMessageDelayed(MSG_CHECK_STORAGE_DELTA, DELAY_IN_MILLIS);
+                    sendEmptyMessageDelayed(MSG_CHECK_STORAGE_DELTA, DELAY_CHECK_STORAGE_DELTA);
                     break;
                 }
                 case MSG_LOAD_CACHED_QUOTAS_FROM_FILE: {
@@ -588,7 +590,13 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                         mPreviousBytes = mStats.getAvailableBytes();
                         recalculateQuotas(strategy);
                     }
-                    sendEmptyMessageDelayed(MSG_CHECK_STORAGE_DELTA, DELAY_IN_MILLIS);
+                    sendEmptyMessageDelayed(MSG_CHECK_STORAGE_DELTA, DELAY_CHECK_STORAGE_DELTA);
+                    sendEmptyMessageDelayed(MSG_RECALCULATE_QUOTAS, DELAY_RECALCULATE_QUOTAS);
+                    break;
+                }
+                case MSG_RECALCULATE_QUOTAS: {
+                    recalculateQuotas(getInitializedStrategy());
+                    sendEmptyMessageDelayed(MSG_RECALCULATE_QUOTAS, DELAY_RECALCULATE_QUOTAS);
                     break;
                 }
                 default:

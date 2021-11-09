@@ -25,7 +25,6 @@ import static org.hamcrest.core.Is.is;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
-import android.window.TaskSnapshot;
 import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -41,6 +40,7 @@ import android.util.Pair;
 import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationTarget;
+import android.window.TaskSnapshot;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.lifecycle.Stage;
@@ -210,7 +210,8 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase
             }
 
             @Override
-            public void onAnimationCanceled(TaskSnapshot taskSnapshot) throws RemoteException {
+            public void onAnimationCanceled(int[] taskIds, TaskSnapshot[] taskSnapshots)
+                    throws RemoteException {
                 Assume.assumeNoException(
                         new AssertionError("onAnimationCanceled should not be called"));
             }

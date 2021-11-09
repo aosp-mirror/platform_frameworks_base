@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -1042,6 +1043,14 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final float OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE = 16 / 9f;
 
     /**
+     * Compares activity window layout min width/height with require space for multi window to
+     * determine if it can be put into multi window mode.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    private static final long CHECK_MIN_WIDTH_HEIGHT_FOR_MULTI_WINDOW = 197654537L;
+
+    /**
      * Convert Java change bits to native.
      *
      * @hide
@@ -1479,6 +1488,17 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             default:
                 return "unknown=" + mode;
         }
+    }
+
+    /**
+     * Whether we should compare activity window layout min width/height with require space for
+     * multi window to determine if it can be put into multi window mode.
+     * @hide
+     */
+    public boolean shouldCheckMinWidthHeightForMultiWindow() {
+        return CompatChanges.isChangeEnabled(CHECK_MIN_WIDTH_HEIGHT_FOR_MULTI_WINDOW,
+                applicationInfo.packageName,
+                UserHandle.getUserHandleForUid(applicationInfo.uid));
     }
 
     public void dump(Printer pw, String prefix) {

@@ -3,15 +3,14 @@ package com.android.systemui.qs
 import android.view.ViewGroup
 import com.android.systemui.qs.dagger.QSFragmentModule.QQS_FOOTER
 import com.android.systemui.qs.dagger.QSScope
-import com.android.systemui.qs.tileimpl.HeightOverrideable
 import javax.inject.Inject
 import javax.inject.Named
 
 @QSScope
 class QSSquishinessController @Inject constructor(
-    private val qsTileHost: QSTileHost,
     @Named(QQS_FOOTER) private val qqsFooterActionsView: FooterActionsView,
     private val qsAnimator: QSAnimator,
+    private val qsPanelController: QSPanelController,
     private val quickQSPanelController: QuickQSPanelController
 ) {
 
@@ -34,17 +33,9 @@ class QSSquishinessController @Inject constructor(
      * Change the height of all tiles and repositions their siblings.
      */
     private fun updateSquishiness() {
-        // Update tile positions in the layout
+        (qsPanelController.tileLayout as QSPanel.QSTileLayout).setSquishinessFraction(squishiness)
         val tileLayout = quickQSPanelController.tileLayout as TileLayout
         tileLayout.setSquishinessFraction(squishiness)
-
-        // Adjust their heights as well
-        for (tile in qsTileHost.tiles) {
-            val tileView = quickQSPanelController.getTileView(tile)
-            (tileView as? HeightOverrideable)?.let {
-                it.squishinessFraction = squishiness
-            }
-        }
 
         // Calculate how much we should move the footer
         val tileHeightOffset = tileLayout.height - tileLayout.tilesHeight

@@ -339,7 +339,6 @@ public class StatusBar extends SystemUI implements
     }
 
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
-    private boolean mCallingFadingAwayAfterReveal;
     private StatusBarCommandQueueCallbacks mCommandQueueCallbacks;
 
     void setWindowState(int state) {
@@ -902,7 +901,7 @@ public class StatusBar extends SystemUI implements
         mStartingSurfaceOptional = startingSurfaceOptional;
         lockscreenShadeTransitionController.setStatusbar(this);
 
-        mPanelExpansionStateManager.addListener(this::onPanelExpansionChanged);
+        mPanelExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged);
 
         mBubbleExpandListener =
                 (isExpanding, key) -> mContext.getMainExecutor().execute(() -> {
@@ -1149,7 +1148,7 @@ public class StatusBar extends SystemUI implements
         mNotificationLogger.setUpWithContainer(notifListContainer);
 
         mNotificationIconAreaController.setupShelf(mNotificationShelfController);
-        mPanelExpansionStateManager.addListener(mWakeUpCoordinator);
+        mPanelExpansionStateManager.addExpansionListener(mWakeUpCoordinator);
 
         mUserSwitcherController.init(mNotificationShadeWindowView);
 
@@ -1164,11 +1163,7 @@ public class StatusBar extends SystemUI implements
                     PhoneStatusBarView oldStatusBarView = mStatusBarView;
                     mStatusBarView = (PhoneStatusBarView) statusBarFragment.getView();
                     mStatusBarView.setBar(this);
-                    mStatusBarView.setPanelStateChangeListener(
-                            mNotificationPanelViewController.getPanelStateChangeListener());
                     mStatusBarView.setScrimController(mScrimController);
-
-                    mNotificationPanelViewController.setBar(mStatusBarView);
 
                     mPhoneStatusBarViewController = mPhoneStatusBarViewControllerFactory
                             .create(mStatusBarView, mNotificationPanelViewController
@@ -1221,6 +1216,7 @@ public class StatusBar extends SystemUI implements
                                 mAnimationScheduler,
                                 mStatusBarLocationPublisher,
                                 mNotificationIconAreaController,
+                                mPanelExpansionStateManager,
                                 mFeatureFlags,
                                 mStatusBarIconController,
                                 mKeyguardStateController,
@@ -3121,20 +3117,8 @@ public class StatusBar extends SystemUI implements
     public void fadeKeyguardWhilePulsing() {
         mNotificationPanelViewController.fadeOut(0, FADE_KEYGUARD_DURATION_PULSING,
                 ()-> {
-                Runnable finishFading = () -> {
-                    mCallingFadingAwayAfterReveal = false;
-                    hideKeyguard();
-                    mStatusBarKeyguardViewManager.onKeyguardFadedAway();
-                };
-                if (mLightRevealScrim.getRevealAmount() != 1.0f) {
-                    mCallingFadingAwayAfterReveal = true;
-                    // We're still revealing the Light reveal, let's only go to keyguard once
-                    // that has finished and nothing moves anymore.
-                    // Going there introduces lots of jank
-                    mLightRevealScrim.setFullyRevealedRunnable(finishFading);
-                } else {
-                    finishFading.run();
-                }
+                hideKeyguard();
+                mStatusBarKeyguardViewManager.onKeyguardFadedAway();
             }).start();
     }
 
@@ -4281,7 +4265,7 @@ public class StatusBar extends SystemUI implements
                         + "mStatusBarKeyguardViewManager was null");
                 return;
             }
-            if (mKeyguardStateController.isKeyguardFadingAway() && !mCallingFadingAwayAfterReveal) {
+            if (mKeyguardStateController.isKeyguardFadingAway()) {
                 mStatusBarKeyguardViewManager.onKeyguardFadedAway();
             }
         }

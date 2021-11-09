@@ -82,6 +82,7 @@ public class TaskFragmentTest extends WindowTestsBase {
 
     @Test
     public void testStartChangeTransition_resetSurface() {
+        mockSurfaceFreezerSnapshot(mTaskFragment.mSurfaceFreezer);
         final Rect startBounds = new Rect(0, 0, 1000, 1000);
         final Rect endBounds = new Rect(500, 500, 1000, 1000);
         mTaskFragment.setBounds(startBounds);

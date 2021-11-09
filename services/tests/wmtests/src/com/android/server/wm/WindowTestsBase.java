@@ -75,6 +75,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -867,6 +868,21 @@ class WindowTestsBase extends SystemServiceTestsBase {
     /** Sets the default minimum task size to 1 so that tests can use small task sizes */
     public void removeGlobalMinSizeRestriction() {
         mAtm.mRootWindowContainer.mDefaultMinSizeOfResizeableTaskDp = 1;
+    }
+
+    /** Mocks the behavior of taking a snapshot. */
+    void mockSurfaceFreezerSnapshot(SurfaceFreezer surfaceFreezer) {
+        final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+                mock(SurfaceControl.ScreenshotHardwareBuffer.class);
+        final HardwareBuffer hardwareBuffer = mock(HardwareBuffer.class);
+        spyOn(surfaceFreezer);
+        doReturn(screenshotBuffer).when(surfaceFreezer)
+                .createSnapshotBufferInner(any(), any());
+        doReturn(null).when(surfaceFreezer)
+                .createFromHardwareBufferInner(any());
+        doReturn(hardwareBuffer).when(screenshotBuffer).getHardwareBuffer();
+        doReturn(100).when(hardwareBuffer).getWidth();
+        doReturn(100).when(hardwareBuffer).getHeight();
     }
 
     /**

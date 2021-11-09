@@ -131,6 +131,9 @@ public class InsetsResizeAnimationRunner implements InsetsAnimationControlRunner
 
     @Override
     public boolean applyChangeInsets(InsetsState outState) {
+        if (mCancelled) {
+            return false;
+        }
         final float fraction = mAnimation.getInterpolatedFraction();
         for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
             final InsetsSource fromSource = mFromState.peekSource(type);

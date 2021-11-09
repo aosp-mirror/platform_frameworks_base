@@ -114,6 +114,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
+import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.wmshell.BubblesManager;
 
@@ -1568,6 +1569,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     public void initialize(
             NotificationEntry entry,
+            RemoteInputViewSubcomponent.Factory rivSubcomponentFactory,
             String appName,
             String notificationKey,
             ExpansionLogger logger,
@@ -1612,6 +1614,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
         for (NotificationContentView l : mLayouts) {
             l.setPeopleNotificationIdentifier(mPeopleNotificationIdentifier);
+            l.setRemoteInputViewSubcomponentFactory(rivSubcomponentFactory);
         }
         mOnUserInteractionCallback = onUserInteractionCallback;
         mBubblesManagerOptional = bubblesManagerOptional;

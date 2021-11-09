@@ -28,6 +28,7 @@ import static android.content.pm.parsing.ParsingUtils.DEFAULT_TARGET_SDK_VERSION
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import android.annotation.NonNull;
+import android.app.admin.DeviceAdminReceiver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
@@ -399,6 +400,8 @@ public class ApkLiteParseUtils {
         String requiredSystemPropertyName = null;
         String requiredSystemPropertyValue = null;
 
+        boolean hasDeviceAdminReceiver = false;
+
         // Only search the tree when the tag is the direct child of <manifest> tag
         int type;
         final int searchDepth = parser.getDepth() + 1;
@@ -432,6 +435,10 @@ public class ApkLiteParseUtils {
                         "useEmbeddedDex", false);
                 rollbackDataPolicy = parser.getAttributeIntValue(ANDROID_RES_NAMESPACE,
                         "rollbackDataPolicy", 0);
+                String permission = parser.getAttributeValue(ANDROID_RES_NAMESPACE,
+                        "permission");
+                boolean hasBindDeviceAdminPermission =
+                        android.Manifest.permission.BIND_DEVICE_ADMIN.equals(permission);
 
                 final int innerDepth = parser.getDepth();
                 int innerType;
@@ -449,6 +456,9 @@ public class ApkLiteParseUtils {
                     if (ParsingPackageUtils.TAG_PROFILEABLE.equals(parser.getName())) {
                         profilableByShell = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
                                 "shell", profilableByShell);
+                    } else if (ParsingPackageUtils.TAG_RECEIVER.equals(parser.getName())) {
+                        hasDeviceAdminReceiver |= isDeviceAdminReceiver(
+                                parser, hasBindDeviceAdminPermission);
                     }
                 }
             } else if (ParsingPackageUtils.TAG_OVERLAY.equals(parser.getName())) {
@@ -541,7 +551,42 @@ public class ApkLiteParseUtils {
                         useEmbeddedDex, extractNativeLibs, isolatedSplits, targetPackage,
                         overlayIsStatic, overlayPriority, requiredSystemPropertyName,
                         requiredSystemPropertyValue, minSdkVersion, targetSdkVersion,
-                        rollbackDataPolicy, requiredSplitTypes.first, requiredSplitTypes.second));
+                        rollbackDataPolicy, requiredSplitTypes.first, requiredSplitTypes.second,
+                        hasDeviceAdminReceiver));
+    }
+
+    private static boolean isDeviceAdminReceiver(
+            XmlResourceParser parser, boolean applicationHasBindDeviceAdminPermission)
+            throws XmlPullParserException, IOException {
+        String permission = parser.getAttributeValue(ANDROID_RES_NAMESPACE,
+                "permission");
+        if (!applicationHasBindDeviceAdminPermission
+                && !android.Manifest.permission.BIND_DEVICE_ADMIN.equals(permission)) {
+            return false;
+        }
+
+        boolean hasDeviceAdminReceiver = false;
+        final int depth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > depth)) {
+            if (type == XmlPullParser.END_TAG
+                    || type == XmlPullParser.TEXT) {
+                continue;
+            }
+            if (parser.getDepth() != depth + 1) {
+                // Search only under <receiver>.
+                continue;
+            }
+            if (!hasDeviceAdminReceiver && "meta-data".equals(parser.getName())) {
+                String name = parser.getAttributeValue(ANDROID_RES_NAMESPACE,
+                        "name");
+                if (DeviceAdminReceiver.DEVICE_ADMIN_META_DATA.equals(name)) {
+                    hasDeviceAdminReceiver = true;
+                }
+            }
+        }
+        return hasDeviceAdminReceiver;
     }
 
     public static ParseResult<Pair<String, String>> parsePackageSplitNames(ParseInput input,

@@ -1266,6 +1266,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     public void notifyFinished(InsetsAnimationControlRunner runner, boolean shown) {
         cancelAnimation(runner, false /* invokeCallback */);
         if (DEBUG) Log.d(TAG, "notifyFinished. shown: " + shown);
+        if (runner.getAnimationType() == ANIMATION_TYPE_RESIZE) {
+            // The resize animation doesn't show or hide the insets. We shouldn't change the
+            // requested visibility.
+            return;
+        }
         if (shown) {
             showDirectly(runner.getTypes(), true /* fromIme */);
         } else {

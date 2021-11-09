@@ -52,6 +52,14 @@ public class LogModule {
         return factory.create("NotifLog", 1000);
     }
 
+    /** Provides a logging buffer for all logs related to the data layer of notifications. */
+    @Provides
+    @SysUISingleton
+    @NotificationHeadsUpLog
+    public static LogBuffer provideNotificationHeadsUpLogBuffer(LogBufferFactory factory) {
+        return factory.create("NotifHeadsUpLog", 1000);
+    }
+
     /** Provides a logging buffer for all logs related to managing notification sections. */
     @Provides
     @SysUISingleton

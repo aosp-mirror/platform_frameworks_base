@@ -54,40 +54,6 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun panelStateChanged_toStateOpening_listenerNotified() {
-        val listener = TestStateChangedListener()
-        view.setPanelStateChangeListener(listener)
-
-        view.panelExpansionChanged(0.5f, true)
-
-        assertThat(listener.state).isEqualTo(PanelBar.STATE_OPENING)
-    }
-
-    @Test
-    fun panelStateChanged_toStateOpen_listenerNotified() {
-        val listener = TestStateChangedListener()
-        view.setPanelStateChangeListener(listener)
-
-        view.panelExpansionChanged(1f, true)
-
-        assertThat(listener.state).isEqualTo(PanelBar.STATE_OPEN)
-    }
-
-    @Test
-    fun panelStateChanged_toStateClosed_listenerNotified() {
-        val listener = TestStateChangedListener()
-        view.setPanelStateChangeListener(listener)
-
-        // First, open the panel
-        view.panelExpansionChanged(1f, true)
-
-        // Then, close it again
-        view.panelExpansionChanged(0f, false)
-
-        assertThat(listener.state).isEqualTo(PanelBar.STATE_CLOSED)
-    }
-
-    @Test
     fun onTouchEvent_listenerNotified() {
         val handler = TestTouchEventHandler()
         view.setTouchEventHandler(handler)
@@ -124,13 +90,6 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     fun onTouchEvent_noListener_noCrash() {
         view.onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
         // No assert needed, just testing no crash
-    }
-
-    private class TestStateChangedListener : PanelBar.PanelStateChangeListener {
-        var state: Int = 0
-        override fun onStateChanged(state: Int) {
-            this.state = state
-        }
     }
 
     private class TestTouchEventHandler : PhoneStatusBarView.TouchEventHandler {
