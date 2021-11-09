@@ -18,7 +18,12 @@ package com.android.systemui.flags;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import android.content.res.Resources;
 
 import androidx.test.filters.SmallTest;
 
@@ -29,11 +34,13 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 
 @SmallTest
 public class FeatureFlagsTest extends SysuiTestCase {
 
-    @Mock FeatureFlagReader mFeatureFlagReader;
+    @Mock Resources mResources;
+    @Mock FlagReader mFeatureFlagReader;
 
     private FeatureFlags mFeatureFlags;
 
@@ -41,7 +48,10 @@ public class FeatureFlagsTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mFeatureFlags = new FeatureFlags(mFeatureFlagReader, getContext());
+        when(mFeatureFlagReader.isEnabled(anyInt(), anyBoolean())).thenAnswer(
+                (Answer<Boolean>) invocation -> invocation.getArgument(1));
+
+        mFeatureFlags = new FeatureFlags(mResources, mFeatureFlagReader, getContext());
     }
 
     @Test
@@ -103,6 +113,26 @@ public class FeatureFlagsTest extends SysuiTestCase {
         pluginListener.onFlagChanged(flag.getId());
         // Assert that the change was not triggered
         assertThat(changedFlag[0]).isNull();
+    }
 
+    @Test
+    public void testBooleanDefault() {
+        BooleanFlag flag = new BooleanFlag(1, true);
+
+        mFeatureFlags.addFlag(flag);
+
+        assertThat(mFeatureFlags.isEnabled(flag)).isTrue();
+    }
+
+    @Test
+    public void testBooleanResourceOverlay() {
+        int resourceId = 12;
+        BooleanFlag flag = new BooleanFlag(1, false, resourceId);
+        when(mResources.getBoolean(resourceId)).thenReturn(true);
+        when(mResources.getResourceEntryName(resourceId)).thenReturn("flag");
+
+        mFeatureFlags.addFlag(flag);
+
+        assertThat(mFeatureFlags.isEnabled(flag)).isTrue();
     }
 }
