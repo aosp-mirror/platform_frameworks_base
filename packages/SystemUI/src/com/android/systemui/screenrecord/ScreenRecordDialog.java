@@ -26,7 +26,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.Gravity;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -34,34 +33,38 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.R;
 import com.android.systemui.settings.UserContextProvider;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
 /**
- * Activity to select screen recording options
+ * Dialog to select screen recording options
  */
-public class ScreenRecordDialog extends Activity {
+public class ScreenRecordDialog extends SystemUIDialog {
+    private static final List<ScreenRecordingAudioSource> MODES = Arrays.asList(INTERNAL, MIC,
+            MIC_AND_INTERNAL);
     private static final long DELAY_MS = 3000;
     private static final long INTERVAL_MS = 1000;
-    private static final String TAG = "ScreenRecordDialog";
 
     private final RecordingController mController;
     private final UserContextProvider mUserContextProvider;
+    @Nullable
+    private final Runnable mOnStartRecordingClicked;
     private Switch mTapsSwitch;
     private Switch mAudioSwitch;
     private Spinner mOptions;
-    private List<ScreenRecordingAudioSource> mModes;
 
-    @Inject
-    public ScreenRecordDialog(RecordingController controller,
-            UserContextProvider userContextProvider) {
+    public ScreenRecordDialog(Context context, RecordingController controller,
+            UserContextProvider userContextProvider, @Nullable Runnable onStartRecordingClicked) {
+        super(context);
         mController = controller;
         mUserContextProvider = userContextProvider;
+        mOnStartRecordingClicked = onStartRecordingClicked;
     }
 
     @Override
@@ -69,37 +72,35 @@ public class ScreenRecordDialog extends Activity {
         super.onCreate(savedInstanceState);
 
         Window window = getWindow();
-        // Inflate the decor view, so the attributes below are not overwritten by the theme.
-        window.getDecorView();
-        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
         window.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS);
-        window.setGravity(Gravity.TOP);
+
+        window.setGravity(Gravity.CENTER);
         setTitle(R.string.screenrecord_name);
 
         setContentView(R.layout.screen_record_dialog);
 
         TextView cancelBtn = findViewById(R.id.button_cancel);
-        cancelBtn.setOnClickListener(v -> {
-            finish();
-        });
+        cancelBtn.setOnClickListener(v -> dismiss());
 
         TextView startBtn = findViewById(R.id.button_start);
         startBtn.setOnClickListener(v -> {
-            requestScreenCapture();
-            finish();
-        });
+            if (mOnStartRecordingClicked != null) {
+                // Note that it is important to run this callback before dismissing, so that the
+                // callback can disable the dialog exit animation if it wants to.
+                mOnStartRecordingClicked.run();
+            }
 
-        mModes = new ArrayList<>();
-        mModes.add(INTERNAL);
-        mModes.add(MIC);
-        mModes.add(MIC_AND_INTERNAL);
+            requestScreenCapture();
+            dismiss();
+        });
 
         mAudioSwitch = findViewById(R.id.screenrecord_audio_switch);
         mTapsSwitch = findViewById(R.id.screenrecord_taps_switch);
         mOptions = findViewById(R.id.screen_recording_options);
-        ArrayAdapter a = new ScreenRecordingAdapter(getApplicationContext(),
+        ArrayAdapter a = new ScreenRecordingAdapter(getContext().getApplicationContext(),
                 android.R.layout.simple_spinner_dropdown_item,
-                mModes);
+                MODES);
         a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mOptions.setAdapter(a);
         mOptions.setOnItemClickListenerInt((parent, view, position, id) -> {
@@ -116,7 +117,7 @@ public class ScreenRecordDialog extends Activity {
         PendingIntent startIntent = PendingIntent.getForegroundService(userContext,
                 RecordingService.REQUEST_CODE,
                 RecordingService.getStartIntent(
-                        userContext, RESULT_OK,
+                        userContext, Activity.RESULT_OK,
                         audioMode.ordinal(), showTaps),
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         PendingIntent stopIntent = PendingIntent.getService(userContext,
