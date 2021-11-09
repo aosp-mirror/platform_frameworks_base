@@ -8018,11 +8018,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 crashInfo.throwFileName,
                 crashInfo.throwLineNumber);
 
+        int processClassEnum = processName.equals("system_server") ? ServerProtoEnums.SYSTEM_SERVER
+                : (r != null) ? r.getProcessClassEnum()
+                        : ServerProtoEnums.ERROR_SOURCE_UNKNOWN;
+        int uid = (r != null) ? r.uid : -1;
+        int pid = (r != null) ? r.getPid() : -1;
         FrameworkStatsLog.write(FrameworkStatsLog.APP_CRASH_OCCURRED,
-                (r != null) ? r.uid : -1,
+                uid,
                 eventType,
                 processName,
-                (r != null) ? r.getPid() : -1,
+                pid,
                 (r != null && r.info != null) ? r.info.packageName : "",
                 (r != null && r.info != null) ? (r.info.isInstantApp()
                         ? FrameworkStatsLog.APP_CRASH_OCCURRED__IS_INSTANT_APP__TRUE
@@ -8032,9 +8037,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         ? FrameworkStatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__FOREGROUND
                         : FrameworkStatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__BACKGROUND)
                         : FrameworkStatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__UNKNOWN,
-                processName.equals("system_server") ? ServerProtoEnums.SYSTEM_SERVER
-                        : (r != null) ? r.getProcessClassEnum()
-                                      : ServerProtoEnums.ERROR_SOURCE_UNKNOWN,
+                processClassEnum,
                 incrementalMetrics != null /* isIncremental */, loadingProgress,
                 incrementalMetrics != null ? incrementalMetrics.getMillisSinceOldestPendingRead()
                         : -1,
@@ -8060,6 +8063,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 incrementalMetrics != null ? incrementalMetrics.getTotalDelayedReadsDurationMillis()
                         : -1
         );
+
+        if (eventType.equals("native_crash")) {
+            CriticalEventLog.getInstance().logNativeCrash(processClassEnum, processName, uid, pid);
+        } else if (eventType.equals("crash")) {
+            CriticalEventLog.getInstance().logJavaCrash(crashInfo.exceptionClassName,
+                    processClassEnum, processName, uid, pid);
+        }
 
         final int relaunchReason = r == null ? RELAUNCH_REASON_NONE
                         : r.getWindowProcessController().computeRelaunchReason();
