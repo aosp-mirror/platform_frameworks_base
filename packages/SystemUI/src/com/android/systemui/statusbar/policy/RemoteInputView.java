@@ -138,6 +138,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private boolean mRemoved;
     private NotificationViewWrapper mWrapper;
 
+    // TODO(b/193539698): remove this; views shouldn't have access to their controller, and places
+    //  that need the controller shouldn't have access to the view
+    private RemoteInputViewController mViewController;
+
     /**
      * Enum for logged notification remote input UiEvents.
      */
@@ -283,6 +287,24 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         });
     }
 
+    /**
+     * @deprecated TODO(b/193539698): views shouldn't have access to their controller, and places
+     *  that need the controller shouldn't have access to the view
+     */
+    @Deprecated
+    public void setController(RemoteInputViewController controller) {
+        mViewController = controller;
+    }
+
+    /**
+     * @deprecated TODO(b/193539698): views shouldn't have access to their controller, and places
+     *  that need the controller shouldn't have access to the view
+     */
+    @Deprecated
+    public RemoteInputViewController getController() {
+        return mViewController;
+    }
+
     @VisibleForTesting
     protected void setAttachment(ContentInfo item) {
         if (mEntry.remoteInputAttachment != null && mEntry.remoteInputAttachment != item) {
@@ -298,6 +320,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             mEntry.remoteInputUri = item.getClip().getItemAt(0).getUri();
             mEntry.remoteInputMimeType = item.getClip().getDescription().getMimeType(0);
         }
+
         View attachment = findViewById(R.id.remote_input_content_container);
         ImageView iconView = findViewById(R.id.remote_input_attachment_image);
         iconView.setImageDrawable(null);
