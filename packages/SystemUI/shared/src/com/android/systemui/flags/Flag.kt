@@ -22,15 +22,21 @@ import android.os.Parcelable
 interface Flag<T> : Parcelable {
     val id: Int
     val default: T
+    val resourceOverride: Int
 
     override fun describeContents() = 0
+
+    fun hasResourceOverride(): Boolean {
+        return resourceOverride != -1
+    }
 }
 
 // Consider using the "parcelize" kotlin library.
 
 data class BooleanFlag @JvmOverloads constructor(
     override val id: Int,
-    override val default: Boolean = false
+    override val default: Boolean = false,
+    override val resourceOverride: Int = -1
 ) : Flag<Boolean> {
 
     companion object {
@@ -54,7 +60,8 @@ data class BooleanFlag @JvmOverloads constructor(
 
 data class StringFlag @JvmOverloads constructor(
     override val id: Int,
-    override val default: String = ""
+    override val default: String = "",
+    override val resourceOverride: Int = -1
 ) : Flag<String> {
     companion object {
         @JvmField
@@ -77,7 +84,8 @@ data class StringFlag @JvmOverloads constructor(
 
 data class IntFlag @JvmOverloads constructor(
     override val id: Int,
-    override val default: Int = 0
+    override val default: Int = 0,
+    override val resourceOverride: Int = -1
 ) : Flag<Int> {
 
     companion object {
@@ -101,7 +109,8 @@ data class IntFlag @JvmOverloads constructor(
 
 data class LongFlag @JvmOverloads constructor(
     override val id: Int,
-    override val default: Long = 0
+    override val default: Long = 0,
+    override val resourceOverride: Int = -1
 ) : Flag<Long> {
 
     companion object {
@@ -125,7 +134,8 @@ data class LongFlag @JvmOverloads constructor(
 
 data class FloatFlag @JvmOverloads constructor(
     override val id: Int,
-    override val default: Float = 0f
+    override val default: Float = 0f,
+    override val resourceOverride: Int = -1
 ) : Flag<Float> {
 
     companion object {
@@ -149,7 +159,8 @@ data class FloatFlag @JvmOverloads constructor(
 
 data class DoubleFlag @JvmOverloads constructor(
     override val id: Int,
-    override val default: Double = 0.0
+    override val default: Double = 0.0,
+    override val resourceOverride: Int = -1
 ) : Flag<Double> {
 
     companion object {
