@@ -16,18 +16,15 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
 
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.DisplayCutout;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +38,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.statusbar.window.StatusBarWindowView;
 import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.Objects;
@@ -219,17 +215,18 @@ public class PhoneStatusBarView extends FrameLayout {
 
     private void updateLayoutForCutout() {
         updateStatusBarHeight();
-        updateCutoutLocation(StatusBarWindowView.cornerCutoutMargins(mDisplayCutout, getDisplay()));
+        updateCutoutLocation();
         updateSafeInsets();
     }
 
-    private void updateCutoutLocation(Pair<Integer, Integer> cornerCutoutMargins) {
+    private void updateCutoutLocation() {
         // Not all layouts have a cutout (e.g., Car)
         if (mCutoutSpace == null) {
             return;
         }
 
-        if (mDisplayCutout == null || mDisplayCutout.isEmpty() || cornerCutoutMargins != null) {
+        boolean hasCornerCutout = mContentInsetsProvider.currentRotationHasCornerCutout();
+        if (mDisplayCutout == null || mDisplayCutout.isEmpty() || hasCornerCutout) {
             mCenterIconSpace.setVisibility(View.VISIBLE);
             mCutoutSpace.setVisibility(View.GONE);
             return;
@@ -239,8 +236,7 @@ public class PhoneStatusBarView extends FrameLayout {
         mCutoutSpace.setVisibility(View.VISIBLE);
         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mCutoutSpace.getLayoutParams();
 
-        Rect bounds = new Rect();
-        boundsFromDirection(mDisplayCutout, Gravity.TOP, bounds);
+        Rect bounds = mDisplayCutout.getBoundingRectTop();
 
         bounds.left = bounds.left + mCutoutSideNudge;
         bounds.right = bounds.right - mCutoutSideNudge;
@@ -249,16 +245,13 @@ public class PhoneStatusBarView extends FrameLayout {
     }
 
     private void updateSafeInsets() {
-        Rect contentRect = mContentInsetsProvider
-                .getStatusBarContentInsetsForRotation(RotationUtils.getExactRotation(getContext()));
-
-        Point size = new Point();
-        getDisplay().getRealSize(size);
+        Pair<Integer, Integer> insets = mContentInsetsProvider
+                .getStatusBarContentInsetsForCurrentRotation();
 
         setPadding(
-                contentRect.left,
+                insets.first,
                 getPaddingTop(),
-                size.x - contentRect.right,
+                insets.second,
                 getPaddingBottom());
     }
 

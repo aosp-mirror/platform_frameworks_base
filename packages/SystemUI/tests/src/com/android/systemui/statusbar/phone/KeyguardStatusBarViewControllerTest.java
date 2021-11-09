@@ -85,6 +85,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     private BiometricUnlockController mBiometricUnlockController;
     @Mock
     private SysuiStatusBarStateController mStatusBarStateController;
+    @Mock
+    private StatusBarContentInsetsProvider mStatusBarContentInsetsProvider;
 
     private TestNotificationPanelViewStateProvider mNotificationPanelViewStateProvider;
     private KeyguardStatusBarView mKeyguardStatusBarView;
@@ -118,7 +120,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mKeyguardBypassController,
                 mKeyguardUpdateMonitor,
                 mBiometricUnlockController,
-                mStatusBarStateController
+                mStatusBarStateController,
+                mStatusBarContentInsetsProvider
         );
     }
 
