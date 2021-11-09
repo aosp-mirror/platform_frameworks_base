@@ -34,6 +34,7 @@ import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.policy.Clock
@@ -106,6 +107,8 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     private lateinit var context: Context
     @Mock
     private lateinit var featureFlags: FeatureFlags
+    @Mock
+    private lateinit var insetsProvider: StatusBarContentInsetsProvider
 
     private val qsExpansionPathInterpolator = QSExpansionPathInterpolator()
 
@@ -149,7 +152,8 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
                 qsExpansionPathInterpolator,
                 batteryMeterViewController,
                 featureFlags,
-                variableDateViewControllerFactory
+                variableDateViewControllerFactory,
+                insetsProvider
         )
     }
 
@@ -248,7 +252,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         controller.init()
 
         val captor = argumentCaptor<List<String>>()
-        verify(view).onAttach(any(), any(), capture(captor), anyBoolean())
+        verify(view).onAttach(any(), any(), capture(captor), anyBoolean(), any())
 
         assertThat(captor.value).containsExactly(
             mContext.getString(com.android.internal.R.string.status_bar_mobile)
@@ -261,7 +265,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         controller.init()
 
         val captor = argumentCaptor<List<String>>()
-        verify(view).onAttach(any(), any(), capture(captor), anyBoolean())
+        verify(view).onAttach(any(), any(), capture(captor), anyBoolean(), any())
 
         assertThat(captor.value).containsExactly(
             mContext.getString(com.android.internal.R.string.status_bar_no_calling),
