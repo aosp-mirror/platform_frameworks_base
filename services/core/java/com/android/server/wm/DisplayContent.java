@@ -6162,7 +6162,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // Reparent the SurfaceControl of this DisplayContent to null, to prevent content
                 // being added to it. This ensures that no app launched explicitly on the
                 // VirtualDisplay will show up as part of the mirrored content.
-                .reparent(mWindowingLayer, null);
+                .reparent(mWindowingLayer, null)
+                .reparent(mOverlayLayer, null);
         // Retrieve the size of the DisplayArea to mirror.
         updateMirroredSurface(transaction, wc.getDisplayContent().getBounds(), surfaceSize);
         mTokenToMirror = tokenToMirror;
@@ -6192,7 +6193,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     // Reparent the SurfaceControl of this DisplayContent back to mSurfaceControl,
                     // to allow content to be added to it. This allows this DisplayContent to stop
                     // mirroring and show content normally.
-                    .reparent(mWindowingLayer, mSurfaceControl).apply();
+                    .reparent(mWindowingLayer, mSurfaceControl)
+                    .reparent(mOverlayLayer, mSurfaceControl)
+                    .apply();
             // Stop mirroring by destroying the reference to the mirrored layer.
             mMirroredSurface = null;
             // Do not un-set the token, in case content is removed and mirroring should begin again.
