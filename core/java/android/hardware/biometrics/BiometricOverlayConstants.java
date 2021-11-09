@@ -38,13 +38,16 @@ public interface BiometricOverlayConstants {
     int REASON_AUTH_KEYGUARD = 4;
     /** Non-specific usage (from FingerprintManager). */
     int REASON_AUTH_OTHER = 5;
+    /** Usage from Settings. */
+    int REASON_AUTH_SETTINGS = 6;
 
     @IntDef({REASON_UNKNOWN,
             REASON_ENROLL_FIND_SENSOR,
             REASON_ENROLL_ENROLLING,
             REASON_AUTH_BP,
             REASON_AUTH_KEYGUARD,
-            REASON_AUTH_OTHER})
+            REASON_AUTH_OTHER,
+            REASON_AUTH_SETTINGS})
     @Retention(RetentionPolicy.SOURCE)
     @interface ShowReason {}
 }

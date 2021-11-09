@@ -7915,7 +7915,7 @@ public class Notification implements Parcelable
          * Adds a message for display by this notification. Convenience call for a simple
          * {@link Message} in {@link #addMessage(Notification.MessagingStyle.Message)}.
          * @param text A {@link CharSequence} to be displayed as the message content
-         * @param timestamp Time at which the message arrived
+         * @param timestamp Time in milliseconds at which the message arrived
          * @param sender A {@link CharSequence} to be used for displaying the name of the
          * sender. Should be <code>null</code> for messages by the current user, in which case
          * the platform will insert {@link #getUserDisplayName()}.
@@ -7937,7 +7937,7 @@ public class Notification implements Parcelable
          * Adds a message for display by this notification. Convenience call for a simple
          * {@link Message} in {@link #addMessage(Notification.MessagingStyle.Message)}.
          * @param text A {@link CharSequence} to be displayed as the message content
-         * @param timestamp Time at which the message arrived
+         * @param timestamp Time in milliseconds at which the message arrived
          * @param sender The {@link Person} who sent the message.
          * Should be <code>null</code> for messages by the current user, in which case
          * the platform will insert the user set in {@code MessagingStyle(Person)}.

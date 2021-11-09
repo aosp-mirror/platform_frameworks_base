@@ -115,7 +115,8 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
         mBlueFill.setColor(context.getColor(R.color.udfps_moving_target_fill));
         mBlueFill.setStyle(Paint.Style.FILL);
 
-        mMovingTargetFpIcon = context.getResources().getDrawable(R.drawable.ic_fingerprint, null);
+        mMovingTargetFpIcon = context.getResources()
+                .getDrawable(R.drawable.ic_kg_fingerprint, null);
         mMovingTargetFpIcon.setTint(Color.WHITE);
         mMovingTargetFpIcon.mutate();
 

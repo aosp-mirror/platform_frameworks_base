@@ -2710,7 +2710,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final ActivityInfo.WindowLayout windowLayout = info.windowLayout;
         return windowLayout == null
                 || tda.supportsActivityMinWidthHeightMultiWindow(windowLayout.minWidth,
-                windowLayout.minHeight);
+                windowLayout.minHeight, info);
     }
 
     /**
@@ -5695,7 +5695,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     destroyImmediately("stop-config");
                     mRootWindowContainer.resumeFocusedTasksTopActivities();
                 } else {
-                    mRootWindowContainer.updatePreviousProcess(this);
+                    mAtmService.updatePreviousProcess(this);
                 }
             }
             mTaskSupervisor.checkReadyForSleepLocked(true /* allowDelay */);

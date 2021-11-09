@@ -271,7 +271,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 ScrimController.this.onThemeChanged();
             }
         });
-        panelExpansionStateManager.addListener(
+        panelExpansionStateManager.addExpansionListener(
                 (fraction, expanded, tracking) -> setRawPanelExpansionFraction(fraction)
         );
 

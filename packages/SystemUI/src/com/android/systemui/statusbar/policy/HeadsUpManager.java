@@ -26,7 +26,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.provider.Settings;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
@@ -81,7 +80,8 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         }
     }
 
-    public HeadsUpManager(@NonNull final Context context) {
+    public HeadsUpManager(@NonNull final Context context, HeadsUpManagerLogger logger) {
+        super(logger);
         mContext = context;
         mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
         mUiEventLogger = Dependency.get(UiEventLogger.class);
@@ -102,9 +102,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
                         context.getContentResolver(), SETTING_HEADS_UP_SNOOZE_LENGTH_MS, -1);
                 if (packageSnoozeLengthMs > -1 && packageSnoozeLengthMs != mSnoozeLengthMs) {
                     mSnoozeLengthMs = packageSnoozeLengthMs;
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, "mSnoozeLengthMs = " + mSnoozeLengthMs);
-                    }
+                    mLogger.logSnoozeLengthChange(packageSnoozeLengthMs);
                 }
             }
         };
@@ -145,9 +143,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
 
     protected void setEntryPinned(
             @NonNull HeadsUpManager.HeadsUpEntry headsUpEntry, boolean isPinned) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "setEntryPinned: " + isPinned);
-        }
+        mLogger.logSetEntryPinned(headsUpEntry.mEntry.getKey(), isPinned);
         NotificationEntry entry = headsUpEntry.mEntry;
         if (entry.isRowPinned() != isPinned) {
             entry.setRowPinned(isPinned);
@@ -198,10 +194,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         if (hasPinnedNotification == mHasPinnedNotification) {
             return;
         }
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "Pinned mode changed: " + mHasPinnedNotification + " -> " +
-                       hasPinnedNotification);
-        }
+        mLogger.logUpdatePinnedMode(hasPinnedNotification);
         mHasPinnedNotification = hasPinnedNotification;
         if (mHasPinnedNotification) {
             MetricsLogger.count(mContext, "note_peek", 1);
@@ -219,12 +212,11 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         Long snoozedUntil = mSnoozedPackages.get(key);
         if (snoozedUntil != null) {
             if (snoozedUntil > mClock.currentTimeMillis()) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, key + " snoozed");
-                }
+                mLogger.logIsSnoozedReturned(key);
                 return true;
             }
-            mSnoozedPackages.remove(packageName);
+            mLogger.logPackageUnsnoozed(key);
+            mSnoozedPackages.remove(key);
         }
         return false;
     }
@@ -236,8 +228,9 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         for (String key : mAlertEntries.keySet()) {
             AlertEntry entry = getHeadsUpEntry(key);
             String packageName = entry.mEntry.getSbn().getPackageName();
-            mSnoozedPackages.put(snoozeKey(packageName, mUser),
-                    mClock.currentTimeMillis() + mSnoozeLengthMs);
+            String snoozeKey = snoozeKey(packageName, mUser);
+            mLogger.logPackageSnoozed(snoozeKey);
+            mSnoozedPackages.put(snoozeKey, mClock.currentTimeMillis() + mSnoozeLengthMs);
         }
     }
 

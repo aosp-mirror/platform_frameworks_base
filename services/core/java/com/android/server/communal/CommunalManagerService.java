@@ -17,27 +17,39 @@
 package com.android.server.communal;
 
 import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
+import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 
 import static com.android.server.wm.ActivityInterceptorCallback.COMMUNAL_MODE_ORDERED_ID;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.TestApi;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.communal.ICommunalManager;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.Overridable;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
-import android.database.ContentObserver;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.dreams.DreamManagerInternal;
 import android.text.TextUtils;
+import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LaunchAfterAuthenticationActivity;
@@ -47,6 +59,7 @@ import com.android.server.wm.ActivityInterceptorCallback;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -55,21 +68,47 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * System service for handling Communal Mode state.
  */
 public final class CommunalManagerService extends SystemService {
+    private static final String TAG = CommunalManagerService.class.getSimpleName();
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final String DELIMITER = ",";
     private final Context mContext;
     private final ActivityTaskManagerInternal mAtmInternal;
     private final KeyguardManager mKeyguardManager;
     private final AtomicBoolean mCommunalViewIsShowing = new AtomicBoolean(false);
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
-    private final Set<String> mEnabledApps = new HashSet<>();
-    private final SettingsObserver mSettingsObserver;
+    private final BinderService mBinderService;
+    private final PackageReceiver mPackageReceiver;
+    private final PackageManager mPackageManager;
+    private final DreamManagerInternal mDreamManagerInternal;
+
+    /**
+     * This change id is used to annotate packages which are allowed to run in communal mode.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT = 200324021L;
+
+    /**
+     * This change id is used to annotate packages which can run in communal mode by default,
+     * without requiring user opt-in.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long ALLOW_COMMUNAL_MODE_BY_DEFAULT = 203673428L;
 
     private final ActivityInterceptorCallback mActivityInterceptorCallback =
             new ActivityInterceptorCallback() {
                 @Nullable
                 @Override
                 public Intent intercept(ActivityInterceptorInfo info) {
-                    if (isActivityAllowed(info.aInfo)) {
+                    if (!shouldIntercept(info.aInfo)) {
                         return null;
                     }
 
@@ -96,63 +135,108 @@ public final class CommunalManagerService extends SystemService {
     public CommunalManagerService(Context context) {
         super(context);
         mContext = context;
-        mSettingsObserver = new SettingsObserver();
+        mPackageManager = mContext.getPackageManager();
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
+        mDreamManagerInternal = LocalServices.getService(DreamManagerInternal.class);
         mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
+        mBinderService = new BinderService();
+        mPackageReceiver = new PackageReceiver(mContext);
+    }
+
+    @VisibleForTesting
+    BinderService getBinderServiceInstance() {
+        return mBinderService;
     }
 
     @Override
     public void onStart() {
-        publishBinderService(Context.COMMUNAL_MANAGER_SERVICE, new BinderService());
-        mAtmInternal.registerActivityStartInterceptor(COMMUNAL_MODE_ORDERED_ID,
-                mActivityInterceptorCallback);
-
-
-        updateSelectedApps();
-        mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
-                Settings.Secure.COMMUNAL_MODE_PACKAGES), false, mSettingsObserver,
-                UserHandle.USER_SYSTEM);
+        publishBinderService(Context.COMMUNAL_MANAGER_SERVICE, mBinderService);
     }
 
-    @VisibleForTesting
-    void updateSelectedApps() {
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase != SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) return;
+        mAtmInternal.registerActivityStartInterceptor(
+                COMMUNAL_MODE_ORDERED_ID,
+                mActivityInterceptorCallback);
+        mPackageReceiver.register();
+        removeUninstalledPackagesFromSettings();
+    }
+
+    @Override
+    public void finalize() {
+        mPackageReceiver.unregister();
+    }
+
+    private Set<String> getUserEnabledApps() {
         final String encodedApps = Settings.Secure.getStringForUser(
                 mContext.getContentResolver(),
                 Settings.Secure.COMMUNAL_MODE_PACKAGES,
                 UserHandle.USER_SYSTEM);
 
-        mEnabledApps.clear();
+        return TextUtils.isEmpty(encodedApps)
+                ? Collections.emptySet()
+                : new HashSet<>(Arrays.asList(encodedApps.split(DELIMITER)));
+    }
 
-        if (!TextUtils.isEmpty(encodedApps)) {
-            mEnabledApps.addAll(Arrays.asList(encodedApps.split(DELIMITER)));
+    private void removeUninstalledPackagesFromSettings() {
+        for (String packageName : getUserEnabledApps()) {
+            if (!isPackageInstalled(packageName, mPackageManager)) {
+                removePackageFromSettings(packageName);
+            }
         }
     }
 
-    private boolean isActivityAllowed(ActivityInfo activityInfo) {
-        return true;
-        // TODO(b/191994709): Uncomment the lines below once Dreams and Assistant have been fixed.
-//        if (!mCommunalViewIsShowing.get() || !mKeyguardManager.isKeyguardLocked()) return true;
-//
-//        // If the activity doesn't have showWhenLocked enabled, disallow the activity.
-//        final boolean showWhenLocked =
-//                (activityInfo.flags & ActivityInfo.FLAG_SHOW_WHEN_LOCKED) != 0;
-//        if (!showWhenLocked) {
-//            return false;
-//        }
-//
-//        // Check the cached user preferences to see if the user has allowed this app.
-//        return mEnabledApps.contains(activityInfo.applicationInfo.packageName);
+    private void removePackageFromSettings(String packageName) {
+        Set<String> enabledPackages = getUserEnabledApps();
+        if (enabledPackages.remove(packageName)) {
+            Settings.Secure.putStringForUser(
+                    mContext.getContentResolver(),
+                    Settings.Secure.COMMUNAL_MODE_PACKAGES,
+                    String.join(DELIMITER, enabledPackages),
+                    UserHandle.USER_SYSTEM);
+        }
     }
 
-    private final class SettingsObserver extends ContentObserver {
-        SettingsObserver() {
-            super(mHandler);
+    @VisibleForTesting
+    static boolean isPackageInstalled(String packageName, PackageManager packageManager) {
+        if (packageManager == null) return false;
+        try {
+            return packageManager.getPackageInfo(packageName, 0) != null;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    private boolean isAppAllowed(ApplicationInfo appInfo) {
+        if (isActiveDream(appInfo) || isChangeEnabled(ALLOW_COMMUNAL_MODE_BY_DEFAULT, appInfo)) {
+            return true;
         }
 
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            mContext.getMainExecutor().execute(CommunalManagerService.this::updateSelectedApps);
-        }
+        return isChangeEnabled(ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT, appInfo)
+                && getUserEnabledApps().contains(appInfo.packageName);
+    }
+
+    private boolean isActiveDream(ApplicationInfo appInfo) {
+        final ComponentName activeDream = mDreamManagerInternal.getActiveDreamComponent(
+                /* doze= */ false);
+        final ComponentName activeDoze = mDreamManagerInternal.getActiveDreamComponent(
+                /* doze= */ true);
+        return isFromPackage(activeDream, appInfo) || isFromPackage(activeDoze, appInfo);
+    }
+
+    private static boolean isFromPackage(ComponentName componentName, ApplicationInfo appInfo) {
+        if (componentName == null) return false;
+        return TextUtils.equals(appInfo.packageName, componentName.getPackageName());
+    }
+
+    private static boolean isChangeEnabled(long changeId, ApplicationInfo appInfo) {
+        return CompatChanges.isChangeEnabled(changeId, appInfo.packageName, UserHandle.SYSTEM);
+    }
+
+    private boolean shouldIntercept(ActivityInfo activityInfo) {
+        if (!mCommunalViewIsShowing.get() || !mKeyguardManager.isKeyguardLocked()) return false;
+        return !isAppAllowed(activityInfo.applicationInfo);
     }
 
     private final class BinderService extends ICommunalManager.Stub {
@@ -166,6 +250,51 @@ public final class CommunalManagerService extends SystemService {
                     Manifest.permission.WRITE_COMMUNAL_STATE
                             + "permission required to modify communal state.");
             mCommunalViewIsShowing.set(isShowing);
+        }
+    }
+
+    /**
+     * A {@link BroadcastReceiver} that listens on package removed events and updates any stored
+     * package state in Settings.
+     */
+    private final class PackageReceiver extends BroadcastReceiver {
+        private final Context mContext;
+        private final IntentFilter mIntentFilter;
+
+        private PackageReceiver(Context context) {
+            mContext = context;
+            mIntentFilter = new IntentFilter();
+            mIntentFilter.addAction(ACTION_PACKAGE_REMOVED);
+            mIntentFilter.addDataScheme("package");
+        }
+
+        private void register() {
+            mContext.registerReceiverAsUser(
+                    this,
+                    UserHandle.SYSTEM,
+                    mIntentFilter,
+                    /* broadcastPermission= */null,
+                    /* scheduler= */ null);
+        }
+
+        private void unregister() {
+            mContext.unregisterReceiver(this);
+        }
+
+        @Override
+        public void onReceive(@NonNull final Context context, @NonNull final Intent intent) {
+            final Uri data = intent.getData();
+            if (data == null) {
+                Slog.w(TAG, "Failed to get package name in package receiver");
+                return;
+            }
+            final String packageName = data.getSchemeSpecificPart();
+            final String action = intent.getAction();
+            if (ACTION_PACKAGE_REMOVED.equals(action)) {
+                removePackageFromSettings(packageName);
+            } else {
+                Slog.w(TAG, "Unsupported action in package receiver: " + action);
+            }
         }
     }
 }

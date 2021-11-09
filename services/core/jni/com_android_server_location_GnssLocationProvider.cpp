@@ -1664,6 +1664,13 @@ static void android_location_gnss_hal_GnssNative_init_once(JNIEnv* env, jobject 
         }
     }
 
+    auto gnssGeofencing = gnssHal->getExtensionGnssGeofencing();
+    if (!gnssGeofencing.isOk()) {
+        ALOGD("Unable to get a handle to GnssGeofencing");
+    } else {
+        gnssGeofencingIface = gnssGeofencing;
+    }
+
     if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() >= 2) {
         sp<IGnssBatchingAidl> gnssBatchingAidl;
         auto status = gnssHalAidl->getExtensionGnssBatching(&gnssBatchingAidl);

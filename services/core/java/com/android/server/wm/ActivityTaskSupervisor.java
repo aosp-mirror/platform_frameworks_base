@@ -1278,10 +1278,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
     /**
      * Called when all resumed tasks/root-tasks are idle.
-     * @return the state of mService.mAm.mBooting before this was called.
      */
     @GuardedBy("mService")
-    private boolean checkFinishBootingLocked() {
+    private void checkFinishBootingLocked() {
         final boolean booting = mService.isBooting();
         boolean enableScreen = false;
         mService.setBooting(false);
@@ -1292,14 +1291,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         if (booting || enableScreen) {
             mService.postFinishBooting(booting, enableScreen);
         }
-        return booting;
     }
 
     void activityIdleInternal(ActivityRecord r, boolean fromTimeout,
             boolean processPausingActivities, Configuration config) {
         if (DEBUG_ALL) Slog.v(TAG, "Activity idle: " + r);
-
-        boolean booting = false;
 
         if (r != null) {
             if (DEBUG_IDLE) Slog.d(TAG_IDLE, "activityIdleInternal: Callers="
@@ -1327,7 +1323,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // are idle.
             if ((mService.isBooting() && mRootWindowContainer.allResumedActivitiesIdle())
                     || fromTimeout) {
-                booting = checkFinishBootingLocked();
+                checkFinishBootingLocked();
             }
 
             // When activity is idle, we consider the relaunch must be successful, so let's clear
@@ -1356,21 +1352,17 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         processStoppingAndFinishingActivities(r, processPausingActivities, "idle");
 
         if (DEBUG_IDLE) {
-            Slogf.i(TAG, "activityIdleInternal(): r=%s, booting=%b, mStartingUsers=%s", r, booting,
-                    mStartingUsers);
+            Slogf.i(TAG, "activityIdleInternal(): r=%s, mStartingUsers=%s", r, mStartingUsers);
         }
 
         if (!mStartingUsers.isEmpty()) {
             final ArrayList<UserState> startingUsers = new ArrayList<>(mStartingUsers);
             mStartingUsers.clear();
-            // TODO(b/190854171): remove the isHeadlessSystemUserMode() check on master
-            if (!booting || UserManager.isHeadlessSystemUserMode()) {
-                // Complete user switch.
-                for (int i = 0; i < startingUsers.size(); i++) {
-                    UserState userState = startingUsers.get(i);
-                    Slogf.i(TAG, "finishing switch of user %d", userState.mHandle.getIdentifier());
-                    mService.mAmInternal.finishUserSwitch(userState);
-                }
+            // Complete user switch.
+            for (int i = 0; i < startingUsers.size(); i++) {
+                UserState userState = startingUsers.get(i);
+                Slogf.i(TAG, "finishing switch of user %d", userState.mHandle.getIdentifier());
+                mService.mAmInternal.finishUserSwitch(userState);
             }
         }
 

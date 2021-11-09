@@ -614,7 +614,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         final DisplayContent dc = getDisplayContent();
         if (dc != null) {
             mSurfaceFreezer.unfreeze(getSyncTransaction());
-            dc.mChangingContainers.remove(this);
         }
         while (!mChildren.isEmpty()) {
             final E child = mChildren.peekLast();
@@ -1052,9 +1051,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // part of a change transition.
         if (!visible) {
             mSurfaceFreezer.unfreeze(getSyncTransaction());
-            if (mDisplayContent != null) {
-                mDisplayContent.mChangingContainers.remove(this);
-            }
         }
         WindowContainer parent = getParent();
         if (parent != null) {
@@ -2117,47 +2113,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * Finds the first non {@code null} return value from calling the callback on all root
-     * {@link Task} at or below this container.
-     * @param callback Applies on each root {@link Task} found and stops the search if it
-     *                 returns non {@code null}.
-     * @param traverseTopToBottom If {@code true}, traverses the hierarchy from top-to-bottom in
-     *                            terms of z-order, else from bottom-to-top.
-     * @return the first returned object that is not {@code null}. Returns {@code null} if not
-     *         found.
-     */
-    @Nullable
-    <R> R getItemFromRootTasks(Function<Task, R> callback, boolean traverseTopToBottom) {
-        int count = mChildren.size();
-        if (traverseTopToBottom) {
-            for (int i = count - 1; i >= 0; --i) {
-                R result = (R) mChildren.get(i).getItemFromRootTasks(callback, traverseTopToBottom);
-                if (result != null) {
-                    return result;
-                }
-            }
-        } else {
-            for (int i = 0; i < count; i++) {
-                R result = (R) mChildren.get(i).getItemFromRootTasks(callback, traverseTopToBottom);
-                if (result != null) {
-                    return result;
-                }
-                // Root tasks may be removed from this display. Ensure each task will be processed
-                // and the loop will end.
-                int newCount = mChildren.size();
-                i -= count - newCount;
-                count = newCount;
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    <R> R getItemFromRootTasks(Function<Task, R> callback) {
-        return getItemFromRootTasks(callback, true /* traverseTopToBottom */);
-    }
-
-    /**
      * Returns 1, 0, or -1 depending on if this container is greater than, equal to, or lesser than
      * the input container in terms of z-order.
      */
@@ -2629,6 +2584,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             return null;
         }
         return getSurfaceControl();
+    }
+
+    @Override
+    public void onUnfrozen() {
+        if (mDisplayContent != null) {
+            mDisplayContent.mChangingContainers.remove(this);
+        }
     }
 
     @Override

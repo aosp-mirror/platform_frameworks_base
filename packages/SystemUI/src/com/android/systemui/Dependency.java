@@ -511,6 +511,7 @@ public class Dependency {
 
         mProviders.put(KeyguardEnvironment.class, mKeyguardEnvironment::get);
         mProviders.put(ShadeController.class, mShadeController::get);
+
         mProviders.put(NotificationRemoteInputManager.Callback.class,
                 mNotificationRemoteInputManagerCallback::get);
 

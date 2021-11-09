@@ -378,6 +378,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private float mInitialAutoBrightness;
 
     // The controller for the automatic brightness level.
+    @Nullable
     private AutomaticBrightnessController mAutomaticBrightnessController;
 
     private Sensor mLightSensor;
@@ -608,7 +609,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mPendingRbcOnOrChanged = strengthChanged || justActivated;
 
         // Reset model if strength changed OR rbc is turned off
-        if (strengthChanged || !justActivated && mAutomaticBrightnessController != null) {
+        if ((strengthChanged || !justActivated) && mAutomaticBrightnessController != null) {
             mAutomaticBrightnessController.resetShortTermModel();
         }
     }
@@ -1567,7 +1568,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     sendUpdatePowerStateLocked();
                     mHandler.post(mOnBrightnessChangeRunnable);
                     // TODO(b/192258832): Switch the HBMChangeCallback to a listener pattern.
-                    mAutomaticBrightnessController.update();
+                    if (mAutomaticBrightnessController != null) {
+                        mAutomaticBrightnessController.update();
+                    }
                 }, mContext);
     }
 

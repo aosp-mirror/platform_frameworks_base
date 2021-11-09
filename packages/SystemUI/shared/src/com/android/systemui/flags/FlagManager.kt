@@ -16,10 +16,13 @@
 
 package com.android.systemui.flags
 
+import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.database.ContentObserver
 import android.net.Uri
+import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
 import androidx.concurrent.futures.CallbackToFutureAdapter
@@ -34,10 +37,12 @@ class FlagManager constructor(
     companion object {
         const val RECEIVING_PACKAGE = "com.android.systemui"
         const val ACTION_SET_FLAG = "com.android.systemui.action.SET_FLAG"
+        const val ACTION_GET_FLAGS = "com.android.systemui.action.GET_FLAGS"
         const val FLAGS_PERMISSION = "com.android.systemui.permission.FLAGS"
         const val FIELD_ID = "id"
         const val FIELD_VALUE = "value"
         const val FIELD_TYPE = "type"
+        const val FIELD_FLAGS = "flags"
         const val TYPE_BOOLEAN = "boolean"
         private const val SETTINGS_PREFIX = "systemui/flags"
     }
@@ -46,14 +51,26 @@ class FlagManager constructor(
     private val settingsObserver: ContentObserver = SettingsObserver()
 
     fun getFlagsFuture(): ListenableFuture<Collection<Flag<*>>> {
-        val knownFlagMap = Flags.collectFlags()
-        // Possible todo in the future: query systemui async to actually get the known flag ids.
-        return CallbackToFutureAdapter.getFuture(
-            CallbackToFutureAdapter.Resolver {
-                completer: CallbackToFutureAdapter.Completer<Collection<Flag<*>>> ->
-                completer.set(knownFlagMap.values as Collection<Flag<*>>)
-                "Retrieving Flags"
-            })
+        val intent = Intent(ACTION_GET_FLAGS)
+        intent.setPackage(RECEIVING_PACKAGE)
+
+        return CallbackToFutureAdapter.getFuture {
+            completer: CallbackToFutureAdapter.Completer<Any?> ->
+                context.sendOrderedBroadcast(intent, null,
+                    object : BroadcastReceiver() {
+                        override fun onReceive(context: Context, intent: Intent) {
+                            val extras: Bundle? = getResultExtras(false)
+                            val listOfFlags: java.util.ArrayList<Flag<*>>? =
+                                extras?.getParcelableArrayList(FIELD_FLAGS)
+                            if (listOfFlags != null) {
+                                completer.set(listOfFlags)
+                            } else {
+                                completer.setException(NoFlagResultsException())
+                            }
+                        }
+                    }, null, Activity.RESULT_OK, "extra data", null)
+            "QueryingFlags"
+        } as ListenableFuture<Collection<Flag<*>>>
     }
 
     fun setFlagValue(id: Int, enabled: Boolean) {
@@ -150,3 +167,6 @@ class FlagManager constructor(
 }
 
 class InvalidFlagStorageException : Exception("Data found but is invalid")
+
+class NoFlagResultsException : Exception(
+    "SystemUI failed to communicate its flags back successfully")

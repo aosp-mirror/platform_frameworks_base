@@ -128,7 +128,9 @@ public class InternetDialog extends SystemUIDialog implements
     private boolean mCanConfigMobileData;
 
     // Wi-Fi entries
+    @VisibleForTesting
     protected WifiEntry mConnectedWifiEntry;
+    @VisibleForTesting
     protected int mWifiEntriesCount;
 
     // Wi-Fi scanning progress bar
@@ -334,6 +336,9 @@ public class InternetDialog extends SystemUIDialog implements
         mSeeAllLayout.setOnClickListener(v -> onClickSeeMoreButton());
         mWiFiToggle.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> {
+                    if (isChecked) {
+                        mWifiScanNotifyLayout.setVisibility(View.GONE);
+                    }
                     buttonView.setChecked(isChecked);
                     mWifiManager.setWifiEnabled(isChecked);
                 });
@@ -576,12 +581,12 @@ public class InternetDialog extends SystemUIDialog implements
     @WorkerThread
     public void onAccessPointsChanged(@Nullable List<WifiEntry> wifiEntries,
             @Nullable WifiEntry connectedEntry) {
-        mConnectedWifiEntry = connectedEntry;
-        mWifiEntriesCount = wifiEntries == null ? 0 : wifiEntries.size();
-        mAdapter.setWifiEntries(wifiEntries, mWifiEntriesCount);
         mHandler.post(() -> {
-            mAdapter.notifyDataSetChanged();
+            mConnectedWifiEntry = connectedEntry;
+            mWifiEntriesCount = wifiEntries == null ? 0 : wifiEntries.size();
             updateDialog(false /* shouldUpdateMobileNetwork */);
+            mAdapter.setWifiEntries(wifiEntries, mWifiEntriesCount);
+            mAdapter.notifyDataSetChanged();
         });
     }
 

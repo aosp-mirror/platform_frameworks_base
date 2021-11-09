@@ -66,6 +66,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
+import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -120,8 +121,7 @@ public class SplitTransitionTests extends ShellTestCase {
         mStageCoordinator = new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
                 mSyncQueue, mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage,
                 mDisplayImeController, mDisplayInsetsController, mSplitLayout, mTransitions,
-                mTransactionPool,
-                mLogger, Optional::empty);
+                mTransactionPool, mLogger, Optional.empty(), Optional::empty);
         mSplitScreenTransitions = mStageCoordinator.getSplitTransitions();
         doAnswer((Answer<IBinder>) invocation -> mock(IBinder.class))
                 .when(mTransitions).startTransition(anyInt(), any(), any());

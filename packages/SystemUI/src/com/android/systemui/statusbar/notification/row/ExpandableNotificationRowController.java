@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.notification.row.dagger.NotificationRowSco
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wmshell.BubblesManager;
 
@@ -60,6 +61,7 @@ import javax.inject.Named;
 public class ExpandableNotificationRowController implements NodeController {
     private final ExpandableNotificationRow mView;
     private final NotificationListContainer mListContainer;
+    private final RemoteInputViewSubcomponent.Factory mRemoteInputViewSubcomponentFactory;
     private final ActivatableNotificationViewController mActivatableNotificationViewController;
     private final NotificationMediaManager mMediaManager;
     private final PluginManager mPluginManager;
@@ -92,6 +94,7 @@ public class ExpandableNotificationRowController implements NodeController {
     public ExpandableNotificationRowController(
             ExpandableNotificationRow view,
             NotificationListContainer listContainer,
+            RemoteInputViewSubcomponent.Factory rivSubcomponentFactory,
             ActivatableNotificationViewController activatableNotificationViewController,
             NotificationMediaManager mediaManager,
             PluginManager pluginManager,
@@ -116,6 +119,7 @@ public class ExpandableNotificationRowController implements NodeController {
             ExpandableNotificationRowDragController dragController) {
         mView = view;
         mListContainer = listContainer;
+        mRemoteInputViewSubcomponentFactory = rivSubcomponentFactory;
         mActivatableNotificationViewController = activatableNotificationViewController;
         mMediaManager = mediaManager;
         mPluginManager = pluginManager;
@@ -148,6 +152,7 @@ public class ExpandableNotificationRowController implements NodeController {
         mActivatableNotificationViewController.init();
         mView.initialize(
                 entry,
+                mRemoteInputViewSubcomponentFactory,
                 mAppName,
                 mNotificationKey,
                 mExpansionLogger,

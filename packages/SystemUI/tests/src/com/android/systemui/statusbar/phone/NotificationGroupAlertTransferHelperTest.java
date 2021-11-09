@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCal
 import com.android.systemui.statusbar.notification.row.RowContentBindParams;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import org.junit.Before;
@@ -86,7 +87,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mHeadsUpManager = new HeadsUpManager(mContext) {};
+        mHeadsUpManager = new HeadsUpManager(mContext, mock(HeadsUpManagerLogger.class)) {};
 
         when(mNotificationEntryManager.getPendingNotificationsIterator())
                 .thenReturn(mPendingEntries.values());

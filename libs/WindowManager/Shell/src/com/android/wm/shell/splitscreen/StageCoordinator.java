@@ -17,6 +17,7 @@
 package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityOptions.KEY_LAUNCH_ROOT_TASK_TOKEN;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.TRANSIT_OPEN;
@@ -92,6 +93,7 @@ import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
 import com.android.wm.shell.common.split.SplitWindowManager;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController.ExitReason;
 import com.android.wm.shell.transition.Transitions;
 
@@ -147,6 +149,10 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final DisplayInsetsController mDisplayInsetsController;
     private final SplitScreenTransitions mSplitTransitions;
     private final SplitscreenEventLogger mLogger;
+    private final Optional<RecentTasksController> mRecentTasks;
+    // Tracks whether we should update the recent tasks.  Only allow this to happen in between enter
+    // and exit, since exit itself can trigger a number of changes that update the stages.
+    private boolean mShouldUpdateRecents;
     private boolean mExitSplitScreenOnHide;
     private boolean mKeyguardOccluded;
 
@@ -191,6 +197,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             DisplayInsetsController displayInsetsController, Transitions transitions,
             TransactionPool transactionPool, SplitscreenEventLogger logger,
             IconProvider iconProvider,
+            Optional<RecentTasksController> recentTasks,
             Provider<Optional<StageTaskUnfoldController>> unfoldControllerProvider) {
         mContext = context;
         mDisplayId = displayId;
@@ -198,6 +205,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mRootTDAOrganizer = rootTDAOrganizer;
         mTaskOrganizer = taskOrganizer;
         mLogger = logger;
+        mRecentTasks = recentTasks;
         mMainUnfoldController = unfoldControllerProvider.get().orElse(null);
         mSideUnfoldController = unfoldControllerProvider.get().orElse(null);
 
@@ -238,6 +246,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             DisplayInsetsController displayInsetsController, SplitLayout splitLayout,
             Transitions transitions, TransactionPool transactionPool,
             SplitscreenEventLogger logger,
+            Optional<RecentTasksController> recentTasks,
             Provider<Optional<StageTaskUnfoldController>> unfoldControllerProvider) {
         mContext = context;
         mDisplayId = displayId;
@@ -255,6 +264,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mMainUnfoldController = unfoldControllerProvider.get().orElse(null);
         mSideUnfoldController = unfoldControllerProvider.get().orElse(null);
         mLogger = logger;
+        mRecentTasks = recentTasks;
         transitions.addHandler(this);
     }
 
@@ -560,12 +570,23 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void applyExitSplitScreen(StageTaskListener childrenToTop,
             WindowContainerTransaction wct, @ExitReason int exitReason) {
+        mRecentTasks.ifPresent(recentTasks -> {
+            // Notify recents if we are exiting in a way that breaks the pair, and disable further
+            // updates to splits in the recents until we enter split again
+            if (shouldBreakPairedTaskInRecents(exitReason) && mShouldUpdateRecents) {
+                recentTasks.removeSplitPair(mMainStage.getTopVisibleChildTaskId());
+                recentTasks.removeSplitPair(mSideStage.getTopVisibleChildTaskId());
+            }
+        });
+        mShouldUpdateRecents = false;
+
         mSideStage.removeAllTasks(wct, childrenToTop == mSideStage);
         mMainStage.deactivate(wct, childrenToTop == mMainStage);
         mTaskOrganizer.applyTransaction(wct);
         mSyncQueue.runInSync(t -> t
                 .setWindowCrop(mMainStage.mRootLeash, null)
                 .setWindowCrop(mSideStage.mRootLeash, null));
+
         // Hide divider and reset its position.
         setDividerVisibility(false);
         mSplitLayout.resetDividerPosition();
@@ -576,6 +597,23 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             logExitToStage(exitReason, childrenToTop == mMainStage);
         } else {
             logExit(exitReason);
+        }
+    }
+
+    /**
+     * Returns whether the split pair in the recent tasks list should be broken.
+     */
+    private boolean shouldBreakPairedTaskInRecents(@ExitReason int exitReason) {
+        switch (exitReason) {
+            // One of the apps doesn't support MW
+            case EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW:
+            // User has explicitly dragged the divider to dismiss split
+            case EXIT_REASON_DRAG_DIVIDER:
+            // Either of the split apps have finished
+            case EXIT_REASON_APP_FINISHED:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -645,10 +683,26 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mLogger.logSideStageAppChange(getSideStagePosition(), mSideStage.getTopChildTaskUid(),
                     mSplitLayout.isLandscape());
         }
+        updateRecentTasksSplitPair();
 
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onTaskStageChanged(taskId, stage, visible);
         }
+    }
+
+    private void updateRecentTasksSplitPair() {
+        if (!mShouldUpdateRecents) {
+            return;
+        }
+
+        mRecentTasks.ifPresent(recentTasks -> {
+            int mainStageTopTaskId = mMainStage.getTopVisibleChildTaskId();
+            int sideStageTopTaskId = mSideStage.getTopVisibleChildTaskId();
+            if (mainStageTopTaskId != INVALID_TASK_ID && sideStageTopTaskId != INVALID_TASK_ID) {
+                // Update the pair for the top tasks
+                recentTasks.addSplitPair(mainStageTopTaskId, sideStageTopTaskId);
+            }
+        });
     }
 
     private void sendSplitVisibilityChanged() {
@@ -784,12 +838,16 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSyncQueue.queue(wct);
             mSyncQueue.runInSync(t -> updateSurfaceBounds(mSplitLayout, t));
         }
-        if (!mLogger.hasStartedSession() && mMainStageListener.mHasChildren
-                && mSideStageListener.mHasChildren) {
-            mLogger.logEnter(mSplitLayout.getDividerPositionAsFraction(),
-                    getMainStagePosition(), mMainStage.getTopChildTaskUid(),
-                    getSideStagePosition(), mSideStage.getTopChildTaskUid(),
-                    mSplitLayout.isLandscape());
+        if (mMainStageListener.mHasChildren && mSideStageListener.mHasChildren) {
+            mShouldUpdateRecents = true;
+            updateRecentTasksSplitPair();
+
+            if (!mLogger.hasStartedSession()) {
+                mLogger.logEnter(mSplitLayout.getDividerPositionAsFraction(),
+                        getMainStagePosition(), mMainStage.getTopChildTaskUid(),
+                        getSideStagePosition(), mSideStage.getTopChildTaskUid(),
+                        mSplitLayout.isLandscape());
+            }
         }
     }
 

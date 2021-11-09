@@ -46,6 +46,7 @@ import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.UserHandle;
 import android.util.IntArray;
@@ -1633,13 +1634,17 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * Whether we can show activity requesting the given min width/height in multi window below
      * this {@link TaskDisplayArea}.
      */
-    boolean supportsActivityMinWidthHeightMultiWindow(int minWidth, int minHeight) {
-        final int configRespectsActivityMinWidthHeightMultiWindow =
-                mAtmService.mRespectsActivityMinWidthHeightMultiWindow;
+    boolean supportsActivityMinWidthHeightMultiWindow(int minWidth, int minHeight,
+            @Nullable ActivityInfo activityInfo) {
+        if (activityInfo != null && !activityInfo.shouldCheckMinWidthHeightForMultiWindow()) {
+            return true;
+        }
         if (minWidth <= 0 && minHeight <= 0) {
             // No request min width/height.
             return true;
         }
+        final int configRespectsActivityMinWidthHeightMultiWindow =
+                mAtmService.mRespectsActivityMinWidthHeightMultiWindow;
         if (configRespectsActivityMinWidthHeightMultiWindow == -1) {
             // Device override to ignore min width/height.
             return true;

@@ -1119,16 +1119,15 @@ public class WindowContainerTests extends WindowTestsBase {
         final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
         spyOn(container);
         spyOn(surfaceAnimator);
-        spyOn(surfaceFreezer);
+        mockSurfaceFreezerSnapshot(surfaceFreezer);
         doReturn(t).when(container).getPendingTransaction();
         doReturn(t).when(container).getSyncTransaction();
 
         // Leash and snapshot created for change transition.
         container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
-        // Can't really take a snapshot, manually set one.
-        surfaceFreezer.mSnapshot = mock(SurfaceFreezer.Snapshot.class);
 
         assertNotNull(surfaceFreezer.mLeash);
+        assertNotNull(surfaceFreezer.mSnapshot);
         assertEquals(surfaceFreezer.mLeash, container.getAnimationLeash());
 
         // Start animation: surfaceAnimator take over the leash and snapshot from surfaceFreezer.
@@ -1145,9 +1144,9 @@ public class WindowContainerTests extends WindowTestsBase {
 
         // Prepare another change transition.
         container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
-        surfaceFreezer.mSnapshot = mock(SurfaceFreezer.Snapshot.class);
 
         assertNotNull(surfaceFreezer.mLeash);
+        assertNotNull(surfaceFreezer.mSnapshot);
         assertEquals(surfaceFreezer.mLeash, container.getAnimationLeash());
         assertNotEquals(prevLeash, container.getAnimationLeash());
 
@@ -1175,11 +1174,42 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testUnfreezeWindow_removeWindowFromChanging() {
+        final WindowContainer container = createTaskFragmentWithParentTask(
+                createTask(mDisplayContent), false);
+        mockSurfaceFreezerSnapshot(container.mSurfaceFreezer);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+
+        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
+
+        assertTrue(mDisplayContent.mChangingContainers.contains(container));
+
+        container.mSurfaceFreezer.unfreeze(t);
+
+        assertFalse(mDisplayContent.mChangingContainers.contains(container));
+    }
+
+    @Test
+    public void testFailToTaskSnapshot_unfreezeWindow() {
+        final WindowContainer container = createTaskFragmentWithParentTask(
+                createTask(mDisplayContent), false);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        spyOn(container.mSurfaceFreezer);
+
+        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
+
+        verify(container.mSurfaceFreezer).freeze(any(), any(), any(), any());
+        verify(container.mSurfaceFreezer).unfreeze(any());
+        assertTrue(mDisplayContent.mChangingContainers.isEmpty());
+    }
+
+    @Test
     public void testRemoveUnstartedFreezeSurfaceWhenFreezeAgain() {
         final WindowContainer container = createTaskFragmentWithParentTask(
                 createTask(mDisplayContent), false);
         container.mSurfaceControl = mock(SurfaceControl.class);
         final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
+        mockSurfaceFreezerSnapshot(surfaceFreezer);
         final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
         spyOn(container);
         doReturn(t).when(container).getPendingTransaction();
@@ -1189,16 +1219,16 @@ public class WindowContainerTests extends WindowTestsBase {
         container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
 
         assertNotNull(surfaceFreezer.mLeash);
+        assertNotNull(surfaceFreezer.mSnapshot);
 
-        // Can't really take a snapshot, manually set one.
-        final SurfaceFreezer.Snapshot snapshot = mock(SurfaceFreezer.Snapshot.class);
-        surfaceFreezer.mSnapshot = snapshot;
         final SurfaceControl prevLeash = surfaceFreezer.mLeash;
+        final SurfaceFreezer.Snapshot prevSnapshot = surfaceFreezer.mSnapshot;
+        spyOn(prevSnapshot);
 
         container.initializeChangeTransition(new Rect(0, 0, 1500, 2500));
 
         verify(t).remove(prevLeash);
-        verify(snapshot).destroy(t);
+        verify(prevSnapshot).destroy(t);
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
