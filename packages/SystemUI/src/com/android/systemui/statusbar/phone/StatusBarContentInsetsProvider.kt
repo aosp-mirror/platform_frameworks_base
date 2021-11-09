@@ -251,7 +251,7 @@ class StatusBarContentInsetsProvider @Inject constructor(
                 targetRotation,
                 dc,
                 context.resources.configuration.windowConfiguration.maxBounds,
-                SystemBarUtils.getStatusBarHeight(context),
+                SystemBarUtils.getStatusBarHeightForRotation(context, targetRotation),
                 minLeft,
                 minRight,
                 configurationController.isLayoutRtl,
