@@ -90,6 +90,14 @@ public final class TvIAppInfo implements Parcelable {
     }
 
     /**
+     * Returns the component of the TV IApp service.
+     * @hide
+     */
+    public ComponentName getComponent() {
+        return new ComponentName(mService.serviceInfo.packageName, mService.serviceInfo.name);
+    }
+
+    /**
      * Returns the information of the service that implements this TV IApp service.
      */
     public ServiceInfo getServiceInfo() {
