@@ -27,6 +27,5 @@ public interface HealthInfoCallback {
      *
      * @param props the new health info.
      */
-    // TODO(b/177269435): AIDL
-    void update(android.hardware.health.V2_1.HealthInfo props);
+    void update(android.hardware.health.HealthInfo props);
 }
