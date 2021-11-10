@@ -45687,6 +45687,17 @@ package android.text.style {
     method public void writeToParcel(android.os.Parcel, int);
   }
 
+  public final class SuggestionRangeSpan extends android.text.style.CharacterStyle implements android.text.ParcelableSpan {
+    ctor public SuggestionRangeSpan();
+    method public int describeContents();
+    method public int getBackgroundColor();
+    method public int getSpanTypeId();
+    method public void setBackgroundColor(int);
+    method public void updateDrawState(@NonNull android.text.TextPaint);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.text.style.SuggestionRangeSpan> CREATOR;
+  }
+
   public class SuggestionSpan extends android.text.style.CharacterStyle implements android.text.ParcelableSpan {
     ctor public SuggestionSpan(android.content.Context, String[], int);
     ctor public SuggestionSpan(java.util.Locale, String[], int);
