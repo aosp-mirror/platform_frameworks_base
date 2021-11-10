@@ -5365,5 +5365,14 @@ public final class Telephony {
          */
         public static final String COLUMN_D2D_STATUS_SHARING_SELECTED_CONTACTS =
                 "d2d_sharing_contacts";
+
+        /**
+        * TelephonyProvider column name for NR Advanced calling
+        * Determines if the user has enabled VoNR settings for this subscription.
+        *
+        * @hide
+        */
+        public static final String COLUMN_NR_ADVANCED_CALLING_ENABLED =
+                "nr_advanced_calling_enabled";
     }
 }
