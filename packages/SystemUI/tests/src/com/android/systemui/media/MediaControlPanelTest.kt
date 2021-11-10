@@ -122,7 +122,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     private lateinit var session: MediaSession
     private val device = MediaDeviceData(true, null, DEVICE_NAME)
-    private val disabledDevice = MediaDeviceData(false, null, null)
+    private val disabledDevice = MediaDeviceData(false, null, "Disabled Device")
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 

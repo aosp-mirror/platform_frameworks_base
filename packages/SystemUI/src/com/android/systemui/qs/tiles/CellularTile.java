@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles;
 
 import static com.android.systemui.Prefs.Key.QS_HAS_TURNED_OFF_MOBILE_DATA;
 
+import android.annotation.NonNull;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
@@ -56,10 +57,10 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.statusbar.connectivity.IconState;
+import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
 import com.android.systemui.statusbar.connectivity.NetworkController;
-import com.android.systemui.statusbar.connectivity.NetworkController.IconState;
-import com.android.systemui.statusbar.connectivity.NetworkController.MobileDataIndicators;
-import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import javax.inject.Inject;
@@ -269,7 +270,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
         private final CallbackInfo mInfo = new CallbackInfo();
 
         @Override
-        public void setMobileDataIndicators(MobileDataIndicators indicators) {
+        public void setMobileDataIndicators(@NonNull MobileDataIndicators indicators) {
             if (indicators.qsIcon == null) {
                 // Not data sim, don't display.
                 return;
@@ -291,7 +292,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
         }
 
         @Override
-        public void setIsAirplaneMode(IconState icon) {
+        public void setIsAirplaneMode(@NonNull IconState icon) {
             mInfo.airplaneModeEnabled = icon.visible;
             refreshState(mInfo);
         }

@@ -142,6 +142,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     mUdfpsEnrolledForUser.put(userId, hasEnrollments);
                 }
             }
+
+            for (Callback cb : mCallbacks) {
+                cb.onEnrollmentsChanged();
+            }
         }
     };
 
@@ -844,5 +848,11 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
          * registered before this call, this callback will never be triggered.
          */
         void onAllAuthenticatorsRegistered();
+
+        /**
+         * Called when UDFPS enrollments have changed. This is called after boot and on changes to
+         * enrollment.
+         */
+        void onEnrollmentsChanged();
     }
 }

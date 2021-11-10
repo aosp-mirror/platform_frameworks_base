@@ -26,6 +26,7 @@ import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedul
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.SHOWING_PERSISTENT_DOT;
 
 import android.animation.ValueAnimator;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Fragment;
 import android.os.Bundle;
@@ -46,8 +47,9 @@ import com.android.systemui.statusbar.DisableFlagsLogger.DisableState;
 import com.android.systemui.statusbar.OperatorNameView;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.NetworkController;
-import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
@@ -104,12 +106,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final NotificationIconAreaController mNotificationIconAreaController;
     private final PanelExpansionStateManager mPanelExpansionStateManager;
     private final StatusBarIconController mStatusBarIconController;
+    private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
 
     private List<String> mBlockedIcons = new ArrayList<>();
 
     private SignalCallback mSignalCallback = new SignalCallback() {
         @Override
-        public void setIsAirplaneMode(NetworkController.IconState icon) {
+        public void setIsAirplaneMode(@NonNull IconState icon) {
             mCommandQueue.recomputeDisableFlags(getContext().getDisplayId(), true /* animate */);
         }
     };
@@ -132,6 +135,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             FeatureFlags featureFlags,
             Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             StatusBarIconController statusBarIconController,
+            StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
             NetworkController networkController,
             StatusBarStateController statusBarStateController,
@@ -147,6 +151,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mFeatureFlags = featureFlags;
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mStatusBarIconController = statusBarIconController;
+        mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mKeyguardStateController = keyguardStateController;
         mNetworkController = networkController;
         mStatusBarStateController = statusBarStateController;
@@ -372,10 +377,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                         StatusBar::hideStatusBarIconsWhenExpanded).orElse(false)) {
             return true;
         }
-        if (statusBarOptional.map(StatusBar::hideStatusBarIconsForBouncer).orElse(false)) {
-            return true;
-        }
-        return false;
+        return mStatusBarHideIconsForBouncerManager.getShouldHideStatusBarIconsForBouncer();
     }
 
     private void hideSystemIconArea(boolean animate) {
