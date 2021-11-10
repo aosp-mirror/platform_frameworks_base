@@ -1863,7 +1863,7 @@ public class WindowManagerService extends IWindowManager.Stub
             ProtoLog.v(WM_DEBUG_ADD_REMOVE, "addWindow: New client %s"
                     + ": window=%s Callers=%s", client.asBinder(), win, Debug.getCallers(5));
 
-            if (win.isVisibleOrAdding() && displayContent.updateOrientation()) {
+            if (win.isVisibleRequestedOrAdding() && displayContent.updateOrientation()) {
                 displayContent.sendNewConfiguration();
             }
 
