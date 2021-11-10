@@ -53,8 +53,6 @@ import java.io.StringWriter;
 public class FeatureFlagManagerTest extends SysuiTestCase {
     FeatureFlagManager mFeatureFlagManager;
 
-    @Mock private FlagManager mFlagManager;
-    @Mock private SecureSettings mSecureSettings;
     @Mock private Context mContext;
     @Mock private DumpManager mDumpManager;
 
@@ -62,14 +60,11 @@ public class FeatureFlagManagerTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mFeatureFlagManager = new FeatureFlagManager(mSecureSettings, mContext, mDumpManager);
+        mFeatureFlagManager = new FeatureFlagManager(mDumpManager);
     }
 
     @After
     public void onFinished() {
-        // SecureSettings and Context are provided for constructor consistency with the
-        // debug version of the FeatureFlagManager, but should never be used.
-        verifyZeroInteractions(mSecureSettings, mContext);
         // The dump manager should be registered with even for the release version, but that's it.
         verify(mDumpManager).registerDumpable(anyString(), any());
         verifyNoMoreInteractions(mDumpManager);
