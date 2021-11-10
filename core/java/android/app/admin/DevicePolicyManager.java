@@ -7867,7 +7867,7 @@ public class DevicePolicyManager {
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS,
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
     })
     public ComponentName getDeviceOwnerComponentOnAnyUser() {
         return getDeviceOwnerComponentInner(/* callingUserOnly =*/ false);
@@ -7980,8 +7980,8 @@ public class DevicePolicyManager {
      * Called by the system to find out whether the device is managed by a Device Owner.
      *
      * @return whether the device is managed by a Device Owner.
-     * @throws SecurityException if the caller is not the device owner, does not hold the
-     *         MANAGE_USERS permission and is not the system.
+     * @throws SecurityException if the caller is not the device owner, does not hold
+     *         MANAGE_USERS or MANAGE_PROFILE_AND_DEVICE_OWNERS permissions and is not the system.
      *
      * @hide
      */
@@ -8002,7 +8002,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
+    })
     public String getDeviceOwnerNameOnAnyUser() {
         throwIfParentInstance("getDeviceOwnerNameOnAnyUser");
         if (mService != null) {
@@ -8392,7 +8395,10 @@ public class DevicePolicyManager {
      * @throws IllegalArgumentException if the userId is invalid.
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
+    })
     public @Nullable String getProfileOwnerNameAsUser(int userId) throws IllegalArgumentException {
         throwIfParentInstance("getProfileOwnerNameAsUser");
         if (mService != null) {
@@ -11930,7 +11936,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
+    })
     @UserProvisioningState
     public int getUserProvisioningState() {
         throwIfParentInstance("getUserProvisioningState");
@@ -13439,7 +13448,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
+    })
     public boolean isManagedKiosk() {
         throwIfParentInstance("isManagedKiosk");
         if (mService != null) {
@@ -13468,7 +13480,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
+    })
     public boolean isUnattendedManagedKiosk() {
         throwIfParentInstance("isUnattendedManagedKiosk");
         if (mService != null) {

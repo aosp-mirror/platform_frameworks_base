@@ -8460,7 +8460,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean hasDeviceOwner() {
         final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || canManageUsers(caller));
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                        || canManageUsers(caller)
+                        || hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
         return mOwners.hasDeviceOwner();
     }
 
@@ -8640,7 +8642,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return null;
         }
-        Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity()));
+        Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity())
+                || hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
 
         synchronized (getLockObject()) {
             if (!mOwners.hasDeviceOwner()) {
@@ -8986,7 +8989,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return DevicePolicyManager.STATE_USER_UNMANAGED;
         }
         final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(canManageUsers(caller));
+        Preconditions.checkCallAuthorization(canManageUsers(caller)
+                || hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
 
         return getUserProvisioningState(caller.getUserId());
     }
@@ -9240,7 +9244,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return null;
         }
-        Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity()));
+        Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity())
+                || hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
         return getProfileOwnerNameUnchecked(userHandle);
     }
 
@@ -16466,7 +16471,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return false;
         }
-        Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity()));
+        Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity())
+                || hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
 
         long id = mInjector.binderClearCallingIdentity();
         try {
@@ -16492,7 +16498,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return false;
         }
-        Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity()));
+        Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity())
+                || hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
 
         return mInjector.binderWithCleanCallingIdentity(() -> isUnattendedManagedKioskUnchecked());
     }
