@@ -2385,6 +2385,16 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR = 0x00001000;
 
         /**
+         * Flag to indicate that the window frame should be the requested frame adding the display
+         * cutout frame. This will only be applied if a specific size smaller than the parent frame
+         * is given, and the window is covering the display cutout. The extended frame will not be
+         * larger than the parent frame.
+         *
+         * {@hide}
+         */
+        public static final int PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT = 0x00002000;
+
+        /**
          * Flag that will make window ignore app visibility and instead depend purely on the decor
          * view visibility for determining window visibility. This is used by recents to keep
          * drawing after it launches an app.
