@@ -26,13 +26,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.annotation.BoolRes;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -62,14 +65,19 @@ public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
 
     private final FlagManager mFlagManager;
     private final SecureSettings mSecureSettings;
+    private final Resources mResources;
     private final Map<Integer, Boolean> mBooleanFlagCache = new HashMap<>();
 
     @Inject
-    public FeatureFlagManager(FlagManager flagManager,
-            SecureSettings secureSettings, Context context,
+    public FeatureFlagManager(
+            FlagManager flagManager,
+            Context context,
+            SecureSettings secureSettings,
+            @Main Resources resources,
             DumpManager dumpManager) {
         mFlagManager = flagManager;
         mSecureSettings = secureSettings;
+        mResources = resources;
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_SET_FLAG);
         filter.addAction(ACTION_GET_FLAGS);
@@ -77,15 +85,30 @@ public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
         dumpManager.registerDumpable(TAG, this);
     }
 
-    /** Return a {@link BooleanFlag}'s value. */
     @Override
-    public boolean isEnabled(int id, boolean defaultValue) {
+    public boolean isEnabled(BooleanFlag flag) {
+        int id = flag.getId();
         if (!mBooleanFlagCache.containsKey(id)) {
-            Boolean result = isEnabledInternal(id);
-            mBooleanFlagCache.put(id, result == null ? defaultValue : result);
+            boolean def = flag.getDefault();
+            if (flag.hasResourceOverride()) {
+                try {
+                    def = isEnabledInOverlay(flag.getResourceOverride());
+                } catch (Resources.NotFoundException e) {
+                    // no-op
+                }
+            }
+
+            mBooleanFlagCache.put(id, isEnabled(id, def));
         }
 
         return mBooleanFlagCache.get(id);
+    }
+
+    /** Return a {@link BooleanFlag}'s value. */
+    @Override
+    public boolean isEnabled(int id, boolean defaultValue) {
+        Boolean result = isEnabledInternal(id);
+        return result == null ? defaultValue : result;
     }
 
     /** Returns the stored value or null if not set. */
@@ -96,6 +119,10 @@ public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
             eraseInternal(id);
         }
         return null;
+    }
+
+    private boolean isEnabledInOverlay(@BoolRes int resId) {
+        return mResources.getBoolean(resId);
     }
 
     /** Set whether a given {@link BooleanFlag} is enabled or not. */

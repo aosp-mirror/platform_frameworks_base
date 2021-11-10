@@ -16,7 +16,6 @@
 
 package com.android.systemui.flags;
 
-import android.content.Context;
 import android.util.SparseBooleanArray;
 
 import androidx.annotation.NonNull;
@@ -24,7 +23,6 @@ import androidx.annotation.NonNull;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -41,8 +39,7 @@ import javax.inject.Inject;
 public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
     SparseBooleanArray mAccessedFlags = new SparseBooleanArray();
     @Inject
-    public FeatureFlagManager(
-            SecureSettings secureSettings, Context context, DumpManager dumpManager) {
+    public FeatureFlagManager(DumpManager dumpManager) {
         dumpManager.registerDumpable("SysUIFlags", this);
     }
 
@@ -51,6 +48,11 @@ public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
 
     @Override
     public void removeListener(Listener run) {}
+
+    @Override
+    public boolean isEnabled(BooleanFlag flag) {
+        return isEnabled(flag.getId(), flag.getDefault());
+    }
 
     @Override
     public boolean isEnabled(int key, boolean defaultValue) {
