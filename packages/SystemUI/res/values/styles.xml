@@ -200,9 +200,9 @@
 
     <style name="TextAppearance.DeviceManagementDialog.Title" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle"/>
 
-    <style name="TextAppearance.AuthCredential">
+    <style name="TextAppearance.AuthCredential"
+        parent="@android:style/TextAppearance.DeviceDefault">
         <item name="android:accessibilityLiveRegion">polite</item>
-        <item name="android:gravity">center_horizontal</item>
         <item name="android:textAlignment">gravity</item>
         <item name="android:layout_gravity">top</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
@@ -210,42 +210,55 @@
 
     <style name="TextAppearance.AuthCredential.Title">
         <item name="android:fontFamily">google-sans</item>
-        <item name="android:paddingTop">12dp</item>
-        <item name="android:paddingHorizontal">24dp</item>
-        <item name="android:textSize">24sp</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:textSize">36sp</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.Subtitle">
         <item name="android:fontFamily">google-sans</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingHorizontal">24dp</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.Description">
         <item name="android:fontFamily">google-sans</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingHorizontal">24dp</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:textSize">16sp</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.Error">
         <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingBottom">18dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/colorError</item>
+        <item name="android:gravity">center</item>
     </style>
 
-    <style name="TextAppearance.AuthCredential.PasswordEntry" parent="@android:style/TextAppearance.DeviceDefault">
+    <style name="TextAppearance.AuthCredential.PasswordEntry">
         <item name="android:gravity">center</item>
         <item name="android:singleLine">true</item>
         <item name="android:textColor">?android:attr/colorForeground</item>
         <item name="android:textSize">24sp</item>
     </style>
 
+    <style name="AuthCredentialHeaderStyle">
+        <item name="android:paddingStart">48dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:paddingTop">28dp</item>
+        <item name="android:paddingBottom">20dp</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:layout_gravity">top</item>
+    </style>
+
     <style name="DeviceManagementDialogTitle">
         <item name="android:gravity">center</item>
         <item name="android:textAppearance">@style/TextAppearance.DeviceManagementDialog.Title</item>
+    </style>
+
+    <style name="AuthCredentialPasswordTheme" parent="@style/Theme.MaterialComponents.DayNight">
+        <item name="colorPrimary">?android:attr/colorPrimary</item>
+        <item name="colorPrimaryDark">?android:attr/colorPrimary</item>
     </style>
 
     <style name="TextAppearance.DeviceManagementDialog.Content" parent="@*android:style/TextAppearance.DeviceDefault.Subhead"/>
@@ -307,9 +320,8 @@
         <item name="android:maxWidth">420dp</item>
         <item name="android:minHeight">0dp</item>
         <item name="android:minWidth">0dp</item>
-        <item name="android:paddingBottom">0dp</item>
-        <item name="android:paddingHorizontal">44dp</item>
-        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingHorizontal">60dp</item>
+        <item name="android:paddingBottom">40dp</item>
     </style>
 
     <style name="LockPatternStyle">
