@@ -19,12 +19,15 @@ package com.android.server.criticalevents;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import android.server.ServerProtoEnums;
+
 import com.android.framework.protobuf.nano.MessageNano;
 import com.android.server.criticalevents.CriticalEventLog.ILogLoader;
 import com.android.server.criticalevents.CriticalEventLog.LogLoader;
 import com.android.server.criticalevents.nano.CriticalEventLogProto;
 import com.android.server.criticalevents.nano.CriticalEventLogStorageProto;
 import com.android.server.criticalevents.nano.CriticalEventProto;
+import com.android.server.criticalevents.nano.CriticalEventProto.AppNotResponding;
 import com.android.server.criticalevents.nano.CriticalEventProto.HalfWatchdog;
 import com.android.server.criticalevents.nano.CriticalEventProto.Watchdog;
 
@@ -63,6 +66,13 @@ public class CriticalEventLogTest {
 
     private static final String UUID_STRING = "123e4567-e89b-12d3-a456-556642440000";
 
+    private static final int SYSTEM_SERVER_UID = 1000;
+    private static final int SYSTEM_APP_UID = 1001;
+
+    private static final int DATA_APP_UID = 10_001;
+    private static final int DATA_APP_UID_2 = 10_002;
+    private static final int DATA_APP_UID_3 = 10_003;
+
     @Rule
     public TemporaryFolder mFolder = new TemporaryFolder();
 
@@ -80,7 +90,7 @@ public class CriticalEventLogTest {
         createTestFileWithEvents(2);
         setLogInstance(); // Log instance reads the proto file at initialization.
 
-        CriticalEventLogProto logProto = mCriticalEventLog.getRecentEvents();
+        CriticalEventLogProto logProto = getLogOutput();
 
         assertThat(logProto.timestampMs).isEqualTo(START_TIME_MS);
         assertProtoArrayEquals(
@@ -96,7 +106,7 @@ public class CriticalEventLogTest {
         mTestFile.delete();
         setLogInstance();
 
-        CriticalEventLogProto logProto = mCriticalEventLog.getRecentEvents();
+        CriticalEventLogProto logProto = getLogOutput();
 
         assertThat(logProto.timestampMs).isEqualTo(START_TIME_MS);
         assertThat(logProto.events).isEmpty();
@@ -107,7 +117,7 @@ public class CriticalEventLogTest {
         mFolder.delete();
         setLogInstance();
 
-        CriticalEventLogProto logProto = mCriticalEventLog.getRecentEvents();
+        CriticalEventLogProto logProto = getLogOutput();
 
         assertThat(logProto.timestampMs).isEqualTo(START_TIME_MS);
         assertThat(logProto.events).isEmpty();
@@ -119,7 +129,7 @@ public class CriticalEventLogTest {
         mTestFile.setReadable(false);
         setLogInstance();
 
-        CriticalEventLogProto logProto = mCriticalEventLog.getRecentEvents();
+        CriticalEventLogProto logProto = getLogOutput();
 
         assertThat(logProto.timestampMs).isEqualTo(START_TIME_MS);
         assertThat(logProto.events).isEmpty();
@@ -132,7 +142,7 @@ public class CriticalEventLogTest {
         }
         setLogInstance();
 
-        CriticalEventLogProto logProto = mCriticalEventLog.getRecentEvents();
+        CriticalEventLogProto logProto = getLogOutput();
 
         assertThat(logProto.timestampMs).isEqualTo(START_TIME_MS);
         assertThat(logProto.events).isEmpty();
@@ -143,7 +153,7 @@ public class CriticalEventLogTest {
         createTestFileWithEvents(0);
         setLogInstance();
 
-        CriticalEventLogProto logProto = mCriticalEventLog.getRecentEvents();
+        CriticalEventLogProto logProto = getLogOutput();
 
         assertThat(logProto.timestampMs).isEqualTo(START_TIME_MS);
         assertThat(logProto.events).isEmpty();
@@ -154,7 +164,7 @@ public class CriticalEventLogTest {
         createTestFileWithEvents(10); // Ring buffer capacity is 5
         setLogInstance();
 
-        CriticalEventLogProto logProto = mCriticalEventLog.getRecentEvents();
+        CriticalEventLogProto logProto = getLogOutput();
 
         assertThat(logProto.timestampMs).isEqualTo(START_TIME_MS);
         // Log contains the last 5 events only.
@@ -170,7 +180,7 @@ public class CriticalEventLogTest {
     }
 
     @Test
-    public void logLinesForAnrFile() {
+    public void logLinesForTraceFile() {
         mCriticalEventLog.incTimeSeconds(1);
         mCriticalEventLog.logWatchdog("Watchdog subject",
                 UUID.fromString("123e4567-e89b-12d3-a456-556642440000"));
@@ -178,7 +188,7 @@ public class CriticalEventLogTest {
         mCriticalEventLog.logHalfWatchdog("Half watchdog subject");
         mCriticalEventLog.incTimeSeconds(1);
 
-        assertThat(mCriticalEventLog.logLinesForAnrFile()).isEqualTo(
+        assertThat(mCriticalEventLog.logLinesForSystemServerTraceFile()).isEqualTo(
                 "--- CriticalEventLog ---\n"
                         + "capacity: 5\n"
                         + "events <\n"
@@ -205,7 +215,7 @@ public class CriticalEventLogTest {
                 UUID.fromString("123e4567-e89b-12d3-a456-556642440000"));
         mCriticalEventLog.incTimeSeconds(1);
 
-        CriticalEventLogProto logProto = mCriticalEventLog.getRecentEvents();
+        CriticalEventLogProto logProto = getLogOutput();
 
         assertThat(logProto.timestampMs).isEqualTo(START_TIME_MS + 2000);
         assertProtoArrayEquals(logProto.events, new CriticalEventProto[]{
@@ -220,12 +230,114 @@ public class CriticalEventLogTest {
         mCriticalEventLog.logHalfWatchdog("Subject 1");
         mCriticalEventLog.incTimeSeconds(1);
 
-        CriticalEventLogProto logProto = mCriticalEventLog.getRecentEvents();
+        CriticalEventLogProto logProto = getLogOutput();
 
         assertThat(logProto.timestampMs).isEqualTo(START_TIME_MS + 2000);
         assertProtoArrayEquals(logProto.events, new CriticalEventProto[]{
                 halfWatchdog(START_TIME_MS + 1000, "Subject 1")
         });
+    }
+
+    @Test
+    public void logAnr() {
+        mCriticalEventLog.incTimeSeconds(1);
+        mCriticalEventLog.logAnr("Subject 1", ServerProtoEnums.SYSTEM_SERVER, "AID_SYSTEM",
+                SYSTEM_SERVER_UID, 0);
+        mCriticalEventLog.incTimeSeconds(1);
+
+        CriticalEventLogProto logProto = getLogOutput();
+
+        assertThat(logProto.timestampMs).isEqualTo(START_TIME_MS + 2000);
+        assertProtoArrayEquals(logProto.events, new CriticalEventProto[]{
+                anr(START_TIME_MS + 1000, "Subject 1", ServerProtoEnums.SYSTEM_SERVER,
+                        "AID_SYSTEM", SYSTEM_SERVER_UID, 0)
+        });
+    }
+
+    @Test
+    public void privacyRedaction_anr() {
+        mCriticalEventLog.incTimeSeconds(1);
+        mCriticalEventLog.logAnr("Subject 1", ServerProtoEnums.SYSTEM_SERVER, "AID_SYSTEM",
+                SYSTEM_SERVER_UID, 0);
+        mCriticalEventLog.incTimeSeconds(1);
+        mCriticalEventLog.logAnr("Subject 2", ServerProtoEnums.SYSTEM_APP, "AID_RADIO",
+                SYSTEM_APP_UID, 1);
+        mCriticalEventLog.incTimeSeconds(1);
+        mCriticalEventLog.logAnr("Subject 3", ServerProtoEnums.DATA_APP, "com.foo",
+                DATA_APP_UID, 2);
+        mCriticalEventLog.incTimeSeconds(1);
+        mCriticalEventLog.logAnr("Subject 4", ServerProtoEnums.DATA_APP, "com.foo",
+                DATA_APP_UID_2, 3);
+        mCriticalEventLog.incTimeSeconds(1);
+        mCriticalEventLog.logAnr("Subject 5", ServerProtoEnums.DATA_APP, "com.bar",
+                DATA_APP_UID_3, 4);
+        mCriticalEventLog.incTimeSeconds(1);
+
+        CriticalEventProto systemServerAnr = anr(START_TIME_MS + 1000, "Subject 1",
+                CriticalEventProto.SYSTEM_SERVER, "AID_SYSTEM", SYSTEM_SERVER_UID, 0);
+        CriticalEventProto systemAppAnr = anr(START_TIME_MS + 2000, "Subject 2",
+                CriticalEventProto.SYSTEM_APP,
+                "AID_RADIO", SYSTEM_APP_UID, 1);
+        CriticalEventProto fooAppAnr = anr(START_TIME_MS + 3000, "Subject 3",
+                CriticalEventProto.DATA_APP, "com.foo", DATA_APP_UID, 2);
+        CriticalEventProto fooAppAnrUid2 = anr(START_TIME_MS + 4000, "Subject 4",
+                CriticalEventProto.DATA_APP, "com.foo", DATA_APP_UID_2, 3);
+        CriticalEventProto fooAppAnrUid2Redacted = anr(START_TIME_MS + 4000, "",
+                CriticalEventProto.DATA_APP, "", DATA_APP_UID_2, 3);
+        CriticalEventProto barAppAnr = anr(START_TIME_MS + 5000, "Subject 5",
+                CriticalEventProto.DATA_APP, "com.bar", DATA_APP_UID_3, 4);
+        CriticalEventProto barAppAnrRedacted = anr(START_TIME_MS + 5000, "",
+                CriticalEventProto.DATA_APP, "", DATA_APP_UID_3, 4);
+
+        assertProtoArrayEquals(
+                getLogOutput(ServerProtoEnums.DATA_APP, "com.foo", DATA_APP_UID).events,
+                new CriticalEventProto[]{
+                        systemServerAnr,
+                        systemAppAnr,
+                        fooAppAnr,
+                        // Redacted since the trace file and ANR are for different uids.
+                        fooAppAnrUid2Redacted,
+                        // Redacted since the trace file and ANR are for different data apps.
+                        barAppAnrRedacted
+                });
+
+        assertProtoArrayEquals(
+                getLogOutput(ServerProtoEnums.SYSTEM_SERVER, "AID_SYSTEM",
+                        SYSTEM_SERVER_UID).events,
+                new CriticalEventProto[]{
+                        systemServerAnr,
+                        systemAppAnr,
+                        fooAppAnr,
+                        fooAppAnrUid2,
+                        barAppAnr
+                });
+
+        assertProtoArrayEquals(
+                getLogOutput(ServerProtoEnums.SYSTEM_APP, "AID_RADIO",
+                        SYSTEM_APP_UID).events,
+                new CriticalEventProto[]{
+                        systemServerAnr,
+                        systemAppAnr,
+                        fooAppAnr,
+                        fooAppAnrUid2,
+                        barAppAnr
+                });
+    }
+
+    @Test
+    public void privacyRedaction_anr_doesNotMutateLogState() {
+        mCriticalEventLog.logAnr("Subject", ServerProtoEnums.DATA_APP, "com.foo",
+                10_001, DATA_APP_UID);
+
+        CriticalEventLogProto unredactedLogBefore = getLogOutput(ServerProtoEnums.SYSTEM_SERVER,
+                "AID_SYSTEM", SYSTEM_SERVER_UID);
+        CriticalEventLogProto redactedLog = getLogOutput(ServerProtoEnums.DATA_APP, "com.bar",
+                DATA_APP_UID);
+        CriticalEventLogProto unredactedLogAfter = getLogOutput(ServerProtoEnums.SYSTEM_SERVER,
+                "AID_SYSTEM", SYSTEM_SERVER_UID);
+
+        assertProtoNotEqual(unredactedLogBefore, redactedLog); // verify some redaction took place.
+        assertProtoEquals(unredactedLogBefore, unredactedLogAfter);
     }
 
     @Test
@@ -237,7 +349,7 @@ public class CriticalEventLogTest {
             mCriticalEventLog.incTimeSeconds(1);
         }
 
-        CriticalEventLogProto logProto = mCriticalEventLog.getRecentEvents();
+        CriticalEventLogProto logProto = getLogOutput();
 
         assertThat(logProto.timestampMs).isEqualTo(START_TIME_MS + 10000);
         assertThat(logProto.windowMs).isEqualTo(300_000); // 5 minutes
@@ -270,7 +382,7 @@ public class CriticalEventLogTest {
         mCriticalEventLog.logHalfWatchdog("New event 2"); // 5m59s old
 
         mCriticalEventLog.setCurrentTimeMillis(logTimestamp);
-        CriticalEventLogProto logProto = mCriticalEventLog.getRecentEvents();
+        CriticalEventLogProto logProto = getLogOutput();
 
         assertThat(logProto.timestampMs).isEqualTo(logTimestamp);
         assertThat(logProto.windowMs).isEqualTo(300_000); // 5 minutes
@@ -288,7 +400,7 @@ public class CriticalEventLogTest {
         createTestFileWithEvents(5);
         setLogInstance(new NoOpLogLoader());
 
-        CriticalEventLogProto logProto = mCriticalEventLog.getRecentEvents();
+        CriticalEventLogProto logProto = getLogOutput();
 
         // Output log is empty.
         assertThat(logProto.timestampMs).isEqualTo(START_TIME_MS);
@@ -350,7 +462,7 @@ public class CriticalEventLogTest {
         log2.logHalfWatchdog("New subject");
         log2.incTimeSeconds(1);
 
-        CriticalEventLogProto logProto = log2.getRecentEvents();
+        CriticalEventLogProto logProto = getLogOutput(log2);
 
         // Log contains 4 + 1 events.
         assertThat(logProto.timestampMs).isEqualTo(START_TIME_MS + 21_000);
@@ -361,6 +473,38 @@ public class CriticalEventLogTest {
                 halfWatchdog(START_TIME_MS + 7000, "Old subject 7"),
                 halfWatchdog(START_TIME_MS + 20_000, "New subject")
         });
+    }
+
+    @Test
+    public void processClassEnumParity() {
+        String message = "CriticalEventProto.ProcessClass and ServerProtoEnum are out of sync.";
+        assertWithMessage(message).that(CriticalEventProto.PROCESS_CLASS_UNKNOWN).isEqualTo(
+                ServerProtoEnums.ERROR_SOURCE_UNKNOWN);
+        assertWithMessage(message).that(CriticalEventProto.DATA_APP).isEqualTo(
+                ServerProtoEnums.DATA_APP);
+        assertWithMessage(message).that(CriticalEventProto.SYSTEM_APP).isEqualTo(
+                ServerProtoEnums.SYSTEM_APP);
+        assertWithMessage(message).that(CriticalEventProto.SYSTEM_SERVER).isEqualTo(
+                ServerProtoEnums.SYSTEM_SERVER);
+    }
+
+    private CriticalEventLogProto getLogOutput() {
+        return getLogOutput(mCriticalEventLog);
+    }
+
+    private CriticalEventLogProto getLogOutput(CriticalEventLog log) {
+        return getLogOutput(log, ServerProtoEnums.SYSTEM_SERVER, "AID_SYSTEM", SYSTEM_SERVER_UID);
+    }
+
+    private CriticalEventLogProto getLogOutput(int traceProcessClassEnum,
+            String traceProcessName, int traceProcessUid) {
+        return getLogOutput(mCriticalEventLog, traceProcessClassEnum, traceProcessName,
+                traceProcessUid);
+    }
+
+    private CriticalEventLogProto getLogOutput(CriticalEventLog log, int traceProcessClassEnum,
+            String traceProcessName, int traceProcessUid) {
+        return log.getOutputLogProto(traceProcessClassEnum, traceProcessName, traceProcessUid);
     }
 
     private CriticalEventLogStorageProto getEventsWritten() throws IOException {
@@ -389,6 +533,20 @@ public class CriticalEventLogTest {
         }
     }
 
+    private static CriticalEventProto anr(long timestampMs, String subject, int processClass,
+            String processName,
+            int uid, int pid) {
+        CriticalEventProto event = new CriticalEventProto();
+        event.timestampMs = timestampMs;
+        event.setAnr(new AppNotResponding());
+        event.getAnr().subject = subject;
+        event.getAnr().processClass = processClass;
+        event.getAnr().process = processName;
+        event.getAnr().uid = uid;
+        event.getAnr().pid = pid;
+        return event;
+    }
+
     private CriticalEventProto watchdog(long timestampMs, String subject) {
         return watchdog(timestampMs, subject, "A UUID");
     }
@@ -414,13 +572,30 @@ public class CriticalEventLogTest {
         assertThat(expected).isNotNull();
         assertThat(actual).isNotNull();
 
-        String message =
-                "Expected:\n" + Arrays.toString(expected) + "\nGot:\n" + Arrays.toString(actual);
-        assertWithMessage(message).that(expected.length).isEqualTo(actual.length);
+        String baseMsg = String.format("Expected:\n%s\nGot:\n%s", Arrays.toString(expected),
+                Arrays.toString(actual));
+        String lengthMsg = String.format("%s\nGot different length arrays.\bExpected %d, got %d",
+                baseMsg, expected.length, actual.length);
+        assertWithMessage(lengthMsg).that(expected.length).isEqualTo(actual.length);
         for (int i = 0; i < expected.length; i++) {
-            assertWithMessage(message).that(
+            String pairMsg = String.format("%s\nMismatched pair.\nExpected:\n%s\nGot:\n%s",
+                    baseMsg, expected[i], actual[i]);
+            assertWithMessage(pairMsg).that(
                     MessageNano.messageNanoEquals(expected[i], actual[i])).isTrue();
         }
+    }
+
+    private static void assertProtoEquals(MessageNano actual, MessageNano expected) {
+        String message = String.format("Expected:\n%s\nGot:\n%s", expected, actual);
+        assertWithMessage(message).that(
+                MessageNano.messageNanoEquals(expected, actual)).isTrue();
+    }
+
+    private static void assertProtoNotEqual(MessageNano first, MessageNano second) {
+        String message = String.format("Expected protos to be different, but were equal:\n%s",
+                first);
+        assertWithMessage(message).that(
+                MessageNano.messageNanoEquals(first, second)).isFalse();
     }
 
     private TestableCriticalEventLog setLogInstance() {

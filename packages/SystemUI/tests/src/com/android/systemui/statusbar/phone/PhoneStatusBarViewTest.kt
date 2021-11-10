@@ -34,10 +34,6 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     private lateinit var panelViewController: PanelViewController
     @Mock
     private lateinit var panelView: ViewGroup
-    @Mock
-    private lateinit var scrimController: ScrimController
-    @Mock
-    private lateinit var statusBar: StatusBar
 
     private lateinit var view: PhoneStatusBarView
 
@@ -49,8 +45,6 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
         `when`(panelViewController.view).thenReturn(panelView)
 
         view = PhoneStatusBarView(mContext, null)
-        view.setScrimController(scrimController)
-        view.setBar(statusBar)
     }
 
     @Test
@@ -65,12 +59,23 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     }
 
     @Test
+    fun onInterceptTouchEvent_listenerNotified() {
+        val handler = TestTouchEventHandler()
+        view.setTouchEventHandler(handler)
+
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+        view.onInterceptTouchEvent(event)
+
+        assertThat(handler.lastInterceptEvent).isEqualTo(event)
+    }
+
+    @Test
     fun onTouchEvent_listenerReturnsTrue_viewReturnsTrue() {
         val handler = TestTouchEventHandler()
         view.setTouchEventHandler(handler)
         val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
 
-        handler.returnValue = true
+        handler.handleTouchReturnValue = true
 
         assertThat(view.onTouchEvent(event)).isTrue()
     }
@@ -81,7 +86,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
         view.setTouchEventHandler(handler)
         val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
 
-        handler.returnValue = false
+        handler.handleTouchReturnValue = false
 
         assertThat(view.onTouchEvent(event)).isFalse()
     }
@@ -93,11 +98,17 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     }
 
     private class TestTouchEventHandler : PhoneStatusBarView.TouchEventHandler {
+        var lastInterceptEvent: MotionEvent? = null
         var lastEvent: MotionEvent? = null
-        var returnValue: Boolean = false
+        var handleTouchReturnValue: Boolean = false
+
+        override fun onInterceptTouchEvent(event: MotionEvent?) {
+            lastInterceptEvent = event
+        }
+
         override fun handleTouchEvent(event: MotionEvent?): Boolean {
             lastEvent = event
-            return returnValue
+            return handleTouchReturnValue
         }
     }
 }

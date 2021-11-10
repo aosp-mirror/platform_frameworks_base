@@ -5825,7 +5825,6 @@ public abstract class Context {
      * {@link android.app.LocaleManager}.
      *
      * @see #getSystemService(String)
-     * @hide
      */
     public static final String LOCALE_SERVICE = "locale";
 

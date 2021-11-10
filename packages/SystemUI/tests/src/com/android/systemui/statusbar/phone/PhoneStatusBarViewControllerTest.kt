@@ -26,6 +26,7 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.any
@@ -39,6 +40,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import java.util.Optional
 
 @SmallTest
 class PhoneStatusBarViewControllerTest : SysuiTestCase() {
@@ -50,10 +52,9 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var panelView: ViewGroup
     @Mock
-    private lateinit var scrimController: ScrimController
-
-    @Mock
     private lateinit var moveFromCenterAnimation: StatusBarMoveFromCenterAnimationController
+    @Mock
+    private lateinit var sysuiUnfoldComponent: SysUIUnfoldComponent
     @Mock
     private lateinit var progressProvider: ScopedUnfoldTransitionProgressProvider
 
@@ -66,14 +67,13 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         `when`(panelViewController.view).thenReturn(panelView)
-
+        `when`(sysuiUnfoldComponent.getStatusBarMoveFromCenterAnimationController())
+            .thenReturn(moveFromCenterAnimation)
         // create the view on main thread as it requires main looper
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             val parent = FrameLayout(mContext) // add parent to keep layout params
             view = LayoutInflater.from(mContext)
                 .inflate(R.layout.status_bar, parent, false) as PhoneStatusBarView
-            view.setScrimController(scrimController)
-            view.setBar(mock(StatusBar::class.java))
         }
 
         controller = createController(view)
@@ -81,10 +81,13 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     @Test
     fun constructor_setsTouchHandlerOnView() {
+        val interceptEvent = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 10f, 10f, 0)
         val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
 
+        view.onInterceptTouchEvent(interceptEvent)
         view.onTouchEvent(event)
 
+        assertThat(touchEventHandler.lastInterceptEvent).isEqualTo(interceptEvent)
         assertThat(touchEventHandler.lastEvent).isEqualTo(event)
     }
 
@@ -112,9 +115,8 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     private fun createController(view: PhoneStatusBarView): PhoneStatusBarViewController {
         return PhoneStatusBarViewController.Factory(
-            { progressProvider },
-            { moveFromCenterAnimation },
-            unfoldConfig
+            Optional.of(sysuiUnfoldComponent),
+            Optional.of(progressProvider)
         ).create(view, touchEventHandler)
     }
 
@@ -125,6 +127,11 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     private class TestTouchEventHandler : PhoneStatusBarView.TouchEventHandler {
         var lastEvent: MotionEvent? = null
+        var lastInterceptEvent: MotionEvent? = null
+
+        override fun onInterceptTouchEvent(event: MotionEvent?) {
+            lastInterceptEvent = event
+        }
         override fun handleTouchEvent(event: MotionEvent?): Boolean {
             lastEvent = event
             return false

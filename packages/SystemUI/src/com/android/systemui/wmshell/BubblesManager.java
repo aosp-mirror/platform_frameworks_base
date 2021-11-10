@@ -76,8 +76,8 @@ import com.android.systemui.statusbar.notification.collection.coordinator.Bubble
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
-import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -109,6 +109,7 @@ public class BubblesManager implements Dumpable {
     private final ShadeController mShadeController;
     private final IStatusBarService mBarService;
     private final INotificationManager mNotificationManager;
+    private final NotificationVisibilityProvider mVisibilityProvider;
     private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final NotificationGroupManagerLegacy mNotificationGroupManager;
     private final NotificationEntryManager mNotificationEntryManager;
@@ -132,6 +133,7 @@ public class BubblesManager implements Dumpable {
             ConfigurationController configurationController,
             @Nullable IStatusBarService statusBarService,
             INotificationManager notificationManager,
+            NotificationVisibilityProvider visibilityProvider,
             NotificationInterruptStateProvider interruptionStateProvider,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
@@ -146,6 +148,7 @@ public class BubblesManager implements Dumpable {
             return new BubblesManager(context, bubblesOptional.get(),
                     notificationShadeWindowController, statusBarStateController, shadeController,
                     configurationController, statusBarService, notificationManager,
+                    visibilityProvider,
                     interruptionStateProvider, zenModeController, notifUserManager,
                     groupManager, entryManager, notifPipeline, sysUiState, featureFlags,
                     dumpManager, sysuiMainExecutor);
@@ -163,6 +166,7 @@ public class BubblesManager implements Dumpable {
             ConfigurationController configurationController,
             @Nullable IStatusBarService statusBarService,
             INotificationManager notificationManager,
+            NotificationVisibilityProvider visibilityProvider,
             NotificationInterruptStateProvider interruptionStateProvider,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
@@ -178,6 +182,7 @@ public class BubblesManager implements Dumpable {
         mNotificationShadeWindowController = notificationShadeWindowController;
         mShadeController = shadeController;
         mNotificationManager = notificationManager;
+        mVisibilityProvider = visibilityProvider;
         mNotificationInterruptStateProvider = interruptionStateProvider;
         mNotificationGroupManager = groupManager;
         mNotificationEntryManager = entryManager;
@@ -598,12 +603,7 @@ public class BubblesManager implements Dumpable {
         return new DismissedByUserStats(
                 DISMISSAL_BUBBLE,
                 DISMISS_SENTIMENT_NEUTRAL,
-                NotificationVisibility.obtain(
-                        entry.getKey(),
-                        entry.getRanking().getRank(),
-                        mNotificationEntryManager.getActiveNotificationsCount(),
-                        isVisible,
-                        NotificationLogger.getNotificationLocation(entry)));
+                mVisibilityProvider.obtain(entry, isVisible));
     }
 
     /**

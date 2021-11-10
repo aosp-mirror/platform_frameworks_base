@@ -44,6 +44,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 
@@ -71,7 +72,7 @@ public class SmartReplyControllerTest extends SysuiTestCase {
     private SmartReplyController mSmartReplyController;
     private NotificationRemoteInputManager mRemoteInputManager;
 
-    @Mock private NotificationPresenter mPresenter;
+    @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private RemoteInputController.Delegate mDelegate;
     @Mock private NotificationRemoteInputManager.Callback mCallback;
     @Mock private StatusBarNotification mSbn;
@@ -89,7 +90,7 @@ public class SmartReplyControllerTest extends SysuiTestCase {
 
         mSmartReplyController = new SmartReplyController(
                 mock(DumpManager.class),
-                mNotificationEntryManager,
+                mVisibilityProvider,
                 mIStatusBarService,
                 mClickNotifier);
         mDependency.injectTestDependency(SmartReplyController.class,
@@ -97,7 +98,9 @@ public class SmartReplyControllerTest extends SysuiTestCase {
 
         mRemoteInputManager = new NotificationRemoteInputManager(mContext,
                 mock(FeatureFlags.class),
-                mock(NotificationLockscreenUserManager.class), mSmartReplyController,
+                mock(NotificationLockscreenUserManager.class),
+                mSmartReplyController,
+                mVisibilityProvider,
                 mNotificationEntryManager,
                 new RemoteInputNotificationRebuilder(mContext),
                 () -> Optional.of(mock(StatusBar.class)),

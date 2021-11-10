@@ -92,10 +92,10 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
-import com.android.systemui.statusbar.phone.StatusBarMoveFromCenterAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
@@ -110,10 +110,6 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.tuner.TunerService;
-import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
-import com.android.systemui.unfold.UnfoldTransitionWallpaperController;
-import com.android.systemui.unfold.config.UnfoldTransitionConfig;
-import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider;
 import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
@@ -224,16 +220,12 @@ public interface StatusBarPhoneModule {
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             NotificationIconAreaController notificationIconAreaController,
             BrightnessSliderController.Factory brightnessSliderFactory,
-            UnfoldTransitionConfig unfoldTransitionConfig,
-            Lazy<UnfoldLightRevealOverlayAnimation> unfoldLightRevealOverlayAnimation,
-            Lazy<NaturalRotationUnfoldProgressProvider> naturalRotationUnfoldProgressProvider,
-            Lazy<UnfoldTransitionWallpaperController> unfoldTransitionWallpaperController,
-            Lazy<StatusBarMoveFromCenterAnimationController> statusBarMoveFromCenterAnimation,
             WallpaperController wallpaperController,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
             StatusBarIconController statusBarIconController,
+            StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             LockscreenShadeTransitionController transitionController,
             FeatureFlags featureFlags,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
@@ -327,15 +319,12 @@ public interface StatusBarPhoneModule {
                 statusBarTouchableRegionManager,
                 notificationIconAreaController,
                 brightnessSliderFactory,
-                unfoldTransitionConfig,
-                unfoldLightRevealOverlayAnimation,
-                unfoldTransitionWallpaperController,
-                naturalRotationUnfoldProgressProvider,
                 wallpaperController,
                 ongoingCallController,
                 animationScheduler,
                 locationPublisher,
                 statusBarIconController,
+                statusBarHideIconsForBouncerManager,
                 transitionController,
                 featureFlags,
                 keyguardUnlockAnimationController,

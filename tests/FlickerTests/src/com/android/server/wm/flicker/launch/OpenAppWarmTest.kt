@@ -24,7 +24,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -59,9 +58,9 @@ class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
     /**
      * Defines the transition used to run the test
      */
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this, it)
+            super.transition(this)
             setup {
                 test {
                     testApp.launchViaIntent(wmHelper)
@@ -69,7 +68,7 @@ class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
                 eachRun {
                     device.pressHome()
                     wmHelper.waitForHomeActivityVisible()
-                    this.setRotation(testSpec.config.startRotation)
+                    this.setRotation(testSpec.startRotation)
                 }
             }
             teardown {

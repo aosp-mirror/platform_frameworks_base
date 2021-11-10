@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -52,13 +53,13 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
+import com.android.systemui.statusbar.connectivity.AccessPointController;
+import com.android.systemui.statusbar.connectivity.IconState;
+import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
 import com.android.systemui.statusbar.connectivity.NetworkController;
-import com.android.systemui.statusbar.connectivity.NetworkController.AccessPointController;
-import com.android.systemui.statusbar.connectivity.NetworkController.IconState;
-import com.android.systemui.statusbar.connectivity.NetworkController.MobileDataIndicators;
-import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
-import com.android.systemui.statusbar.connectivity.NetworkController.WifiIndicators;
+import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.statusbar.connectivity.WifiIcons;
+import com.android.systemui.statusbar.connectivity.WifiIndicators;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -250,7 +251,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
 
         @Override
-        public void setWifiIndicators(WifiIndicators indicators) {
+        public void setWifiIndicators(@NonNull WifiIndicators indicators) {
             if (DEBUG) {
                 Log.d(TAG, "setWifiIndicators: " + indicators);
             }
@@ -271,7 +272,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
         }
 
         @Override
-        public void setMobileDataIndicators(MobileDataIndicators indicators) {
+        public void setMobileDataIndicators(@NonNull MobileDataIndicators indicators) {
             if (DEBUG) {
                 Log.d(TAG, "setMobileDataIndicators: " + indicators);
             }
@@ -293,7 +294,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
         }
 
         @Override
-        public void setEthernetIndicators(IconState icon) {
+        public void setEthernetIndicators(@NonNull IconState icon) {
             if (DEBUG) {
                 Log.d(TAG, "setEthernetIndicators: "
                         + "icon = " + (icon == null ? "" :  icon.toString()));

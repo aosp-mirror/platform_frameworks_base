@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles;
 
 import static android.media.MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY;
 
+import android.annotation.NonNull;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -52,7 +53,8 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.connectivity.NetworkController;
-import com.android.systemui.statusbar.connectivity.NetworkController.WifiIndicators;
+import com.android.systemui.statusbar.connectivity.SignalCallback;
+import com.android.systemui.statusbar.connectivity.WifiIndicators;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
@@ -273,10 +275,9 @@ public class CastTile extends QSTileImpl<BooleanState> {
         return mWifiConnected || mHotspotConnected;
     }
 
-    private final NetworkController.SignalCallback mSignalCallback =
-            new NetworkController.SignalCallback() {
+    private final SignalCallback mSignalCallback = new SignalCallback() {
                 @Override
-                public void setWifiIndicators(WifiIndicators indicators) {
+                public void setWifiIndicators(@NonNull WifiIndicators indicators) {
                     // statusIcon.visible has the connected status information
                     boolean enabledAndConnected = indicators.enabled
                             && (indicators.qsIcon == null ? false : indicators.qsIcon.visible);

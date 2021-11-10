@@ -42,15 +42,17 @@ import org.junit.runners.Parameterized
 @Group4
 class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
                 eachRun {
                     val addBubbleBtn = waitAndGetAddBubbleBtn()
                     addBubbleBtn?.click() ?: error("Bubble widget not found")
+                    device.sleep()
                     wmHelper.waitFor("noAppWindowsOnTop") {
                         it.wmState.topVisibleAppWindow.isEmpty()
                     }
+                    device.wakeUp()
                 }
             }
             transitions {

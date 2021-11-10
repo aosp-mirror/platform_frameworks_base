@@ -1119,7 +1119,7 @@ public final class DisplayManager {
      * @hide
      */
     @TestApi
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @RequiresPermission(Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE)
     public void setUserPreferredDisplayMode(@NonNull Display.Mode mode) {
         // Create a new object containing default values for the unused fields like mode ID and
         // alternative refresh rates.
@@ -1134,7 +1134,7 @@ public final class DisplayManager {
      * @hide
      */
     @TestApi
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @RequiresPermission(Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE)
     public void clearUserPreferredDisplayMode() {
         mGlobal.setUserPreferredDisplayMode(null);
     }

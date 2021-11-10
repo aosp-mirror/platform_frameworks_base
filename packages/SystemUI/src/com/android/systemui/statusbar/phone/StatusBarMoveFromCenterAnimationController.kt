@@ -17,19 +17,17 @@ package com.android.systemui.statusbar.phone
 
 import android.view.View
 import android.view.WindowManager
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator.ViewCenterProvider
-import com.android.systemui.unfold.UNFOLD_STATUS_BAR
+import com.android.systemui.unfold.SysUIUnfoldScope
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import javax.inject.Inject
-import javax.inject.Named
 
-@SysUISingleton
+@SysUIUnfoldScope
 class StatusBarMoveFromCenterAnimationController @Inject constructor(
-    @Named(UNFOLD_STATUS_BAR) private val progressProvider: ScopedUnfoldTransitionProgressProvider,
-    private val windowManager: WindowManager,
+    private val progressProvider: ScopedUnfoldTransitionProgressProvider,
+    private val windowManager: WindowManager
 ) {
 
     private val transitionListener = TransitionListener()

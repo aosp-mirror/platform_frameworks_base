@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.notifcollection;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -45,4 +47,10 @@ public interface CommonNotifCollection {
      * The returned collection is read-only, unsorted, unfiltered, and ungrouped.
      */
     Collection<NotificationEntry> getAllNotifs();
+
+    /**
+     * Returns the notification entry for the given notification key;
+     * the returned entry (if present) may be in any state.
+     */
+    @Nullable NotificationEntry getEntry(String key);
 }

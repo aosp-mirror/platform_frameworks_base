@@ -23,6 +23,7 @@ import com.android.internal.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.connectivity.AccessPointControllerImpl;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.NetworkControllerImpl;
@@ -135,7 +136,7 @@ public interface StatusBarPolicyModule {
 
     /** */
     @Binds
-    NetworkController.AccessPointController provideAccessPointController(
+    AccessPointController provideAccessPointController(
             AccessPointControllerImpl accessPointControllerImpl);
 
     /** */

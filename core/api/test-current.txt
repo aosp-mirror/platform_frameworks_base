@@ -114,7 +114,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.RESET_APP_ERRORS) public void resetAppErrors();
     method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void setStopBackgroundUsersOnSwitch(int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void setStopUserOnSwitch(int);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean stopUser(int, boolean);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.DUMP) public void waitForBroadcastIdle();
@@ -129,9 +129,9 @@ package android.app {
     field public static final int PROCESS_CAPABILITY_NONE = 0; // 0x0
     field public static final int PROCESS_STATE_FOREGROUND_SERVICE = 4; // 0x4
     field public static final int PROCESS_STATE_TOP = 2; // 0x2
-    field public static final int STOP_BG_USERS_ON_SWITCH_DEFAULT = -1; // 0xffffffff
-    field public static final int STOP_BG_USERS_ON_SWITCH_FALSE = 0; // 0x0
-    field public static final int STOP_BG_USERS_ON_SWITCH_TRUE = 1; // 0x1
+    field public static final int STOP_USER_ON_SWITCH_DEFAULT = -1; // 0xffffffff
+    field public static final int STOP_USER_ON_SWITCH_FALSE = 0; // 0x0
+    field public static final int STOP_USER_ON_SWITCH_TRUE = 1; // 0x1
   }
 
   public static class ActivityManager.RunningAppProcessInfo implements android.os.Parcelable {
@@ -279,6 +279,11 @@ package android.app {
   public class KeyguardManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS, "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"}) public boolean checkLock(int, @Nullable byte[]);
     method @RequiresPermission(anyOf={android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS, "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"}) public boolean setLock(int, @Nullable byte[], int, @Nullable byte[]);
+  }
+
+  public class LocaleManager {
+    method @Nullable public android.os.LocaleList getSystemLocales();
+    method public void setSystemLocales(@NonNull android.os.LocaleList);
   }
 
   public class Notification implements android.os.Parcelable {
@@ -1193,7 +1198,7 @@ package android.hardware.display {
 
   public final class DisplayManager {
     method public boolean areUserDisabledHdrTypesAllowed();
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void clearUserPreferredDisplayMode();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void clearUserPreferredDisplayMode();
     method @NonNull public int[] getUserDisabledHdrTypes();
     method @Nullable public android.view.Display.Mode getUserPreferredDisplayMode();
     method public boolean isMinimalPostProcessingRequested(int);
@@ -1201,7 +1206,7 @@ package android.hardware.display {
     method @RequiresPermission(android.Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE) public void setRefreshRateSwitchingType(int);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public void setShouldAlwaysRespectAppRequestedMode(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setUserDisabledHdrTypes(@NonNull int[]);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setUserPreferredDisplayMode(@NonNull android.view.Display.Mode);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void setUserPreferredDisplayMode(@NonNull android.view.Display.Mode);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public boolean shouldAlwaysRespectAppRequestedMode();
     field public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2; // 0x2
     field public static final int SWITCHING_TYPE_NONE = 0; // 0x0

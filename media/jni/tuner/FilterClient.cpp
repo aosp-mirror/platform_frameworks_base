@@ -177,11 +177,14 @@ Result FilterClient::setDataSource(sp<FilterClient> filterClient){
 }
 
 Result FilterClient::close() {
-    if (mFilterMQEventFlag) {
+    if (mFilterMQEventFlag != nullptr) {
         EventFlag::deleteEventFlag(&mFilterMQEventFlag);
+        mFilterMQEventFlag = nullptr;
     }
-    mFilterMQEventFlag = nullptr;
-    mFilterMQ = nullptr;
+    if (mFilterMQ != nullptr) {
+        delete mFilterMQ;
+        mFilterMQ = nullptr;
+    }
 
     if (mTunerFilter != nullptr) {
         Status s = mTunerFilter->close();

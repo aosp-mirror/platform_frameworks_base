@@ -49,7 +49,7 @@ class DismissBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(tes
     private val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private val displaySize = DisplayMetrics()
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
                 eachRun {

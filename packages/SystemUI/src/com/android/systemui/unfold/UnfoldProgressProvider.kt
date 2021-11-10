@@ -21,7 +21,7 @@ import com.android.wm.shell.unfold.ShellUnfoldProgressProvider
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider.UnfoldListener
 import java.util.concurrent.Executor
 
-class ShellUnfoldProgressProvider(
+class UnfoldProgressProvider(
     private val unfoldProgressProvider: UnfoldTransitionProgressProvider
 ) : ShellUnfoldProgressProvider {
 

@@ -25,12 +25,9 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.repetitions
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.helpers.BaseAppHelper.Companion.isShellTransitionsEnabled
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.getDevEnableNonResizableMultiWindow
@@ -45,7 +42,6 @@ import org.junit.Test
 abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestParameter) {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     protected val context: Context = instrumentation.context
-    protected val isRotated = testSpec.config.startRotation.isRotated()
     protected val splitScreenApp = SplitScreenHelper.getPrimary(instrumentation)
     protected val secondaryApp = SplitScreenHelper.getSecondary(instrumentation)
     protected val nonResizeableApp = SplitScreenHelper.getNonResizeable(instrumentation)
@@ -82,15 +78,15 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
         FlickerComponentName.SPLASH_SCREEN,
         FlickerComponentName.SNAPSHOT)
 
-    protected open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
+    protected open val transition: FlickerBuilder.() -> Unit
+        get() = {
             setup {
                 eachRun {
                     device.wakeUpAndGoToHomeScreen()
                     device.openQuickStepAndClearRecentAppsFromOverview(wmHelper)
                     secondaryApp.launchViaIntent(wmHelper)
                     splitScreenApp.launchViaIntent(wmHelper)
-                    this.setRotation(configuration.startRotation)
+                    this.setRotation(testSpec.startRotation)
                 }
             }
             teardown {
@@ -105,19 +101,17 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            withTestName { testSpec.name }
-            repeat { testSpec.config.repetitions }
-            transition(this, testSpec.config)
+            transition(this)
         }
     }
 
-    internal open val cleanSetup: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
+    internal open val cleanSetup: FlickerBuilder.() -> Unit
+        get() = {
             setup {
                 eachRun {
                     device.wakeUpAndGoToHomeScreen()
                     device.openQuickStepAndClearRecentAppsFromOverview(wmHelper)
-                    this.setRotation(configuration.startRotation)
+                    this.setRotation(testSpec.startRotation)
                 }
             }
             teardown {

@@ -37,7 +37,6 @@ import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
@@ -69,12 +68,12 @@ class ResizeLegacySplitScreen(
     private val testAppTop = SimpleAppHelper(instrumentation)
     private val testAppBottom = ImeAppHelper(instrumentation)
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
             setup {
                 eachRun {
                     device.wakeUpAndGoToHomeScreen()
-                    this.setRotation(configuration.startRotation)
+                    this.setRotation(testSpec.startRotation)
                     this.launcherStrategy.clearRecentAppsFromOverview()
                     testAppBottom.launchViaIntent(wmHelper)
                     device.pressHome()
@@ -220,8 +219,8 @@ class ResizeLegacySplitScreen(
                 .map {
                     val description = (startRatio.toString().replace("/", "-") + "_to_" +
                         stopRatio.toString().replace("/", "-"))
-                    val newName = "${FlickerTestParameter.defaultName(it.config)}_$description"
-                    FlickerTestParameter(it.config, name = newName)
+                    val newName = "${FlickerTestParameter.defaultName(it)}_$description"
+                    FlickerTestParameter(it.config, nameOverride = newName)
                 }
         }
     }

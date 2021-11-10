@@ -26,7 +26,6 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
-import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.TwoActivitiesAppHelper
@@ -60,7 +59,7 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
 class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
-    val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp: TwoActivitiesAppHelper = TwoActivitiesAppHelper(instrumentation)
 
     /**
@@ -70,8 +69,6 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            withTestName { testSpec.name }
-            repeat { testSpec.config.repetitions }
             setup {
                 eachRun {
                     testApp.launchViaIntent(wmHelper)

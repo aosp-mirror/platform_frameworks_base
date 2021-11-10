@@ -17,13 +17,17 @@
 package com.android.systemui.flags;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
+import android.util.SparseArray;
 import android.widget.Toast;
 
+import androidx.annotation.BoolRes;
+
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,13 +43,16 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class FeatureFlags {
-    private final FeatureFlagReader mFlagReader;
+    private final Resources mResources;
+    private final FlagReader mFlagReader;
     private final Context mContext;
     private final Map<Integer, Flag<?>> mFlagMap = new HashMap<>();
     private final Map<Integer, List<Listener>> mListeners = new HashMap<>();
+    private final SparseArray<Boolean> mCachedFlags = new SparseArray<>();
 
     @Inject
-    public FeatureFlags(FeatureFlagReader flagReader, Context context) {
+    public FeatureFlags(@Main Resources resources, FlagReader flagReader, Context context) {
+        mResources = resources;
         mFlagReader = flagReader;
         mContext = context;
 
@@ -59,7 +66,7 @@ public class FeatureFlags {
     };
 
     @VisibleForTesting
-    void addFlag(Flag flag) {
+    void addFlag(Flag<?> flag) {
         mFlagMap.put(flag.getId(), flag);
     }
 
@@ -68,7 +75,15 @@ public class FeatureFlags {
      * @return The value of the flag.
      */
     public boolean isEnabled(BooleanFlag flag) {
-        return mFlagReader.isEnabled(flag);
+        boolean def = flag.getDefault();
+        if (flag.hasResourceOverride()) {
+            try {
+                def = isEnabledInOverlay(flag.getResourceOverride());
+            } catch (Resources.NotFoundException e) {
+                // no-op
+            }
+        }
+        return mFlagReader.isEnabled(flag.getId(), def);
     }
 
     /**
@@ -118,13 +133,11 @@ public class FeatureFlags {
     }
 
     public boolean isPeopleTileEnabled() {
-        // TODO(b/202860494): different resource overlays have different values.
-        return mFlagReader.isEnabled(R.bool.flag_conversations);
+        return isEnabled(Flags.PEOPLE_TILE);
     }
 
     public boolean isMonetEnabled() {
-        // TODO(b/202860494): used in wallpaper picker. Always true, maybe delete.
-        return mFlagReader.isEnabled(R.bool.flag_monet);
+        return isEnabled(Flags.MONET);
     }
 
     public boolean isPMLiteEnabled() {
@@ -132,8 +145,7 @@ public class FeatureFlags {
     }
 
     public boolean isChargingRippleEnabled() {
-        // TODO(b/202860494): different resource overlays have different values.
-        return mFlagReader.isEnabled(R.bool.flag_charging_ripple);
+        return isEnabled(Flags.CHARGING_RIPPLE);
     }
 
     public boolean isOngoingCallStatusBarChipEnabled() {
@@ -150,8 +162,7 @@ public class FeatureFlags {
     }
 
     public boolean isSmartspaceEnabled() {
-        // TODO(b/202860494): different resource overlays have different values.
-        return mFlagReader.isEnabled(R.bool.flag_smartspace);
+        return isEnabled(Flags.SMARTSPACE);
     }
 
     public boolean isSmartspaceDedupingEnabled() {
@@ -163,7 +174,7 @@ public class FeatureFlags {
     }
 
     public boolean isKeyguardQsUserDetailsShortcutEnabled() {
-        return mFlagReader.isEnabled(R.bool.flag_lockscreen_qs_user_detail_shortcut);
+        return isEnabled(Flags.QS_USER_DETAIL_SHORTCUT);
     }
 
     public boolean isSmartSpaceSharedElementTransitionEnabled() {
@@ -197,6 +208,16 @@ public class FeatureFlags {
     /** static method for the system setting */
     public static boolean isProviderModelSettingEnabled(Context context) {
         return FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);
+    }
+
+    private boolean isEnabledInOverlay(@BoolRes int resId) {
+        synchronized (mCachedFlags) {
+            if (!mCachedFlags.contains(resId)) {
+                mCachedFlags.put(resId, mResources.getBoolean(resId));
+            }
+
+            return mCachedFlags.get(resId);
+        }
     }
 
     /** Simple interface for beinga alerted when a specific flag changes value. */

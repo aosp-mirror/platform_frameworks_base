@@ -25,12 +25,10 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import org.junit.FixMethodOrder
@@ -47,7 +45,7 @@ import org.junit.runners.Parameterized
  * Actions:
  *     Launch a [pipApp] in pip mode
  *     Launch another app [fixedApp] (appears below pip)
- *     Rotate the screen from [testSpec.config.startRotation] to [testSpec.config.endRotation]
+ *     Rotate the screen from [testSpec.startRotation] to [testSpec.endRotation]
  *     (usually, 0->90 and 90->0)
  *
  * Notes:
@@ -65,21 +63,21 @@ import org.junit.runners.Parameterized
 @Group4
 class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val fixedApp = FixedAppHelper(instrumentation)
-    private val screenBoundsStart = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
-    private val screenBoundsEnd = WindowUtils.getDisplayBounds(testSpec.config.endRotation)
+    private val screenBoundsStart = WindowUtils.getDisplayBounds(testSpec.startRotation)
+    private val screenBoundsEnd = WindowUtils.getDisplayBounds(testSpec.endRotation)
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = buildTransition(eachRun = false) { configuration ->
+    override val transition: FlickerBuilder.() -> Unit
+        get() = buildTransition(eachRun = false) {
             setup {
                 test {
                     fixedApp.launchViaIntent(wmHelper)
                 }
                 eachRun {
-                    setRotation(configuration.startRotation)
+                    setRotation(testSpec.startRotation)
                 }
             }
             transitions {
-                setRotation(configuration.endRotation)
+                setRotation(testSpec.endRotation)
             }
         }
 

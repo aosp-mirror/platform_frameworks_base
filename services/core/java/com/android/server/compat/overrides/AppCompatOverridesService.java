@@ -196,8 +196,8 @@ public final class AppCompatOverridesService {
     private void applyPackageOverrides(String configStr, String packageName, long versionCode,
             Set<Long> ownedChangeIds, Set<Long> changeIdsToSkip,
             boolean removeOtherOwnedOverrides) {
-        Map<Long, PackageOverride> overridesToAdd = AppCompatOverridesParser.parsePackageOverrides(
-                configStr, versionCode, changeIdsToSkip);
+        Map<Long, PackageOverride> overridesToAdd = mOverridesParser.parsePackageOverrides(
+                configStr, packageName, versionCode, changeIdsToSkip);
         putPackageOverrides(packageName, overridesToAdd);
 
         if (!removeOtherOwnedOverrides) {
@@ -426,5 +426,5 @@ public final class AppCompatOverridesService {
                     break;
             }
         }
-    };
+    }
 }

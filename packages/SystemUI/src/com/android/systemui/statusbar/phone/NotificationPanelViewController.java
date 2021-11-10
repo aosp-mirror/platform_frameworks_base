@@ -22,7 +22,6 @@ import static androidx.constraintlayout.widget.ConstraintSet.END;
 import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
 import static androidx.constraintlayout.widget.ConstraintSet.START;
 import static androidx.constraintlayout.widget.ConstraintSet.TOP;
-import static androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
@@ -100,6 +99,7 @@ import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
+import com.android.keyguard.KeyguardUnfoldTransition;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
@@ -190,6 +190,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
@@ -201,6 +202,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -453,9 +455,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mIsFullWidth;
     private boolean mBlockingExpansionForCurrentTouch;
 
-    // TODO (b/204204226): no longer needed once refactor is complete
-    private final boolean mUseCombinedQSHeaders;
-
     /**
      * Following variables maintain state of events when input focus transfer may occur.
      */
@@ -654,6 +653,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private boolean mStatusViewCentered = true;
 
+    private Optional<KeyguardUnfoldTransition> mKeyguardUnfoldTransition;
+
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
         @Override
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
@@ -774,6 +775,7 @@ public class NotificationPanelViewController extends PanelViewController {
             LockscreenGestureLogger lockscreenGestureLogger,
             PanelExpansionStateManager panelExpansionStateManager,
             NotificationRemoteInputManager remoteInputManager,
+            Optional<SysUIUnfoldComponent> unfoldComponent,
             ControlsComponent controlsComponent) {
         super(view,
                 falsingManager,
@@ -895,10 +897,9 @@ public class NotificationPanelViewController extends PanelViewController {
         }
 
         mMaxKeyguardNotifications = resources.getInteger(R.integer.keyguard_max_notification_count);
+        mKeyguardUnfoldTransition = unfoldComponent.map(c -> c.getKeyguardUnfoldTransition());
         updateUserSwitcherFlags();
         onFinishInflate();
-
-        mUseCombinedQSHeaders = featureFlags.useCombinedQSHeaders();
     }
 
     private void onFinishInflate() {
@@ -941,14 +942,14 @@ public class NotificationPanelViewController extends PanelViewController {
             mCommunalViewController.init();
         }
 
-
+        mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
         updateViewControllers(
                 mView.findViewById(R.id.keyguard_status_view),
                 userAvatarContainer,
                 keyguardUserSwitcherView,
                 mIdleHostView,
                 mCommunalView);
-        mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
+
         NotificationStackScrollLayout stackScrollLayout = mView.findViewById(
                 R.id.notification_stack_scroller);
         mNotificationStackScrollLayoutController.attach(stackScrollLayout);
@@ -999,6 +1000,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
 
         mTapAgainViewController.init();
+        mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mNotificationContainerParent));
     }
 
     @Override
@@ -1127,9 +1129,6 @@ public class NotificationPanelViewController extends PanelViewController {
         } else {
             constraintSet.connect(R.id.qs_frame, END, PARENT_ID, END);
             constraintSet.connect(R.id.notification_stack_scroller, START, PARENT_ID, START);
-            if (mUseCombinedQSHeaders) {
-                constraintSet.constrainHeight(R.id.split_shade_status_bar, WRAP_CONTENT);
-            }
         }
         constraintSet.getConstraint(R.id.notification_stack_scroller).layout.mWidth = panelWidth;
         constraintSet.getConstraint(R.id.qs_frame).layout.mWidth = qsWidth;
@@ -1252,6 +1251,8 @@ public class NotificationPanelViewController extends PanelViewController {
                     mBarState);
         }
         setKeyguardBottomAreaVisibility(mBarState, false);
+
+        mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mNotificationContainerParent));
     }
 
     private void attachSplitShadeMediaPlayerContainer(FrameLayout container) {
@@ -3937,45 +3938,6 @@ public class NotificationPanelViewController extends PanelViewController {
             private long mLastTouchDownTime = -1L;
 
             @Override
-            public boolean onTouchForwardedFromStatusBar(MotionEvent event) {
-                // TODO(b/202981994): Move the touch debugging in this method to a central location.
-                //  (Right now, it's split between StatusBar and here.)
-
-                // If panels aren't enabled, ignore the gesture and don't pass it down to the
-                // panel view.
-                if (!mCommandQueue.panelsEnabled()) {
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        Log.v(
-                                TAG,
-                                String.format(
-                                        "onTouchForwardedFromStatusBar: "
-                                                + "panel disabled, ignoring touch at (%d,%d)",
-                                        (int) event.getX(),
-                                        (int) event.getY()
-                                )
-                        );
-                    }
-                    return false;
-                }
-
-                // If the view that would receive the touch is disabled, just have status bar eat
-                // the gesture.
-                if (event.getAction() == MotionEvent.ACTION_DOWN && !mView.isEnabled()) {
-                    Log.v(TAG,
-                            String.format(
-                                    "onTouchForwardedFromStatusBar: "
-                                            + "panel view disabled, eating touch at (%d,%d)",
-                                    (int) event.getX(),
-                                    (int) event.getY()
-                            )
-                    );
-                    return true;
-                }
-
-                return mView.dispatchTouchEvent(event);
-            }
-
-            @Override
             public boolean onInterceptTouchEvent(MotionEvent event) {
                 if (mBlockTouches || mQs.disallowPanelTouches()) {
                     return false;
@@ -4085,6 +4047,55 @@ public class NotificationPanelViewController extends PanelViewController {
             }
         };
     }
+
+    private final PhoneStatusBarView.TouchEventHandler mStatusBarViewTouchEventHandler =
+            new PhoneStatusBarView.TouchEventHandler() {
+                @Override
+                public void onInterceptTouchEvent(MotionEvent event) {
+                    mStatusBar.onTouchEvent(event);
+                }
+
+                @Override
+                public boolean handleTouchEvent(MotionEvent event) {
+                    mStatusBar.onTouchEvent(event);
+
+                    // TODO(b/202981994): Move the touch debugging in this method to a central
+                    //  location. (Right now, it's split between StatusBar and here.)
+
+                    // If panels aren't enabled, ignore the gesture and don't pass it down to the
+                    // panel view.
+                    if (!mCommandQueue.panelsEnabled()) {
+                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                            Log.v(
+                                    TAG,
+                                    String.format(
+                                            "onTouchForwardedFromStatusBar: "
+                                                    + "panel disabled, ignoring touch at (%d,%d)",
+                                            (int) event.getX(),
+                                            (int) event.getY()
+                                    )
+                            );
+                        }
+                        return false;
+                    }
+
+                    // If the view that would receive the touch is disabled, just have status bar
+                    // eat the gesture.
+                    if (event.getAction() == MotionEvent.ACTION_DOWN && !mView.isEnabled()) {
+                        Log.v(TAG,
+                                String.format(
+                                        "onTouchForwardedFromStatusBar: "
+                                                + "panel view disabled, eating touch at (%d,%d)",
+                                        (int) event.getX(),
+                                        (int) event.getY()
+                                )
+                        );
+                        return true;
+                    }
+
+                    return mView.dispatchTouchEvent(event);
+                }
+            };
 
     @Override
     protected PanelViewController.OnConfigurationChangedListener
@@ -4879,6 +4890,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
     /** Returns the handler that the status bar should forward touches to. */
     public PhoneStatusBarView.TouchEventHandler getStatusBarTouchEventHandler() {
-        return getTouchHandler()::onTouchForwardedFromStatusBar;
+        return mStatusBarViewTouchEventHandler;
     }
 }

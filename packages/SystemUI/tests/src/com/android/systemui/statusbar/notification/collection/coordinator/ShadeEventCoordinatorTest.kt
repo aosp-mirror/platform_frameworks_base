@@ -26,7 +26,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
-import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.withArgCaptor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -56,13 +56,11 @@ class ShadeEventCoordinatorTest : SysuiTestCase() {
         initMocks(this)
         coordinator = ShadeEventCoordinator(logger)
         coordinator.attach(pipeline)
-        notifCollectionListener = argumentCaptor<NotifCollectionListener>().let {
-            verify(pipeline).addCollectionListener(it.capture())
-            it.value!!
+        notifCollectionListener = withArgCaptor {
+            verify(pipeline).addCollectionListener(capture())
         }
-        onBeforeRenderListListener = argumentCaptor<OnBeforeRenderListListener>().let {
-            verify(pipeline).addOnBeforeRenderListListener(it.capture())
-            it.value!!
+        onBeforeRenderListListener = withArgCaptor {
+            verify(pipeline).addOnBeforeRenderListListener(capture())
         }
         coordinator.setNotifRemovedByUserCallback(notifRemovedByUserCallback)
         coordinator.setShadeEmptiedCallback(shadeEmptiedCallback)
