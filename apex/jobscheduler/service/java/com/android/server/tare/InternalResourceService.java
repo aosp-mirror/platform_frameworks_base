@@ -45,8 +45,12 @@ import android.net.Uri;
 import android.os.BatteryManagerInternal;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.IDeviceIdleController;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -104,6 +108,8 @@ public class InternalResourceService extends SystemService {
     private final BatteryManagerInternal mBatteryManagerInternal;
     private final PackageManager mPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;
+
+    private IDeviceIdleController mDeviceIdleController;
 
     private final Agent mAgent;
     private final ConfigObserver mConfigObserver;
@@ -163,8 +169,14 @@ public class InternalResourceService extends SystemService {
     @GuardedBy("mPackageToUidCache")
     private final SparseArrayMap<String, Integer> mPackageToUidCache = new SparseArrayMap<>();
 
+    /** List of packages that are "exempted" from battery restrictions. */
+    // TODO(144864180): include userID
+    @GuardedBy("mLock")
+    private ArraySet<String> mExemptedApps = new ArraySet<>();
+
     private volatile boolean mIsEnabled;
     private volatile int mBootPhase;
+    private volatile boolean mExemptListLoaded;
     // In the range [0,100] to represent 0% to 100% battery.
     @GuardedBy("mLock")
     private int mCurrentBatteryLevel;
@@ -213,6 +225,9 @@ public class InternalResourceService extends SystemService {
                     onUserRemoved(userId);
                 }
                 break;
+                case PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED:
+                    onExemptionListChanged();
+                    break;
             }
         }
     };
@@ -285,7 +300,22 @@ public class InternalResourceService extends SystemService {
 
         if (PHASE_SYSTEM_SERVICES_READY == phase) {
             mConfigObserver.start();
+            mDeviceIdleController = IDeviceIdleController.Stub.asInterface(
+                    ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
             setupEverything();
+        } else if (PHASE_BOOT_COMPLETED == phase) {
+            if (!mExemptListLoaded) {
+                synchronized (mLock) {
+                    try {
+                        mExemptedApps =
+                                new ArraySet<>(mDeviceIdleController.getFullPowerWhitelist());
+                    } catch (RemoteException e) {
+                        // Shouldn't happen.
+                        Slog.wtf(TAG, e);
+                    }
+                    mExemptListLoaded = true;
+                }
+            }
         }
     }
 
@@ -350,6 +380,12 @@ public class InternalResourceService extends SystemService {
         return mIsEnabled;
     }
 
+    boolean isPackageExempted(final int userId, @NonNull String pkgName) {
+        synchronized (mLock) {
+            return mExemptedApps.contains(pkgName);
+        }
+    }
+
     boolean isSystem(final int userId, @NonNull String pkgName) {
         if ("android".equals(pkgName)) {
             return true;
@@ -372,6 +408,53 @@ public class InternalResourceService extends SystemService {
     void onDeviceStateChanged() {
         synchronized (mLock) {
             mAgent.onDeviceStateChangedLocked();
+        }
+    }
+
+    void onExemptionListChanged() {
+        final int[] userIds = LocalServices.getService(UserManagerInternal.class).getUserIds();
+        synchronized (mLock) {
+            final ArraySet<String> removed = mExemptedApps;
+            final ArraySet<String> added = new ArraySet<>();
+            try {
+                mExemptedApps = new ArraySet<>(mDeviceIdleController.getFullPowerWhitelist());
+            } catch (RemoteException e) {
+                // Shouldn't happen.
+                Slog.wtf(TAG, e);
+                return;
+            }
+
+            for (int i = mExemptedApps.size() - 1; i >= 0; --i) {
+                final String pkg = mExemptedApps.valueAt(i);
+                if (!removed.contains(pkg)) {
+                    added.add(pkg);
+                }
+                removed.remove(pkg);
+            }
+            for (int a = added.size() - 1; a >= 0; --a) {
+                final String pkgName = added.valueAt(a);
+                for (int userId : userIds) {
+                    // Since the exemption list doesn't specify user ID and we track by user ID,
+                    // we need to see if the app exists on the user before talking to the agent.
+                    // Otherwise, we may end up with invalid ledgers.
+                    final boolean appExists = getUid(userId, pkgName) >= 0;
+                    if (appExists) {
+                        mAgent.onAppExemptedLocked(userId, pkgName);
+                    }
+                }
+            }
+            for (int r = removed.size() - 1; r >= 0; --r) {
+                final String pkgName = removed.valueAt(r);
+                for (int userId : userIds) {
+                    // Since the exemption list doesn't specify user ID and we track by user ID,
+                    // we need to see if the app exists on the user before talking to the agent.
+                    // Otherwise, we may end up with invalid ledgers.
+                    final boolean appExists = getUid(userId, pkgName) >= 0;
+                    if (appExists) {
+                        mAgent.onAppUnexemptedLocked(userId, pkgName);
+                    }
+                }
+            }
         }
     }
 
@@ -602,6 +685,7 @@ public class InternalResourceService extends SystemService {
     private void registerListeners() {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_LEVEL_CHANGED);
+        filter.addAction(PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED);
         getContext().registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
 
         final IntentFilter pkgFilter = new IntentFilter();
@@ -625,6 +709,15 @@ public class InternalResourceService extends SystemService {
     private void setupHeavyWork() {
         synchronized (mLock) {
             loadInstalledPackageListLocked();
+            if (mBootPhase >= PHASE_BOOT_COMPLETED && !mExemptListLoaded) {
+                try {
+                    mExemptedApps = new ArraySet<>(mDeviceIdleController.getFullPowerWhitelist());
+                } catch (RemoteException e) {
+                    // Shouldn't happen.
+                    Slog.wtf(TAG, e);
+                }
+                mExemptListLoaded = true;
+            }
             final boolean isFirstSetup = !mScribe.recordExists();
             if (isFirstSetup) {
                 mAgent.grantBirthrightsLocked();
@@ -654,6 +747,8 @@ public class InternalResourceService extends SystemService {
         synchronized (mLock) {
             mAgent.tearDownLocked();
             mCompleteEconomicPolicy.tearDown();
+            mExemptedApps.clear();
+            mExemptListLoaded = false;
             mHandler.post(() -> {
                 // Never call out to AlarmManager with the lock held. This sits below AM.
                 AlarmManager alarmManager = getContext().getSystemService(AlarmManager.class);
@@ -953,9 +1048,9 @@ public class InternalResourceService extends SystemService {
             pw.print("Current battery level: ");
             pw.println(mCurrentBatteryLevel);
 
-            final long maxCircluation = getMaxCirculationLocked();
+            final long maxCirculation = getMaxCirculationLocked();
             pw.print("Max circulation (current/satiated): ");
-            pw.print(narcToString(maxCircluation));
+            pw.print(narcToString(maxCirculation));
             pw.print("/");
             pw.println(narcToString(mCompleteEconomicPolicy.getMaxSatiatedCirculation()));
 
@@ -963,8 +1058,12 @@ public class InternalResourceService extends SystemService {
             pw.print("Current GDP: ");
             pw.print(narcToString(currentCirculation));
             pw.print(" (");
-            pw.print(String.format("%.2f", 100f * currentCirculation / maxCircluation));
+            pw.print(String.format("%.2f", 100f * currentCirculation / maxCirculation));
             pw.println("% of current max)");
+
+            pw.println();
+            pw.print("Exempted apps", mExemptedApps);
+            pw.println();
 
             pw.println();
             mCompleteEconomicPolicy.dump(pw);
