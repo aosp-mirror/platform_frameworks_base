@@ -19,8 +19,10 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import static junit.framework.Assert.assertFalse;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,6 +32,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -37,7 +40,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
-import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -57,9 +59,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
     private VisualStabilityCoordinator mCoordinator;
 
-    // captured listeners and pluggables:
-    private NotifCollectionListener mCollectionListener;
-
+    @Mock private DumpManager mDumpManager;
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock private StatusBarStateController mStatusBarStateController;
@@ -69,7 +69,6 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Captor private ArgumentCaptor<WakefulnessLifecycle.Observer> mWakefulnessObserverCaptor;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mSBStateListenerCaptor;
     @Captor private ArgumentCaptor<NotifStabilityManager> mNotifStabilityManagerCaptor;
-    @Captor private ArgumentCaptor<NotifCollectionListener> mNotifCollectionListenerCaptor;
 
     private FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
@@ -84,6 +83,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mCoordinator = new VisualStabilityCoordinator(
+                mDumpManager,
                 mHeadsUpManager,
                 mWakefulnessLifecycle,
                 mStatusBarStateController,
@@ -107,6 +107,12 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
                 .build();
 
         when(mHeadsUpManager.isAlerting(mEntry.getKey())).thenReturn(false);
+
+        // Whenever we invalidate, the pipeline runs again, so we invalidate the state
+        doAnswer(i -> {
+            mNotifStabilityManager.onBeginRun();
+            return null;
+        }).when(mInvalidateListener).onPluggableInvalidated(eq(mNotifStabilityManager));
     }
 
     @Test
@@ -211,7 +217,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         mCoordinator.temporarilyAllowSectionChanges(mEntry, mFakeSystemClock.uptimeMillis());
 
         // THEN the notification list is invalidated
-        verifyInvalidateCalled(true);
+        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
     }
 
     @Test
@@ -225,7 +231,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         mCoordinator.temporarilyAllowSectionChanges(mEntry, mFakeSystemClock.currentTimeMillis());
 
         // THEN invalidate is not called because this entry was never suppressed from reordering
-        verifyInvalidateCalled(false);
+        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
     }
 
     @Test
@@ -241,7 +247,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // THEN invalidate is not called because this entry was never suppressed from reordering;
         // THEN section changes are allowed for this notification
-        verifyInvalidateCalled(false);
+        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
         assertTrue(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
 
         // WHEN we're pulsing (now disallowing reordering)
@@ -268,13 +274,14 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // WHEN we temporarily allow section changes for this notification entry
         mCoordinator.temporarilyAllowSectionChanges(mEntry, mFakeSystemClock.currentTimeMillis());
-        verifyInvalidateCalled(true); // can now reorder, so invalidates
+        // can now reorder, so invalidates
+        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
 
         // WHEN reordering is now allowed because device isn't pulsing anymore
         setPulsing(false);
 
-        // THEN invalidate isn't called since reordering was already allowed
-        verifyInvalidateCalled(false);
+        // THEN invalidate isn't called a second time since reordering was already allowed
+        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
     }
 
     @Test
@@ -292,7 +299,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // THEN we never see any calls to invalidate since there weren't any notifications that
         // were being suppressed from grouping or section changes
-        verifyInvalidateCalled(false);
+        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
     }
 
     @Test
@@ -308,7 +315,41 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setPanelExpanded(false);
 
         //  invalidate is called because we were previously suppressing a group change
-        verifyInvalidateCalled(true);
+        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+    }
+
+    @Test
+    public void testNotSuppressingEntryReorderingAnymoreWillInvalidate() {
+        // GIVEN visual stability is being maintained b/c panel is expanded
+        setPulsing(false);
+        setScreenOn(true);
+        setPanelExpanded(true);
+
+        assertFalse(mNotifStabilityManager.isEntryReorderingAllowed(mEntry));
+        // The pipeline still has to report back that entry reordering was suppressed
+        mNotifStabilityManager.onEntryReorderSuppressed();
+
+        // WHEN the panel isn't expanded anymore
+        setPanelExpanded(false);
+
+        //  invalidate is called because we were previously suppressing an entry reorder
+        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+    }
+
+    @Test
+    public void testQueryingEntryReorderingButNotReportingReorderSuppressedDoesNotInvalidate() {
+        // GIVEN visual stability is being maintained b/c panel is expanded
+        setPulsing(false);
+        setScreenOn(true);
+        setPanelExpanded(true);
+
+        assertFalse(mNotifStabilityManager.isEntryReorderingAllowed(mEntry));
+
+        // WHEN the panel isn't expanded anymore
+        setPanelExpanded(false);
+
+        // invalidate is not called because we were not told that an entry reorder was suppressed
+        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
     }
 
     @Test
@@ -345,13 +386,4 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         mStatusBarStateListener.onExpandedChanged(expanded);
     }
 
-    private void verifyInvalidateCalled(boolean invalidateCalled) {
-        if (invalidateCalled) {
-            verify(mInvalidateListener).onPluggableInvalidated(mNotifStabilityManager);
-        } else {
-            verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
-        }
-
-        reset(mInvalidateListener);
-    }
 }

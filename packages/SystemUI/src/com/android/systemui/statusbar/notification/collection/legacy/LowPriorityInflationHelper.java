@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.collection.inflation;
+package com.android.systemui.statusbar.notification.collection.legacy;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.RowContentBindParams;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
@@ -61,6 +59,7 @@ public class LowPriorityInflationHelper {
     public void recheckLowPriorityViewAndInflate(
             NotificationEntry entry,
             ExpandableNotificationRow row) {
+        mFeatureFlags.checkLegacyPipelineEnabled();
         RowContentBindParams params = mRowContentBindStage.getStageParams(entry);
         final boolean shouldBeLowPriority = shouldUseLowPriorityView(entry);
         if (!row.isRemoved() && row.isLowPriority() != shouldBeLowPriority) {
@@ -74,12 +73,7 @@ public class LowPriorityInflationHelper {
      * Whether the notification should inflate a low priority version of its content views.
      */
     public boolean shouldUseLowPriorityView(NotificationEntry entry) {
-        boolean isGroupChild;
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
-            isGroupChild = (entry.getParent() != GroupEntry.ROOT_ENTRY);
-        } else {
-            isGroupChild = mGroupManager.isChildInGroup(entry);
-        }
-        return entry.isAmbient() && !isGroupChild;
+        mFeatureFlags.checkLegacyPipelineEnabled();
+        return entry.isAmbient() && !mGroupManager.isChildInGroup(entry);
     }
 }
