@@ -68,8 +68,7 @@ public abstract class HealthServiceWrapper {
      *     service-specific error when calling {@code getHealthInfo}, e.g. it is unsupported.
      * @throws RemoteException for any transaction-level errors
      */
-    // TODO(b/177269435): AIDL
-    public abstract android.hardware.health.V1_0.HealthInfo getHealthInfo() throws RemoteException;
+    public abstract android.hardware.health.HealthInfo getHealthInfo() throws RemoteException;
 
     /**
      * Create a new HealthServiceWrapper instance.
