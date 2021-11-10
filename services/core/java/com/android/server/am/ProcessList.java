@@ -1793,13 +1793,14 @@ public final class ProcessList {
         if (app.isPendingStart()) {
             return true;
         }
-        long startTime = SystemClock.uptimeMillis();
+        final long startUptime = SystemClock.uptimeMillis();
+        final long startElapsedTime = SystemClock.elapsedRealtime();
         if (app.getPid() > 0 && app.getPid() != ActivityManagerService.MY_PID) {
-            checkSlow(startTime, "startProcess: removing from pids map");
+            checkSlow(startUptime, "startProcess: removing from pids map");
             mService.removePidLocked(app.getPid(), app);
             app.setBindMountPending(false);
             mService.mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
-            checkSlow(startTime, "startProcess: done removing from pids map");
+            checkSlow(startUptime, "startProcess: done removing from pids map");
             app.setPid(0);
             app.setStartSeq(0);
         }
@@ -1812,9 +1813,9 @@ public final class ProcessList {
                 "startProcessLocked removing on hold: " + app);
         mService.mProcessesOnHold.remove(app);
 
-        checkSlow(startTime, "startProcess: starting to update cpu stats");
+        checkSlow(startUptime, "startProcess: starting to update cpu stats");
         mService.updateCpuStats();
-        checkSlow(startTime, "startProcess: done updating cpu stats");
+        checkSlow(startUptime, "startProcess: done updating cpu stats");
 
         try {
             final int userId = UserHandle.getUserId(app.uid);
@@ -1831,7 +1832,7 @@ public final class ProcessList {
             if (!app.isolated) {
                 int[] permGids = null;
                 try {
-                    checkSlow(startTime, "startProcess: getting gids from package manager");
+                    checkSlow(startUptime, "startProcess: getting gids from package manager");
                     final IPackageManager pm = AppGlobals.getPackageManager();
                     permGids = pm.getPackageGids(app.info.packageName,
                             MATCH_DIRECT_BOOT_AUTO, app.userId);
@@ -1869,7 +1870,7 @@ public final class ProcessList {
                 gids = computeGidsForProcess(mountExternal, uid, permGids, externalStorageAccess);
             }
             app.setMountMode(mountExternal);
-            checkSlow(startTime, "startProcess: building args");
+            checkSlow(startUptime, "startProcess: building args");
             if (mService.mAtmInternal.isFactoryTestProcess(app.getWindowProcessController())) {
                 uid = 0;
             }
@@ -2027,7 +2028,7 @@ public final class ProcessList {
 
             return startProcessLocked(hostingRecord, entryPoint, app, uid, gids,
                     runtimeFlags, zygotePolicyFlags, mountExternal, seInfo, requiredAbi,
-                    instructionSet, invokeWith, startTime);
+                    instructionSet, invokeWith, startUptime, startElapsedTime);
         } catch (RuntimeException e) {
             Slog.e(ActivityManagerService.TAG, "Failure starting process " + app.processName, e);
 
@@ -2047,7 +2048,7 @@ public final class ProcessList {
     boolean startProcessLocked(HostingRecord hostingRecord, String entryPoint, ProcessRecord app,
             int uid, int[] gids, int runtimeFlags, int zygotePolicyFlags, int mountExternal,
             String seInfo, String requiredAbi, String instructionSet, String invokeWith,
-            long startTime) {
+            long startUptime, long startElapsedTime) {
         app.setPendingStart(true);
         app.setRemoved(false);
         synchronized (mProcLock) {
@@ -2068,7 +2069,7 @@ public final class ProcessList {
         }
         final long startSeq = ++mProcStartSeqCounter;
         app.setStartSeq(startSeq);
-        app.setStartParams(uid, hostingRecord, seInfo, startTime);
+        app.setStartParams(uid, hostingRecord, seInfo, startUptime, startElapsedTime);
         app.setUsingWrapper(invokeWith != null
                 || Zygote.getWrapProperty(app.processName) != null);
         mPendingStarts.put(startSeq, app);
@@ -2085,7 +2086,7 @@ public final class ProcessList {
                 final Process.ProcessStartResult startResult = startProcess(hostingRecord,
                         entryPoint, app,
                         uid, gids, runtimeFlags, zygotePolicyFlags, mountExternal, seInfo,
-                        requiredAbi, instructionSet, invokeWith, startTime);
+                        requiredAbi, instructionSet, invokeWith, startUptime);
                 handleProcessStartedLocked(app, startResult.pid, startResult.usingWrapper,
                         startSeq, false);
             } catch (RuntimeException e) {

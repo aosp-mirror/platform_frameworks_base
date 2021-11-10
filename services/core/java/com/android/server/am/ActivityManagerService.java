@@ -4666,7 +4666,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.getCompat(), getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
                         buildSerial, autofillOptions, contentCaptureOptions,
-                        app.getDisabledCompatChanges(), serializedSystemFontMap);
+                        app.getDisabledCompatChanges(), serializedSystemFontMap,
+                        app.getStartElapsedTime(), app.getStartUptime());
             } else {
                 thread.bindApplication(processName, appInfo, providerList, null, profilerInfo,
                         null, null, null, testMode,
@@ -4676,7 +4677,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.getCompat(), getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
                         buildSerial, autofillOptions, contentCaptureOptions,
-                        app.getDisabledCompatChanges(), serializedSystemFontMap);
+                        app.getDisabledCompatChanges(), serializedSystemFontMap,
+                        app.getStartElapsedTime(), app.getStartUptime());
             }
             if (profilerInfo != null) {
                 profilerInfo.closeFd();

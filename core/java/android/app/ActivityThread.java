@@ -37,8 +37,10 @@ import static android.window.ConfigurationHelper.shouldUpdateResources;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UptimeMillisLong;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
@@ -888,6 +890,9 @@ public final class ActivityThread extends ClientTransactionHandler
 
         SharedMemory mSerializedSystemFontMap;
 
+        long startRequestedElapsedTime;
+        long startRequestedUptime;
+
         @Override
         public String toString() {
             return "AppBindData{appInfo=" + appInfo + "}";
@@ -1099,7 +1104,8 @@ public final class ActivityThread extends ClientTransactionHandler
                 CompatibilityInfo compatInfo, Map services, Bundle coreSettings,
                 String buildSerial, AutofillOptions autofillOptions,
                 ContentCaptureOptions contentCaptureOptions, long[] disabledCompatChanges,
-                SharedMemory serializedSystemFontMap) {
+                SharedMemory serializedSystemFontMap,
+                long startRequestedElapsedTime, long startRequestedUptime) {
             if (services != null) {
                 if (false) {
                     // Test code to make sure the app could see the passed-in services.
@@ -1149,6 +1155,8 @@ public final class ActivityThread extends ClientTransactionHandler
             data.contentCaptureOptions = contentCaptureOptions;
             data.disabledCompatChanges = disabledCompatChanges;
             data.mSerializedSystemFontMap = serializedSystemFontMap;
+            data.startRequestedElapsedTime = startRequestedElapsedTime;
+            data.startRequestedUptime = startRequestedUptime;
             sendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -6407,7 +6415,8 @@ public final class ActivityThread extends ClientTransactionHandler
             DdmVmInternal.setRecentAllocationsTrackingEnabled(true);
         }
         // Note when this process has started.
-        Process.setStartTimes(SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
+        Process.setStartTimes(SystemClock.elapsedRealtime(), SystemClock.uptimeMillis(),
+                data.startRequestedElapsedTime, data.startRequestedUptime);
 
         AppCompatCallbacks.install(data.disabledCompatChanges);
         // Let libcore handle any compat changes after installing the list of compat changes.
