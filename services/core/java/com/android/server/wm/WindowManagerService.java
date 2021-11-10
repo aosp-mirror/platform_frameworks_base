@@ -6136,9 +6136,10 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " callers=" + Debug.getCallers(3));
                 return NAV_BAR_INVALID;
             }
-            displayContent.performLayout(false /* initial */,
-                    false /* updateInputWindows */);
-            return displayContent.getDisplayPolicy().getNavBarPosition();
+            return displayContent.getDisplayPolicy().navigationBarPosition(
+                displayContent.mBaseDisplayWidth,
+                displayContent.mBaseDisplayHeight,
+                displayContent.getDisplayRotation().getRotation());
         }
     }
 

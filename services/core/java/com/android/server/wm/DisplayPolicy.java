@@ -120,6 +120,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.gui.DropInputMode;
@@ -2306,6 +2307,24 @@ public class DisplayPolicy {
         }
     }
 
+    private int getAltBarWidth(@InternalInsetsType int insetsType) {
+        final InsetsSource source = mDisplayContent.getInsetsStateController().getRawInsetsState()
+                .peekSource(insetsType);
+        if (source == null) {
+            return 0;
+        }
+        return source.getFrame().width();
+    }
+
+    private int getAltBarHeight(@InternalInsetsType int insetsType) {
+        final InsetsSource source = mDisplayContent.getInsetsStateController().getRawInsetsState()
+                .peekSource(insetsType);
+        if (source == null) {
+            return 0;
+        }
+        return source.getFrame().height();
+    }
+
     void notifyDisplayReady() {
         mHandler.post(() -> {
             final int displayId = getDisplayId();
@@ -2319,26 +2338,6 @@ public class DisplayPolicy {
                 wpMgr.onDisplayReady(displayId);
             }
         });
-    }
-
-    /**
-     * Return the display width available after excluding any screen
-     * decorations that could never be removed in Honeycomb. That is, system bar or
-     * button bar.
-     */
-    public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode,
-            DisplayCutout displayCutout) {
-        int width = fullWidth;
-        if (hasNavigationBar()) {
-            final int navBarPosition = navigationBarPosition(fullWidth, fullHeight, rotation);
-            if (navBarPosition == NAV_BAR_LEFT || navBarPosition == NAV_BAR_RIGHT) {
-                width -= getNavigationBarWidth(rotation, uiMode, navBarPosition);
-            }
-        }
-        if (displayCutout != null) {
-            width -= displayCutout.getSafeInsetLeft() + displayCutout.getSafeInsetRight();
-        }
-        return width;
     }
 
     private int getNavigationBarHeight(int rotation, int uiMode) {
@@ -2388,43 +2387,59 @@ public class DisplayPolicy {
     }
 
     /**
-     * Return the display height available after excluding any screen
+     * Return the display size available after excluding any screen
      * decorations that could never be removed in Honeycomb. That is, system bar or
      * button bar.
      */
-    public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode,
+    Point getNonDecorDisplaySize(int fullWidth, int fullHeight, int rotation, int uiMode,
             DisplayCutout displayCutout) {
+        int width = fullWidth;
         int height = fullHeight;
+        int navBarReducedHeight = 0;
+        int navBarReducedWidth = 0;
+        final int navBarPosition = navigationBarPosition(fullWidth, fullHeight, rotation);
         if (hasNavigationBar()) {
-            final int navBarPosition = navigationBarPosition(fullWidth, fullHeight, rotation);
             if (navBarPosition == NAV_BAR_BOTTOM) {
-                height -= getNavigationBarHeight(rotation, uiMode);
+                navBarReducedHeight = getNavigationBarHeight(rotation, uiMode);
+            } else if (navBarPosition == NAV_BAR_LEFT || navBarPosition == NAV_BAR_RIGHT) {
+                navBarReducedWidth = getNavigationBarWidth(rotation, uiMode, navBarPosition);
             }
         }
+        if (mExtraNavBarAlt != null) {
+            final LayoutParams altBarParams = mExtraNavBarAlt.getLayoutingAttrs(rotation);
+            final int altBarPosition = getAltBarPosition(altBarParams);
+            if (altBarPosition == ALT_BAR_BOTTOM || altBarPosition == ALT_BAR_TOP) {
+                if (altBarPosition == navBarPosition) {
+                    navBarReducedHeight = Math.max(navBarReducedHeight,
+                            getAltBarHeight(ITYPE_EXTRA_NAVIGATION_BAR));
+                } else {
+                    navBarReducedHeight += getAltBarHeight(ITYPE_EXTRA_NAVIGATION_BAR);
+                }
+            } else if (altBarPosition == ALT_BAR_LEFT || altBarPosition == ALT_BAR_RIGHT) {
+                if (altBarPosition == navBarPosition) {
+                    navBarReducedWidth = Math.max(navBarReducedWidth,
+                            getAltBarWidth(ITYPE_EXTRA_NAVIGATION_BAR));
+                } else {
+                    navBarReducedWidth += getAltBarWidth(ITYPE_EXTRA_NAVIGATION_BAR);
+                }
+            }
+        }
+        height -= navBarReducedHeight;
+        width -= navBarReducedWidth;
         if (displayCutout != null) {
             height -= displayCutout.getSafeInsetTop() + displayCutout.getSafeInsetBottom();
+            width -= displayCutout.getSafeInsetLeft() + displayCutout.getSafeInsetRight();
         }
-        return height;
+        return new Point(width, height);
     }
 
     /**
-     * Return the available screen width that we should report for the
+     * Return the available screen size that we should report for the
      * configuration.  This must be no larger than
-     * {@link #getNonDecorDisplayWidth(int, int, int, int, DisplayCutout)}; it may be smaller
+     * {@link #getNonDecorDisplaySize(int, int, int, int, DisplayCutout)}; it may be smaller
      * than that to account for more transient decoration like a status bar.
      */
-    public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode,
-            DisplayCutout displayCutout) {
-        return getNonDecorDisplayWidth(fullWidth, fullHeight, rotation, uiMode, displayCutout);
-    }
-
-    /**
-     * Return the available screen height that we should report for the
-     * configuration.  This must be no larger than
-     * {@link #getNonDecorDisplayHeight(int, int, int, int, DisplayCutout)}; it may be smaller
-     * than that to account for more transient decoration like a status bar.
-     */
-    public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode,
+    Point getConfigDisplaySize(int fullWidth, int fullHeight, int rotation, int uiMode,
             DisplayCutout displayCutout) {
         // There is a separate status bar at the top of the display.  We don't count that as part
         // of the fixed decor, since it can hide; however, for purposes of configurations,
@@ -2436,8 +2451,9 @@ public class DisplayPolicy {
             // bar height.
             statusBarHeight = Math.max(0, statusBarHeight - displayCutout.getSafeInsetTop());
         }
-        return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation, uiMode, displayCutout)
-                - statusBarHeight;
+        final Point nonDecorSize = getNonDecorDisplaySize(fullWidth, fullHeight, rotation,
+                uiMode, displayCutout);
+        return new Point(nonDecorSize.x, nonDecorSize.y - statusBarHeight);
     }
 
     /**
@@ -2485,7 +2501,7 @@ public class DisplayPolicy {
 
     /**
      * Calculates the insets for the areas that could never be removed in Honeycomb, i.e. system
-     * bar or button bar. See {@link #getNonDecorDisplayWidth}.
+     * bar or button bar. See {@link #getNonDecorDisplaySize}.
      *
      * @param displayRotation the current display rotation
      * @param displayWidth the current display width
@@ -2497,7 +2513,7 @@ public class DisplayPolicy {
             DisplayCutout displayCutout, Rect outInsets) {
         outInsets.setEmpty();
 
-        // Only navigation bar
+        // Only navigation bar and extra navigation bar
         if (hasNavigationBar()) {
             final int uiMode = mService.mPolicy.getUiMode();
             int position = navigationBarPosition(displayWidth, displayHeight, displayRotation);
@@ -2507,6 +2523,24 @@ public class DisplayPolicy {
                 outInsets.right = getNavigationBarWidth(displayRotation, uiMode, position);
             } else if (position == NAV_BAR_LEFT) {
                 outInsets.left = getNavigationBarWidth(displayRotation, uiMode, position);
+            }
+        }
+        if (mExtraNavBarAlt != null) {
+            final LayoutParams extraNavLayoutParams =
+                    mExtraNavBarAlt.getLayoutingAttrs(displayRotation);
+            final int position = getAltBarPosition(extraNavLayoutParams);
+            if (position == ALT_BAR_BOTTOM) {
+                outInsets.bottom = Math.max(outInsets.bottom,
+                        getAltBarHeight(ITYPE_EXTRA_NAVIGATION_BAR));
+            } else if (position == ALT_BAR_RIGHT) {
+                outInsets.right = Math.max(outInsets.right,
+                        getAltBarWidth(ITYPE_EXTRA_NAVIGATION_BAR));
+            } else if (position == ALT_BAR_LEFT) {
+                outInsets.left = Math.max(outInsets.left,
+                        getAltBarWidth(ITYPE_EXTRA_NAVIGATION_BAR));
+            } else if (position == ALT_BAR_TOP) {
+                outInsets.top = Math.max(outInsets.top,
+                        getAltBarHeight(ITYPE_EXTRA_NAVIGATION_BAR));
             }
         }
 
