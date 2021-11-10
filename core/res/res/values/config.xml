@@ -1464,6 +1464,30 @@
     <integer-array name="config_autoBrightnessLevels">
     </integer-array>
 
+    <!-- Array of light sensor lux values to define our levels for auto backlight brightness
+         support whilst in idle mode.
+         The N entries of this array define N + 1 control points as follows:
+         (1-based arrays)
+
+         Point 1:            (0, value[1]):             lux <= 0
+         Point 2:     (level[1], value[2]):  0        < lux <= level[1]
+         Point 3:     (level[2], value[3]):  level[2] < lux <= level[3]
+         ...
+         Point N+1: (level[N], value[N+1]):  level[N] < lux
+
+         The control points must be strictly increasing. Each control point
+         corresponds to an entry in the brightness backlight values arrays.
+         For example, if lux == level[1] (first element of the levels array)
+         then the brightness will be determined by value[2] (second element
+         of the brightness values array).
+
+         Spline interpolation is used to determine the auto-brightness
+         backlight values for lux levels between these control points.
+
+         Must be overridden in platform specific overlays -->
+    <integer-array name="config_autoBrightnessLevelsIdle">
+    </integer-array>
+
     <!-- Timeout (in milliseconds) after which we remove the effects any user interactions might've
          had on the brightness mapping. This timeout doesn't start until we transition to a
          non-interactive display policy so that we don't reset while users are using their devices,
@@ -1487,6 +1511,10 @@
     <integer-array name="config_autoBrightnessLcdBacklightValues_doze">
     </integer-array>
 
+    <!-- Enables idle screen brightness mode on this device.
+         If this is true, config_autoBrightnessDisplayValuesNitsIdle must be defined. -->
+    <bool name="config_enableIdleScreenBrightnessMode">false</bool>
+
     <!-- Array of desired screen brightness in nits corresponding to the lux values
          in the config_autoBrightnessLevels array. As with config_screenBrightnessMinimumNits and
          config_screenBrightnessMaximumNits, the display brightness is defined as the measured
@@ -1501,6 +1529,13 @@
          array. The brightness values must be non-negative and non-decreasing. This must be
          overridden in platform specific overlays -->
     <array name="config_autoBrightnessDisplayValuesNits">
+    </array>
+
+    <!-- Array of desired screen brightness in nits for idle screen brightness mode.
+         This array should meet the same requirements as config_autoBrightnessDisplayValuesNits.
+         This array also corresponds to the lux values given in config_autoBrightnessLevelsIdle.
+         In order to activate this mode, config_enableIdleScreenBrightnessMode must be true. -->
+    <array name="config_autoBrightnessDisplayValuesNitsIdle">
     </array>
 
     <!-- Array of output values for button backlight corresponding to the luX values

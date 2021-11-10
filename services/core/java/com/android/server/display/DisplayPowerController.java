@@ -54,6 +54,7 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.view.Display;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.display.BrightnessSynchronizer;
@@ -384,8 +385,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private Sensor mLightSensor;
 
     // The mapper between ambient lux, display backlight values, and display brightness.
+    // This mapper holds the current one that is being used. We will switch between the idle
+    // mapper and active mapper here.
     @Nullable
-    private BrightnessMappingStrategy mBrightnessMapper;
+    private BrightnessMappingStrategy mCurrentBrightnessMapper;
+
+    // Mapper used for active (normal) screen brightness mode
+    @Nullable
+    private BrightnessMappingStrategy mInteractiveModeBrightnessMapper;
+    // Mapper used for idle screen brightness mode
+    @Nullable
+    private BrightnessMappingStrategy mIdleModeBrightnessMapper;
 
     // The current brightness configuration.
     @Nullable
@@ -406,7 +416,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     // The temporary screen brightness. Typically set when a user is interacting with the
     // brightness slider but hasn't settled on a choice yet. Set to
-    // PowerManager.BRIGHNTESS_INVALID_FLOAT when there's no temporary brightness set.
+    // PowerManager.BRIGHTNESS_INVALID_FLOAT when there's no temporary brightness set.
     private float mTemporaryScreenBrightness;
 
     // The current screen brightness while in VR mode.
@@ -595,7 +605,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void handleRbcChanged(boolean strengthChanged, boolean justActivated) {
-        if (mBrightnessMapper == null) {
+        if (mCurrentBrightnessMapper == null) {
             Log.w(TAG, "No brightness mapping available to recalculate splines");
             return;
         }
@@ -604,7 +614,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         for (int i = 0; i < mNitsRange.length; i++) {
             adjustedNits[i] = mCdsi.getReduceBrightColorsAdjustedBrightnessNits(mNitsRange[i]);
         }
-        mBrightnessMapper.recalculateSplines(mCdsi.isReduceBrightColorsActivated(), adjustedNits);
+        mCurrentBrightnessMapper.recalculateSplines(mCdsi.isReduceBrightColorsActivated(),
+                adjustedNits);
 
         mPendingRbcOnOrChanged = strengthChanged || justActivated;
 
@@ -862,9 +873,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             return;
         }
 
-        mBrightnessMapper = BrightnessMappingStrategy.create(resources, mDisplayDeviceConfig);
+        final boolean isIdleScreenBrightnessEnabled = resources.getBoolean(
+                R.bool.config_enableIdleScreenBrightnessMode);
+        mInteractiveModeBrightnessMapper = BrightnessMappingStrategy.create(resources,
+                mDisplayDeviceConfig);
+        if (isIdleScreenBrightnessEnabled) {
+            mIdleModeBrightnessMapper = BrightnessMappingStrategy.createForIdleMode(resources,
+                    mDisplayDeviceConfig);
+        }
+        mCurrentBrightnessMapper = mInteractiveModeBrightnessMapper;
 
-        if (mBrightnessMapper != null) {
+        if (mCurrentBrightnessMapper != null) {
             final float dozeScaleFactor = resources.getFraction(
                     com.android.internal.R.fraction.config_screenAutoBrightnessDozeScaleFactor,
                     1, 1);
@@ -915,7 +934,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mAutomaticBrightnessController.stop();
             }
             mAutomaticBrightnessController = new AutomaticBrightnessController(this,
-                    handler.getLooper(), mSensorManager, mLightSensor, mBrightnessMapper,
+                    handler.getLooper(), mSensorManager, mLightSensor, mCurrentBrightnessMapper,
                     lightSensorWarmUpTimeConfig, PowerManager.BRIGHTNESS_MIN,
                     PowerManager.BRIGHTNESS_MAX, dozeScaleFactor, lightSensorRate,
                     initialLightSensorRate, brighteningLightDebounce, darkeningLightDebounce,
@@ -2138,8 +2157,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private float convertToNits(float brightness) {
-        if (mBrightnessMapper != null) {
-            return mBrightnessMapper.convertToNits(brightness);
+        if (mCurrentBrightnessMapper != null) {
+            return mCurrentBrightnessMapper.convertToNits(brightness);
         } else {
             return -1.0f;
         }
@@ -2290,6 +2309,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mPendingScreenOff=" + mPendingScreenOff);
         pw.println("  mReportedToPolicy=" +
                 reportedToPolicyToString(mReportedScreenStateToPolicy));
+
+        if (mIdleModeBrightnessMapper != null) {
+            pw.println("  mIdleModeBrightnessMapper= ");
+            mIdleModeBrightnessMapper.dump(pw);
+        }
 
         if (mScreenBrightnessRampAnimator != null) {
             pw.println("  mScreenBrightnessRampAnimator.isAnimating()=" +
