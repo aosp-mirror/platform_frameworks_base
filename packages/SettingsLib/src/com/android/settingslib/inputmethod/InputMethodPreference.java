@@ -18,6 +18,7 @@ package com.android.settingslib.inputmethod;
 
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
+import android.annotation.UserIdInt;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -75,30 +76,34 @@ public class InputMethodPreference extends PrimarySwitchPreference
     private final OnSavePreferenceListener mOnSaveListener;
     private final InputMethodSettingValuesWrapper mInputMethodSettingValues;
     private final boolean mIsAllowedByOrganization;
+    @UserIdInt
+    private final int mUserId;
 
     private AlertDialog mDialog = null;
 
     /**
      * A preference entry of an input method.
      *
-     * @param context The Context this is associated with.
+     * @param prefContext The Context this preference is associated with.
      * @param imi The {@link InputMethodInfo} of this preference.
      * @param isAllowedByOrganization false if the IME has been disabled by a device or profile
      *     owner.
      * @param onSaveListener The listener called when this preference has been changed and needs
      *     to save the state to shared preference.
+     * @param userId The userId to specify the corresponding user for this preference.
      */
-    public InputMethodPreference(final Context context, final InputMethodInfo imi,
-            final boolean isAllowedByOrganization, final OnSavePreferenceListener onSaveListener) {
-        this(context, imi, imi.loadLabel(context.getPackageManager()), isAllowedByOrganization,
-                onSaveListener);
+    public InputMethodPreference(final Context prefContext, final InputMethodInfo imi,
+            final boolean isAllowedByOrganization, final OnSavePreferenceListener onSaveListener,
+            final @UserIdInt int userId) {
+        this(prefContext, imi, imi.loadLabel(prefContext.getPackageManager()),
+                isAllowedByOrganization, onSaveListener, userId);
     }
 
     @VisibleForTesting
-    InputMethodPreference(final Context context, final InputMethodInfo imi,
+    InputMethodPreference(final Context prefContext, final InputMethodInfo imi,
             final CharSequence title, final boolean isAllowedByOrganization,
-            final OnSavePreferenceListener onSaveListener) {
-        super(context);
+            final OnSavePreferenceListener onSaveListener, final @UserIdInt int userId) {
+        super(prefContext);
         setPersistent(false);
         mImi = imi;
         mIsAllowedByOrganization = isAllowedByOrganization;
@@ -114,7 +119,12 @@ public class InputMethodPreference extends PrimarySwitchPreference
             intent.setClassName(imi.getPackageName(), settingsActivity);
             setIntent(intent);
         }
-        mInputMethodSettingValues = InputMethodSettingValuesWrapper.getInstance(context);
+        // Handle the context by given userId because {@link InputMethodSettingValuesWrapper} is
+        // per-user instance.
+        final Context userAwareContext = userId == UserHandle.myUserId() ? prefContext :
+                getContext().createContextAsUser(UserHandle.of(userId), 0);
+        mInputMethodSettingValues = InputMethodSettingValuesWrapper.getInstance(userAwareContext);
+        mUserId = userId;
         mHasPriorityInSorting = imi.isSystem()
                 && InputMethodAndSubtypeUtil.isValidNonAuxAsciiCapableIme(imi);
         setOnPreferenceClickListener(this);
@@ -130,17 +140,15 @@ public class InputMethodPreference extends PrimarySwitchPreference
         super.onBindViewHolder(holder);
         final Switch switchWidget = getSwitch();
         if (switchWidget != null) {
+            // Avoid default behavior in {@link PrimarySwitchPreference#onBindViewHolder}.
             switchWidget.setOnClickListener(v -> {
-                // no-op, avoid default behavior in {@link PrimarySwitchPreference#onBindViewHolder}
-            });
-            switchWidget.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                // Avoid the invocation after we call {@link PrimarySwitchPreference#setChecked()}
-                // in {@link setCheckedInternal}
-                if (isChecked != isChecked()) {
-                    // Keep switch to previous state because we have to show the dialog first
-                    buttonView.setChecked(!isChecked);
-                    callChangeListener(isChecked());
+                if (!switchWidget.isEnabled()) {
+                    return;
                 }
+                final boolean newValue = !isChecked();
+                // Keep switch to previous state because we have to show the dialog first.
+                switchWidget.setChecked(isChecked());
+                callChangeListener(newValue);
             });
         }
         final ImageView icon = holder.itemView.findViewById(android.R.id.icon);
@@ -187,7 +195,7 @@ public class InputMethodPreference extends PrimarySwitchPreference
             final Intent intent = getIntent();
             if (intent != null) {
                 // Invoke a settings activity of an input method.
-                context.startActivity(intent);
+                context.startActivityAsUser(intent, UserHandle.of(mUserId));
             }
         } catch (final ActivityNotFoundException e) {
             Log.d(TAG, "IME's Settings Activity Not Found", e);
