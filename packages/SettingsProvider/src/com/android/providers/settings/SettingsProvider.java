@@ -5294,11 +5294,6 @@ public class SettingsProvider extends ContentProvider {
                             Global.Wearable.WEAR_PLATFORM_MR_NUMBER,
                             SystemProperties.getInt("ro.cw_build.platform_mr", 0));
                     initGlobalSettingsDefaultValForWearLocked(
-                            Settings.Global.Wearable.BOTTOM_OFFSET, 0);
-                    initGlobalSettingsDefaultValForWearLocked(
-                            Settings.Global.Wearable.DISPLAY_SHAPE,
-                            Settings.Global.Wearable.DISPLAY_SHAPE_SQUARE);
-                    initGlobalSettingsDefaultValForWearLocked(
                             Settings.Global.Wearable.SCREEN_BRIGHTNESS_LEVEL,
                             getContext()
                                     .getResources()

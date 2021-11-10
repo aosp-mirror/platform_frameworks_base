@@ -16609,24 +16609,6 @@ public final class Settings {
             public static final String WEAR_PLATFORM_MR_NUMBER = "wear_platform_mr_number";
 
             /**
-             * The offset of the visible screen from the display bottom (overscan bottom).
-             * @hide
-             */
-            public static final String BOTTOM_OFFSET = "bottom_offset";
-
-            /**
-             * The shape of the display.
-             * @hide
-             */
-            public static final String DISPLAY_SHAPE = "display_shape";
-
-            // Possible display shapes
-            /** @hide */
-            public static final int DISPLAY_SHAPE_SQUARE = 0;
-            /** @hide */
-            public static final int DISPLAY_SHAPE_ROUND = 1;
-
-            /**
              * The different levels of screen brightness the user can select.
              * @hide
              */

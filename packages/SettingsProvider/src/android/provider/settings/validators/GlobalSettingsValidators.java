@@ -257,14 +257,6 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.SYSTEM_CAPABILITIES, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.SYSTEM_EDITION, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.WEAR_PLATFORM_MR_NUMBER, ANY_INTEGER_VALIDATOR);
-        VALIDATORS.put(Global.Wearable.BOTTOM_OFFSET, ANY_INTEGER_VALIDATOR);
-        VALIDATORS.put(
-                Global.Wearable.DISPLAY_SHAPE,
-                new DiscreteValueValidator(
-                        new String[] {
-                            String.valueOf(Global.Wearable.DISPLAY_SHAPE_ROUND),
-                            String.valueOf(Global.Wearable.DISPLAY_SHAPE_SQUARE)
-                        }));
         VALIDATORS.put(Global.Wearable.MOBILE_SIGNAL_DETECTOR, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.AMBIENT_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.AMBIENT_TILT_TO_WAKE, BOOLEAN_VALIDATOR);
