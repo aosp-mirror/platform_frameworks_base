@@ -329,8 +329,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     protected int adjustDisableFlags(int state) {
-        boolean headsUpVisible = mStatusBarOptionalLazy.get()
-                .map(StatusBar::headsUpShouldBeVisible).orElse(false);
+        boolean headsUpVisible =
+                mStatusBarFragmentComponent.getHeadsUpAppearanceController().shouldBeVisible();
         if (headsUpVisible) {
             state |= DISABLE_CLOCK;
         }
