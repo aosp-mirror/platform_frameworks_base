@@ -16,6 +16,7 @@
 
 package android.media.tv.interactive;
 
+import android.media.tv.interactive.ITvIAppServiceCallback;
 import android.media.tv.interactive.ITvIAppSessionCallback;
 
 /**
@@ -24,5 +25,7 @@ import android.media.tv.interactive.ITvIAppSessionCallback;
  * @hide
  */
 oneway interface ITvIAppService {
+    void registerCallback(in ITvIAppServiceCallback callback);
+    void unregisterCallback(in ITvIAppServiceCallback callback);
     void createSession(in ITvIAppSessionCallback callback, in String iAppServiceId, int type);
 }

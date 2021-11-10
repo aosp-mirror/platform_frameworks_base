@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -62,11 +63,26 @@ public abstract class TvIAppService extends Service {
     public static final String SERVICE_META_DATA = "android.media.tv.interactive.app";
 
     private final Handler mServiceHandler = new ServiceHandler();
+    private final RemoteCallbackList<ITvIAppServiceCallback> mCallbacks =
+            new RemoteCallbackList<>();
 
     /** @hide */
     @Override
     public final IBinder onBind(Intent intent) {
         ITvIAppService.Stub tvIAppServiceBinder = new ITvIAppService.Stub() {
+            @Override
+            public void registerCallback(ITvIAppServiceCallback cb) {
+                if (cb != null) {
+                    mCallbacks.register(cb);
+                }
+            }
+
+            @Override
+            public void unregisterCallback(ITvIAppServiceCallback cb) {
+                if (cb != null) {
+                    mCallbacks.unregister(cb);
+                }
+            }
 
             @Override
             public void createSession(ITvIAppSessionCallback cb, String iAppServiceId, int type) {
@@ -137,7 +153,7 @@ public abstract class TvIAppService extends Service {
          * Called when the application sets the surface.
          *
          * <p>The TV IApp service should render interactive app UI onto the given surface. When
-         * called with {@code null}, the input service should immediately free any references to the
+         * called with {@code null}, the IApp service should immediately free any references to the
          * currently set surface and stop using it.
          *
          * @param surface The surface to be used for interactive app UI rendering. Can be
