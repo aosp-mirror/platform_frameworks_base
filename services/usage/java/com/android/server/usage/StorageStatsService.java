@@ -31,8 +31,11 @@ import android.app.usage.ExternalStorageStats;
 import android.app.usage.IStorageStatsManager;
 import android.app.usage.StorageStats;
 import android.app.usage.UsageStatsManagerInternal;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -155,6 +158,21 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         });
 
         LocalManagerRegistry.addManager(StorageStatsManagerLocal.class, new LocalService());
+
+        IntentFilter prFilter = new IntentFilter();
+        prFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        prFilter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
+        prFilter.addDataScheme("package");
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (Intent.ACTION_PACKAGE_REMOVED.equals(action)
+                        || Intent.ACTION_PACKAGE_FULLY_REMOVED.equals(action)) {
+                    mHandler.removeMessages(H.MSG_PACKAGE_REMOVED);
+                    mHandler.sendEmptyMessage(H.MSG_PACKAGE_REMOVED);
+                }
+            }
+        }, prFilter);
     }
 
     private void invalidateMounts() {
@@ -531,6 +549,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         private static final int MSG_CHECK_STORAGE_DELTA = 100;
         private static final int MSG_LOAD_CACHED_QUOTAS_FROM_FILE = 101;
         private static final int MSG_RECALCULATE_QUOTAS = 102;
+        private static final int MSG_PACKAGE_REMOVED = 103;
         /**
          * By only triggering a re-calculation after the storage has changed sizes, we can avoid
          * recalculating quotas too often. Minimum change delta defines the percentage of change
@@ -597,6 +616,11 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 case MSG_RECALCULATE_QUOTAS: {
                     recalculateQuotas(getInitializedStrategy());
                     sendEmptyMessageDelayed(MSG_RECALCULATE_QUOTAS, DELAY_RECALCULATE_QUOTAS);
+                    break;
+                }
+                case MSG_PACKAGE_REMOVED: {
+                    // recalculate quotas when package is removed
+                    recalculateQuotas(getInitializedStrategy());
                     break;
                 }
                 default:
