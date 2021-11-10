@@ -2044,17 +2044,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
-     * @return true if there's at least one udfps enrolled
+     * @return true if there's at least one udfps enrolled for the current user.
      */
     public boolean isUdfpsEnrolled() {
         return mIsUdfpsEnrolled;
     }
 
     /**
-     * @return if udfps is available on this device. will return true even if the user hasn't
-     * enrolled udfps. This may be false if called before onAllAuthenticatorsRegistered.
+     * @return true if udfps HW is supported on this device. Can return true even if the user has
+     * not enrolled udfps. This may be false if called before onAllAuthenticatorsRegistered.
      */
-    public boolean isUdfpsAvailable() {
+    public boolean isUdfpsSupported() {
         return mAuthController.getUdfpsProps() != null
                 && !mAuthController.getUdfpsProps().isEmpty();
     }
@@ -2102,7 +2102,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
 
         updateUdfpsEnrolled(getCurrentUser());
-        final boolean shouldListenForFingerprint = shouldListenForFingerprint(isUdfpsEnrolled());
+        final boolean shouldListenForFingerprint = shouldListenForFingerprint(isUdfpsSupported());
         final boolean runningOrRestarting = mFingerprintRunningState == BIOMETRIC_STATE_RUNNING
                 || mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING;
         if (runningOrRestarting && !shouldListenForFingerprint) {
@@ -3388,11 +3388,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     + " expected=" + (shouldListenForFingerprint(isUdfpsEnrolled()) ? 1 : 0));
             pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
-            pw.println("    udfpsEnrolled=" + isUdfpsEnrolled());
             pw.println("    mFingerprintLockedOut=" + mFingerprintLockedOut);
             pw.println("    mFingerprintLockedOutPermanent=" + mFingerprintLockedOutPermanent);
             pw.println("    enabledByUser=" + mBiometricEnabledForUser.get(userId));
-            if (isUdfpsEnrolled()) {
+            if (isUdfpsSupported()) {
+                pw.println("        udfpsEnrolled=" + isUdfpsEnrolled());
                 pw.println("        shouldListenForUdfps=" + shouldListenForFingerprint(true));
                 pw.println("        bouncerVisible=" + mBouncer);
                 pw.println("        mStatusBarState="
