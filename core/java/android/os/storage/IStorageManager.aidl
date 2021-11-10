@@ -90,9 +90,9 @@ interface IStorageManager {
      */
     int changeEncryptionPassword(int type, in String password) = 28;
     /**
-     * Returns list of all mountable volumes.
+     * Returns list of all mountable volumes for the specified userId
      */
-    StorageVolume[] getVolumeList(int uid, in String packageName, int flags) = 29;
+    StorageVolume[] getVolumeList(int userId, in String callingPackage, int flags) = 29;
     /**
      * Determines the encryption state of the volume.
      * @return a numerical value. See {@code ENCRYPTION_STATE_*} for possible
