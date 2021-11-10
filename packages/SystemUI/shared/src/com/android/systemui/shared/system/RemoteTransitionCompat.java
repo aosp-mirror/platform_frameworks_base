@@ -53,6 +53,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DataClass;
 import com.android.systemui.shared.recents.model.ThumbnailData;
 
+import java.util.ArrayList;
 import java.util.concurrent.Executor;
 
 /**
@@ -127,7 +128,7 @@ public class RemoteTransitionCompat implements Parcelable {
                 mToken = transition;
                 // This transition is for opening recents, so recents is on-top. We want to draw
                 // the current going-away task on top of recents, though, so move it to front
-                WindowContainerToken pausingTask = null;
+                final ArrayList<WindowContainerToken> pausingTasks = new ArrayList<>();
                 WindowContainerToken pipTask = null;
                 for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                     final TransitionInfo.Change change = info.getChanges().get(i);
@@ -138,7 +139,8 @@ public class RemoteTransitionCompat implements Parcelable {
                         if (taskInfo == null) {
                             continue;
                         }
-                        pausingTask = taskInfo.token;
+                        // Add to front since we are iterating backwards.
+                        pausingTasks.add(0, taskInfo.token);
                         if (taskInfo.pictureInPictureParams != null
                                 && taskInfo.pictureInPictureParams.isAutoEnterEnabled()) {
                             pipTask = taskInfo.token;
@@ -150,7 +152,7 @@ public class RemoteTransitionCompat implements Parcelable {
                     t.setAlpha(wallpapers[i].leash.mSurfaceControl, 1);
                 }
                 t.apply();
-                mRecentsSession.setup(controller, info, finishedCallback, pausingTask, pipTask,
+                mRecentsSession.setup(controller, info, finishedCallback, pausingTasks, pipTask,
                         leashMap, mToken);
                 recents.onAnimationStart(mRecentsSession, apps, wallpapers, new Rect(0, 0, 0, 0),
                         new Rect());
@@ -198,18 +200,18 @@ public class RemoteTransitionCompat implements Parcelable {
     static class RecentsControllerWrap extends RecentsAnimationControllerCompat {
         private RecentsAnimationControllerCompat mWrapped = null;
         private IRemoteTransitionFinishedCallback mFinishCB = null;
-        private WindowContainerToken mPausingTask = null;
+        private ArrayList<WindowContainerToken> mPausingTasks = null;
         private WindowContainerToken mPipTask = null;
         private TransitionInfo mInfo = null;
-        private SurfaceControl mOpeningLeash = null;
+        private ArrayList<SurfaceControl> mOpeningLeashes = null;
         private ArrayMap<SurfaceControl, SurfaceControl> mLeashMap = null;
         private PictureInPictureSurfaceTransaction mPipTransaction = null;
         private IBinder mTransition = null;
 
         void setup(RecentsAnimationControllerCompat wrapped, TransitionInfo info,
-                IRemoteTransitionFinishedCallback finishCB, WindowContainerToken pausingTask,
-                WindowContainerToken pipTask, ArrayMap<SurfaceControl, SurfaceControl> leashMap,
-                IBinder transition) {
+                IRemoteTransitionFinishedCallback finishCB,
+                ArrayList<WindowContainerToken> pausingTasks, WindowContainerToken pipTask,
+                ArrayMap<SurfaceControl, SurfaceControl> leashMap, IBinder transition) {
             if (mInfo != null) {
                 throw new IllegalStateException("Trying to run a new recents animation while"
                         + " recents is already active.");
@@ -217,7 +219,7 @@ public class RemoteTransitionCompat implements Parcelable {
             mWrapped = wrapped;
             mInfo = info;
             mFinishCB = finishCB;
-            mPausingTask = pausingTask;
+            mPausingTasks = pausingTasks;
             mPipTask = pipTask;
             mLeashMap = leashMap;
             mTransition = transition;
@@ -226,36 +228,57 @@ public class RemoteTransitionCompat implements Parcelable {
         @SuppressLint("NewApi")
         boolean merge(TransitionInfo info, SurfaceControl.Transaction t,
                 RecentsAnimationListener recents) {
-            TransitionInfo.Change openingTask = null;
+            ArrayList<TransitionInfo.Change> openingTasks = null;
             for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
                 if (change.getMode() == TRANSIT_OPEN || change.getMode() == TRANSIT_TO_FRONT) {
                     if (change.getTaskInfo() != null) {
-                        if (openingTask != null) {
-                            Log.w(TAG, " Expecting to merge a task-open, but got >1 opening "
-                                    + "tasks");
+                        if (openingTasks == null) {
+                            openingTasks = new ArrayList<>();
                         }
-                        openingTask = change;
+                        openingTasks.add(change);
                     }
                 }
             }
-            if (openingTask == null) return false;
-            mOpeningLeash = openingTask.getLeash();
-            if (openingTask.getContainer().equals(mPausingTask)) {
-                // In this case, we are "returning" to the already running app, so just consume
+            if (openingTasks == null) return false;
+            int pauseMatches = 0;
+            for (int i = 0; i < openingTasks.size(); ++i) {
+                if (mPausingTasks.contains(openingTasks.get(i).getContainer())) {
+                    ++pauseMatches;
+                }
+                if (openingTasks.get(i).getContainer().equals(mPausingTasks.get(i))) {
+                    // In this case, we are "returning" to an already running app, so just consume
+                    // the merge and do nothing.
+                }
+            }
+            if (pauseMatches > 0) {
+                if (pauseMatches != mPausingTasks.size()) {
+                    // We are not really "returning" properly... something went wrong.
+                    throw new IllegalStateException("\"Concelling\" a recents transitions by "
+                            + "unpausing " + pauseMatches + " apps after pausing "
+                            + mPausingTasks.size() + " apps.");
+                }
+                // In this case, we are "returning" to an already running app, so just consume
                 // the merge and do nothing.
                 return true;
             }
-            // We are receiving a new opening task, so convert to onTaskAppeared.
             final int layer = mInfo.getChanges().size() * 3;
-            final RemoteAnimationTargetCompat target = new RemoteAnimationTargetCompat(
-                    openingTask, layer, mInfo, t);
-            mLeashMap.put(mOpeningLeash, target.leash.mSurfaceControl);
-            t.reparent(target.leash.mSurfaceControl, mInfo.getRootLeash());
-            t.setLayer(target.leash.mSurfaceControl, layer);
-            t.hide(target.leash.mSurfaceControl);
-            t.apply();
-            recents.onTaskAppeared(target);
+            mOpeningLeashes = new ArrayList<>();
+            final RemoteAnimationTargetCompat[] targets =
+                    new RemoteAnimationTargetCompat[openingTasks.size()];
+            for (int i = 0; i < openingTasks.size(); ++i) {
+                mOpeningLeashes.add(openingTasks.get(i).getLeash());
+                // We are receiving new opening tasks, so convert to onTasksAppeared.
+                final RemoteAnimationTargetCompat target = new RemoteAnimationTargetCompat(
+                        openingTasks.get(i), layer, mInfo, t);
+                mLeashMap.put(mOpeningLeashes.get(i), target.leash.mSurfaceControl);
+                t.reparent(target.leash.mSurfaceControl, mInfo.getRootLeash());
+                t.setLayer(target.leash.mSurfaceControl, layer);
+                t.hide(target.leash.mSurfaceControl);
+                t.apply();
+                targets[i] = target;
+            }
+            recents.onTasksAppeared(targets);
             return true;
         }
 
@@ -292,21 +315,26 @@ public class RemoteTransitionCompat implements Parcelable {
             }
             if (mWrapped != null) mWrapped.finish(toHome, sendUserLeaveHint);
             try {
-                if (!toHome && mPausingTask != null && mOpeningLeash == null) {
+                if (!toHome && mPausingTasks != null && mOpeningLeashes == null) {
                     // The gesture went back to opening the app rather than continuing with
                     // recents, so end the transition by moving the app back to the top (and also
                     // re-showing it's task).
                     final WindowContainerTransaction wct = new WindowContainerTransaction();
-                    wct.reorder(mPausingTask, true /* onTop */);
                     final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                    t.show(mInfo.getChange(mPausingTask).getLeash());
+                    for (int i = mPausingTasks.size() - 1; i >= 0; ++i) {
+                        // reverse order so that index 0 ends up on top
+                        wct.reorder(mPausingTasks.get(i), true /* onTop */);
+                        t.show(mInfo.getChange(mPausingTasks.get(i)).getLeash());
+                    }
                     mFinishCB.onTransitionFinished(wct, t);
                 } else {
-                    if (mOpeningLeash != null) {
+                    if (mOpeningLeashes != null) {
                         // TODO: the launcher animation should handle this
                         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                        t.show(mOpeningLeash);
-                        t.setAlpha(mOpeningLeash, 1.f);
+                        for (int i = 0; i < mOpeningLeashes.size(); ++i) {
+                            t.show(mOpeningLeashes.get(i));
+                            t.setAlpha(mOpeningLeashes.get(i), 1.f);
+                        }
                         t.apply();
                     }
                     if (mPipTask != null && mPipTransaction != null) {
@@ -339,9 +367,9 @@ public class RemoteTransitionCompat implements Parcelable {
             // Reset all members.
             mWrapped = null;
             mFinishCB = null;
-            mPausingTask = null;
+            mPausingTasks = null;
             mInfo = null;
-            mOpeningLeash = null;
+            mOpeningLeashes = null;
             mLeashMap = null;
             mTransition = null;
         }
