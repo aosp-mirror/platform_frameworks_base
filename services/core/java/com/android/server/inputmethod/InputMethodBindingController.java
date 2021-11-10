@@ -18,8 +18,12 @@ package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.ArrayMap;
 import android.view.inputmethod.InputMethodInfo;
 
 /**
@@ -29,7 +33,9 @@ final class InputMethodBindingController {
     static final boolean DEBUG = false;
     private static final String TAG = InputMethodBindingController.class.getSimpleName();
 
-    private final InputMethodManagerService mService;
+    @NonNull private final InputMethodManagerService mService;
+    @NonNull private final Context mContext;
+    @NonNull private final ArrayMap<String, InputMethodInfo> mMethodMap;
 
     private long mLastBindTime;
     private boolean mHasConnection;
@@ -38,10 +44,13 @@ final class InputMethodBindingController {
     @Nullable private Intent mCurIntent;
     private IBinder mCurToken;
     private int mCurSeq;
+    private boolean mVisibleBound;
 
 
     InputMethodBindingController(@NonNull InputMethodManagerService service) {
         mService = service;
+        mContext = mService.mContext;
+        mMethodMap = mService.mMethodMap;
     }
 
     /**
@@ -149,4 +158,41 @@ final class InputMethodBindingController {
             mCurSeq = 1;
         }
     }
+
+    /**
+     * Indicates whether {@link #getVisibleConnection} is currently in use.
+     */
+    boolean isVisibleBound() {
+        return mVisibleBound;
+    }
+
+    void setVisibleBound(boolean visibleBound) {
+        mVisibleBound = visibleBound;
+    }
+
+    /**
+     * Used to bring IME service up to visible adjustment while it is being shown.
+     */
+    @NonNull
+    ServiceConnection getVisibleConnection() {
+        return mVisibleConnection;
+    }
+
+    private final ServiceConnection mVisibleConnection = new ServiceConnection() {
+        @Override public void onBindingDied(ComponentName name) {
+            synchronized (mMethodMap) {
+                if (isVisibleBound()) {
+                    mContext.unbindService(getVisibleConnection());
+                    setVisibleBound(false);
+                }
+            }
+        }
+
+        @Override public void onServiceConnected(ComponentName name, IBinder service) {
+        }
+
+        @Override public void onServiceDisconnected(ComponentName name) {
+        }
+    };
+
 }

@@ -355,37 +355,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * Indicates whether {@link #getVisibleConnection} is currently in use.
      */
     private boolean isVisibleBound() {
-        return mVisibleBound;
+        return mBindingController.isVisibleBound();
     }
 
     private void setVisibleBound(boolean visibleBound) {
-        mVisibleBound = visibleBound;
+        mBindingController.setVisibleBound(visibleBound);
     }
-    private boolean mVisibleBound = false;
 
     /**
      * Used to bring IME service up to visible adjustment while it is being shown.
      */
     private ServiceConnection getVisibleConnection() {
-        return mVisibleConnection;
+        return mBindingController.getVisibleConnection();
     }
-
-    private final ServiceConnection mVisibleConnection = new ServiceConnection() {
-        @Override public void onBindingDied(ComponentName name) {
-            synchronized (mMethodMap) {
-                if (isVisibleBound()) {
-                    mContext.unbindService(getVisibleConnection());
-                    setVisibleBound(false);
-                }
-            }
-        }
-
-        @Override public void onServiceConnected(ComponentName name, IBinder service) {
-        }
-
-        @Override public void onServiceDisconnected(ComponentName name) {
-        }
-    };
 
     // Ongoing notification
     private NotificationManager mNotificationManager;
