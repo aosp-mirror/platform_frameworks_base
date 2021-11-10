@@ -200,7 +200,6 @@ public class CompanionDeviceManagerService extends SystemService {
         super(context);
         mImpl = new CompanionDeviceManagerImpl();
         mPersistentDataStore = new PersistentDataStore();
-        mAssociationRequestsProcessor = new AssociationRequestsProcessor(this);
 
         mPowerWhitelistManager = context.getSystemService(PowerWhitelistManager.class);
         mRoleManager = context.getSystemService(RoleManager.class);
@@ -213,6 +212,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 context.getSystemService(PermissionControllerManager.class));
         mUserManager = context.getSystemService(UserManager.class);
         mCompanionDevicePresenceController = new CompanionDevicePresenceController();
+        mAssociationRequestsProcessor = new AssociationRequestsProcessor(this, mRoleManager);
 
         registerPackageMonitor();
     }
