@@ -29,9 +29,7 @@ import android.app.TaskInfo;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.Trace;
-import android.util.Slog;
 import android.util.SparseIntArray;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowInfo.StartingWindowType;
@@ -66,10 +64,7 @@ import com.android.wm.shell.common.TransactionPool;
  * @hide
  */
 public class StartingWindowController implements RemoteCallable<StartingWindowController> {
-    private static final String TAG = StartingWindowController.class.getSimpleName();
-
-    public static final boolean DEBUG_SPLASH_SCREEN = false;
-    public static final boolean DEBUG_TASK_SNAPSHOT = false;
+    public static final String TAG = "ShellStartingWindow";
 
     private static final long TASK_BG_COLOR_RETAIN_TIME_MS = 5000;
 
