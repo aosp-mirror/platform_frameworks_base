@@ -351,12 +351,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("mMethodMap")
     private int mMethodMapUpdateCount = 0;
 
-    // Used to bring IME service up to visible adjustment while it is being shown.
-    final ServiceConnection mVisibleConnection = new ServiceConnection() {
+    /**
+     * Used to bring IME service up to visible adjustment while it is being shown.
+     */
+    private ServiceConnection getVisibleConnection() {
+        return mVisibleConnection;
+    }
+
+    private final ServiceConnection mVisibleConnection = new ServiceConnection() {
         @Override public void onBindingDied(ComponentName name) {
             synchronized (mMethodMap) {
                 if (mVisibleBound) {
-                    mContext.unbindService(mVisibleConnection);
+                    mContext.unbindService(getVisibleConnection());
                     mVisibleBound = false;
                 }
             }
@@ -2668,7 +2674,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("mMethodMap")
     void unbindCurrentMethodLocked() {
         if (mVisibleBound) {
-            mContext.unbindService(mVisibleConnection);
+            mContext.unbindService(getVisibleConnection());
             mVisibleBound = false;
         }
 
@@ -3242,7 +3248,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mInputShown = true;
             if (hasConnection() && !mVisibleBound) {
                 bindCurrentInputMethodServiceLocked(
-                        getCurIntent(), mVisibleConnection, IME_VISIBLE_BIND_FLAGS);
+                        getCurIntent(), getVisibleConnection(), IME_VISIBLE_BIND_FLAGS);
                 mVisibleBound = true;
             }
             res = true;
@@ -3350,7 +3356,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             res = false;
         }
         if (hasConnection() && mVisibleBound) {
-            mContext.unbindService(mVisibleConnection);
+            mContext.unbindService(getVisibleConnection());
             mVisibleBound = false;
         }
         mInputShown = false;
