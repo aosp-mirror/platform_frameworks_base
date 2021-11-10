@@ -23,6 +23,8 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.app.PendingIntent.FLAG_MUTABLE;
+import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.UserHandle.USER_SYSTEM;
@@ -84,6 +86,7 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.res.Resources;
 import android.media.AudioManager;
+import android.media.session.MediaSession;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -710,5 +713,103 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
                 temp.getUserId(), temp.getSbn().getPackageName(), temp.getKey());
 
         assertThat(r.isImportanceFixed()).isTrue();
+    }
+
+    @Test
+    public void testMediaNotificationsBypassBlock() throws Exception {
+        when(mAmi.getPendingIntentFlags(any(IIntentSender.class)))
+                .thenReturn(FLAG_MUTABLE | FLAG_ONE_SHOT);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+
+        Notification.Builder nb = new Notification.Builder(
+                mContext, mTestNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .addAction(new Notification.Action.Builder(null, "test", null).build());
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        when(mPermissionHelper.hasPermission(mUid)).thenReturn(false);
+
+        // normal blocked notifications - blocked
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
+
+        // just using the style - blocked
+        nb.setStyle(new Notification.MediaStyle());
+        sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
+
+        // style + media session - bypasses block
+        nb.setStyle(new Notification.MediaStyle().setMediaSession(mock(MediaSession.Token.class)));
+        sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
+    }
+
+    @Test
+    public void testMediaNotificationsBypassBlock_atPost() throws Exception {
+        when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+
+        Notification.Builder nb = new Notification.Builder(
+                mContext, mTestNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .addAction(new Notification.Action.Builder(null, "test", null).build());
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        when(mPermissionHelper.hasPermission(anyInt())).thenReturn(false);
+
+        mService.addEnqueuedNotification(r);
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mService.new PostNotificationRunnable(r.getKey());
+        runnable.run();
+        waitForIdle();
+
+        verify(mUsageStats).registerBlocked(any());
+        verify(mUsageStats, never()).registerPostedByApp(any());
+
+        // just using the style - blocked
+        mService.clearNotifications();
+        reset(mUsageStats);
+        nb.setStyle(new Notification.MediaStyle());
+        sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.addEnqueuedNotification(r);
+        runnable = mService.new PostNotificationRunnable(r.getKey());
+        runnable.run();
+        waitForIdle();
+
+        verify(mUsageStats).registerBlocked(any());
+        verify(mUsageStats, never()).registerPostedByApp(any());
+
+        // style + media session - bypasses block
+        mService.clearNotifications();
+        reset(mUsageStats);
+        nb.setStyle(new Notification.MediaStyle().setMediaSession(mock(MediaSession.Token.class)));
+        sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.addEnqueuedNotification(r);
+        runnable = mService.new PostNotificationRunnable(r.getKey());
+        runnable.run();
+        waitForIdle();
+
+        verify(mUsageStats, never()).registerBlocked(any());
+        verify(mUsageStats).registerPostedByApp(any());
     }
 }
