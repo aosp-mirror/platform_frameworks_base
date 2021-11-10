@@ -62,6 +62,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 /**
@@ -178,8 +180,12 @@ import java.util.function.Supplier;
  * {@link #writeStrongInterface(IInterface)}, {@link #readStrongBinder()},
  * {@link #writeBinderArray(IBinder[])}, {@link #readBinderArray(IBinder[])},
  * {@link #createBinderArray()},
+ * {@link #writeInterfaceArray(T[])}, {@link #readInterfaceArray(T[], Function)},
+ * {@link #createInterfaceArray(IntFunction, Function)},
  * {@link #writeBinderList(List)}, {@link #readBinderList(List)},
- * {@link #createBinderArrayList()}.</p>
+ * {@link #createBinderArrayList()},
+ * {@link #writeInterfaceList(List)}, {@link #readInterfaceList(List, Function)},
+ * {@link #createInterfaceArrayList(Function)}.</p>
  *
  * <p>FileDescriptor objects, representing raw Linux file descriptor identifiers,
  * can be written and {@link ParcelFileDescriptor} objects returned to operate
@@ -1730,6 +1736,30 @@ public final class Parcel {
     }
 
     /**
+     * Flatten a homogeneous array containing an IInterface type into the parcel,
+     * at the current dataPosition() and growing dataCapacity() if needed.  The
+     * type of the objects in the array must be one that implements IInterface.
+     *
+     * @param val The array of objects to be written.
+     *
+     * @see #createInterfaceArray
+     * @see #readInterfaceArray
+     * @see IInterface
+     */
+    public final <T extends IInterface> void writeInterfaceArray(
+            @SuppressLint("ArrayReturn") @Nullable T[] val) {
+        if (val != null) {
+            int N = val.length;
+            writeInt(N);
+            for (int i=0; i<N; i++) {
+                writeStrongInterface(val[i]);
+            }
+        } else {
+            writeInt(-1);
+        }
+    }
+
+    /**
      * @hide
      */
     public final void writeCharSequenceArray(@Nullable CharSequence[] val) {
@@ -1781,6 +1811,50 @@ public final class Parcel {
             }
         } else {
             throw new RuntimeException("bad array lengths");
+        }
+    }
+
+    /**
+     * Read and return a new array of T (IInterface) from the parcel.
+     *
+     * @return the IInterface array of type T
+     * @param newArray a function to create an array of T with a given length
+     * @param asInterface a function to convert IBinder object into T (IInterface)
+     */
+    @SuppressLint({"ArrayReturn", "NullableCollection", "SamShouldBeLast"})
+    @Nullable
+    public final <T extends IInterface> T[] createInterfaceArray(
+            @NonNull IntFunction<T[]> newArray, @NonNull Function<IBinder, T> asInterface) {
+        int N = readInt();
+        if (N >= 0) {
+            T[] val = newArray.apply(N);
+            for (int i=0; i<N; i++) {
+                val[i] = asInterface.apply(readStrongBinder());
+            }
+            return val;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Read an array of T (IInterface) from a parcel.
+     *
+     * @param asInterface a function to convert IBinder object into T (IInterface)
+     *
+     * @throws BadParcelableException Throws BadParcelableException if the length of `val`
+     *    mismatches the number of items in the parcel.
+     */
+    public final <T extends IInterface> void readInterfaceArray(
+            @SuppressLint("ArrayReturn") @NonNull T[] val,
+            @NonNull Function<IBinder, T> asInterface) {
+        int N = readInt();
+        if (N == val.length) {
+            for (int i=0; i<N; i++) {
+                val[i] = asInterface.apply(readStrongBinder());
+            }
+        } else {
+            throw new BadParcelableException("bad array lengths");
         }
     }
 
@@ -1893,6 +1967,28 @@ public final class Parcel {
         writeInt(N);
         while (i < N) {
             writeStrongBinder(val.get(i));
+            i++;
+        }
+    }
+
+    /**
+     * Flatten a {@code List} containing T (IInterface) objects into this parcel
+     * at the current position. They can later be retrieved with
+     * {@link #createInterfaceArrayList} or {@link #readInterfaceList}.
+     *
+     * @see #createInterfaceArrayList
+     * @see #readInterfaceList
+     */
+    public final <T extends IInterface> void writeInterfaceList(@Nullable List<T> val) {
+        if (val == null) {
+            writeInt(-1);
+            return;
+        }
+        int N = val.size();
+        int i=0;
+        writeInt(N);
+        while (i < N) {
+            writeStrongInterface(val.get(i));
             i++;
         }
     }
@@ -3380,6 +3476,32 @@ public final class Parcel {
     }
 
     /**
+     * Read and return a new ArrayList containing T (IInterface) objects from
+     * the parcel that was written with {@link #writeInterfaceList} at the
+     * current dataPosition().  Returns null if the
+     * previously written list object was null.
+     *
+     * @return A newly created ArrayList containing T (IInterface)
+     *
+     * @see #writeInterfaceList
+     */
+    @SuppressLint({"ConcreteCollection", "NullableCollection"})
+    @Nullable
+    public final <T extends IInterface> ArrayList<T> createInterfaceArrayList(
+            @NonNull Function<IBinder, T> asInterface) {
+        int N = readInt();
+        if (N < 0) {
+            return null;
+        }
+        ArrayList<T> l = new ArrayList<T>(N);
+        while (N > 0) {
+            l.add(asInterface.apply(readStrongBinder()));
+            N--;
+        }
+        return l;
+    }
+
+    /**
      * Read into the given List items String objects that were written with
      * {@link #writeStringList} at the current dataPosition().
      *
@@ -3415,6 +3537,28 @@ public final class Parcel {
         }
         for (; i<N; i++) {
             list.add(readStrongBinder());
+        }
+        for (; i<M; i++) {
+            list.remove(N);
+        }
+    }
+
+    /**
+     * Read into the given List items IInterface objects that were written with
+     * {@link #writeInterfaceList} at the current dataPosition().
+     *
+     * @see #writeInterfaceList
+     */
+    public final <T extends IInterface> void readInterfaceList(@NonNull List<T> list,
+            @NonNull Function<IBinder, T> asInterface) {
+        int M = list.size();
+        int N = readInt();
+        int i = 0;
+        for (; i < M && i < N; i++) {
+            list.set(i, asInterface.apply(readStrongBinder()));
+        }
+        for (; i<N; i++) {
+            list.add(asInterface.apply(readStrongBinder()));
         }
         for (; i<M; i++) {
             list.remove(N);

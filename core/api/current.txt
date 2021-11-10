@@ -31427,6 +31427,8 @@ package android.os {
     method @Nullable public double[] createDoubleArray();
     method @Nullable public float[] createFloatArray();
     method @Nullable public int[] createIntArray();
+    method @Nullable public <T extends android.os.IInterface> T[] createInterfaceArray(@NonNull java.util.function.IntFunction<T[]>, @NonNull java.util.function.Function<android.os.IBinder,T>);
+    method @Nullable public <T extends android.os.IInterface> java.util.ArrayList<T> createInterfaceArrayList(@NonNull java.util.function.Function<android.os.IBinder,T>);
     method @Nullable public long[] createLongArray();
     method @Nullable public String[] createStringArray();
     method @Nullable public java.util.ArrayList<java.lang.String> createStringArrayList();
@@ -31467,6 +31469,8 @@ package android.os {
     method @Nullable public java.util.HashMap readHashMap(@Nullable ClassLoader);
     method public int readInt();
     method public void readIntArray(@NonNull int[]);
+    method public <T extends android.os.IInterface> void readInterfaceArray(@NonNull T[], @NonNull java.util.function.Function<android.os.IBinder,T>);
+    method public <T extends android.os.IInterface> void readInterfaceList(@NonNull java.util.List<T>, @NonNull java.util.function.Function<android.os.IBinder,T>);
     method public void readList(@NonNull java.util.List, @Nullable ClassLoader);
     method public <T> void readList(@NonNull java.util.List<? super T>, @Nullable ClassLoader, @NonNull Class<T>);
     method public long readLong();
@@ -31519,6 +31523,8 @@ package android.os {
     method public void writeFloatArray(@Nullable float[]);
     method public void writeInt(int);
     method public void writeIntArray(@Nullable int[]);
+    method public <T extends android.os.IInterface> void writeInterfaceArray(@Nullable T[]);
+    method public <T extends android.os.IInterface> void writeInterfaceList(@Nullable java.util.List<T>);
     method public void writeInterfaceToken(@NonNull String);
     method public void writeList(@Nullable java.util.List);
     method public void writeLong(long);
