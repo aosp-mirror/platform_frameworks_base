@@ -35,7 +35,7 @@ import javax.inject.Inject;
  * system that are used for testing the latency.
  */
 @SysUISingleton
-public class LatencyTester extends SystemUI {
+public class LatencyTester extends CoreStartable {
 
     private static final String
             ACTION_FINGERPRINT_WAKE =

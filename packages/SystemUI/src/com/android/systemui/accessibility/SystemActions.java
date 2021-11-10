@@ -49,7 +49,7 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.R;
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.util.ScreenshotHelper;
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.CommandQueue;
@@ -69,7 +69,7 @@ import dagger.Lazy;
  * Class to register system actions with accessibility framework.
  */
 @SysUISingleton
-public class SystemActions extends SystemUI {
+public class SystemActions extends CoreStartable {
     private static final String TAG = "SystemActions";
 
     /**

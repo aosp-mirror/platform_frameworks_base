@@ -42,9 +42,9 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.fuelgauge.Estimate;
 import com.android.settingslib.utils.ThreadUtils;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
@@ -62,7 +62,7 @@ import javax.inject.Inject;
 import dagger.Lazy;
 
 @SysUISingleton
-public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
+public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
 
     static final String TAG = "PowerUI";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);

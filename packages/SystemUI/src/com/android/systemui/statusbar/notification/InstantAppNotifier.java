@@ -51,9 +51,9 @@ import android.util.Pair;
 
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.statusbar.CommandQueue;
@@ -71,7 +71,7 @@ import javax.inject.Inject;
  * splitted screen.
  */
 @SysUISingleton
-public class InstantAppNotifier extends SystemUI
+public class InstantAppNotifier extends CoreStartable
         implements CommandQueue.Callbacks, KeyguardStateController.Callback {
     private static final String TAG = "InstantAppNotifier";
     public static final int NUM_TASKS_FOR_INSTANT_APP_INFO = 5;

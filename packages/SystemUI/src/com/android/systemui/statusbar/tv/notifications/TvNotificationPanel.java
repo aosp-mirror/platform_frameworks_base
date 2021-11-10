@@ -25,7 +25,7 @@ import android.content.pm.ResolveInfo;
 import android.os.UserHandle;
 import android.util.Log;
 
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -35,7 +35,7 @@ import javax.inject.Inject;
  * Offers control methods for the notification panel handler on TV devices.
  */
 @SysUISingleton
-public class TvNotificationPanel extends SystemUI implements CommandQueue.Callbacks {
+public class TvNotificationPanel extends CoreStartable implements CommandQueue.Callbacks {
     private static final String TAG = "TvNotificationPanel";
     private final CommandQueue mCommandQueue;
     private final String mNotificationHandlerPackage;
