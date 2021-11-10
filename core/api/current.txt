@@ -13385,6 +13385,7 @@ package android.content.pm {
     method public boolean isDynamic();
     method public boolean isEnabled();
     method public boolean isImmutable();
+    method public boolean isIncludedIn(int);
     method public boolean isPinned();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.ShortcutInfo> CREATOR;
@@ -13397,6 +13398,7 @@ package android.content.pm {
     field public static final int DISABLED_REASON_UNKNOWN = 3; // 0x3
     field public static final int DISABLED_REASON_VERSION_LOWER = 100; // 0x64
     field public static final String SHORTCUT_CATEGORY_CONVERSATION = "android.shortcut.conversation";
+    field public static final int SURFACE_LAUNCHER = 1; // 0x1
   }
 
   public static class ShortcutInfo.Builder {
@@ -13405,6 +13407,7 @@ package android.content.pm {
     method @NonNull public android.content.pm.ShortcutInfo.Builder setActivity(@NonNull android.content.ComponentName);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setCategories(java.util.Set<java.lang.String>);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setDisabledMessage(@NonNull CharSequence);
+    method @NonNull public android.content.pm.ShortcutInfo.Builder setExcludedFromSurfaces(int);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setExtras(@NonNull android.os.PersistableBundle);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setIcon(android.graphics.drawable.Icon);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setIntent(@NonNull android.content.Intent);

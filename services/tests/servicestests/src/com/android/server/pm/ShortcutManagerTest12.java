@@ -257,6 +257,28 @@ public class ShortcutManagerTest12 extends BaseShortcutManagerTest {
         assertEquals("custom", map.get("s3").getShortLabel());
     }
 
+    public void testShortcutsExcludedFromLauncher_PersistedToDisk() {
+        if (!mService.isAppSearchEnabled()) {
+            return;
+        }
+        setCaller(CALLING_PACKAGE_1, USER_0);
+        mManager.setDynamicShortcuts(list(
+                makeShortcutExcludedFromLauncher("s1"),
+                makeShortcutExcludedFromLauncher("s2"),
+                makeShortcutExcludedFromLauncher("s3"),
+                makeShortcutExcludedFromLauncher("s4"),
+                makeShortcutExcludedFromLauncher("s5")
+        ));
+        final List<ShortcutInfo> shortcuts = getAllPersistedShortcuts();
+        assertNotNull(shortcuts);
+        assertEquals(5, shortcuts.size());
+        final Map<String, ShortcutInfo> map = shortcuts.stream()
+                .collect(Collectors.toMap(ShortcutInfo::getId, Function.identity()));
+        assertTrue(map.containsKey("s3"));
+        assertEquals("Title-s3", map.get("s3").getShortLabel());
+    }
+
+
     private List<ShortcutInfo> getAllPersistedShortcuts() {
         try {
             SystemClock.sleep(500);
