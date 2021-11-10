@@ -27,6 +27,7 @@ import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -266,5 +267,43 @@ class TaskFragmentContainer {
         } else {
             mLastRequestedBounds.set(bounds);
         }
+    }
+
+    @Override
+    public String toString() {
+        return toString(true /* includeContainersToFinishOnExit */);
+    }
+
+    /**
+     * @return string for this TaskFragmentContainer and includes containers to finish on exit
+     * based on {@code includeContainersToFinishOnExit}. If containers to finish on exit are always
+     * included in the string, then calling {@link #toString()} on a container that mutually
+     * finishes with another container would cause a stack overflow.
+     */
+    private String toString(boolean includeContainersToFinishOnExit) {
+        return "TaskFragmentContainer{"
+                + " token=" + mToken
+                + " info=" + mInfo
+                + " topNonFinishingActivity=" + getTopNonFinishingActivity()
+                + " pendingAppearedActivities=" + mPendingAppearedActivities
+                + (includeContainersToFinishOnExit ? " containersToFinishOnExit="
+                + containersToFinishOnExitToString() : "")
+                + " activitiesToFinishOnExit=" + mActivitiesToFinishOnExit
+                + " isFinished=" + mIsFinished
+                + " lastRequestedBounds=" + mLastRequestedBounds
+                + "}";
+    }
+
+    private String containersToFinishOnExitToString() {
+        StringBuilder sb = new StringBuilder("[");
+        Iterator<TaskFragmentContainer> containerIterator = mContainersToFinishOnExit.iterator();
+        while (containerIterator.hasNext()) {
+            sb.append(containerIterator.next().toString(
+                    false /* includeContainersToFinishOnExit */));
+            if (containerIterator.hasNext()) {
+                sb.append(", ");
+            }
+        }
+        return sb.append("]").toString();
     }
 }
