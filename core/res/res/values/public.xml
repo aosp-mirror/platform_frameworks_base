@@ -3312,12 +3312,14 @@
     <public name="accessibilityActionSwipeDown" />
   </staging-public-group>
 
-  <staging-public-group type="style" first-id="0x0dfd0000">
+  <staging-public-group type="style" first-id="0x01dd0000">
   </staging-public-group>
 
   <staging-public-group type="string" first-id="0x01dc0000">
     <!-- @hide @SystemApi -->
     <public name="config_systemSupervision" />
+    <!-- @hide @SystemApi -->
+    <public name="config_deviceManager" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01db0000">
