@@ -41,7 +41,9 @@ annotation class SysUIUnfoldScope
  * no objects will get constructed if these parameters are empty.
  */
 @Module(subcomponents = [SysUIUnfoldComponent::class])
-object SysUIUnfoldModule {
+class SysUIUnfoldModule {
+    constructor() {}
+
     @Provides
     @SysUISingleton
     fun provideSysUIUnfoldComponent(
