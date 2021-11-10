@@ -83,4 +83,13 @@ class SplitContainer {
                 && ((SplitPairRule) splitRule).shouldFinishSecondaryWithPrimary();
         return shouldFinishSecondaryWithPrimary || isPlaceholderContainer;
     }
+
+    @Override
+    public String toString() {
+        return "SplitContainer{"
+                + " primaryContainer=" + mPrimaryContainer
+                + " secondaryContainer=" + mSecondaryContainer
+                + " splitRule=" + mSplitRule
+                + "}";
+    }
 }
