@@ -16,9 +16,11 @@
 
 package com.android.server.health;
 
+import static android.hardware.health.Translate.h2aTranslate;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.hardware.health.V1_0.HealthInfo;
+import android.hardware.health.HealthInfo;
 import android.hardware.health.V2_0.IHealth;
 import android.hardware.health.V2_0.Result;
 import android.hidl.manager.V1_0.IServiceManager;
@@ -155,7 +157,7 @@ final class HealthServiceWrapperHidl extends HealthServiceWrapper {
         service.getHealthInfo(
                 (result, value) -> {
                     if (result == Result.SUCCESS) {
-                        ret.value = value.legacy;
+                        ret.value = h2aTranslate(value.legacy);
                     }
                 });
         return ret.value;
