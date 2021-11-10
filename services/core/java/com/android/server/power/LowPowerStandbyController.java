@@ -35,6 +35,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
@@ -43,6 +44,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * Controls Low Power Standby state.
@@ -71,6 +73,7 @@ public final class LowPowerStandbyController {
 
     private static final int MSG_STANDBY_TIMEOUT = 0;
     private static final int MSG_NOTIFY_ACTIVE_CHANGED = 1;
+    private static final int MSG_NOTIFY_ALLOWLIST_CHANGED = 2;
 
     private final Handler mHandler;
     private final SettingsObserver mSettingsObserver;
@@ -80,6 +83,8 @@ public final class LowPowerStandbyController {
     private final Clock mClock;
     private final AlarmManager.OnAlarmListener mOnStandbyTimeoutExpired =
             this::onStandbyTimeoutExpired;
+    private final LowPowerStandbyControllerInternal mLocalService = new LocalService();
+    private final SparseBooleanArray mAllowlistUids = new SparseBooleanArray();
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -187,6 +192,8 @@ public final class LowPowerStandbyController {
                 registerBroadcastReceiver();
             }
         }
+
+        LocalServices.addService(LowPowerStandbyControllerInternal.class, mLocalService);
     }
 
     @GuardedBy("mLock")
@@ -431,6 +438,10 @@ public final class LowPowerStandbyController {
                 ipw.print("mIsDeviceIdle=");
                 ipw.println(mIsDeviceIdle);
             }
+
+            final int[] allowlistUids = getAllowlistUidsLocked();
+            ipw.print("mAllowlistUids=");
+            ipw.println(Arrays.toString(allowlistUids));
         }
         ipw.decreaseIndent();
     }
@@ -452,6 +463,11 @@ public final class LowPowerStandbyController {
                     mIdleSinceNonInteractive);
             proto.write(LowPowerStandbyControllerDumpProto.IS_DEVICE_IDLE, mIsDeviceIdle);
 
+            final int[] allowlistUids = getAllowlistUidsLocked();
+            for (int appId : allowlistUids) {
+                proto.write(LowPowerStandbyControllerDumpProto.ALLOWLIST, appId);
+            }
+
             proto.end(token);
         }
     }
@@ -471,7 +487,69 @@ public final class LowPowerStandbyController {
                     boolean active = (boolean) msg.obj;
                     notifyActiveChanged(active);
                     break;
+                case MSG_NOTIFY_ALLOWLIST_CHANGED:
+                    final int[] allowlistUids = (int[]) msg.obj;
+                    notifyAllowlistChanged(allowlistUids);
+                    break;
             }
+        }
+    }
+
+    private void addToAllowlistInternal(int uid) {
+        if (DEBUG) {
+            Slog.i(TAG, "Adding to allowlist: " + uid);
+        }
+        synchronized (mLock) {
+            if (mSupportedConfig && !mAllowlistUids.get(uid)) {
+                mAllowlistUids.append(uid, true);
+                enqueueNotifyAllowlistChangedLocked();
+            }
+        }
+    }
+
+    private void removeFromAllowlistInternal(int uid) {
+        if (DEBUG) {
+            Slog.i(TAG, "Removing from allowlist: " + uid);
+        }
+        synchronized (mLock) {
+            if (mSupportedConfig && mAllowlistUids.get(uid)) {
+                mAllowlistUids.delete(uid);
+                enqueueNotifyAllowlistChangedLocked();
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private int[] getAllowlistUidsLocked() {
+        final int[] uids = new int[mAllowlistUids.size()];
+        for (int i = 0; i < mAllowlistUids.size(); i++) {
+            uids[i] = mAllowlistUids.keyAt(i);
+        }
+        return uids;
+    }
+
+    @GuardedBy("mLock")
+    private void enqueueNotifyAllowlistChangedLocked() {
+        final long now = mClock.elapsedRealtime();
+        final int[] allowlistUids = getAllowlistUidsLocked();
+        final Message msg = mHandler.obtainMessage(MSG_NOTIFY_ALLOWLIST_CHANGED, allowlistUids);
+        mHandler.sendMessageAtTime(msg, now);
+    }
+
+    private void notifyAllowlistChanged(int[] allowlistUids) {
+        final PowerManagerInternal pmi = LocalServices.getService(PowerManagerInternal.class);
+        pmi.setLowPowerStandbyAllowlist(allowlistUids);
+    }
+
+    private final class LocalService extends LowPowerStandbyControllerInternal {
+        @Override
+        public void addToAllowlist(int uid) {
+            addToAllowlistInternal(uid);
+        }
+
+        @Override
+        public void removeFromAllowlist(int uid) {
+            removeFromAllowlistInternal(uid);
         }
     }
 

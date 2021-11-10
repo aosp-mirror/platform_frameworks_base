@@ -49,6 +49,7 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.testutils.OffsettableClock;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -114,6 +115,12 @@ public class LowPowerStandbyControllerTest {
 
         mController = new LowPowerStandbyController(mContextSpy, mTestLooper.getLooper(),
                 () -> mClock.now());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        LocalServices.removeServiceForTest(PowerManagerInternal.class);
+        LocalServices.removeServiceForTest(LowPowerStandbyControllerInternal.class);
     }
 
     @Test
@@ -313,6 +320,22 @@ public class LowPowerStandbyControllerTest {
         mController.systemReady();
 
         assertThat(mController.isSupported()).isFalse();
+    }
+
+    @Test
+    public void testAllowlistChange_servicesAreNotified() throws Exception {
+        setLowPowerStandbySupportedConfig(true);
+        mController.systemReady();
+
+        LowPowerStandbyControllerInternal service = LocalServices.getService(
+                LowPowerStandbyControllerInternal.class);
+        service.addToAllowlist(10);
+        mTestLooper.dispatchAll();
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[] {10});
+
+        service.removeFromAllowlist(10);
+        mTestLooper.dispatchAll();
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[] {});
     }
 
     private void setLowPowerStandbySupportedConfig(boolean supported) {

@@ -304,6 +304,7 @@ public class PowerManagerServiceTest {
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.removeServiceForTest(BatteryManagerInternal.class);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.removeServiceForTest(LowPowerStandbyControllerInternal.class);
         FakeSettingsProvider.clearSettingsProvider();
     }
 
@@ -1608,6 +1609,19 @@ public class PowerManagerServiceTest {
         mService.setLowPowerStandbyActiveInternal(true);
 
         assertThat(wakeLock.mDisabled).isTrue();
+    }
+
+    @Test
+    public void testLowPowerStandby_whenActive_FgsWakeLockEnabledIfAllowlisted() {
+        createService();
+        mService.systemReady();
+        WakeLock wakeLock = acquireWakeLock("fgsWakeLock", PowerManager.PARTIAL_WAKE_LOCK);
+        mService.updateUidProcStateInternal(wakeLock.mOwnerUid, PROCESS_STATE_FOREGROUND_SERVICE);
+        mService.setDeviceIdleModeInternal(true);
+        mService.setLowPowerStandbyActiveInternal(true);
+        mService.setLowPowerStandbyAllowlistInternal(new int[]{wakeLock.mOwnerUid});
+
+        assertThat(wakeLock.mDisabled).isFalse();
     }
 
     @Test

@@ -617,6 +617,9 @@ public final class PowerManagerService extends SystemService
     // Set of app ids that are temporarily allowed to acquire wakelocks due to high-pri message
     int[] mDeviceIdleTempWhitelist = new int[0];
 
+    // Set of app ids that are allowed to acquire wakelocks while low power standby is active
+    int[] mLowPowerStandbyAllowlist = new int[0];
+
     private boolean mLowPowerStandbyActive;
 
     private final SparseArray<UidState> mUidState = new SparseArray<>();
@@ -3874,6 +3877,15 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    void setLowPowerStandbyAllowlistInternal(int[] appids) {
+        synchronized (mLock) {
+            mLowPowerStandbyAllowlist = appids;
+            if (mLowPowerStandbyActive) {
+                updateWakeLockDisabledStatesLocked();
+            }
+        }
+    }
+
     void setLowPowerStandbyActiveInternal(boolean active) {
         synchronized (mLock) {
             if (mLowPowerStandbyActive != active) {
@@ -4026,7 +4038,8 @@ public final class PowerManagerService extends SystemService
                 }
                 if (mLowPowerStandbyActive) {
                     final UidState state = wakeLock.mUidState;
-                    if (state.mProcState != ActivityManager.PROCESS_STATE_NONEXISTENT
+                    if (Arrays.binarySearch(mLowPowerStandbyAllowlist, appid) < 0
+                            && state.mProcState != ActivityManager.PROCESS_STATE_NONEXISTENT
                             && state.mProcState > ActivityManager.PROCESS_STATE_BOUND_TOP) {
                         disabled = true;
                     }
@@ -6348,6 +6361,11 @@ public final class PowerManagerService extends SystemService
         @Override
         public void setDeviceIdleTempWhitelist(int[] appids) {
             setDeviceIdleTempWhitelistInternal(appids);
+        }
+
+        @Override
+        public void setLowPowerStandbyAllowlist(int[] appids) {
+            setLowPowerStandbyAllowlistInternal(appids);
         }
 
         @Override
