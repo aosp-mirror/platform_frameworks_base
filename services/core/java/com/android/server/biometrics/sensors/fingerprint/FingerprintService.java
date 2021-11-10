@@ -281,7 +281,7 @@ public class FingerprintService extends SystemService {
         @Override // Binder call
         public long authenticate(final IBinder token, final long operationId,
                 final int sensorId, final int userId, final IFingerprintServiceReceiver receiver,
-                final String opPackageName) {
+                final String opPackageName, boolean ignoreEnrollmentState) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int callingUserId = UserHandle.getCallingUserId();
@@ -333,7 +333,8 @@ public class FingerprintService extends SystemService {
                     && sensorProps != null && sensorProps.isAnyUdfpsType()) {
                 identity = Binder.clearCallingIdentity();
                 try {
-                    return authenticateWithPrompt(operationId, sensorProps, userId, receiver);
+                    return authenticateWithPrompt(operationId, sensorProps, userId, receiver,
+                            ignoreEnrollmentState);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -347,7 +348,8 @@ public class FingerprintService extends SystemService {
                 final long operationId,
                 @NonNull final FingerprintSensorPropertiesInternal props,
                 final int userId,
-                final IFingerprintServiceReceiver receiver) {
+                final IFingerprintServiceReceiver receiver,
+                boolean ignoreEnrollmentState) {
 
             final Context context = getUiContext();
             final Executor executor = context.getMainExecutor();
@@ -368,6 +370,7 @@ public class FingerprintService extends SystemService {
                             })
                     .setAllowedSensorIds(new ArrayList<>(
                             Collections.singletonList(props.sensorId)))
+                    .setIgnoreEnrollmentState(ignoreEnrollmentState)
                     .build();
 
             final BiometricPrompt.AuthenticationCallback promptCallback =
