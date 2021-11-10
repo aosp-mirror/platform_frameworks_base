@@ -278,11 +278,11 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void updateViewState_qsExpansionOne_viewHidden() {
+    public void updateViewState_dragProgressOne_viewHidden() {
         mController.onViewAttached();
         updateStateToKeyguard();
 
-        mNotificationPanelViewStateProvider.setQsExpansionFraction(1f);
+        mNotificationPanelViewStateProvider.setLockscreenShadeDragProgress(1f);
 
         mController.updateViewState();
 
@@ -356,6 +356,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         private float mPanelViewExpandedHeight = 100f;
         private float mQsExpansionFraction = 0f;
         private boolean mShouldHeadsUpBeVisible = false;
+        private float mLockscreenShadeDragProgress = 0f;
 
         @Override
         public float getPanelViewExpandedHeight() {
@@ -372,6 +373,11 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
             return mShouldHeadsUpBeVisible;
         }
 
+        @Override
+        public float getLockscreenShadeDragProgress() {
+            return mLockscreenShadeDragProgress;
+        }
+
         public void setPanelViewExpandedHeight(float panelViewExpandedHeight) {
             this.mPanelViewExpandedHeight = panelViewExpandedHeight;
         }
@@ -382,6 +388,10 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
 
         public void setShouldHeadsUpBeVisible(boolean shouldHeadsUpBeVisible) {
             this.mShouldHeadsUpBeVisible = shouldHeadsUpBeVisible;
+        }
+
+        public void setLockscreenShadeDragProgress(float lockscreenShadeDragProgress) {
+            this.mLockscreenShadeDragProgress = lockscreenShadeDragProgress;
         }
     }
 }

@@ -8,6 +8,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.qs.HeaderPrivacyIconsController
@@ -37,6 +38,7 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
     @Mock private lateinit var batteryMeterView: BatteryMeterView
     @Mock private lateinit var batteryMeterViewController: BatteryMeterViewController
     @Mock private lateinit var privacyIconsController: HeaderPrivacyIconsController
+    @Mock private lateinit var dumpManager: DumpManager
 
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
     var viewVisibility = View.GONE
@@ -66,7 +68,8 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
                 privacyIconsController,
                 qsCarrierGroupControllerBuilder,
                 featureFlags,
-                batteryMeterViewController
+                batteryMeterViewController,
+                dumpManager
         )
         carrierIconSlots = listOf(
                 context.getString(com.android.internal.R.string.status_bar_mobile))
