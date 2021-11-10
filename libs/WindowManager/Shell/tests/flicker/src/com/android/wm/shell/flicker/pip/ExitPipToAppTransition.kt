@@ -45,8 +45,8 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
     @Presubmit
     @Test
     open fun pipAppWindowRemainInsideVisibleBounds() {
-        testSpec.assertWm {
-            coversAtMost(displayBounds, pipApp.component)
+        testSpec.assertWmVisibleRegion(pipApp.component) {
+            coversAtMost(displayBounds)
         }
     }
 
@@ -57,8 +57,8 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
     @Presubmit
     @Test
     open fun pipAppLayerRemainInsideVisibleBounds() {
-        testSpec.assertLayers {
-            coversAtMost(displayBounds, pipApp.component)
+        testSpec.assertLayersVisibleRegion(pipApp.component) {
+            coversAtMost(displayBounds)
         }
     }
 
