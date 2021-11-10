@@ -352,6 +352,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private int mMethodMapUpdateCount = 0;
 
     /**
+     * Indicates whether {@link #getVisibleConnection} is currently in use.
+     */
+    private boolean isVisibleBound() {
+        return mVisibleBound;
+    }
+
+    private void setVisibleBound(boolean visibleBound) {
+        mVisibleBound = visibleBound;
+    }
+    private boolean mVisibleBound = false;
+
+    /**
      * Used to bring IME service up to visible adjustment while it is being shown.
      */
     private ServiceConnection getVisibleConnection() {
@@ -361,9 +373,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final ServiceConnection mVisibleConnection = new ServiceConnection() {
         @Override public void onBindingDied(ComponentName name) {
             synchronized (mMethodMap) {
-                if (mVisibleBound) {
+                if (isVisibleBound()) {
                     mContext.unbindService(getVisibleConnection());
-                    mVisibleBound = false;
+                    setVisibleBound(false);
                 }
             }
         }
@@ -374,7 +386,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override public void onServiceDisconnected(ComponentName name) {
         }
     };
-    boolean mVisibleBound = false;
 
     // Ongoing notification
     private NotificationManager mNotificationManager;
@@ -2673,9 +2684,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("mMethodMap")
     void unbindCurrentMethodLocked() {
-        if (mVisibleBound) {
+        if (isVisibleBound()) {
             mContext.unbindService(getVisibleConnection());
-            mVisibleBound = false;
+            setVisibleBound(false);
         }
 
         if (hasConnection()) {
@@ -3246,10 +3257,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageIIOOO(MSG_SHOW_SOFT_INPUT,
                     getImeShowFlagsLocked(), reason, mCurMethod, resultReceiver, showInputToken));
             mInputShown = true;
-            if (hasConnection() && !mVisibleBound) {
+            if (hasConnection() && !isVisibleBound()) {
                 bindCurrentInputMethodServiceLocked(
                         getCurIntent(), getVisibleConnection(), IME_VISIBLE_BIND_FLAGS);
-                mVisibleBound = true;
+                setVisibleBound(true);
             }
             res = true;
         } else {
@@ -3355,9 +3366,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         } else {
             res = false;
         }
-        if (hasConnection() && mVisibleBound) {
+        if (hasConnection() && isVisibleBound()) {
             mContext.unbindService(getVisibleConnection());
-            mVisibleBound = false;
+            setVisibleBound(false);
         }
         mInputShown = false;
         mShowRequested = false;
@@ -5303,7 +5314,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + " client=" + mCurFocusedWindowClient);
             focusedWindowClient = mCurFocusedWindowClient;
             p.println("  mCurId=" + getCurId() + " mHaveConnection=" + hasConnection()
-                    + " mBoundToMethod=" + mBoundToMethod + " mVisibleBound=" + mVisibleBound);
+                    + " mBoundToMethod=" + mBoundToMethod + " mVisibleBound=" + isVisibleBound());
             p.println("  mCurToken=" + getCurToken());
             p.println("  mCurTokenDisplayId=" + mCurTokenDisplayId);
             p.println("  mCurHostInputToken=" + mCurHostInputToken);
