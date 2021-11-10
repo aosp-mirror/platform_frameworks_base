@@ -1179,4 +1179,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"ବର୍ତ୍ତମାନ ପାଇଁ ୱାଇ-ଫାଇ ସ୍ୱତଃ-ସଂଯୋଗ ହେବ ନାହିଁ"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"ସବୁ ଦେଖନ୍ତୁ"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ନେଟୱାର୍କ ସ୍ୱିଚ୍ କରିବାକୁ, ଇଥରନେଟ୍ ବିଚ୍ଛିନ୍ନ କରନ୍ତୁ"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ଡିଭାଇସ ଅନୁଭୂତିକୁ ଉନ୍ନତ କରିବା ପାଇଁ, ୱାଇ-ଫାଇ ବନ୍ଦ ଥିଲେ ମଧ୍ୟ ଆପ ଓ ସେବାଗୁଡ଼ିକ ଏବେ ବି ଯେ କୌଣସି ସମୟରେ ୱାଇ-ଫାଇ ନେଟୱାର୍କ ପାଇଁ ସ୍କାନ କରିପାରିବ। ଆପଣ ଏହାକୁ ୱାଇ-ଫାଇ ସ୍କାନିଂ ସେଟିଂସରେ ପରିବର୍ତ୍ତନ କରିପାରିବେ। "<annotation id="link">"ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</annotation></string>
 </resources>
