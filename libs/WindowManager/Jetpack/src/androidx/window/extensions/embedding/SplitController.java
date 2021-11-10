@@ -497,7 +497,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return;
         }
         List<SplitInfo> currentSplitStates = getActiveSplitStates();
-        if (mLastReportedSplitStates.equals(currentSplitStates)) {
+        if (currentSplitStates == null || mLastReportedSplitStates.equals(currentSplitStates)) {
             return;
         }
         mLastReportedSplitStates.clear();
@@ -506,15 +506,19 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
-     * Returns a list of descriptors for currently active split states.
+     * @return a list of descriptors for currently active split states. If the value returned is
+     * null, that indicates that the active split states are in an intermediate state and should
+     * not be reported.
      */
+    @Nullable
     private List<SplitInfo> getActiveSplitStates() {
         List<SplitInfo> splitStates = new ArrayList<>();
         for (SplitContainer container : mSplitContainers) {
             if (container.getPrimaryContainer().isEmpty()
                     || container.getSecondaryContainer().isEmpty()) {
-                // Skipping containers that do not have any activities to report.
-                continue;
+                // We are in an intermediate state because either the split container is about to be
+                // removed or the primary or secondary container are about to receive an activity.
+                return null;
             }
             ActivityStack primaryContainer = container.getPrimaryContainer().toActivityStack();
             ActivityStack secondaryContainer = container.getSecondaryContainer().toActivityStack();
