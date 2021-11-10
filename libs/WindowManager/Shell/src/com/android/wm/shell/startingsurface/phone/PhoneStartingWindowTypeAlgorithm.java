@@ -75,27 +75,34 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
         }
 
         if (!topIsHome) {
-            if (!processRunning
-                    || newTask
-                    || (taskSwitch && (!activityCreated || !activityDrawn))) {
-                return useEmptySplashScreen
-                        ? STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
-                        : legacySplashScreen
-                                ? STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
-                                : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+            if (!processRunning || newTask || (taskSwitch && !activityCreated)) {
+                return getSplashscreenType(useEmptySplashScreen, legacySplashScreen);
             }
         }
-        if (taskSwitch && allowTaskSnapshot) {
-            if (isSnapshotCompatible(windowInfo)) {
-                return STARTING_WINDOW_TYPE_SNAPSHOT;
+
+        if (taskSwitch) {
+            if (allowTaskSnapshot) {
+                if (isSnapshotCompatible(windowInfo)) {
+                    return STARTING_WINDOW_TYPE_SNAPSHOT;
+                }
+                if (!topIsHome) {
+                    return STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
+                }
             }
-            if (!topIsHome) {
-                return STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
+            if (!activityDrawn && !topIsHome) {
+                return getSplashscreenType(useEmptySplashScreen, legacySplashScreen);
             }
         }
         return STARTING_WINDOW_TYPE_NONE;
     }
 
+    private static int getSplashscreenType(boolean emptySplashScreen, boolean legacySplashScreen) {
+        return emptySplashScreen
+                ? STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
+                : legacySplashScreen
+                        ? STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
+                        : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+    }
 
     /**
      * Returns {@code true} if the task snapshot is compatible with this activity (at least the
