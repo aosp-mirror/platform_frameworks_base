@@ -43,7 +43,6 @@ import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -54,7 +53,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
-import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
@@ -118,6 +116,7 @@ import com.android.server.job.controllers.TimeController;
 import com.android.server.job.restrictions.JobRestriction;
 import com.android.server.job.restrictions.ThermalStatusRestriction;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.tare.EconomyManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 import com.android.server.utils.quota.Categorizer;
@@ -356,38 +355,19 @@ public class JobSchedulerService extends com.android.server.SystemService
     // (ScheduledJobStateChanged and JobStatusDumpProto).
     public static final int RESTRICTED_INDEX = 5;
 
-    private class ConstantsObserver extends ContentObserver
-            implements DeviceConfig.OnPropertiesChangedListener {
-        private final ContentResolver mContentResolver;
-
-        ConstantsObserver(Handler handler, Context context) {
-            super(handler);
-            mContentResolver = context.getContentResolver();
-        }
-
+    private class ConstantsObserver implements DeviceConfig.OnPropertiesChangedListener,
+            EconomyManagerInternal.TareStateChangeListener {
         public void start() {
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     JobSchedulerBackgroundThread.getExecutor(), this);
-            mContentResolver.registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.ENABLE_TARE), false, this);
+            final EconomyManagerInternal economyManagerInternal =
+                    LocalServices.getService(EconomyManagerInternal.class);
+            economyManagerInternal.registerTareStateChangeListener(this);
             // Load all the constants.
             synchronized (mLock) {
-                mConstants.updateSettingsConstantsLocked(mContentResolver);
+                mConstants.updateTareSettingsLocked(economyManagerInternal.isEnabled());
             }
             onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER));
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            synchronized (mLock) {
-                if (mConstants.updateSettingsConstantsLocked(mContentResolver)) {
-                    for (int controller = 0; controller < mControllers.size(); controller++) {
-                        final StateController sc = mControllers.get(controller);
-                        sc.onConstantsUpdatedLocked();
-                    }
-                    onControllerStateChanged(null);
-                }
-            }
         }
 
         @Override
@@ -463,6 +443,17 @@ public class JobSchedulerService extends com.android.server.SystemService
                     final StateController sc = mControllers.get(controller);
                     sc.onConstantsUpdatedLocked();
                 }
+            }
+        }
+
+        @Override
+        public void onTareEnabledStateChanged(boolean isTareEnabled) {
+            if (mConstants.updateTareSettingsLocked(isTareEnabled)) {
+                for (int controller = 0; controller < mControllers.size(); controller++) {
+                    final StateController sc = mControllers.get(controller);
+                    sc.onConstantsUpdatedLocked();
+                }
+                onControllerStateChanged(null);
             }
         }
     }
@@ -719,10 +710,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                             DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS));
         }
 
-        private boolean updateSettingsConstantsLocked(ContentResolver contentResolver) {
+        private boolean updateTareSettingsLocked(boolean isTareEnabled) {
             boolean changed = false;
-            final boolean isTareEnabled = Settings.Global.getInt(contentResolver,
-                    Settings.Global.ENABLE_TARE, Settings.Global.DEFAULT_ENABLE_TARE) == 1;
             if (USE_TARE_POLICY != isTareEnabled) {
                 USE_TARE_POLICY = isTareEnabled;
                 changed = true;
@@ -1673,7 +1662,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         mHandler = new JobHandler(context.getMainLooper());
         mConstants = new Constants();
-        mConstantsObserver = new ConstantsObserver(mHandler, context);
+        mConstantsObserver = new ConstantsObserver();
         mJobSchedulerStub = new JobSchedulerStub();
 
         mConcurrencyManager = new JobConcurrencyManager(this);

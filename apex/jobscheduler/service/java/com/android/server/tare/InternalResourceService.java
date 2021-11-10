@@ -53,6 +53,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
@@ -68,11 +69,13 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.tare.EconomyManagerInternal.TareStateChangeListener;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Responsible for handling app's ARC count based on events, ensuring ARCs are credited when
@@ -169,6 +172,9 @@ public class InternalResourceService extends SystemService {
     @GuardedBy("mPackageToUidCache")
     private final SparseArrayMap<String, Integer> mPackageToUidCache = new SparseArrayMap<>();
 
+    private final CopyOnWriteArraySet<TareStateChangeListener> mStateChangeListeners =
+            new CopyOnWriteArraySet<>();
+
     /** List of packages that are "exempted" from battery restrictions. */
     // TODO(144864180): include userID
     @GuardedBy("mLock")
@@ -261,6 +267,7 @@ public class InternalResourceService extends SystemService {
     private static final int MSG_SCHEDULE_UNUSED_WEALTH_RECLAMATION_EVENT = 1;
     private static final int MSG_PROCESS_USAGE_EVENT = 2;
     private static final int MSG_MAYBE_FORCE_RECLAIM = 3;
+    private static final int MSG_NOTIFY_STATE_CHANGE_LISTENERS = 4;
     private static final String ALARM_TAG_WEALTH_RECLAMATION = "*tare.reclamation*";
 
     /**
@@ -802,6 +809,13 @@ public class InternalResourceService extends SystemService {
                 }
                 break;
 
+                case MSG_NOTIFY_STATE_CHANGE_LISTENERS: {
+                    for (TareStateChangeListener listener : mStateChangeListeners) {
+                        listener.onTareEnabledStateChanged(mIsEnabled);
+                    }
+                }
+                break;
+
                 case MSG_PROCESS_USAGE_EVENT: {
                     final int userId = msg.arg1;
                     final UsageEvents.Event event = (UsageEvents.Event) msg.obj;
@@ -892,6 +906,16 @@ public class InternalResourceService extends SystemService {
         }
 
         @Override
+        public void registerTareStateChangeListener(@NonNull TareStateChangeListener listener) {
+            mStateChangeListeners.add(listener);
+        }
+
+        @Override
+        public void unregisterTareStateChangeListener(@NonNull TareStateChangeListener listener) {
+            mStateChangeListeners.remove(listener);
+        }
+
+        @Override
         public boolean canPayFor(int userId, @NonNull String pkgName, @NonNull ActionBill bill) {
             if (!mIsEnabled) {
                 return true;
@@ -944,6 +968,11 @@ public class InternalResourceService extends SystemService {
         }
 
         @Override
+        public boolean isEnabled() {
+            return mIsEnabled;
+        }
+
+        @Override
         public void noteInstantaneousEvent(int userId, @NonNull String pkgName, int eventId,
                 @Nullable String tag) {
             if (!mIsEnabled) {
@@ -980,7 +1009,10 @@ public class InternalResourceService extends SystemService {
         }
     }
 
-    private class ConfigObserver extends ContentObserver {
+    private class ConfigObserver extends ContentObserver
+            implements DeviceConfig.OnPropertiesChangedListener {
+        private static final String KEY_DC_ENABLE_TARE = "enable_tare";
+
         private final ContentResolver mContentResolver;
 
         ConfigObserver(Handler handler, Context context) {
@@ -989,12 +1021,15 @@ public class InternalResourceService extends SystemService {
         }
 
         public void start() {
+            DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_TARE,
+                    TareHandlerThread.getExecutor(), this);
             mContentResolver.registerContentObserver(
                     Settings.Global.getUriFor(Settings.Global.ENABLE_TARE), false, this);
             mContentResolver.registerContentObserver(
                     Settings.Global.getUriFor(TARE_ALARM_MANAGER_CONSTANTS), false, this);
             mContentResolver.registerContentObserver(
                     Settings.Global.getUriFor(TARE_JOB_SCHEDULER_CONSTANTS), false, this);
+            onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_TARE));
             updateEnabledStatus();
         }
 
@@ -1008,9 +1043,31 @@ public class InternalResourceService extends SystemService {
             }
         }
 
+        @Override
+        public void onPropertiesChanged(DeviceConfig.Properties properties) {
+            synchronized (mLock) {
+                for (String name : properties.getKeyset()) {
+                    if (name == null) {
+                        continue;
+                    }
+                    switch (name) {
+                        case KEY_DC_ENABLE_TARE:
+                            updateEnabledStatus();
+                            break;
+                    }
+                }
+            }
+        }
+
         private void updateEnabledStatus() {
+            // User setting should override DeviceConfig setting.
+            // NOTE: There's currently no way for a user to reset the value (via UI), so if a user
+            // manually toggles TARE via UI, we'll always defer to the user's current setting
+            // TODO: add a "reset" value if the user toggle is an issue
+            final boolean isTareEnabledDC = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TARE,
+                    KEY_DC_ENABLE_TARE, Settings.Global.DEFAULT_ENABLE_TARE == 1);
             final boolean isTareEnabled = Settings.Global.getInt(mContentResolver,
-                    Settings.Global.ENABLE_TARE, Settings.Global.DEFAULT_ENABLE_TARE) == 1;
+                    Settings.Global.ENABLE_TARE, isTareEnabledDC ? 1 : 0) == 1;
             if (mIsEnabled != isTareEnabled) {
                 mIsEnabled = isTareEnabled;
                 if (mIsEnabled) {
@@ -1018,6 +1075,7 @@ public class InternalResourceService extends SystemService {
                 } else {
                     tearDownEverything();
                 }
+                mHandler.sendEmptyMessage(MSG_NOTIFY_STATE_CHANGE_LISTENERS);
             }
         }
 
