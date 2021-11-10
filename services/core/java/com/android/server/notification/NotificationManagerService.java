@@ -6784,11 +6784,13 @@ public class NotificationManagerService extends SystemService {
 
 
         // blocked apps
+        boolean isMediaNotification = n.isMediaNotification()
+                && n.extras.getParcelable(Notification.EXTRA_MEDIA_SESSION) != null;
         boolean isBlocked = !areNotificationsEnabledForPackageInt(pkg, uid);
         synchronized (mNotificationLock) {
             isBlocked |= isRecordBlockedLocked(r);
         }
-        if (isBlocked) {
+        if (isBlocked && !isMediaNotification) {
             if (DBG) {
                 Slog.e(TAG, "Suppressing notification from package " + r.getSbn().getPackageName()
                         + " by user request.");
@@ -7174,7 +7176,13 @@ public class NotificationManagerService extends SystemService {
                         return;
                     }
 
-                    if (appBanned || isRecordBlockedLocked(r)) {
+                    final StatusBarNotification n = r.getSbn();
+                    final Notification notification = n.getNotification();
+
+                    boolean isMediaNotification = notification.isMediaNotification()
+                            && notification.extras.getParcelable(
+                                    Notification.EXTRA_MEDIA_SESSION) != null;
+                    if (!isMediaNotification && (appBanned || isRecordBlockedLocked(r))) {
                         mUsageStats.registerBlocked(r);
                         if (DBG) {
                             Slog.e(TAG, "Suppressing notification from package " + pkg);
@@ -7189,8 +7197,6 @@ public class NotificationManagerService extends SystemService {
                         mUsageStats.registerSuspendedByAdmin(r);
                     }
                     NotificationRecord old = mNotificationsByKey.get(key);
-                    final StatusBarNotification n = r.getSbn();
-                    final Notification notification = n.getNotification();
 
                     // Make sure the SBN has an instance ID for statsd logging.
                     if (old == null || old.getSbn().getInstanceId() == null) {
