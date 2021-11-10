@@ -32477,7 +32477,7 @@ package android.os {
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.CREATE_USERS"}) public int getUserCount();
     method public long getUserCreationTime(android.os.UserHandle);
     method public android.os.UserHandle getUserForSerialNumber(long);
-    method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED, "android.permission.CREATE_USERS"}, conditional=true) public String getUserName();
+    method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.CREATE_USERS", "android.permission.QUERY_USERS", android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}) public String getUserName();
     method public java.util.List<android.os.UserHandle> getUserProfiles();
     method public android.os.Bundle getUserRestrictions();
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public android.os.Bundle getUserRestrictions(android.os.UserHandle);
