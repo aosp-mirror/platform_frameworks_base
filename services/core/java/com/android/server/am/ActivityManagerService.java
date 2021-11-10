@@ -441,14 +441,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final String SYSTEM_PROPERTY_DEVICE_PROVISIONED =
             "persist.sys.device_provisioned";
 
-    /**
-     * Enabling this flag enforces the requirement for context registered receivers to use one of
-     * {@link Context#RECEIVER_EXPORTED} or {@link Context#RECEIVER_NOT_EXPORTED} for unprotected
-     * broadcasts
-     */
-    private static final boolean ENFORCE_DYNAMIC_RECEIVER_EXPLICIT_EXPORT =
-            SystemProperties.getBoolean("fw.enforce_dynamic_receiver_explicit_export", false);
-
     static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityManagerService" : TAG_AM;
     static final String TAG_BACKUP = TAG + POSTFIX_BACKUP;
     private static final String TAG_BROADCAST = TAG + POSTFIX_BROADCAST;
@@ -12597,43 +12589,28 @@ public class ActivityManagerService extends IActivityManager.Stub
             // an error so the consumer can know to explicitly set the value for their flag.
             // If the caller is registering for a sticky broadcast with a null receiver, we won't
             // require a flag
-            final boolean explicitExportStateDefined =
-                    (flags & (Context.RECEIVER_EXPORTED | Context.RECEIVER_NOT_EXPORTED)) != 0;
-            if (((flags & Context.RECEIVER_EXPORTED) != 0) && (
+            if (!onlyProtectedBroadcasts && receiver != null && (
+                    CompatChanges.isChangeEnabled(
+                            DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid)
+                            && (flags & (Context.RECEIVER_EXPORTED | Context.RECEIVER_NOT_EXPORTED))
+                            == 0)) {
+                Slog.e(TAG,
+                        callerPackage + ": Targeting T+ (version " + Build.VERSION_CODES.TIRAMISU
+                                + " and above) requires that one of RECEIVER_EXPORTED or "
+                                + "RECEIVER_NOT_EXPORTED be specified when registering a receiver");
+            } else if (((flags & Context.RECEIVER_EXPORTED) != 0) && (
                     (flags & Context.RECEIVER_NOT_EXPORTED) != 0)) {
                 throw new IllegalArgumentException(
                         "Receiver can't specify both RECEIVER_EXPORTED and RECEIVER_NOT_EXPORTED"
                                 + "flag");
             }
-            if (CompatChanges.isChangeEnabled(DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED,
-                    callingUid)
-                    && !explicitExportStateDefined) {
-                if (ENFORCE_DYNAMIC_RECEIVER_EXPLICIT_EXPORT) {
-                    throw new SecurityException(
-                            callerPackage + ": Targeting T+ (version "
-                                    + Build.VERSION_CODES.TIRAMISU
-                                    + " and above) requires that one of RECEIVER_EXPORTED or "
-                                    + "RECEIVER_NOT_EXPORTED be specified when registering a "
-                                    + "receiver");
-                } else {
-                    Slog.wtf(TAG,
-                            callerPackage + ": Targeting T+ (version "
-                                    + Build.VERSION_CODES.TIRAMISU
-                                    + " and above) requires that one of RECEIVER_EXPORTED or "
-                                    + "RECEIVER_NOT_EXPORTED be specified when registering a "
-                                    + "receiver");
-                    // Assume default behavior-- flag check is not enforced
-                    flags |= Context.RECEIVER_EXPORTED;
-                }
-            } else if (!CompatChanges.isChangeEnabled(DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED,
-                    callingUid)) {
-                // Change is not enabled, thus not targeting T+. Assume exported.
-                flags |= Context.RECEIVER_EXPORTED;
-            }
         }
 
         // Dynamic receivers are exported by default for versions prior to T
-        final boolean exported = (flags & Context.RECEIVER_EXPORTED) != 0;
+        final boolean exported =
+                ((flags & Context.RECEIVER_EXPORTED) != 0
+                        || (!CompatChanges.isChangeEnabled(
+                        DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid)));
 
         ArrayList<Intent> allSticky = null;
         if (stickyIntents != null) {
