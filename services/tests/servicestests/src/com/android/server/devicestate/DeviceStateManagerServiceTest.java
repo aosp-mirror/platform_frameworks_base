@@ -551,13 +551,14 @@ public final class DeviceStateManagerServiceTest {
         Assert.assertTrue(Arrays.equals(expected, actual));
     }
 
-    private static final class TestDeviceStatePolicy implements DeviceStatePolicy {
+    private static final class TestDeviceStatePolicy extends DeviceStatePolicy {
         private final DeviceStateProvider mProvider;
         private int mLastDeviceStateRequestedToConfigure = INVALID_DEVICE_STATE;
         private boolean mConfigureBlocked = false;
         private Runnable mPendingConfigureCompleteRunnable;
 
         TestDeviceStatePolicy(DeviceStateProvider provider) {
+            super(InstrumentationRegistry.getContext());
             mProvider = provider;
         }
 
