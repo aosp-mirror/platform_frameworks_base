@@ -64,13 +64,24 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
      */
     @Override
     public boolean onShowTranslation(@NonNull View view) {
+        if (mIsShowingTranslation) {
+            if (DEBUG) {
+                Log.d(TAG, view + " is already showing translated text.");
+            }
+            return false;
+        }
         ViewTranslationResponse response = view.getViewTranslationResponse();
         if (response == null) {
             Log.e(TAG, "onShowTranslation() shouldn't be called before "
                     + "onViewTranslationResponse().");
             return false;
         }
-        if (mTranslationTransformation == null) {
+        // It is possible user changes text and new translation response returns, system should
+        // update the translation response to keep the result up to date.
+        // Because TextView.setTransformationMethod() will skip the same TransformationMethod
+        // instance, we should create a new one to let new translation can work.
+        if (mTranslationTransformation == null
+                || !response.equals(mTranslationTransformation.getViewTranslationResponse())) {
             TransformationMethod originalTranslationMethod =
                     ((TextView) view).getTransformationMethod();
             mTranslationTransformation = new TranslationTransformationMethod(response,
@@ -147,7 +158,7 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
         return true;
     }
 
-    boolean isShowingTranslation() {
+    public boolean isShowingTranslation() {
         return mIsShowingTranslation;
     }
 

@@ -576,19 +576,16 @@ public class BubbleStackView extends FrameLayout
                 mBubbleContainer.setActiveController(mStackAnimationController);
                 hideFlyoutImmediate();
 
-                if (!mPositioner.showingInTaskbar()) {
-                    // Also, save the magnetized stack so we can dispatch touch events to it.
-                    mMagnetizedObject = mStackAnimationController.getMagnetizedStack(
-                            mMagneticTarget);
-                    mMagnetizedObject.setMagnetListener(mStackMagnetListener);
-                } else {
+                if (mPositioner.showingInTaskbar()) {
                     // In taskbar, the stack isn't draggable so we shouldn't dispatch touch events.
                     mMagnetizedObject = null;
+                } else {
+                    // Save the magnetized stack so we can dispatch touch events to it.
+                    mMagnetizedObject = mStackAnimationController.getMagnetizedStack();
+                    mMagnetizedObject.clearAllTargets();
+                    mMagnetizedObject.addTarget(mMagneticTarget);
+                    mMagnetizedObject.setMagnetListener(mStackMagnetListener);
                 }
-
-                // Also, save the magnetized stack so we can dispatch touch events to it.
-                mMagnetizedObject = mStackAnimationController.getMagnetizedStack(mMagneticTarget);
-                mMagnetizedObject.setMagnetListener(mStackMagnetListener);
 
                 mIsDraggingStack = true;
 
@@ -881,7 +878,6 @@ public class BubbleStackView extends FrameLayout
                         mRelativeStackPositionBeforeRotation = null;
                     }
 
-                    setUpDismissView();
                     if (mIsExpanded) {
                         // Re-draw bubble row and pointer for new orientation.
                         beforeExpandedViewAnimation();
@@ -1043,10 +1039,9 @@ public class BubbleStackView extends FrameLayout
                 contentResolver, "bubble_dismiss_radius", mBubbleSize * 2 /* default */);
 
         // Save the MagneticTarget instance for the newly set up view - we'll add this to the
-        // MagnetizedObjects.
+        // MagnetizedObjects when the dismiss view gets shown.
         mMagneticTarget = new MagnetizedObject.MagneticTarget(
                 mDismissView.getCircle(), dismissRadius);
-
         mBubbleContainer.bringToFront();
     }
 

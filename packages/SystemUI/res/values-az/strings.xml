@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Ekranı doldurmaq üçün yaxınlaşdır"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Ekranı doldurmaq üçün uzat"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skrinşot"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock deaktivdir"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"şəkil göndərdi"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Skrinşot yadda saxlanılır..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Skrinşot yadda saxlanır..."</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Kamera və mikrofon istifadə edən bütün tətbiq və xidmətlərə giriş verir."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Kamera və mikrofon istifadə edən bütün tətbiq və xidmətlərə giriş verir."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Kamera və mikrofon istifadə edən bütün tətbiq və xidmətlərə giriş verir."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Cihaz"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Digər cihaz"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"İcmala Keçin"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Enerji yığılıb"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Enerji doldurulur"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Enerji bildiriş nəzarəti"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Aktiv"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Deaktiv"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Aktiv - Üz əsaslı"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Enerji bildiriş nəzarəti ilə, tətbiq bildirişləri üçün əhəmiyyət səviyyəsini 0-dan 5-ə kimi ayarlaya bilərsiniz. \n\n"<b>"Səviyyə 5"</b>" \n- Bildiriş siyahısının yuxarı hissəsində göstərin \n- Tam ekran kəsintisinə icazə verin \n- Hər zaman izləyin \n\n"<b>"Səviyyə 4"</b>" \n- Tam ekran kəsintisinin qarşısını alın \n- Hər zaman izləyin \n\n"<b>"Level 3"</b>" \n- Tam ekran kəsintisinin qarşısını alın \n- Heç vaxt izləməyin \n\n"<b>"Level 2"</b>" \n- Tam ekran kəsintisinin qarşısını alın \n- Heç vaxt izləməyin \n- Heç vaxt səsliyə və ya vibrasiyaya qoymayın \n\n"<b>"Səviyyə 1"</b>" \n- Prevent full screen interruption \n- Heç vaxt izləməyin \n- Heç vaxt səsliyə və ya vibrasiyaya qoymayın \n- Ekran kilidi və ya status panelindən gizlədin \n- Bildiriş siyahısının yuxarı hissəsində göstərin \n\n"<b>"Səviyyə 0"</b>" \n- Bütün bildirişləri tətbiqdən blok edin"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Bildirişlər"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Artıq bu bildirişləri görməyəcəkəsiniz"</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Açmaq üçün barmaq izindən istifadə edin"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Doğrulanma tələb olunur. Doğrulamaq üçün barmaq izi sensoruna toxunun."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Davam edən zəng"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobil data"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Qoşulub"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobil data avtomatik qoşulmayacaq"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"Bağlantı yoxdur"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Heç bir başqa şəbəkə əlçatan deyil"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"Əlçatan şəbəkə yoxdur"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"Şəbəkə məlumatları"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Qoşulmaq üçün şəbəkəyə toxunun"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"Şəbəkələrə baxmaq üçün kilidi açın"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Şəbəkə axtarılır…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Şəbəkəyə qoşulmaq alınmadı"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi hələlik avtomatik qoşulmayacaq"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Hamısına baxın"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Şəbəkəni dəyişmək üçün etherneti ayırın"</string>
 </resources>

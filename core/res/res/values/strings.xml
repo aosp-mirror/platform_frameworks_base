@@ -1650,6 +1650,8 @@
     <!-- Array containing custom error messages from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="fingerprint_error_vendor">
     </string-array>
+    <!-- Default error message to use when fingerprint_error_vendor does not contain a message. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_error_vendor_unknown">Something went wrong. Try again.</string>
 
     <!-- Content description which should be used for the fingerprint icon. -->
     <string name="fingerprint_icon_content_description">Fingerprint icon</string>
@@ -1760,6 +1762,8 @@
     <!-- Array containing custom error messages from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="face_error_vendor">
     </string-array>
+    <!-- Default error message to use when face_error_vendor does not contain a message. [CHAR LIMIT=NONE] -->
+    <string name="face_error_vendor_unknown">Something went wrong. Try again.</string>
 
     <!-- Content description which should be used for the face icon. [CHAR LIMIT=10] -->
     <string name="face_icon_content_description">Face icon</string>

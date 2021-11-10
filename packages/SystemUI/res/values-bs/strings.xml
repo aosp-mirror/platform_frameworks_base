@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Uvećaj prikaz na ekran"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Razvuci prikaz na ekran"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Snimak ekrana"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock je onemogućen"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"je poslao/la sliku"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Spašavanje snimka ekrana..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Spašavanje snimka ekrana..."</string>
@@ -436,7 +437,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Ovim se deblokira pristup za sve aplikacije i usluge kojima je dozvoljeno da koriste vaš mikrofon."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ovim se deblokira pristup za sve aplikacije i usluge kojima je dozvoljeno da koriste vašu kameru."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ovim se deblokira pristup za sve aplikacije i usluge kojima je dozvoljeno da koriste vašu kameru ili mikrofon."</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"Uređaj"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"Drugi uređaj"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Pregled uključivanja/isključivanja"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Napunjeno"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Punjenje"</string>
@@ -712,6 +713,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Kontrole obavještenja o napajanju"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Uključeno"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Isključeno"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Uključeno – na osnovu lica"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Uz kontrolu obavještenja o napajanju, možete postaviti nivo značaja obavještenja iz aplikacije, i to od nivoa 0 do 5. \n\n"<b>"Nivo 5"</b>" \n- Prikaži na vrhu liste obavještenja \n- Dopusti prekid prikaza cijelog ekrana \n- Uvijek izviruj \n\n"<b>"Nvio 4"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Uvijek izviruj \n\n"<b>"Nivo 3"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikad ne izviruj \n\n"<b>"Nivo 2"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikad ne izviruj \n- Nikada ne puštaj zvuk ili vibraciju \n\n"<b>"Nivo 1"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikada ne izviruj \n- Nikada ne puštaj zvuk ili vibraciju \n- Sakrij sa ekrana za zaključavanje i statusne trake \n- Prikaži na dnu liste obavještenja \n\n"<b>"Nivo 0"</b>" \n- Blokiraj sva obavještenja iz aplikacije"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Obavještenja"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Nećete više vidjeti ova obavještenja"</string>
@@ -1167,4 +1169,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Otvorite pomoću otiska prsta"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Potrebna je autentifikacija. Dodirnite senzor za otisak prsta da autentificirate."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Telefonski poziv u toku"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"Prijenos podataka na mobilnoj mreži"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Povezano"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Prijenos podataka se neće automatski povezati"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"Niste povezani s mrežom"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Druge mreže nisu dostupne"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"Nema dostupnih mreža"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"WiFi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"Detalji o mreži"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Dodirnite mrežu da se povežete"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"Otključajte da vidite mreže"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Traženje mreža…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Povezivanje s mrežom nije uspjelo"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"WiFi se trenutno ne može automatski povezati"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Prikaži sve"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Da promijenite mrežu, isključite ethernet"</string>
 </resources>

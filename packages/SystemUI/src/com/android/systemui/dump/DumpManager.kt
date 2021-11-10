@@ -34,7 +34,7 @@ import javax.inject.Inject
  * See [DumpHandler] for more information on how and when this information is dumped.
  */
 @SysUISingleton
-class DumpManager @Inject constructor() {
+open class DumpManager @Inject constructor() {
     private val dumpables: MutableMap<String, RegisteredDumpable<Dumpable>> = ArrayMap()
     private val buffers: MutableMap<String, RegisteredDumpable<LogBuffer>> = ArrayMap()
 

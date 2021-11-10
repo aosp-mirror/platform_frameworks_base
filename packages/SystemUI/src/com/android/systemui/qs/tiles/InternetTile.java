@@ -51,7 +51,9 @@ import com.android.systemui.qs.AlphaControlledSignalTileView;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
@@ -66,15 +68,16 @@ import javax.inject.Inject;
 /** Quick settings tile: Internet **/
 public class InternetTile extends QSTileImpl<SignalState> {
     private static final Intent WIFI_SETTINGS = new Intent(Settings.ACTION_WIFI_SETTINGS);
-    private static final Intent INTERNET_PANEL =
-            new Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY);
 
     protected final NetworkController mController;
+    private final AccessPointController mAccessPointController;
     private final DataUsageController mDataController;
     // The last updated tile state, 0: mobile, 1: wifi, 2: ethernet.
     private int mLastTileState = -1;
 
     protected final InternetSignalCallback mSignalCallback = new InternetSignalCallback();
+    private final InternetDialogFactory mInternetDialogFactory;
+    final Handler mHandler;
 
     @Inject
     public InternetTile(
@@ -86,11 +89,16 @@ public class InternetTile extends QSTileImpl<SignalState> {
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
-            NetworkController networkController
+            NetworkController networkController,
+            AccessPointController accessPointController,
+            InternetDialogFactory internetDialogFactory
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
+        mInternetDialogFactory = internetDialogFactory;
+        mHandler = mainHandler;
         mController = networkController;
+        mAccessPointController = accessPointController;
         mDataController = mController.getMobileDataController();
         mController.observe(getLifecycle(), mSignalCallback);
     }
@@ -114,7 +122,9 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
     @Override
     protected void handleClick(@Nullable View view) {
-        mActivityStarter.postStartActivityDismissingKeyguard(INTERNET_PANEL, 0);
+        mHandler.post(() -> mInternetDialogFactory.create(true,
+                mAccessPointController.canConfigMobileData(),
+                mAccessPointController.canConfigWifi()));
     }
 
     @Override
@@ -429,7 +439,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
                 state.icon = ResourceIcon.get(cb.mWifiSignalIconId);
             }
         } else if (cb.mNoDefaultNetwork) {
-            if (cb.mNoNetworksAvailable) {
+            if (cb.mNoNetworksAvailable || !cb.mEnabled) {
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable);
                 state.secondaryLabel = r.getString(R.string.quick_settings_networks_unavailable);
             } else {
@@ -489,7 +499,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
             state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable);
             state.secondaryLabel = r.getString(R.string.status_bar_airplane);
         } else if (cb.mNoDefaultNetwork) {
-            if (cb.mNoNetworksAvailable) {
+            if (cb.mNoNetworksAvailable || !mSignalCallback.mWifiInfo.mEnabled) {
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable);
                 state.secondaryLabel = r.getString(R.string.quick_settings_networks_unavailable);
             } else {

@@ -53,6 +53,8 @@ public class NotificationActionListLayout extends LinearLayout {
     private int mEmphasizedHeight;
     private int mRegularHeight;
     @DimenRes private int mCollapsibleIndentDimen = R.dimen.notification_actions_padding_start;
+    int mNumNotGoneChildren;
+    int mNumPriorityChildren;
 
     public NotificationActionListLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -76,15 +78,14 @@ public class NotificationActionListLayout extends LinearLayout {
                 && ((EmphasizedNotificationButton) actionView).isPriority();
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int N = getChildCount();
+    private void countAndRebuildMeasureOrder() {
+        final int numChildren = getChildCount();
         int textViews = 0;
         int otherViews = 0;
-        int notGoneChildren = 0;
-        int priorityChildren = 0;
+        mNumNotGoneChildren = 0;
+        mNumPriorityChildren = 0;
 
-        for (int i = 0; i < N; i++) {
+        for (int i = 0; i < numChildren; i++) {
             View c = getChildAt(i);
             if (c instanceof TextView) {
                 textViews++;
@@ -92,9 +93,9 @@ public class NotificationActionListLayout extends LinearLayout {
                 otherViews++;
             }
             if (c.getVisibility() != GONE) {
-                notGoneChildren++;
+                mNumNotGoneChildren++;
                 if (isPriority(c)) {
-                    priorityChildren++;
+                    mNumPriorityChildren++;
                 }
             }
         }
@@ -119,17 +120,20 @@ public class NotificationActionListLayout extends LinearLayout {
         if (needRebuild) {
             rebuildMeasureOrder(textViews, otherViews);
         }
+    }
 
+    private int measureAndGetUsedWidth(int widthMeasureSpec, int heightMeasureSpec, int innerWidth,
+            boolean collapsePriorityActions) {
+        final int numChildren = getChildCount();
         final boolean constrained =
                 MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.UNSPECIFIED;
-
-        final int innerWidth = MeasureSpec.getSize(widthMeasureSpec) - mPaddingLeft - mPaddingRight;
         final int otherSize = mMeasureOrderOther.size();
         int usedWidth = 0;
 
+        int maxPriorityWidth = 0;
         int measuredChildren = 0;
         int measuredPriorityChildren = 0;
-        for (int i = 0; i < N; i++) {
+        for (int i = 0; i < numChildren; i++) {
             // Measure shortest children first. To avoid measuring twice, we approximate by looking
             // at the text length.
             final boolean isPriority;
@@ -154,12 +158,20 @@ public class NotificationActionListLayout extends LinearLayout {
                 // measure in the order of (approx.) size, a large view can still take more than its
                 // share if the others are small.
                 int availableWidth = innerWidth - usedWidth;
-                int unmeasuredChildren = notGoneChildren - measuredChildren;
+                int unmeasuredChildren = mNumNotGoneChildren - measuredChildren;
                 int maxWidthForChild = availableWidth / unmeasuredChildren;
-                if (isPriority) {
+                if (isPriority && collapsePriorityActions) {
+                    // Collapsing the actions to just the width required to show the icon.
+                    if (maxPriorityWidth == 0) {
+                        maxPriorityWidth = getResources().getDimensionPixelSize(
+                                R.dimen.notification_actions_collapsed_priority_width);
+                    }
+                    maxWidthForChild = maxPriorityWidth + lp.leftMargin + lp.rightMargin;
+                } else if (isPriority) {
                     // Priority children get a larger maximum share of the total space:
                     //  maximum priority share = (nPriority + 1) / (MAX + 1)
-                    int unmeasuredPriorityChildren = priorityChildren - measuredPriorityChildren;
+                    int unmeasuredPriorityChildren = mNumPriorityChildren
+                            - measuredPriorityChildren;
                     int unmeasuredOtherChildren = unmeasuredChildren - unmeasuredPriorityChildren;
                     int widthReservedForOtherChildren = innerWidth * unmeasuredOtherChildren
                             / (Notification.MAX_ACTION_BUTTONS + 1);
@@ -186,6 +198,19 @@ public class NotificationActionListLayout extends LinearLayout {
             mExtraStartPadding = collapsibleIndent;
         } else {
             mExtraStartPadding = 0;
+        }
+        return usedWidth;
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        countAndRebuildMeasureOrder();
+        final int innerWidth = MeasureSpec.getSize(widthMeasureSpec) - mPaddingLeft - mPaddingRight;
+        int usedWidth = measureAndGetUsedWidth(widthMeasureSpec, heightMeasureSpec, innerWidth,
+                false /* collapsePriorityButtons */);
+        if (mNumPriorityChildren != 0 && usedWidth >= innerWidth) {
+            usedWidth = measureAndGetUsedWidth(widthMeasureSpec, heightMeasureSpec, innerWidth,
+                    true /* collapsePriorityButtons */);
         }
 
         mTotalWidth = usedWidth + mPaddingRight + mPaddingLeft + mExtraStartPadding;

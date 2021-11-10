@@ -16,6 +16,12 @@
 
 package com.android.server.wm;
 
+import static android.view.DisplayCutout.BOUNDS_POSITION_BOTTOM;
+import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
+import static android.view.DisplayCutout.BOUNDS_POSITION_RIGHT;
+import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
+
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -32,6 +38,8 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.widget.OverScroller;
+
+import java.io.PrintWriter;
 
 /**
  * Listens for system-wide input gestures, firing callbacks when detected.
@@ -54,7 +62,8 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
     private final Context mContext;
     private final Handler mHandler;
     private int mDisplayCutoutTouchableRegionSize;
-    private int mSwipeStartThreshold;
+    // The thresholds for each edge of the display
+    private final Rect mSwipeStartThreshold = new Rect();
     private int mSwipeDistanceThreshold;
     private final Callbacks mCallbacks;
     private final int[] mDownPointerId = new int[MAX_TRACKED_POINTERS];
@@ -66,7 +75,6 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
 
     int screenHeight;
     int screenWidth;
-    private DisplayInfo mTmpDisplayInfo = new DisplayInfo();
     private int mDownPointers;
     private boolean mSwipeFireable;
     private boolean mDebugFireable;
@@ -88,27 +96,41 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
 
     void onConfigurationChanged() {
         final Resources r = mContext.getResources();
+        final int defaultThreshold = r.getDimensionPixelSize(
+                com.android.internal.R.dimen.system_gestures_start_threshold);
+        mSwipeStartThreshold.set(defaultThreshold, defaultThreshold, defaultThreshold,
+                defaultThreshold);
+        mSwipeDistanceThreshold = defaultThreshold;
+
         final Display display = DisplayManagerGlobal.getInstance()
                 .getRealDisplay(Display.DEFAULT_DISPLAY);
-        display.getDisplayInfo(mTmpDisplayInfo);
-        mSwipeStartThreshold = mTmpDisplayInfo.logicalWidth > mTmpDisplayInfo.logicalHeight
-                ? r.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height_landscape)
-                : r.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height_portrait);
-
         final DisplayCutout displayCutout = display.getCutout();
         if (displayCutout != null) {
-            final Rect bounds = displayCutout.getBoundingRectTop();
-            if (!bounds.isEmpty()) {
-                // Expand swipe start threshold such that we can catch touches that just start below
-                // the notch area
-                mDisplayCutoutTouchableRegionSize = r.getDimensionPixelSize(
-                        com.android.internal.R.dimen.display_cutout_touchable_region_size);
-                mSwipeStartThreshold += mDisplayCutoutTouchableRegionSize;
+            // Expand swipe start threshold such that we can catch touches that just start beyond
+            // the notch area
+            mDisplayCutoutTouchableRegionSize = r.getDimensionPixelSize(
+                    com.android.internal.R.dimen.display_cutout_touchable_region_size);
+            final Rect[] bounds = displayCutout.getBoundingRectsAll();
+            if (bounds[BOUNDS_POSITION_LEFT] != null) {
+                mSwipeStartThreshold.left = Math.max(mSwipeStartThreshold.left,
+                        bounds[BOUNDS_POSITION_LEFT].width() + mDisplayCutoutTouchableRegionSize);
+            }
+            if (bounds[BOUNDS_POSITION_TOP] != null) {
+                mSwipeStartThreshold.top = Math.max(mSwipeStartThreshold.top,
+                        bounds[BOUNDS_POSITION_TOP].height() + mDisplayCutoutTouchableRegionSize);
+            }
+            if (bounds[BOUNDS_POSITION_RIGHT] != null) {
+                mSwipeStartThreshold.right = Math.max(mSwipeStartThreshold.right,
+                        bounds[BOUNDS_POSITION_RIGHT].width() + mDisplayCutoutTouchableRegionSize);
+            }
+            if (bounds[BOUNDS_POSITION_BOTTOM] != null) {
+                mSwipeStartThreshold.bottom = Math.max(mSwipeStartThreshold.bottom,
+                        bounds[BOUNDS_POSITION_BOTTOM].height()
+                                + mDisplayCutoutTouchableRegionSize);
             }
         }
-        mSwipeDistanceThreshold = mSwipeStartThreshold;
         if (DEBUG) Slog.d(TAG,  "mSwipeStartThreshold=" + mSwipeStartThreshold
-            + " mSwipeDistanceThreshold=" + mSwipeDistanceThreshold);
+                + " mSwipeDistanceThreshold=" + mSwipeDistanceThreshold);
     }
 
     private static <T> T checkNull(String name, T arg) {
@@ -275,27 +297,36 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
         final long elapsed = time - mDownTime[i];
         if (DEBUG) Slog.d(TAG, "pointer " + mDownPointerId[i]
                 + " moved (" + fromX + "->" + x + "," + fromY + "->" + y + ") in " + elapsed);
-        if (fromY <= mSwipeStartThreshold
+        if (fromY <= mSwipeStartThreshold.top
                 && y > fromY + mSwipeDistanceThreshold
                 && elapsed < SWIPE_TIMEOUT_MS) {
             return SWIPE_FROM_TOP;
         }
-        if (fromY >= screenHeight - mSwipeStartThreshold
+        if (fromY >= screenHeight - mSwipeStartThreshold.bottom
                 && y < fromY - mSwipeDistanceThreshold
                 && elapsed < SWIPE_TIMEOUT_MS) {
             return SWIPE_FROM_BOTTOM;
         }
-        if (fromX >= screenWidth - mSwipeStartThreshold
+        if (fromX >= screenWidth - mSwipeStartThreshold.right
                 && x < fromX - mSwipeDistanceThreshold
                 && elapsed < SWIPE_TIMEOUT_MS) {
             return SWIPE_FROM_RIGHT;
         }
-        if (fromX <= mSwipeStartThreshold
+        if (fromX <= mSwipeStartThreshold.left
                 && x > fromX + mSwipeDistanceThreshold
                 && elapsed < SWIPE_TIMEOUT_MS) {
             return SWIPE_FROM_LEFT;
         }
         return SWIPE_NONE;
+    }
+
+    public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+        final String inner = prefix  + "  ";
+        pw.println(prefix + TAG + ":");
+        pw.print(inner); pw.print("mDisplayCutoutTouchableRegionSize=");
+        pw.println(mDisplayCutoutTouchableRegionSize);
+        pw.print(inner); pw.print("mSwipeStartThreshold="); pw.println(mSwipeStartThreshold);
+        pw.print(inner); pw.print("mSwipeDistanceThreshold="); pw.println(mSwipeDistanceThreshold);
     }
 
     private final class FlingGestureDetector extends GestureDetector.SimpleOnGestureListener {

@@ -24,9 +24,9 @@
     android:layout_marginEnd="@dimen/ongoing_appops_dialog_side_margins"
     android:layout_marginTop="8dp"
     android:orientation="vertical"
-    android:paddingBottom="12dp"
-    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:paddingTop="12dp"
+    android:paddingHorizontal="@dimen/ongoing_appops_dialog_side_padding"
     android:background="@drawable/qs_dialog_bg"
 />
-<!-- 12dp padding bottom so there's 20dp total under the icon -->
-<!-- 8dp padding top, as there's 4dp margin in each row -->
+<!-- 8dp padding bottom so there's 16dp total under the icon -->

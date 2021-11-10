@@ -22,6 +22,7 @@ import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_UNKNOWN;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
@@ -44,6 +45,8 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
+import android.service.notification.NotificationListenerService;
+import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -392,19 +395,28 @@ public class NotificationShellCmd extends ShellCommand {
                                     + "--context <snooze-criterion-id>) <key>");
                             return 1;
                     }
-                    if (null == mDirectService.getNotificationRecord(key)) {
-                        pw.println("error: no notification matching key: " + key);
-                        return 1;
-                    }
                     if (duration > 0 || criterion != null) {
+                        ShellNls nls = new ShellNls();
+                        nls.registerAsSystemService(mDirectService.getContext(),
+                                new ComponentName(nls.getClass().getPackageName(),
+                                        nls.getClass().getName()),
+                                ActivityManager.getCurrentUser());
+                        if (!waitForBind(nls)) {
+                            pw.println("error: could not bind a listener in time");
+                            return 1;
+                        }
                         if (duration > 0) {
                             pw.println(String.format("snoozing <%s> until time: %s", key,
                                     new Date(System.currentTimeMillis() + duration)));
+                            nls.snoozeNotification(key, duration);
                         } else {
                             pw.println(String.format("snoozing <%s> until criterion: %s", key,
                                     criterion));
+                            nls.snoozeNotification(key, criterion);
                         }
-                        mDirectService.snoozeNotificationInt(key, duration, criterion, null);
+                        waitForSnooze(nls, key);
+                        nls.unregisterAsSystemService();
+                        waitForUnbind(nls);
                     } else {
                         pw.println("error: invalid value for --" + subflag + ": " + flagarg);
                         return 1;
@@ -527,14 +539,17 @@ public class NotificationShellCmd extends ShellCommand {
                     final PendingIntent pi;
                     if ("broadcast".equals(intentKind)) {
                         pi = PendingIntent.getBroadcastAsUser(
-                                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED,
+                                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+                                        | PendingIntent.FLAG_MUTABLE_UNAUDITED,
                                 UserHandle.CURRENT);
                     } else if ("service".equals(intentKind)) {
                         pi = PendingIntent.getService(
-                                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+                                        | PendingIntent.FLAG_MUTABLE_UNAUDITED);
                     } else {
                         pi = PendingIntent.getActivityAsUser(
-                                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED, null,
+                                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+                                        | PendingIntent.FLAG_MUTABLE_UNAUDITED, null,
                                 UserHandle.CURRENT);
                     }
                     builder.setContentIntent(pi);
@@ -685,9 +700,79 @@ public class NotificationShellCmd extends ShellCommand {
         return 0;
     }
 
+    private void waitForSnooze(ShellNls nls, String key) {
+        for (int i = 0; i < 20; i++) {
+            StatusBarNotification[] sbns = nls.getSnoozedNotifications();
+            for (StatusBarNotification sbn : sbns) {
+                if (sbn.getKey().equals(key)) {
+                    return;
+                }
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return;
+    }
+
+    private boolean waitForBind(ShellNls nls) {
+        for (int i = 0; i < 20; i++) {
+            if (nls.isConnected) {
+                Slog.i(TAG, "Bound Shell NLS");
+                return true;
+            } else {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
+    }
+
+    private void waitForUnbind(ShellNls nls) {
+        for (int i = 0; i < 10; i++) {
+            if (!nls.isConnected) {
+                Slog.i(TAG, "Unbound Shell NLS");
+                return;
+            } else {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     @Override
     public void onHelp() {
         getOutPrintWriter().println(USAGE);
+    }
+
+    @SuppressLint("OverrideAbstract")
+    private static class ShellNls extends NotificationListenerService {
+        private static ShellNls
+                sNotificationListenerInstance = null;
+        boolean isConnected;
+
+        @Override
+        public void onListenerConnected() {
+            super.onListenerConnected();
+            sNotificationListenerInstance = this;
+            isConnected = true;
+        }
+        @Override
+        public void onListenerDisconnected() {
+            isConnected = false;
+        }
+
+        public static ShellNls getInstance() {
+            return sNotificationListenerInstance;
+        }
     }
 }
 

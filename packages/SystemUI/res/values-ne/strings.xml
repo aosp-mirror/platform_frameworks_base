@@ -77,6 +77,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"स्क्रिन भर्न जुम गर्नुहोस्"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"स्क्रिन भर्न तन्काउनुहोस्"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"स्क्रिनसट"</string>
+    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"स्मार्ट लक अफ गरिएको छ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"कुनै छवि पठाइयो"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"स्क्रिनसट बचत गर्दै…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"स्क्रिनसट बचत गर्दै…"</string>
@@ -434,7 +435,7 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"यसो गर्नुभयो भने माइक्रोफोन प्रयोग गर्ने अनुमति दिइएका सबै एप तथा सेवाहरूका लागि सो अनुमति अनब्लक गरिन्छ।"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"यसो गर्नुभयो भने क्यामेरा प्रयोग गर्ने अनुमति दिइएका सबै एप तथा सेवाहरूका लागि सो अनुमति अनब्लक गरिन्छ।"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"यसो गर्नुभयो भने क्यामेरा वा माइक्रोफोन प्रयोग गर्ने अनुमति दिइएका सबै एप तथा सेवाहरूका लागि सो अनुमति अनब्लक गरिन्छ।"</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"यन्त्र"</string>
+    <string name="media_seamless_other_device" msgid="4654849800789196737">"अर्को डिभाइड"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"परिदृश्य टगल गर्नुहोस्"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"चार्ज भयो"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"चार्ज हुँदै छ"</string>
@@ -709,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"सशक्त सूचना नियन्त्रण"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"अन छ"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"अफ"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"अन छ - अनुहारमा आधारित"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"सशक्त सूचना नियन्त्रणहरू मार्फत तपाईं अनुप्रयाेगका सूचनाहरूका लागि ० देखि ५ सम्मको महत्व सम्बन्धी स्तर सेट गर्न सक्नुहुन्छ। \n\n"<b>"स्तर ५"</b>" \n- सूचनाको सूचीको माथिल्लो भागमा देखाउने \n- पूर्ण स्क्रिनमा अवरोधका लागि अनुमति दिने \n- सधैँ चियाउने \n\n"<b>"स्तर ४"</b>" \n- पूर्ण स्क्रिनमा अवरोधलाई रोक्ने \n- सधैँ चियाउने \n\n"<b>"स्तर ३"</b>" \n- पूर्ण स्क्रिनमा अवरोधलाई रोक्ने \n- कहिल्यै नचियाउने \n\n"<b>"स्तर २"</b>" \n- पूर्ण स्क्रिनमा अवरोधलाई रोक्ने \n- कहिल्यै नचियाउने \n- कहिल्यै पनि आवाज ननिकाल्ने र कम्पन नगर्ने \n\n"<b>"स्तर १"</b>" \n- पूर्ण स्क्रिनमा अवरोध रोक्ने \n- कहिल्यै नचियाउने \n- कहिल्यै पनि आवाज ननिकाल्ने वा कम्पन नगर्ने \n- लक स्क्रिन र वस्तुस्थिति पट्टीबाट लुकाउने \n- सूचनाको सूचीको तल्लो भागमा देखाउने \n\n"<b>"स्तर ०"</b>" \n- एपका सबै सूचनाहरूलाई रोक्ने"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"सूचनाहरू"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"तपाईं अब उप्रान्त यी सूचनाहरू देख्नु हुने छैन"</string>
@@ -1161,4 +1163,20 @@
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"फिंगरप्रिन्ट प्रयोग गरी खोल्नुहोस्"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"पुष्टि गर्नु पर्ने हुन्छ। पुष्टि गर्न फिंगरप्रिन्ट सेन्सर छुनुहोस्।"</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"जारी फोन कल"</string>
+    <string name="mobile_data_settings_title" msgid="3955246641380064901">"मोबाइल डेटा"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"इन्टरनेटमा कनेक्ट गरिएको छ"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"मोबाइल डेटा स्वतः कनेक्ट हुँदैन"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"इन्टरनेट छैन"</string>
+    <string name="non_carrier_network_unavailable" msgid="770049357024492372">"अन्य नेटवर्क उपलब्ध छैनन्"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"कुनै पनि नेटवर्क उपलब्ध छैन"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
+    <string name="pref_title_network_details" msgid="1639455355897668883">"नेटवर्कसम्बन्धी विवरण"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"इन्टरनेट कनेक्ट गर्न कुनै नेटवर्कमा ट्याप गर्नुहोस्"</string>
+    <string name="unlock_to_view_networks" msgid="5072880496312015676">"नेटवर्कहरू हेर्न आफ्नो स्क्रिन अनलक गर्नुहोस्"</string>
+    <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"नेटवर्कहरू खोजिँदै छन्…"</string>
+    <string name="wifi_failed_connect_message" msgid="4161863112079000071">"नेटवर्कमा कनेक्ट गर्न सकिएन"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"केही समयका लागि Wi-Fi स्वतः कनेक्ट हुँदैन"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"सबै नेटवर्क हेर्नुहोस्"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"नेटवर्क बदल्न इथरनेट डिस्कनेक्ट गर्नुहोस्"</string>
 </resources>

@@ -40,6 +40,7 @@ import android.platform.test.annotations.Presubmit;
 import android.testing.TestableContext;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
@@ -193,7 +194,7 @@ public class BiometricSchedulerTest {
         // Request it to be canceled. The operation can be canceled immediately, and the scheduler
         // should go back to idle, since in this case the framework has not even requested the HAL
         // to authenticate yet.
-        mScheduler.cancelAuthenticationOrDetection(mToken);
+        mScheduler.cancelAuthenticationOrDetection(mToken, 1 /* requestId */);
         assertNull(mScheduler.mCurrentOperation);
     }
 
@@ -303,7 +304,7 @@ public class BiometricSchedulerTest {
                 mScheduler.mPendingOperations.getFirst().mState);
 
         // Request cancel before the authentication client has started
-        mScheduler.cancelAuthenticationOrDetection(mToken);
+        mScheduler.cancelAuthenticationOrDetection(mToken, 1 /* requestId */);
         waitForIdle();
         assertEquals(Operation.STATE_WAITING_IN_QUEUE_CANCELING,
                 mScheduler.mPendingOperations.getFirst().mState);
@@ -315,6 +316,107 @@ public class BiometricSchedulerTest {
                 eq(BiometricConstants.BIOMETRIC_ERROR_CANCELED),
                 eq(0) /* vendorCode */);
         assertNull(mScheduler.getCurrentClient());
+    }
+
+    @Test
+    public void testCancels_whenAuthRequestIdNotSet() {
+        testCancelsWhenRequestId(null /* requestId */, 2, true /* started */);
+    }
+
+    @Test
+    public void testCancels_whenAuthRequestIdNotSet_notStarted() {
+        testCancelsWhenRequestId(null /* requestId */, 2, false /* started */);
+    }
+
+    @Test
+    public void testCancels_whenAuthRequestIdMatches() {
+        testCancelsWhenRequestId(200L, 200, true /* started */);
+    }
+
+    @Test
+    public void testCancels_whenAuthRequestIdMatches_noStarted() {
+        testCancelsWhenRequestId(200L, 200, false /* started */);
+    }
+
+    @Test
+    public void testDoesNotCancel_whenAuthRequestIdMismatched() {
+        testCancelsWhenRequestId(10L, 20, true /* started */);
+    }
+
+    @Test
+    public void testDoesNotCancel_whenAuthRequestIdMismatched_notStarted() {
+        testCancelsWhenRequestId(10L, 20, false /* started */);
+    }
+
+    private void testCancelsWhenRequestId(@Nullable Long requestId, long cancelRequestId,
+            boolean started) {
+        final boolean matches = requestId == null || requestId == cancelRequestId;
+        final HalClientMonitor.LazyDaemon<Object> lazyDaemon = () -> mock(Object.class);
+        final ClientMonitorCallbackConverter callback = mock(ClientMonitorCallbackConverter.class);
+        final TestAuthenticationClient client = new TestAuthenticationClient(
+                mContext, lazyDaemon, mToken, callback);
+        if (requestId != null) {
+            client.setRequestId(requestId);
+        }
+
+        mScheduler.scheduleClientMonitor(client);
+        if (started) {
+            mScheduler.startPreparedClient(client.getCookie());
+        }
+        waitForIdle();
+        mScheduler.cancelAuthenticationOrDetection(mToken, cancelRequestId);
+        waitForIdle();
+
+        assertEquals(matches && started ? 1 : 0, client.mNumCancels);
+
+        if (matches) {
+            if (started) {
+                assertEquals(Operation.STATE_STARTED_CANCELING,
+                        mScheduler.mCurrentOperation.mState);
+            }
+        } else {
+            if (started) {
+                assertEquals(Operation.STATE_STARTED,
+                        mScheduler.mCurrentOperation.mState);
+            } else {
+                assertEquals(Operation.STATE_WAITING_FOR_COOKIE,
+                        mScheduler.mCurrentOperation.mState);
+            }
+        }
+    }
+
+    @Test
+    public void testCancelsPending_whenAuthRequestIdsSet() {
+        final long requestId1 = 10;
+        final long requestId2 = 20;
+        final HalClientMonitor.LazyDaemon<Object> lazyDaemon = () -> mock(Object.class);
+        final ClientMonitorCallbackConverter callback = mock(ClientMonitorCallbackConverter.class);
+        final TestAuthenticationClient client1 = new TestAuthenticationClient(
+                mContext, lazyDaemon, mToken, callback);
+        client1.setRequestId(requestId1);
+        final TestAuthenticationClient client2 = new TestAuthenticationClient(
+                mContext, lazyDaemon, mToken, callback);
+        client2.setRequestId(requestId2);
+
+        mScheduler.scheduleClientMonitor(client1);
+        mScheduler.scheduleClientMonitor(client2);
+        mScheduler.startPreparedClient(client1.getCookie());
+        waitForIdle();
+        mScheduler.cancelAuthenticationOrDetection(mToken, 9999);
+        waitForIdle();
+
+        assertEquals(Operation.STATE_STARTED,
+                mScheduler.mCurrentOperation.mState);
+        assertEquals(Operation.STATE_WAITING_IN_QUEUE,
+                mScheduler.mPendingOperations.getFirst().mState);
+
+        mScheduler.cancelAuthenticationOrDetection(mToken, requestId2);
+        waitForIdle();
+
+        assertEquals(Operation.STATE_STARTED,
+                mScheduler.mCurrentOperation.mState);
+        assertEquals(Operation.STATE_WAITING_IN_QUEUE_CANCELING,
+                mScheduler.mPendingOperations.getFirst().mState);
     }
 
     @Test
@@ -348,6 +450,17 @@ public class BiometricSchedulerTest {
         verify((Interruptable) interruptableMonitor, never()).cancel();
     }
 
+    @Test
+    public void testClientDestroyed_afterFinish() {
+        final HalClientMonitor.LazyDaemon<Object> nonNullDaemon = () -> mock(Object.class);
+        final TestClientMonitor client =
+                new TestClientMonitor(mContext, mToken, nonNullDaemon);
+        mScheduler.scheduleClientMonitor(client);
+        client.mCallback.onClientFinished(client, true /* success */);
+        waitForIdle();
+        assertTrue(client.wasDestroyed());
+    }
+
     private BiometricSchedulerProto getDump(boolean clearSchedulerBuffer) throws Exception {
         return BiometricSchedulerProto.parseFrom(mScheduler.dumpProtoState(clearSchedulerBuffer));
     }
@@ -366,12 +479,10 @@ public class BiometricSchedulerTest {
 
         @Override
         protected void stopHalOperation() {
-
         }
 
         @Override
         protected void startHalOperation() {
-
         }
 
         @Override
@@ -386,6 +497,7 @@ public class BiometricSchedulerTest {
     }
 
     private static class TestAuthenticationClient extends AuthenticationClient<Object> {
+        int mNumCancels = 0;
 
         public TestAuthenticationClient(@NonNull Context context,
                 @NonNull LazyDaemon<Object> lazyDaemon, @NonNull IBinder token,
@@ -417,6 +529,11 @@ public class BiometricSchedulerTest {
         public boolean wasUserDetected() {
             return false;
         }
+
+        public void cancel() {
+            mNumCancels++;
+            super.cancel();
+        }
     }
 
     private static class TestClientMonitor2 extends TestClientMonitor {
@@ -437,6 +554,7 @@ public class BiometricSchedulerTest {
     private static class TestClientMonitor extends HalClientMonitor<Object> {
         private boolean mUnableToStart;
         private boolean mStarted;
+        private boolean mDestroyed;
 
         public TestClientMonitor(@NonNull Context context, @NonNull IBinder token,
                 @NonNull LazyDaemon<Object> lazyDaemon) {
@@ -475,6 +593,11 @@ public class BiometricSchedulerTest {
 
         }
 
+        @Override
+        public void destroy() {
+            mDestroyed = true;
+        }
+
         public boolean wasUnableToStart() {
             return mUnableToStart;
         }
@@ -482,6 +605,11 @@ public class BiometricSchedulerTest {
         public boolean hasStarted() {
             return mStarted;
         }
+
+        public boolean wasDestroyed() {
+            return mDestroyed;
+        }
+
     }
 
     private static void waitForIdle() {

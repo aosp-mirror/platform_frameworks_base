@@ -85,6 +85,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Presubmit
 @SmallTest
@@ -93,6 +94,7 @@ public class BiometricServiceTest {
     private static final String TAG = "BiometricServiceTest";
 
     private static final String TEST_PACKAGE_NAME = "test_package";
+    private static final long TEST_REQUEST_ID = 44;
 
     private static final String ERROR_HW_UNAVAILABLE = "hw_unavailable";
     private static final String ERROR_NOT_RECOGNIZED = "not_recognized";
@@ -151,6 +153,7 @@ public class BiometricServiceTest {
                 .thenReturn(mock(BiometricStrengthController.class));
         when(mInjector.getTrustManager()).thenReturn(mTrustManager);
         when(mInjector.getDevicePolicyManager(any())).thenReturn(mDevicePolicyManager);
+        when(mInjector.getRequestGenerator()).thenReturn(new AtomicLong(TEST_REQUEST_ID - 1));
 
         when(mResources.getString(R.string.biometric_error_hw_unavailable))
                 .thenReturn(ERROR_HW_UNAVAILABLE);
@@ -215,8 +218,7 @@ public class BiometricServiceTest {
                 mBiometricService.mCurrentAuthSession.getState());
 
         verify(mBiometricService.mCurrentAuthSession.mPreAuthInfo.eligibleSensors.get(0).impl)
-                .cancelAuthenticationFromService(any(),
-                        any());
+                .cancelAuthenticationFromService(any(), any(), anyLong());
 
         // Simulate ERROR_CANCELED received from HAL
         mBiometricService.mBiometricSensorReceiver.onError(
@@ -272,8 +274,9 @@ public class BiometricServiceTest {
                 eq(true) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
+                anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */,
+                eq(TEST_REQUEST_ID),
                 eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
     }
 
@@ -357,8 +360,9 @@ public class BiometricServiceTest {
                 eq(false) /* credentialAllowed */,
                 eq(false) /* requireConfirmation */,
                 anyInt() /* userId */,
+                anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */,
+                eq(TEST_REQUEST_ID),
                 eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
     }
 
@@ -467,6 +471,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 any(IBiometricSensorReceiver.class),
                 anyString() /* opPackageName */,
+                eq(TEST_REQUEST_ID),
                 cookieCaptor.capture() /* cookie */,
                 anyBoolean() /* allowBackgroundAuthentication */);
 
@@ -488,8 +493,9 @@ public class BiometricServiceTest {
                 eq(false) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
+                anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */,
+                eq(TEST_REQUEST_ID),
                 eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
 
         // Hardware authenticated
@@ -543,8 +549,9 @@ public class BiometricServiceTest {
                 eq(true) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
+                anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */,
+                eq(TEST_REQUEST_ID),
                 eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
     }
 
@@ -705,8 +712,9 @@ public class BiometricServiceTest {
                 anyBoolean() /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
+                anyLong() /* operationId */,
                 anyString(),
-                anyLong() /* sessionId */,
+                anyLong() /* requestId */,
                 eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
     }
 
@@ -805,8 +813,9 @@ public class BiometricServiceTest {
                 eq(true) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
+                anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */,
+                eq(TEST_REQUEST_ID),
                 eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
     }
 
@@ -885,8 +894,9 @@ public class BiometricServiceTest {
                 eq(true) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
+                anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */,
+                eq(TEST_REQUEST_ID),
                 eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
     }
 
@@ -1030,8 +1040,7 @@ public class BiometricServiceTest {
                 eq(BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED),
                 eq(0 /* vendorCode */));
         verify(mBiometricService.mSensors.get(0).impl).cancelAuthenticationFromService(
-                any(),
-                any());
+                any(), any(), anyLong());
         assertNull(mBiometricService.mCurrentAuthSession);
     }
 
@@ -1051,7 +1060,7 @@ public class BiometricServiceTest {
         waitForIdle();
 
         verify(mBiometricService.mSensors.get(0).impl)
-                .cancelAuthenticationFromService(any(), any());
+                .cancelAuthenticationFromService(any(), any(), anyLong());
     }
 
     @Test
@@ -1071,7 +1080,7 @@ public class BiometricServiceTest {
         waitForIdle();
 
         verify(mBiometricService.mSensors.get(0).impl)
-                .cancelAuthenticationFromService(any(), any());
+                .cancelAuthenticationFromService(any(), any(), anyLong());
     }
 
     @Test
@@ -1088,7 +1097,7 @@ public class BiometricServiceTest {
         waitForIdle();
 
         verify(mBiometricService.mSensors.get(0).impl)
-                .cancelAuthenticationFromService(any(), any());
+                .cancelAuthenticationFromService(any(), any(), anyLong());
         verify(mReceiver1).onError(
                 eq(BiometricAuthenticator.TYPE_FACE),
                 eq(BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED),
@@ -1126,7 +1135,7 @@ public class BiometricServiceTest {
                 false /* requireConfirmation */, null /* authenticators */);
 
         mBiometricService.mImpl.cancelAuthentication(mBiometricService.mCurrentAuthSession.mToken,
-                TEST_PACKAGE_NAME);
+                TEST_PACKAGE_NAME, TEST_REQUEST_ID);
         waitForIdle();
 
         // Pretend that the HAL has responded to cancel with ERROR_CANCELED
@@ -1353,8 +1362,8 @@ public class BiometricServiceTest {
         int authenticators = Authenticators.BIOMETRIC_STRONG;
         assertEquals(BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
                 invokeCanAuthenticate(mBiometricService, authenticators));
-        invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
-                authenticators);
+        long requestId = invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
+                false /* requireConfirmation */, authenticators);
         waitForIdle();
         verify(mReceiver1).onError(
                 eq(BiometricAuthenticator.TYPE_FINGERPRINT),
@@ -1366,7 +1375,7 @@ public class BiometricServiceTest {
         authenticators = Authenticators.BIOMETRIC_WEAK;
         assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
                 invokeCanAuthenticate(mBiometricService, authenticators));
-        invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
+        requestId = invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
                 false /* requireConfirmation */,
                 authenticators);
         waitForIdle();
@@ -1377,8 +1386,9 @@ public class BiometricServiceTest {
                 eq(false) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
+                anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */,
+                eq(requestId),
                 eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
 
         // Requesting strong and credential, when credential is setup
@@ -1387,7 +1397,7 @@ public class BiometricServiceTest {
         when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
         assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
                 invokeCanAuthenticate(mBiometricService, authenticators));
-        invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
+        requestId = invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
                 false /* requireConfirmation */,
                 authenticators);
         waitForIdle();
@@ -1399,8 +1409,9 @@ public class BiometricServiceTest {
                 eq(true) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
+                anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */,
+                eq(requestId),
                 eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
 
         // Un-downgrading the authenticator allows successful strong auth
@@ -1414,7 +1425,7 @@ public class BiometricServiceTest {
         authenticators = Authenticators.BIOMETRIC_STRONG;
         assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
                 invokeCanAuthenticate(mBiometricService, authenticators));
-        invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
+        requestId = invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
                 false /* requireConfirmation */, authenticators);
         waitForIdle();
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
@@ -1424,8 +1435,9 @@ public class BiometricServiceTest {
                 eq(false) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
+                anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */,
+                eq(requestId),
                 eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
     }
 
@@ -1617,11 +1629,12 @@ public class BiometricServiceTest {
         mBiometricService.mStatusBarService = mock(IStatusBarService.class);
     }
 
-    private void invokeAuthenticateAndStart(IBiometricService.Stub service,
+    private long invokeAuthenticateAndStart(IBiometricService.Stub service,
             IBiometricServiceReceiver receiver, boolean requireConfirmation,
             Integer authenticators) throws Exception {
         // Request auth, creates a pending session
-        invokeAuthenticate(service, receiver, requireConfirmation, authenticators);
+        final long requestId = invokeAuthenticate(
+                service, receiver, requireConfirmation, authenticators);
         waitForIdle();
 
         startPendingAuthSession(mBiometricService);
@@ -1629,6 +1642,8 @@ public class BiometricServiceTest {
 
         assertNotNull(mBiometricService.mCurrentAuthSession);
         assertEquals(STATE_AUTH_STARTED, mBiometricService.mCurrentAuthSession.getState());
+
+        return requestId;
     }
 
     private static void startPendingAuthSession(BiometricService service) throws Exception {
@@ -1644,10 +1659,10 @@ public class BiometricServiceTest {
         service.mImpl.onReadyForAuthentication(cookie);
     }
 
-    private static void invokeAuthenticate(IBiometricService.Stub service,
+    private static long invokeAuthenticate(IBiometricService.Stub service,
             IBiometricServiceReceiver receiver, boolean requireConfirmation,
             Integer authenticators) throws Exception {
-        service.authenticate(
+        return service.authenticate(
                 new Binder() /* token */,
                 0 /* operationId */,
                 0 /* userId */,
@@ -1657,9 +1672,9 @@ public class BiometricServiceTest {
                         false /* checkDevicePolicy */));
     }
 
-    private static void invokeAuthenticateForWorkApp(IBiometricService.Stub service,
+    private static long invokeAuthenticateForWorkApp(IBiometricService.Stub service,
             IBiometricServiceReceiver receiver, Integer authenticators) throws Exception {
-        service.authenticate(
+        return service.authenticate(
                 new Binder() /* token */,
                 0 /* operationId */,
                 0 /* userId */,

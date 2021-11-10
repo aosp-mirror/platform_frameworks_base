@@ -20,9 +20,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.NetworkKey;
 import android.net.RssiCurve;
 import android.net.ScoredNetwork;
@@ -36,6 +39,8 @@ import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 
+import androidx.test.core.app.ApplicationProvider;
+
 import com.android.settingslib.R;
 
 import org.junit.Before;
@@ -44,7 +49,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -69,7 +73,7 @@ public class WifiUtilsTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mContext = RuntimeEnvironment.application;
+        mContext = spy(ApplicationProvider.getApplicationContext());
     }
 
     @Test
@@ -146,6 +150,32 @@ public class WifiUtilsTest {
         mWifiConfig.meteredHint = true;
         mWifiConfig.meteredOverride = WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
         assertThat(WifiUtils.isMeteredOverridden(mWifiConfig)).isTrue();
+    }
+
+    @Test
+    public void getWifiDetailsSettingsIntent_returnsCorrectValues() {
+        final String key = "test_key";
+
+        final Intent intent = WifiUtils.getWifiDetailsSettingsIntent(key);
+
+        assertThat(intent.getAction()).isEqualTo(WifiUtils.ACTION_WIFI_DETAILS_SETTINGS);
+        final Bundle bundle = intent.getBundleExtra(WifiUtils.EXTRA_SHOW_FRAGMENT_ARGUMENTS);
+        assertThat(bundle.getString(WifiUtils.KEY_CHOSEN_WIFIENTRY_KEY)).isEqualTo(key);
+    }
+
+    @Test
+    public void testInternetIconInjector_getIcon_returnsCorrectValues() {
+        WifiUtils.InternetIconInjector iconInjector = new WifiUtils.InternetIconInjector(mContext);
+
+        for (int level = 0; level <= 4; level++) {
+            iconInjector.getIcon(false /* noInternet */, level);
+            verify(mContext).getDrawable(
+                    WifiUtils.getInternetIconResource(level, false /* noInternet */));
+
+            iconInjector.getIcon(true /* noInternet */, level);
+            verify(mContext).getDrawable(
+                    WifiUtils.getInternetIconResource(level, true /* noInternet */));
+        }
     }
 
     private static ArrayList<ScanResult> buildScanResultCache() {

@@ -29,6 +29,7 @@ import android.util.Log
 import androidx.annotation.MainThread
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.appops.AppOpsController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -67,6 +68,7 @@ class PrivacyDialogController(
     private val privacyLogger: PrivacyLogger,
     private val keyguardStateController: KeyguardStateController,
     private val appOpsController: AppOpsController,
+    private val uiEventLogger: UiEventLogger,
     @VisibleForTesting private val dialogProvider: DialogProvider
 ) {
 
@@ -81,7 +83,8 @@ class PrivacyDialogController(
         @Main uiExecutor: Executor,
         privacyLogger: PrivacyLogger,
         keyguardStateController: KeyguardStateController,
-        appOpsController: AppOpsController
+        appOpsController: AppOpsController,
+        uiEventLogger: UiEventLogger
     ) : this(
             permissionManager,
             packageManager,
@@ -93,6 +96,7 @@ class PrivacyDialogController(
             privacyLogger,
             keyguardStateController,
             appOpsController,
+            uiEventLogger,
             defaultDialogProvider
     )
 
@@ -105,6 +109,7 @@ class PrivacyDialogController(
     private val onDialogDismissed = object : PrivacyDialog.OnDialogDismissed {
         override fun onDialogDismissed() {
             privacyLogger.logPrivacyDialogDismissed()
+            uiEventLogger.log(PrivacyDialogEvent.PRIVACY_DIALOG_DISMISSED)
             dialog = null
         }
     }
@@ -114,6 +119,8 @@ class PrivacyDialogController(
         val intent = Intent(Intent.ACTION_MANAGE_APP_PERMISSIONS)
         intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName)
         intent.putExtra(Intent.EXTRA_USER, UserHandle.of(userId))
+        uiEventLogger.log(PrivacyDialogEvent.PRIVACY_DIALOG_ITEM_CLICKED_TO_APP_SETTINGS,
+                userId, packageName)
         privacyLogger.logStartSettingsActivityFromDialog(packageName, userId)
         if (!keyguardStateController.isUnlocked) {
             // If we are locked, hide the dialog so the user can unlock
@@ -155,7 +162,7 @@ class PrivacyDialogController(
             val items = usage.mapNotNull {
                 val type = filterType(permGroupToPrivacyType(it.permGroupName))
                 val userInfo = userInfos.firstOrNull { ui -> ui.id == UserHandle.getUserId(it.uid) }
-                userInfo?.let { ui ->
+                if (userInfo != null || it.isPhoneCall) {
                     type?.let { t ->
                         // Only try to get the app name if we actually need it
                         val appName = if (it.isPhoneCall) {
@@ -171,10 +178,14 @@ class PrivacyDialogController(
                                 it.attribution,
                                 it.lastAccess,
                                 it.isActive,
-                                ui.isManagedProfile,
+                                // If there's no user info, we're in a phoneCall in secondary user
+                                userInfo?.isManagedProfile ?: false,
                                 it.isPhoneCall
                         )
                     }
+                } else {
+                    // No matching user or phone call
+                    null
                 }
             }
             uiExecutor.execute {

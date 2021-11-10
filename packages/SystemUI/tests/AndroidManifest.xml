@@ -93,6 +93,13 @@
         <activity android:name="com.android.systemui.screenshot.RecyclerViewActivity"
                   android:exported="false" />
 
+        <!-- started from UsbDeviceSettingsManager -->
+        <activity android:name=".usb.UsbPermissionActivityTest$UsbPermissionActivityTestable"
+                  android:exported="false"
+                  android:theme="@style/Theme.SystemUI.Dialog.Alert"
+                  android:finishOnCloseSystemDialogs="true"
+                  android:excludeFromRecents="true" />
+
         <provider
             android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"
             tools:replace="android:authorities"

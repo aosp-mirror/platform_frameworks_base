@@ -403,7 +403,7 @@ public class BatteryStatsSensorTest extends TestCase {
         assertNotNull(sensor.getSensorBackgroundTime());
 
         // Reset the stats. Since the sensor is still running, we should still see the timer
-        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000);
+        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000, 0);
 
         sensor = uid.getSensorStats().get(SENSOR_ID);
         assertNotNull(sensor);
@@ -413,7 +413,7 @@ public class BatteryStatsSensorTest extends TestCase {
         bi.noteStopSensorLocked(UID, SENSOR_ID);
 
         // Now the sensor timer has stopped so this reset should also take out the sensor.
-        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000);
+        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000, 0);
 
         sensor = uid.getSensorStats().get(SENSOR_ID);
         assertNull(sensor);
@@ -465,7 +465,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // Reset the stats. Since the sensor is still running, we should still see the timer
         // but still with 0 times.
-        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000);
+        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000, 0);
         assertEquals(0, timer.getTotalTimeLocked(1000*clocks.realtime, which));
         assertEquals(0, timer.getTotalDurationMsLocked(clocks.realtime));
         assertEquals(0, bgTimer.getTotalTimeLocked(1000*clocks.realtime, which));
@@ -504,7 +504,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // Reset the stats. Since the sensor is still running, we should still see the timer
         // but with 0 times.
-        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000);
+        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000, 0);
         assertEquals(0, timer.getTotalTimeLocked(1000*clocks.realtime, which));
         assertEquals(0, timer.getTotalDurationMsLocked(clocks.realtime));
         assertEquals(0, bgTimer.getTotalTimeLocked(1000*clocks.realtime, which));

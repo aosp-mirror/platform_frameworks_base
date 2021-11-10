@@ -5144,7 +5144,7 @@ class Task extends WindowContainer<WindowContainer> {
     /**
      * @return true if the task is currently focused.
      */
-    private boolean isFocused() {
+    boolean isFocused() {
         if (mDisplayContent == null || mDisplayContent.mCurrentFocus == null) {
             return false;
         }
@@ -5771,23 +5771,8 @@ class Task extends WindowContainer<WindowContainer> {
                         + "directly: %s", prev);
 
                 didAutoPip = mAtmService.enterPictureInPictureMode(prev, prev.pictureInPictureArgs);
-                mPausingActivity = null;
             } else {
-                ProtoLog.v(WM_DEBUG_STATES, "Enqueueing pending pause: %s", prev);
-                try {
-                    EventLogTags.writeWmPauseActivity(prev.mUserId, System.identityHashCode(prev),
-                            prev.shortComponentName, "userLeaving=" + userLeaving, reason);
-
-                    mAtmService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
-                            prev.appToken, PauseActivityItem.obtain(prev.finishing, userLeaving,
-                                    prev.configChangeFlags, pauseImmediately));
-                } catch (Exception e) {
-                    // Ignore exception, if process died other code will cleanup.
-                    Slog.w(TAG, "Exception thrown during pause", e);
-                    mPausingActivity = null;
-                    mLastPausedActivity = null;
-                    mTaskSupervisor.mNoHistoryActivities.remove(prev);
-                }
+                schedulePauseActivity(prev, userLeaving, pauseImmediately, reason);
             }
         } else {
             mPausingActivity = null;
@@ -5802,7 +5787,7 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         // If already entered PIP mode, no need to keep pausing.
-        if (mPausingActivity != null && !didAutoPip) {
+        if (mPausingActivity != null) {
             // Have the window manager pause its key dispatching until the new
             // activity has started.  If we're pausing the activity just because
             // the screen is being turned off and the UI is sleeping, don't interrupt
@@ -5832,6 +5817,25 @@ class Task extends WindowContainer<WindowContainer> {
                 mRootWindowContainer.resumeFocusedTasksTopActivities();
             }
             return false;
+        }
+    }
+
+    void schedulePauseActivity(ActivityRecord prev, boolean userLeaving,
+            boolean pauseImmediately, String reason) {
+        ProtoLog.v(WM_DEBUG_STATES, "Enqueueing pending pause: %s", prev);
+        try {
+            EventLogTags.writeWmPauseActivity(prev.mUserId, System.identityHashCode(prev),
+                    prev.shortComponentName, "userLeaving=" + userLeaving, reason);
+
+            mAtmService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
+                    prev.appToken, PauseActivityItem.obtain(prev.finishing, userLeaving,
+                            prev.configChangeFlags, pauseImmediately));
+        } catch (Exception e) {
+            // Ignore exception, if process died other code will cleanup.
+            Slog.w(TAG, "Exception thrown during pause", e);
+            mPausingActivity = null;
+            mLastPausedActivity = null;
+            mTaskSupervisor.mNoHistoryActivities.remove(prev);
         }
     }
 

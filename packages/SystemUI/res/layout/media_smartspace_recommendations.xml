@@ -48,20 +48,41 @@
         android:id="@+id/recommendation_card_icon"
         android:layout_width="@dimen/qs_media_icon_size"
         android:layout_height="@dimen/qs_media_icon_size"
+        android:layout_marginTop="@dimen/qs_media_padding"
         android:src="@drawable/ic_headset"
-        style="@style/MediaPlayer.AppIcon"/>
+        style="@style/MediaPlayer.AppIcon"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/media_vertical_start_guideline"
+        app:layout_constraintHorizontal_bias="0"/>
 
     <TextView
         android:id="@+id/recommendation_card_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:maxLines="2"
+        android:maxLines="1"
         android:text="@string/controls_media_smartspace_rec_title"
         android:fontFamily="google-sans-medium"
         android:textDirection="locale"
         android:textSize="@dimen/qq_aa_media_rec_header_text_size"
-        android:breakStrategy="balanced"
-        android:hyphenationFrequency="none"/>
+        android:hyphenationFrequency="none"
+        app:layout_constraintTop_toBottomOf="@id/recommendation_card_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/media_vertical_start_guideline"
+        app:layout_constraintHorizontal_bias="0"/>
+
+    <View
+        android:id="@+id/recommendation_gradient_view"
+        android:layout_width="@dimen/qs_aa_media_gradient_bg_width"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:clipChildren="false"
+        android:background="@drawable/qs_media_recommendation_bg_gradient"
+        app:layout_constraintTop_toTopOf="@id/recommendation_card_text"
+        app:layout_constraintBottom_toBottomOf="@id/recommendation_card_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/media_vertical_start_guideline"
+        app:layout_constraintHorizontal_bias="1"/>
 
     <FrameLayout
         android:id="@+id/media_cover1_container"

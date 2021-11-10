@@ -740,6 +740,16 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
+        public UserHandle getUser() {
+            return mContextForResources.getUser();
+        }
+
+        @Override
+        public int getUserId() {
+            return mContextForResources.getUserId();
+        }
+
+        @Override
         public boolean isRestricted() {
             // Override isRestricted and direct to resource's implementation. The isRestricted is
             // used for determining the risky resources loading, e.g. fonts, thus direct to context
