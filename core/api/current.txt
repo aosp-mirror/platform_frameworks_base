@@ -18482,6 +18482,7 @@ package android.hardware.camera2 {
     method @NonNull public android.hardware.camera2.CameraExtensionCharacteristics getCameraExtensionCharacteristics(@NonNull String) throws android.hardware.camera2.CameraAccessException;
     method @NonNull public String[] getCameraIdList() throws android.hardware.camera2.CameraAccessException;
     method @NonNull public java.util.Set<java.util.Set<java.lang.String>> getConcurrentCameraIds() throws android.hardware.camera2.CameraAccessException;
+    method public int getTorchStrengthLevel(@NonNull String) throws android.hardware.camera2.CameraAccessException;
     method @RequiresPermission(android.Manifest.permission.CAMERA) public boolean isConcurrentSessionConfigurationSupported(@NonNull java.util.Map<java.lang.String,android.hardware.camera2.params.SessionConfiguration>) throws android.hardware.camera2.CameraAccessException;
     method @RequiresPermission(android.Manifest.permission.CAMERA) public void openCamera(@NonNull String, @NonNull android.hardware.camera2.CameraDevice.StateCallback, @Nullable android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method @RequiresPermission(android.Manifest.permission.CAMERA) public void openCamera(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraDevice.StateCallback) throws android.hardware.camera2.CameraAccessException;
@@ -18490,6 +18491,7 @@ package android.hardware.camera2 {
     method public void registerTorchCallback(@NonNull android.hardware.camera2.CameraManager.TorchCallback, @Nullable android.os.Handler);
     method public void registerTorchCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraManager.TorchCallback);
     method public void setTorchMode(@NonNull String, boolean) throws android.hardware.camera2.CameraAccessException;
+    method public void turnOnTorchWithStrengthLevel(@NonNull String, int) throws android.hardware.camera2.CameraAccessException;
     method public void unregisterAvailabilityCallback(@NonNull android.hardware.camera2.CameraManager.AvailabilityCallback);
     method public void unregisterTorchCallback(@NonNull android.hardware.camera2.CameraManager.TorchCallback);
   }
@@ -18507,6 +18509,7 @@ package android.hardware.camera2 {
     ctor public CameraManager.TorchCallback();
     method public void onTorchModeChanged(@NonNull String, boolean);
     method public void onTorchModeUnavailable(@NonNull String);
+    method public void onTorchStrengthLevelChanged(@NonNull String, int);
   }
 
   public abstract class CameraMetadata<TKey> {
