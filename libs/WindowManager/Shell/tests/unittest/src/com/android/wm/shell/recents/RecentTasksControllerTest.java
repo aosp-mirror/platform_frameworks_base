@@ -20,6 +20,8 @@ import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
@@ -31,10 +33,9 @@ import static org.mockito.Mockito.verify;
 import static java.lang.Integer.MAX_VALUE;
 
 import android.app.ActivityManager;
-import android.app.WindowConfiguration;
 import android.content.Context;
+import android.graphics.Rect;
 import android.view.SurfaceControl;
-import android.window.TaskAppearedInfo;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -45,6 +46,7 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
+import com.android.wm.shell.util.StagedSplitBounds;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -106,8 +108,11 @@ public class RecentTasksControllerTest extends ShellTestCase {
         setRawList(t1, t2, t3, t4, t5, t6);
 
         // Mark a couple pairs [t2, t4], [t3, t5]
-        mRecentTasksController.addSplitPair(t2.taskId, t4.taskId);
-        mRecentTasksController.addSplitPair(t3.taskId, t5.taskId);
+        StagedSplitBounds pair1Bounds = new StagedSplitBounds(new Rect(), new Rect(), 2, 4);
+        StagedSplitBounds pair2Bounds = new StagedSplitBounds(new Rect(), new Rect(), 3, 5);
+
+        mRecentTasksController.addSplitPair(t2.taskId, t4.taskId, pair1Bounds);
+        mRecentTasksController.addSplitPair(t3.taskId, t5.taskId, pair2Bounds);
 
         ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
                 MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
@@ -126,7 +131,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
         setRawList(t1, t2, t3);
 
         // Add a pair
-        mRecentTasksController.addSplitPair(t2.taskId, t3.taskId);
+        StagedSplitBounds pair1Bounds = new StagedSplitBounds(new Rect(), new Rect(), 2, 3);
+        mRecentTasksController.addSplitPair(t2.taskId, t3.taskId, pair1Bounds);
         reset(mRecentTasksController);
 
         // Remove one of the tasks and ensure the pair is removed
@@ -201,10 +207,23 @@ public class RecentTasksControllerTest extends ShellTestCase {
         int[] flattenedTaskIds = new int[recentTasks.size() * 2];
         for (int i = 0; i < recentTasks.size(); i++) {
             GroupedRecentTaskInfo pair = recentTasks.get(i);
-            flattenedTaskIds[2 * i] = pair.mTaskInfo1.taskId;
+            int taskId1 = pair.mTaskInfo1.taskId;
+            flattenedTaskIds[2 * i] = taskId1;
             flattenedTaskIds[2 * i + 1] = pair.mTaskInfo2 != null
                     ? pair.mTaskInfo2.taskId
                     : -1;
+
+            if (pair.mTaskInfo2 != null) {
+                assertNotNull(pair.mStagedSplitBounds);
+                int leftTopTaskId = pair.mStagedSplitBounds.leftTopTaskId;
+                int bottomRightTaskId = pair.mStagedSplitBounds.rightBottomTaskId;
+                // Unclear if pairs are ordered by split position, most likely not.
+                assertTrue(leftTopTaskId == taskId1 || leftTopTaskId == pair.mTaskInfo2.taskId);
+                assertTrue(bottomRightTaskId == taskId1
+                        || bottomRightTaskId == pair.mTaskInfo2.taskId);
+            } else {
+                assertNull(pair.mStagedSplitBounds);
+            }
         }
         assertTrue("Expected: " + Arrays.toString(expectedTaskIds)
                         + " Received: " + Arrays.toString(flattenedTaskIds),
