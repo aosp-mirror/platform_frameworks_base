@@ -648,6 +648,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_GAME_OVERLAY = "game_overlay";
 
     /**
+     * Namespace for Android Virtualization Framework related features accessible by native code.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_VIRTUALIZATION_FRAMEWORK_NATIVE =
+            "virtualization_framework_native";
+
+    /**
      * Namespace for Constrain Display APIs related features.
      *
      * @hide
