@@ -42,7 +42,8 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        dialogLaunchAnimator = DialogLaunchAnimator(context, launchAnimator, dreamManager)
+        dialogLaunchAnimator = DialogLaunchAnimator(
+            context, launchAnimator, dreamManager, isForTesting = true)
     }
 
     @After
