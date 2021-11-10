@@ -7808,7 +7808,10 @@ public class NotificationManagerService extends SystemService {
                     final int waitMs = mAudioManager.getFocusRampTimeMs(
                             AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
                             record.getAudioAttributes());
-                    if (DBG) Slog.v(TAG, "Delaying vibration by " + waitMs + "ms");
+                    if (DBG) {
+                        Slog.v(TAG, "Delaying vibration for notification "
+                                + record.getKey() + " by " + waitMs + "ms");
+                    }
                     try {
                         Thread.sleep(waitMs);
                     } catch (InterruptedException e) { }
@@ -7816,9 +7819,17 @@ public class NotificationManagerService extends SystemService {
                     // so need to check the notification still valide for vibrate.
                     synchronized (mNotificationLock) {
                         if (mNotificationsByKey.get(record.getKey()) != null) {
-                            vibrate(record, effect, true);
+                            if (record.getKey().equals(mVibrateNotificationKey)) {
+                                vibrate(record, effect, true);
+                            } else {
+                                if (DBG) {
+                                    Slog.v(TAG, "No vibration for notification "
+                                            + record.getKey() + ": a new notification is "
+                                            + "vibrating, or effects were cleared while waiting");
+                                }
+                            }
                         } else {
-                            Slog.e(TAG, "No vibration for canceled notification : "
+                            Slog.w(TAG, "No vibration for canceled notification "
                                     + record.getKey());
                         }
                     }
