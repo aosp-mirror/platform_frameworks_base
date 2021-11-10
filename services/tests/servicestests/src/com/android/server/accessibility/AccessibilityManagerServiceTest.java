@@ -42,7 +42,6 @@ import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
@@ -57,13 +56,16 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
  * APCT tests for {@link AccessibilityManagerService}.
  */
-public class AccessibilityManagerServiceTest extends AndroidTestCase {
+public class AccessibilityManagerServiceTest {
     private static final String TAG = "A11Y_MANAGER_SERVICE_TEST";
     private static final int ACTION_ID = 20;
     private static final String LABEL = "label";
@@ -108,8 +110,8 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     private AccessibilityServiceConnection mAccessibilityServiceConnection;
     private AccessibilityManagerService mA11yms;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
@@ -174,44 +176,48 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
+    @Test
     public void testRegisterSystemActionWithoutPermission() throws Exception {
         doThrow(SecurityException.class).when(mMockSecurityPolicy)
                 .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
 
         try {
             mA11yms.registerSystemAction(TEST_ACTION, ACTION_ID);
-            fail();
+            Assert.fail();
         } catch (SecurityException expected) {
         }
         verify(mMockSystemActionPerformer, never()).registerSystemAction(ACTION_ID, TEST_ACTION);
     }
 
     @SmallTest
+    @Test
     public void testRegisterSystemAction() throws Exception {
         mA11yms.registerSystemAction(TEST_ACTION, ACTION_ID);
         verify(mMockSystemActionPerformer).registerSystemAction(ACTION_ID, TEST_ACTION);
     }
 
-    @SmallTest
+    @Test
     public void testUnregisterSystemActionWithoutPermission() throws Exception {
         doThrow(SecurityException.class).when(mMockSecurityPolicy)
                 .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
 
         try {
             mA11yms.unregisterSystemAction(ACTION_ID);
-            fail();
+            Assert.fail();
         } catch (SecurityException expected) {
         }
         verify(mMockSystemActionPerformer, never()).unregisterSystemAction(ACTION_ID);
     }
 
     @SmallTest
+    @Test
     public void testUnregisterSystemAction() throws Exception {
         mA11yms.unregisterSystemAction(ACTION_ID);
         verify(mMockSystemActionPerformer).unregisterSystemAction(ACTION_ID);
     }
 
     @SmallTest
+    @Test
     public void testOnSystemActionsChanged() throws Exception {
         setupAccessibilityServiceConnection();
         mA11yms.notifySystemActionsChangedLocked(mUserState);
@@ -220,6 +226,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
+    @Test
     public void testOnMagnificationTransitionFailed_capabilitiesIsAll_fallBackToPreviousMode() {
         final AccessibilityUserState userState = mA11yms.mUserStates.get(
                 mA11yms.getCurrentUserIdLocked());
@@ -230,11 +237,12 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
 
         mA11yms.onMagnificationTransitionEndedLocked(false);
 
-        assertEquals(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+        Assert.assertEquals(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
                 userState.getMagnificationModeLocked());
     }
 
     @SmallTest
+    @Test
     public void testOnClientChange_magnificationEnabledAndCapabilityAll_requestConnection() {
         mUserState.mAccessibilityShortcutKeyTargets.add(MAGNIFICATION_CONTROLLER_NAME);
         mUserState.setMagnificationCapabilitiesLocked(
@@ -247,6 +255,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
+    @Test
     public void testOnClientChange_boundServiceCanControlMagnification_requestConnection() {
         setupAccessibilityServiceConnection();
         when(mMockSecurityPolicy.canControlMagnification(any())).thenReturn(true);
