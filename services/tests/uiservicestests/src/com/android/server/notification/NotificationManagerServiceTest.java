@@ -214,6 +214,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
@@ -478,6 +479,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ArgumentCaptor<IntentFilter> intentFilterCaptor =
                 ArgumentCaptor.forClass(IntentFilter.class);
 
+        Mockito.doReturn(new Intent()).when(mContext).registerReceiverAsUser(
+                any(), any(), any(), any(), any());
+        Mockito.doReturn(new Intent()).when(mContext).registerReceiver(any(), any());
         verify(mContext, atLeastOnce()).registerReceiverAsUser(broadcastReceiverCaptor.capture(),
                 any(), intentFilterCaptor.capture(), any(), any());
         verify(mContext, atLeastOnce()).registerReceiver(broadcastReceiverCaptor.capture(),
