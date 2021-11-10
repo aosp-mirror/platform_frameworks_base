@@ -2613,13 +2613,11 @@ public class AudioService extends IAudioService.Stub
         }
         if (!TextUtils.isEmpty(packageName)) {
             PackageManager pm = mContext.getPackageManager();
-            ActivityManager am =
-                          (ActivityManager) mContext.getSystemService(mContext.ACTIVITY_SERVICE);
 
             if (pm.checkPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD, packageName)
                     == PackageManager.PERMISSION_GRANTED) {
                 try {
-                    assistantUid = pm.getPackageUidAsUser(packageName, am.getCurrentUser());
+                    assistantUid = pm.getPackageUidAsUser(packageName, getCurrentUserId());
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.e(TAG,
                             "updateAssistantUId() could not find UID for package: " + packageName);
@@ -3766,23 +3764,23 @@ public class AudioService extends IAudioService.Stub
     }
 
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    /** @see AudioManager#setVolumeIndexForAttributes(attr, int, int) */
-    public void setVolumeIndexForAttributes(@NonNull AudioAttributes attr, int index, int flags,
+    @Override
+    @android.annotation.EnforcePermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS,
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING
+    })
+    /** @see AudioManager#setVolumeGroupVolumeIndex(int, int, int) */
+    public void setVolumeGroupVolumeIndex(int groupId, int index, int flags,
             String callingPackage, String attributionTag) {
-        super.setVolumeIndexForAttributes_enforcePermission();
-
-        Objects.requireNonNull(attr, "attr must not be null");
-        int volumeGroup = AudioProductStrategy.getVolumeGroupIdForAudioAttributes(
-                attr, /* fallbackOnDefault= */false);
-        if (sVolumeGroupStates.indexOfKey(volumeGroup) < 0) {
-            Log.e(TAG, ": no volume group found for attributes " + attr.toString());
+        super.setVolumeGroupVolumeIndex_enforcePermission();
+        if (sVolumeGroupStates.indexOfKey(groupId) < 0) {
+            Log.e(TAG, ": no volume group found for id " + groupId);
             return;
         }
-        VolumeGroupState vgs = sVolumeGroupStates.get(volumeGroup);
+        VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
 
-        sVolumeLogger.enqueue(new VolumeEvent(VolumeEvent.VOL_SET_GROUP_VOL, attr, vgs.name(),
-                index, flags, callingPackage + ", user " + ActivityManager.getCurrentUser()));
+        sVolumeLogger.enqueue(new VolumeEvent(VolumeEvent.VOL_SET_GROUP_VOL, vgs.name(),
+                index, flags, callingPackage + ", user " + getCurrentUserId()));
 
         vgs.setVolumeIndex(index, flags);
 
@@ -3791,7 +3789,7 @@ public class AudioService extends IAudioService.Stub
             try {
                 ensureValidStreamType(groupedStream);
             } catch (IllegalArgumentException e) {
-                Log.d(TAG, "volume group " + volumeGroup + " has internal streams (" + groupedStream
+                Log.d(TAG, "volume group " + groupId + " has internal streams (" + groupedStream
                         + "), do not change associated stream volume");
                 continue;
             }
@@ -3813,39 +3811,53 @@ public class AudioService extends IAudioService.Stub
         return null;
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    /** @see AudioManager#getVolumeIndexForAttributes(attr) */
-    public int getVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
-        super.getVolumeIndexForAttributes_enforcePermission();
-
-        Objects.requireNonNull(attr, "attr must not be null");
+    @Override
+    @android.annotation.EnforcePermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS,
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING
+    })
+    /** @see AudioManager#getVolumeGroupVolumeIndex(int) */
+    public int getVolumeGroupVolumeIndex(int groupId) {
+        super.getVolumeGroupVolumeIndex_enforcePermission();
         synchronized (VolumeStreamState.class) {
-            int volumeGroup = AudioProductStrategy.getVolumeGroupIdForAudioAttributes(
-                    attr, /* fallbackOnDefault= */false);
-            if (sVolumeGroupStates.indexOfKey(volumeGroup) < 0) {
-                throw new IllegalArgumentException("No volume group for attributes " + attr);
+            if (sVolumeGroupStates.indexOfKey(groupId) < 0) {
+                throw new IllegalArgumentException("No volume group for id " + groupId);
             }
-            VolumeGroupState vgs = sVolumeGroupStates.get(volumeGroup);
+            VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
             return vgs.isMuted() ? vgs.getMinIndex() : vgs.getVolumeIndex();
         }
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    /** @see AudioManager#getMaxVolumeIndexForAttributes(attr) */
-    public int getMaxVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
-        super.getMaxVolumeIndexForAttributes_enforcePermission();
-
-        Objects.requireNonNull(attr, "attr must not be null");
-        return AudioSystem.getMaxVolumeIndexForAttributes(attr);
+    /** @see AudioManager#getVolumeGroupMaxVolumeIndex(int) */
+    @android.annotation.EnforcePermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS,
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING
+    })
+    public int getVolumeGroupMaxVolumeIndex(int groupId) {
+        super.getVolumeGroupMaxVolumeIndex_enforcePermission();
+        synchronized (VolumeStreamState.class) {
+            if (sVolumeGroupStates.indexOfKey(groupId) < 0) {
+                throw new IllegalArgumentException("No volume group for id " + groupId);
+            }
+            VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
+            return vgs.getMaxIndex();
+        }
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    /** @see AudioManager#getMinVolumeIndexForAttributes(attr) */
-    public int getMinVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
-        super.getMinVolumeIndexForAttributes_enforcePermission();
-
-        Objects.requireNonNull(attr, "attr must not be null");
-        return AudioSystem.getMinVolumeIndexForAttributes(attr);
+    /** @see AudioManager#getVolumeGroupMinVolumeIndex(int) */
+    @android.annotation.EnforcePermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS,
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING
+    })
+    public int getVolumeGroupMinVolumeIndex(int groupId) {
+        super.getVolumeGroupMinVolumeIndex_enforcePermission();
+        synchronized (VolumeStreamState.class) {
+            if (sVolumeGroupStates.indexOfKey(groupId) < 0) {
+                throw new IllegalArgumentException("No volume group for id " + groupId);
+            }
+            VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
+            return vgs.getMinIndex();
+        }
     }
 
     @Override
@@ -3912,6 +3924,46 @@ public class AudioService extends IAudioService.Stub
     public void setStreamVolume(int streamType, int index, int flags, String callingPackage) {
         setStreamVolumeWithAttribution(streamType, index, flags,
                 callingPackage, /*attributionTag*/ null);
+    }
+
+    /** @see AudioManager#adjustVolumeGroupVolume(int, int, int) */
+    public void adjustVolumeGroupVolume(int groupId, int direction, int flags,
+                                        String callingPackage) {
+        ensureValidDirection(direction);
+        if (sVolumeGroupStates.indexOfKey(groupId) < 0) {
+            Log.e(TAG, ": no volume group found for id " + groupId);
+            return;
+        }
+        VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
+        sVolumeLogger.enqueue(new VolumeEvent(VolumeEvent.VOL_ADJUST_GROUP_VOL, vgs.name(),
+                direction, flags, callingPackage));
+        vgs.adjustVolume(direction, flags);
+    }
+
+    /** @see AudioManager#getLastAudibleVolumeGroupVolume(int) */
+    @android.annotation.EnforcePermission(android.Manifest.permission.QUERY_AUDIO_STATE)
+    public int getLastAudibleVolumeGroupVolume(int groupId) {
+        super.getLastAudibleVolumeGroupVolume_enforcePermission();
+        synchronized (VolumeStreamState.class) {
+            if (sVolumeGroupStates.indexOfKey(groupId) < 0) {
+                Log.e(TAG, ": no volume group found for id " + groupId);
+                return 0;
+            }
+            VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
+            return vgs.getVolumeIndex();
+        }
+    }
+
+    /** @see AudioManager#isVolumeGroupMuted(int) */
+    public boolean isVolumeGroupMuted(int groupId) {
+        synchronized (VolumeStreamState.class) {
+            if (sVolumeGroupStates.indexOfKey(groupId) < 0) {
+                Log.e(TAG, ": no volume group found for id " + groupId);
+                return false;
+            }
+            VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
+            return vgs.isMuted();
+        }
     }
 
     /** @see AudioManager#setStreamVolume(int, int, int)
@@ -7489,14 +7541,56 @@ public class AudioService extends IAudioService.Stub
             return mIsMuted;
         }
 
+        public void adjustVolume(int direction, int flags) {
+            synchronized (AudioService.VolumeStreamState.class) {
+                int device = getDeviceForVolume();
+                int previousIndex = getIndex(device);
+
+                switch (direction) {
+                    case AudioManager.ADJUST_TOGGLE_MUTE: {
+                        // Note: If muted by volume 0, unmute will restore volume 0.
+                        mute(!mIsMuted);
+                        break;
+                    }
+                    case AudioManager.ADJUST_UNMUTE:
+                        // Note: If muted by volume 0, unmute will restore volume 0.
+                        mute(false);
+                        break;
+                    case AudioManager.ADJUST_MUTE:
+                        // May be already muted by setvolume 0, prevent from setting same value
+                        if (previousIndex != 0) {
+                            // bypass persist
+                            mute(true);
+                        }
+                        mIsMuted = true;
+                        break;
+                    case AudioManager.ADJUST_RAISE:
+                        // As for stream, RAISE during mute will increment the index
+                        setVolumeIndex(Math.min(previousIndex + 1, mIndexMax),  device, flags);
+                        break;
+                    case AudioManager.ADJUST_LOWER:
+                        // For stream, ADJUST_LOWER on a muted VSS is a no-op
+                        // If we decide to unmute on ADJUST_LOWER, cannot fallback on
+                        // adjustStreamVolume for group associated to legacy stream type
+                        if (isMuted() && previousIndex != 0) {
+                            mute(false);
+                        } else {
+                            int newIndex = Math.max(previousIndex - 1, mIndexMin);
+                            setVolumeIndex(newIndex, device, flags);
+                        }
+                        break;
+                }
+            }
+        }
+
         public int getVolumeIndex() {
-            synchronized (VolumeStreamState.class) {
+            synchronized (AudioService.VolumeStreamState.class) {
                 return getIndex(getDeviceForVolume());
             }
         }
 
         public void setVolumeIndex(int index, int flags) {
-            synchronized (VolumeStreamState.class) {
+            synchronized (AudioService.VolumeStreamState.class) {
                 if (mUseFixedVolume) {
                     return;
                 }
@@ -7581,7 +7675,7 @@ public class AudioService extends IAudioService.Stub
 
         public void applyAllVolumes(boolean userSwitch) {
             String caller = "from vgs";
-            synchronized (VolumeStreamState.class) {
+            synchronized (AudioService.VolumeStreamState.class) {
                 // apply device specific volumes first
                 for (int i = 0; i < mIndexMap.size(); i++) {
                     int device = mIndexMap.keyAt(i);
@@ -7681,7 +7775,7 @@ public class AudioService extends IAudioService.Stub
                 Log.v(TAG, "persistVolumeGroup: storing index " + getIndex(device) + " for group "
                         + mAudioVolumeGroup.name()
                         + ", device " + AudioSystem.getOutputDeviceName(device)
-                        + " and User=" + ActivityManager.getCurrentUser());
+                        + " and User=" + getCurrentUserId());
             }
             boolean success = mSettings.putSystemIntForUser(mContentResolver,
                     getSettingNameForDevice(device),
@@ -7693,7 +7787,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         public void readSettings() {
-            synchronized (VolumeStreamState.class) {
+            synchronized (AudioService.VolumeStreamState.class) {
                 // force maximum volume on all streams if fixed volume property is set
                 if (mUseFixedVolume) {
                     mIndexMap.put(AudioSystem.DEVICE_OUT_DEFAULT, mIndexMax);
@@ -7720,7 +7814,7 @@ public class AudioService extends IAudioService.Stub
                     if (DEBUG_VOL) {
                         Log.v(TAG, "readSettings: found stored index " + getValidIndex(index)
                                  + " for group " + mAudioVolumeGroup.name() + ", device: " + name
-                                 + ", User=" + ActivityManager.getCurrentUser());
+                                 + ", User=" + getCurrentUserId());
                     }
                     mIndexMap.put(device, getValidIndex(index));
                 }

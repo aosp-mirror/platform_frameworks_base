@@ -138,18 +138,25 @@ interface IAudioService {
     @EnforcePermission("MODIFY_AUDIO_ROUTING")
     List<AudioVolumeGroup> getAudioVolumeGroups();
 
-    @EnforcePermission("MODIFY_AUDIO_ROUTING")
-    void setVolumeIndexForAttributes(in AudioAttributes aa, int index, int flags,
-            String callingPackage, in String attributionTag);
+    @EnforcePermission(anyOf={"MODIFY_AUDIO_SYSTEM_SETTINGS", "MODIFY_AUDIO_ROUTING"})
+    void setVolumeGroupVolumeIndex(int groupId, int index, int flags, String callingPackage,
+            in String attributionTag);
 
-    @EnforcePermission("MODIFY_AUDIO_ROUTING")
-    int getVolumeIndexForAttributes(in AudioAttributes aa);
+    @EnforcePermission(anyOf={"MODIFY_AUDIO_SYSTEM_SETTINGS", "MODIFY_AUDIO_ROUTING"})
+    int getVolumeGroupVolumeIndex(int groupId);
 
-    @EnforcePermission("MODIFY_AUDIO_ROUTING")
-    int getMaxVolumeIndexForAttributes(in AudioAttributes aa);
+    @EnforcePermission(anyOf={"MODIFY_AUDIO_SYSTEM_SETTINGS", "MODIFY_AUDIO_ROUTING"})
+    int getVolumeGroupMaxVolumeIndex(int groupId);
 
-    @EnforcePermission("MODIFY_AUDIO_ROUTING")
-    int getMinVolumeIndexForAttributes(in AudioAttributes aa);
+    @EnforcePermission(anyOf={"MODIFY_AUDIO_SYSTEM_SETTINGS", "MODIFY_AUDIO_ROUTING"})
+    int getVolumeGroupMinVolumeIndex(int groupId);
+
+    @EnforcePermission("QUERY_AUDIO_STATE")
+    int getLastAudibleVolumeGroupVolume(int groupId);
+
+    boolean isVolumeGroupMuted(int groupId);
+
+    void adjustVolumeGroupVolume(int groupId, int direction, int flags, String callingPackage);
 
     @EnforcePermission("QUERY_AUDIO_STATE")
     int getLastAudibleStreamVolume(int streamType);
