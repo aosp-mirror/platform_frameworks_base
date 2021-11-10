@@ -36,7 +36,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.settingslib.mobile.TelephonyIcons;
-import com.android.systemui.statusbar.connectivity.NetworkController.WifiIndicators;
 
 import org.junit.Before;
 import org.junit.Test;

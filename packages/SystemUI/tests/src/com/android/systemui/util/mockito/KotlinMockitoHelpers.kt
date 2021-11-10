@@ -67,6 +67,27 @@ inline fun <reified T : Any> argumentCaptor(): ArgumentCaptor<T> =
 inline fun <reified T : Any> mock(): T = Mockito.mock(T::class.java)
 
 /**
+ * A kotlin implemented wrapper of [ArgumentCaptor] which prevents the following exception when
+ * kotlin tests are mocking kotlin objects and the methods take non-null parameters:
+ *
+ *     java.lang.NullPointerException: capture() must not be null
+ */
+class KotlinArgumentCaptor<T> constructor(clazz: Class<T>) {
+    private val wrapped: ArgumentCaptor<T> = ArgumentCaptor.forClass(clazz)
+    fun capture(): T = wrapped.capture()
+    val value: T
+        get() = wrapped.value
+}
+
+/**
+ * Helper function for creating an argumentCaptor in kotlin.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ */
+inline fun <reified T : Any> kotlinArgumentCaptor(): KotlinArgumentCaptor<T> =
+        KotlinArgumentCaptor(T::class.java)
+
+/**
  * Helper function for creating and using a single-use ArgumentCaptor in kotlin.
  *
  *    val captor = argumentCaptor<Foo>()
@@ -76,6 +97,8 @@ inline fun <reified T : Any> mock(): T = Mockito.mock(T::class.java)
  * becomes:
  *
  *    val captured = withArgCaptor<Foo> { verify(...).someMethod(capture()) }
+ *
+ * NOTE: this uses the KotlinArgumentCaptor to avoid the NullPointerException.
  */
-inline fun <reified T : Any> withArgCaptor(block: ArgumentCaptor<T>.() -> Unit): T =
-        argumentCaptor<T>().apply { block() }.value
+inline fun <reified T : Any> withArgCaptor(block: KotlinArgumentCaptor<T>.() -> Unit): T =
+        kotlinArgumentCaptor<T>().apply { block() }.value

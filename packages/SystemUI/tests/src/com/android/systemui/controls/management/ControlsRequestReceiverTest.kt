@@ -154,6 +154,28 @@ class ControlsRequestReceiverTest : SysuiTestCase() {
         assertNull(wrapper.intent)
     }
 
+    @Test
+    fun testClassCastExceptionComponentName_noCrash() {
+        val badIntent = Intent(ControlsProviderService.ACTION_ADD_CONTROL).apply {
+            putExtra(Intent.EXTRA_COMPONENT_NAME, Intent())
+            putExtra(ControlsProviderService.EXTRA_CONTROL, control)
+        }
+        receiver.onReceive(wrapper, badIntent)
+
+        assertNull(wrapper.intent)
+    }
+
+    @Test
+    fun testClassCastExceptionControl_noCrash() {
+        val badIntent = Intent(ControlsProviderService.ACTION_ADD_CONTROL).apply {
+            putExtra(Intent.EXTRA_COMPONENT_NAME, componentName)
+            putExtra(ControlsProviderService.EXTRA_CONTROL, Intent())
+        }
+        receiver.onReceive(wrapper, badIntent)
+
+        assertNull(wrapper.intent)
+    }
+
     class MyWrapper(context: Context) : ContextWrapper(context) {
         var intent: Intent? = null
 

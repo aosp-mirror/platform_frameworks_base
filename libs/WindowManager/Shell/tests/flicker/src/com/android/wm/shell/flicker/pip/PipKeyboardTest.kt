@@ -26,7 +26,6 @@ import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.helpers.ImeAppHelper
 import org.junit.FixMethodOrder
@@ -47,12 +46,12 @@ import org.junit.runners.Parameterized
 class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val imeApp = ImeAppHelper(instrumentation)
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = buildTransition(eachRun = false) { configuration ->
+    override val transition: FlickerBuilder.() -> Unit
+        get() = buildTransition(eachRun = false) {
             setup {
                 test {
                     imeApp.launchViaIntent(wmHelper)
-                    setRotation(configuration.startRotation)
+                    setRotation(testSpec.startRotation)
                 }
             }
             teardown {
@@ -78,7 +77,7 @@ class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     @Test
     fun pipInVisibleBounds() {
         testSpec.assertWm {
-            val displayBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
+            val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
             coversAtMost(displayBounds, pipApp.component)
         }
     }

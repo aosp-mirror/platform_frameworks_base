@@ -76,8 +76,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.connectivity.NetworkController;
-import com.android.systemui.statusbar.connectivity.NetworkController.AccessPointController;
+import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.toast.SystemUIToast;
@@ -100,7 +99,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 public class InternetDialogController implements WifiEntry.DisconnectCallback,
-        NetworkController.AccessPointController.AccessPointCallback {
+        AccessPointController.AccessPointCallback {
 
     private static final String TAG = "InternetDialogController";
     private static final String ACTION_NETWORK_PROVIDER_SETTINGS =

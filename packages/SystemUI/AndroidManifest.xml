@@ -366,10 +366,6 @@
                   android:exported="false"
                   android:finishOnTaskLaunch="true" />
 
-        <activity android:name=".screenrecord.ScreenRecordDialog"
-            android:theme="@style/ScreenRecord"
-            android:showForAllUsers="true"
-            android:excludeFromRecents="true" />
         <service android:name=".screenrecord.RecordingService" />
 
         <receiver android:name=".SysuiRestartReceiver"

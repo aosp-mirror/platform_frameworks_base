@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.settingslib;
+package com.android.systemui.statusbar.connectivity;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.AndroidTestingRunner;
+
 import com.android.settingslib.mobile.TelephonyIcons;
+import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
-@RunWith(RobolectricTestRunner.class)
-public class MobileStateTest {
+@SmallTest
+@RunWith(AndroidTestingRunner.class)
+public class MobileStateTest extends SysuiTestCase {
 
-    private SignalIcon.MobileState mState = new SignalIcon.MobileState();
+    private final MobileState mState = new MobileState();
 
     @Before
     public void setUp() {

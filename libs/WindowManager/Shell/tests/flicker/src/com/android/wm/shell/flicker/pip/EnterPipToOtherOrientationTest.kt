@@ -74,9 +74,9 @@ class EnterPipToOtherOrientationTest(
     /**
      * Defines the transition used to run the test
      */
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
-            setupAndTeardown(this, configuration)
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
+            setupAndTeardown(this)
 
             setup {
                 eachRun {

@@ -27,7 +27,6 @@ import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.wm.shell.flicker.helpers.BaseAppHelper.Companion.isShellTransitionsEnabled
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
@@ -64,10 +63,8 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
         assumeFalse(isShellTransitionsEnabled())
     }
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = {
-            withTestName { testSpec.name }
-            repeat { testSpec.config.repetitions }
             setup {
                 test {
                     removeAllTasksButHome()

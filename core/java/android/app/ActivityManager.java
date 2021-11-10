@@ -4087,45 +4087,46 @@ public class ActivityManager {
      * @hide
      */
     @TestApi
-    public static final int STOP_BG_USERS_ON_SWITCH_DEFAULT = -1;
+    public static final int STOP_USER_ON_SWITCH_DEFAULT = -1;
 
     /**
-     * Overrides value defined by the platform and stop background users on switch.
+     * Overrides value defined by the platform and stop user on switch.
      *
      * @hide
      */
     @TestApi
-    public static final int STOP_BG_USERS_ON_SWITCH_TRUE = 1;
+    public static final int STOP_USER_ON_SWITCH_TRUE = 1;
 
     /**
-     * Overrides value defined by the platform and don't stop background users on switch.
+     * Overrides value defined by the platform and don't stop user on switch.
      *
      * @hide
      */
     @TestApi
-    public static final int STOP_BG_USERS_ON_SWITCH_FALSE = 0;
+    public static final int STOP_USER_ON_SWITCH_FALSE = 0;
 
     /** @hide */
-    @IntDef(prefix = { "STOP_BG_USERS_ON_SWITCH_" }, value = {
-            STOP_BG_USERS_ON_SWITCH_DEFAULT,
-            STOP_BG_USERS_ON_SWITCH_TRUE,
-            STOP_BG_USERS_ON_SWITCH_FALSE
+    @IntDef(prefix = { "STOP_USER_ON_SWITCH_" }, value = {
+            STOP_USER_ON_SWITCH_DEFAULT,
+            STOP_USER_ON_SWITCH_TRUE,
+            STOP_USER_ON_SWITCH_FALSE
     })
-    public @interface StopBgUsersOnSwitch {}
+    public @interface StopUserOnSwitch {}
 
     /**
-     * Sets whether background users should be stopped when the current user is switched.
+     * Sets whether the current foreground user (and its profiles) should be stopped after switched
+     * out.
      *
-     * <p>Should only be used on tests.
+     * <p>Should only be used on tests. Doesn't apply to {@link UserHandle#SYSTEM system user}.
      *
      * @hide
      */
     @TestApi
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
-    public void setStopBackgroundUsersOnSwitch(@StopBgUsersOnSwitch int value) {
+    public void setStopUserOnSwitch(@StopUserOnSwitch int value) {
         try {
-            getService().setStopBackgroundUsersOnSwitch(value);
+            getService().setStopUserOnSwitch(value);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

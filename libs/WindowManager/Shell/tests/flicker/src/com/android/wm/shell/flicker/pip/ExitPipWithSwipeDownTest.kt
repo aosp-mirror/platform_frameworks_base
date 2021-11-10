@@ -55,9 +55,9 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
 class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { args ->
-            super.transition(this, args)
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
+            super.transition(this)
             transitions {
                 val pipRegion = wmHelper.getWindowRegion(pipApp.component).bounds
                 val pipCenterX = pipRegion.centerX()

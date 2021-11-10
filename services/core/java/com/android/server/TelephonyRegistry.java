@@ -47,6 +47,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.telecom.TelecomManager;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.Annotation;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SrvccState;
@@ -1961,42 +1962,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         ApnSetting apnSetting = preciseState.getApnSetting();
 
-        int apnTypes = apnSetting.getApnTypeBitmask();
-        int state = preciseState.getState();
-        int networkType = preciseState.getNetworkType();
-
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
-                // We only call the callback when the change is for default APN type.
-                if ((ApnSetting.TYPE_DEFAULT & apnTypes) != 0
-                        && (mDataConnectionState[phoneId] != state
-                        || mDataConnectionNetworkType[phoneId] != networkType)) {
-                    String str = "onDataConnectionStateChanged("
-                            + TelephonyUtils.dataStateToString(state)
-                            + ", " + getNetworkTypeName(networkType)
-                            + ") subId=" + subId + ", phoneId=" + phoneId;
-                    log(str);
-                    mLocalLog.log(str);
-                    for (Record r : mRecords) {
-                        if (r.matchTelephonyCallbackEvent(
-                                TelephonyCallback.EVENT_DATA_CONNECTION_STATE_CHANGED)
-                                && idMatch(r, subId, phoneId)) {
-                            try {
-                                if (DBG) {
-                                    log("Notify data connection state changed on sub: " + subId);
-                                }
-                                r.callback.onDataConnectionStateChanged(state, networkType);
-                            } catch (RemoteException ex) {
-                                mRemoveList.add(r.binder);
-                            }
-                        }
-                    }
-                    handleRemoveListLocked();
-
-                    mDataConnectionState[phoneId] = state;
-                    mDataConnectionNetworkType[phoneId] = networkType;
-                }
-
                 Pair<Integer, ApnSetting> key = Pair.create(preciseState.getTransportType(),
                         preciseState.getApnSetting());
                 PreciseDataConnectionState oldState = mPreciseDataConnectionStates.get(phoneId)
@@ -2027,6 +1994,73 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 // connection, so remove it from the cache.
                 if (preciseState.getState() != TelephonyManager.DATA_DISCONNECTED) {
                     mPreciseDataConnectionStates.get(phoneId).put(key, preciseState);
+                }
+
+                // Note that below is just the workaround for reporting the correct data connection
+                // state. The actual fix should be put in the new data stack in T.
+                // TODO: Remove the code below in T.
+
+                // Collect all possible candidate data connection state for internet. Key is the
+                // data connection state, value is the precise data connection state.
+                Map<Integer, PreciseDataConnectionState> internetConnections = new ArrayMap<>();
+                if (preciseState.getState() == TelephonyManager.DATA_DISCONNECTED
+                        && preciseState.getApnSetting().getApnTypes()
+                        .contains(ApnSetting.TYPE_DEFAULT)) {
+                    internetConnections.put(TelephonyManager.DATA_DISCONNECTED, preciseState);
+                }
+                for (Map.Entry<Pair<Integer, ApnSetting>, PreciseDataConnectionState> entry :
+                        mPreciseDataConnectionStates.get(phoneId).entrySet()) {
+                    if (entry.getKey().first == AccessNetworkConstants.TRANSPORT_TYPE_WWAN
+                            && entry.getKey().second.getApnTypes()
+                            .contains(ApnSetting.TYPE_DEFAULT)) {
+                        internetConnections.put(entry.getValue().getState(), entry.getValue());
+                    }
+                }
+
+                // If any internet data is in connected state, then report connected, then check
+                // suspended, connecting, disconnecting, and disconnected. The order is very
+                // important.
+                int[] statesInPriority = new int[]{TelephonyManager.DATA_CONNECTED,
+                        TelephonyManager.DATA_SUSPENDED, TelephonyManager.DATA_CONNECTING,
+                        TelephonyManager.DATA_DISCONNECTING,
+                        TelephonyManager.DATA_DISCONNECTED};
+                int state = TelephonyManager.DATA_DISCONNECTED;
+                int networkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+                for (int s : statesInPriority) {
+                    if (internetConnections.containsKey(s)) {
+                        state = s;
+                        networkType = internetConnections.get(s).getNetworkType();
+                        break;
+                    }
+                }
+
+                if (mDataConnectionState[phoneId] != state
+                        || mDataConnectionNetworkType[phoneId] != networkType) {
+                    String str = "onDataConnectionStateChanged("
+                            + TelephonyUtils.dataStateToString(state)
+                            + ", " + TelephonyManager.getNetworkTypeName(networkType)
+                            + ") subId=" + subId + ", phoneId=" + phoneId;
+                    log(str);
+                    mLocalLog.log(str);
+                    for (Record r : mRecords) {
+                        if (r.matchTelephonyCallbackEvent(
+                                TelephonyCallback.EVENT_DATA_CONNECTION_STATE_CHANGED)
+                                && idMatch(r, subId, phoneId)) {
+                            try {
+                                if (DBG) {
+                                    log("Notify data connection state changed on sub: " + subId);
+                                }
+                                r.callback.onDataConnectionStateChanged(state, networkType);
+                            } catch (RemoteException ex) {
+                                mRemoveList.add(r.binder);
+                            }
+                        }
+                    }
+
+                    mDataConnectionState[phoneId] = state;
+                    mDataConnectionNetworkType[phoneId] = networkType;
+
+                    handleRemoveListLocked();
                 }
             }
         }

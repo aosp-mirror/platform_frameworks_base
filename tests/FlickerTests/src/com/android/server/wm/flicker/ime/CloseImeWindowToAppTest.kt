@@ -119,14 +119,14 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun navBarLayerRotatesAndScales() {
-        Assume.assumeFalse(testSpec.isRotated)
+        Assume.assumeFalse(testSpec.isLandscapeOrSeascapeAtStart)
         testSpec.navBarLayerRotatesAndScales()
     }
 
     @FlakyTest
     @Test
     fun navBarLayerRotatesAndScales_Flaky() {
-        Assume.assumeTrue(testSpec.isRotated)
+        Assume.assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
         testSpec.navBarLayerRotatesAndScales()
     }
 

@@ -26,7 +26,6 @@
 // Log debug messages about InputDispatcherPolicy
 #define DEBUG_INPUT_DISPATCHER_POLICY 0
 
-#include <InputFlingerProperties.sysprop.h>
 #include <android-base/parseint.h>
 #include <android-base/stringprintf.h>
 #include <android/os/IInputConstants.h>
@@ -2087,9 +2086,6 @@ static void nativeReloadDeviceAliases(JNIEnv* /* env */,
 
 static std::string dumpInputProperties() {
     std::string out = "Input properties:\n";
-    const bool perWindowInputRotation =
-            sysprop::InputFlingerProperties::per_window_input_rotation().value_or(false);
-    out += StringPrintf("  per_window_input_rotation = %s\n", toString(perWindowInputRotation));
     const std::string strategy =
             sysprop::InputProperties::velocitytracker_strategy().value_or("default");
     out += "  persist.input.velocitytracker.strategy = " + strategy + "\n";

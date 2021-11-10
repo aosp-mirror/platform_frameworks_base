@@ -482,8 +482,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     false /* fromShelfAdjustment */,
                     wct /* windowContainerTransaction */);
             if (wct != null) {
-                mPipTaskOrganizer.applyFinishBoundsResize(wct, TRANSITION_DIRECTION_SAME,
-                        false /* wasPipTopLeft */);
+                mPipTaskOrganizer.applyFinishBoundsResize(wct, TRANSITION_DIRECTION_SAME);
             }
         };
 

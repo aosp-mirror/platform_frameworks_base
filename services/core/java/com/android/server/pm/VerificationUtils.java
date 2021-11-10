@@ -27,18 +27,12 @@ import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.Settings;
 
-public final class VerificationHelper {
+final class VerificationUtils {
     /**
      * The default maximum time to wait for the verification agent to return in
      * milliseconds.
      */
     private static final long DEFAULT_VERIFICATION_TIMEOUT = 10 * 1000;
-
-    Context mContext;
-
-    public VerificationHelper(Context context) {
-        mContext = context;
-    }
 
     /**
      * Get the verification agent timeout.  Used for both the APK verifier and the
@@ -46,17 +40,17 @@ public final class VerificationHelper {
      *
      * @return verification timeout in milliseconds
      */
-    public long getVerificationTimeout() {
-        long timeout = Settings.Global.getLong(mContext.getContentResolver(),
+    public static long getVerificationTimeout(Context context) {
+        long timeout = Settings.Global.getLong(context.getContentResolver(),
                 Settings.Global.PACKAGE_VERIFIER_TIMEOUT, DEFAULT_VERIFICATION_TIMEOUT);
         // The setting can be used to increase the timeout but not decrease it, since that is
         // equivalent to disabling the verifier.
         return Math.max(timeout, DEFAULT_VERIFICATION_TIMEOUT);
     }
 
-    public void broadcastPackageVerified(int verificationId, Uri packageUri,
+    public static void broadcastPackageVerified(int verificationId, Uri packageUri,
             int verificationCode, @Nullable String rootHashString, int dataLoaderType,
-            UserHandle user) {
+            UserHandle user, Context context) {
         final Intent intent = new Intent(Intent.ACTION_PACKAGE_VERIFIED);
         intent.setDataAndType(packageUri, PACKAGE_MIME_TYPE);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -67,7 +61,7 @@ public final class VerificationHelper {
         }
         intent.putExtra(PackageInstaller.EXTRA_DATA_LOADER_TYPE, dataLoaderType);
 
-        mContext.sendBroadcastAsUser(intent, user,
+        context.sendBroadcastAsUser(intent, user,
                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT);
     }
 }

@@ -68,8 +68,8 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
-import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowDragController;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
@@ -97,6 +97,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
     private final NotificationEntryManager mEntryManager;
     private final NotifPipeline mNotifPipeline;
+    private final NotificationVisibilityProvider mVisibilityProvider;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final ActivityStarter mActivityStarter;
     private final NotificationClickNotifier mClickNotifier;
@@ -136,6 +137,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             Executor uiBgExecutor,
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
+            NotificationVisibilityProvider visibilityProvider,
             HeadsUpManagerPhone headsUpManager,
             ActivityStarter activityStarter,
             NotificationClickNotifier clickNotifier,
@@ -171,6 +173,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mUiBgExecutor = uiBgExecutor;
         mEntryManager = entryManager;
         mNotifPipeline = notifPipeline;
+        mVisibilityProvider = visibilityProvider;
         mHeadsUpManager = headsUpManager;
         mActivityStarter = activityStarter;
         mClickNotifier = clickNotifier;
@@ -366,10 +369,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mAssistManagerLazy.get().hideAssist();
         }
 
-        NotificationVisibility.NotificationLocation location =
-                NotificationLogger.getNotificationLocation(entry);
-        final NotificationVisibility nv = NotificationVisibility.obtain(entry.getKey(),
-                entry.getRanking().getRank(), getVisibleNotificationsCount(), true, location);
+        final NotificationVisibility nv = mVisibilityProvider.obtain(entry, true);
 
         // retrieve the group summary to remove with this entry before we tell NMS the
         // notification was clicked to avoid a race condition
@@ -414,10 +414,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     public void onDragSuccess(NotificationEntry entry) {
         // this method is not responsible for intent sending.
         // will focus follow operation only after drag-and-drop that notification.
-        NotificationVisibility.NotificationLocation location =
-                NotificationLogger.getNotificationLocation(entry);
-        final NotificationVisibility nv = NotificationVisibility.obtain(entry.getKey(),
-                entry.getRanking().getRank(), getVisibleNotificationsCount(), true, location);
+        final NotificationVisibility nv = mVisibilityProvider.obtain(entry, true);
 
         // retrieve the group summary to remove with this entry before we tell NMS the
         // notification was clicked to avoid a race condition
@@ -681,6 +678,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         private final Executor mUiBgExecutor;
         private final NotificationEntryManager mEntryManager;
         private final NotifPipeline mNotifPipeline;
+        private final NotificationVisibilityProvider mVisibilityProvider;
         private final HeadsUpManagerPhone mHeadsUpManager;
         private final ActivityStarter mActivityStarter;
         private final NotificationClickNotifier mClickNotifier;
@@ -719,6 +717,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 @UiBackground Executor uiBgExecutor,
                 NotificationEntryManager entryManager,
                 NotifPipeline notifPipeline,
+                NotificationVisibilityProvider visibilityProvider,
                 HeadsUpManagerPhone headsUpManager,
                 ActivityStarter activityStarter,
                 NotificationClickNotifier clickNotifier,
@@ -749,6 +748,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mUiBgExecutor = uiBgExecutor;
             mEntryManager = entryManager;
             mNotifPipeline = notifPipeline;
+            mVisibilityProvider = visibilityProvider;
             mHeadsUpManager = headsUpManager;
             mActivityStarter = activityStarter;
             mClickNotifier = clickNotifier;
@@ -813,6 +813,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     mUiBgExecutor,
                     mEntryManager,
                     mNotifPipeline,
+                    mVisibilityProvider,
                     mHeadsUpManager,
                     mActivityStarter,
                     mClickNotifier,

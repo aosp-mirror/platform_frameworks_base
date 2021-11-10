@@ -23,10 +23,6 @@ import android.telephony.SubscriptionInfo;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.connectivity.NetworkController.EmergencyListener;
-import com.android.systemui.statusbar.connectivity.NetworkController.IconState;
-import com.android.systemui.statusbar.connectivity.NetworkController.MobileDataIndicators;
-import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
-import com.android.systemui.statusbar.connectivity.NetworkController.WifiIndicators;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;

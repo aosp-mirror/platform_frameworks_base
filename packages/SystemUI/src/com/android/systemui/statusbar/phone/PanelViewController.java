@@ -292,10 +292,6 @@ public abstract class PanelViewController {
                 : mTouchSlop;
     }
 
-    protected TouchHandler getTouchHandler() {
-        return mTouchHandler;
-    }
-
     private void addMovement(MotionEvent event) {
         // Add movement to velocity tracker using raw screen X and Y coordinates instead
         // of window coordinates because the window frame may be moving at the same time.
@@ -1161,17 +1157,7 @@ public abstract class PanelViewController {
         return new OnConfigurationChangedListener();
     }
 
-    public abstract class TouchHandler implements View.OnTouchListener {
-        /**
-         * Method called when a touch has occurred on {@link PhoneStatusBarView}.
-         *
-         * Touches that occur on the status bar view may have ramifications for the notification
-         * panel (e.g. a touch that pulls down the shade could start on the status bar), so we need
-         * to notify the panel controller when these touches occur.
-         *
-         * Returns true if the event was handled and false otherwise.
-         */
-        public abstract boolean onTouchForwardedFromStatusBar(MotionEvent event);
+    public class TouchHandler implements View.OnTouchListener {
 
         public boolean onInterceptTouchEvent(MotionEvent event) {
             if (mInstantExpanding || !mNotificationsDragEnabled || mTouchDisabled || (mMotionAborted

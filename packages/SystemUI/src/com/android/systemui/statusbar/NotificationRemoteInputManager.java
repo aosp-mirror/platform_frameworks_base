@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry.EditedSuggestionInfo;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -95,6 +96,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     // Dependencies:
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final SmartReplyController mSmartReplyController;
+    private final NotificationVisibilityProvider mVisibilityProvider;
     private final NotificationEntryManager mEntryManager;
     private final Handler mMainHandler;
     private final ActionClickLogger mLogger;
@@ -202,14 +204,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                 ViewGroup actionGroup = (ViewGroup) parent;
                 buttonIndex = actionGroup.indexOfChild(view);
             }
-            // TODO(b/204183781): get this from the current pipeline
-            final int count = mEntryManager.getActiveNotificationsCount();
-            final int rank = entry.getRanking().getRank();
-
-            NotificationVisibility.NotificationLocation location =
-                    NotificationLogger.getNotificationLocation(entry);
-            final NotificationVisibility nv =
-                    NotificationVisibility.obtain(key, rank, count, true, location);
+            final NotificationVisibility nv = mVisibilityProvider.obtain(entry, true);
             mClickNotifier.onNotificationActionClick(key, buttonIndex, action, nv, false);
         }
 
@@ -263,6 +258,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             FeatureFlags featureFlags,
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
+            NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager notificationEntryManager,
             RemoteInputNotificationRebuilder rebuilder,
             Lazy<Optional<StatusBar>> statusBarOptionalLazy,
@@ -276,6 +272,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         mFeatureFlags = featureFlags;
         mLockscreenUserManager = lockscreenUserManager;
         mSmartReplyController = smartReplyController;
+        mVisibilityProvider = visibilityProvider;
         mEntryManager = notificationEntryManager;
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mMainHandler = mainHandler;

@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager.LegacyRemot
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
@@ -70,7 +71,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
 
-    @Mock private NotificationPresenter mPresenter;
+    @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private RemoteInputController.Delegate mDelegate;
     @Mock private NotificationRemoteInputManager.Callback mCallback;
     @Mock private RemoteInputController mController;
@@ -101,6 +102,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 mock(FeatureFlags.class),
                 mLockscreenUserManager,
                 mSmartReplyController,
+                mVisibilityProvider,
                 mEntryManager,
                 mock(RemoteInputNotificationRebuilder.class),
                 () -> Optional.of(mock(StatusBar.class)),
@@ -191,6 +193,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 FeatureFlags featureFlags,
                 NotificationLockscreenUserManager lockscreenUserManager,
                 SmartReplyController smartReplyController,
+                NotificationVisibilityProvider visibilityProvider,
                 NotificationEntryManager notificationEntryManager,
                 RemoteInputNotificationRebuilder rebuilder,
                 Lazy<Optional<StatusBar>> statusBarOptionalLazy,
@@ -205,6 +208,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                     featureFlags,
                     lockscreenUserManager,
                     smartReplyController,
+                    visibilityProvider,
                     notificationEntryManager,
                     rebuilder,
                     statusBarOptionalLazy,

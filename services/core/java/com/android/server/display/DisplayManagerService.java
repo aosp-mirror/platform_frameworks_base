@@ -3150,7 +3150,7 @@ public final class DisplayManagerService extends SystemService {
         @Override // Binder call
         public void setUserPreferredDisplayMode(Display.Mode mode) {
             mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.WRITE_SECURE_SETTINGS,
+                    Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE,
                     "Permission required to set the user preferred display mode.");
             final long token = Binder.clearCallingIdentity();
             try {

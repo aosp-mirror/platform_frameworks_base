@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.notification.collection.inflation.LowPrior
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectionController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
@@ -102,6 +103,7 @@ public interface StatusBarDependenciesModule {
             FeatureFlags featureFlags,
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
+            NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager notificationEntryManager,
             RemoteInputNotificationRebuilder rebuilder,
             Lazy<Optional<StatusBar>> statusBarOptionalLazy,
@@ -116,6 +118,7 @@ public interface StatusBarDependenciesModule {
                 featureFlags,
                 lockscreenUserManager,
                 smartReplyController,
+                visibilityProvider,
                 notificationEntryManager,
                 rebuilder,
                 statusBarOptionalLazy,
@@ -134,6 +137,7 @@ public interface StatusBarDependenciesModule {
             Context context,
             Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
+            NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager notificationEntryManager,
             MediaArtworkProcessor mediaArtworkProcessor,
             KeyguardBypassController keyguardBypassController,
@@ -147,6 +151,7 @@ public interface StatusBarDependenciesModule {
                 context,
                 statusBarOptionalLazy,
                 notificationShadeWindowController,
+                visibilityProvider,
                 notificationEntryManager,
                 mediaArtworkProcessor,
                 keyguardBypassController,
@@ -174,10 +179,14 @@ public interface StatusBarDependenciesModule {
     @Provides
     static SmartReplyController provideSmartReplyController(
             DumpManager dumpManager,
-            NotificationEntryManager entryManager,
+            NotificationVisibilityProvider visibilityProvider,
             IStatusBarService statusBarService,
             NotificationClickNotifier clickNotifier) {
-        return new SmartReplyController(dumpManager, entryManager, statusBarService, clickNotifier);
+        return new SmartReplyController(
+                dumpManager,
+                visibilityProvider,
+                statusBarService,
+                clickNotifier);
     }
 
 

@@ -56,7 +56,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController.StateList
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -66,6 +67,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import dagger.Lazy;
 
 /**
  * Handles keeping track of the current user, profiles, and various things related to hiding
@@ -86,6 +89,8 @@ public class NotificationLockscreenUserManagerImpl implements
     // Lazy
     private NotificationEntryManager mEntryManager;
 
+    private final Lazy<NotificationVisibilityProvider> mVisibilityProviderLazy;
+    private final Lazy<CommonNotifCollection> mCommonNotifCollectionLazy;
     private final DevicePolicyManager mDevicePolicyManager;
     private final SparseBooleanArray mLockscreenPublicMode = new SparseBooleanArray();
     private final SparseBooleanArray mUsersWithSeperateWorkChallenge = new SparseBooleanArray();
@@ -162,15 +167,8 @@ public class NotificationLockscreenUserManagerImpl implements
                         }
                     }
                     if (notificationKey != null) {
-                        NotificationEntry entry =
-                                getEntryManager().getActiveNotificationUnfiltered(notificationKey);
-                        final int count = getEntryManager().getActiveNotificationsCount();
-                        final int rank = entry != null ? entry.getRanking().getRank() : 0;
-                        NotificationVisibility.NotificationLocation location =
-                                NotificationLogger.getNotificationLocation(entry);
-                        final NotificationVisibility nv = NotificationVisibility.obtain(
-                                notificationKey,
-                                rank, count, true, location);
+                        final NotificationVisibility nv = mVisibilityProviderLazy.get()
+                                .obtain(notificationKey, true);
                         mClickNotifier.onNotificationClick(notificationKey, nv);
                     }
                     break;
@@ -200,6 +198,8 @@ public class NotificationLockscreenUserManagerImpl implements
             BroadcastDispatcher broadcastDispatcher,
             DevicePolicyManager devicePolicyManager,
             UserManager userManager,
+            Lazy<NotificationVisibilityProvider> visibilityProviderLazy,
+            Lazy<CommonNotifCollection> commonNotifCollectionLazy,
             NotificationClickNotifier clickNotifier,
             KeyguardManager keyguardManager,
             StatusBarStateController statusBarStateController,
@@ -212,6 +212,8 @@ public class NotificationLockscreenUserManagerImpl implements
         mDevicePolicyManager = devicePolicyManager;
         mUserManager = userManager;
         mCurrentUserId = ActivityManager.getCurrentUser();
+        mVisibilityProviderLazy = visibilityProviderLazy;
+        mCommonNotifCollectionLazy = commonNotifCollectionLazy;
         mClickNotifier = clickNotifier;
         statusBarStateController.addCallback(this);
         mLockPatternUtils = new LockPatternUtils(context);
@@ -337,18 +339,18 @@ public class NotificationLockscreenUserManagerImpl implements
      * package-specific override.
      */
     public boolean shouldHideNotifications(String key) {
-        if (getEntryManager() == null) {
-            Log.wtf(TAG, "mEntryManager was null!", new Throwable());
+        if (mCommonNotifCollectionLazy.get() == null) {
+            Log.wtf(TAG, "mCommonNotifCollectionLazy was null!", new Throwable());
             return true;
         }
-        NotificationEntry visibleEntry = getEntryManager().getActiveNotificationUnfiltered(key);
+        NotificationEntry visibleEntry = mCommonNotifCollectionLazy.get().getEntry(key);
         return isLockscreenPublicMode(mCurrentUserId) && visibleEntry != null
                 && visibleEntry.getRanking().getLockscreenVisibilityOverride() == VISIBILITY_SECRET;
     }
 
     public boolean shouldShowOnKeyguard(NotificationEntry entry) {
-        if (getEntryManager() == null) {
-            Log.wtf(TAG, "mEntryManager was null!", new Throwable());
+        if (mCommonNotifCollectionLazy.get() == null) {
+            Log.wtf(TAG, "mCommonNotifCollectionLazy was null!", new Throwable());
             return false;
         }
         for (int i = 0; i < mKeyguardSuppressors.size(); i++) {
@@ -520,11 +522,11 @@ public class NotificationLockscreenUserManagerImpl implements
     }
 
     private boolean packageHasVisibilityOverride(String key) {
-        if (getEntryManager() == null) {
+        if (mCommonNotifCollectionLazy.get() == null) {
             Log.wtf(TAG, "mEntryManager was null!", new Throwable());
             return true;
         }
-        NotificationEntry entry = getEntryManager().getActiveNotificationUnfiltered(key);
+        NotificationEntry entry = mCommonNotifCollectionLazy.get().getEntry(key);
         return entry != null
                 && entry.getRanking().getLockscreenVisibilityOverride() 
                 == Notification.VISIBILITY_PRIVATE;

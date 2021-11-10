@@ -23,18 +23,17 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.startRotation
 import org.junit.Test
 
 /**
  * Base class for exiting pip (closing pip window) without returning to the app
  */
 abstract class ExitPipTransition(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = buildTransition(eachRun = true) { configuration ->
+    override val transition: FlickerBuilder.() -> Unit
+        get() = buildTransition(eachRun = true) {
             setup {
                 eachRun {
-                    this.setRotation(configuration.startRotation)
+                    this.setRotation(testSpec.startRotation)
                 }
             }
             teardown {

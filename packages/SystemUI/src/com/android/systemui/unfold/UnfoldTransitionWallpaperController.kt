@@ -16,12 +16,11 @@
 
 package com.android.systemui.unfold
 
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.util.WallpaperController
 import javax.inject.Inject
 
-@SysUISingleton
+@SysUIUnfoldScope
 class UnfoldTransitionWallpaperController @Inject constructor(
     private val unfoldTransitionProgressProvider: UnfoldTransitionProgressProvider,
     private val wallpaperController: WallpaperController

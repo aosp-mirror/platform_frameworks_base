@@ -213,7 +213,7 @@ class AnrController {
             }
         }
 
-        String criticalEvents = CriticalEventLog.getInstance().logLinesForAnrFile();
+        String criticalEvents = CriticalEventLog.getInstance().logLinesForSystemServerTraceFile();
         final File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
                 null /* processCpuTracker */, null /* lastPids */, nativePids,
                 null /* logExceptionCreatingFile */, "Pre-dump", criticalEvents);

@@ -78,6 +78,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -204,6 +205,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     @Mock
     private IStatusBarService mStatusBarService;
     @Mock
+    private NotificationVisibilityProvider mVisibilityProvider;
+    @Mock
     private LauncherApps mLauncherApps;
     @Mock
     private WindowManagerShellWrapper mWindowManagerShellWrapper;
@@ -319,6 +322,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mConfigurationController,
                 mStatusBarService,
                 mock(INotificationManager.class),
+                mVisibilityProvider,
                 interruptionStateProvider,
                 mZenModeController,
                 mLockscreenUserManager,

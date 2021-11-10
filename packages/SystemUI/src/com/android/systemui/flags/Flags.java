@@ -16,6 +16,8 @@
 
 package com.android.systemui.flags;
 
+import com.android.systemui.R;
+
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +49,6 @@ public class Flags {
     public static final BooleanFlag NOTIFICATION_UPDATES =
             new BooleanFlag(102, true);
 
-
     /***************************************/
     // 200 - keyguard/lockscreen
     public static final BooleanFlag KEYGUARD_LAYOUT =
@@ -58,6 +59,9 @@ public class Flags {
 
     public static final BooleanFlag NEW_UNLOCK_SWIPE_ANIMATION =
             new BooleanFlag(202, true);
+
+    public static final BooleanFlag CHARGING_RIPPLE =
+            new BooleanFlag(203, false, R.bool.flag_charging_ripple);
 
     /***************************************/
     // 300 - power menu
@@ -72,6 +76,9 @@ public class Flags {
     public static final BooleanFlag SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
             new BooleanFlag(401, false);
 
+    public static final BooleanFlag SMARTSPACE =
+            new BooleanFlag(402, false, R.bool.flag_smartspace);
+
     /***************************************/
     // 500 - quick settings
     public static final BooleanFlag NEW_USER_SWITCHER =
@@ -79,6 +86,12 @@ public class Flags {
 
     public static final BooleanFlag COMBINED_QS_HEADERS =
             new BooleanFlag(501, false);
+
+    public static final BooleanFlag PEOPLE_TILE =
+            new BooleanFlag(502, false, R.bool.flag_conversations);
+
+    public static final BooleanFlag QS_USER_DETAIL_SHORTCUT =
+            new BooleanFlag(503, false, R.bool.flag_lockscreen_qs_user_detail_shortcut);
 
     /***************************************/
     // 600- status bar
@@ -95,6 +108,11 @@ public class Flags {
 
     public static final BooleanFlag ONGOING_CALL_IN_IMMERSIVE_CHIP_TAP =
             new BooleanFlag(702, true);
+
+    /***************************************/
+    // 800 - general visual/theme
+    public static final BooleanFlag MONET =
+            new BooleanFlag(800, true, R.bool.flag_monet);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================

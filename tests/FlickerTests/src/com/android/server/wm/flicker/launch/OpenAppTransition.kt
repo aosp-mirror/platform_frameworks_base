@@ -31,9 +31,7 @@ import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.replacesLayer
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
@@ -50,13 +48,11 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     /**
      * Defines the transition used to run the test
      */
-    protected open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit = {
-        withTestName { testSpec.name }
-        repeat { testSpec.config.repetitions }
+    protected open val transition: FlickerBuilder.() -> Unit = {
         setup {
             test {
                 device.wakeUpAndGoToHomeScreen()
-                this.setRotation(testSpec.config.startRotation)
+                this.setRotation(testSpec.startRotation)
             }
         }
         teardown {
@@ -73,7 +69,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            transition(testSpec.config)
+            transition()
         }
     }
 

@@ -16,11 +16,16 @@
 
 package com.android.systemui.animation
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Rect
 import android.os.Looper
 import android.util.Log
+import android.util.MathUtils
 import android.view.GhostView
 import android.view.Gravity
 import android.view.View
@@ -32,6 +37,7 @@ import android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
 import android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
 import android.view.WindowManagerPolicyConstants
 import android.widget.FrameLayout
+import kotlin.math.roundToInt
 
 private const val TAG = "DialogLaunchAnimator"
 
@@ -52,7 +58,8 @@ class DialogLaunchAnimator(
     private val currentAnimations = hashSetOf<DialogLaunchAnimation>()
 
     /**
-     * Show [dialog] by expanding it from [view].
+     * Show [dialog] by expanding it from [view]. If [animateBackgroundBoundsChange] is true, then
+     * the background of the dialog will be animated when the dialog bounds change.
      *
      * Caveats: When calling this function, the dialog content view will actually be stolen and
      * attached to a different dialog (and thus a different window) which means that the actual
@@ -60,7 +67,12 @@ class DialogLaunchAnimator(
      * must call dismiss(), hide() and show() on the [Dialog] returned by this function to actually
      * dismiss, hide or show the dialog.
      */
-    fun showFromView(dialog: Dialog, view: View): Dialog {
+    @JvmOverloads
+    fun showFromView(
+        dialog: Dialog,
+        view: View,
+        animateBackgroundBoundsChange: Boolean = false
+    ): Dialog {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             throw IllegalStateException(
                 "showFromView must be called from the main thread and dialog must be created in " +
@@ -78,7 +90,8 @@ class DialogLaunchAnimator(
 
         val launchAnimation = DialogLaunchAnimation(
             context, launchAnimator, hostDialogProvider, view,
-            onDialogDismissed = { currentAnimations.remove(it) }, originalDialog = dialog)
+            onDialogDismissed = { currentAnimations.remove(it) }, originalDialog = dialog,
+            animateBackgroundBoundsChange)
         val hostDialog = launchAnimation.hostDialog
         currentAnimations.add(launchAnimation)
 
@@ -208,7 +221,10 @@ private class DialogLaunchAnimation(
     private val onDialogDismissed: (DialogLaunchAnimation) -> Unit,
 
     /** The original dialog whose content will be shown and animate in/out in [hostDialog]. */
-    private val originalDialog: Dialog
+    private val originalDialog: Dialog,
+
+    /** Whether we should animate the dialog background when its bounds change. */
+    private val animateBackgroundBoundsChange: Boolean
 ) {
     /**
      * The fullscreen dialog to which we will add the content view [originalDialogView] of
@@ -221,10 +237,11 @@ private class DialogLaunchAnimation(
     private val hostDialogRoot = FrameLayout(context)
 
     /**
-     * The content view of [originalDialog], which will be stolen from that dialog and added to
-     * [hostDialogRoot].
+     * The parent of the original dialog content view, that serves as a fake window that will have
+     * the same size as the original dialog window and to which we will set the original dialog
+     * window background.
      */
-    private var originalDialogView: View? = null
+    private val dialogContentParent = FrameLayout(context)
 
     /**
      * The background color of [originalDialogView], taking into consideration the [originalDialog]
@@ -246,6 +263,11 @@ private class DialogLaunchAnimation(
 
     private var isTouchSurfaceGhostDrawn = false
     private var isOriginalDialogViewLaidOut = false
+    private var backgroundLayoutListener = if (animateBackgroundBoundsChange) {
+        AnimatedBoundsLayoutListener()
+    } else {
+        null
+    }
 
     fun start() {
         // Show the host (fullscreen) dialog, to which we will add the stolen dialog view.
@@ -374,9 +396,6 @@ private class DialogLaunchAnimation(
     }
 
     private fun showDialogFromView(dialogView: View) {
-        // Save the dialog view for later as we will need it for the close animation.
-        this.originalDialogView = dialogView
-
         // Close the dialog when clicking outside of it.
         hostDialogRoot.setOnClickListener { hostDialog.dismiss() }
         dialogView.isClickable = true
@@ -394,17 +413,13 @@ private class DialogLaunchAnimation(
             throw IllegalStateException("Dialogs with no backgrounds on window are not supported")
         }
 
-        dialogView.setBackgroundResource(backgroundRes)
-        originalDialogBackgroundColor =
-            GhostedViewLaunchAnimatorController.findGradientDrawable(dialogView.background!!)
-                ?.color
-                ?.defaultColor ?: Color.BLACK
-
-        // Add the dialog view to the host (fullscreen) dialog and make it invisible to make sure
-        // it's not drawn yet.
-        (dialogView.parent as? ViewGroup)?.removeView(dialogView)
+        // Add a parent view to the original dialog view to which we will set the original dialog
+        // window background. This View serves as a fake window with background, so that we are sure
+        // that we don't override the dialog view paddings with the window background that usually
+        // has insets.
+        dialogContentParent.setBackgroundResource(backgroundRes)
         hostDialogRoot.addView(
-            dialogView,
+            dialogContentParent,
 
             // We give it the size of its original dialog window.
             FrameLayout.LayoutParams(
@@ -413,10 +428,31 @@ private class DialogLaunchAnimation(
                 Gravity.CENTER
             )
         )
-        dialogView.visibility = View.INVISIBLE
+
+        // Make the dialog view parent invisible for now, to make sure it's not drawn yet.
+        dialogContentParent.visibility = View.INVISIBLE
+
+        val background = dialogContentParent.background!!
+        originalDialogBackgroundColor =
+            GhostedViewLaunchAnimatorController.findGradientDrawable(background)
+                ?.color
+                ?.defaultColor ?: Color.BLACK
+
+        // Add the dialog view to its parent (that has the original window background).
+        (dialogView.parent as? ViewGroup)?.removeView(dialogView)
+        dialogContentParent.addView(
+            dialogView,
+
+            // It should match its parent size, which is sized the same as the original dialog
+            // window.
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        )
 
         // Start the animation when the dialog is laid out in the center of the host dialog.
-        dialogView.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+        dialogContentParent.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
             override fun onLayoutChange(
                 view: View,
                 left: Int,
@@ -428,7 +464,7 @@ private class DialogLaunchAnimation(
                 oldRight: Int,
                 oldBottom: Int
             ) {
-                dialogView.removeOnLayoutChangeListener(this)
+                dialogContentParent.removeOnLayoutChangeListener(this)
 
                 isOriginalDialogViewLaidOut = true
                 maybeStartLaunchAnimation()
@@ -478,6 +514,13 @@ private class DialogLaunchAnimation(
                 // dismiss.
                 if (dismissRequested) {
                     hostDialog.dismiss()
+                }
+
+                // If necessary, we animate the dialog background when its bounds change. We do it
+                // at the end of the launch animation, because the lauch animation already correctly
+                // handles bounds changes.
+                if (backgroundLayoutListener != null) {
+                    dialogContentParent.addOnLayoutChangeListener(backgroundLayoutListener)
                 }
             }
         )
@@ -548,7 +591,11 @@ private class DialogLaunchAnimation(
                 }
 
                 touchSurface.visibility = View.VISIBLE
-                originalDialogView!!.visibility = View.INVISIBLE
+                dialogContentParent.visibility = View.INVISIBLE
+
+                if (backgroundLayoutListener != null) {
+                    dialogContentParent.removeOnLayoutChangeListener(backgroundLayoutListener)
+                }
 
                 // The animated ghost was just removed. We create a temporary ghost that will be
                 // removed only once we draw the touch surface, to avoid flickering that would
@@ -578,12 +625,10 @@ private class DialogLaunchAnimation(
         onLaunchAnimationStart: () -> Unit = {},
         onLaunchAnimationEnd: () -> Unit = {}
     ) {
-        val dialogView = this.originalDialogView!!
-
         // Create 2 ghost controllers to animate both the dialog and the touch surface in the host
         // dialog.
-        val startView = if (isLaunching) touchSurface else dialogView
-        val endView = if (isLaunching) dialogView else touchSurface
+        val startView = if (isLaunching) touchSurface else dialogContentParent
+        val endView = if (isLaunching) dialogContentParent else touchSurface
         val startViewController = GhostedViewLaunchAnimatorController(startView)
         val endViewController = GhostedViewLaunchAnimatorController(endView)
         startViewController.launchContainer = hostDialogRoot
@@ -661,5 +706,82 @@ private class DialogLaunchAnimation(
         }
 
         return (touchSurface.parent as? View)?.isShown ?: true
+    }
+
+    /** A layout listener to animate the change of bounds of the dialog background.  */
+    class AnimatedBoundsLayoutListener : View.OnLayoutChangeListener {
+        companion object {
+            private const val ANIMATION_DURATION = 500L
+        }
+
+        private var lastBounds: Rect? = null
+        private var currentAnimator: ValueAnimator? = null
+
+        override fun onLayoutChange(
+            view: View,
+            left: Int,
+            top: Int,
+            right: Int,
+            bottom: Int,
+            oldLeft: Int,
+            oldTop: Int,
+            oldRight: Int,
+            oldBottom: Int
+        ) {
+            // Don't animate if bounds didn't actually change.
+            if (left == oldLeft && top == oldTop && right == oldRight && bottom == oldBottom) {
+                // Make sure that we that the last bounds set by the animator were not overridden.
+                lastBounds?.let { bounds ->
+                    view.left = bounds.left
+                    view.top = bounds.top
+                    view.right = bounds.right
+                    view.bottom = bounds.bottom
+                }
+                return
+            }
+
+            if (lastBounds == null) {
+                lastBounds = Rect(oldLeft, oldTop, oldRight, oldBottom)
+            }
+
+            val bounds = lastBounds!!
+            val startLeft = bounds.left
+            val startTop = bounds.top
+            val startRight = bounds.right
+            val startBottom = bounds.bottom
+
+            currentAnimator?.cancel()
+            currentAnimator = null
+
+            val animator = ValueAnimator.ofFloat(0f, 1f).apply {
+                duration = ANIMATION_DURATION
+                interpolator = Interpolators.STANDARD
+
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        currentAnimator = null
+                    }
+                })
+
+                addUpdateListener { animatedValue ->
+                    val progress = animatedValue.animatedFraction
+
+                    // Compute new bounds.
+                    bounds.left = MathUtils.lerp(startLeft, left, progress).roundToInt()
+                    bounds.top = MathUtils.lerp(startTop, top, progress).roundToInt()
+                    bounds.right = MathUtils.lerp(startRight, right, progress).roundToInt()
+                    bounds.bottom = MathUtils.lerp(startBottom, bottom, progress).roundToInt()
+
+                    // Set the new bounds.
+                    view.left = bounds.left
+                    view.top = bounds.top
+                    view.right = bounds.right
+                    view.bottom = bounds.bottom
+                }
+            }
+
+            currentAnimator = animator
+            animator.start()
+        }
     }
 }

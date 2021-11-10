@@ -33,8 +33,6 @@ import com.android.server.wm.flicker.helpers.NewTasksAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.repetitions
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.flicker.testapp.ActivityOptions.LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME
@@ -71,8 +69,6 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            withTestName { testSpec.name }
-            repeat { testSpec.config.repetitions }
             setup {
                 eachRun {
                     mTestApp.launchViaIntent(wmHelper)
@@ -149,7 +145,7 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     @Test
     fun colorLayerIsVisibleDuringTransition() {
         val bgColorLayer = FlickerComponentName("", "colorBackgroundLayer")
-        val displayBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
+        val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
 
         testSpec.assertLayers {
             this.coversExactly(displayBounds, LAUNCH_NEW_TASK_ACTIVITY)

@@ -63,7 +63,8 @@ class InternetDialogFactory @Inject constructor(
                     canConfigMobileData, canConfigWifi, aboveStatusBar, uiEventLogger, handler,
                     executor)
             if (view != null) {
-                dialogLaunchAnimator.showFromView(internetDialog!!, view)
+                dialogLaunchAnimator.showFromView(internetDialog!!, view,
+                    animateBackgroundBoundsChange = true)
             } else {
                 internetDialog?.show()
             }

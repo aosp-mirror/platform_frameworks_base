@@ -23,15 +23,13 @@ import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 
-import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
-import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.coordinator.VisualStabilityCoordinator;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
-import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -40,7 +38,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
  * information about the interaction to the notification pipeline.
  */
 public class OnUserInteractionCallbackImpl implements OnUserInteractionCallback {
-    private final NotifPipeline mNotifPipeline;
+    private final NotificationVisibilityProvider mVisibilityProvider;
     private final NotifCollection mNotifCollection;
     private final HeadsUpManager mHeadsUpManager;
     private final StatusBarStateController mStatusBarStateController;
@@ -48,14 +46,14 @@ public class OnUserInteractionCallbackImpl implements OnUserInteractionCallback 
     private final GroupMembershipManager mGroupMembershipManager;
 
     public OnUserInteractionCallbackImpl(
-            NotifPipeline notifPipeline,
+            NotificationVisibilityProvider visibilityProvider,
             NotifCollection notifCollection,
             HeadsUpManager headsUpManager,
             StatusBarStateController statusBarStateController,
             VisualStabilityCoordinator visualStabilityCoordinator,
             GroupMembershipManager groupMembershipManager
     ) {
-        mNotifPipeline = notifPipeline;
+        mVisibilityProvider = visibilityProvider;
         mNotifCollection = notifCollection;
         mHeadsUpManager = headsUpManager;
         mStatusBarStateController = statusBarStateController;
@@ -91,12 +89,7 @@ public class OnUserInteractionCallbackImpl implements OnUserInteractionCallback 
                 new DismissedByUserStats(
                     dismissalSurface,
                     DISMISS_SENTIMENT_NEUTRAL,
-                    NotificationVisibility.obtain(
-                            entry.getKey(),
-                            entry.getRanking().getRank(),
-                            mNotifPipeline.getShadeListCount(),
-                            true,
-                            NotificationLogger.getNotificationLocation(entry)))
+                    mVisibilityProvider.obtain(entry, true))
         );
     }
 
