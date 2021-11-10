@@ -46,8 +46,10 @@ class NotifCoordinatorsImpl @Inject constructor(
     gutsCoordinator: GutsCoordinator,
     conversationCoordinator: ConversationCoordinator,
     preparationCoordinator: PreparationCoordinator,
+    groupCountCoordinator: GroupCountCoordinator,
     mediaCoordinator: MediaCoordinator,
     remoteInputCoordinator: RemoteInputCoordinator,
+    stackCoordinator: StackCoordinator,
     shadeEventCoordinator: ShadeEventCoordinator,
     smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
     viewConfigCoordinator: ViewConfigCoordinator,
@@ -72,8 +74,10 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(deviceProvisionedCoordinator)
         mCoordinators.add(bubbleCoordinator)
         mCoordinators.add(conversationCoordinator)
+        mCoordinators.add(groupCountCoordinator)
         mCoordinators.add(mediaCoordinator)
         mCoordinators.add(remoteInputCoordinator)
+        mCoordinators.add(stackCoordinator)
         mCoordinators.add(shadeEventCoordinator)
         mCoordinators.add(viewConfigCoordinator)
         mCoordinators.add(visualStabilityCoordinator)
@@ -89,7 +93,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         }
 
         // Manually add Ordered Sections
-        // HeadsUp > FGS > People > Alerting > Silent > Unknown/Default
+        // HeadsUp > FGS > People > Alerting > Silent > Minimized > Unknown/Default
         if (notifPipelineFlags.isNewPipelineEnabled()) {
             mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
         }

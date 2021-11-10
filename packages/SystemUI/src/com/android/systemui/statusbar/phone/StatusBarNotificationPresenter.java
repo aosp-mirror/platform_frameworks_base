@@ -192,6 +192,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         initController.addPostInitTask(() -> {
             mKeyguardIndicationController.init();
             mViewHierarchyManager.setUpWithPresenter(this,
+                    stackScrollerController.getNotifStackController(),
                     stackScrollerController.getNotificationListContainer());
             mNotifShadeEventSource.setShadeEmptiedCallback(this::maybeClosePanelForShadeEmptied);
             mNotifShadeEventSource.setNotifRemovedByUserCallback(this::maybeEndAmbientPulse);

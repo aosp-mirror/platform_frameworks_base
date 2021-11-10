@@ -30,6 +30,8 @@ import com.android.systemui.statusbar.notification.collection.ShadeListBuilder;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
 import com.android.systemui.statusbar.notification.collection.coordinator.NotifCoordinators;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
+import com.android.systemui.statusbar.notification.collection.render.NotifStackController;
+import com.android.systemui.statusbar.notification.collection.render.RenderStageManager;
 import com.android.systemui.statusbar.notification.collection.render.ShadeViewManagerFactory;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 
@@ -47,6 +49,7 @@ public class NotifPipelineInitializer implements Dumpable {
     private final GroupCoalescer mGroupCoalescer;
     private final NotifCollection mNotifCollection;
     private final ShadeListBuilder mListBuilder;
+    private final RenderStageManager mRenderStageManager;
     private final NotifCoordinators mNotifPluggableCoordinators;
     private final NotifInflaterImpl mNotifInflater;
     private final DumpManager mDumpManager;
@@ -60,15 +63,18 @@ public class NotifPipelineInitializer implements Dumpable {
             GroupCoalescer groupCoalescer,
             NotifCollection notifCollection,
             ShadeListBuilder listBuilder,
+            RenderStageManager renderStageManager,
             NotifCoordinators notifCoordinators,
             NotifInflaterImpl notifInflater,
             DumpManager dumpManager,
             ShadeViewManagerFactory shadeViewManagerFactory,
-            NotifPipelineFlags notifPipelineFlags) {
+            NotifPipelineFlags notifPipelineFlags
+    ) {
         mPipelineWrapper = pipelineWrapper;
         mGroupCoalescer = groupCoalescer;
         mNotifCollection = notifCollection;
         mListBuilder = listBuilder;
+        mRenderStageManager = renderStageManager;
         mNotifPluggableCoordinators = notifCoordinators;
         mDumpManager = dumpManager;
         mNotifInflater = notifInflater;
@@ -80,7 +86,8 @@ public class NotifPipelineInitializer implements Dumpable {
     public void initialize(
             NotificationListener notificationService,
             NotificationRowBinderImpl rowBinder,
-            NotificationListContainer listContainer) {
+            NotificationListContainer listContainer,
+            NotifStackController stackController) {
 
         mDumpManager.registerDumpable("NotifPipeline", this);
 
@@ -94,8 +101,11 @@ public class NotifPipelineInitializer implements Dumpable {
 
         // Wire up pipeline
         if (mNotifPipelineFlags.isNewPipelineEnabled()) {
-            mShadeViewManagerFactory.create(listContainer).attach(mListBuilder);
+            mShadeViewManagerFactory
+                    .create(listContainer, stackController)
+                    .attach(mRenderStageManager);
         }
+        mRenderStageManager.attach(mListBuilder);
         mListBuilder.attach(mNotifCollection);
         mNotifCollection.attach(mGroupCoalescer);
         mGroupCoalescer.attach(notificationService);

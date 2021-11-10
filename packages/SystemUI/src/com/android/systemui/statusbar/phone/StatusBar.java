@@ -1488,6 +1488,7 @@ public class StatusBar extends CoreStartable implements
                 mBubblesOptional,
                 mPresenter,
                 mStackScrollerController.getNotificationListContainer(),
+                mStackScrollerController.getNotifStackController(),
                 mNotificationActivityStarter,
                 mPresenter);
     }

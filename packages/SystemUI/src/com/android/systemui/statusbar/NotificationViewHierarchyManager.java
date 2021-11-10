@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
@@ -39,6 +41,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.LowPriorityInflationHelper;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.render.NotifStackController;
+import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectionController;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -97,6 +101,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     private final Context mContext;
 
     private NotificationPresenter mPresenter;
+    private NotifStackController mStackController;
     private NotificationListContainer mListContainer;
 
     // Used to help track down re-entrant calls to our update methods, which will cause bugs.
@@ -147,8 +152,10 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
+            NotifStackController stackController,
             NotificationListContainer listContainer) {
         mPresenter = presenter;
+        mStackController = stackController;
         mListContainer = listContainer;
         if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
             mDynamicPrivacyController.addListener(this);
@@ -328,10 +335,60 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         mTmpChildOrderMap.clear();
 
         updateRowStatesInternal();
+        updateNotifStats();
 
         mListContainer.onNotificationViewUpdateFinished();
 
         endUpdate();
+    }
+
+    /**
+     * In the spirit of unidirectional data flow, calculate this information when the notification
+     * views are updated, and set it once, speeding up lookups later.
+     * This is analogous to logic in the
+     * {@link com.android.systemui.statusbar.notification.collection.coordinator.StackCoordinator}
+     */
+    private void updateNotifStats() {
+        boolean hasNonClearableAlertingNotifs = false;
+        boolean hasClearableAlertingNotifs = false;
+        boolean hasNonClearableSilentNotifs = false;
+        boolean hasClearableSilentNotifs = false;
+        final int childCount = mListContainer.getContainerChildCount();
+        int visibleTopLevelEntries = 0;
+        for (int i = 0; i < childCount; i++) {
+            View child = mListContainer.getContainerChildAt(i);
+            if (child == null || child.getVisibility() == View.GONE) {
+                continue;
+            }
+            if (!(child instanceof ExpandableNotificationRow)) {
+                continue;
+            }
+            final ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            boolean isSilent = row.getEntry().getBucket() == BUCKET_SILENT;
+            // NOTE: NotificationEntry.isClearable() will internally check group children to ensure
+            //  the group itself definitively clearable.
+            boolean isClearable = row.getEntry().isClearable();
+            if (isSilent) {
+                if (isClearable) {
+                    hasClearableSilentNotifs = true;
+                } else {  // !isClearable
+                    hasNonClearableSilentNotifs = true;
+                }
+            } else {  // !isSilent
+                if (isClearable) {
+                    hasClearableAlertingNotifs = true;
+                } else {  // !isClearable
+                    hasNonClearableAlertingNotifs = true;
+                }
+            }
+        }
+        mStackController.setNotifStats(new NotifStats(
+                visibleTopLevelEntries /* numActiveNotifs */,
+                hasNonClearableAlertingNotifs /* hasNonClearableAlertingNotifs */,
+                hasClearableAlertingNotifs /* hasClearableAlertingNotifs */,
+                hasNonClearableSilentNotifs /* hasNonClearableSilentNotifs */,
+                hasClearableSilentNotifs /* hasClearableSilentNotifs */
+        ));
     }
 
     /**
@@ -528,9 +585,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
     @Override
     public void onDynamicPrivacyChanged() {
-        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
-            throw new IllegalStateException("Old pipeline code running w/ new pipeline enabled");
-        }
+        mNotifPipelineFlags.assertLegacyPipelineEnabled();
         if (mPerformingUpdate) {
             Log.w(TAG, "onDynamicPrivacyChanged made a re-entrant call");
         }

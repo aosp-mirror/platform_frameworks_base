@@ -16,6 +16,9 @@
 package com.android.systemui.statusbar.notification.collection
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderEntryListener
+import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderGroupListener
+import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener
@@ -31,6 +34,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.In
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender
+import com.android.systemui.statusbar.notification.collection.render.RenderStageManager
 import javax.inject.Inject
 
 /**
@@ -65,11 +69,15 @@ import javax.inject.Inject
  *  9. Finalize filters are fired on each notification ([.addFinalizeFilter])
  *  10. OnBeforeRenderListListeners are fired ([.addOnBeforeRenderListListener])
  *  11. The list is handed off to the view layer to be rendered
+ *  12. OnAfterRenderListListeners are fired ([.addOnAfterRenderListListener])
+ *  13. OnAfterRenderGroupListeners are fired ([.addOnAfterRenderGroupListener])
+ *  13. OnAfterRenderEntryListeners are fired ([.addOnAfterRenderEntryListener])
  */
 @SysUISingleton
 class NotifPipeline @Inject constructor(
     private val mNotifCollection: NotifCollection,
-    private val mShadeListBuilder: ShadeListBuilder
+    private val mShadeListBuilder: ShadeListBuilder,
+    private val mRenderStageManager: RenderStageManager
 ) : CommonNotifCollection {
     /**
      * Returns the list of all known notifications, i.e. the notifications that are currently posted
@@ -203,6 +211,28 @@ class NotifPipeline @Inject constructor(
     /** Registers an invalidator that can be used to invalidate the entire notif list. */
     fun addPreRenderInvalidator(invalidator: Invalidator) {
         mShadeListBuilder.addPreRenderInvalidator(invalidator)
+    }
+
+    /**
+     * Called at the end of the pipeline after the notif list has been handed off to the view layer.
+     */
+    fun addOnAfterRenderListListener(listener: OnAfterRenderListListener) {
+        mRenderStageManager.addOnAfterRenderListListener(listener)
+    }
+
+    /**
+     * Called at the end of the pipeline after a group has been handed off to the view layer.
+     */
+    fun addOnAfterRenderGroupListener(listener: OnAfterRenderGroupListener) {
+        mRenderStageManager.addOnAfterRenderGroupListener(listener)
+    }
+
+    /**
+     * Called at the end of the pipeline after an entry has been handed off to the view layer.
+     * This will be called for every top level entry, every group summary, and every group child.
+     */
+    fun addOnAfterRenderEntryListener(listener: OnAfterRenderEntryListener) {
+        mRenderStageManager.addOnAfterRenderEntryListener(listener)
     }
 
     /**
