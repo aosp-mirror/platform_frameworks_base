@@ -2665,10 +2665,15 @@ public class DisplayPolicy {
     }
 
     void updateSystemBarAttributes() {
+        WindowState winCandidate = mFocusedWindow;
+        if (winCandidate == null && mTopFullscreenOpaqueWindowState != null
+                && (mTopFullscreenOpaqueWindowState.mAttrs.flags
+                & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0) {
+            // Only focusable window can take system bar control.
+            winCandidate = mTopFullscreenOpaqueWindowState;
+        }
         // If there is no window focused, there will be nobody to handle the events
         // anyway, so just hang on in whatever state we're in until things settle down.
-        WindowState winCandidate = mFocusedWindow != null ? mFocusedWindow
-                : mTopFullscreenOpaqueWindowState;
         if (winCandidate == null) {
             return;
         }

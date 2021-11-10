@@ -78,6 +78,7 @@ public class CompanionDeviceActivity extends Activity {
 
         getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
         sInstance = this;
+        getService().mActivity = this;
 
         String deviceProfile = getRequest().getDeviceProfile();
         String profilePrivacyDisclaimer = emptyIfNull(getRequest()
@@ -141,8 +142,6 @@ public class CompanionDeviceActivity extends Activity {
             profileSummary.setVisibility(View.GONE);
         }
 
-        getService().mActivity = this;
-
         mCancelButton = findViewById(R.id.button_cancel);
         mCancelButton.setOnClickListener(v -> cancel());
     }
@@ -194,6 +193,7 @@ public class CompanionDeviceActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        getService().mActivity = null;
         if (sInstance == this) {
             sInstance = null;
         }

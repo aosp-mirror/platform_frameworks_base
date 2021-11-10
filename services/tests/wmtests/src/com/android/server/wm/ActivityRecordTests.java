@@ -16,9 +16,11 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
@@ -100,7 +102,6 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
 import android.app.ActivityOptions;
-import android.app.WindowConfiguration;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.DestroyActivityItem;
@@ -560,7 +561,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWith2LevelTask();
         final Task task = activity.getTask();
         final Task rootTask = activity.getRootTask();
-        rootTask.setWindowingMode(WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        rootTask.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         final Rect stableRect = new Rect();
         rootTask.mDisplayContent.getStableRect(stableRect);
 
@@ -602,19 +603,22 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void respectRequestedOrientationForNonResizableInSplitWindows() {
-        final Task task = new TaskBuilder(mSupervisor)
-                .setCreateParentTask(true).setCreateActivity(true).build();
-        final Task rootTask = task.getRootTask();
+        final TaskDisplayArea tda = mDisplayContent.getDefaultTaskDisplayArea();
+        spyOn(tda);
+        doReturn(true).when(tda).supportsNonResizableMultiWindow();
+        final Task rootTask = mDisplayContent.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        rootTask.setBounds(0, 0, 1000, 500);
         final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setParentTask(task)
+                .setParentTask(rootTask)
+                .setCreateTask(true)
                 .setOnTop(true)
                 .setResizeMode(RESIZE_MODE_UNRESIZEABLE)
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
                 .build();
+        final Task task = activity.getTask();
 
         // Task in landscape.
-        rootTask.setWindowingMode(WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        task.setBounds(0, 0, 1000, 500);
         assertEquals(ORIENTATION_LANDSCAPE, task.getConfiguration().orientation);
 
         // Asserts fixed orientation request is respected, and the orientation is not changed.
@@ -623,7 +627,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Clear size compat.
         activity.clearSizeCompatMode();
         activity.ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
-        activity.mDisplayContent.sendNewConfiguration();
+        mDisplayContent.sendNewConfiguration();
 
         // Relaunching the app should still respect the orientation request.
         assertEquals(ORIENTATION_PORTRAIT, activity.getConfiguration().orientation);

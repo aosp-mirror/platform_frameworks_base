@@ -49,8 +49,7 @@ import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.connectivity.NetworkController;
-import com.android.systemui.statusbar.connectivity.NetworkController.AccessPointController;
+import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.toast.SystemUIToast;
@@ -104,7 +103,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
-    private NetworkController.AccessPointController mAccessPointController;
+    private AccessPointController mAccessPointController;
     @Mock
     private WifiEntry mConnectedEntry;
     @Mock

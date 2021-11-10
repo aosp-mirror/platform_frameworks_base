@@ -97,7 +97,8 @@ public class AppWidgetHostView extends FrameLayout {
     AppWidgetProviderInfo mInfo;
     View mView;
     int mViewMode = VIEW_MODE_NOINIT;
-    int mLayoutId = -1;
+    // If true, we should not try to re-apply the RemoteViews on the next inflation.
+    boolean mColorMappingChanged = false;
     private InteractionHandler mInteractionHandler;
     private boolean mOnLightBackground;
     private SizeF mCurrentSize = null;
@@ -540,7 +541,6 @@ public class AppWidgetHostView extends FrameLayout {
                 return;
             }
             content = getDefaultView();
-            mLayoutId = -1;
             mViewMode = VIEW_MODE_DEFAULT;
         } else {
             // Select the remote view we are actually going to apply.
@@ -557,8 +557,7 @@ public class AppWidgetHostView extends FrameLayout {
             // inflate any requested LayoutParams.
             mRemoteContext = getRemoteContextEnsuringCorrectCachedApkPath();
 
-            int layoutId = rvToApply.getLayoutId();
-            if (rvToApply.canRecycleView(mView)) {
+            if (!mColorMappingChanged && rvToApply.canRecycleView(mView)) {
                 try {
                     rvToApply.reapply(mContext, mView, mInteractionHandler, mCurrentSize,
                             mColorResources);
@@ -583,7 +582,6 @@ public class AppWidgetHostView extends FrameLayout {
                 }
             }
 
-            mLayoutId = layoutId;
             mViewMode = VIEW_MODE_CONTENT;
         }
 
@@ -591,6 +589,7 @@ public class AppWidgetHostView extends FrameLayout {
     }
 
     private void applyContent(View content, boolean recycled, Exception exception) {
+        mColorMappingChanged = false;
         if (content == null) {
             if (mViewMode == VIEW_MODE_ERROR) {
                 // We've already done this -- nothing to do.
@@ -626,7 +625,7 @@ public class AppWidgetHostView extends FrameLayout {
 
         // If our stale view has been prepared to match active, and the new
         // layout matches, try recycling it
-        if (remoteViews.canRecycleView(mView)) {
+        if (!mColorMappingChanged && remoteViews.canRecycleView(mView)) {
             try {
                 mLastExecutionSignal = remoteViews.reapplyAsync(mContext,
                         mView,
@@ -666,7 +665,6 @@ public class AppWidgetHostView extends FrameLayout {
 
         @Override
         public void onViewApplied(View v) {
-            AppWidgetHostView.this.mLayoutId = mLayoutId;
             mViewMode = VIEW_MODE_CONTENT;
 
             applyContent(v, mIsReapply, null);
@@ -907,7 +905,7 @@ public class AppWidgetHostView extends FrameLayout {
         }
         mColorMapping = colorMapping.clone();
         mColorResources = RemoteViews.ColorResources.create(mContext, mColorMapping);
-        mLayoutId = -1;
+        mColorMappingChanged = true;
         mViewMode = VIEW_MODE_NOINIT;
         reapplyLastRemoteViews();
     }
@@ -937,7 +935,7 @@ public class AppWidgetHostView extends FrameLayout {
         if (mColorResources != null) {
             mColorResources = null;
             mColorMapping = null;
-            mLayoutId = -1;
+            mColorMappingChanged = true;
             mViewMode = VIEW_MODE_NOINIT;
             reapplyLastRemoteViews();
         }

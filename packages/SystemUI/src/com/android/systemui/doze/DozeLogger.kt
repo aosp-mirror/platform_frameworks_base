@@ -66,6 +66,14 @@ class DozeLogger @Inject constructor(
         })
     }
 
+    fun logDozingChanged(isDozing: Boolean) {
+        buffer.log(TAG, INFO, {
+            bool1 = isDozing
+        }, {
+            "Dozing changed dozing=$bool1"
+        })
+    }
+
     fun logDozingSuppressed(isDozingSuppressed: Boolean) {
         buffer.log(TAG, INFO, {
             bool1 = isDozingSuppressed
