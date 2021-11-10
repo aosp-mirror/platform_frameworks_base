@@ -31,6 +31,7 @@ import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
+import static android.os.Process.INVALID_UID;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -221,6 +222,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     /** Organizer that organizing this TaskFragment. */
     @Nullable
     private ITaskFragmentOrganizer mTaskFragmentOrganizer;
+    private int mTaskFragmentOrganizerUid = INVALID_UID;
+    private @Nullable String mTaskFragmentOrganizerProcessName;
 
     /** Client assigned unique token for this TaskFragment if this is created by an organizer. */
     @Nullable
@@ -232,13 +235,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * opportunity to perform other actions or animations.
      */
     private boolean mDelayLastActivityRemoval;
-
-    /**
-     * The PID of the organizer that created this TaskFragment. It should be the same as the PID
-     * of {@link android.window.TaskFragmentCreationParams#getOwnerToken()}.
-     * {@link ActivityRecord#INVALID_PID} if this is not an organizer-created TaskFragment.
-     */
-    private int mTaskFragmentOrganizerPid = ActivityRecord.INVALID_PID;
 
     final Point mLastSurfaceSize = new Point();
 
@@ -338,9 +334,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mDelayLastActivityRemoval = false;
     }
 
-    void setTaskFragmentOrganizer(TaskFragmentOrganizerToken organizer, int pid) {
+    void setTaskFragmentOrganizer(@NonNull TaskFragmentOrganizerToken organizer, int uid,
+            @NonNull String processName) {
         mTaskFragmentOrganizer = ITaskFragmentOrganizer.Stub.asInterface(organizer.asBinder());
-        mTaskFragmentOrganizerPid = pid;
+        mTaskFragmentOrganizerUid = uid;
+        mTaskFragmentOrganizerProcessName = processName;
     }
 
     /** Whether this TaskFragment is organized by the given {@code organizer}. */
@@ -2180,9 +2178,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         List<IBinder> childActivities = new ArrayList<>();
         for (int i = 0; i < getChildCount(); i++) {
             WindowContainer wc = getChildAt(i);
-            if (mTaskFragmentOrganizerPid != ActivityRecord.INVALID_PID
+            if (mTaskFragmentOrganizerUid != INVALID_UID
                     && wc.asActivityRecord() != null
-                    && wc.asActivityRecord().getPid() == mTaskFragmentOrganizerPid) {
+                    && wc.asActivityRecord().info.processName.equals(
+                            mTaskFragmentOrganizerProcessName)
+                    && wc.asActivityRecord().getUid() == mTaskFragmentOrganizerUid) {
                 // Only includes Activities that belong to the organizer process for security.
                 childActivities.add(wc.asActivityRecord().appToken);
             }

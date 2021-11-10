@@ -1205,8 +1205,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 creationParams.getFragmentToken(), true /* createdByOrganizer */);
         // Set task fragment organizer immediately, since it might have to be notified about further
         // actions.
-        taskFragment.setTaskFragmentOrganizer(
-                creationParams.getOrganizer(), ownerActivity.getPid());
+        taskFragment.setTaskFragmentOrganizer(creationParams.getOrganizer(),
+                ownerActivity.getUid(), ownerActivity.info.processName);
         ownerActivity.getTask().addChild(taskFragment, POSITION_TOP);
         taskFragment.setWindowingMode(creationParams.getWindowingMode());
         taskFragment.setBounds(creationParams.getInitialBounds());
