@@ -16,6 +16,9 @@
 
 package com.android.server.companion.virtual;
 
+import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -131,11 +134,14 @@ public class VirtualDeviceManagerService extends SystemService {
 
         private final AssociationInfo mAssociationInfo;
         private final int mOwnerUid;
+        private final GenericWindowPolicyController mGenericWindowPolicyController;
         private final ArrayList<Integer> mDisplayIds = new ArrayList<>();
 
         private VirtualDeviceImpl(int ownerUid, IBinder token, AssociationInfo associationInfo) {
             mOwnerUid = ownerUid;
             mAssociationInfo = associationInfo;
+            mGenericWindowPolicyController = new GenericWindowPolicyController(FLAG_SECURE,
+                    SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
             try {
                 token.linkToDeath(this, 0);
             } catch (RemoteException e) {
@@ -167,8 +173,7 @@ public class VirtualDeviceManagerService extends SystemService {
                         "Virtual device already have a virtual display with ID " + displayId);
             }
             mDisplayIds.add(displayId);
-            // TODO(b/201712607): Return the corresponding DisplayWindowPolicyController.
-            return null;
+            return mGenericWindowPolicyController;
         }
 
         void onVirtualDisplayRemovedLocked(int displayId) {

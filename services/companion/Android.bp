@@ -24,5 +24,8 @@ java_library_static {
         type: "stream",
     },
     srcs: [":services.companion-sources"],
-    libs: ["services.core"],
+    libs: [
+        "app-compat-annotations",
+        "services.core",
+    ],
 }
