@@ -23,6 +23,7 @@ import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HIDDEN
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_IGNORE_HARD_KEYBOARD;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_MASK;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 import static android.view.accessibility.AccessibilityManager.ShortcutType;
@@ -42,6 +43,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseIntArray;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 
@@ -122,8 +124,8 @@ class AccessibilityUserState {
 
     /** {@code true} if the device config supports magnification area. */
     private final boolean mSupportMagnificationArea;
-    // The magnification mode of default display.
-    private int mMagnificationMode = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+    // The magnification modes on displays.
+    private final SparseIntArray mMagnificationModes = new SparseIntArray();
     // The magnification capabilities used to know magnification mode could be switched.
     private int mMagnificationCapabilities = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 
@@ -141,12 +143,13 @@ class AccessibilityUserState {
     @SoftKeyboardShowMode
     private int mSoftKeyboardShowMode = SHOW_MODE_AUTO;
 
-    boolean isValidMagnificationModeLocked() {
+    boolean isValidMagnificationModeLocked(int displayId) {
+        final int mode = getMagnificationModeLocked(displayId);
         if (!mSupportMagnificationArea
-                && mMagnificationMode == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW) {
+                && mode == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW) {
             return false;
         }
-        return (mMagnificationCapabilities & mMagnificationMode) != 0;
+        return (mMagnificationCapabilities & mode) != 0;
     }
 
     interface ServiceInfoChangeListener {
@@ -203,7 +206,7 @@ class AccessibilityUserState {
         mIsAutoclickEnabled = false;
         mUserNonInteractiveUiTimeout = 0;
         mUserInteractiveUiTimeout = 0;
-        mMagnificationMode = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+        mMagnificationModes.clear();
         mFocusStrokeWidth = mFocusStrokeWidthDefaultValue;
         mFocusColor = mFocusColorDefaultValue;
     }
@@ -500,7 +503,7 @@ class AccessibilityUserState {
         pw.append(", nonInteractiveUiTimeout=").append(String.valueOf(mNonInteractiveUiTimeout));
         pw.append(", interactiveUiTimeout=").append(String.valueOf(mInteractiveUiTimeout));
         pw.append(", installedServiceCount=").append(String.valueOf(mInstalledServices.size()));
-        pw.append(", magnificationMode=").append(String.valueOf(mMagnificationMode));
+        pw.append(", magnificationModes=").append(String.valueOf(mMagnificationModes));
         pw.append(", magnificationCapabilities=")
                 .append(String.valueOf(mMagnificationCapabilities));
         pw.append("}");
@@ -635,14 +638,19 @@ class AccessibilityUserState {
     }
 
     /**
-     * Gets the magnification mode of default display.
+     * Gets the magnification mode for the given display.
      * @return magnification mode
      *
      * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
      * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
      */
-    public int getMagnificationModeLocked() {
-        return mMagnificationMode;
+    public int getMagnificationModeLocked(int displayId) {
+        int mode = mMagnificationModes.get(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_NONE);
+        if (mode == ACCESSIBILITY_MAGNIFICATION_MODE_NONE) {
+            mode = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+            setMagnificationModeLocked(displayId, mode);
+        }
+        return mode;
     }
 
 
@@ -671,11 +679,13 @@ class AccessibilityUserState {
     }
 
     /**
-     * Sets the magnification mode of default display.
+     * Sets the magnification mode to the given display.
+     *
+     * @param displayId The display id.
      * @param mode The magnification mode.
      */
-    public void setMagnificationModeLocked(int mode) {
-        mMagnificationMode = mode;
+    public void setMagnificationModeLocked(int displayId, int mode) {
+        mMagnificationModes.put(displayId, mode);
     }
 
     /**

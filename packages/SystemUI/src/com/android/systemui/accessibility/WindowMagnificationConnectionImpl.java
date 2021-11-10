@@ -130,4 +130,14 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
             }
         }
     }
+
+    void onChangeMagnificationMode(int displayId, int mode) {
+        if (mConnectionCallback != null) {
+            try {
+                mConnectionCallback.onChangeMagnificationMode(displayId, mode);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to inform changing magnification mode", e);
+            }
+        }
+    }
 }
