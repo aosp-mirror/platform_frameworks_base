@@ -1551,9 +1551,14 @@ public final class ViewRootImpl implements ViewParent,
 
     void handleAppVisibility(boolean visible) {
         if (mAppVisible != visible) {
+            final boolean previousVisible = getHostVisibility() == View.VISIBLE;
             mAppVisible = visible;
-            mAppVisibilityChanged = true;
-            scheduleTraversals();
+            final boolean currentVisible = getHostVisibility() == View.VISIBLE;
+            // Root view only cares about whether it is visible or not.
+            if (previousVisible != currentVisible) {
+                mAppVisibilityChanged = true;
+                scheduleTraversals();
+            }
             if (!mAppVisible) {
                 WindowManagerGlobal.trimForeground();
             }
@@ -1843,8 +1848,13 @@ public final class ViewRootImpl implements ViewParent,
                 renderer.setStopped(mStopped);
             }
             if (!mStopped) {
-                mNewSurfaceNeeded = true;
-                scheduleTraversals();
+                // Unnecessary to traverse if the window is not yet visible.
+                if (getHostVisibility() == View.VISIBLE) {
+                    // Make sure that relayoutWindow will be called to get valid surface because
+                    // the previous surface may have been released.
+                    mAppVisibilityChanged = true;
+                    scheduleTraversals();
+                }
             } else {
                 if (renderer != null) {
                     renderer.destroyHardwareResources(mView);
@@ -2025,7 +2035,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     int getHostVisibility() {
-        return (mAppVisible || mForceDecorViewVisibility) ? mView.getVisibility() : View.GONE;
+        return mView != null && (mAppVisible || mForceDecorViewVisibility)
+                ? mView.getVisibility() : View.GONE;
     }
 
     /**
