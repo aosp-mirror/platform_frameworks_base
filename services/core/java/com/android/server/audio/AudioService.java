@@ -1268,6 +1268,20 @@ public class AudioService extends IAudioService.Stub
                 0 /* arg1 */, 0 /* arg2 */, null /* obj */, 0 /* delay */);
     }
 
+    private void initVolumeStreamStates() {
+        int numStreamTypes = AudioSystem.getNumStreamTypes();
+        synchronized (VolumeStreamState.class) {
+            for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
+                VolumeStreamState streamState = mStreamStates[streamType];
+                int groupId = getVolumeGroupForStreamType(streamType);
+                if (groupId != AudioVolumeGroup.DEFAULT_VOLUME_GROUP
+                        && sVolumeGroupStates.indexOfKey(groupId) >= 0) {
+                    streamState.setVolumeGroupState(sVolumeGroupStates.get(groupId));
+                }
+            }
+        }
+    }
+
     /**
      * Separating notification volume from ring is NOT of aliasing the corresponding streams
      * @param properties
@@ -1295,6 +1309,8 @@ public class AudioService extends IAudioService.Stub
         initVolumeGroupStates();
 
         mSoundDoseHelper.initSafeUsbMediaVolumeIndex();
+        // Link VGS on VSS
+        initVolumeStreamStates();
 
         // Call setRingerModeInt() to apply correct mute
         // state on streams affected by ringer mode.
@@ -3964,6 +3980,23 @@ public class AudioService extends IAudioService.Stub
             return;
         }
         VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
+        // For compatibility reason, use stream API if group linked to a valid stream
+        for (int stream : vgs.getLegacyStreamTypes()) {
+            try {
+                ensureValidStreamType(stream);
+            } catch (IllegalArgumentException e) {
+                Log.d(TAG, "volume group " + groupId + " has internal streams (" + stream
+                        + "), do not change associated stream volume");
+                continue;
+            }
+            // Call only for the first valid stream, legacy API will propagate to aliased streams.
+            // Note: Group and Stream does not share same convention, 0 is mute for stream,
+            // min index is acting as mute for Groups
+            if (vgs.isVssMuteBijective(stream)) {
+                adjustStreamVolume(stream, direction, flags, callingPackage);
+                return;
+            }
+        }
         sVolumeLogger.enqueue(new VolumeEvent(VolumeEvent.VOL_ADJUST_GROUP_VOL, vgs.name(),
                 direction, flags, callingPackage));
         vgs.adjustVolume(direction, flags);
@@ -7462,6 +7495,16 @@ public class AudioService extends IAudioService.Stub
                 || stream == AudioSystem.STREAM_BLUETOOTH_SCO;
     }
 
+    private static int getVolumeGroupForStreamType(int stream) {
+        AudioAttributes attributes =
+                AudioProductStrategy.getAudioAttributesForStrategyWithLegacyStreamType(stream);
+        if (attributes.equals(new AudioAttributes.Builder().build())) {
+            return AudioVolumeGroup.DEFAULT_VOLUME_GROUP;
+        }
+        return AudioProductStrategy.getVolumeGroupIdForAudioAttributes(
+                attributes, /* fallbackOnDefault= */ false);
+    }
+
     // NOTE: Locking order for synchronized objects related to volume management:
     //  1     mSettingsLock
     //  2       VolumeStreamState.class
@@ -7920,6 +7963,7 @@ public class AudioService extends IAudioService.Stub
     //  4       VolumeStreamState.class
     /*package*/ class VolumeStreamState {
         private final int mStreamType;
+        private VolumeGroupState mVolumeGroupState = null;
         private int mIndexMin;
         // min index when user doesn't have permission to change audio settings
         private int mIndexMinNoPerm;
@@ -7998,6 +8042,15 @@ public class AudioService extends IAudioService.Stub
             mStreamDevicesChangedOptions = streamDevicesChangedOptions.toBundle();
         }
 
+        /**
+         * Associate a {@link volumeGroupState} on the {@link VolumeStreamState}.
+         * <p> It helps to synchronize the index, mute attributes on the maching
+         * {@link volumeGroupState}
+         * @param volumeGroupState matching the {@link VolumeStreamState}
+         */
+        public void setVolumeGroupState(VolumeGroupState volumeGroupState) {
+            mVolumeGroupState = volumeGroupState;
+        }
         /**
          * Update the minimum index that can be used without MODIFY_AUDIO_SETTINGS permission
          * @param index minimum index expressed in "UI units", i.e. no 10x factor
@@ -8259,6 +8312,9 @@ public class AudioService extends IAudioService.Stub
                 }
             }
             if (changed) {
+                // If associated to volume group, update group cache
+                updateVolumeGroupIndex(device, /* forceMuteState= */ false);
+
                 oldIndex = (oldIndex + 5) / 10;
                 index = (index + 5) / 10;
                 // log base stream changes to the event log
@@ -8376,6 +8432,28 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
+        // If associated to volume group, update group cache
+        private void updateVolumeGroupIndex(int device, boolean forceMuteState) {
+            synchronized (VolumeStreamState.class) {
+                if (mVolumeGroupState != null) {
+                    int groupIndex = (getIndex(device) + 5) / 10;
+                    if (DEBUG_VOL) {
+                        Log.d(TAG, "updateVolumeGroupIndex for stream " + mStreamType
+                                + ", muted=" + mIsMuted + ", device=" + device + ", index="
+                                + getIndex(device) + ", group " + mVolumeGroupState.name()
+                                + " Muted=" + mVolumeGroupState.isMuted() + ", Index=" + groupIndex
+                                + ", forceMuteState=" + forceMuteState);
+                    }
+                    mVolumeGroupState.updateVolumeIndex(groupIndex, device);
+                    // Only propage mute of stream when applicable
+                    if (mIndexMin == 0 || isCallStream(mStreamType)) {
+                        // For call stream, align mute only when muted, not when index is set to 0
+                        mVolumeGroupState.mute(forceMuteState ? mIsMuted : groupIndex == 0);
+                    }
+                }
+            }
+        }
+
         /**
          * Mute/unmute the stream
          * @param state the new mute state
@@ -8442,6 +8520,9 @@ public class AudioService extends IAudioService.Stub
 
         public void doMute() {
             synchronized (VolumeStreamState.class) {
+                // If associated to volume group, update group cache
+                updateVolumeGroupIndex(getDeviceForStream(mStreamType), /* forceMuteState= */ true);
+
                 // Set the new mute volume. This propagates the values to
                 // the audio system, otherwise the volume won't be changed
                 // at the lower level.
@@ -8523,6 +8604,9 @@ public class AudioService extends IAudioService.Stub
             pw.println();
             pw.print("   Devices: ");
             pw.print(AudioSystem.deviceSetToString(getDeviceSetForStream(mStreamType)));
+            pw.println();
+            pw.print("   Volume Group: ");
+            pw.println(mVolumeGroupState != null ? mVolumeGroupState.name() : "n/a");
         }
     }
 
