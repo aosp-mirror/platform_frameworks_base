@@ -2916,7 +2916,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
             if (mStatusBar != null) {
                 mStatusBar.setImeWindowStatus(mCurTokenDisplayId, mCurToken, vis, backDisposition,
-                        needsToShowImeSwitcher, false /*isMultiClientImeEnabled*/);
+                        needsToShowImeSwitcher);
             }
             final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
             if (imi != null && needsToShowImeSwitcher) {
