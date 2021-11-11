@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
@@ -29,6 +31,8 @@ import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -138,27 +142,6 @@ public final class BluetoothGatt implements BluetoothProfile {
 
     /** Connection parameter update - Request low power, reduced data rate connection parameters. */
     public static final int CONNECTION_PRIORITY_LOW_POWER = 2;
-
-    /**
-     * A GATT writeCharacteristic request is started successfully.
-     *
-     * @hide
-     */
-    public static final int GATT_WRITE_REQUEST_SUCCESS = 0;
-
-    /**
-     * A GATT writeCharacteristic request failed to start.
-     *
-     * @hide
-     */
-    public static final int GATT_WRITE_REQUEST_FAIL = 1;
-
-    /**
-     * A GATT writeCharacteristic request is issued to a busy remote device.
-     *
-     * @hide
-     */
-    public static final int GATT_WRITE_REQUEST_BUSY = 2;
 
     /**
      * No authentication required.
@@ -430,6 +413,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                             if (callback != null) {
                                 if (status == 0) characteristic.setValue(value);
                                 callback.onCharacteristicRead(BluetoothGatt.this, characteristic,
+                                        value, status);
+                                // Keep calling deprecated callback to maintain app compatibility
+                                callback.onCharacteristicRead(BluetoothGatt.this, characteristic,
                                         status);
                             }
                         }
@@ -443,7 +429,8 @@ public final class BluetoothGatt implements BluetoothProfile {
                  */
                 @Override
                 @SuppressLint("AndroidFrameworkRequiresPermission")
-                public void onCharacteristicWrite(String address, int status, int handle) {
+                public void onCharacteristicWrite(String address, int status, int handle,
+                        byte[] value) {
                     if (VDBG) {
                         Log.d(TAG, "onCharacteristicWrite() - Device=" + address
                                 + " handle=" + handle + " Status=" + status);
@@ -467,12 +454,13 @@ public final class BluetoothGatt implements BluetoothProfile {
                         try {
                             final int authReq = (mAuthRetryState == AUTH_RETRY_STATE_IDLE)
                                     ? AUTHENTICATION_NO_MITM : AUTHENTICATION_MITM;
-                            int requestStatus = GATT_WRITE_REQUEST_FAIL;
+                            int requestStatus = BluetoothStatusCodes.ERROR_UNKNOWN;
                             for (int i = 0; i < WRITE_CHARACTERISTIC_MAX_RETRIES; i++) {
                                 requestStatus =  mService.writeCharacteristic(mClientIf, address,
                                                   handle, characteristic.getWriteType(), authReq,
-                                                  characteristic.getValue(), mAttributionSource);
-                                if (requestStatus != GATT_WRITE_REQUEST_BUSY) {
+                                                  value, mAttributionSource);
+                                if (requestStatus
+                                        != BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY) {
                                     break;
                                 }
                                 try {
@@ -488,7 +476,6 @@ public final class BluetoothGatt implements BluetoothProfile {
                     }
 
                     mAuthRetryState = AUTH_RETRY_STATE_IDLE;
-
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
@@ -524,6 +511,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                             final BluetoothGattCallback callback = mCallback;
                             if (callback != null) {
                                 characteristic.setValue(value);
+                                callback.onCharacteristicChanged(BluetoothGatt.this,
+                                        characteristic, value);
+                                // Keep calling deprecated callback to maintain app compatibility
                                 callback.onCharacteristicChanged(BluetoothGatt.this,
                                         characteristic);
                             }
@@ -578,6 +568,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                             final BluetoothGattCallback callback = mCallback;
                             if (callback != null) {
                                 if (status == 0) descriptor.setValue(value);
+                                callback.onDescriptorRead(BluetoothGatt.this, descriptor, status,
+                                        value);
+                                // Keep calling deprecated callback to maintain app compatibility
                                 callback.onDescriptorRead(BluetoothGatt.this, descriptor, status);
                             }
                         }
@@ -590,7 +583,8 @@ public final class BluetoothGatt implements BluetoothProfile {
                  */
                 @Override
                 @SuppressLint("AndroidFrameworkRequiresPermission")
-                public void onDescriptorWrite(String address, int status, int handle) {
+                public void onDescriptorWrite(String address, int status, int handle,
+                        byte[] value) {
                     if (VDBG) {
                         Log.d(TAG,
                                 "onDescriptorWrite() - Device=" + address + " handle=" + handle);
@@ -614,7 +608,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                             final int authReq = (mAuthRetryState == AUTH_RETRY_STATE_IDLE)
                                     ? AUTHENTICATION_NO_MITM : AUTHENTICATION_MITM;
                             mService.writeDescriptor(mClientIf, address, handle,
-                                    authReq, descriptor.getValue(), mAttributionSource);
+                                    authReq, value, mAttributionSource);
                             mAuthRetryState++;
                             return;
                         } catch (RemoteException e) {
@@ -1194,8 +1188,8 @@ public final class BluetoothGatt implements BluetoothProfile {
      * Reads the requested characteristic from the associated remote device.
      *
      * <p>This is an asynchronous operation. The result of the read operation
-     * is reported by the {@link BluetoothGattCallback#onCharacteristicRead}
-     * callback.
+     * is reported by the {@link BluetoothGattCallback#onCharacteristicRead(BluetoothGatt,
+     * BluetoothGattCharacteristic, byte[], int)} callback.
      *
      * @param characteristic Characteristic to read from the remote device
      * @return true, if the read operation was initiated successfully
@@ -1240,8 +1234,8 @@ public final class BluetoothGatt implements BluetoothProfile {
      * Reads the characteristic using its UUID from the associated remote device.
      *
      * <p>This is an asynchronous operation. The result of the read operation
-     * is reported by the {@link BluetoothGattCallback#onCharacteristicRead}
-     * callback.
+     * is reported by the {@link BluetoothGattCallback#onCharacteristicRead(BluetoothGatt,
+     * BluetoothGattCharacteristic, byte[], int)} callback.
      *
      * @param uuid UUID of characteristic to read from the remote device
      * @return true, if the read operation was initiated successfully
@@ -1284,40 +1278,94 @@ public final class BluetoothGatt implements BluetoothProfile {
      *
      * @param characteristic Characteristic to write on the remote device
      * @return true, if the write operation was initiated successfully
+     * @throws IllegalArgumentException if characteristic or its value are null
+     *
+     * @deprecated Use {@link BluetoothGatt#writeCharacteristic(BluetoothGattCharacteristic, byte[],
+     * int)} as this is not memory safe.
      */
+    @Deprecated
     @RequiresLegacyBluetoothPermission
     @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic) {
+        try {
+            return writeCharacteristic(characteristic, characteristic.getValue(),
+                    characteristic.getWriteType()) == BluetoothStatusCodes.SUCCESS;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            BluetoothStatusCodes.SUCCESS,
+            BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION,
+            BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_PRIVILEGED_PERMISSION,
+            BluetoothStatusCodes.ERROR_DEVICE_NOT_CONNECTED,
+            BluetoothStatusCodes.ERROR_PROFILE_SERVICE_NOT_BOUND,
+            BluetoothStatusCodes.ERROR_GATT_WRITE_NOT_ALLOWED,
+            BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY,
+            BluetoothStatusCodes.ERROR_UNKNOWN
+    })
+    public @interface WriteOperationReturnValues{}
+
+    /**
+     * Writes a given characteristic and its values to the associated remote device.
+     *
+     * <p>Once the write operation has been completed, the
+     * {@link BluetoothGattCallback#onCharacteristicWrite} callback is invoked,
+     * reporting the result of the operation.
+     *
+     * @param characteristic Characteristic to write on the remote device
+     * @return whether the characteristic was successfully written to
+     * @throws IllegalArgumentException if characteristic or value are null
+     */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @WriteOperationReturnValues
+    public int writeCharacteristic(@NonNull BluetoothGattCharacteristic characteristic,
+            @NonNull byte[] value, int writeType) {
+        if (characteristic == null) {
+            throw new IllegalArgumentException("characteristic must not be null");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("value must not be null");
+        }
+        if (VDBG) Log.d(TAG, "writeCharacteristic() - uuid: " + characteristic.getUuid());
         if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE) == 0
                 && (characteristic.getProperties()
                 & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) == 0) {
-            return false;
+            return BluetoothStatusCodes.ERROR_GATT_WRITE_NOT_ALLOWED;
+        }
+        if (mService == null || mClientIf == 0) {
+            return BluetoothStatusCodes.ERROR_PROFILE_SERVICE_NOT_BOUND;
         }
 
-        if (VDBG) Log.d(TAG, "writeCharacteristic() - uuid: " + characteristic.getUuid());
-        if (mService == null || mClientIf == 0 || characteristic.getValue() == null) return false;
-
         BluetoothGattService service = characteristic.getService();
-        if (service == null) return false;
+        if (service == null) {
+            throw new IllegalArgumentException("Characteristic must have a non-null service");
+        }
 
         BluetoothDevice device = service.getDevice();
-        if (device == null) return false;
+        if (device == null) {
+            throw new IllegalArgumentException("Service must have a non-null device");
+        }
 
         synchronized (mDeviceBusyLock) {
             if (mDeviceBusy) {
-                return false;
+                return BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY;
             }
             mDeviceBusy = true;
         }
 
-        int requestStatus = GATT_WRITE_REQUEST_FAIL;
+        int requestStatus = BluetoothStatusCodes.ERROR_UNKNOWN;
         try {
             for (int i = 0; i < WRITE_CHARACTERISTIC_MAX_RETRIES; i++) {
                 requestStatus = mService.writeCharacteristic(mClientIf, device.getAddress(),
-                    characteristic.getInstanceId(), characteristic.getWriteType(),
-                    AUTHENTICATION_NONE, characteristic.getValue(), mAttributionSource);
-                if (requestStatus != GATT_WRITE_REQUEST_BUSY) {
+                        characteristic.getInstanceId(), writeType, AUTHENTICATION_NONE, value,
+                        mAttributionSource);
+                if (requestStatus != BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY) {
                     break;
                 }
                 try {
@@ -1330,10 +1378,10 @@ public final class BluetoothGatt implements BluetoothProfile {
             synchronized (mDeviceBusyLock) {
                 mDeviceBusy = false;
             }
-            return false;
+            throw e.rethrowFromSystemServer();
         }
 
-        return requestStatus == GATT_WRITE_REQUEST_SUCCESS;
+        return requestStatus;
     }
 
     /**
@@ -1384,45 +1432,86 @@ public final class BluetoothGatt implements BluetoothProfile {
     /**
      * Write the value of a given descriptor to the associated remote device.
      *
-     * <p>A {@link BluetoothGattCallback#onDescriptorWrite} callback is
-     * triggered to report the result of the write operation.
+     * <p>A {@link BluetoothGattCallback#onDescriptorWrite} callback is triggered to report the
+     * result of the write operation.
      *
      * @param descriptor Descriptor to write to the associated remote device
      * @return true, if the write operation was initiated successfully
+     * @throws IllegalArgumentException if descriptor or its value are null
+     *
+     * @deprecated Use {@link BluetoothGatt#writeDescriptor(BluetoothGattDescriptor, byte[])} as
+     * this is not memory safe.
      */
+    @Deprecated
     @RequiresLegacyBluetoothPermission
     @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean writeDescriptor(BluetoothGattDescriptor descriptor) {
+        try {
+            return writeDescriptor(descriptor, descriptor.getValue())
+                    == BluetoothStatusCodes.SUCCESS;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Write the value of a given descriptor to the associated remote device.
+     *
+     * <p>A {@link BluetoothGattCallback#onDescriptorWrite} callback is triggered to report the
+     * result of the write operation.
+     *
+     * @param descriptor Descriptor to write to the associated remote device
+     * @return true, if the write operation was initiated successfully
+     * @throws IllegalArgumentException if descriptor or value are null
+     */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @WriteOperationReturnValues
+    public int writeDescriptor(@NonNull BluetoothGattDescriptor descriptor,
+            @NonNull byte[] value) {
+        if (descriptor == null) {
+            throw new IllegalArgumentException("descriptor must not be null");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("value must not be null");
+        }
         if (VDBG) Log.d(TAG, "writeDescriptor() - uuid: " + descriptor.getUuid());
-        if (mService == null || mClientIf == 0 || descriptor.getValue() == null) return false;
+        if (mService == null || mClientIf == 0) {
+            return BluetoothStatusCodes.ERROR_PROFILE_SERVICE_NOT_BOUND;
+        }
 
         BluetoothGattCharacteristic characteristic = descriptor.getCharacteristic();
-        if (characteristic == null) return false;
+        if (characteristic == null) {
+            throw new IllegalArgumentException("Descriptor must have a non-null characteristic");
+        }
 
         BluetoothGattService service = characteristic.getService();
-        if (service == null) return false;
+        if (service == null) {
+            throw new IllegalArgumentException("Characteristic must have a non-null service");
+        }
 
         BluetoothDevice device = service.getDevice();
-        if (device == null) return false;
+        if (device == null) {
+            throw new IllegalArgumentException("Service must have a non-null device");
+        }
 
         synchronized (mDeviceBusyLock) {
-            if (mDeviceBusy) return false;
+            if (mDeviceBusy) return BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY;
             mDeviceBusy = true;
         }
 
         try {
-            mService.writeDescriptor(mClientIf, device.getAddress(), descriptor.getInstanceId(),
-                    AUTHENTICATION_NONE, descriptor.getValue(), mAttributionSource);
+            return mService.writeDescriptor(mClientIf, device.getAddress(),
+                    descriptor.getInstanceId(), AUTHENTICATION_NONE, value, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
             synchronized (mDeviceBusyLock) {
                 mDeviceBusy = false;
             }
-            return false;
+            e.rethrowFromSystemServer();
         }
-
-        return true;
+        return BluetoothStatusCodes.ERROR_UNKNOWN;
     }
 
     /**
@@ -1431,9 +1520,9 @@ public final class BluetoothGatt implements BluetoothProfile {
      * <p>Once a reliable write transaction has been initiated, all calls
      * to {@link #writeCharacteristic} are sent to the remote device for
      * verification and queued up for atomic execution. The application will
-     * receive an {@link BluetoothGattCallback#onCharacteristicWrite} callback
-     * in response to every {@link #writeCharacteristic} call and is responsible
-     * for verifying if the value has been transmitted accurately.
+     * receive a {@link BluetoothGattCallback#onCharacteristicWrite} callback in response to every
+     * {@link #writeCharacteristic(BluetoothGattCharacteristic, byte[], int)} call and is
+     * responsible for verifying if the value has been transmitted accurately.
      *
      * <p>After all characteristics have been queued up and verified,
      * {@link #executeReliableWrite} will execute all writes. If a characteristic
@@ -1530,9 +1619,9 @@ public final class BluetoothGatt implements BluetoothProfile {
      * Enable or disable notifications/indications for a given characteristic.
      *
      * <p>Once notifications are enabled for a characteristic, a
-     * {@link BluetoothGattCallback#onCharacteristicChanged} callback will be
-     * triggered if the remote device indicates that the given characteristic
-     * has changed.
+     * {@link BluetoothGattCallback#onCharacteristicChanged(BluetoothGatt,
+     * BluetoothGattCharacteristic, byte[])} callback will be triggered if the remote device
+     * indicates that the given characteristic has changed.
      *
      * @param characteristic The characteristic for which to enable notifications
      * @param enable Set to true to enable notifications/indications
