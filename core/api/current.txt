@@ -40940,12 +40940,21 @@ package android.telephony {
     method @NonNull public java.util.List<java.lang.Integer> getBands();
     method @NonNull public java.util.List<java.lang.String> getMccMncs();
     method public int getPriority();
+    method @NonNull public java.util.List<android.telephony.RadioAccessSpecifier> getRadioAccessSpecifiers();
     method public int getSubId();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.AvailableNetworkInfo> CREATOR;
     field public static final int PRIORITY_HIGH = 1; // 0x1
     field public static final int PRIORITY_LOW = 3; // 0x3
     field public static final int PRIORITY_MED = 2; // 0x2
+  }
+
+  public static final class AvailableNetworkInfo.Builder {
+    ctor public AvailableNetworkInfo.Builder(int);
+    method @NonNull public android.telephony.AvailableNetworkInfo build();
+    method @NonNull public android.telephony.AvailableNetworkInfo.Builder setMccMncs(@NonNull java.util.List<java.lang.String>);
+    method @NonNull public android.telephony.AvailableNetworkInfo.Builder setPriority(int);
+    method @NonNull public android.telephony.AvailableNetworkInfo.Builder setRadioAccessSpecifiers(@NonNull java.util.List<android.telephony.RadioAccessSpecifier>);
   }
 
   public final class BarringInfo implements android.os.Parcelable {
