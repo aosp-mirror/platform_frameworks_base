@@ -16,7 +16,11 @@
 
 package androidx.window.extensions.embedding;
 
+import static androidx.window.extensions.embedding.SplitContainer.getFinishPrimaryWithSecondaryBehavior;
+import static androidx.window.extensions.embedding.SplitContainer.getFinishSecondaryWithPrimaryBehavior;
 import static androidx.window.extensions.embedding.SplitContainer.isStickyPlaceholderRule;
+import static androidx.window.extensions.embedding.SplitContainer.shouldFinishAssociatedContainerWhenAdjacent;
+import static androidx.window.extensions.embedding.SplitContainer.shouldFinishAssociatedContainerWhenStacked;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -665,15 +669,21 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // Containers are not in the same split, no need to retain.
             return false;
         }
-
-        if (!isStickyPlaceholderRule(splitContainer.getSplitRule())) {
-            // Currently only the containers associated with sticky placeholders can be retained.
-            return false;
+        // Find the finish behavior for the associated container
+        int finishBehavior;
+        SplitRule splitRule = splitContainer.getSplitRule();
+        if (finishingContainer == splitContainer.getPrimaryContainer()) {
+            finishBehavior = getFinishSecondaryWithPrimaryBehavior(splitRule);
+        } else {
+            finishBehavior = getFinishPrimaryWithSecondaryBehavior(splitRule);
         }
-
-        // When sticky placeholder is stacked on top of the main container it should not cause the
-        // destruction of the primary one.
-        return !mPresenter.shouldShowSideBySide(splitContainer);
+        // Decide whether the associated container should be retained based on the current
+        // presentation mode.
+        if (mPresenter.shouldShowSideBySide(splitContainer)) {
+            return !shouldFinishAssociatedContainerWhenAdjacent(finishBehavior);
+        } else {
+            return !shouldFinishAssociatedContainerWhenStacked(finishBehavior);
+        }
     }
 
     /**
