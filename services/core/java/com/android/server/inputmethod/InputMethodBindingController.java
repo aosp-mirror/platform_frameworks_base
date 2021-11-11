@@ -16,18 +16,28 @@
 
 package com.android.server.inputmethod;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+
+import static com.android.server.inputmethod.InputMethodManagerService.MSG_INITIALIZE_IME;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManagerInternal;
 import android.os.IBinder;
 import android.os.Process;
+import android.os.SystemClock;
+import android.os.Trace;
 import android.util.ArrayMap;
+import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
 
+import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.view.IInputMethod;
+import com.android.server.inputmethod.InputMethodManagerService.ClientState;
 
 /**
  * A controller managing the state of the input method binding.
@@ -39,6 +49,8 @@ final class InputMethodBindingController {
     @NonNull private final InputMethodManagerService mService;
     @NonNull private final Context mContext;
     @NonNull private final ArrayMap<String, InputMethodInfo> mMethodMap;
+    @NonNull private final InputMethodUtils.InputMethodSettings mSettings;
+    @NonNull private final PackageManagerInternal mPackageManagerInternal;
 
     private long mLastBindTime;
     private boolean mHasConnection;
@@ -56,6 +68,8 @@ final class InputMethodBindingController {
         mService = service;
         mContext = mService.mContext;
         mMethodMap = mService.mMethodMap;
+        mSettings = mService.mSettings;
+        mPackageManagerInternal = mService.mPackageManagerInternal;
     }
 
     /**
@@ -221,6 +235,86 @@ final class InputMethodBindingController {
         }
 
         @Override public void onServiceDisconnected(ComponentName name) {
+        }
+    };
+
+    /**
+     * Used to bind the IME while it is not currently being shown.
+     */
+    @NonNull
+    ServiceConnection getMainConnection() {
+        return mMainConnection;
+    }
+
+    private final ServiceConnection mMainConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.onServiceConnected");
+            synchronized (mMethodMap) {
+                if (getCurIntent() != null && name.equals(getCurIntent().getComponent())) {
+                    setCurMethod(IInputMethod.Stub.asInterface(service));
+                    final String curMethodPackage =
+                            getCurIntent().getComponent().getPackageName();
+                    final int curMethodUid = mPackageManagerInternal.getPackageUid(
+                            curMethodPackage, 0 /* flags */, mSettings.getCurrentUserId());
+                    if (curMethodUid < 0) {
+                        Slog.e(TAG, "Failed to get UID for package=" + curMethodPackage);
+                        setCurMethodUid(Process.INVALID_UID);
+                    } else {
+                        setCurMethodUid(curMethodUid);
+                    }
+                    if (getCurToken() == null) {
+                        Slog.w(TAG, "Service connected without a token!");
+                        mService.unbindCurrentMethodLocked();
+                        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                        return;
+                    }
+                    if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + getCurToken());
+                    // Dispatch display id for InputMethodService to update context display.
+                    mService.executeOrSendMessage(getCurMethod(),
+                            mService.mCaller.obtainMessageIOO(MSG_INITIALIZE_IME,
+                                    mMethodMap.get(getSelectedMethodId()).getConfigChanges(),
+                                    getCurMethod(), getCurToken()));
+                    mService.scheduleNotifyImeUidToAudioService(getCurMethodUid());
+                    ClientState curClient = mService.getCurClient();
+                    if (curClient != null) {
+                        mService.clearClientSessionLocked(curClient);
+                        mService.requestClientSessionLocked(curClient);
+                    }
+                }
+            }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // Note that mContext.unbindService(this) does not trigger this.  Hence if we are
+            // here the
+            // disconnection is not intended by IMMS (e.g. triggered because the current IMS
+            // crashed),
+            // which is irregular but can eventually happen for everyone just by continuing
+            // using the
+            // device.  Thus it is important to make sure that all the internal states are
+            // properly
+            // refreshed when this method is called back.  Running
+            //    adb install -r <APK that implements the current IME>
+            // would be a good way to trigger such a situation.
+            synchronized (mMethodMap) {
+                if (DEBUG) {
+                    Slog.v(TAG, "Service disconnected: " + name
+                            + " mCurIntent=" + getCurIntent());
+                }
+                if (getCurMethod() != null && getCurIntent() != null
+                        && name.equals(getCurIntent().getComponent())) {
+                    mService.clearCurMethodLocked();
+                    // We consider this to be a new bind attempt, since the system
+                    // should now try to restart the service for us.
+                    setLastBindTime(SystemClock.uptimeMillis());
+                    mService.setShowRequested(mService.isInputShown());
+                    mService.setInputShown(false);
+                    mService.unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME);
+                }
+            }
         }
     };
 
