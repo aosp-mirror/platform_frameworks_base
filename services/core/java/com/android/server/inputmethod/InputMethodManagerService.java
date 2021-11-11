@@ -1984,17 +1984,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return true;
     }
 
-    @GuardedBy("mMethodMap")
-    private boolean bindCurrentInputMethodServiceLocked(ServiceConnection conn, int flags) {
-        Intent service = getCurIntent();
-        if (service == null || conn == null) {
-            Slog.e(TAG, "--- bind failed: service = " + service + ", conn = " + conn);
-            return false;
-        }
-        return mContext.bindServiceAsUser(service, conn, flags,
-                new UserHandle(mSettings.getCurrentUserId()));
-    }
-
     @Override
     public List<InputMethodInfo> getInputMethodList(@UserIdInt int userId) {
         if (UserHandle.getCallingUserId() != userId) {
@@ -2511,7 +2500,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         Intent intent = createImeBindingIntent(info.getComponent());
         setCurIntent(intent);
 
-        if (bindCurrentInputMethodServiceLocked(intent, getMainConnection(),
+        if (mBindingController.bindCurrentInputMethodServiceLocked(intent, getMainConnection(),
                 mImeConnectionBindFlags)) {
             addFreshWindowTokenLocked(displayIdToShowIme, info.getId());
             return new InputBindResult(
@@ -3211,7 +3200,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     showInputToken));
             mInputShown = true;
             if (hasConnection() && !isVisibleBound()) {
-                bindCurrentInputMethodServiceLocked(getVisibleConnection(), IME_VISIBLE_BIND_FLAGS);
+                mBindingController.bindCurrentInputMethodServiceLocked(getVisibleConnection(),
+                        IME_VISIBLE_BIND_FLAGS);
                 setVisibleBound(true);
             }
             res = true;
@@ -3227,7 +3217,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Slog.w(TAG, "Force disconnect/connect to the IME in showCurrentInputLocked()");
                 ServiceConnection connection = getMainConnection();
                 mContext.unbindService(connection);
-                bindCurrentInputMethodServiceLocked(connection,
+                mBindingController.bindCurrentInputMethodServiceLocked(connection,
                         mImeConnectionBindFlags);
             } else {
                 if (DEBUG) {

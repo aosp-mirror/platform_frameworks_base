@@ -31,6 +31,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
@@ -341,4 +342,15 @@ final class InputMethodBindingController {
         mCurId = null;
         mService.clearCurMethodLocked();
     }
+
+    @GuardedBy("mMethodMap")
+    boolean bindCurrentInputMethodServiceLocked(ServiceConnection conn, int flags) {
+        if (mCurIntent == null || conn == null) {
+            Slog.e(TAG, "--- bind failed: service = " + mCurIntent + ", conn = " + conn);
+            return false;
+        }
+        return mContext.bindServiceAsUser(mCurIntent, conn, flags,
+                new UserHandle(mSettings.getCurrentUserId()));
+    }
+
 }
