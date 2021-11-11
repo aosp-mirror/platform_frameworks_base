@@ -24,13 +24,16 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import android.content.res.Configuration;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
+import android.view.IWindowManager;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -56,14 +59,17 @@ import org.mockito.MockitoAnnotations;
 public class WindowContextControllerTest {
     private WindowContextController mController;
     @Mock
+    private IWindowManager mMockWms;
+    @Mock
     private WindowTokenClient mMockToken;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mController = new WindowContextController(mMockToken);
+        mController = new WindowContextController(mMockToken, mMockWms);
         doNothing().when(mMockToken).onConfigurationChanged(any(), anyInt(), anyBoolean());
-        doReturn(true).when(mMockToken).attachToDisplayArea(anyInt(), anyInt(), any());
+        doReturn(new Configuration()).when(mMockWms).attachWindowContextToDisplayArea(any(),
+                anyInt(), anyInt(), any());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -75,10 +81,10 @@ public class WindowContextControllerTest {
     }
 
     @Test
-    public void testDetachIfNeeded_NotAttachedYet_DoNothing() {
+    public void testDetachIfNeeded_NotAttachedYet_DoNothing() throws Exception {
         mController.detachIfNeeded();
 
-        verify(mMockToken, never()).detachFromWindowContainerIfNeeded();
+        verify(mMockWms, never()).detachWindowContextFromWindowContainer(any());
     }
 
     @Test
@@ -87,6 +93,8 @@ public class WindowContextControllerTest {
                 null /* options */);
 
         assertThat(mController.mAttachedToDisplayArea).isTrue();
+        verify(mMockToken).onConfigurationChanged(any(), eq(DEFAULT_DISPLAY),
+                eq(false) /* shouldReportConfigChange */);
 
         mController.detachIfNeeded();
 
