@@ -1518,6 +1518,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     @Override
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
+        // update assistant entry points on system navigation radio button click
+        updateAssistantEntrypoints();
+
         if (!QuickStepContract.isGesturalMode(mode)) {
             // Reset the override alpha
             if (getBarTransitions() != null) {
