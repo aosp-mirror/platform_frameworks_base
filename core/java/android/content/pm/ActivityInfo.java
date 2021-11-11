@@ -1002,10 +1002,9 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * OVERRIDE_MIN_ASPECT_RATIO_MEDIUM
      * OVERRIDE_MIN_ASPECT_RATIO_LARGE
      *
-     * If OVERRIDE_MIN_ASPECT_RATIO is applied, and the activity's orientation is fixed to
-     * portrait, the min aspect ratio given in the app's manifest will be overridden to the
-     * largest enabled aspect ratio treatment unless the app's manifest value is higher.
-     * TODO(b/203647190): add OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY instead of portrait by default
+     * If OVERRIDE_MIN_ASPECT_RATIO is applied, the min aspect ratio given in the app's manifest
+     * will be overridden to the largest enabled aspect ratio treatment unless the app's manifest
+     * value is higher.
      * @hide
      */
     @ChangeId
@@ -1013,6 +1012,19 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @Disabled
     @TestApi
     public static final long OVERRIDE_MIN_ASPECT_RATIO = 174042980L; // buganizer id
+
+    /**
+     * This change id restricts treatments that force a given min aspect ratio to activities
+     * whose orientation is fixed to portrait.
+     *
+     * This treatment only takes effect if OVERRIDE_MIN_ASPECT_RATIO is also enabled.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    @TestApi
+    public static final long OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY = 203647190L; // buganizer id
 
     /**
      * This change id sets the activity's min aspect ratio to a medium value as defined by
@@ -1343,9 +1355,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      */
     @SizeChangesSupportMode
     public int supportsSizeChanges() {
-        if (CompatChanges.isChangeEnabled(FORCE_NON_RESIZE_APP,
-                applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+        if (isChangeEnabled(FORCE_NON_RESIZE_APP)) {
             return SIZE_CHANGES_UNSUPPORTED_OVERRIDE;
         }
 
@@ -1353,9 +1363,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             return SIZE_CHANGES_SUPPORTED_METADATA;
         }
 
-        if (CompatChanges.isChangeEnabled(FORCE_RESIZE_APP,
-                applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+        if (isChangeEnabled(FORCE_RESIZE_APP)) {
             return SIZE_CHANGES_SUPPORTED_OVERRIDE;
         }
 
@@ -1367,9 +1375,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @hide
      */
     public boolean neverSandboxDisplayApis() {
-        return CompatChanges.isChangeEnabled(NEVER_SANDBOX_DISPLAY_APIS,
-                applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid))
+        return isChangeEnabled(NEVER_SANDBOX_DISPLAY_APIS)
                 || ConstrainDisplayApisConfig.neverConstrainDisplayApis(applicationInfo);
     }
 
@@ -1378,9 +1384,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @hide
      */
     public boolean alwaysSandboxDisplayApis() {
-        return CompatChanges.isChangeEnabled(ALWAYS_SANDBOX_DISPLAY_APIS,
-                applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid))
+        return isChangeEnabled(ALWAYS_SANDBOX_DISPLAY_APIS)
                 || ConstrainDisplayApisConfig.alwaysConstrainDisplayApis(applicationInfo);
     }
 
@@ -1410,29 +1414,26 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @hide
      */
     public float getMinAspectRatio(@ScreenOrientation int orientation) {
-        // TODO(b/203647190): check orientation only if OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY
-        // In case the activity's orientation isn't fixed to portrait, OVERRIDE_MIN_ASPECT_RATIO
-        // shouldn't be applied.
-        if (applicationInfo == null || !CompatChanges.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO,
-                applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid))
-                || !isFixedOrientationPortrait(orientation)) {
+        if (applicationInfo == null || !isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO) || (
+                isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY)
+                        && !isFixedOrientationPortrait(orientation))) {
             return mMinAspectRatio;
         }
 
-        if (CompatChanges.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_LARGE,
-                applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+        if (isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_LARGE)) {
             return Math.max(OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE, mMinAspectRatio);
         }
 
-        if (CompatChanges.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_MEDIUM,
-                applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+        if (isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_MEDIUM)) {
             return Math.max(OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE, mMinAspectRatio);
         }
 
         return mMinAspectRatio;
+    }
+
+    private boolean isChangeEnabled(long changeId) {
+        return CompatChanges.isChangeEnabled(changeId, applicationInfo.packageName,
+                UserHandle.getUserHandleForUid(applicationInfo.uid));
     }
 
     /** @hide */
@@ -1502,9 +1503,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @hide
      */
     public boolean shouldCheckMinWidthHeightForMultiWindow() {
-        return CompatChanges.isChangeEnabled(CHECK_MIN_WIDTH_HEIGHT_FOR_MULTI_WINDOW,
-                applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid));
+        return isChangeEnabled(CHECK_MIN_WIDTH_HEIGHT_FOR_MULTI_WINDOW);
     }
 
     public void dump(Printer pw, String prefix) {
