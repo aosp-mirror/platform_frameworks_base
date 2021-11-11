@@ -109,7 +109,9 @@ public class AmbientDisplayConfiguration {
 
     /** {@hide} */
     public boolean quickPickupSensorEnabled(int user) {
-        return !TextUtils.isEmpty(quickPickupSensorType()) && !alwaysOnEnabled(user);
+        return !TextUtils.isEmpty(quickPickupSensorType())
+                && pickupGestureEnabled(user)
+                && !alwaysOnEnabled(user);
     }
 
     /** {@hide} */
