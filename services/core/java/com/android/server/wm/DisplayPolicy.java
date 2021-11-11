@@ -54,6 +54,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
@@ -111,9 +112,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
 import android.app.ActivityManager;
-import android.app.ActivityThread;
-import android.app.LoadedApk;
-import android.app.ResourcesManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -450,7 +448,7 @@ public class DisplayPolicy {
                 : service.mContext.createDisplayContext(displayContent.getDisplay());
         mUiContext = displayContent.isDefaultDisplay ? service.mAtmService.mUiContext
                 : service.mAtmService.mSystemThread
-                        .createSystemUiContext(displayContent.getDisplayId());
+                        .getSystemUiContext(displayContent.getDisplayId());
         mDisplayContent = displayContent;
         mLock = service.getWindowManagerLock();
 
@@ -880,6 +878,20 @@ public class DisplayPolicy {
     }
 
     /**
+     * Only trusted overlays are allowed to use FLAG_SLIPPERY.
+     */
+    static int sanitizeFlagSlippery(int flags, int privateFlags, String name) {
+        if ((flags & FLAG_SLIPPERY) == 0) {
+            return flags;
+        }
+        if ((privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0) {
+            return flags;
+        }
+        Slog.w(TAG, "Removing FLAG_SLIPPERY for non-trusted overlay " + name);
+        return flags & ~FLAG_SLIPPERY;
+    }
+
+    /**
      * Sanitize the layout parameters coming from a client.  Allows the policy
      * to do things like ensure that windows of a specific type can't take
      * input focus.
@@ -950,6 +962,8 @@ public class DisplayPolicy {
         if (mExtraNavBarAlt == win) {
             mExtraNavBarAltPosition = getAltBarPosition(attrs);
         }
+
+        attrs.flags = sanitizeFlagSlippery(attrs.flags, attrs.privateFlags, win.getName());
     }
 
     /**
@@ -2240,19 +2254,8 @@ public class DisplayPolicy {
 
         // For non-system users, ensure that the resources are loaded from the current
         // user's package info (see ContextImpl.createDisplayContext)
-        final LoadedApk pi = ActivityThread.currentActivityThread().getPackageInfo(
-                uiContext.getPackageName(), null, 0, userId);
-        mCurrentUserResources = ResourcesManager.getInstance().getResources(null,
-                pi.getResDir(),
-                null /* splitResDirs */,
-                pi.getOverlayDirs(),
-                pi.getOverlayPaths(),
-                pi.getApplicationInfo().sharedLibraryFiles,
-                mDisplayContent.getDisplayId(),
-                null /* overrideConfig */,
-                uiContext.getResources().getCompatibilityInfo(),
-                null /* classLoader */,
-                null /* loaders */);
+        mCurrentUserResources = uiContext.createContextAsUser(UserHandle.of(userId), 0 /* flags*/)
+                .getResources();
     }
 
     @VisibleForTesting

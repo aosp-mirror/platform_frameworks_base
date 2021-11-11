@@ -58,6 +58,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -2740,6 +2741,9 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public Configuration attachWindowContextToDisplayArea(IBinder clientToken, int
             type, int displayId, Bundle options) {
+        if (clientToken == null) {
+            throw new IllegalArgumentException("clientToken must not be null!");
+        }
         final boolean callerCanManageAppTokens = checkCallingPermission(MANAGE_APP_TOKENS,
                 "attachWindowContextToDisplayArea", false /* printLog */);
         final int callingUid = Binder.getCallingUid();
@@ -2824,6 +2828,39 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (token != null && token.isFromClient()) {
                     removeWindowToken(token.token, token.getDisplayContent().getDisplayId());
                 }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public Configuration attachToDisplayContent(IBinder clientToken, int displayId) {
+        if (clientToken == null) {
+            throw new IllegalArgumentException("clientToken must not be null!");
+        }
+        final int callingUid = Binder.getCallingUid();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                // We use "getDisplayContent" instead of "getDisplayContentOrCreate" because
+                // this method may be called in DisplayPolicy's constructor and may cause
+                // infinite loop. In this scenario, we early return here and switch to do the
+                // registration in DisplayContent#onParentChanged at DisplayContent initialization.
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    if (Binder.getCallingPid() != myPid()) {
+                        throw new WindowManager.InvalidDisplayException("attachToDisplayContent: "
+                                + "trying to attach to a non-existing display:" + displayId);
+                    }
+                    // Early return if this method is invoked from system process.
+                    // See above comments for more detail.
+                    return null;
+                }
+
+                mWindowContextListenerController.registerWindowContainerListener(clientToken, dc,
+                        callingUid, INVALID_WINDOW_TYPE, null /* options */);
+                return dc.getConfiguration();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -8337,8 +8374,10 @@ public class WindowManagerService extends IWindowManager.Stub
         h.setWindowToken(window);
         h.name = name;
 
+        flags = DisplayPolicy.sanitizeFlagSlippery(flags, privateFlags, name);
+
         final int sanitizedFlags = flags & (LayoutParams.FLAG_NOT_TOUCHABLE
-                | LayoutParams.FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE);
+                | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE);
         h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | sanitizedFlags;
         h.layoutParamsType = type;
         h.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
