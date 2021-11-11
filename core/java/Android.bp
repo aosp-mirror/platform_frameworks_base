@@ -343,7 +343,6 @@ aidl_interface {
 filegroup {
     name: "framework-telephony-common-shared-srcs",
     srcs: [
-        ":modules-utils-preconditions-srcs",
         "android/os/RegistrantList.java",
         "android/os/Registrant.java",
         "android/util/IndentingPrintWriter.java",
@@ -355,10 +354,7 @@ filegroup {
         "com/android/internal/util/BitwiseInputStream.java",
         "com/android/internal/util/FastXmlSerializer.java",
         "com/android/internal/util/HexDump.java",
-        "com/android/internal/util/IState.java",
         "com/android/internal/util/IndentingPrintWriter.java",
-        "com/android/internal/util/State.java",
-        "com/android/internal/util/StateMachine.java",
         "com/android/internal/util/UserIcons.java",
     ],
 }
