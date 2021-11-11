@@ -513,10 +513,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     boolean mImeHiddenByDisplayPolicy;
 
+    ClientState getCurClient() {
+        return mCurClient;
+    }
+
+    void setCurClient(ClientState curClient) {
+        mCurClient = curClient;
+    }
+
     /**
      * The client that is currently bound to an input method.
      */
-    ClientState mCurClient;
+    private ClientState mCurClient;
 
     /**
      * The last window token that we confirmed to be focused.  This is always updated upon reports
@@ -594,10 +602,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mBindingController.setHasConnection(hasConnection);
     }
 
+    boolean isShowRequested() {
+        return mShowRequested;
+    }
+
+    void setShowRequested(boolean showRequested) {
+        mShowRequested = showRequested;
+    }
+
     /**
      * Set if the client has asked for the input method to be shown.
      */
-    boolean mShowRequested;
+    private boolean mShowRequested;
 
     /**
      * Set if we were explicitly told to show the input method.
@@ -609,10 +625,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     boolean mShowForced;
 
+    boolean isInputShown() {
+        return mInputShown;
+    }
+
+    void setInputShown(boolean inputShown) {
+        mInputShown = inputShown;
+    }
+
     /**
      * Set if we last told the input method to show itself.
      */
-    boolean mInputShown;
+    private boolean mInputShown;
 
     /**
      * {@code true} if the current input method is in fullscreen mode.
