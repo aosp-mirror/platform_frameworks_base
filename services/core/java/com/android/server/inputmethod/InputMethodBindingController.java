@@ -144,10 +144,6 @@ final class InputMethodBindingController {
         return mHasConnection;
     }
 
-    void setHasConnection(boolean hasConnection) {
-        mHasConnection = hasConnection;
-    }
-
     /**
      * Id obtained with {@link InputMethodInfo#getId()} for the input method that we are currently
      * connected to or in the process of connecting to.
@@ -259,10 +255,6 @@ final class InputMethodBindingController {
      */
     boolean isVisibleBound() {
         return mVisibleBound;
-    }
-
-    void setVisibleBound(boolean visibleBound) {
-        mVisibleBound = visibleBound;
     }
 
     /**
@@ -405,14 +397,16 @@ final class InputMethodBindingController {
 
     @GuardedBy("mMethodMap")
     boolean bindCurrentInputMethodServiceVisibleConnectionLocked() {
-        return bindCurrentInputMethodServiceLocked(mVisibleConnection,
+        mVisibleBound = bindCurrentInputMethodServiceLocked(mVisibleConnection,
                 IME_VISIBLE_BIND_FLAGS);
+        return mVisibleBound;
     }
 
     @GuardedBy("mMethodMap")
     boolean bindCurrentInputMethodServiceMainConnectionLocked() {
-        return bindCurrentInputMethodServiceLocked(mMainConnection,
+        mHasConnection = bindCurrentInputMethodServiceLocked(mMainConnection,
                 mImeConnectionBindFlags);
+        return mHasConnection;
     }
 
 

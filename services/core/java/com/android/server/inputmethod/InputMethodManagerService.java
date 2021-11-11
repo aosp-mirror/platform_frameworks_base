@@ -559,10 +559,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return mBindingController.hasConnection();
     }
 
-    private void setHasConnection(boolean hasConnection) {
-        mBindingController.setHasConnection(hasConnection);
-    }
-
     boolean isShowRequested() {
         return mShowRequested;
     }
@@ -2531,7 +2527,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         Binder token = new Binder();
         setCurToken(token);
         setLastBindTime(SystemClock.uptimeMillis());
-        setHasConnection(true);
         setCurId(methodId);
         mCurTokenDisplayId = displayIdToShowIme;
         try {
@@ -3152,7 +3147,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mInputShown = true;
             if (hasConnection() && !isVisibleBound()) {
                 mBindingController.bindCurrentInputMethodServiceVisibleConnectionLocked();
-                setVisibleBound(true);
             }
             res = true;
         } else {
