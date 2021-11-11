@@ -223,7 +223,7 @@ public class InputMethodMenuController {
     public Context getSettingsContext(int displayId) {
         if (mSettingsContext == null || mSettingsContext.getDisplayId() != displayId) {
             final Context systemUiContext = ActivityThread.currentActivityThread()
-                    .getSystemUiContext(displayId);
+                    .createSystemUiContext(displayId);
             final Context windowContext = systemUiContext.createWindowContext(
                     WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG, null /* options */);
             mSettingsContext = new ContextThemeWrapper(
