@@ -16,7 +16,6 @@
 
 package android.companion.virtual;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -43,10 +42,6 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.view.Surface;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.concurrent.Executor;
 
 /**
@@ -60,23 +55,6 @@ public final class VirtualDeviceManager {
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "VirtualDeviceManager";
-
-    /** @hide */
-    @IntDef(prefix = "DISPLAY_FLAG_",
-            flag = true,
-            value = {DISPLAY_FLAG_TRUSTED})
-    @Retention(RetentionPolicy.SOURCE)
-    @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
-    public @interface DisplayFlags {}
-
-    /**
-     * Indicates that the display is trusted to show system decorations and receive inputs without
-     * users' touch.
-     *
-     * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED
-     * @hide  // TODO(b/194949534): Unhide this API
-     */
-    public static final int DISPLAY_FLAG_TRUSTED = 1;
 
     private static final int DEFAULT_VIRTUAL_DISPLAY_FLAGS =
             DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC
@@ -102,12 +80,12 @@ public final class VirtualDeviceManager {
      * @param associationId The association ID as returned by {@link AssociationInfo#getId()} from
      *   Companion Device Manager. Virtual devices must have a corresponding association with CDM in
      *   order to be created.
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Nullable
-    public VirtualDevice createVirtualDevice(int associationId, VirtualDeviceParams params) {
-        // TODO(b/194949534): Unhide this API
+    public VirtualDevice createVirtualDevice(
+            int associationId,
+            @NonNull VirtualDeviceParams params) {
         try {
             IVirtualDevice virtualDevice = mService.createVirtualDevice(
                     new Binder(), mContext.getPackageName(), associationId, params);
@@ -187,7 +165,12 @@ public final class VirtualDeviceManager {
          * @param surface The surface to which the content of the virtual display should
          * be rendered, or null if there is none initially. The surface can also be set later using
          * {@link VirtualDisplay#setSurface(Surface)}.
-         * @param flags Either 0, or {@link #DISPLAY_FLAG_TRUSTED}.
+         * @param flags A combination of virtual display flags accepted by
+         * {@link DisplayManager#createVirtualDisplay}. In addition, the following flags are
+         * automatically set for all virtual devices:
+         * {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_PUBLIC VIRTUAL_DISPLAY_FLAG_PUBLIC} and
+         * {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+         * VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY}.
          * @param callback Callback to call when the state of the {@link VirtualDisplay} changes
          * @param handler The handler on which the listener should be invoked, or null
          * if the listener should be invoked on the calling thread's looper.
@@ -195,9 +178,7 @@ public final class VirtualDeviceManager {
          * not create the virtual display.
          *
          * @see DisplayManager#createVirtualDisplay
-         * @hide
          */
-        // TODO(b/194949534): Unhide this API
         // Suppress "ExecutorRegistration" because DisplayManager.createVirtualDisplay takes a
         // handler
         @SuppressLint("ExecutorRegistration")
@@ -207,7 +188,7 @@ public final class VirtualDeviceManager {
                 int height,
                 int densityDpi,
                 @Nullable Surface surface,
-                @DisplayFlags int flags,
+                int flags,
                 @Nullable Handler handler,
                 @Nullable VirtualDisplay.Callback callback) {
             // TODO(b/205343547): Handle display groups properly instead of creating a new display
@@ -246,7 +227,6 @@ public final class VirtualDeviceManager {
          * @param inputDeviceName the name to call this input device
          * @param vendorId the vendor id
          * @param productId the product id
-         * @hide
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
@@ -273,7 +253,6 @@ public final class VirtualDeviceManager {
          * @param inputDeviceName the name to call this input device
          * @param vendorId the vendor id
          * @param productId the product id
-         * @hide
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
@@ -300,7 +279,6 @@ public final class VirtualDeviceManager {
          * @param inputDeviceName the name to call this input device
          * @param vendorId the vendor id
          * @param productId the product id
-         * @hide
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
@@ -328,12 +306,8 @@ public final class VirtualDeviceManager {
          * com.android.server.companion.virtual.VirtualDeviceImpl#getBaseVirtualDisplayFlags()} will
          * be added by DisplayManagerService.
          */
-        private int getVirtualDisplayFlags(@DisplayFlags int flags) {
-            int virtualDisplayFlags = DEFAULT_VIRTUAL_DISPLAY_FLAGS;
-            if ((flags & DISPLAY_FLAG_TRUSTED) != 0) {
-                virtualDisplayFlags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
-            }
-            return virtualDisplayFlags;
+        private int getVirtualDisplayFlags(int flags) {
+            return DEFAULT_VIRTUAL_DISPLAY_FLAGS | flags;
         }
 
         private String getVirtualDisplayName() {

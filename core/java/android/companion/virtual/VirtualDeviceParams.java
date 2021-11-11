@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -41,7 +42,7 @@ import java.util.Set;
  *
  * @hide
  */
-// TODO(b/194949534): Unhide this API
+@SystemApi
 public final class VirtualDeviceParams implements Parcelable {
 
     /** @hide */
@@ -53,15 +54,11 @@ public final class VirtualDeviceParams implements Parcelable {
 
     /**
      * Indicates that the lock state of the virtual device should be always locked.
-     *
-     * @hide  // TODO(b/194949534): Unhide this API
      */
     public static final int LOCK_STATE_ALWAYS_LOCKED = 0;
 
     /**
      * Indicates that the lock state of the virtual device should be always unlocked.
-     *
-     * @hide  // TODO(b/194949534): Unhide this API
      */
     public static final int LOCK_STATE_ALWAYS_UNLOCKED = 1;
 
@@ -112,6 +109,7 @@ public final class VirtualDeviceParams implements Parcelable {
      * Returns the set of activities allowed to be streamed, or {@code null} if this is not set.
      *
      * @see Builder#setAllowedActivities(Set)
+     * @hide  // TODO(b/194949534): Unhide this API
      */
     @Nullable
     public Set<ComponentName> getAllowedActivities() {
@@ -126,6 +124,7 @@ public final class VirtualDeviceParams implements Parcelable {
      * set.
      *
      * @see Builder#setBlockedActivities(Set)
+     * @hide  // TODO(b/194949534): Unhide this API
      */
     @Nullable
     public Set<ComponentName> getBlockedActivities() {
@@ -169,6 +168,7 @@ public final class VirtualDeviceParams implements Parcelable {
     }
 
     @Override
+    @NonNull
     public String toString() {
         return "VirtualDeviceParams("
                 + " mLockState=" + mLockState
@@ -178,6 +178,7 @@ public final class VirtualDeviceParams implements Parcelable {
                 + ")";
     }
 
+    @NonNull
     public static final Parcelable.Creator<VirtualDeviceParams> CREATOR =
             new Parcelable.Creator<VirtualDeviceParams>() {
                 public VirtualDeviceParams createFromParcel(Parcel in) {
@@ -216,13 +217,25 @@ public final class VirtualDeviceParams implements Parcelable {
 
         /**
          * Sets the user handles with matching managed accounts on the remote device to which
-         * this virtual device is streaming.
+         * this virtual device is streaming. The caller is responsible for verifying the presence
+         * and legitimacy of a matching managed account on the remote device.
+         *
+         * <p>If the app streaming policy is
+         * {@link android.app.admin.DevicePolicyManager#NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY
+         * NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY}, activities not in
+         * {@code usersWithMatchingAccounts} will be blocked from starting.
+         *
+         * <p> If {@code usersWithMatchingAccounts} is empty (the default), streaming is allowed
+         * only if there is no device policy, or if the nearby streaming policy is
+         * {@link android.app.admin.DevicePolicyManager#NEARBY_STREAMING_ENABLED
+         * NEARBY_STREAMING_ENABLED}.
          *
          * @param usersWithMatchingAccounts A set of user handles with matching managed
          *   accounts on the remote device this is streaming to.
          *
          * @see android.app.admin.DevicePolicyManager#NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY
          */
+        @NonNull
         public Builder setUsersWithMatchingAccounts(
                 @NonNull Set<UserHandle> usersWithMatchingAccounts) {
             mUsersWithMatchingAccounts = usersWithMatchingAccounts;
@@ -242,6 +255,7 @@ public final class VirtualDeviceParams implements Parcelable {
          *
          * @param allowedActivities A set of activity {@link ComponentName} allowed to be launched
          *   in the virtual device.
+         * @hide  // TODO(b/194949534): Unhide this API
          */
         public Builder setAllowedActivities(@Nullable Set<ComponentName> allowedActivities) {
             if (mBlockedActivities != null && allowedActivities != null) {
@@ -265,6 +279,7 @@ public final class VirtualDeviceParams implements Parcelable {
          *
          * @param blockedActivities A set of {@link ComponentName} to be blocked launching from
          *   virtual device.
+         * @hide  // TODO(b/194949534): Unhide this API
          */
         public Builder setBlockedActivities(@Nullable Set<ComponentName> blockedActivities) {
             if (mAllowedActivities != null && blockedActivities != null) {

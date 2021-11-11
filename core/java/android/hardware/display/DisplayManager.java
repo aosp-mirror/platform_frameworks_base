@@ -334,6 +334,7 @@ public final class DisplayManager {
      * @hide
      */
     @TestApi
+    @SystemApi
     public static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1 << 10;
 
     /**
