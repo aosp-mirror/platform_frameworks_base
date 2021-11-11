@@ -35,6 +35,7 @@ import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.view.IInputMethod;
 import com.android.server.inputmethod.InputMethodManagerService.ClientState;
@@ -253,15 +254,7 @@ final class InputMethodBindingController {
             synchronized (mMethodMap) {
                 if (mCurIntent != null && name.equals(mCurIntent.getComponent())) {
                     mCurMethod = IInputMethod.Stub.asInterface(service);
-                    final String curMethodPackage = mCurIntent.getComponent().getPackageName();
-                    final int curMethodUid = mPackageManagerInternal.getPackageUid(
-                            curMethodPackage, 0 /* flags */, mSettings.getCurrentUserId());
-                    if (curMethodUid < 0) {
-                        Slog.e(TAG, "Failed to get UID for package=" + curMethodPackage);
-                        mCurMethodUid = Process.INVALID_UID;
-                    } else {
-                        mCurMethodUid = curMethodUid;
-                    }
+                    updateCurrentMethodUidLocked();
                     if (mCurToken == null) {
                         Slog.w(TAG, "Service connected without a token!");
                         mService.unbindCurrentMethodLocked();
@@ -283,6 +276,19 @@ final class InputMethodBindingController {
                 }
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+
+        @GuardedBy("mMethodMap")
+        private void updateCurrentMethodUidLocked() {
+            final String curMethodPackage = mCurIntent.getComponent().getPackageName();
+            final int curMethodUid = mPackageManagerInternal.getPackageUid(
+                    curMethodPackage, 0 /* flags */, mSettings.getCurrentUserId());
+            if (curMethodUid < 0) {
+                Slog.e(TAG, "Failed to get UID for package=" + curMethodPackage);
+                mCurMethodUid = Process.INVALID_UID;
+            } else {
+                mCurMethodUid = curMethodUid;
+            }
         }
 
         @Override
