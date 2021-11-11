@@ -33,7 +33,11 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IVolumeController;
+import android.media.MediaRoute2Info;
+import android.media.MediaRouter2Manager;
+import android.media.RoutingSessionInfo;
 import android.media.VolumePolicy;
+import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession.Token;
 import android.net.Uri;
@@ -71,6 +75,7 @@ import com.android.systemui.util.concurrency.ThreadFactory;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -118,6 +123,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final Context mContext;
     private final Looper mWorkerLooper;
     private final PackageManager mPackageManager;
+    private final MediaRouter2Manager mRouter2Manager;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private AudioManager mAudio;
     private IAudioService mAudioService;
@@ -179,6 +185,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mWorkerLooper = theadFactory.buildLooperOnNewThread(
                 VolumeDialogControllerImpl.class.getSimpleName());
         mWorker = new W(mWorkerLooper);
+        mRouter2Manager = MediaRouter2Manager.getInstance(mContext);
         mMediaSessionsCallbacksW = new MediaSessionsCallbacks(mContext);
         mMediaSessions = createMediaSessions(mContext, mWorkerLooper, mMediaSessionsCallbacksW);
         mAudio = audioManager;
@@ -1149,16 +1156,16 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         private final HashMap<Token, Integer> mRemoteStreams = new HashMap<>();
 
         private int mNextStream = DYNAMIC_STREAM_START_INDEX;
-        private final boolean mShowRemoteSessions;
+        private final boolean mVolumeAdjustmentForRemoteGroupSessions;
 
         public MediaSessionsCallbacks(Context context) {
-            mShowRemoteSessions = context.getResources().getBoolean(
-                    com.android.internal.R.bool.config_volumeShowRemoteSessions);
+            mVolumeAdjustmentForRemoteGroupSessions = context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
         }
 
         @Override
         public void onRemoteUpdate(Token token, String name, PlaybackInfo pi) {
-            if (mShowRemoteSessions) {
+            if (showForSession(token)) {
                 addStream(token, "onRemoteUpdate");
 
                 int stream = 0;
@@ -1190,7 +1197,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
         @Override
         public void onRemoteVolumeChanged(Token token, int flags) {
-            if (mShowRemoteSessions) {
+            if (showForSession(token)) {
                 addStream(token, "onRemoteVolumeChanged");
                 int stream = 0;
                 synchronized (mRemoteStreams) {
@@ -1214,7 +1221,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
         @Override
         public void onRemoteRemoved(Token token) {
-            if (mShowRemoteSessions) {
+            if (showForSession(token)) {
                 int stream = 0;
                 synchronized (mRemoteStreams) {
                     if (!mRemoteStreams.containsKey(token)) {
@@ -1233,14 +1240,41 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         }
 
         public void setStreamVolume(int stream, int level) {
-            if (mShowRemoteSessions) {
-                final Token t = findToken(stream);
-                if (t == null) {
-                    Log.w(TAG, "setStreamVolume: No token found for stream: " + stream);
-                    return;
-                }
-                mMediaSessions.setVolume(t, level);
+            final Token token = findToken(stream);
+            if (token == null) {
+                Log.w(TAG, "setStreamVolume: No token found for stream: " + stream);
+                return;
             }
+            if (showForSession(token)) {
+                mMediaSessions.setVolume(token, level);
+            }
+        }
+
+        private boolean showForSession(Token token) {
+            if (mVolumeAdjustmentForRemoteGroupSessions) {
+                return true;
+            }
+            MediaController ctr = new MediaController(mContext, token);
+            String packageName = ctr.getPackageName();
+            List<RoutingSessionInfo> sessions =
+                    mRouter2Manager.getRoutingSessions(packageName);
+            boolean foundNonSystemSession = false;
+            boolean isGroup = false;
+            for (RoutingSessionInfo session : sessions) {
+                if (!session.isSystemSession()) {
+                    foundNonSystemSession = true;
+                    int selectedRouteCount = session.getSelectedRoutes().size();
+                    if (selectedRouteCount > 1) {
+                        isGroup = true;
+                        break;
+                    }
+                }
+            }
+            if (!foundNonSystemSession) {
+                Log.d(TAG, "No routing session for " + packageName);
+                return false;
+            }
+            return !isGroup;
         }
 
         private Token findToken(int stream) {
