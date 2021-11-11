@@ -82,6 +82,7 @@ import android.window.WindowContainerTransaction;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.AttributeCache;
+import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.DisplayController;
@@ -301,6 +302,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final int wallpaperTransit = getWallpaperTransitType(info);
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
+            final boolean isTask = change.getTaskInfo() != null;
 
             if (change.getMode() == TRANSIT_CHANGE && (change.getFlags() & FLAG_IS_DISPLAY) != 0) {
                 int rotateDelta = change.getEndRotation() - change.getStartRotation();
@@ -348,7 +350,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 startTransaction.setPosition(change.getLeash(),
                         change.getEndAbsBounds().left - change.getEndRelOffset().x,
                         change.getEndAbsBounds().top - change.getEndRelOffset().y);
-                if (change.getTaskInfo() != null) {
+                if (isTask) {
                     // Skip non-tasks since those usually have null bounds.
                     startTransaction.setWindowCrop(change.getLeash(),
                             change.getEndAbsBounds().width(), change.getEndAbsBounds().height());
@@ -364,11 +366,22 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     requireBackgroundForTransition = true;
                 }
 
+                float cornerRadius = 0;
+                if (a.hasRoundedCorners() && isTask) {
+                    // hasRoundedCorners is currently only enabled for tasks
+                    final Context displayContext =
+                            mDisplayController.getDisplayContext(change.getTaskInfo().displayId);
+                    cornerRadius =
+                            ScreenDecorationsUtils.getWindowCornerRadius(displayContext);
+                }
+
                 startSurfaceAnimation(animations, a, change.getLeash(), onAnimFinish,
-                        mTransactionPool, mMainExecutor, mAnimExecutor, null /* position */);
+                        mTransactionPool, mMainExecutor, mAnimExecutor, null /* position */,
+                        cornerRadius, change.getEndAbsBounds());
 
                 if (info.getAnimationOptions() != null) {
-                    attachThumbnail(animations, onAnimFinish, change, info.getAnimationOptions());
+                    attachThumbnail(animations, onAnimFinish, change, info.getAnimationOptions(),
+                            cornerRadius);
                 }
             }
         }
@@ -557,7 +570,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             @NonNull Animation anim, @NonNull SurfaceControl leash,
             @NonNull Runnable finishCallback, @NonNull TransactionPool pool,
             @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor,
-            @Nullable Point position) {
+            @Nullable Point position, float cornerRadius, @Nullable Rect clipRect) {
         final SurfaceControl.Transaction transaction = pool.acquire();
         final ValueAnimator va = ValueAnimator.ofFloat(0f, 1f);
         final Transformation transformation = new Transformation();
@@ -569,12 +582,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             final long currentPlayTime = Math.min(va.getDuration(), va.getCurrentPlayTime());
 
             applyTransformation(currentPlayTime, transaction, leash, anim, transformation, matrix,
-                    position);
+                    position, cornerRadius, clipRect);
         });
 
         final Runnable finisher = () -> {
             applyTransformation(va.getDuration(), transaction, leash, anim, transformation, matrix,
-                    position);
+                    position, cornerRadius, clipRect);
 
             pool.release(transaction);
             mainExecutor.execute(() -> {
@@ -599,23 +612,24 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
     private void attachThumbnail(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, TransitionInfo.Change change,
-            TransitionInfo.AnimationOptions options) {
+            TransitionInfo.AnimationOptions options, float cornerRadius) {
         final boolean isTask = change.getTaskInfo() != null;
         final boolean isOpen = Transitions.isOpeningType(change.getMode());
         final boolean isClose = Transitions.isClosingType(change.getMode());
         if (isOpen) {
             if (options.getType() == ANIM_OPEN_CROSS_PROFILE_APPS && isTask) {
-                attachCrossProfileThunmbnailAnimation(animations, finishCallback, change);
+                attachCrossProfileThunmbnailAnimation(animations, finishCallback, change,
+                        cornerRadius);
             } else if (options.getType() == ANIM_THUMBNAIL_SCALE_UP) {
-                attachThumbnailAnimation(animations, finishCallback, change, options);
+                attachThumbnailAnimation(animations, finishCallback, change, options, cornerRadius);
             }
         } else if (isClose && options.getType() == ANIM_THUMBNAIL_SCALE_DOWN) {
-            attachThumbnailAnimation(animations, finishCallback, change, options);
+            attachThumbnailAnimation(animations, finishCallback, change, options, cornerRadius);
         }
     }
 
     private void attachCrossProfileThunmbnailAnimation(@NonNull ArrayList<Animator> animations,
-            @NonNull Runnable finishCallback, TransitionInfo.Change change) {
+            @NonNull Runnable finishCallback, TransitionInfo.Change change, float cornerRadius) {
         final int thumbnailDrawableRes = change.getTaskInfo().userId == mCurrentUserId
                 ? R.drawable.ic_account_circle : R.drawable.ic_corp_badge;
         final Rect bounds = change.getEndAbsBounds();
@@ -643,12 +657,13 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         a.restrictDuration(MAX_ANIMATION_DURATION);
         a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
         startSurfaceAnimation(animations, a, wt.getSurface(), finisher, mTransactionPool,
-                mMainExecutor, mAnimExecutor, new Point(bounds.left, bounds.top));
+                mMainExecutor, mAnimExecutor, new Point(bounds.left, bounds.top),
+                cornerRadius, change.getEndAbsBounds());
     }
 
     private void attachThumbnailAnimation(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, TransitionInfo.Change change,
-            TransitionInfo.AnimationOptions options) {
+            TransitionInfo.AnimationOptions options, float cornerRadius) {
         final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
         final WindowThumbnail wt = WindowThumbnail.createAndAttach(mSurfaceSession,
                 change.getLeash(), options.getThumbnail(), transaction);
@@ -667,7 +682,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         a.restrictDuration(MAX_ANIMATION_DURATION);
         a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
         startSurfaceAnimation(animations, a, wt.getSurface(), finisher, mTransactionPool,
-                mMainExecutor, mAnimExecutor, null /* position */);
+                mMainExecutor, mAnimExecutor, null /* position */,
+                cornerRadius, change.getEndAbsBounds());
     }
 
     private static int getWallpaperTransitType(TransitionInfo info) {
@@ -699,13 +715,19 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
     private static void applyTransformation(long time, SurfaceControl.Transaction t,
             SurfaceControl leash, Animation anim, Transformation transformation, float[] matrix,
-            Point position) {
+            Point position, float cornerRadius, @Nullable Rect clipRect) {
         anim.getTransformation(time, transformation);
         if (position != null) {
             transformation.getMatrix().postTranslate(position.x, position.y);
         }
         t.setMatrix(leash, transformation.getMatrix(), matrix);
         t.setAlpha(leash, transformation.getAlpha());
+        if (anim.hasRoundedCorners() && cornerRadius > 0 && clipRect != null) {
+            // We can only apply rounded corner if a crop is set
+            t.setWindowCrop(leash, clipRect);
+            t.setCornerRadius(leash, cornerRadius);
+        }
+
         t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
         t.apply();
     }
