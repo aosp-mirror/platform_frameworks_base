@@ -305,6 +305,9 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
     @Override
     public void updateNotificationViews(final String reason) {
+        if (!mFeatureFlags.checkLegacyPipelineEnabled()) {
+            return;
+        }
         // The function updateRowStates depends on both of these being non-null, so check them here.
         // We may be called before they are set from DeviceProvisionedController's callback.
         if (mScrimController == null) return;
@@ -325,15 +328,17 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         // End old BaseStatusBar.userSwitched
         if (MULTIUSER_DEBUG) mNotificationPanel.setHeaderDebugInfo("USER " + newUserId);
         mCommandQueue.animateCollapsePanels();
-        if (mReinflateNotificationsOnUserSwitched) {
-            updateNotificationsOnDensityOrFontScaleChanged();
-            mReinflateNotificationsOnUserSwitched = false;
+        if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            if (mReinflateNotificationsOnUserSwitched) {
+                updateNotificationsOnDensityOrFontScaleChanged();
+                mReinflateNotificationsOnUserSwitched = false;
+            }
+            if (mDispatchUiModeChangeOnUserSwitched) {
+                updateNotificationsOnUiModeChanged();
+                mDispatchUiModeChangeOnUserSwitched = false;
+            }
+            updateNotificationViews("user switched");
         }
-        if (mDispatchUiModeChangeOnUserSwitched) {
-            updateNotificationsOnUiModeChanged();
-            mDispatchUiModeChangeOnUserSwitched = false;
-        }
-        updateNotificationViews("user switched");
         mMediaManager.clearCurrentMediaNotification();
         mStatusBar.setLockscreenUser(newUserId);
         updateMediaMetaData(true, false);
