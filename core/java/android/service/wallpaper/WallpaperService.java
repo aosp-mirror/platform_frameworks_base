@@ -1575,7 +1575,7 @@ public abstract class WallpaperService extends Service {
         void updatePage(EngineWindowPage currentPage, int pageIndx, int numPages,
                 float xOffsetStep) {
             // to save creating a runnable, check twice
-            long current = SystemClock.elapsedRealtime();
+            long current = System.currentTimeMillis();
             long lapsed = current - currentPage.getLastUpdateTime();
             // Always update the page when the last update time is <= 0
             // This is important especially when the device first boots
@@ -1768,6 +1768,7 @@ public abstract class WallpaperService extends Service {
                     return;
                 }
             }
+            processLocalColors(mPendingXOffset, mPendingYOffset);
         }
 
         /**
