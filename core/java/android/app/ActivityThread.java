@@ -29,7 +29,6 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.window.ConfigurationHelper.diffPublicWithSizeBuckets;
 import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
@@ -315,7 +314,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @UnsupportedAppUsage
     private ContextImpl mSystemContext;
-    private final SparseArray<ContextImpl> mDisplaySystemUiContexts = new SparseArray<>();
+    private ContextImpl mSystemUiContext;
 
     @UnsupportedAppUsage
     static volatile IPackageManager sPackageManager;
@@ -2612,26 +2611,22 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @Override
-    @NonNull
     public ContextImpl getSystemUiContext() {
-        return getSystemUiContext(DEFAULT_DISPLAY);
+        synchronized (this) {
+            if (mSystemUiContext == null) {
+                mSystemUiContext = ContextImpl.createSystemUiContext(getSystemContext());
+            }
+            return mSystemUiContext;
+        }
     }
 
     /**
-     * Gets the context instance base on system resources & display information which used for UI.
+     * Create the context instance base on system resources & display information which used for UI.
      * @param displayId The ID of the display where the UI is shown.
      * @see ContextImpl#createSystemUiContext(ContextImpl, int)
      */
-    @NonNull
-    public ContextImpl getSystemUiContext(int displayId) {
-        synchronized (this) {
-            ContextImpl systemUiContext = mDisplaySystemUiContexts.get(displayId);
-            if (systemUiContext == null) {
-                systemUiContext = ContextImpl.createSystemUiContext(getSystemContext(), displayId);
-                mDisplaySystemUiContexts.put(displayId, systemUiContext);
-            }
-            return systemUiContext;
-        }
+    public ContextImpl createSystemUiContext(int displayId) {
+        return ContextImpl.createSystemUiContext(getSystemUiContext(), displayId);
     }
 
     public void installSystemApplicationInfo(ApplicationInfo info, ClassLoader classLoader) {
@@ -3750,7 +3745,7 @@ public final class ActivityThread extends ClientTransactionHandler
         if (pkgName != null && !pkgName.isEmpty()
                 && r.packageInfo.mPackageName.contains(pkgName)) {
             for (int id : dm.getDisplayIds()) {
-                if (id != DEFAULT_DISPLAY) {
+                if (id != Display.DEFAULT_DISPLAY) {
                     Display display =
                             dm.getCompatibleDisplay(id, appContext.getResources());
                     appContext = (ContextImpl) appContext.createDisplayContext(display);

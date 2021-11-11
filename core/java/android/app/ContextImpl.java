@@ -2632,10 +2632,7 @@ class ContextImpl extends Context {
                 overrideConfig, display.getDisplayAdjustments().getCompatibilityInfo(),
                 mResources.getLoaders()));
         context.mDisplay = display;
-        // Inherit context type if the container is from System or System UI context to bypass
-        // UI context check.
-        context.mContextType = mContextType == CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI
-                ? CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI : CONTEXT_TYPE_DISPLAY_CONTEXT;
+        context.mContextType = CONTEXT_TYPE_DISPLAY_CONTEXT;
         // Display contexts and any context derived from a display context should always override
         // the display that would otherwise be inherited from mToken (or the global configuration if
         // mToken is null).
@@ -2688,8 +2685,7 @@ class ContextImpl extends Context {
 
         // Step 2. Create the base context of the window context, it will also create a Resources
         //         associated with the WindowTokenClient and set the token to the base context.
-        final ContextImpl windowContextBase = createWindowContextBase(windowTokenClient,
-                display.getDisplayId());
+        final ContextImpl windowContextBase = createWindowContextBase(windowTokenClient, display);
 
         // Step 3. Create a WindowContext instance and set it as the outer context of the base
         //         context to make the service obtained by #getSystemService(String) able to query
@@ -2714,7 +2710,9 @@ class ContextImpl extends Context {
         if (display == null) {
             throw new IllegalArgumentException("Display must not be null");
         }
-        return createWindowContextBase(token, display.getDisplayId());
+        final ContextImpl tokenContext = createWindowContextBase(token, display);
+        tokenContext.setResources(createWindowContextResources(tokenContext));
+        return tokenContext;
     }
 
     /**
@@ -2722,13 +2720,13 @@ class ContextImpl extends Context {
      * window.
      *
      * @param token The token to associate with {@link Resources}
-     * @param displayId The ID of {@link Display} to associate with.
+     * @param display The {@link Display} to associate with.
      *
      * @see #createWindowContext(Display, int, Bundle)
      * @see #createTokenContext(IBinder, Display)
      */
     @UiContext
-    ContextImpl createWindowContextBase(@NonNull IBinder token, int displayId) {
+    ContextImpl createWindowContextBase(@NonNull IBinder token, @NonNull Display display) {
         ContextImpl baseContext = new ContextImpl(this, mMainThread, mPackageInfo, mParams,
                 mAttributionSource.getAttributionTag(),
                 mAttributionSource.getNext(),
@@ -2742,8 +2740,8 @@ class ContextImpl extends Context {
         baseContext.setResources(windowContextResources);
         // Associate the display with window context resources so that configuration update from
         // the server side will also apply to the display's metrics.
-        baseContext.mDisplay = ResourcesManager.getInstance().getAdjustedDisplay(displayId,
-                windowContextResources);
+        baseContext.mDisplay = ResourcesManager.getInstance()
+                .getAdjustedDisplay(display.getDisplayId(), windowContextResources);
 
         return baseContext;
     }
@@ -2979,16 +2977,6 @@ class ContextImpl extends Context {
         mContentCaptureOptions = options;
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        // If token is a WindowTokenClient, the Context is usually associated with a
-        // WindowContainer. We should detach from WindowContainer when the Context is finalized.
-        if (mToken instanceof WindowTokenClient) {
-            ((WindowTokenClient) mToken).detachFromWindowContainerIfNeeded();
-        }
-        super.finalize();
-    }
-
     @UnsupportedAppUsage
     static ContextImpl createSystemContext(ActivityThread mainThread) {
         LoadedApk packageInfo = new LoadedApk(mainThread);
@@ -3009,13 +2997,22 @@ class ContextImpl extends Context {
      * @param displayId The ID of the display where the UI is shown.
      */
     static ContextImpl createSystemUiContext(ContextImpl systemContext, int displayId) {
-        final WindowTokenClient token = new WindowTokenClient();
-        ContextImpl context = systemContext.createWindowContextBase(token, displayId);
-        token.attachContext(context);
-        token.attachToDisplayContent(displayId);
+        final LoadedApk packageInfo = systemContext.mPackageInfo;
+        ContextImpl context = new ContextImpl(null, systemContext.mMainThread, packageInfo,
+                ContextParams.EMPTY, null, null, null, null, null, 0, null, null);
+        context.setResources(createResources(null, packageInfo, null, displayId, null,
+                packageInfo.getCompatibilityInfo(), null));
+        context.updateDisplay(displayId);
         context.mContextType = CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI;
-
         return context;
+    }
+
+    /**
+     * The overloaded method of {@link #createSystemUiContext(ContextImpl, int)}.
+     * Uses {@Code Display.DEFAULT_DISPLAY} as the target display.
+     */
+    static ContextImpl createSystemUiContext(ContextImpl systemContext) {
+        return createSystemUiContext(systemContext, Display.DEFAULT_DISPLAY);
     }
 
     @UnsupportedAppUsage
@@ -3223,13 +3220,7 @@ class ContextImpl extends Context {
 
     @Override
     public IBinder getWindowContextToken() {
-        switch (mContextType) {
-            case CONTEXT_TYPE_WINDOW_CONTEXT:
-            case CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI:
-                return mToken;
-            default:
-                return null;
-        }
+        return mContextType == CONTEXT_TYPE_WINDOW_CONTEXT ? mToken : null;
     }
 
     private void checkMode(int mode) {
