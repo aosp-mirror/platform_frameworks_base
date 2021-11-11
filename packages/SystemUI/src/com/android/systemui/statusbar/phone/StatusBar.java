@@ -4287,7 +4287,9 @@ public class StatusBar extends CoreStartable implements
                 Log.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
             }
 
-            mViewHierarchyManager.updateRowStates();
+            if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+                mViewHierarchyManager.updateRowStates();
+            }
             mScreenPinningRequest.onConfigurationChanged();
         }
 
