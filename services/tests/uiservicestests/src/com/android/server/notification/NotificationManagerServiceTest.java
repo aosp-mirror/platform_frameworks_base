@@ -8507,4 +8507,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
                 r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
     }
+
+    @Test
+    public void testGetAllUsersNotificationPermissions_migrationNotEnabled() {
+        // make sure we don't bother if the migration is not enabled
+        assertThat(mService.getAllUsersNotificationPermissions()).isNull();
+    }
 }
