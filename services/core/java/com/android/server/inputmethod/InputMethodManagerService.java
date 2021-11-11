@@ -2687,23 +2687,28 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         if (getCurToken() != null) {
-            if (DEBUG) {
-                Slog.v(TAG, "Removing window token: " + getCurToken() + " for display: "
-                        + mCurTokenDisplayId);
-            }
-            mWindowManagerInternal.removeWindowToken(getCurToken(), false /* removeWindows */,
-                    false /* animateExit */, mCurTokenDisplayId);
-            // Set IME window status as invisible when unbind current method.
-            mImeWindowVis = 0;
-            mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
-            updateSystemUiLocked(mImeWindowVis, mBackDisposition);
-            setCurToken(null);
-            mCurTokenDisplayId = INVALID_DISPLAY;
-            mCurHostInputToken = null;
+            removeCurrentTokenLocked();
         }
 
         setCurId(null);
         clearCurMethodLocked();
+    }
+
+    @GuardedBy("mMethodMap")
+    void removeCurrentTokenLocked() {
+        IBinder token = getCurToken();
+        if (DEBUG) {
+            Slog.v(TAG, "Removing window token: " + token + " for display: " + mCurTokenDisplayId);
+        }
+        mWindowManagerInternal.removeWindowToken(token, false /* removeWindows */,
+                false /* animateExit */, mCurTokenDisplayId);
+        // Set IME window status as invisible when unbind current method.
+        mImeWindowVis = 0;
+        mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
+        updateSystemUiLocked(mImeWindowVis, mBackDisposition);
+        setCurToken(null);
+        mCurTokenDisplayId = INVALID_DISPLAY;
+        mCurHostInputToken = null;
     }
 
     @GuardedBy("mMethodMap")
