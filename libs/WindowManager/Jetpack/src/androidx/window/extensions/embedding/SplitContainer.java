@@ -73,15 +73,46 @@ class SplitContainer {
     static boolean shouldFinishPrimaryWithSecondary(@NonNull SplitRule splitRule) {
         final boolean isPlaceholderContainer = splitRule instanceof SplitPlaceholderRule;
         final boolean shouldFinishPrimaryWithSecondary = (splitRule instanceof SplitPairRule)
-                && ((SplitPairRule) splitRule).shouldFinishPrimaryWithSecondary();
+                && ((SplitPairRule) splitRule).getFinishPrimaryWithSecondary()
+                != SplitRule.FINISH_NEVER;
         return shouldFinishPrimaryWithSecondary || isPlaceholderContainer;
     }
 
     static boolean shouldFinishSecondaryWithPrimary(@NonNull SplitRule splitRule) {
         final boolean isPlaceholderContainer = splitRule instanceof SplitPlaceholderRule;
         final boolean shouldFinishSecondaryWithPrimary = (splitRule instanceof SplitPairRule)
-                && ((SplitPairRule) splitRule).shouldFinishSecondaryWithPrimary();
+                && ((SplitPairRule) splitRule).getFinishSecondaryWithPrimary()
+                != SplitRule.FINISH_NEVER;
         return shouldFinishSecondaryWithPrimary || isPlaceholderContainer;
+    }
+
+    static boolean shouldFinishAssociatedContainerWhenStacked(int finishBehavior) {
+        return finishBehavior == SplitRule.FINISH_ALWAYS;
+    }
+
+    static boolean shouldFinishAssociatedContainerWhenAdjacent(int finishBehavior) {
+        return finishBehavior == SplitRule.FINISH_ALWAYS
+                || finishBehavior == SplitRule.FINISH_ADJACENT;
+    }
+
+    static int getFinishPrimaryWithSecondaryBehavior(@NonNull SplitRule splitRule) {
+        if (splitRule instanceof SplitPlaceholderRule) {
+            return ((SplitPlaceholderRule) splitRule).getFinishPrimaryWithSecondary();
+        }
+        if (splitRule instanceof SplitPairRule) {
+            return ((SplitPairRule) splitRule).getFinishPrimaryWithSecondary();
+        }
+        return SplitRule.FINISH_NEVER;
+    }
+
+    static int getFinishSecondaryWithPrimaryBehavior(@NonNull SplitRule splitRule) {
+        if (splitRule instanceof SplitPlaceholderRule) {
+            return SplitRule.FINISH_ALWAYS;
+        }
+        if (splitRule instanceof SplitPairRule) {
+            return ((SplitPairRule) splitRule).getFinishSecondaryWithPrimary();
+        }
+        return SplitRule.FINISH_NEVER;
     }
 
     static boolean isStickyPlaceholderRule(@NonNull SplitRule splitRule) {
