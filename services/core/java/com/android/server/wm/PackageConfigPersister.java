@@ -16,10 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.app.UiModeManager.MODE_NIGHT_AUTO;
-import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
-
 import android.annotation.NonNull;
+import android.content.res.Configuration;
 import android.os.Environment;
 import android.os.LocaleList;
 import android.util.AtomicFile;
@@ -308,7 +306,7 @@ public class PackageConfigPersister {
         }
 
         boolean isResetNightMode() {
-            return mNightMode == MODE_NIGHT_AUTO || mNightMode == MODE_NIGHT_CUSTOM;
+            return mNightMode == Configuration.UI_MODE_NIGHT_UNDEFINED;
         }
 
         @Override
