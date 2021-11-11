@@ -767,10 +767,6 @@ class ActivityMetricsLogger {
         if (compatStateInfo.mLastLoggedActivity == r) {
             compatStateInfo.mLastLoggedActivity = null;
         }
-        if (compatStateInfo.mVisibleActivities.isEmpty()) {
-            // No need to keep the entry if there are no visible activities.
-            mPackageUidToCompatStateInfo.remove(packageUid);
-        }
     }
 
     /**
@@ -1266,13 +1262,14 @@ class ActivityMetricsLogger {
      *   activity.
      *   <li>If the current state is NOT_VISIBLE, there is a previously logged state for the
      *   package UID and there are no other visible activities with the same package UID.
-     *   <li>The last logged activity with the same package UID is either {@code activity} or the
-     *   last logged state is NOT_VISIBLE or NOT_LETTERBOXED.
+     *   <li>The last logged activity with the same package UID is either {@code activity} (or an
+     *   activity that has been removed) or the last logged state is NOT_VISIBLE or NOT_LETTERBOXED.
      * </ul>
      *
      * <p>If the current state is NOT_VISIBLE and the previous state which was logged by {@code
-     * activity} wasn't, looks for the first visible activity with the same package UID that has
-     * a letterboxed state, or a non-letterboxed state if there isn't one, and logs that state.
+     * activity} (or an activity that has been removed) wasn't, looks for the first visible activity
+     * with the same package UID that has a letterboxed state, or a non-letterboxed state if
+     * there isn't one, and logs that state.
      *
      * <p>This method assumes that the caller is wrapping the call with a synchronized block so
      * that there won't be a race condition between two activities with the same package.
@@ -1308,14 +1305,14 @@ class ActivityMetricsLogger {
 
         if (!isVisible && !visibleActivities.isEmpty()) {
             // There is another visible activity for this package UID.
-            if (activity == lastLoggedActivity) {
+            if (lastLoggedActivity == null || activity == lastLoggedActivity) {
                 // Make sure a new visible state is logged if needed.
                 findAppCompatStateToLog(compatStateInfo, packageUid);
             }
             return;
         }
 
-        if (activity != lastLoggedActivity
+        if (lastLoggedActivity != null && activity != lastLoggedActivity
                 && lastLoggedState != APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE
                 && lastLoggedState != APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED) {
             // Another visible activity for this package UID has logged a letterboxed state.
@@ -1329,15 +1326,25 @@ class ActivityMetricsLogger {
      * Looks for the first visible activity in {@code compatStateInfo} that has a letterboxed
      * state, or a non-letterboxed state if there isn't one, and logs that state for the given
      * {@code packageUid}.
+     *
+     * <p>If there is a visible activity in {@code compatStateInfo} with the same state as the
+     * last logged state for the given {@code packageUid}, changes the last logged activity to
+     * reference the first such activity without actually logging the same state twice.
      */
     private void findAppCompatStateToLog(PackageCompatStateInfo compatStateInfo, int packageUid) {
         final ArrayList<ActivityRecord> visibleActivities = compatStateInfo.mVisibleActivities;
+        final int lastLoggedState = compatStateInfo.mLastLoggedState;
 
         ActivityRecord activityToLog = null;
         int stateToLog = APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
         for (int i = 0; i < visibleActivities.size(); i++) {
             ActivityRecord activity = visibleActivities.get(i);
             int state = activity.getAppCompatState();
+            if (state == lastLoggedState) {
+                // Change last logged activity without logging the same state twice.
+                compatStateInfo.mLastLoggedActivity = activity;
+                return;
+            }
             if (state == APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE) {
                 // This shouldn't happen.
                 Slog.w(TAG, "Visible activity with NOT_VISIBLE App Compat state for package UID: "
