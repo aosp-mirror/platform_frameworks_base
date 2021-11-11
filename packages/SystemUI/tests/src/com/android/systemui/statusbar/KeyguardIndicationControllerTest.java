@@ -701,7 +701,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // GIVEN fingerprint is also running (not udfps)
         when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
-        when(mKeyguardUpdateMonitor.isUdfpsAvailable()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(false);
 
         mController.setVisible(true);
 
