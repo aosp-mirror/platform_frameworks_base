@@ -22,6 +22,7 @@ import static android.util.MathUtils.sq;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 
 import static java.util.Objects.requireNonNull;
 
@@ -659,6 +660,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                         | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
         params.receiveInsetsIgnoringZOrder = true;
+        params.privateFlags |= PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
         params.windowAnimations = android.R.style.Animation_Translucent;
         params.gravity = Gravity.START | Gravity.TOP;
         params.x = (mAlignment == Alignment.RIGHT) ? getMaxWindowX() : getMinWindowX();
