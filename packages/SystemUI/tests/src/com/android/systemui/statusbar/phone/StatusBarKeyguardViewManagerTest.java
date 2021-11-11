@@ -61,8 +61,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import dagger.Lazy;
-
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -87,6 +85,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock
     private SysuiStatusBarStateController mStatusBarStateController;
     @Mock
+    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock
     private View mNotificationContainer;
     @Mock
     private KeyguardBypassController mBypassController;
@@ -103,7 +103,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock
     private KeyguardMessageArea mKeyguardMessageArea;
     @Mock
-    private Lazy<ShadeController> mShadeController;
+    private ShadeController mShadeController;
 
     private WakefulnessLifecycle mWakefulnessLifecycle;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -127,7 +127,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mLockPatternUtils,
                 mStatusBarStateController,
                 mock(ConfigurationController.class),
-                mock(KeyguardUpdateMonitor.class),
+                mKeyguardUpdateMonitor,
                 mock(NavigationModeController.class),
                 mock(DockManager.class),
                 mock(NotificationShadeWindowController.class),
@@ -137,7 +137,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mWakefulnessLifecycle,
                 mUnlockedScreenOffAnimationController,
                 mKeyguardMessageAreaFactory,
-                mShadeController);
+                () -> mShadeController);
         mStatusBarKeyguardViewManager.registerStatusBar(
                 mStatusBar,
                 mNotificationPanelView,
@@ -289,6 +289,45 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         clearInvocations(mStatusBar);
         mStatusBarKeyguardViewManager.setOccluded(false /* occluded */, true /* animated */);
         verify(mStatusBar, never()).animateKeyguardUnoccluding();
+    }
+
+    @Test
+    public void setOccluded_onKeyguardOccludedChangedCalledCorrectly() {
+        mStatusBarKeyguardViewManager.setOccluded(false /* occluded */, false /* animated */);
+        verify(mKeyguardUpdateMonitor).onKeyguardOccludedChanged(false);
+
+        clearInvocations(mKeyguardUpdateMonitor);
+
+        mStatusBarKeyguardViewManager.setOccluded(false /* occluded */, false /* animated */);
+        verify(mKeyguardUpdateMonitor, never()).onKeyguardOccludedChanged(anyBoolean());
+
+        clearInvocations(mKeyguardUpdateMonitor);
+
+        mStatusBarKeyguardViewManager.setOccluded(true /* occluded */, false /* animated */);
+        verify(mKeyguardUpdateMonitor).onKeyguardOccludedChanged(true);
+
+        clearInvocations(mKeyguardUpdateMonitor);
+
+        mStatusBarKeyguardViewManager.setOccluded(true /* occluded */, false /* animated */);
+        verify(mKeyguardUpdateMonitor, never()).onKeyguardOccludedChanged(anyBoolean());
+    }
+
+    @Test
+    public void setOccluded_isInLaunchTransition_onKeyguardOccludedChangedCalled() {
+        when(mStatusBar.isInLaunchTransition()).thenReturn(true);
+        mStatusBarKeyguardViewManager.show(null);
+
+        mStatusBarKeyguardViewManager.setOccluded(true /* occluded */, false /* animated */);
+        verify(mKeyguardUpdateMonitor).onKeyguardOccludedChanged(true);
+    }
+
+    @Test
+    public void setOccluded_isLaunchingActivityOverLockscreen_onKeyguardOccludedChangedCalled() {
+        when(mStatusBar.isLaunchingActivityOverLockscreen()).thenReturn(true);
+        mStatusBarKeyguardViewManager.show(null);
+
+        mStatusBarKeyguardViewManager.setOccluded(true /* occluded */, false /* animated */);
+        verify(mKeyguardUpdateMonitor).onKeyguardOccludedChanged(true);
     }
 
     @Test

@@ -627,7 +627,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_STATE_CHANGED,
                     SysUiStatsLog.KEYGUARD_STATE_CHANGED__STATE__OCCLUDED);
             if (mStatusBar.isInLaunchTransition()) {
-                mOccluded = true;
+                setOccludedAndUpdateStates(true);
                 mStatusBar.fadeKeyguardAfterLaunchTransition(null /* beforeFading */,
                         new Runnable() {
                             @Override
@@ -640,7 +640,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
 
             if (mStatusBar.isLaunchingActivityOverLockscreen()) {
-                mOccluded = true;
+                setOccludedAndUpdateStates(true);
 
                 // When isLaunchingActivityOverLockscreen() is true, we know for sure that the post
                 // collapse runnables will be run.
@@ -655,7 +655,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     SysUiStatsLog.KEYGUARD_STATE_CHANGED__STATE__SHOWN);
         }
         boolean isOccluding = !mOccluded && occluded;
-        mOccluded = occluded;
+        setOccludedAndUpdateStates(occluded);
         if (mShowing) {
             mMediaManager.updateMediaMetaData(false, animate && !occluded);
         }
@@ -670,6 +670,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (animate && !occluded && mShowing && !mBouncer.isShowing()) {
             mStatusBar.animateKeyguardUnoccluding();
         }
+    }
+
+    private void setOccludedAndUpdateStates(boolean occluded) {
+        mOccluded = occluded;
+        updateStates();
     }
 
     public boolean isOccluded() {
