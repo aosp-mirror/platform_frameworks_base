@@ -19,7 +19,6 @@ package com.android.server.companion;
 
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
-import static android.companion.DeviceId.TYPE_MAC_ADDRESS;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
@@ -58,7 +57,6 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
-import android.companion.DeviceId;
 import android.companion.DeviceNotAssociatedException;
 import android.companion.ICompanionDeviceManager;
 import android.companion.IFindDeviceCallback;
@@ -74,6 +72,7 @@ import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
+import android.net.MacAddress;
 import android.net.NetworkPolicyManager;
 import android.os.Binder;
 import android.os.Environment;
@@ -117,7 +116,6 @@ import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -351,7 +349,7 @@ public class CompanionDeviceManagerService extends SystemService {
             }
             return new ArrayList<>(map(
                     getAllAssociations(userId, callingPackage),
-                    a -> a.getDeviceMacAddress()));
+                    AssociationInfo::getDeviceMacAddressAsString));
         }
 
         @Override
@@ -623,7 +621,8 @@ public class CompanionDeviceManagerService extends SystemService {
                 getNewAssociationIdForPackage(userId, packageName),
                 userId,
                 packageName,
-                Arrays.asList(new DeviceId(TYPE_MAC_ADDRESS, deviceMacAddress)),
+                MacAddress.fromString(deviceMacAddress),
+                null,
                 deviceProfile,
                 /* managedByCompanionApp */false,
                 /* notifyOnDeviceNearby */ false ,
@@ -649,7 +648,7 @@ public class CompanionDeviceManagerService extends SystemService {
             // First: collect all IDs currently in use for this user's Associations.
             final SparseBooleanArray usedIds = new SparseBooleanArray();
             for (AssociationInfo it : getAllAssociations(userId)) {
-                usedIds.put(it.getAssociationId(), true);
+                usedIds.put(it.getId(), true);
             }
 
             // Second: collect all IDs that have been previously used for this package (and user).
@@ -680,7 +679,7 @@ public class CompanionDeviceManagerService extends SystemService {
                     && Objects.equals(it.getDeviceMacAddress(), deviceMacAddress);
             if (match) {
                 onAssociationPreRemove(it);
-                markIdAsPreviouslyUsedForPackage(it.getAssociationId(), userId, packageName);
+                markIdAsPreviouslyUsedForPackage(it.getId(), userId, packageName);
             }
             return match;
         }), userId);
@@ -780,7 +779,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
         exemptFromAutoRevoke(packageInfo.packageName, packageInfo.applicationInfo.uid);
 
-        if (!association.isManagedByCompanionApp()) {
+        if (!association.isSelfManaged()) {
             if (mCurrentlyConnectedDevices.contains(association.getDeviceMacAddress())) {
                 grantDeviceProfile(association);
             }
@@ -1224,10 +1223,10 @@ public class CompanionDeviceManagerService extends SystemService {
         ArrayList<ScanFilter> result = new ArrayList<>();
         ArraySet<String> addressesSeen = new ArraySet<>();
         for (AssociationInfo association : getAllAssociations()) {
-            if (association.isManagedByCompanionApp()) {
+            if (association.isSelfManaged()) {
                 continue;
             }
-            String address = association.getDeviceMacAddress();
+            String address = association.getDeviceMacAddressAsString();
             if (addressesSeen.contains(address)) {
                 continue;
             }
