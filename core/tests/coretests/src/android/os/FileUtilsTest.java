@@ -58,9 +58,9 @@ import android.provider.DocumentsContract.Document;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import libcore.io.Streams;
-
 import com.google.android.collect.Sets;
+
+import libcore.io.Streams;
 
 import org.junit.After;
 import org.junit.Before;
@@ -477,6 +477,14 @@ public class FileUtilsTest {
         new File(mTarget, "test (1).jpg").createNewFile();
         assertNameEquals("test (2).jpg",
                 FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpg"));
+
+        assertNameEquals("test.mp3", FileUtils.buildUniqueFile(mTarget, "audio/mp3", "test.mp3"));
+        new File(mTarget, "test.mp3").createNewFile();
+        assertNameEquals("test (1).mp3",
+                FileUtils.buildUniqueFile(mTarget, "audio/mp3", "test.mp3"));
+        new File(mTarget, "test (1).mp3").createNewFile();
+        assertNameEquals("test (2).mp3",
+                FileUtils.buildUniqueFile(mTarget, "audio/mp3", "test.mp3"));
     }
 
     @Test
