@@ -207,17 +207,6 @@ public class SystemPreparer extends ExternalResource {
             default:
                 device.executeShellCommand("stop");
                 device.executeShellCommand("start");
-                ITestDevice.RecoveryMode cachedRecoveryMode = device.getRecoveryMode();
-                device.setRecoveryMode(ITestDevice.RecoveryMode.ONLINE);
-
-                if (device.isEncryptionSupported()) {
-                    if (device.isDeviceEncrypted()) {
-                        LogUtil.CLog.e("Device is encrypted after userspace reboot!");
-                        device.unlockDevice();
-                    }
-                }
-
-                device.setRecoveryMode(cachedRecoveryMode);
                 device.waitForDeviceAvailable();
                 break;
         }
