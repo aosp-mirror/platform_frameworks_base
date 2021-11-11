@@ -64,7 +64,7 @@
   <string-array name="tile_states_rotation">
     <item msgid="4578491772376121579">"Indisponible"</item>
     <item msgid="5776427577477729185">"Désactivé"</item>
-    <item msgid="7105052717007227415">"Activé"</item>
+    <item msgid="7105052717007227415">"Activée"</item>
   </string-array>
   <string-array name="tile_states_bt">
     <item msgid="5330252067413512277">"Indisponible"</item>
