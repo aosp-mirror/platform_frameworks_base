@@ -46,6 +46,7 @@ public class UdfpsDialogMeasureAdapter {
     @NonNull private final FingerprintSensorPropertiesInternal mSensorProps;
 
     @Nullable private WindowManager mWindowManager;
+    private int mBottomSpacerHeight;
 
     public UdfpsDialogMeasureAdapter(
             @NonNull ViewGroup view, @NonNull FingerprintSensorPropertiesInternal sensorProps) {
@@ -75,6 +76,16 @@ public class UdfpsDialogMeasureAdapter {
         }
     }
 
+    /**
+     * @return the actual (and possibly negative) bottom spacer height. If negative, this indicates
+     * that the UDFPS sensor is too low. Our current xml and custom measurement logic is very hard
+     * too cleanly support this case. So, let's have the onLayout code translate the sensor location
+     * instead.
+     */
+    int getBottomSpacerHeight() {
+        return mBottomSpacerHeight;
+    }
+
     @NonNull
     private AuthDialog.LayoutParams onMeasureInternalPortrait(int width, int height) {
         // Get the height of the everything below the icon. Currently, that's the indicator and
@@ -87,7 +98,7 @@ public class UdfpsDialogMeasureAdapter {
         final int dialogMargin = getDialogMarginPx();
         final int displayHeight = getWindowBounds().height();
         final Insets navbarInsets = getNavbarInsets();
-        final int bottomSpacerHeight = calculateBottomSpacerHeightForPortrait(
+        mBottomSpacerHeight = calculateBottomSpacerHeightForPortrait(
                 mSensorProps, displayHeight, textIndicatorHeight, buttonBarHeight,
                 dialogMargin, navbarInsets.bottom);
 
@@ -123,9 +134,10 @@ public class UdfpsDialogMeasureAdapter {
                                 MeasureSpec.EXACTLY));
             } else if (child.getId() == R.id.space_below_icon) {
                 // Set the spacer height so the fingerprint icon is on the physical sensor area
+                final int clampedSpacerHeight = Math.max(mBottomSpacerHeight, 0);
                 child.measure(
                         MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                        MeasureSpec.makeMeasureSpec(bottomSpacerHeight, MeasureSpec.EXACTLY));
+                        MeasureSpec.makeMeasureSpec(clampedSpacerHeight, MeasureSpec.EXACTLY));
             } else {
                 child.measure(
                         MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),

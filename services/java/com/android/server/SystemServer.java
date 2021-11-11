@@ -1357,6 +1357,7 @@ public final class SystemServer implements Dumpable {
      */
     private void startOtherServices(@NonNull TimingsTraceAndSlog t) {
         t.traceBegin("startOtherServices");
+        mSystemServiceManager.updateOtherServicesStartIndex();
 
         final Context context = mSystemContext;
         DynamicSystemService dynamicSystem = null;

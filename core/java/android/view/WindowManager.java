@@ -2442,6 +2442,20 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY = 0x00100000;
 
         /**
+         * Flag to indicate that this window will be excluded while computing the magnifiable region
+         * on the un-scaled screen coordinate, which could avoid the cutout on the magnification
+         * border. It should be used for unmagnifiable overlays.
+         *
+         * </p><p>
+         * Note unlike {@link #PRIVATE_FLAG_NOT_MAGNIFIABLE}, this flag doesn't affect the ability
+         * of magnification. If you want to the window to be unmagnifiable and doesn't lead to the
+         * cutout, you need to combine both of them.
+         * </p><p>
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION = 0x00200000;
+
+        /**
          * Flag to prevent the window from being magnified by the accessibility magnifier.
          *
          * TODO(b/190623172): This is a temporary solution and need to find out another way instead.
@@ -2552,6 +2566,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                 PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
+                PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION,
                 PRIVATE_FLAG_NOT_MAGNIFIABLE,
                 PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
                 PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
@@ -2632,6 +2647,10 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
                         equals = PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
                         name = "IS_ROUNDED_CORNERS_OVERLAY"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION,
+                        equals = PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION,
+                        name = "EXCLUDE_FROM_SCREEN_MAGNIFICATION"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_NOT_MAGNIFIABLE,
                         equals = PRIVATE_FLAG_NOT_MAGNIFIABLE,

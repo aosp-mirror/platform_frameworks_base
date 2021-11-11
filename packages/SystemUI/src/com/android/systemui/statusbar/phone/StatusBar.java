@@ -128,12 +128,12 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.AutoReinflateContainer;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.InitController;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.assist.AssistManager;
@@ -255,7 +255,7 @@ import javax.inject.Named;
 import dagger.Lazy;
 
 /** */
-public class StatusBar extends SystemUI implements
+public class StatusBar extends CoreStartable implements
         ActivityStarter,
         LifecycleOwner {
     public static final boolean MULTIUSER_DEBUG = false;
@@ -2385,6 +2385,8 @@ public class StatusBar extends SystemUI implements
 
         if (mLightRevealScrim != null) {
             pw.println(
+                    "mLightRevealScrim.getRevealEffect(): " + mLightRevealScrim.getRevealEffect());
+            pw.println(
                     "mLightRevealScrim.getRevealAmount(): " + mLightRevealScrim.getRevealAmount());
         }
 
@@ -3370,17 +3372,24 @@ public class StatusBar extends SystemUI implements
             return;
         }
 
-        if (wakingUp && mWakefulnessLifecycle.getLastWakeReason()
-                == PowerManager.WAKE_REASON_POWER_BUTTON
-                || !wakingUp && mWakefulnessLifecycle.getLastSleepReason()
-                == PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON) {
+        final boolean wakingUpFromPowerButton = wakingUp
+                && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)
+                && mWakefulnessLifecycle.getLastWakeReason()
+                == PowerManager.WAKE_REASON_POWER_BUTTON;
+        final boolean sleepingFromPowerButton = !wakingUp
+                && mWakefulnessLifecycle.getLastSleepReason()
+                == PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON;
+
+        if (wakingUpFromPowerButton || sleepingFromPowerButton) {
             mLightRevealScrim.setRevealEffect(mPowerButtonReveal);
+            mLightRevealScrim.setRevealAmount(1f - mStatusBarStateController.getDozeAmount());
         } else if (!wakingUp || !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
             // If we're going to sleep, but it's not from the power button, use the default reveal.
             // If we're waking up, only use the default reveal if the biometric controller didn't
             // already set it to the circular reveal because we're waking up from a fingerprint/face
             // auth.
             mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
+            mLightRevealScrim.setRevealAmount(1f - mStatusBarStateController.getDozeAmount());
         }
     }
 

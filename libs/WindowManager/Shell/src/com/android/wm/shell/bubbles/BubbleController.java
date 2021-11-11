@@ -1036,10 +1036,9 @@ public class BubbleController {
                 // notification, so that the bubble will be re-created if shouldBubbleUp returns
                 // true.
                 mBubbleData.dismissBubbleWithKey(key, DISMISS_NO_BUBBLE_UP);
-            } else if (entry != null && mTmpRanking.isBubble() && !isActiveBubble
-                    && !entry.getRanking().isSuspended()) {
+            } else if (entry != null && mTmpRanking.isBubble() && !isActiveBubble) {
                 entry.setFlagBubble(true);
-                onEntryUpdated(entry, true /* shouldBubbleUp */);
+                onEntryUpdated(entry, shouldBubbleUp && !entry.getRanking().isSuspended());
             }
         }
     }

@@ -70,8 +70,8 @@ import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
-import com.android.systemui.statusbar.notification.collection.inflation.LowPriorityInflationHelper;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
+import com.android.systemui.statusbar.notification.collection.legacy.LowPriorityInflationHelper;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.icon.IconBuilder;
@@ -283,6 +283,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
 
         mRowBinder = new NotificationRowBinderImpl(
                 mContext,
+                mFeatureFlags,
                 new NotificationMessagingUtil(mContext),
                 mRemoteInputManager,
                 mLockscreenUserManager,

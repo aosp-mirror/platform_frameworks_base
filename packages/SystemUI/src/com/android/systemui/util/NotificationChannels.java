@@ -23,13 +23,13 @@ import android.net.Uri;
 import android.provider.Settings;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.wm.shell.pip.tv.TvPipNotificationController;
 
 import java.util.Arrays;
 
-public class NotificationChannels extends SystemUI {
+public class NotificationChannels extends CoreStartable {
     public static String ALERTS      = "ALR";
     public static String SCREENSHOTS_HEADSUP = "SCN_HEADSUP";
     public static String GENERAL     = "GEN";

@@ -934,6 +934,10 @@ public class AppTransitionController {
                 voiceInteraction);
         applyAnimations(closingWcs, closingApps, transit, false /* visible */, animLp,
                 voiceInteraction);
+        final RecentsAnimationController rac = mService.getRecentsAnimationController();
+        if (rac != null) {
+            rac.sendTasksAppeared();
+        }
 
         for (int i = 0; i < openingApps.size(); ++i) {
             openingApps.valueAtUnchecked(i).mOverrideTaskTransition = false;

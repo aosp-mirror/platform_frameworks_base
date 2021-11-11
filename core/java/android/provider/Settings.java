@@ -16609,30 +16609,6 @@ public final class Settings {
             public static final String WEAR_PLATFORM_MR_NUMBER = "wear_platform_mr_number";
 
             /**
-             * The bluetooth settings storing duplicate address of companion device.
-             * @hide
-             */
-            public static final String COMPANION_BT_ADDRESS_DUAL = "companion_bt_address_dual";
-
-            /**
-             * The offset of the visible screen from the display bottom (overscan bottom).
-             * @hide
-             */
-            public static final String BOTTOM_OFFSET = "bottom_offset";
-
-            /**
-             * The shape of the display.
-             * @hide
-             */
-            public static final String DISPLAY_SHAPE = "display_shape";
-
-            // Possible display shapes
-            /** @hide */
-            public static final int DISPLAY_SHAPE_SQUARE = 0;
-            /** @hide */
-            public static final int DISPLAY_SHAPE_ROUND = 1;
-
-            /**
              * The different levels of screen brightness the user can select.
              * @hide
              */
@@ -16706,12 +16682,6 @@ public final class Settings {
             public static final String AMBIENT_PLUGGED_TIMEOUT_MIN = "ambient_plugged_timeout_min";
 
             /**
-             * The companion device's bluetooth address.
-             * @hide
-             */
-            public static final String COMPANION_ADDRESS = "companion_address";
-
-            /**
              * What OS does paired device has.
              * @hide
              */
@@ -16756,12 +16726,6 @@ public final class Settings {
             public static final int HFP_CLIENT_ENABLED = 1;
             /** @hide */
             public static final int HFP_CLIENT_DISABLED = 2;
-
-            /**
-             * The current HFP client profile setting.
-             * @hide
-             */
-            public static final String HFP_CLIENT_PROFILE_ENABLED = "hfp_client_profile_enabled";
 
             /**
              * The companion phone's android version.

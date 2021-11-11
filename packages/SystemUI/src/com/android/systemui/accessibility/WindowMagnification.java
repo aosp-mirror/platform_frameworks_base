@@ -35,7 +35,7 @@ import android.view.accessibility.IWindowMagnificationConnection;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
@@ -54,7 +54,7 @@ import javax.inject.Inject;
  * when {@code IStatusBar#requestWindowMagnificationConnection(boolean)} is called.
  */
 @SysUISingleton
-public class WindowMagnification extends SystemUI implements WindowMagnifierCallback,
+public class WindowMagnification extends CoreStartable implements WindowMagnifierCallback,
         CommandQueue.Callbacks {
     private static final String TAG = "WindowMagnification";
 
@@ -243,12 +243,15 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
             mWindowMagnificationConnectionImpl = new WindowMagnificationConnectionImpl(this,
                     mHandler, mModeSwitchesController);
         }
+        mModeSwitchesController.setSwitchListenerDelegate(
+                mWindowMagnificationConnectionImpl::onChangeMagnificationMode);
         mAccessibilityManager.setWindowMagnificationConnection(
                 mWindowMagnificationConnectionImpl);
     }
 
     private void clearWindowMagnificationConnection() {
         mAccessibilityManager.setWindowMagnificationConnection(null);
+        mModeSwitchesController.setSwitchListenerDelegate(null);
         //TODO: destroy controllers.
     }
 }

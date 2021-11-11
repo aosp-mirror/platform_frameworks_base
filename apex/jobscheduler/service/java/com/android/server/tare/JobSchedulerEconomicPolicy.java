@@ -40,6 +40,7 @@ import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_TIMEOUT_PENA
 import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MAX_CIRCULATION;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MAX_SATIATED_BALANCE;
+import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP;
 import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_INSTANT;
 import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_MAX;
@@ -80,6 +81,7 @@ import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_
 import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP;
 import static android.app.tare.EconomyManager.KEY_JS_MAX_CIRCULATION;
 import static android.app.tare.EconomyManager.KEY_JS_MAX_SATIATED_BALANCE;
+import static android.app.tare.EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED;
 import static android.app.tare.EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP;
 import static android.app.tare.EconomyManager.KEY_JS_REWARD_NOTIFICATION_INTERACTION_INSTANT;
 import static android.app.tare.EconomyManager.KEY_JS_REWARD_NOTIFICATION_INTERACTION_MAX;
@@ -140,7 +142,8 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
             COST_MODIFIER_PROCESS_STATE
     };
 
-    private long mMinSatiatedBalance;
+    private long mMinSatiatedBalanceExempted;
+    private long mMinSatiatedBalanceOther;
     private long mMaxSatiatedBalance;
     private long mMaxSatiatedCirculation;
 
@@ -165,8 +168,11 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
 
     @Override
     long getMinSatiatedBalance(final int userId, @NonNull final String pkgName) {
-        // TODO: incorporate time since usage
-        return mMinSatiatedBalance;
+        if (mInternalResourceService.isPackageExempted(userId, pkgName)) {
+            return mMinSatiatedBalanceExempted;
+        }
+        // TODO: take other exemptions into account
+        return mMinSatiatedBalanceOther;
     }
 
     @Override
@@ -207,7 +213,10 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
             Slog.e(TAG, "Global setting key incorrect: ", e);
         }
 
-        mMinSatiatedBalance = arcToNarc(
+        mMinSatiatedBalanceExempted = arcToNarc(
+                mParser.getInt(KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED,
+                        DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED));
+        mMinSatiatedBalanceOther = arcToNarc(
                 mParser.getInt(KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP,
                         DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP));
         mMaxSatiatedBalance = arcToNarc(mParser.getInt(KEY_JS_MAX_SATIATED_BALANCE,
@@ -317,7 +326,11 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
 
     @Override
     void dump(IndentingPrintWriter pw) {
-        pw.print("Min satiated balance", narcToString(mMinSatiatedBalance)).println();
+        pw.println("Min satiated balances:");
+        pw.increaseIndent();
+        pw.print("Exempted", narcToString(mMinSatiatedBalanceExempted)).println();
+        pw.print("Other", narcToString(mMinSatiatedBalanceOther)).println();
+        pw.decreaseIndent();
         pw.print("Max satiated balance", narcToString(mMaxSatiatedBalance)).println();
         pw.print("Min satiated circulation", narcToString(mMaxSatiatedCirculation)).println();
 

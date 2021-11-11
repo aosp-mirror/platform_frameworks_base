@@ -30,17 +30,18 @@ import java.io.PrintWriter;
 
 /**
  * A top-level module of system UI code (sometimes called "system UI services" elsewhere in code).
- * Which SystemUI modules are loaded can be controlled via a config resource.
+ * Which CoreStartable modules are loaded can be controlled via a config resource.
  *
  * @see SystemUIApplication#startServicesIfNeeded()
  */
-public abstract class SystemUI implements Dumpable {
+public abstract class CoreStartable implements Dumpable {
     protected final Context mContext;
 
-    public SystemUI(Context context) {
+    public CoreStartable(Context context) {
         mContext = context;
     }
 
+    /** Main entry point for implementations. Called shortly after app startup. */
     public abstract void start();
 
     protected void onConfigurationChanged(Configuration newConfig) {
@@ -54,6 +55,7 @@ public abstract class SystemUI implements Dumpable {
     protected void onBootCompleted() {
     }
 
+    /** TODO(b/205725937): Move this. SystemUIApplication? */
     public static void overrideNotificationAppName(Context context, Notification.Builder n,
             boolean system) {
         final Bundle extras = new Bundle();

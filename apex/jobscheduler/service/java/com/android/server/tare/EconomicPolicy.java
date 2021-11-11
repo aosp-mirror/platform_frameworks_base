@@ -57,6 +57,8 @@ public abstract class EconomicPolicy {
     static final int REGULATION_BASIC_INCOME = TYPE_REGULATION | 0;
     static final int REGULATION_BIRTHRIGHT = TYPE_REGULATION | 1;
     static final int REGULATION_WEALTH_RECLAMATION = TYPE_REGULATION | 2;
+    static final int REGULATION_PROMOTION = TYPE_REGULATION | 3;
+    static final int REGULATION_DEMOTION = TYPE_REGULATION | 4;
 
     static final int REWARD_NOTIFICATION_SEEN = TYPE_REWARD | 0;
     static final int REWARD_NOTIFICATION_INTERACTION = TYPE_REWARD | 1;
@@ -363,6 +365,10 @@ public abstract class EconomicPolicy {
                 return "BIRTHRIGHT";
             case REGULATION_WEALTH_RECLAMATION:
                 return "WEALTH_RECLAMATION";
+            case REGULATION_PROMOTION:
+                return "PROMOTION";
+            case REGULATION_DEMOTION:
+                return "DEMOTION";
         }
         return "UNKNOWN_REGULATION:" + Integer.toHexString(eventId);
     }

@@ -621,12 +621,8 @@ public class AlarmManagerServiceTest {
     }
 
     private void setTareEnabled(boolean enabled) {
-        doReturn(enabled ? 1 : 0).when(
-                () -> Settings.Global.getInt(mContentResolver, Settings.Global.ENABLE_TARE));
-        doReturn(enabled ? 1 : 0).when(
-                () -> Settings.Global.getInt(mContentResolver,
-                        Settings.Global.ENABLE_TARE, Settings.Global.DEFAULT_ENABLE_TARE));
-        mService.mConstants.onChange(true);
+        when(mEconomyManagerInternal.isEnabled()).thenReturn(enabled);
+        mService.mConstants.onTareEnabledStateChanged(enabled);
     }
 
     /**

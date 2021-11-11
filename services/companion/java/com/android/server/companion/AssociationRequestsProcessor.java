@@ -17,6 +17,7 @@
 package com.android.server.companion;
 
 import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
@@ -32,6 +33,7 @@ import static java.util.Collections.unmodifiableMap;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.role.RoleManager;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
@@ -41,8 +43,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.Signature;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.PackageUtils;
 import android.util.Slog;
@@ -56,6 +60,7 @@ import com.android.server.FgThread;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -69,6 +74,8 @@ class AssociationRequestsProcessor {
         map.put(DEVICE_PROFILE_WATCH, Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH);
         map.put(DEVICE_PROFILE_APP_STREAMING,
                 Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING);
+        map.put(DEVICE_PROFILE_AUTOMOTIVE_PROJECTION,
+                Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION);
 
         DEVICE_PROFILE_TO_PERMISSION = unmodifiableMap(map);
     }
@@ -87,12 +94,14 @@ class AssociationRequestsProcessor {
     private IFindDeviceCallback mFindDeviceCallback;
     private String mCallingPackage;
     private AndroidFuture<?> mOngoingDeviceDiscovery;
+    private RoleManager mRoleManager;
 
     private PerUser<ServiceConnector<ICompanionDeviceDiscoveryService>> mServiceConnectors;
 
-    AssociationRequestsProcessor(CompanionDeviceManagerService service) {
+    AssociationRequestsProcessor(CompanionDeviceManagerService service, RoleManager roleManager) {
         mContext = service.getContext();
         mService = service;
+        mRoleManager = roleManager;
 
         final Intent serviceIntent = new Intent().setComponent(SERVICE_TO_BIND_TO);
         mServiceConnectors = new PerUser<ServiceConnector<ICompanionDeviceDiscoveryService>>() {
@@ -165,6 +174,16 @@ class AssociationRequestsProcessor {
                 }));
     }
 
+    private boolean isRoleHolder(int userId, String packageName, String role) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            List<String> holders = mRoleManager.getRoleHoldersAsUser(role, UserHandle.of(userId));
+            return holders.contains(packageName);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     void stopScan(AssociationRequest request, IFindDeviceCallback callback, String callingPackage) {
         if (DEBUG) {
             Slog.d(TAG, "stopScan(request = " + request + ")");
@@ -184,6 +203,12 @@ class AssociationRequestsProcessor {
             // TODO: remove, when properly supporting this profile.
             throw new UnsupportedOperationException(
                     "DEVICE_PROFILE_APP_STREAMING is not fully supported yet.");
+        }
+
+        if (DEVICE_PROFILE_AUTOMOTIVE_PROJECTION.equals(deviceProfile)) {
+            // TODO: remove, when properly supporting this profile.
+            throw new UnsupportedOperationException(
+                    "DEVICE_PROFILE_AUTOMOTIVE_PROJECTION is not fully supported yet.");
         }
 
         if (!DEVICE_PROFILE_TO_PERMISSION.containsKey(deviceProfile)) {
@@ -217,6 +242,12 @@ class AssociationRequestsProcessor {
     }
 
     private boolean mayAssociateWithoutPrompt(String packageName, int userId) {
+        if (mRequest.getDeviceProfile() != null
+                && isRoleHolder(userId, packageName, mRequest.getDeviceProfile())) {
+            // Don't need to collect user's consent since app already holds the role.
+            return true;
+        }
+
         String[] sameOemPackages = mContext.getResources()
                 .getStringArray(com.android.internal.R.array.config_companionDevicePackages);
         if (!ArrayUtils.contains(sameOemPackages, packageName)) {

@@ -272,6 +272,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return getUserStateLocked(mCurrentUserId);
     }
 
+    /**
+     * Changes the magnification mode on the given display.
+     *
+     * @param displayId the logical display
+     * @param magnificationMode the target magnification mode
+     */
+    public void changeMagnificationMode(int displayId, int magnificationMode) {
+        synchronized (mLock) {
+            if (displayId == Display.DEFAULT_DISPLAY) {
+                persistMagnificationModeSettingsLocked(magnificationMode);
+            } else {
+                final AccessibilityUserState userState = getCurrentUserStateLocked();
+                final int currentMode = userState.getMagnificationModeLocked(displayId);
+                if (magnificationMode != currentMode) {
+                    userState.setMagnificationModeLocked(displayId, magnificationMode);
+                    updateMagnificationModeChangeSettingsLocked(userState, displayId);
+                }
+            }
+        }
+    }
+
     public static final class Lifecycle extends SystemService {
         private final AccessibilityManagerService mService;
 
@@ -299,7 +320,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             SystemActionPerformer systemActionPerformer,
             AccessibilityWindowManager a11yWindowManager,
             AccessibilityDisplayListener a11yDisplayListener,
-            MagnificationController magnificationController) {
+            MagnificationController magnificationController,
+            @Nullable AccessibilityInputFilter inputFilter) {
         mContext = context;
         mPowerManager =  (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
@@ -314,6 +336,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mA11yDisplayListener = a11yDisplayListener;
         mMagnificationController = magnificationController;
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
+        if (inputFilter != null) {
+            mInputFilter = inputFilter;
+            mHasInputFilter = true;
+        }
         init();
     }
 
@@ -1794,47 +1820,51 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return relevantEventTypes;
     }
 
-    private void updateMagnificationModeChangeSettingsLocked(AccessibilityUserState userState) {
+    private void updateMagnificationModeChangeSettingsLocked(AccessibilityUserState userState,
+            int displayId) {
         if (userState.mUserId != mCurrentUserId) {
             return;
         }
         // New mode is invalid, so ignore and restore it.
-        if (fallBackMagnificationModeSettingsLocked(userState)) {
+        if (fallBackMagnificationModeSettingsLocked(userState, displayId)) {
             return;
         }
         mMagnificationController.transitionMagnificationModeLocked(
-                Display.DEFAULT_DISPLAY, userState.getMagnificationModeLocked(),
+                displayId, userState.getMagnificationModeLocked(displayId),
                 this::onMagnificationTransitionEndedLocked);
     }
 
     /**
-     * Called when the magnification mode transition is completed.
+     * Called when the magnification mode transition is completed. If the given display is default
+     * display, we also need to fall back the mode in user settings.
      */
-    void onMagnificationTransitionEndedLocked(boolean success) {
+    void onMagnificationTransitionEndedLocked(int displayId, boolean success) {
         final AccessibilityUserState userState = getCurrentUserStateLocked();
-        final int previousMode = userState.getMagnificationModeLocked()
+        final int previousMode = userState.getMagnificationModeLocked(displayId)
                 ^ Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
         if (!success && previousMode != 0) {
-            userState.setMagnificationModeLocked(previousMode);
-            persistMagnificationModeSettingLocked(previousMode);
+            userState.setMagnificationModeLocked(displayId, previousMode);
+            if (displayId == Display.DEFAULT_DISPLAY) {
+                persistMagnificationModeSettingsLocked(previousMode);
+            }
         } else {
             mMainHandler.sendMessage(obtainMessage(
                     AccessibilityManagerService::notifyRefreshMagnificationModeToInputFilter,
-                    this));
+                    this, displayId));
         }
     }
 
-    private void notifyRefreshMagnificationModeToInputFilter() {
+    private void notifyRefreshMagnificationModeToInputFilter(int displayId) {
         synchronized (mLock) {
             if (!mHasInputFilter) {
                 return;
             }
-            // TODO: notify the mode change on specified display.
             final ArrayList<Display> displays = getValidDisplayList();
             for (int i = 0; i < displays.size(); i++) {
                 final Display display = displays.get(i);
-                if (display != null) {
+                if (display != null && display.getDisplayId() == displayId) {
                     mInputFilter.refreshMagnificationMode(display);
+                    return;
                 }
             }
         }
@@ -2245,10 +2275,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         scheduleUpdateClientsIfNeededLocked(userState);
         updateAccessibilityShortcutKeyTargetsLocked(userState);
         updateAccessibilityButtonTargetsLocked(userState);
-        // Update the capabilities before the mode.
+        // Update the capabilities before the mode because we will check the current mode is
+        // invalid or not..
         updateMagnificationCapabilitiesSettingsChangeLocked(userState);
-        updateMagnificationModeChangeSettingsLocked(userState);
+        updateMagnificationModeChangeSettingsForAllDisplaysLocked(userState);
         updateFocusAppearanceDataLocked(userState);
+    }
+
+    private void updateMagnificationModeChangeSettingsForAllDisplaysLocked(
+            AccessibilityUserState userState) {
+        final ArrayList<Display> displays = getValidDisplayList();
+        for (int i = 0; i < displays.size(); i++) {
+            final int displayId = displays.get(i).getDisplayId();
+            updateMagnificationModeChangeSettingsLocked(userState, displayId);
+        }
     }
 
     private void updateWindowsForAccessibilityCallbackLocked(AccessibilityUserState userState) {
@@ -2348,7 +2388,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         somethingChanged |= readAccessibilityButtonTargetsLocked(userState);
         somethingChanged |= readAccessibilityButtonTargetComponentLocked(userState);
         somethingChanged |= readUserRecommendedUiTimeoutSettingsLocked(userState);
-        somethingChanged |= readMagnificationModeLocked(userState);
+        somethingChanged |= readMagnificationModeForDefaultDisplayLocked(userState);
         somethingChanged |= readMagnificationCapabilitiesLocked(userState);
         return somethingChanged;
     }
@@ -3878,8 +3918,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         || mUserInteractiveUiTimeoutUri.equals(uri)) {
                     readUserRecommendedUiTimeoutSettingsLocked(userState);
                 } else if (mMagnificationModeUri.equals(uri)) {
-                    if (readMagnificationModeLocked(userState)) {
-                        updateMagnificationModeChangeSettingsLocked(userState);
+                    if (readMagnificationModeForDefaultDisplayLocked(userState)) {
+                        updateMagnificationModeChangeSettingsLocked(userState,
+                                Display.DEFAULT_DISPLAY);
                     }
                 } else if (mMagnificationCapabilityUri.equals(uri)) {
                     if (readMagnificationCapabilitiesLocked(userState)) {
@@ -3892,8 +3933,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private void updateMagnificationCapabilitiesSettingsChangeLocked(
             AccessibilityUserState userState) {
-        if (fallBackMagnificationModeSettingsLocked(userState)) {
-            updateMagnificationModeChangeSettingsLocked(userState);
+        final ArrayList<Display> displays = getValidDisplayList();
+        for (int i = 0; i < displays.size(); i++) {
+            final int displayId = displays.get(i).getDisplayId();
+            if (fallBackMagnificationModeSettingsLocked(userState, displayId)) {
+                updateMagnificationModeChangeSettingsLocked(userState, displayId);
+            }
         }
         updateWindowMagnificationConnectionIfNeeded(userState);
         // Remove magnification button UI when the magnification capability is not all mode or
@@ -3902,7 +3947,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 || userState.isShortcutMagnificationEnabledLocked())
                 || userState.getMagnificationCapabilitiesLocked()
                 != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL) {
-            final ArrayList<Display> displays = getValidDisplayList();
+
             for (int i = 0; i < displays.size(); i++) {
                 final int displayId = displays.get(i).getDisplayId();
                 getWindowMagnificationMgr().removeMagnificationButton(displayId);
@@ -3910,18 +3955,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    private boolean fallBackMagnificationModeSettingsLocked(AccessibilityUserState userState) {
-        if (userState.isValidMagnificationModeLocked()) {
+    private boolean fallBackMagnificationModeSettingsLocked(AccessibilityUserState userState,
+            int displayId) {
+        if (userState.isValidMagnificationModeLocked(displayId)) {
             return false;
         }
-        Slog.w(LOG_TAG, "invalid magnification mode:" + userState.getMagnificationModeLocked());
+        Slog.w(LOG_TAG, "displayId " + displayId + ", invalid magnification mode:"
+                + userState.getMagnificationModeLocked(displayId));
         final int capabilities = userState.getMagnificationCapabilitiesLocked();
-        userState.setMagnificationModeLocked(capabilities);
-        persistMagnificationModeSettingLocked(capabilities);
+        userState.setMagnificationModeLocked(displayId, capabilities);
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            persistMagnificationModeSettingsLocked(capabilities);
+        }
         return true;
     }
 
-    private void persistMagnificationModeSettingLocked(int mode) {
+    private void persistMagnificationModeSettingsLocked(int mode) {
         BackgroundThread.getHandler().post(() -> {
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -3933,7 +3982,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         });
     }
 
-    //TODO: support multi-display.
     /**
      * Gets the magnification mode of the specified display.
      *
@@ -3943,17 +3991,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     public int getMagnificationMode(int displayId) {
         synchronized (mLock) {
-            return getCurrentUserStateLocked().getMagnificationModeLocked();
+            return getCurrentUserStateLocked().getMagnificationModeLocked(displayId);
         }
     }
 
-    private boolean readMagnificationModeLocked(AccessibilityUserState userState) {
+    // Only the value of the default display is from user settings because not each of displays has
+    // a unique id.
+    private boolean readMagnificationModeForDefaultDisplayLocked(AccessibilityUserState userState) {
         final int magnificationMode = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN, userState.mUserId);
-        if (magnificationMode != userState.getMagnificationModeLocked()) {
-            userState.setMagnificationModeLocked(magnificationMode);
+        if (magnificationMode != userState.getMagnificationModeLocked(Display.DEFAULT_DISPLAY)) {
+            userState.setMagnificationModeLocked(Display.DEFAULT_DISPLAY, magnificationMode);
             return true;
         }
         return false;

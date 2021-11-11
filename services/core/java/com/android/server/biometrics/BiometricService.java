@@ -1381,7 +1381,8 @@ public class BiometricService extends SystemService {
 
                 Slog.d(TAG, "handleAuthenticate: modality(" + preAuthStatus.first
                         + "), status(" + preAuthStatus.second + "), preAuthInfo: " + preAuthInfo
-                        + " requestId: " + requestId);
+                        + " requestId: " + requestId + " promptInfo.isIgnoreEnrollmentState: "
+                        + promptInfo.isIgnoreEnrollmentState());
 
                 if (preAuthStatus.second == BiometricConstants.BIOMETRIC_SUCCESS) {
                     // If BIOMETRIC_WEAK or BIOMETRIC_STRONG are allowed, but not enrolled, but

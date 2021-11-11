@@ -16,10 +16,10 @@
 
 package com.android.systemui.dagger;
 
+import com.android.systemui.CoreStartable;
 import com.android.systemui.LatencyTester;
 import com.android.systemui.ScreenDecorations;
 import com.android.systemui.SliceBroadcastRelayHandler;
-import com.android.systemui.SystemUI;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.accessibility.WindowMagnification;
 import com.android.systemui.biometrics.AuthController;
@@ -63,145 +63,145 @@ public abstract class SystemUIBinder {
     @Binds
     @IntoMap
     @ClassKey(AuthController.class)
-    public abstract SystemUI bindAuthController(AuthController service);
+    public abstract CoreStartable bindAuthController(AuthController service);
 
     /** Inject into GarbageMonitor.Service. */
     @Binds
     @IntoMap
     @ClassKey(GarbageMonitor.Service.class)
-    public abstract SystemUI bindGarbageMonitorService(GarbageMonitor.Service sysui);
+    public abstract CoreStartable bindGarbageMonitorService(GarbageMonitor.Service sysui);
 
     /** Inject into GlobalActionsComponent. */
     @Binds
     @IntoMap
     @ClassKey(GlobalActionsComponent.class)
-    public abstract SystemUI bindGlobalActionsComponent(GlobalActionsComponent sysui);
+    public abstract CoreStartable bindGlobalActionsComponent(GlobalActionsComponent sysui);
 
     /** Inject into InstantAppNotifier. */
     @Binds
     @IntoMap
     @ClassKey(InstantAppNotifier.class)
-    public abstract SystemUI bindInstantAppNotifier(InstantAppNotifier sysui);
+    public abstract CoreStartable bindInstantAppNotifier(InstantAppNotifier sysui);
 
     /** Inject into KeyguardViewMediator. */
     @Binds
     @IntoMap
     @ClassKey(KeyguardViewMediator.class)
-    public abstract SystemUI bindKeyguardViewMediator(KeyguardViewMediator sysui);
+    public abstract CoreStartable bindKeyguardViewMediator(KeyguardViewMediator sysui);
 
     /** Inject into LatencyTests. */
     @Binds
     @IntoMap
     @ClassKey(LatencyTester.class)
-    public abstract SystemUI bindLatencyTester(LatencyTester sysui);
+    public abstract CoreStartable bindLatencyTester(LatencyTester sysui);
 
     /** Inject into PowerUI. */
     @Binds
     @IntoMap
     @ClassKey(PowerUI.class)
-    public abstract SystemUI bindPowerUI(PowerUI sysui);
+    public abstract CoreStartable bindPowerUI(PowerUI sysui);
 
     /** Inject into Recents. */
     @Binds
     @IntoMap
     @ClassKey(Recents.class)
-    public abstract SystemUI bindRecents(Recents sysui);
+    public abstract CoreStartable bindRecents(Recents sysui);
 
     /** Inject into ScreenDecorations. */
     @Binds
     @IntoMap
     @ClassKey(ScreenDecorations.class)
-    public abstract SystemUI bindScreenDecorations(ScreenDecorations sysui);
+    public abstract CoreStartable bindScreenDecorations(ScreenDecorations sysui);
 
     /** Inject into ShortcutKeyDispatcher. */
     @Binds
     @IntoMap
     @ClassKey(ShortcutKeyDispatcher.class)
-    public abstract SystemUI bindsShortcutKeyDispatcher(ShortcutKeyDispatcher sysui);
+    public abstract CoreStartable bindsShortcutKeyDispatcher(ShortcutKeyDispatcher sysui);
 
     /** Inject into SliceBroadcastRelayHandler. */
     @Binds
     @IntoMap
     @ClassKey(SliceBroadcastRelayHandler.class)
-    public abstract SystemUI bindSliceBroadcastRelayHandler(SliceBroadcastRelayHandler sysui);
+    public abstract CoreStartable bindSliceBroadcastRelayHandler(SliceBroadcastRelayHandler sysui);
 
     /** Inject into StatusBar. */
     @Binds
     @IntoMap
     @ClassKey(StatusBar.class)
-    public abstract SystemUI bindsStatusBar(StatusBar sysui);
+    public abstract CoreStartable bindsStatusBar(StatusBar sysui);
 
     /** Inject into SystemActions. */
     @Binds
     @IntoMap
     @ClassKey(SystemActions.class)
-    public abstract SystemUI bindSystemActions(SystemActions sysui);
+    public abstract CoreStartable bindSystemActions(SystemActions sysui);
 
     /** Inject into ThemeOverlayController. */
     @Binds
     @IntoMap
     @ClassKey(ThemeOverlayController.class)
-    public abstract SystemUI bindThemeOverlayController(ThemeOverlayController sysui);
+    public abstract CoreStartable bindThemeOverlayController(ThemeOverlayController sysui);
 
     /** Inject into ToastUI. */
     @Binds
     @IntoMap
     @ClassKey(ToastUI.class)
-    public abstract SystemUI bindToastUI(ToastUI service);
+    public abstract CoreStartable bindToastUI(ToastUI service);
 
     /** Inject into TvStatusBar. */
     @Binds
     @IntoMap
     @ClassKey(TvStatusBar.class)
-    public abstract SystemUI bindsTvStatusBar(TvStatusBar sysui);
+    public abstract CoreStartable bindsTvStatusBar(TvStatusBar sysui);
 
     /** Inject into TvNotificationPanel. */
     @Binds
     @IntoMap
     @ClassKey(TvNotificationPanel.class)
-    public abstract SystemUI bindsTvNotificationPanel(TvNotificationPanel sysui);
+    public abstract CoreStartable bindsTvNotificationPanel(TvNotificationPanel sysui);
 
     /** Inject into TvOngoingPrivacyChip. */
     @Binds
     @IntoMap
     @ClassKey(TvOngoingPrivacyChip.class)
-    public abstract SystemUI bindsTvOngoingPrivacyChip(TvOngoingPrivacyChip sysui);
+    public abstract CoreStartable bindsTvOngoingPrivacyChip(TvOngoingPrivacyChip sysui);
 
     /** Inject into VolumeUI. */
     @Binds
     @IntoMap
     @ClassKey(VolumeUI.class)
-    public abstract SystemUI bindVolumeUI(VolumeUI sysui);
+    public abstract CoreStartable bindVolumeUI(VolumeUI sysui);
 
     /** Inject into WindowMagnification. */
     @Binds
     @IntoMap
     @ClassKey(WindowMagnification.class)
-    public abstract SystemUI bindWindowMagnification(WindowMagnification sysui);
+    public abstract CoreStartable bindWindowMagnification(WindowMagnification sysui);
 
     /** Inject into WMShell. */
     @Binds
     @IntoMap
     @ClassKey(WMShell.class)
-    public abstract SystemUI bindWMShell(WMShell sysui);
+    public abstract CoreStartable bindWMShell(WMShell sysui);
 
     /** Inject into HomeSoundEffectController. */
     @Binds
     @IntoMap
     @ClassKey(HomeSoundEffectController.class)
-    public abstract SystemUI bindHomeSoundEffectController(HomeSoundEffectController sysui);
+    public abstract CoreStartable bindHomeSoundEffectController(HomeSoundEffectController sysui);
 
     /** Inject into DreamOverlay. */
     @Binds
     @IntoMap
     @ClassKey(DreamOverlayRegistrant.class)
-    public abstract SystemUI bindDreamOverlayRegistrant(
+    public abstract CoreStartable bindDreamOverlayRegistrant(
             DreamOverlayRegistrant dreamOverlayRegistrant);
 
     /** Inject into AppWidgetOverlayPrimer. */
     @Binds
     @IntoMap
     @ClassKey(AppWidgetOverlayPrimer.class)
-    public abstract SystemUI bindAppWidgetOverlayPrimer(
+    public abstract CoreStartable bindAppWidgetOverlayPrimer(
             AppWidgetOverlayPrimer appWidgetOverlayPrimer);
 }

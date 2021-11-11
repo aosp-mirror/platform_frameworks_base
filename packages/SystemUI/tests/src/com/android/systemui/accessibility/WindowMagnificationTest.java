@@ -22,6 +22,8 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_M
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -99,17 +101,19 @@ public class WindowMagnificationTest extends SysuiTestCase {
     }
 
     @Test
-    public void requestWindowMagnificationConnection_setWindowMagnificationConnection() {
+    public void requestWindowMagnificationConnection_setConnectionAndListener() {
         mCommandQueue.requestWindowMagnificationConnection(true);
         waitForIdleSync();
 
         verify(mAccessibilityManager).setWindowMagnificationConnection(any(
                 IWindowMagnificationConnection.class));
+        verify(mModeSwitchesController).setSwitchListenerDelegate(notNull());
 
         mCommandQueue.requestWindowMagnificationConnection(false);
         waitForIdleSync();
 
-        verify(mAccessibilityManager).setWindowMagnificationConnection(null);
+        verify(mAccessibilityManager).setWindowMagnificationConnection(isNull());
+        verify(mModeSwitchesController).setSwitchListenerDelegate(isNull());
     }
 
     @Test

@@ -119,6 +119,11 @@ public interface EconomyManagerInternal {
                 boolean canAfford);
     }
 
+    /** Listener for various TARE state changes. */
+    interface TareStateChangeListener {
+        void onTareEnabledStateChanged(boolean isTareEnabled);
+    }
+
     /**
      * Return {@code true} if the app is able to pay for the anticipated actions.
      */
@@ -129,6 +134,9 @@ public interface EconomyManagerInternal {
      * based on current prices.
      */
     long getMaxDurationMs(int userId, @NonNull String pkgName, @NonNull ActionBill bill);
+
+    /** Returns true if TARE is enabled. */
+    boolean isEnabled();
 
     /**
      * Register an {@link AffordabilityChangeListener} to track when an app's ability to afford the
@@ -143,6 +151,16 @@ public interface EconomyManagerInternal {
      */
     void unregisterAffordabilityChangeListener(int userId, @NonNull String pkgName,
             @NonNull AffordabilityChangeListener listener, @NonNull ActionBill bill);
+
+    /**
+     * Register a {@link TareStateChangeListener} to track when TARE's state changes.
+     */
+    void registerTareStateChangeListener(@NonNull TareStateChangeListener listener);
+
+    /**
+     * Unregister a {@link TareStateChangeListener} from being notified when TARE's state changes.
+     */
+    void unregisterTareStateChangeListener(@NonNull TareStateChangeListener listener);
 
     /**
      * Note that an instantaneous event has occurred. The event must be specified in one of the

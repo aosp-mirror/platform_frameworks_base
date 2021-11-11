@@ -31636,6 +31636,8 @@ package android.os {
     method @Nullable public double[] createDoubleArray();
     method @Nullable public float[] createFloatArray();
     method @Nullable public int[] createIntArray();
+    method @Nullable public <T extends android.os.IInterface> T[] createInterfaceArray(@NonNull java.util.function.IntFunction<T[]>, @NonNull java.util.function.Function<android.os.IBinder,T>);
+    method @Nullable public <T extends android.os.IInterface> java.util.ArrayList<T> createInterfaceArrayList(@NonNull java.util.function.Function<android.os.IBinder,T>);
     method @Nullable public long[] createLongArray();
     method @Nullable public String[] createStringArray();
     method @Nullable public java.util.ArrayList<java.lang.String> createStringArrayList();
@@ -31674,13 +31676,17 @@ package android.os {
     method public float readFloat();
     method public void readFloatArray(@NonNull float[]);
     method @Nullable public java.util.HashMap readHashMap(@Nullable ClassLoader);
+    method @Nullable public <K, V> java.util.HashMap<K,V> readHashMap(@Nullable ClassLoader, @NonNull Class<? extends K>, @NonNull Class<? extends V>);
     method public int readInt();
     method public void readIntArray(@NonNull int[]);
+    method public <T extends android.os.IInterface> void readInterfaceArray(@NonNull T[], @NonNull java.util.function.Function<android.os.IBinder,T>);
+    method public <T extends android.os.IInterface> void readInterfaceList(@NonNull java.util.List<T>, @NonNull java.util.function.Function<android.os.IBinder,T>);
     method public void readList(@NonNull java.util.List, @Nullable ClassLoader);
     method public <T> void readList(@NonNull java.util.List<? super T>, @Nullable ClassLoader, @NonNull Class<T>);
     method public long readLong();
     method public void readLongArray(@NonNull long[]);
     method public void readMap(@NonNull java.util.Map, @Nullable ClassLoader);
+    method public <K, V> void readMap(@NonNull java.util.Map<? super K,? super V>, @Nullable ClassLoader, @NonNull Class<K>, @NonNull Class<V>);
     method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader);
     method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader, @NonNull Class<T>);
     method @Nullable public android.os.Parcelable[] readParcelableArray(@Nullable ClassLoader);
@@ -31728,6 +31734,8 @@ package android.os {
     method public void writeFloatArray(@Nullable float[]);
     method public void writeInt(int);
     method public void writeIntArray(@Nullable int[]);
+    method public <T extends android.os.IInterface> void writeInterfaceArray(@Nullable T[]);
+    method public <T extends android.os.IInterface> void writeInterfaceList(@Nullable java.util.List<T>);
     method public void writeInterfaceToken(@NonNull String);
     method public void writeList(@Nullable java.util.List);
     method public void writeLong(long);
@@ -40972,11 +40980,11 @@ package android.telephony {
   }
 
   public class CarrierConfigManager {
-    method @Nullable public android.os.PersistableBundle getConfig();
-    method @Nullable public android.os.PersistableBundle getConfigByComponentForSubId(@NonNull String, int);
-    method @Nullable public android.os.PersistableBundle getConfigForSubId(int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfig();
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfigByComponentForSubId(@NonNull String, int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfigForSubId(int);
     method public static boolean isConfigForIdentifiedCarrier(android.os.PersistableBundle);
-    method public void notifyConfigChangedForSubId(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyConfigChangedForSubId(int);
     field public static final String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
     field public static final int CARRIER_NR_AVAILABILITY_NSA = 1; // 0x1
     field public static final int CARRIER_NR_AVAILABILITY_SA = 2; // 0x2
@@ -42985,7 +42993,7 @@ package android.telephony {
     method public boolean isEmergencyNumber(@NonNull String);
     method public boolean isHearingAidCompatibilitySupported();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public boolean isManualNetworkSelectionAllowed();
-    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isModemEnabledForSlot(int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public boolean isModemEnabledForSlot(int);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int isMultiSimSupported();
     method public boolean isNetworkRoaming();
     method public boolean isRadioInterfaceCapabilitySupported(@NonNull String);

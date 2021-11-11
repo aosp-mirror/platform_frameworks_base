@@ -196,7 +196,7 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
         testSpec.replacesLayer(testApp.component, LAUNCHER_COMPONENT)
     }
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun runPresubmitAssertion() {
         flickerRule.checkPresubmitAssertions()

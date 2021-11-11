@@ -142,6 +142,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.media.AudioManager;
+import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -214,6 +215,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
@@ -478,6 +480,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ArgumentCaptor<IntentFilter> intentFilterCaptor =
                 ArgumentCaptor.forClass(IntentFilter.class);
 
+        Mockito.doReturn(new Intent()).when(mContext).registerReceiverAsUser(
+                any(), any(), any(), any(), any());
+        Mockito.doReturn(new Intent()).when(mContext).registerReceiver(any(), any());
         verify(mContext, atLeastOnce()).registerReceiverAsUser(broadcastReceiverCaptor.capture(),
                 any(), intentFilterCaptor.capture(), any(), any());
         verify(mContext, atLeastOnce()).registerReceiver(broadcastReceiverCaptor.capture(),
@@ -8460,5 +8465,46 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         } catch (SecurityException e) {
             fail("call to matchesCallFilter with listener permissions should work");
         }
+    }
+
+    @Test
+    public void testMediaNotificationsBypassBlock() throws Exception {
+        when(mAmi.getPendingIntentFlags(any(IIntentSender.class)))
+                .thenReturn(FLAG_MUTABLE | FLAG_ONE_SHOT);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+
+        Notification.Builder nb = new Notification.Builder(
+                mContext, mTestNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .addAction(new Notification.Action.Builder(null, "test", null).build());
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.setNotificationsEnabledForPackage(
+                r.getSbn().getPackageName(), r.getUid(), false);
+
+        // normal blocked notifications - blocked
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
+
+        // just using the style - blocked
+        nb.setStyle(new Notification.MediaStyle());
+        sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
+
+        // style + media session - bypasses block
+        nb.setStyle(new Notification.MediaStyle().setMediaSession(mock(MediaSession.Token.class)));
+        sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
     }
 }

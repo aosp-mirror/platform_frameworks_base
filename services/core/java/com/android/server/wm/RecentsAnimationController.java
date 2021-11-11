@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
@@ -161,6 +162,8 @@ public class RecentsAnimationController implements DeathRecipient {
     boolean mShouldAttachNavBarToAppDuringTransition;
     private boolean mNavigationBarAttachedToApp;
     private ActivityRecord mNavBarAttachedApp;
+
+    private final ArrayList<RemoteAnimationTarget> mPendingTaskAppears = new ArrayList<>();
 
     /**
      * An app transition listener to cancel the recents animation only after the app transition
@@ -731,11 +734,19 @@ public class RecentsAnimationController implements DeathRecipient {
                 return;
             }
             ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "addTaskToTargets, target: %s", target);
-            try {
-                mRunner.onTaskAppeared(target);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to report task appeared", e);
-            }
+            mPendingTaskAppears.add(target);
+        }
+    }
+
+    void sendTasksAppeared() {
+        if (mPendingTaskAppears.isEmpty() || mRunner == null) return;
+        try {
+            final RemoteAnimationTarget[] targets = mPendingTaskAppears.toArray(
+                    new RemoteAnimationTarget[0]);
+            mRunner.onTasksAppeared(targets);
+            mPendingTaskAppears.clear();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to report task appeared", e);
         }
     }
 
@@ -743,10 +754,15 @@ public class RecentsAnimationController implements DeathRecipient {
             OnAnimationFinishedCallback finishedCallback) {
         final SparseBooleanArray recentTaskIds =
                 mService.mAtmService.getRecentTasks().getRecentTaskIds();
+        // The target must be built off the root task (the leaf task surface would be cropped
+        // within the root surface). However, recents only tracks leaf task ids, so we'll replace
+        // the task-id with the leaf id.
+        final Task leafTask = task.getTopLeafTask();
+        int taskId = leafTask.mTaskId;
         TaskAnimationAdapter adapter = (TaskAnimationAdapter) addAnimation(task,
-                !recentTaskIds.get(task.mTaskId), true /* hidden */, finishedCallback);
-        mPendingNewTaskTargets.add(task.mTaskId);
-        return adapter.createRemoteAnimationTarget();
+                !recentTaskIds.get(taskId), true /* hidden */, finishedCallback);
+        mPendingNewTaskTargets.add(taskId);
+        return adapter.createRemoteAnimationTarget(taskId);
     }
 
     void logRecentsAnimationStartTime(int durationMs) {
@@ -781,7 +797,8 @@ public class RecentsAnimationController implements DeathRecipient {
         final ArrayList<RemoteAnimationTarget> targets = new ArrayList<>();
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter taskAdapter = mPendingAnimations.get(i);
-            final RemoteAnimationTarget target = taskAdapter.createRemoteAnimationTarget();
+            final RemoteAnimationTarget target =
+                    taskAdapter.createRemoteAnimationTarget(INVALID_TASK_ID);
             if (target != null) {
                 targets.add(target);
             } else {
@@ -994,6 +1011,8 @@ public class RecentsAnimationController implements DeathRecipient {
             removeAnimation(taskAdapter);
             taskAdapter.onCleanup();
         }
+        // Should already be empty, but clean-up pending task-appears in-case they weren't sent.
+        mPendingTaskAppears.clear();
 
         for (int i = mPendingWallpaperAnimations.size() - 1; i >= 0; i--) {
             final WallpaperAnimationAdapter wallpaperAdapter = mPendingWallpaperAnimations.get(i);
@@ -1217,7 +1236,14 @@ public class RecentsAnimationController implements DeathRecipient {
             mLocalBounds.offsetTo(tmpPos.x, tmpPos.y);
         }
 
-        RemoteAnimationTarget createRemoteAnimationTarget() {
+        /**
+         * @param overrideTaskId overrides the target's taskId. It may differ from mTaskId and thus
+         *                       can differ from taskInfo. This mismatch is needed, however, in
+         *                       some cases where we are animating root tasks but need need leaf
+         *                       ids for identification. If this is INVALID (-1), then mTaskId
+         *                       will be used.
+         */
+        RemoteAnimationTarget createRemoteAnimationTarget(int overrideTaskId) {
             final ActivityRecord topApp = mTask.getTopVisibleActivity();
             final WindowState mainWindow = topApp != null
                     ? topApp.findMainWindow()
@@ -1231,7 +1257,10 @@ public class RecentsAnimationController implements DeathRecipient {
             final int mode = topApp.getActivityType() == mTargetActivityType
                     ? MODE_OPENING
                     : MODE_CLOSING;
-            mTarget = new RemoteAnimationTarget(mTask.mTaskId, mode, mCapturedLeash,
+            if (overrideTaskId < 0) {
+                overrideTaskId = mTask.mTaskId;
+            }
+            mTarget = new RemoteAnimationTarget(overrideTaskId, mode, mCapturedLeash,
                     !topApp.fillsParent(), new Rect(),
                     insets, mTask.getPrefixOrderIndex(), new Point(mBounds.left, mBounds.top),
                     mLocalBounds, mBounds, mTask.getWindowConfiguration(),

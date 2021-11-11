@@ -129,8 +129,8 @@ public final class TextSnapshot {
      * <p>Values may be any combination of the following values:</p>
      * <ul>
      *     <li>{@link android.text.TextUtils#CAP_MODE_CHARACTERS TextUtils.CAP_MODE_CHARACTERS}</li>
-     *     <li>{@link android.text.TextUtils#CAP_MODE_CHARACTERS TextUtils.CAP_MODE_WORDS}</li>
-     *     <li>{@link android.text.TextUtils#CAP_MODE_CHARACTERS TextUtils.CAP_MODE_SENTENCES}</li>
+     *     <li>{@link android.text.TextUtils#CAP_MODE_WORDS TextUtils.CAP_MODE_WORDS}</li>
+     *     <li>{@link android.text.TextUtils#CAP_MODE_SENTENCES TextUtils.CAP_MODE_SENTENCES}</li>
      * </ul>
      *
      * <p>You should generally just take a non-zero value to mean "start out in caps mode" though.

@@ -16,8 +16,12 @@
 
 package com.android.server.tare;
 
+import static android.text.format.DateUtils.DAY_IN_MILLIS;
+
 import static com.android.server.tare.EconomicPolicy.REGULATION_BASIC_INCOME;
 import static com.android.server.tare.EconomicPolicy.REGULATION_BIRTHRIGHT;
+import static com.android.server.tare.EconomicPolicy.REGULATION_DEMOTION;
+import static com.android.server.tare.EconomicPolicy.REGULATION_PROMOTION;
 import static com.android.server.tare.EconomicPolicy.REGULATION_WEALTH_RECLAMATION;
 import static com.android.server.tare.EconomicPolicy.TYPE_ACTION;
 import static com.android.server.tare.EconomicPolicy.TYPE_REWARD;
@@ -603,6 +607,51 @@ class Agent {
         }
     }
 
+    /**
+     * Reclaim a percentage of unused ARCs from an app that was just removed from an exemption list.
+     * The amount reclaimed will depend on how recently the app was used. The reclamation will not
+     * reduce an app's balance below its current minimum balance.
+     */
+    @GuardedBy("mLock")
+    void onAppUnexemptedLocked(final int userId, @NonNull final String pkgName) {
+        final long curBalance = getBalanceLocked(userId, pkgName);
+        final long minBalance = mIrs.getMinBalanceLocked(userId, pkgName);
+        if (curBalance <= minBalance) {
+            return;
+        }
+        // AppStandby only counts elapsed time for things like this
+        // TODO: should we use clock time instead?
+        final long timeSinceLastUsedMs =
+                mAppStandbyInternal.getTimeSinceLastUsedByUser(pkgName, userId);
+        // The app is no longer exempted. We should take away some of credits so it's more in line
+        // with other non-exempt apps. However, don't take away as many credits if the app was used
+        // recently.
+        final double percentageToReclaim;
+        if (timeSinceLastUsedMs < DAY_IN_MILLIS) {
+            percentageToReclaim = .25;
+        } else if (timeSinceLastUsedMs < 2 * DAY_IN_MILLIS) {
+            percentageToReclaim = .5;
+        } else if (timeSinceLastUsedMs < 3 * DAY_IN_MILLIS) {
+            percentageToReclaim = .75;
+        } else {
+            percentageToReclaim = 1;
+        }
+        final long overage = curBalance - minBalance;
+        final long toReclaim = (long) (overage * percentageToReclaim);
+        if (toReclaim > 0) {
+            if (DEBUG) {
+                Slog.i(TAG, "Reclaiming bonus wealth! Taking " + toReclaim
+                        + " from " + appToString(userId, pkgName));
+            }
+
+            final long now = getCurrentTimeMillis();
+            final Ledger ledger = mScribe.getLedgerLocked(userId, pkgName);
+            recordTransactionLocked(userId, pkgName, ledger,
+                    new Ledger.Transaction(now, now, REGULATION_DEMOTION, null, -toReclaim),
+                    true);
+        }
+    }
+
     /** Returns true if an app should be given credits in the general distributions. */
     private boolean shouldGiveCredits(@NonNull PackageInfo packageInfo) {
         final ApplicationInfo applicationInfo = packageInfo.applicationInfo;
@@ -698,6 +747,21 @@ class Agent {
         recordTransactionLocked(userId, pkgName, ledger,
                 new Ledger.Transaction(now, now, REGULATION_BIRTHRIGHT, null,
                         Math.min(maxBirthright, mIrs.getMinBalanceLocked(userId, pkgName))), true);
+    }
+
+    @GuardedBy("mLock")
+    void onAppExemptedLocked(final int userId, @NonNull final String pkgName) {
+        final long minBalance = mIrs.getMinBalanceLocked(userId, pkgName);
+        final long missing = minBalance - getBalanceLocked(userId, pkgName);
+        if (missing <= 0) {
+            return;
+        }
+
+        final Ledger ledger = mScribe.getLedgerLocked(userId, pkgName);
+        final long now = getCurrentTimeMillis();
+
+        recordTransactionLocked(userId, pkgName, ledger,
+                new Ledger.Transaction(now, now, REGULATION_PROMOTION, null, missing), true);
     }
 
     @GuardedBy("mLock")

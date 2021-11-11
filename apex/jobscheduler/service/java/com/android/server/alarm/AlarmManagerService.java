@@ -490,8 +490,8 @@ public class AlarmManagerService extends SystemService {
      * holding the AlarmManagerService.mLock lock.
      */
     @VisibleForTesting
-    final class Constants extends ContentObserver
-            implements DeviceConfig.OnPropertiesChangedListener {
+    final class Constants implements DeviceConfig.OnPropertiesChangedListener,
+            EconomyManagerInternal.TareStateChangeListener {
         @VisibleForTesting
         static final int MAX_EXACT_ALARM_DENY_LIST_SIZE = 250;
 
@@ -695,7 +695,6 @@ public class AlarmManagerService extends SystemService {
         private int mVersion = 0;
 
         Constants(Handler handler) {
-            super(handler);
             updateAllowWhileIdleWhitelistDurationLocked();
             for (int i = 0; i < APP_STANDBY_QUOTAS.length; i++) {
                 APP_STANDBY_QUOTAS[i] = DEFAULT_APP_STANDBY_QUOTAS[i];
@@ -709,11 +708,12 @@ public class AlarmManagerService extends SystemService {
         }
 
         public void start() {
-            mInjector.registerContentObserver(this,
-                    Settings.Global.getUriFor(Settings.Global.ENABLE_TARE));
             mInjector.registerDeviceConfigListener(this);
+            final EconomyManagerInternal economyManagerInternal =
+                    LocalServices.getService(EconomyManagerInternal.class);
+            economyManagerInternal.registerTareStateChangeListener(this);
             onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_ALARM_MANAGER));
-            updateTareSettings();
+            updateTareSettings(economyManagerInternal.isEnabled());
         }
 
         public void updateAllowWhileIdleWhitelistDurationLocked() {
@@ -886,15 +886,12 @@ public class AlarmManagerService extends SystemService {
         }
 
         @Override
-        public void onChange(boolean selfChange) {
-            updateTareSettings();
+        public void onTareEnabledStateChanged(boolean isTareEnabled) {
+            updateTareSettings(isTareEnabled);
         }
 
-        private void updateTareSettings() {
+        private void updateTareSettings(boolean isTareEnabled) {
             synchronized (mLock) {
-                final boolean isTareEnabled = Settings.Global.getInt(
-                        getContext().getContentResolver(),
-                        Settings.Global.ENABLE_TARE, Settings.Global.DEFAULT_ENABLE_TARE) == 1;
                 if (USE_TARE_POLICY != isTareEnabled) {
                     USE_TARE_POLICY = isTareEnabled;
                     final boolean changed = mAlarmStore.updateAlarmDeliveries(alarm -> {

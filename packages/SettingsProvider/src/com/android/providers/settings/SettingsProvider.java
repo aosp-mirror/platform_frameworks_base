@@ -5294,11 +5294,6 @@ public class SettingsProvider extends ContentProvider {
                             Global.Wearable.WEAR_PLATFORM_MR_NUMBER,
                             SystemProperties.getInt("ro.cw_build.platform_mr", 0));
                     initGlobalSettingsDefaultValForWearLocked(
-                            Settings.Global.Wearable.BOTTOM_OFFSET, 0);
-                    initGlobalSettingsDefaultValForWearLocked(
-                            Settings.Global.Wearable.DISPLAY_SHAPE,
-                            Settings.Global.Wearable.DISPLAY_SHAPE_SQUARE);
-                    initGlobalSettingsDefaultValForWearLocked(
                             Settings.Global.Wearable.SCREEN_BRIGHTNESS_LEVEL,
                             getContext()
                                     .getResources()
@@ -5345,8 +5340,6 @@ public class SettingsProvider extends ContentProvider {
                             Settings.Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN,
                             SystemProperties.getInt("ro.ambient.plugged_timeout_min", -1));
                     initGlobalSettingsDefaultValForWearLocked(
-                            Settings.Global.Wearable.COMPANION_ADDRESS, "");
-                    initGlobalSettingsDefaultValForWearLocked(
                             Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE,
                             Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE_UNKNOWN);
                     initGlobalSettingsDefaultValForWearLocked(
@@ -5359,12 +5352,6 @@ public class SettingsProvider extends ContentProvider {
                             disabledProfileSetting.isNull()
                                     ? 0
                                     : Long.parseLong(disabledProfileSetting.getValue());
-                    final boolean isHfpClientProfileEnabled =
-                            (disabledProfileSettingValue & (1 << BluetoothProfile.HEADSET_CLIENT))
-                                    == 0;
-                    initGlobalSettingsDefaultValForWearLocked(
-                            Settings.Global.Wearable.HFP_CLIENT_PROFILE_ENABLED,
-                            isHfpClientProfileEnabled);
                     initGlobalSettingsDefaultValForWearLocked(
                             Settings.Global.Wearable.COMPANION_OS_VERSION,
                             Settings.Global.Wearable.COMPANION_OS_VERSION_UNDEFINED);

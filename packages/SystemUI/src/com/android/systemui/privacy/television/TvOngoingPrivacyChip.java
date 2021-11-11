@@ -45,8 +45,8 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.privacy.PrivacyChipBuilder;
 import com.android.systemui.privacy.PrivacyItem;
@@ -67,7 +67,7 @@ import javax.inject.Inject;
  * recording audio, accessing the camera or accessing the location.
  */
 @SysUISingleton
-public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemController.Callback,
+public class TvOngoingPrivacyChip extends CoreStartable implements PrivacyItemController.Callback,
         PrivacyChipDrawable.PrivacyChipDrawableListener {
     private static final String TAG = "TvOngoingPrivacyChip";
     private static final boolean DEBUG = false;
