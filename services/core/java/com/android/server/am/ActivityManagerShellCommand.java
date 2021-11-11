@@ -331,7 +331,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 case "get-isolated-pids":
                     return runGetIsolatedProcesses(pw);
                 case "set-stop-user-on-switch":
-                    return runSetStopBackgroundUsersOnSwitch(pw);
+                    return runSetStopUserOnSwitch(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -3166,25 +3166,24 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int runSetStopBackgroundUsersOnSwitch(PrintWriter pw) throws RemoteException {
+    private int runSetStopUserOnSwitch(PrintWriter pw) throws RemoteException {
         mInternal.enforceCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                "setStopBackgroundUsersOnSwitch()");
+                "setStopUserOnSwitch()");
         String arg = getNextArg();
         if (arg == null) {
-            Slogf.i(TAG, "runSetStopBackgroundUsersOnSwitch(): resetting to default value");
-            mInternal.setStopBackgroundUsersOnSwitch(
-                    ActivityManager.STOP_BG_USERS_ON_SWITCH_DEFAULT);
+            Slogf.i(TAG, "setStopUserOnSwitch(): resetting to default value");
+            mInternal.setStopUserOnSwitch(ActivityManager.STOP_USER_ON_SWITCH_DEFAULT);
             pw.println("Reset to default value");
             return 0;
         }
 
         boolean stop = Boolean.parseBoolean(arg);
         int value = stop
-                ? ActivityManager.STOP_BG_USERS_ON_SWITCH_TRUE
-                : ActivityManager.STOP_BG_USERS_ON_SWITCH_FALSE;
+                ? ActivityManager.STOP_USER_ON_SWITCH_TRUE
+                : ActivityManager.STOP_USER_ON_SWITCH_FALSE;
 
-        Slogf.i(TAG, "runSetStopBackgroundUsersOnSwitch(): setting to %d (%b)", value, stop);
-        mInternal.setStopBackgroundUsersOnSwitch(value);
+        Slogf.i(TAG, "runSetStopUserOnSwitch(): setting to %d (%b)", value, stop);
+        mInternal.setStopUserOnSwitch(value);
         pw.println("Set to " + stop);
 
         return 0;
