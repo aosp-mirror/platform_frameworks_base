@@ -1985,8 +1985,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("mMethodMap")
-    private boolean bindCurrentInputMethodServiceLocked(
-            Intent service, ServiceConnection conn, int flags) {
+    private boolean bindCurrentInputMethodServiceLocked(ServiceConnection conn, int flags) {
+        Intent service = getCurIntent();
         if (service == null || conn == null) {
             Slog.e(TAG, "--- bind failed: service = " + service + ", conn = " + conn);
             return false;
@@ -3211,8 +3211,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     showInputToken));
             mInputShown = true;
             if (hasConnection() && !isVisibleBound()) {
-                bindCurrentInputMethodServiceLocked(
-                        getCurIntent(), getVisibleConnection(), IME_VISIBLE_BIND_FLAGS);
+                bindCurrentInputMethodServiceLocked(getVisibleConnection(), IME_VISIBLE_BIND_FLAGS);
                 setVisibleBound(true);
             }
             res = true;
@@ -3228,7 +3227,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Slog.w(TAG, "Force disconnect/connect to the IME in showCurrentInputLocked()");
                 ServiceConnection connection = getMainConnection();
                 mContext.unbindService(connection);
-                bindCurrentInputMethodServiceLocked(getCurIntent(), connection,
+                bindCurrentInputMethodServiceLocked(connection,
                         mImeConnectionBindFlags);
             } else {
                 if (DEBUG) {
