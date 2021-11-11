@@ -1,5 +1,6 @@
 package com.android.systemui.media
 
+import android.app.Notification
 import android.app.Notification.MediaStyle
 import android.app.PendingIntent
 import android.app.smartspace.SmartspaceAction
@@ -229,6 +230,30 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testOnNotificationAdded_isRcn_markedRemote() {
+        val bundle = Bundle().apply {
+            putString(Notification.EXTRA_SUBSTITUTE_APP_NAME, "Remote Cast Notification")
+        }
+        val rcn = SbnBuilder().run {
+            setPkg("com.android.systemui") // System package
+            modifyNotification(context).also {
+                it.setSmallIcon(android.R.drawable.ic_media_pause)
+                it.setStyle(MediaStyle().apply { setMediaSession(session.sessionToken) })
+                it.addExtras(bundle)
+            }
+            build()
+        }
+
+        mediaDataManager.onNotificationAdded(KEY, rcn)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor), eq(true),
+                eq(false))
+        assertThat(mediaDataCaptor.value!!.playbackLocation).isEqualTo(
+                MediaData.PLAYBACK_CAST_REMOTE)
+    }
+
+    @Test
     fun testOnNotificationRemoved_callsListener() {
         mediaDataManager.onNotificationAdded(KEY, mediaNotification)
         mediaDataManager.onMediaDataLoaded(KEY, oldKey = null, data = mock(MediaData::class.java))
@@ -306,7 +331,8 @@ class MediaDataManagerTest : SysuiTestCase() {
         verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor), eq(true),
                 eq(false))
         val data = mediaDataCaptor.value
-        val dataRemoteWithResume = data.copy(resumeAction = Runnable {}, isLocalSession = false)
+        val dataRemoteWithResume = data.copy(resumeAction = Runnable {},
+                playbackLocation = MediaData.PLAYBACK_CAST_LOCAL)
         mediaDataManager.onMediaDataLoaded(KEY, null, dataRemoteWithResume)
 
         // WHEN the notification is removed
