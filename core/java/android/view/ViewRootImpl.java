@@ -211,13 +211,13 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.function.Consumer;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 /**
  * The top of a view hierarchy, implementing the needed protocol between View
@@ -730,7 +730,7 @@ public final class ViewRootImpl implements ViewParent,
 
     /**
      * This is only used on the RenderThread when handling a blast sync. Specifically, it's only
-     * used when calling {@link BLASTBufferQueue#setNextTransaction(Transaction)} and then merged
+     * used when calling {@link BLASTBufferQueue#setSyncTransaction(Transaction)} and then merged
      * with a tmp transaction on the Render Thread. The tmp transaction is then merged into
      * {@link #mSurfaceChangedTransaction} on the UI Thread, avoiding any threading issues.
      */
@@ -3999,7 +3999,7 @@ public final class ViewRootImpl implements ViewParent,
             // draw attempt. The next transaction and transaction complete callback were only set
             // for the current draw attempt.
             if (frameWasNotDrawn) {
-                mBlastBufferQueue.setNextTransaction(null);
+                mBlastBufferQueue.setSyncTransaction(null);
                 // Apply the transactions that were sent to mergeWithNextTransaction since the
                 // frame didn't draw on this vsync. It's possible the frame will draw later, but
                 // it's better to not be sync than to block on a frame that may never come.
@@ -4095,7 +4095,7 @@ public final class ViewRootImpl implements ViewParent,
 
                 // We don't need to synchronize mRtBLASTSyncTransaction here since it's not
                 // being modified and only sent to BlastBufferQueue.
-                mBlastBufferQueue.setNextTransaction(mRtBLASTSyncTransaction);
+                mBlastBufferQueue.setSyncTransaction(mRtBLASTSyncTransaction);
             }
         };
         registerRtFrameCallback(frameDrawingCallback);
