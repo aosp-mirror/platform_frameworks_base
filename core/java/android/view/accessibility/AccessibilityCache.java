@@ -20,6 +20,7 @@ package android.view.accessibility;
 import static android.view.accessibility.AccessibilityNodeInfo.FOCUS_ACCESSIBILITY;
 
 import android.os.Build;
+import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.LongArray;
@@ -71,6 +72,11 @@ public class AccessibilityCache {
 
     private long mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
     private long mInputFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+    /**
+     * The event time of the {@link AccessibilityEvent} which presents the populated windows cache
+     * before it is stale.
+     */
+    private long mValidWindowCacheTimeStamp = 0;
 
     private int mAccessibilityFocusedWindow = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
     private int mInputFocusWindow = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
@@ -97,12 +103,19 @@ public class AccessibilityCache {
      * The key of SparseArray is display ID.
      *
      * @param windowsOnAllDisplays The accessibility windows of all displays.
+     * @param populationTimeStamp The timestamp from {@link SystemClock#uptimeMillis()} when the
+     *                            client requests the data.
      */
     public void setWindowsOnAllDisplays(
-            SparseArray<List<AccessibilityWindowInfo>> windowsOnAllDisplays) {
+            SparseArray<List<AccessibilityWindowInfo>> windowsOnAllDisplays,
+            long populationTimeStamp) {
         synchronized (mLock) {
             if (DEBUG) {
                 Log.i(LOG_TAG, "Set windows");
+            }
+            if (mValidWindowCacheTimeStamp > populationTimeStamp) {
+                // Discard the windows because it might be stale.
+                return;
             }
             clearWindowCacheLocked();
             if (windowsOnAllDisplays == null) {
@@ -224,6 +237,7 @@ public class AccessibilityCache {
                 } break;
 
                 case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
+                    mValidWindowCacheTimeStamp = event.getEventTime();
                     if (event.getWindowChanges()
                             == AccessibilityEvent.WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED) {
                         // Don't need to clear all cache. Unless the changes are related to
@@ -232,6 +246,7 @@ public class AccessibilityCache {
                         break;
                     }
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
+                    mValidWindowCacheTimeStamp = event.getEventTime();
                     clear();
                 } break;
             }
