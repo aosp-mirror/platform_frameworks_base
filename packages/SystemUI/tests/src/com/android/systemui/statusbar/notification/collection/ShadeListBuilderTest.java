@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.collection;
 
 import static com.android.systemui.statusbar.notification.collection.ListDumper.dumpTree;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -44,7 +46,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -79,10 +81,11 @@ import org.mockito.Spy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @SmallTest
@@ -124,7 +127,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         mListBuilder.attach(mNotifCollection);
 
-        mStabilityManager = new TestableStabilityManager();
+        mStabilityManager = spy(new TestableStabilityManager());
         mListBuilder.setNotifStabilityManager(mStabilityManager);
 
         Mockito.verify(mNotifCollection).setBuildListener(mBuildListenerCaptor.capture());
@@ -618,26 +621,53 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
     @Test
     public void testNotifSectionsChildrenUpdated() {
-        AtomicBoolean validChildren = new AtomicBoolean(false);
+        ArrayList<ListEntry> pkg1Entries = new ArrayList<>();
+        ArrayList<ListEntry> pkg2Entries = new ArrayList<>();
+        ArrayList<ListEntry> pkg3Entries = new ArrayList<>();
         final NotifSectioner pkg1Sectioner = spy(new PackageSectioner(PACKAGE_1) {
-            @Nullable
             @Override
             public void onEntriesUpdated(List<ListEntry> entries) {
                 super.onEntriesUpdated(entries);
-                validChildren.set(entries.size() == 2);
+                pkg1Entries.addAll(entries);
             }
         });
-        mListBuilder.setSectioners(asList(pkg1Sectioner));
+        final NotifSectioner pkg2Sectioner = spy(new PackageSectioner(PACKAGE_2) {
+            @Override
+            public void onEntriesUpdated(List<ListEntry> entries) {
+                super.onEntriesUpdated(entries);
+                pkg2Entries.addAll(entries);
+            }
+        });
+        final NotifSectioner pkg3Sectioner = spy(new PackageSectioner(PACKAGE_3) {
+            @Override
+            public void onEntriesUpdated(List<ListEntry> entries) {
+                super.onEntriesUpdated(entries);
+                pkg3Entries.addAll(entries);
+            }
+        });
+        mListBuilder.setSectioners(asList(pkg1Sectioner, pkg2Sectioner, pkg3Sectioner));
 
-        addNotif(0, PACKAGE_4);
+        addNotif(0, PACKAGE_1);
         addNotif(1, PACKAGE_1);
-        addNotif(2, PACKAGE_1);
+        addNotif(2, PACKAGE_3);
         addNotif(3, PACKAGE_3);
+        addNotif(4, PACKAGE_3);
 
         dispatchBuild();
 
-        verify(pkg1Sectioner, times(1)).onEntriesUpdated(any());
-        assertTrue(validChildren.get());
+        verify(pkg1Sectioner).onEntriesUpdated(any());
+        verify(pkg2Sectioner).onEntriesUpdated(any());
+        verify(pkg3Sectioner).onEntriesUpdated(any());
+        assertThat(pkg1Entries).containsExactly(
+                mEntrySet.get(0),
+                mEntrySet.get(1)
+        ).inOrder();
+        assertThat(pkg2Entries).isEmpty();
+        assertThat(pkg3Entries).containsExactly(
+                mEntrySet.get(2),
+                mEntrySet.get(3),
+                mEntrySet.get(4)
+        ).inOrder();
     }
 
     @Test
@@ -835,13 +865,13 @@ public class ShadeListBuilderTest extends SysuiTestCase {
                 .onBeforeTransformGroups(anyList());
         inOrder.verify(promoter, atLeastOnce())
                 .shouldPromoteToTopLevel(any(NotificationEntry.class));
-        inOrder.verify(mOnBeforeFinalizeFilterListener).onBeforeFinalizeFilter(anyList());
-        inOrder.verify(preRenderFilter, atLeastOnce())
-                .shouldFilterOut(any(NotificationEntry.class), anyLong());
         inOrder.verify(mOnBeforeSortListener).onBeforeSort(anyList());
         inOrder.verify(section, atLeastOnce()).isInSection(any(ListEntry.class));
         inOrder.verify(comparator, atLeastOnce())
                 .compare(any(ListEntry.class), any(ListEntry.class));
+        inOrder.verify(mOnBeforeFinalizeFilterListener).onBeforeFinalizeFilter(anyList());
+        inOrder.verify(preRenderFilter, atLeastOnce())
+                .shouldFilterOut(any(NotificationEntry.class), anyLong());
         inOrder.verify(mOnBeforeRenderListListener).onBeforeRenderList(anyList());
         inOrder.verify(mOnRenderListListener).onRenderList(anyList());
     }
@@ -947,13 +977,11 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         );
 
         // THEN all the new notifs, including the new GroupEntry, are passed to the listener
-        assertEquals(
-                asList(
-                        mEntrySet.get(0),
-                        mBuiltList.get(1),
-                        mEntrySet.get(4)),
-                listener.mEntriesReceived
-        );
+        assertThat(listener.mEntriesReceived).containsExactly(
+                mEntrySet.get(0),
+                mBuiltList.get(1),
+                mEntrySet.get(4)
+        ).inOrder(); // Order is a bonus because this listener is before sort
     }
 
     @Test
@@ -993,14 +1021,12 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         );
 
         // THEN all the new notifs, including the new GroupEntry, are passed to the listener
-        assertEquals(
-                asList(
-                        mEntrySet.get(0),
-                        mBuiltList.get(2),
-                        mEntrySet.get(7),
-                        mEntrySet.get(1)),
-                listener.mEntriesReceived
-        );
+        assertThat(listener.mEntriesReceived).containsExactly(
+                mEntrySet.get(0),
+                mEntrySet.get(1),
+                mBuiltList.get(2),
+                mEntrySet.get(7)
+        ).inOrder(); // Order is a bonus because this listener is before sort
     }
 
     @Test
@@ -1091,9 +1117,93 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testFinalizeFilteringGroupSummaryDoesNotBreakSort() {
+        // GIVEN children from 3 packages, with one in the middle of the sort order being a group
+        addNotif(0, PACKAGE_1);
+        addNotif(1, PACKAGE_2);
+        addNotif(2, PACKAGE_3);
+        addNotif(3, PACKAGE_1);
+        addNotif(4, PACKAGE_2);
+        addNotif(5, PACKAGE_3);
+        addGroupSummary(6, PACKAGE_2, GROUP_1);
+        addGroupChild(7, PACKAGE_2, GROUP_1);
+        addGroupChild(8, PACKAGE_2, GROUP_1);
+
+        // GIVEN that they should be sorted by package
+        mListBuilder.setComparators(asList(
+                new HypeComparator(PACKAGE_1),
+                new HypeComparator(PACKAGE_2),
+                new HypeComparator(PACKAGE_3)
+        ));
+
+        // WHEN a finalize filter removes the summary
+        mListBuilder.addFinalizeFilter(new NotifFilter("Test") {
+            @Override
+            public boolean shouldFilterOut(@NonNull NotificationEntry entry, long now) {
+                return entry == notif(6).entry;
+            }
+        });
+
+        dispatchBuild();
+
+        // THEN the notifications remain ordered by package, even though the children were promoted
+        verifyBuiltList(
+                notif(0),
+                notif(3),
+                notif(1),
+                notif(4),
+                notif(7),  // promoted child
+                notif(8),  // promoted child
+                notif(2),
+                notif(5)
+        );
+    }
+
+    @Test
+    public void testFinalizeFilteringGroupChildDoesNotBreakSort() {
+        // GIVEN children from 3 packages, with one in the middle of the sort order being a group
+        addNotif(0, PACKAGE_1);
+        addNotif(1, PACKAGE_2);
+        addNotif(2, PACKAGE_3);
+        addNotif(3, PACKAGE_1);
+        addNotif(4, PACKAGE_2);
+        addNotif(5, PACKAGE_3);
+        addGroupSummary(6, PACKAGE_2, GROUP_1);
+        addGroupChild(7, PACKAGE_2, GROUP_1);
+        addGroupChild(8, PACKAGE_2, GROUP_1);
+
+        // GIVEN that they should be sorted by package
+        mListBuilder.setComparators(asList(
+                new HypeComparator(PACKAGE_1),
+                new HypeComparator(PACKAGE_2),
+                new HypeComparator(PACKAGE_3)
+        ));
+
+        // WHEN a finalize filter one of the 2 children from a group
+        mListBuilder.addFinalizeFilter(new NotifFilter("Test") {
+            @Override
+            public boolean shouldFilterOut(@NonNull NotificationEntry entry, long now) {
+                return entry == notif(7).entry;
+            }
+        });
+
+        dispatchBuild();
+
+        // THEN the notifications remain ordered by package, even though the children were promoted
+        verifyBuiltList(
+                notif(0),
+                notif(3),
+                notif(1),
+                notif(4),
+                notif(8),  // promoted child
+                notif(2),
+                notif(5)
+        );
+    }
+
+    @Test
     public void testBrokenGroupNotificationOrdering() {
         // GIVEN two group children with different sections & without a summary yet
-
         addGroupChild(0, PACKAGE_2, GROUP_1);
         addNotif(1, PACKAGE_1);
         addGroupChild(2, PACKAGE_2, GROUP_1);
@@ -1224,13 +1334,11 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         dispatchBuild();
 
         // THEN all the new notifs are passed to the listener out of order
-        assertEquals(
-                asList(
-                        mEntrySet.get(0),
-                        mEntrySet.get(1),
-                        mEntrySet.get(2)),
-                listener.mEntriesReceived
-        );
+        assertThat(listener.mEntriesReceived).containsExactly(
+                mEntrySet.get(0),
+                mEntrySet.get(1),
+                mEntrySet.get(2)
+        ).inOrder();  // Checking out-of-order input to validate sorted output
 
         // THEN the final list is in order
         verifyBuiltList(
@@ -1256,13 +1364,11 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         dispatchBuild();
 
         // THEN all the new notifs are passed to the listener
-        assertEquals(
-                asList(
-                        mEntrySet.get(0),
-                        mEntrySet.get(1),
-                        mEntrySet.get(2)),
-                listener.mEntriesReceived
-        );
+        assertThat(listener.mEntriesReceived).containsExactly(
+                mEntrySet.get(0),
+                mEntrySet.get(1),
+                mEntrySet.get(2)
+        ).inOrder();
     }
 
     @Test
@@ -1365,6 +1471,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         assertOrder("ABCDEFG", "ACDEFBG", "ABCDEFG"); // no change
         assertOrder("ABCDEFG", "ACDEFBXZG", "XZABCDEFG"); // Z and X
         assertOrder("ABCDEFG", "AXCDEZFBG", "XZABCDEFG"); // Z and X + gap
+        verify(mStabilityManager, times(4)).onEntryReorderSuppressed();
     }
 
     @Test
@@ -1373,6 +1480,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         assertOrder("ABCDEFG", "ACDEFBG", "ACDEFBG"); // no change
         assertOrder("ABCDEFG", "ACDEFBXZG", "ACDEFBXZG"); // Z and X
         assertOrder("ABCDEFG", "AXCDEZFBG", "AXCDEZFBG"); // Z and X + gap
+        verify(mStabilityManager, never()).onEntryReorderSuppressed();
     }
 
     @Test
@@ -1408,6 +1516,26 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         dispatchBuild();
 
         // THEN no exception thrown
+    }
+
+    @Test
+    public void testIsSorted() {
+        Comparator<Integer> intCmp = Integer::compare;
+        assertTrue(ShadeListBuilder.isSorted(Collections.emptyList(), intCmp));
+        assertTrue(ShadeListBuilder.isSorted(Collections.singletonList(1), intCmp));
+        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 2), intCmp));
+        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 3), intCmp));
+        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 3, 4), intCmp));
+        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 3, 4, 5), intCmp));
+        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 1, 1, 1, 1), intCmp));
+        assertTrue(ShadeListBuilder.isSorted(Arrays.asList(1, 1, 2, 2, 3, 3), intCmp));
+
+        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(2, 1), intCmp));
+        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(2, 1, 2), intCmp));
+        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 1), intCmp));
+        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 3, 2, 5), intCmp));
+        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(5, 2, 3, 4, 5), intCmp));
+        assertFalse(ShadeListBuilder.isSorted(Arrays.asList(1, 2, 3, 4, 1), intCmp));
     }
 
     /**
@@ -1814,6 +1942,15 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         @Override
         public boolean isEntryReorderingAllowed(ListEntry entry) {
             return mAllowEntryReodering;
+        }
+
+        @Override
+        public boolean isEveryChangeAllowed() {
+            return mAllowEntryReodering && mAllowGroupChanges && mAllowSectionChanges;
+        }
+
+        @Override
+        public void onEntryReorderSuppressed() {
         }
     }
 

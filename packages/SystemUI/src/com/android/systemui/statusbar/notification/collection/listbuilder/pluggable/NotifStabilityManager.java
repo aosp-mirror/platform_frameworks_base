@@ -60,4 +60,19 @@ public abstract class NotifStabilityManager extends Pluggable<NotifStabilityMana
      * @return if can re-order
      */
     public abstract boolean isEntryReorderingAllowed(ListEntry entry);
+
+    /**
+     * Called by the pipeline to determine if every call to the other stability methods would
+     * return true, regardless of parameters.  This allows the pipeline to skip any pieces of
+     * work related to stability.
+     *
+     * @return true if all other methods will return true for any parameters.
+     */
+    public abstract boolean isEveryChangeAllowed();
+
+    /**
+     * Called by the pipeline to inform the stability manager that an entry reordering was indeed
+     * suppressed as the result of a previous call to {@link #isEntryReorderingAllowed(ListEntry)}.
+     */
+    public abstract void onEntryReorderSuppressed();
 }

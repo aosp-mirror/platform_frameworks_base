@@ -3992,7 +3992,7 @@ public class StatsPullAtomService extends SystemService {
         if (mHealthService == null) {
             return StatsManager.PULL_SKIP;
         }
-        android.hardware.health.V1_0.HealthInfo healthInfo;
+        android.hardware.health.HealthInfo healthInfo;
         try {
             healthInfo = mHealthService.getHealthInfo();
         } catch (RemoteException | IllegalStateException e) {
@@ -4008,13 +4008,13 @@ public class StatsPullAtomService extends SystemService {
                 pulledValue = healthInfo.batteryLevel;
                 break;
             case FrameworkStatsLog.REMAINING_BATTERY_CAPACITY:
-                pulledValue = healthInfo.batteryChargeCounter;
+                pulledValue = healthInfo.batteryChargeCounterUah;
                 break;
             case FrameworkStatsLog.FULL_BATTERY_CAPACITY:
-                pulledValue = healthInfo.batteryFullCharge;
+                pulledValue = healthInfo.batteryFullChargeUah;
                 break;
             case FrameworkStatsLog.BATTERY_VOLTAGE:
-                pulledValue = healthInfo.batteryVoltage;
+                pulledValue = healthInfo.batteryVoltageMillivolts;
                 break;
             case FrameworkStatsLog.BATTERY_CYCLE_COUNT:
                 pulledValue = healthInfo.batteryCycleCount;

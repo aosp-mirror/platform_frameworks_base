@@ -408,6 +408,19 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
+         * Flag to decide if authentication should ignore enrollment state.
+         * Defaults to false (not ignoring enrollment state)
+         * @param ignoreEnrollmentState
+         * @return This builder.
+         * @hide
+         */
+        @NonNull
+        public Builder setIgnoreEnrollmentState(boolean ignoreEnrollmentState) {
+            mPromptInfo.setIgnoreEnrollmentState(ignoreEnrollmentState);
+            return this;
+        }
+
+        /**
          * Creates a {@link BiometricPrompt}.
          *
          * @return An instance of {@link BiometricPrompt}.

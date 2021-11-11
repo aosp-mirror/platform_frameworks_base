@@ -38,7 +38,7 @@ import javax.inject.Inject;
  * @see SliceBroadcastRelay
  */
 @SysUISingleton
-public class SliceBroadcastRelayHandler extends SystemUI {
+public class SliceBroadcastRelayHandler extends CoreStartable {
     private static final String TAG = "SliceBroadcastRelay";
     private static final boolean DEBUG = false;
 

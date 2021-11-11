@@ -638,7 +638,7 @@ public class NotificationEntryManager implements
 
         // Construct the expanded view.
         if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
-            mNotificationRowBinderLazy.get().inflateViews(entry, mInflationCallback);
+            mNotificationRowBinderLazy.get().inflateViews(entry, null, mInflationCallback);
         }
 
         mPendingNotifications.put(key, entry);
@@ -695,7 +695,7 @@ public class NotificationEntryManager implements
         }
 
         if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
-            mNotificationRowBinderLazy.get().inflateViews(entry, mInflationCallback);
+            mNotificationRowBinderLazy.get().inflateViews(entry, null, mInflationCallback);
         }
 
         updateNotifications("updateNotificationInternal");

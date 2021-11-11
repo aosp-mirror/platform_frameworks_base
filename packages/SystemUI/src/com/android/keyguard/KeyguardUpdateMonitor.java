@@ -2407,7 +2407,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             } else {
                 mFpm.authenticate(null /* crypto */, mFingerprintCancelSignal,
                         mFingerprintAuthenticationCallback, null /* handler */,
-                        FingerprintManager.SENSOR_ID_ANY, userId);
+                        FingerprintManager.SENSOR_ID_ANY, userId, 0 /* flags */);
             }
             setFingerprintRunningState(BIOMETRIC_STATE_RUNNING);
         }
@@ -2990,7 +2990,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     /**
      * Register to receive notifications about general keyguard information
-     * (see {@link InfoCallback}.
+     * (see {@link KeyguardUpdateMonitorCallback}.
      *
      * @param callback The callback to register
      */

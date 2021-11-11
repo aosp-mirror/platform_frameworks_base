@@ -30,8 +30,8 @@ import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.util.Log;
 
+import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.qualifiers.Main;
 
 import javax.inject.Inject;
@@ -40,7 +40,7 @@ import javax.inject.Inject;
  * {@link DreamOverlayRegistrant} is responsible for telling system server that SystemUI should be
  * the designated dream overlay component.
  */
-public class DreamOverlayRegistrant extends SystemUI {
+public class DreamOverlayRegistrant extends CoreStartable {
     private static final String TAG = "DreamOverlayRegistrant";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private final IDreamManager mDreamManager;

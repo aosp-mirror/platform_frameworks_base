@@ -22,6 +22,7 @@ import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.graphics.cam.Cam;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Assert;
@@ -89,5 +90,14 @@ public class ColorSchemeTest extends SysuiTestCase {
 
         List<Integer> rankedSeedColors = ColorScheme.getSeedColors(wallpaperColors);
         Assert.assertEquals(rankedSeedColors, List.of(0xffaec00a, 0xffbe0000, 0xffcc040f));
+    }
+
+    @Test
+    public void testTertiaryHueWrapsProperly() {
+        int colorInt = 0xffB3588A; // H350 C50 T50
+        ColorScheme colorScheme = new ColorScheme(colorInt, false /* darkTheme */);
+        int tertiaryMid = colorScheme.getAccent3().get(colorScheme.getAccent3().size() / 2);
+        Cam cam = Cam.fromInt(tertiaryMid);
+        Assert.assertEquals(cam.getHue(), 50.0, 10.0);
     }
 }

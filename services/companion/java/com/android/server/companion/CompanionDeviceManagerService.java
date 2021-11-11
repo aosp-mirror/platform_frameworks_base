@@ -200,7 +200,6 @@ public class CompanionDeviceManagerService extends SystemService {
         super(context);
         mImpl = new CompanionDeviceManagerImpl();
         mPersistentDataStore = new PersistentDataStore();
-        mAssociationRequestsProcessor = new AssociationRequestsProcessor(this);
 
         mPowerWhitelistManager = context.getSystemService(PowerWhitelistManager.class);
         mRoleManager = context.getSystemService(RoleManager.class);
@@ -213,6 +212,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 context.getSystemService(PermissionControllerManager.class));
         mUserManager = context.getSystemService(UserManager.class);
         mCompanionDevicePresenceController = new CompanionDevicePresenceController();
+        mAssociationRequestsProcessor = new AssociationRequestsProcessor(this, mRoleManager);
 
         registerPackageMonitor();
     }
@@ -757,7 +757,12 @@ public class CompanionDeviceManagerService extends SystemService {
                 android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND)) {
             mPowerWhitelistManager.addToWhitelist(packageInfo.packageName);
         } else {
-            mPowerWhitelistManager.removeFromWhitelist(packageInfo.packageName);
+            try {
+                mPowerWhitelistManager.removeFromWhitelist(packageInfo.packageName);
+            } catch (UnsupportedOperationException e) {
+                Slog.w(LOG_TAG, packageInfo.packageName + " can't be removed from power save"
+                        + " whitelist. It might due to the package is whitelisted by the system.");
+            }
         }
 
         NetworkPolicyManager networkPolicyManager = NetworkPolicyManager.from(getContext());

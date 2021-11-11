@@ -27,8 +27,7 @@ data class NotifSection(
     val label: String
         get() = "Section($index, $bucket, \"${sectioner.name}\")"
 
-    val headerController: NodeController?
-        get() = sectioner.headerNodeController
+    val headerController: NodeController? = sectioner.headerNodeController
 
     @PriorityBucket val bucket: Int = sectioner.bucket
 }

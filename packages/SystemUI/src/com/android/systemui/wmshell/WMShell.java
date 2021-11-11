@@ -40,8 +40,8 @@ import android.view.KeyEvent;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.Dependency;
-import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -92,7 +92,7 @@ import javax.inject.Inject;
  *       -> WMShell starts and binds SysUI with Shell components via exported Shell interfaces
  */
 @SysUISingleton
-public final class WMShell extends SystemUI
+public final class WMShell extends CoreStartable
         implements CommandQueue.Callbacks, ProtoTraceable<SystemUiTraceProto> {
     private static final String TAG = WMShell.class.getName();
     private static final int INVALID_SYSUI_STATE_MASK =

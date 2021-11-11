@@ -41,10 +41,13 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
+import com.android.wm.shell.util.StagedSplitBounds;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Manages the recent task list from the system, caching it as necessary.
@@ -62,6 +65,13 @@ public class RecentTasksController implements TaskStackListenerCallback,
     // Mapping of split task ids, mappings are symmetrical (ie. if t1 is the taskid of a task in a
     // pair, then mSplitTasks[t1] = t2, and mSplitTasks[t2] = t1)
     private final SparseIntArray mSplitTasks = new SparseIntArray();
+    /**
+     * Maps taskId to {@link StagedSplitBounds} for both taskIDs.
+     * Meaning there will be two taskId integers mapping to the same object.
+     * If there's any ordering to the pairing than we can probably just get away with only one
+     * taskID mapping to it, leaving both for consistency with {@link #mSplitTasks} for now.
+     */
+    private final Map<Integer, StagedSplitBounds> mTaskSplitBoundsMap = new HashMap<>();
 
     /**
      * Creates {@link RecentTasksController}, returns {@code null} if the feature is not
@@ -97,15 +107,20 @@ public class RecentTasksController implements TaskStackListenerCallback,
     /**
      * Adds a split pair. This call does not validate the taskIds, only that they are not the same.
      */
-    public void addSplitPair(int taskId1, int taskId2) {
+    public void addSplitPair(int taskId1, int taskId2, StagedSplitBounds splitBounds) {
         if (taskId1 == taskId2) {
             return;
         }
         // Remove any previous pairs
         removeSplitPair(taskId1);
         removeSplitPair(taskId2);
+        mTaskSplitBoundsMap.remove(taskId1);
+        mTaskSplitBoundsMap.remove(taskId2);
+
         mSplitTasks.put(taskId1, taskId2);
         mSplitTasks.put(taskId2, taskId1);
+        mTaskSplitBoundsMap.put(taskId1, splitBounds);
+        mTaskSplitBoundsMap.put(taskId2, splitBounds);
     }
 
     /**
@@ -116,6 +131,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
         if (pairedTaskId != INVALID_TASK_ID) {
             mSplitTasks.delete(taskId);
             mSplitTasks.delete(pairedTaskId);
+            mTaskSplitBoundsMap.remove(taskId);
+            mTaskSplitBoundsMap.remove(pairedTaskId);
         }
     }
 
@@ -203,7 +220,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
             if (pairedTaskId != INVALID_TASK_ID) {
                 final ActivityManager.RecentTaskInfo pairedTaskInfo = rawMapping.get(pairedTaskId);
                 rawMapping.remove(pairedTaskId);
-                recentTasks.add(new GroupedRecentTaskInfo(taskInfo, pairedTaskInfo));
+                recentTasks.add(new GroupedRecentTaskInfo(taskInfo, pairedTaskInfo,
+                        mTaskSplitBoundsMap.get(pairedTaskId)));
             } else {
                 recentTasks.add(new GroupedRecentTaskInfo(taskInfo));
             }

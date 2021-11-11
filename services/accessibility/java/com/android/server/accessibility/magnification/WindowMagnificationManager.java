@@ -106,6 +106,15 @@ public class WindowMagnificationManager implements
          * @param activated {@code true} if the magnification is activated, otherwise {@code false}.
          */
         void onWindowMagnificationActivationState(int displayId, boolean activated);
+
+        /**
+         * Called from {@link IWindowMagnificationConnection} to request changing the magnification
+         * mode on the given display.
+         *
+         * @param displayId the logical display id
+         * @param magnificationMode the target magnification mode
+         */
+        void onChangeMagnificationMode(int displayId, int magnificationMode);
     }
 
     private final Callback mCallback;
@@ -535,7 +544,7 @@ public class WindowMagnificationManager implements
                         FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
                         "displayId=" + displayId + ";mode=" + magnificationMode);
             }
-            //TODO: Uses this method to change the magnification mode on non-default display.
+            mCallback.onChangeMagnificationMode(displayId, magnificationMode);
         }
 
         @Override

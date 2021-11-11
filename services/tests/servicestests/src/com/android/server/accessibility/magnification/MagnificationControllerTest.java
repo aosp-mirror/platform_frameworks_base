@@ -150,7 +150,7 @@ public class MagnificationControllerTest {
                 MODE_WINDOW,
                 mTransitionCallBack);
 
-        verify(mTransitionCallBack).onResult(true);
+        verify(mTransitionCallBack).onResult(TEST_DISPLAY, true);
         verify(mScreenMagnificationController, never()).reset(anyInt(),
                 any(MagnificationAnimationCallback.class));
         verify(mMockConnection.getConnection(), never()).enableWindowMagnification(anyInt(),
@@ -171,7 +171,7 @@ public class MagnificationControllerTest {
                 mCallbackArgumentCaptor.capture());
         mCallbackArgumentCaptor.getValue().onResult(true);
         mMockConnection.invokeCallbacks();
-        verify(mTransitionCallBack).onResult(true);
+        verify(mTransitionCallBack).onResult(TEST_DISPLAY, true);
         assertEquals(MAGNIFIED_CENTER_X, mWindowMagnificationManager.getCenterX(TEST_DISPLAY), 0);
         assertEquals(MAGNIFIED_CENTER_Y, mWindowMagnificationManager.getCenterY(TEST_DISPLAY), 0);
     }
@@ -189,7 +189,7 @@ public class MagnificationControllerTest {
                 mTransitionCallBack);
 
         mMockConnection.invokeCallbacks();
-        verify(mTransitionCallBack).onResult(true);
+        verify(mTransitionCallBack).onResult(TEST_DISPLAY, true);
         assertEquals(MAGNIFIED_CENTER_X, mWindowMagnificationManager.getCenterX(TEST_DISPLAY), 0);
         assertEquals(MAGNIFIED_CENTER_Y, mWindowMagnificationManager.getCenterY(TEST_DISPLAY), 0);
     }
@@ -225,7 +225,7 @@ public class MagnificationControllerTest {
         verify(mScreenMagnificationController).setScaleAndCenter(TEST_DISPLAY,
                 DEFAULT_SCALE, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y,
                 true, MAGNIFICATION_GESTURE_HANDLER_ID);
-        verify(mTransitionCallBack).onResult(true);
+        verify(mTransitionCallBack).onResult(TEST_DISPLAY, true);
     }
 
     @Test
@@ -245,7 +245,7 @@ public class MagnificationControllerTest {
         verify(mScreenMagnificationController).setScaleAndCenter(TEST_DISPLAY, DEFAULT_SCALE,
                 magnificationBounds.exactCenterX(), magnificationBounds.exactCenterY(), true,
                 MAGNIFICATION_GESTURE_HANDLER_ID);
-        verify(mTransitionCallBack).onResult(true);
+        verify(mTransitionCallBack).onResult(TEST_DISPLAY, true);
     }
 
     @Test
@@ -265,7 +265,7 @@ public class MagnificationControllerTest {
                 0);
         assertEquals(MAGNIFIED_CENTER_Y, mScreenMagnificationController.getCenterY(TEST_DISPLAY),
                 0);
-        verify(mTransitionCallBack).onResult(true);
+        verify(mTransitionCallBack).onResult(TEST_DISPLAY, true);
     }
 
     @Test
@@ -285,7 +285,7 @@ public class MagnificationControllerTest {
         verify(mScreenMagnificationController, never()).setScaleAndCenter(TEST_DISPLAY,
                 DEFAULT_SCALE, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y,
                 true, MAGNIFICATION_GESTURE_HANDLER_ID);
-        verify(mTransitionCallBack).onResult(false);
+        verify(mTransitionCallBack).onResult(TEST_DISPLAY, false);
     }
 
     @Test
@@ -593,6 +593,13 @@ public class MagnificationControllerTest {
         mMagnificationController.onUserRemoved(SECOND_USER_ID);
 
         verify(mScaleProvider).onUserRemoved(SECOND_USER_ID);
+    }
+
+    @Test
+    public void onChangeMagnificationMode_delegateToService() {
+        mMagnificationController.onChangeMagnificationMode(TEST_DISPLAY, MODE_WINDOW);
+
+        verify(mService).changeMagnificationMode(TEST_DISPLAY, MODE_WINDOW);
     }
 
     private void setMagnificationEnabled(int mode) throws RemoteException {

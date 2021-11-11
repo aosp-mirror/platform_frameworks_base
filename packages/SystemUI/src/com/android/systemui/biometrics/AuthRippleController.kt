@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.PointF
@@ -29,7 +31,9 @@ import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.CircleReveal
+import com.android.systemui.statusbar.LiftReveal
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.Command
@@ -41,13 +45,10 @@ import com.android.systemui.statusbar.phone.dagger.StatusBarComponent.StatusBarS
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.ViewController
+import com.android.systemui.util.leak.RotationUtils
 import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Provider
-import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.util.leak.RotationUtils
-
-private const val WAKE_AND_UNLOCK_FADE_DURATION = 180L
 
 /***
  * Controls the ripple effect that shows when authentication is successful.
@@ -141,11 +142,12 @@ class AuthRippleController @Inject constructor(
 
     private fun showUnlockedRipple() {
         notificationShadeWindowController.setForcePluginOpen(true, this)
-        val useCircleReveal = circleReveal != null && biometricUnlockController.isWakeAndUnlock
         val lightRevealScrim = statusBar.lightRevealScrim
-        if (useCircleReveal) {
-            lightRevealScrim?.revealEffect = circleReveal!!
-            startLightRevealScrimOnKeyguardFadingAway = true
+        if (statusBarStateController.isDozing || biometricUnlockController.isWakeAndUnlock) {
+            circleReveal?.let {
+                lightRevealScrim?.revealEffect = it
+                startLightRevealScrimOnKeyguardFadingAway = true
+            }
         }
 
         mView.startUnlockedRipple(
@@ -160,19 +162,29 @@ class AuthRippleController @Inject constructor(
         if (keyguardStateController.isKeyguardFadingAway) {
             val lightRevealScrim = statusBar.lightRevealScrim
             if (startLightRevealScrimOnKeyguardFadingAway && lightRevealScrim != null) {
-                val revealAnimator = ValueAnimator.ofFloat(.1f, 1f).apply {
+                ValueAnimator.ofFloat(.1f, 1f).apply {
                     interpolator = Interpolators.LINEAR_OUT_SLOW_IN
                     duration = RIPPLE_ANIMATION_DURATION
                     startDelay = keyguardStateController.keyguardFadingAwayDelay
                     addUpdateListener { animator ->
                         if (lightRevealScrim.revealEffect != circleReveal) {
-                            // if the something else took over the reveal, let's do nothing.
+                            // if something else took over the reveal, let's do nothing.
                             return@addUpdateListener
                         }
                         lightRevealScrim.revealAmount = animator.animatedValue as Float
                     }
+                    addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            // Reset light reveal scrim to the default, so the StatusBar
+                            // can handle any subsequent light reveal changes
+                            // (ie: from dozing changes)
+                            if (lightRevealScrim.revealEffect == circleReveal) {
+                                lightRevealScrim.revealEffect = LiftReveal
+                            }
+                        }
+                    })
+                    start()
                 }
-                revealAnimator.start()
                 startLightRevealScrimOnKeyguardFadingAway = false
             }
         }

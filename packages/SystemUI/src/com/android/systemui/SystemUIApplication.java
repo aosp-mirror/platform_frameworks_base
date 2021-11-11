@@ -60,7 +60,7 @@ public class SystemUIApplication extends Application implements
     /**
      * Hold a reference on the stuff we start.
      */
-    private SystemUI[] mServices;
+    private CoreStartable[] mServices;
     private boolean mServicesStarted;
     private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
     private GlobalRootComponent mRootComponent;
@@ -190,7 +190,7 @@ public class SystemUIApplication extends Application implements
         if (mServicesStarted) {
             return;
         }
-        mServices = new SystemUI[services.length];
+        mServices = new CoreStartable[services.length];
 
         if (!mBootCompleteCache.isBootComplete()) {
             // check to see if maybe it was already completed long before we began
@@ -217,10 +217,10 @@ public class SystemUIApplication extends Application implements
             log.traceBegin(metricsPrefix + clsName);
             long ti = System.currentTimeMillis();
             try {
-                SystemUI obj = mComponentHelper.resolveSystemUI(clsName);
+                CoreStartable obj = mComponentHelper.resolveCoreStartable(clsName);
                 if (obj == null) {
                     Constructor constructor = Class.forName(clsName).getConstructor(Context.class);
-                    obj = (SystemUI) constructor.newInstance(this);
+                    obj = (CoreStartable) constructor.newInstance(this);
                 }
                 mServices[i] = obj;
             } catch (ClassNotFoundException
@@ -265,7 +265,7 @@ public class SystemUIApplication extends Application implements
         }
     }
 
-    public SystemUI[] getServices() {
+    public CoreStartable[] getServices() {
         return mServices;
     }
 

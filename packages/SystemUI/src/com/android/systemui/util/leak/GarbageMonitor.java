@@ -45,9 +45,9 @@ import android.util.LongSparseArray;
 import android.view.View;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -565,7 +565,7 @@ public class GarbageMonitor implements Dumpable {
 
     /** */
     @SysUISingleton
-    public static class Service extends SystemUI implements Dumpable {
+    public static class Service extends CoreStartable implements Dumpable {
         private final GarbageMonitor mGarbageMonitor;
 
         @Inject

@@ -58,12 +58,13 @@ import javax.inject.Inject
  *     appropriately).
  *  3. OnBeforeTransformGroupListeners are fired ([.addOnBeforeTransformGroupsListener])
  *  4. NotifPromoters are called on each notification with a parent ([.addPromoter])
- *  5. Finalize filters are fired on each notification ([.addFinalizeFilter])
- *  6. OnBeforeSortListeners are fired ([.addOnBeforeSortListener])
- *  7. Top-level entries are assigned sections by NotifSections ([.setSections])
- *  8. Top-level entries within the same section are sorted by NotifComparators ([.setComparators])
- *  9. OnBeforeRenderListListeners are fired ([.addOnBeforeRenderListListener])
- *  10. The list is handed off to the view layer to be rendered
+ *  5. OnBeforeSortListeners are fired ([.addOnBeforeSortListener])
+ *  6. Top-level entries are assigned sections by NotifSections ([.setSections])
+ *  7. Top-level entries within the same section are sorted by NotifComparators ([.setComparators])
+ *  8. OnBeforeFinalizeFilterListeners are fired ([.addOnBeforeFinalizeFilterListener])
+ *  9. Finalize filters are fired on each notification ([.addFinalizeFilter])
+ *  10. OnBeforeRenderListListeners are fired ([.addOnBeforeRenderListListener])
+ *  11. The list is handed off to the view layer to be rendered
  */
 @SysUISingleton
 class NotifPipeline @Inject constructor(

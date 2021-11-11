@@ -16,6 +16,8 @@
 
 package com.android.server.health;
 
+import static android.hardware.health.Translate.h2aTranslate;
+
 import android.annotation.NonNull;
 import android.hardware.health.V2_0.IHealth;
 import android.hardware.health.V2_0.Result;
@@ -64,12 +66,12 @@ class HealthHalCallbackHidl extends IHealthInfoCallback.Stub
         propsLatest.batteryChargeTimeToFullNowSeconds =
                 Constants.BATTERY_CHARGE_TIME_TO_FULL_NOW_SECONDS_UNSUPPORTED;
 
-        mCallback.update(propsLatest);
+        mCallback.update(h2aTranslate(propsLatest));
     }
 
     @Override
     public void healthInfoChanged_2_1(android.hardware.health.V2_1.HealthInfo props) {
-        mCallback.update(props);
+        mCallback.update(h2aTranslate(props));
     }
 
     // on new service registered

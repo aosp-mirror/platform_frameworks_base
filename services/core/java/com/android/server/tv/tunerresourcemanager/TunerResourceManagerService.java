@@ -457,17 +457,18 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             if (!validateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB, lnbHandle)) {
                 throw new RemoteException("lnbHandle can't be invalid");
             }
-            if (!checkClientExists(clientId)) {
-                throw new RemoteException("Release lnb from unregistered client:" + clientId);
-            }
-            LnbResource lnb = getLnbResource(lnbHandle);
-            if (lnb == null) {
-                throw new RemoteException("Releasing lnb does not exist.");
-            }
-            if (lnb.getOwnerClientId() != clientId) {
-                throw new RemoteException("Client is not the current owner of the releasing lnb.");
-            }
             synchronized (mLock) {
+                if (!checkClientExists(clientId)) {
+                    throw new RemoteException("Release lnb from unregistered client:" + clientId);
+                }
+                LnbResource lnb = getLnbResource(lnbHandle);
+                if (lnb == null) {
+                    throw new RemoteException("Releasing lnb does not exist.");
+                }
+                if (lnb.getOwnerClientId() != clientId) {
+                    throw new RemoteException("Client is not the current owner "
+                            + "of the releasing lnb.");
+                }
                 releaseLnbInternal(lnb);
             }
         }
@@ -869,6 +870,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
         frontendHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
         ClientProfile requestClient = getClientProfile(request.clientId);
+        // TODO: check if this is really needed
         if (requestClient == null) {
             return false;
         }
@@ -1205,7 +1207,9 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         @Override
         public void binderDied() {
             synchronized (mLock) {
-                removeClientProfile(mClientId);
+                if (checkClientExists(mClientId)) {
+                    removeClientProfile(mClientId);
+                }
             }
         }
 
@@ -1246,6 +1250,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         // Reclaim all the resources of the share owners of the frontend that is used by the current
         // resource reclaimed client.
         ClientProfile profile = getClientProfile(reclaimingClientId);
+        // TODO: check if this check is really needed.
         if (profile == null) {
             return true;
         }
@@ -1553,6 +1558,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     }
 
     private void clearFrontendAndClientMapping(ClientProfile profile) {
+        // TODO: check if this check is really needed
         if (profile == null) {
             return;
         }
@@ -1573,6 +1579,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     }
 
     private void clearAllResourcesAndClientMapping(ClientProfile profile) {
+        // TODO: check if this check is really needed. Maybe needed for reclaimResource path.
         if (profile == null) {
             return;
         }

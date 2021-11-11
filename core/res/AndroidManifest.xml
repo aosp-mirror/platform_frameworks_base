@@ -1900,7 +1900,7 @@
          @hide This should only be used by ManagedProvisioning app.
     -->
     <permission android:name="android.permission.NETWORK_MANAGED_PROVISIONING"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- Allows Carrier Provisioning to call methods in Networking services
          <p>Not for use by any other third-party or privileged applications.
@@ -2356,10 +2356,10 @@
     <permission android:name="android.permission.OEM_UNLOCK_STATE"
         android:protectionLevel="signature" />
 
-    <!-- @hide Allows querying state of PersistentDataBlock
+    <!-- @SystemApi @hide Allows querying state of PersistentDataBlock
    <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.ACCESS_PDB_STATE"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- Allows testing if a passwords is forbidden by the admins.
          @hide <p>Not for use by third-party applications. -->
@@ -2417,7 +2417,7 @@
     <!-- @SystemApi @TestApi Allows read access to privileged phone state.
          @hide Used internally. -->
     <permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- Allows to read device identifiers and use ICC based authentication like EAP-AKA.
          Often required in authentication to access the carrier's server and manage services
@@ -2733,25 +2733,25 @@
          user-targeted broadcasts.  This permission is not available to
          third party applications. -->
     <permission android:name="android.permission.INTERACT_ACROSS_USERS"
-        android:protectionLevel="signature|privileged|development" />
+        android:protectionLevel="signature|privileged|development|role" />
 
     <!-- @SystemApi Fuller form of {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
          that removes restrictions on where broadcasts can be sent and allows other
          types of interactions
          @hide -->
     <permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"
-        android:protectionLevel="signature|installer" />
+        android:protectionLevel="signature|installer|role" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
     <!-- Allows interaction across profiles in the same profile group. -->
     <permission android:name="android.permission.INTERACT_ACROSS_PROFILES"
         android:protectionLevel="signature|appop" />
 
-    <!-- Allows configuring apps to have the INTERACT_ACROSS_PROFILES permission so that they can
-         interact across profiles in the same profile group.
+    <!-- @SystemApi Allows configuring apps to have the INTERACT_ACROSS_PROFILES permission so that
+         they can interact across profiles in the same profile group.
          @hide -->
     <permission android:name="android.permission.CONFIGURE_INTERACT_ACROSS_PROFILES"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- @SystemApi @hide Allows an application to call APIs that allow it to query and manage
          users on the device. This permission is not available to
@@ -2772,10 +2772,10 @@
     <permission android:name="android.permission.ACCESS_BLOBS_ACROSS_USERS"
         android:protectionLevel="signature|privileged|development|role" />
 
-    <!-- @hide Allows an application to set the profile owners and the device owner.
+    <!-- @SystemApi @hide Allows an application to set the profile owners and the device owner.
          This permission is not available to third party applications.-->
     <permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS"
-        android:protectionLevel="signature"
+        android:protectionLevel="signature|role"
         android:label="@string/permlab_manageProfileAndDeviceOwners"
         android:description="@string/permdesc_manageProfileAndDeviceOwners" />
 
@@ -2828,7 +2828,7 @@
 
     <!-- @SystemApi @hide Allows an application to start activities from background -->
     <permission android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"
-        android:protectionLevel="signature|privileged|vendorPrivileged|oem|verifier" />
+        android:protectionLevel="signature|privileged|vendorPrivileged|oem|verifier|role" />
 
     <!-- Allows an application to start foreground services from the background at any time.
          <em>This permission is not for use by third-party applications</em>,
@@ -2990,6 +2990,17 @@
     <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- Allows application to request to be associated with a vehicle head unit capable of
+         automotive projection
+         ({@link android.companion.AssociationRequest#DEVICE_PROFILE_AUTOMOTIVE_PROJECTION})
+         by {@link android.companion.CompanionDeviceManager}.
+        <p>Not for use by third-party applications.
+         @hide
+         @SystemApi
+    -->
+    <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION"
+                android:protectionLevel="internal|role" />
+
     <!-- Allows a companion app to associate to Wi-Fi.
          <p>Only for use by a single pre-approved app.
          @hide
@@ -3054,7 +3065,7 @@
     <!-- Allows applications to set the system time directly.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.SET_TIME"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- Allows applications to set the system time zone directly.
          <p>Not for use by third-party applications.
@@ -3062,7 +3073,7 @@
     <permission android:name="android.permission.SET_TIME_ZONE"
         android:label="@string/permlab_setTimeZone"
         android:description="@string/permdesc_setTimeZone"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- Allows telephony to suggest the time / time zone.
          <p>Not for use by third-party applications.
@@ -3176,7 +3187,7 @@
          as locale.
          <p>Protection level: signature|privileged|development -->
     <permission android:name="android.permission.CHANGE_CONFIGURATION"
-        android:protectionLevel="signature|privileged|development" />
+        android:protectionLevel="signature|privileged|development|role" />
 
     <!-- Allows an application to read or write the system settings.
 
@@ -3193,7 +3204,7 @@
     <permission android:name="android.permission.WRITE_SETTINGS"
         android:label="@string/permlab_writeSettings"
         android:description="@string/permdesc_writeSettings"
-        android:protectionLevel="signature|preinstalled|appop|pre23" />
+        android:protectionLevel="signature|preinstalled|appop|pre23|role" />
 
     <!-- Allows an application to modify the Google service map.
     <p>Not for use by third-party applications. -->
@@ -3446,7 +3457,7 @@
     <!-- Allows an application to read or write the secure system settings.
     <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.WRITE_SECURE_SETTINGS"
-        android:protectionLevel="signature|privileged|development" />
+        android:protectionLevel="signature|privileged|development|role" />
 
     <!-- Allows an application to retrieve state dump information from system services.
     <p>Not for use by third-party applications. -->
@@ -3578,6 +3589,13 @@
     <permission android:name="android.permission.GET_APP_OPS_STATS"
         android:protectionLevel="signature|privileged|development" />
 
+    <!-- @SystemApi @hide Allows an application to collect historical application operation
+         statistics.
+         <p>Not for use by third party applications.
+    -->
+    <permission android:name="android.permission.GET_HISTORICAL_APP_OPS_STATS"
+        android:protectionLevel="internal|role" />
+
     <!-- @SystemApi Allows an application to update application operation statistics. Not for
          use by third party apps.
          @hide -->
@@ -3699,7 +3717,7 @@
          to put the higher-level system there into a shutdown state.
          @hide -->
     <permission android:name="android.permission.SHUTDOWN"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- @SystemApi Allows an application to tell the activity manager to temporarily
          stop application switches, putting it into a special mode that
@@ -4070,14 +4088,13 @@
          <p>Protection level: signature
     -->
     <permission android:name="android.permission.BIND_DEVICE_ADMIN"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- @SystemApi Required to add or remove another application as a device admin.
          <p>Not for use by third-party applications.
-         @hide
-         @removed -->
+         @hide -->
     <permission android:name="android.permission.MANAGE_DEVICE_ADMINS"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- @SystemApi Allows an app to reset the device password.
          <p>Not for use by third-party applications.
@@ -4190,14 +4207,14 @@
     <permission android:name="android.permission.INSTALL_PACKAGE_UPDATES"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows an application to install existing system packages. This is a limited
+    <!-- @SystemApi Allows an application to install existing system packages. This is a limited
          version of {@link android.Manifest.permission#INSTALL_PACKAGES}.
          <p>Not for use by third-party applications.
          TODO(b/80204953): remove this permission once we have a long-term solution.
          @hide
     -->
     <permission android:name="com.android.permission.INSTALL_EXISTING_PACKAGES"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- Allows an application to use the package installer v2 APIs.
          <p>The package installer v2 APIs are still a work in progress and we're
@@ -4292,7 +4309,7 @@
          when the application deleting the package is not the same application that installed the
          package. -->
     <permission android:name="android.permission.DELETE_PACKAGES"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- @SystemApi Allows an application to move location of installed package.
          @hide -->
@@ -4308,7 +4325,7 @@
          enabled or not.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- @SystemApi Allows an application to grant specific permissions.
          @hide -->
@@ -4760,7 +4777,7 @@
 
     <!-- Not for use by third-party applications. -->
     <permission android:name="android.permission.MASTER_CLEAR"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- Allows an application to call any phone number, including emergency
          numbers, without going through the Dialer user interface for the user
@@ -4771,7 +4788,7 @@
 
     <!-- @SystemApi Allows an application to perform CDMA OTA provisioning @hide -->
     <permission android:name="android.permission.PERFORM_CDMA_PROVISIONING"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- @SystemApi Allows an application to perform SIM Activation @hide -->
     <permission android:name="android.permission.PERFORM_SIM_ACTIVATION"
@@ -4998,7 +5015,7 @@
         @hide
     -->
     <permission android:name="android.permission.CRYPT_KEEPER"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- @SystemApi Allows an application to read historical network usage for
          specific networks and applications. @hide -->
@@ -5143,10 +5160,10 @@
                 android:protectionLevel="signature|installer" />
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATION_LISTENERS" />
 
-    <!-- Allows notifications to be colorized
+    <!-- @SystemApi Allows notifications to be colorized
          <p>Not for use by third-party applications. @hide -->
     <permission android:name="android.permission.USE_COLORIZED_NOTIFICATIONS"
-                android:protectionLevel="signature|setup" />
+                android:protectionLevel="signature|setup|role" />
 
     <!-- Allows access to keyguard secure storage.  Only allowed for system processes.
         @hide -->
@@ -5387,7 +5404,7 @@
     <!-- @SystemApi Allows access to MAC addresses of WiFi and Bluetooth peer devices.
         @hide -->
     <permission android:name="android.permission.PEERS_MAC_ADDRESS"
-                android:protectionLevel="signature|setup" />
+                android:protectionLevel="signature|setup|role" />
 
     <!-- Allows the Nfc stack to dispatch Nfc messages to applications. Applications
         can use this permission to ensure incoming Nfc messages are from the Nfc stack
@@ -5692,11 +5709,11 @@
     <permission android:name="android.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS"
         android:protectionLevel="signature" />
 
-    <!-- Allows an app to mark a profile owner as managing an organization-owned device.
+    <!-- @SystemApi Allows an app to mark a profile owner as managing an organization-owned device.
          <p>Not for use by third-party applications.
          @hide -->
     <permission android:name="android.permission.MARK_DEVICE_ORGANIZATION_OWNED"
-                android:protectionLevel="signature" />
+                android:protectionLevel="signature|role" />
 
     <!-- Allows financial apps to read filtered sms messages.
          Protection level: signature|appop

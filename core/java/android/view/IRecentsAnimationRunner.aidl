@@ -63,5 +63,5 @@ oneway interface IRecentsAnimationRunner {
      * Called when the task of an activity that has been started while the recents animation
      * was running becomes ready for control.
      */
-    void onTaskAppeared(in RemoteAnimationTarget app) = 3;
+    void onTasksAppeared(in RemoteAnimationTarget[] app) = 3;
 }

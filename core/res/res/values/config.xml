@@ -1956,8 +1956,9 @@
          STREAM_MUSIC as if it's on TV platform. -->
     <bool name="config_single_volume">false</bool>
 
-    <!-- Flag indicating whether the volume panel should show remote sessions. -->
-    <bool name="config_volumeShowRemoteSessions">true</bool>
+    <!-- Flag indicating whether platform level volume adjustments are enabled for remote sessions
+         on grouped devices. -->
+    <bool name="config_volumeAdjustmentForRemoteGroupSessions">true</bool>
 
     <!-- Flag indicating that an outbound call must have a call capable phone account
          that has declared it can process the call's handle. -->
@@ -2050,6 +2051,8 @@
     <!-- The name of the package that will hold the television remote service role.
         TODO(b/189347385) make this a @SystemAPI -->
     <string name="config_systemTelevisionRemoteService" translatable="false">@string/config_tvRemoteServicePackage</string>
+    <!-- The name of the package that will hold the device management role -->
+    <string name="config_deviceManager" translatable="false"></string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false">com.android.stk</string>
