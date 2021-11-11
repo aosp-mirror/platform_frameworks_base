@@ -24299,24 +24299,24 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
                 true /* checkShell */, "stop package");
-        boolean shouldUnhibernate = false;
         // writer
         synchronized (mLock) {
             final PackageSetting ps = mSettings.getPackageLPr(packageName);
-            if (ps != null && ps.getStopped(userId) && !stopped) {
-                shouldUnhibernate = true;
-            }
             if (!shouldFilterApplicationLocked(ps, callingUid, userId)
                     && mSettings.setPackageStoppedStateLPw(this, packageName, stopped, userId)) {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
         }
-        if (shouldUnhibernate) {
+        // If this would cause the app to leave force-stop, then also make sure to unhibernate the
+        // app if needed.
+        if (!stopped) {
             mHandler.post(() -> {
                 AppHibernationManagerInternal ah =
                         mInjector.getLocalService(AppHibernationManagerInternal.class);
-                ah.setHibernatingForUser(packageName, userId, false);
-                ah.setHibernatingGlobally(packageName, false);
+                if (ah != null && ah.isHibernatingForUser(packageName, userId)) {
+                    ah.setHibernatingForUser(packageName, userId, false);
+                    ah.setHibernatingGlobally(packageName, false);
+                }
             });
         }
     }
