@@ -23,8 +23,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.Process;
 import android.util.ArrayMap;
 import android.view.inputmethod.InputMethodInfo;
+
+import com.android.internal.view.IInputMethod;
 
 /**
  * A controller managing the state of the input method binding.
@@ -42,6 +45,8 @@ final class InputMethodBindingController {
     @Nullable private String mCurId;
     @Nullable private String mSelectedMethodId;
     @Nullable private Intent mCurIntent;
+    @Nullable private IInputMethod mCurMethod;
+    private int mCurMethodUid = Process.INVALID_UID;
     private IBinder mCurToken;
     private int mCurSeq;
     private boolean mVisibleBound;
@@ -157,6 +162,30 @@ final class InputMethodBindingController {
         if (mCurSeq <= 0) {
             mCurSeq = 1;
         }
+    }
+
+    /**
+     * If non-null, this is the input method service we are currently connected
+     * to.
+     */
+    @Nullable
+    IInputMethod getCurMethod() {
+        return mCurMethod;
+    }
+
+    void setCurMethod(@Nullable IInputMethod curMethod) {
+        mCurMethod = curMethod;
+    }
+
+    /**
+     * If not {@link Process#INVALID_UID}, then the UID of {@link #getCurIntent()}.
+     */
+    int getCurMethodUid() {
+        return mCurMethodUid;
+    }
+
+    void setCurMethodUid(int curMethodUid) {
+        mCurMethodUid = curMethodUid;
     }
 
     /**

@@ -661,29 +661,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @Nullable
     private IInputMethod getCurMethod() {
-        return mCurMethod;
+        return mBindingController.getCurMethod();
     }
 
     private void setCurMethod(@Nullable IInputMethod curMethod) {
-        mCurMethod = curMethod;
+        mBindingController.setCurMethod(curMethod);
     }
-
-    @Nullable
-    private IInputMethod mCurMethod;
-
 
     /**
      * If not {@link Process#INVALID_UID}, then the UID of {@link #getCurIntent()}.
      */
     private int getCurMethodUid() {
-        return mCurMethodUid;
+        return mBindingController.getCurMethodUid();
     }
 
     private void setCurMethodUid(int curMethodUid) {
-        mCurMethodUid = curMethodUid;
+        mBindingController.setCurMethodUid(curMethodUid);
     }
-
-    private int mCurMethodUid = Process.INVALID_UID;
 
     /**
      * Time that we last initiated a bind to the input method, to determine
