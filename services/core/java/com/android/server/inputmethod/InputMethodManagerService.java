@@ -208,7 +208,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * This class provides a system service that manages input methods.
  */
 public class InputMethodManagerService extends IInputMethodManager.Stub
-        implements ServiceConnection, Handler.Callback {
+        implements Handler.Callback {
     static final boolean DEBUG = false;
     static final String TAG = "InputMethodManagerService";
     public static final String PROTO_ARG = "--proto";
@@ -367,6 +367,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     private ServiceConnection getVisibleConnection() {
         return mBindingController.getVisibleConnection();
+    }
+
+    /**
+     * Used to bind the IME while it is not currently being shown.
+     */
+    @NonNull
+    private ServiceConnection getMainConnection() {
+        return mMainConnection;
     }
 
     // Ongoing notification
@@ -2480,7 +2488,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         Intent intent = createImeBindingIntent(info.getComponent());
         setCurIntent(intent);
 
-        if (bindCurrentInputMethodServiceLocked(intent, this, mImeConnectionBindFlags)) {
+        if (bindCurrentInputMethodServiceLocked(intent, getMainConnection(),
+                mImeConnectionBindFlags)) {
             addFreshWindowTokenLocked(displayIdToShowIme, info.getId());
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
@@ -2613,41 +2622,77 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mCaller.obtainMessageI(MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE, uid).sendToTarget();
     }
 
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.onServiceConnected");
-        synchronized (mMethodMap) {
-            if (getCurIntent() != null && name.equals(getCurIntent().getComponent())) {
-                setCurMethod(IInputMethod.Stub.asInterface(service));
-                final String curMethodPackage = getCurIntent().getComponent().getPackageName();
-                final int curMethodUid = mPackageManagerInternal.getPackageUid(
-                        curMethodPackage, 0 /* flags */, mSettings.getCurrentUserId());
-                if (curMethodUid < 0) {
-                    Slog.e(TAG, "Failed to get UID for package=" + curMethodPackage);
-                    setCurMethodUid(Process.INVALID_UID);
-                } else {
-                    setCurMethodUid(curMethodUid);
+    private final ServiceConnection mMainConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.onServiceConnected");
+            synchronized (mMethodMap) {
+                if (getCurIntent() != null && name.equals(getCurIntent().getComponent())) {
+                    setCurMethod(IInputMethod.Stub.asInterface(service));
+                    final String curMethodPackage =
+                            getCurIntent().getComponent().getPackageName();
+                    final int curMethodUid = mPackageManagerInternal.getPackageUid(
+                            curMethodPackage, 0 /* flags */, mSettings.getCurrentUserId());
+                    if (curMethodUid < 0) {
+                        Slog.e(TAG, "Failed to get UID for package=" + curMethodPackage);
+                        setCurMethodUid(Process.INVALID_UID);
+                    } else {
+                        setCurMethodUid(curMethodUid);
+                    }
+                    if (getCurToken() == null) {
+                        Slog.w(TAG, "Service connected without a token!");
+                        unbindCurrentMethodLocked();
+                        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                        return;
+                    }
+                    if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + getCurToken());
+                    // Dispatch display id for InputMethodService to update context display.
+                    executeOrSendMessage(getCurMethod(),
+                            mCaller.obtainMessageIOO(MSG_INITIALIZE_IME,
+                                    mMethodMap.get(getSelectedMethodId()).getConfigChanges(),
+                                    getCurMethod(), getCurToken()));
+                    scheduleNotifyImeUidToAudioService(getCurMethodUid());
+                    if (mCurClient != null) {
+                        clearClientSessionLocked(mCurClient);
+                        requestClientSessionLocked(mCurClient);
+                    }
                 }
-                if (getCurToken() == null) {
-                    Slog.w(TAG, "Service connected without a token!");
-                    unbindCurrentMethodLocked();
-                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                    return;
+            }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // Note that mContext.unbindService(this) does not trigger this.  Hence if we are
+            // here the
+            // disconnection is not intended by IMMS (e.g. triggered because the current IMS
+            // crashed),
+            // which is irregular but can eventually happen for everyone just by continuing
+            // using the
+            // device.  Thus it is important to make sure that all the internal states are
+            // properly
+            // refreshed when this method is called back.  Running
+            //    adb install -r <APK that implements the current IME>
+            // would be a good way to trigger such a situation.
+            synchronized (mMethodMap) {
+                if (DEBUG) {
+                    Slog.v(TAG, "Service disconnected: " + name
+                            + " mCurIntent=" + getCurIntent());
                 }
-                if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + getCurToken());
-                // Dispatch display id for InputMethodService to update context display.
-                executeOrSendMessage(getCurMethod(), mCaller.obtainMessageIOO(MSG_INITIALIZE_IME,
-                        mMethodMap.get(getSelectedMethodId()).getConfigChanges(), getCurMethod(),
-                        getCurToken()));
-                scheduleNotifyImeUidToAudioService(getCurMethodUid());
-                if (mCurClient != null) {
-                    clearClientSessionLocked(mCurClient);
-                    requestClientSessionLocked(mCurClient);
+                if (getCurMethod() != null && getCurIntent() != null
+                        && name.equals(getCurIntent().getComponent())) {
+                    clearCurMethodLocked();
+                    // We consider this to be a new bind attempt, since the system
+                    // should now try to restart the service for us.
+                    setLastBindTime(SystemClock.uptimeMillis());
+                    mShowRequested = mInputShown;
+                    mInputShown = false;
+                    unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME);
                 }
             }
         }
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-    }
+
+    };
 
     void onSessionCreated(IInputMethod method, IInputMethodSession session,
             InputChannel channel) {
@@ -2686,7 +2731,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         if (hasConnection()) {
-            mContext.unbindService(this);
+            mContext.unbindService(getMainConnection());
             setHasConnection(false);
         }
 
@@ -2773,31 +2818,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mStatusBar.setIconVisibility(mSlotIme, false);
         }
         mInFullscreenMode = false;
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
-        // Note that mContext.unbindService(this) does not trigger this.  Hence if we are here the
-        // disconnection is not intended by IMMS (e.g. triggered because the current IMS crashed),
-        // which is irregular but can eventually happen for everyone just by continuing using the
-        // device.  Thus it is important to make sure that all the internal states are properly
-        // refreshed when this method is called back.  Running
-        //    adb install -r <APK that implements the current IME>
-        // would be a good way to trigger such a situation.
-        synchronized (mMethodMap) {
-            if (DEBUG) Slog.v(TAG, "Service disconnected: " + name
-                    + " mCurIntent=" + getCurIntent());
-            if (getCurMethod() != null && getCurIntent() != null
-                    && name.equals(getCurIntent().getComponent())) {
-                clearCurMethodLocked();
-                // We consider this to be a new bind attempt, since the system
-                // should now try to restart the service for us.
-                setLastBindTime(SystemClock.uptimeMillis());
-                mShowRequested = mInputShown;
-                mInputShown = false;
-                unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME);
-            }
-        }
     }
 
     @BinderThread
@@ -3270,8 +3290,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME, getSelectedMethodId(),
                         bindingDuration, 1);
                 Slog.w(TAG, "Force disconnect/connect to the IME in showCurrentInputLocked()");
-                mContext.unbindService(this);
-                bindCurrentInputMethodServiceLocked(getCurIntent(), this, mImeConnectionBindFlags);
+                ServiceConnection connection = getMainConnection();
+                mContext.unbindService(connection);
+                bindCurrentInputMethodServiceLocked(getCurIntent(), connection,
+                        mImeConnectionBindFlags);
             } else {
                 if (DEBUG) {
                     Slog.d(TAG, "Can't show input: connection = " + hasConnection() + ", time = "
