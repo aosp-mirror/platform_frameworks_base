@@ -1131,7 +1131,7 @@ class Task extends WindowContainer<WindowContainer> {
                     && (newParent == null || !newParent.inPinnedWindowingMode())) {
                 // Notify if a task from the pinned stack is being removed
                 // (or moved depending on the mode).
-                mAtmService.getTaskChangeNotificationController().notifyActivityUnpinned();
+                mRootWindowContainer.notifyActivityPipModeChanged(this, null);
             }
         }
 
@@ -4617,5 +4617,4 @@ class Task extends WindowContainer<WindowContainer> {
     long getProtoFieldId() {
         return TASK;
     }
-
 }
