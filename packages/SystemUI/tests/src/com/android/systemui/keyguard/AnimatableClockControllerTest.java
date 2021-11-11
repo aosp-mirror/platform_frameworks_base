@@ -40,7 +40,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import org.junit.After;
@@ -68,8 +67,6 @@ public class AnimatableClockControllerTest extends SysuiTestCase {
     private BatteryController mBatteryController;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock
-    private KeyguardBypassController mBypassController;
     @Mock
     private Resources mResources;
 
@@ -99,7 +96,6 @@ public class AnimatableClockControllerTest extends SysuiTestCase {
                 mBroadcastDispatcher,
                 mBatteryController,
                 mKeyguardUpdateMonitor,
-                mBypassController,
                 mResources
         );
         mAnimatableClockController.init();
