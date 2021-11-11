@@ -29,6 +29,7 @@ import com.android.server.apphibernation.AppHibernationManagerInternal
 import com.android.server.apphibernation.AppHibernationService
 import com.android.server.extendedtestutils.wheneverStatic
 import com.android.server.testutils.whenever
+import org.junit.Assert
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -36,7 +37,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -102,9 +102,10 @@ class PackageManagerServiceHibernationTests {
         val pm = createPackageManagerService()
         rule.system().validateFinalState()
 
-        pm.setPackageStoppedState(TEST_PACKAGE_NAME, true, TEST_USER_ID)
         TestableLooper.get(this).processAllMessages()
-        Mockito.clearInvocations(appHibernationManager)
+
+        whenever(appHibernationManager.isHibernatingForUser(TEST_PACKAGE_NAME, TEST_USER_ID))
+            .thenReturn(true)
 
         pm.setPackageStoppedState(TEST_PACKAGE_NAME, false, TEST_USER_ID)
 
@@ -112,6 +113,31 @@ class PackageManagerServiceHibernationTests {
 
         verify(appHibernationManager).setHibernatingForUser(TEST_PACKAGE_NAME, TEST_USER_ID, false)
         verify(appHibernationManager).setHibernatingGlobally(TEST_PACKAGE_NAME, false)
+    }
+
+    @Test
+    fun testExitForceStop_nonExistingAppHibernationManager_doesNotThrowException() {
+        whenever(rule.mocks().injector.getLocalService(AppHibernationManagerInternal::class.java))
+            .thenReturn(null)
+
+        rule.system().stageScanExistingPackage(
+            TEST_PACKAGE_NAME,
+            1L,
+            rule.system().dataAppDirectory)
+        val pm = createPackageManagerService()
+        rule.system().validateFinalState()
+
+        TestableLooper.get(this).processAllMessages()
+
+        whenever(appHibernationManager.isHibernatingForUser(TEST_PACKAGE_NAME, TEST_USER_ID))
+            .thenReturn(true)
+
+        try {
+            pm.setPackageStoppedState(TEST_PACKAGE_NAME, false, TEST_USER_ID)
+            TestableLooper.get(this).processAllMessages()
+        } catch (e: Exception) {
+            Assert.fail("Method throws exception when AppHibernationManager is not ready.\n$e")
+        }
     }
 
     @Test
