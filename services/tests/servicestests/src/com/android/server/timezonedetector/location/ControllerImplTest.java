@@ -1202,7 +1202,7 @@ public class ControllerImplTest {
             if (Objects.equals(oldConfig, newConfig)) {
                 fail("Bad test? No config change when one was expected");
             }
-            mController.onConfigChanged();
+            mController.onConfigurationInternalChanged();
         }
     }
 

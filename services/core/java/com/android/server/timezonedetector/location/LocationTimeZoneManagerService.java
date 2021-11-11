@@ -41,6 +41,7 @@ import com.android.server.FgThread;
 import com.android.server.SystemService;
 import com.android.server.timezonedetector.Dumpable;
 import com.android.server.timezonedetector.ServiceConfigAccessor;
+import com.android.server.timezonedetector.ServiceConfigAccessorImpl;
 import com.android.server.timezonedetector.TimeZoneDetectorInternal;
 import com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderMetricsLogger;
 
@@ -77,18 +78,18 @@ public class LocationTimeZoneManagerService extends Binder {
         private LocationTimeZoneManagerService mService;
 
         @NonNull
-        private final ServiceConfigAccessor mServerConfigAccessor;
+        private final ServiceConfigAccessor mServiceConfigAccessor;
 
         public Lifecycle(@NonNull Context context) {
             super(Objects.requireNonNull(context));
-            mServerConfigAccessor = ServiceConfigAccessor.getInstance(context);
+            mServiceConfigAccessor = ServiceConfigAccessorImpl.getInstance(context);
         }
 
         @Override
         public void onStart() {
             Context context = getContext();
-            if (mServerConfigAccessor.isGeoTimeZoneDetectionFeatureSupportedInConfig()) {
-                mService = new LocationTimeZoneManagerService(context);
+            if (mServiceConfigAccessor.isGeoTimeZoneDetectionFeatureSupportedInConfig()) {
+                mService = new LocationTimeZoneManagerService(context, mServiceConfigAccessor);
 
                 // The service currently exposes no LocalService or Binder API, but it extends
                 // Binder and is registered as a binder service so it can receive shell commands.
@@ -100,7 +101,7 @@ public class LocationTimeZoneManagerService extends Binder {
 
         @Override
         public void onBootPhase(@BootPhase int phase) {
-            if (mServerConfigAccessor.isGeoTimeZoneDetectionFeatureSupportedInConfig()) {
+            if (mServiceConfigAccessor.isGeoTimeZoneDetectionFeatureSupportedInConfig()) {
                 if (phase == PHASE_SYSTEM_SERVICES_READY) {
                     // The location service must be functioning after this boot phase.
                     mService.onSystemReady();
@@ -157,12 +158,13 @@ public class LocationTimeZoneManagerService extends Binder {
     @GuardedBy("mSharedLock")
     private ControllerEnvironmentImpl mEnvironment;
 
-    LocationTimeZoneManagerService(Context context) {
+    LocationTimeZoneManagerService(@NonNull Context context,
+            @NonNull ServiceConfigAccessor serviceConfigAccessor) {
         mContext = context.createAttributionContext(ATTRIBUTION_TAG);
         mHandler = FgThread.getHandler();
         mThreadingDomain = new HandlerThreadingDomain(mHandler);
         mSharedLock = mThreadingDomain.getLockObject();
-        mServiceConfigAccessor = ServiceConfigAccessor.getInstance(mContext);
+        mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
     }
 
     // According to the SystemService docs: All lifecycle methods are called from the system

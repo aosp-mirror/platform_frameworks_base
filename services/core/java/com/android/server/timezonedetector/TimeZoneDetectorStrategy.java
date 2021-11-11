@@ -17,7 +17,6 @@ package com.android.server.timezonedetector;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.app.time.TimeZoneConfiguration;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.util.IndentingPrintWriter;
@@ -72,44 +71,13 @@ import android.util.IndentingPrintWriter;
  *
  * <p>Threading:
  *
- * <p>Suggestion calls with a void return type may be handed off to a separate thread and handled
- * asynchronously. Synchronous calls like {@link #getCurrentUserConfigurationInternal()},
- * {@link #generateMetricsState()} and debug calls like {@link
- * #dump(IndentingPrintWriter, String[])}, may be called on a different thread concurrently with
- * other operations.
+ * <p>Implementations of this class must be thread-safe as calls calls like {@link
+ * #generateMetricsState()} and {@link #dump(IndentingPrintWriter, String[])} may be called on
+ * differents thread concurrently with other operations.
  *
  * @hide
  */
 public interface TimeZoneDetectorStrategy extends Dumpable {
-
-    /**
-     * Adds a listener that will be triggered whenever {@link ConfigurationInternal} may have
-     * changed.
-     */
-    void addConfigChangeListener(@NonNull ConfigurationChangeListener listener);
-
-    /**
-     * Returns a snapshot of the configuration that controls time zone detector behavior for the
-     * specified user.
-     */
-    @NonNull
-    ConfigurationInternal getConfigurationInternal(@UserIdInt int userId);
-
-    /**
-     * Returns a snapshot of the configuration that controls time zone detector behavior for the
-     * current user.
-     */
-    @NonNull
-    ConfigurationInternal getCurrentUserConfigurationInternal();
-
-    /**
-     * Updates the configuration properties that control a device's time zone behavior.
-     *
-     * <p>This method returns {@code true} if the configuration was changed,
-     * {@code false} otherwise.
-     */
-    boolean updateConfiguration(
-            @UserIdInt int userId, @NonNull TimeZoneConfiguration configuration);
 
     /**
      * Suggests zero, one or more time zones for the device, or withdraws a previous suggestion if
