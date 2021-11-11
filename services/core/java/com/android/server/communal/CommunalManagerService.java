@@ -236,7 +236,18 @@ public final class CommunalManagerService extends SystemService {
 
     private boolean shouldIntercept(ActivityInfo activityInfo) {
         if (!mCommunalViewIsShowing.get() || !mKeyguardManager.isKeyguardLocked()) return false;
-        return !isAppAllowed(activityInfo.applicationInfo);
+        ApplicationInfo appInfo = activityInfo.applicationInfo;
+        // Dreams are allowed to show, and don't require the showWhenLocked attribute.
+        if (isActiveDream(appInfo)) return false;
+
+        // If the activity doesn't have showWhenLocked enabled, disallow the activity.
+        final boolean showWhenLocked =
+                (activityInfo.flags & ActivityInfo.FLAG_SHOW_WHEN_LOCKED) != 0;
+        if (!showWhenLocked) {
+            return true;
+        }
+
+        return !isAppAllowed(appInfo);
     }
 
     private final class BinderService extends ICommunalManager.Stub {
