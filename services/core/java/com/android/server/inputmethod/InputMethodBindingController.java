@@ -224,9 +224,9 @@ final class InputMethodBindingController {
     private final ServiceConnection mVisibleConnection = new ServiceConnection() {
         @Override public void onBindingDied(ComponentName name) {
             synchronized (mMethodMap) {
-                if (isVisibleBound()) {
-                    mContext.unbindService(getVisibleConnection());
-                    setVisibleBound(false);
+                if (mVisibleBound) {
+                    mContext.unbindService(mVisibleConnection);
+                    mVisibleBound = false;
                 }
             }
         }
@@ -251,31 +251,30 @@ final class InputMethodBindingController {
         public void onServiceConnected(ComponentName name, IBinder service) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.onServiceConnected");
             synchronized (mMethodMap) {
-                if (getCurIntent() != null && name.equals(getCurIntent().getComponent())) {
-                    setCurMethod(IInputMethod.Stub.asInterface(service));
-                    final String curMethodPackage =
-                            getCurIntent().getComponent().getPackageName();
+                if (mCurIntent != null && name.equals(mCurIntent.getComponent())) {
+                    mCurMethod = IInputMethod.Stub.asInterface(service);
+                    final String curMethodPackage = mCurIntent.getComponent().getPackageName();
                     final int curMethodUid = mPackageManagerInternal.getPackageUid(
                             curMethodPackage, 0 /* flags */, mSettings.getCurrentUserId());
                     if (curMethodUid < 0) {
                         Slog.e(TAG, "Failed to get UID for package=" + curMethodPackage);
-                        setCurMethodUid(Process.INVALID_UID);
+                        mCurMethodUid = Process.INVALID_UID;
                     } else {
-                        setCurMethodUid(curMethodUid);
+                        mCurMethodUid = curMethodUid;
                     }
-                    if (getCurToken() == null) {
+                    if (mCurToken == null) {
                         Slog.w(TAG, "Service connected without a token!");
                         mService.unbindCurrentMethodLocked();
                         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                         return;
                     }
-                    if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + getCurToken());
+                    if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
                     // Dispatch display id for InputMethodService to update context display.
-                    mService.executeOrSendMessage(getCurMethod(),
+                    mService.executeOrSendMessage(mCurMethod,
                             mService.mCaller.obtainMessageIOO(MSG_INITIALIZE_IME,
-                                    mMethodMap.get(getSelectedMethodId()).getConfigChanges(),
-                                    getCurMethod(), getCurToken()));
-                    mService.scheduleNotifyImeUidToAudioService(getCurMethodUid());
+                                    mMethodMap.get(mSelectedMethodId).getConfigChanges(),
+                                    mCurMethod, mCurToken));
+                    mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);
                     ClientState curClient = mService.getCurClient();
                     if (curClient != null) {
                         mService.clearClientSessionLocked(curClient);
@@ -287,7 +286,7 @@ final class InputMethodBindingController {
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName name) {
+        public void onServiceDisconnected(@NonNull ComponentName name) {
             // Note that mContext.unbindService(this) does not trigger this.  Hence if we are
             // here the
             // disconnection is not intended by IMMS (e.g. triggered because the current IMS
@@ -301,15 +300,14 @@ final class InputMethodBindingController {
             // would be a good way to trigger such a situation.
             synchronized (mMethodMap) {
                 if (DEBUG) {
-                    Slog.v(TAG, "Service disconnected: " + name
-                            + " mCurIntent=" + getCurIntent());
+                    Slog.v(TAG, "Service disconnected: " + name + " mCurIntent=" + mCurIntent);
                 }
-                if (getCurMethod() != null && getCurIntent() != null
-                        && name.equals(getCurIntent().getComponent())) {
+                if (mCurMethod != null && mCurIntent != null
+                        && name.equals(mCurIntent.getComponent())) {
                     mService.clearCurMethodLocked();
                     // We consider this to be a new bind attempt, since the system
                     // should now try to restart the service for us.
-                    setLastBindTime(SystemClock.uptimeMillis());
+                    mLastBindTime = SystemClock.uptimeMillis();
                     mService.setShowRequested(mService.isInputShown());
                     mService.setInputShown(false);
                     mService.unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME);
