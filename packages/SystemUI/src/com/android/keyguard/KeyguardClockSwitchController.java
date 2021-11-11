@@ -167,7 +167,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                         mBroadcastDispatcher,
                         mBatteryController,
                         mKeyguardUpdateMonitor,
-                        mBypassController,
                         mResources);
         mClockViewController.init();
 
@@ -178,7 +177,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                         mBroadcastDispatcher,
                         mBatteryController,
                         mKeyguardUpdateMonitor,
-                        mBypassController,
                         mResources);
         mLargeClockViewController.init();
     }
