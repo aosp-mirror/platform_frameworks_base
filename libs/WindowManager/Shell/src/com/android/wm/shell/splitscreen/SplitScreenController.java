@@ -242,6 +242,14 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mStageCoordinator.onKeyguardVisibilityChanged(showing);
     }
 
+    public void onFinishedWakingUp() {
+        mStageCoordinator.onFinishedWakingUp();
+    }
+
+    public void onFinishedGoingToSleep() {
+        mStageCoordinator.onFinishedGoingToSleep();
+    }
+
     public void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
         mStageCoordinator.exitSplitScreenOnHide(exitSplitScreenOnHide);
     }
@@ -499,6 +507,20 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         public void onKeyguardVisibilityChanged(boolean showing) {
             mMainExecutor.execute(() -> {
                 SplitScreenController.this.onKeyguardVisibilityChanged(showing);
+            });
+        }
+
+        @Override
+        public void onFinishedWakingUp() {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.onFinishedWakingUp();
+            });
+        }
+
+        @Override
+        public void onFinishedGoingToSleep() {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.onFinishedGoingToSleep();
             });
         }
     }
