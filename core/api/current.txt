@@ -9125,8 +9125,10 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean requestMtu(int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean setCharacteristicNotification(android.bluetooth.BluetoothGattCharacteristic, boolean);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public void setPreferredPhy(int, int, int);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean writeCharacteristic(android.bluetooth.BluetoothGattCharacteristic);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean writeDescriptor(android.bluetooth.BluetoothGattDescriptor);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean writeCharacteristic(android.bluetooth.BluetoothGattCharacteristic);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int writeCharacteristic(@NonNull android.bluetooth.BluetoothGattCharacteristic, @NonNull byte[], int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean writeDescriptor(android.bluetooth.BluetoothGattDescriptor);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int writeDescriptor(@NonNull android.bluetooth.BluetoothGattDescriptor, @NonNull byte[]);
     field public static final int CONNECTION_PRIORITY_BALANCED = 0; // 0x0
     field public static final int CONNECTION_PRIORITY_HIGH = 1; // 0x1
     field public static final int CONNECTION_PRIORITY_LOW_POWER = 2; // 0x2
@@ -9145,11 +9147,14 @@ package android.bluetooth {
 
   public abstract class BluetoothGattCallback {
     ctor public BluetoothGattCallback();
-    method public void onCharacteristicChanged(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic);
-    method public void onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int);
+    method @Deprecated public void onCharacteristicChanged(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic);
+    method public void onCharacteristicChanged(@NonNull android.bluetooth.BluetoothGatt, @NonNull android.bluetooth.BluetoothGattCharacteristic, @NonNull byte[]);
+    method @Deprecated public void onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int);
+    method public void onCharacteristicRead(@NonNull android.bluetooth.BluetoothGatt, @NonNull android.bluetooth.BluetoothGattCharacteristic, @NonNull byte[], int);
     method public void onCharacteristicWrite(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int);
     method public void onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int);
-    method public void onDescriptorRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattDescriptor, int);
+    method @Deprecated public void onDescriptorRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattDescriptor, int);
+    method public void onDescriptorRead(@NonNull android.bluetooth.BluetoothGatt, @NonNull android.bluetooth.BluetoothGattDescriptor, int, @NonNull byte[]);
     method public void onDescriptorWrite(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattDescriptor, int);
     method public void onMtuChanged(android.bluetooth.BluetoothGatt, int, int);
     method public void onPhyRead(android.bluetooth.BluetoothGatt, int, int, int);
@@ -9166,20 +9171,20 @@ package android.bluetooth {
     method public int describeContents();
     method public android.bluetooth.BluetoothGattDescriptor getDescriptor(java.util.UUID);
     method public java.util.List<android.bluetooth.BluetoothGattDescriptor> getDescriptors();
-    method public Float getFloatValue(int, int);
+    method @Deprecated public Float getFloatValue(int, int);
     method public int getInstanceId();
-    method public Integer getIntValue(int, int);
+    method @Deprecated public Integer getIntValue(int, int);
     method public int getPermissions();
     method public int getProperties();
     method public android.bluetooth.BluetoothGattService getService();
-    method public String getStringValue(int);
+    method @Deprecated public String getStringValue(int);
     method public java.util.UUID getUuid();
-    method public byte[] getValue();
+    method @Deprecated public byte[] getValue();
     method public int getWriteType();
-    method public boolean setValue(byte[]);
-    method public boolean setValue(int, int, int);
-    method public boolean setValue(int, int, int, int);
-    method public boolean setValue(String);
+    method @Deprecated public boolean setValue(byte[]);
+    method @Deprecated public boolean setValue(int, int, int);
+    method @Deprecated public boolean setValue(int, int, int, int);
+    method @Deprecated public boolean setValue(String);
     method public void setWriteType(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothGattCharacteristic> CREATOR;
@@ -9219,8 +9224,8 @@ package android.bluetooth {
     method public android.bluetooth.BluetoothGattCharacteristic getCharacteristic();
     method public int getPermissions();
     method public java.util.UUID getUuid();
-    method public byte[] getValue();
-    method public boolean setValue(byte[]);
+    method @Deprecated public byte[] getValue();
+    method @Deprecated public boolean setValue(byte[]);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothGattDescriptor> CREATOR;
     field public static final byte[] DISABLE_NOTIFICATION_VALUE;
@@ -9508,8 +9513,12 @@ package android.bluetooth {
     field public static final int ERROR_BLUETOOTH_NOT_ALLOWED = 2; // 0x2
     field public static final int ERROR_BLUETOOTH_NOT_ENABLED = 1; // 0x1
     field public static final int ERROR_DEVICE_NOT_BONDED = 3; // 0x3
-    field public static final int ERROR_FEATURE_NOT_SUPPORTED = 8; // 0x8
+    field public static final int ERROR_FEATURE_NOT_SUPPORTED = 10; // 0xa
+    field public static final int ERROR_GATT_WRITE_NOT_ALLOWED = 101; // 0x65
+    field public static final int ERROR_GATT_WRITE_REQUEST_BUSY = 102; // 0x66
     field public static final int ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION = 6; // 0x6
+    field public static final int ERROR_MISSING_BLUETOOTH_PRIVILEGED_PERMISSION = 8; // 0x8
+    field public static final int ERROR_PROFILE_SERVICE_NOT_BOUND = 9; // 0x9
     field public static final int ERROR_UNKNOWN = 2147483647; // 0x7fffffff
     field public static final int SUCCESS = 0; // 0x0
   }
@@ -31418,6 +31427,8 @@ package android.os {
     method @Nullable public double[] createDoubleArray();
     method @Nullable public float[] createFloatArray();
     method @Nullable public int[] createIntArray();
+    method @Nullable public <T extends android.os.IInterface> T[] createInterfaceArray(@NonNull java.util.function.IntFunction<T[]>, @NonNull java.util.function.Function<android.os.IBinder,T>);
+    method @Nullable public <T extends android.os.IInterface> java.util.ArrayList<T> createInterfaceArrayList(@NonNull java.util.function.Function<android.os.IBinder,T>);
     method @Nullable public long[] createLongArray();
     method @Nullable public String[] createStringArray();
     method @Nullable public java.util.ArrayList<java.lang.String> createStringArrayList();
@@ -31456,13 +31467,17 @@ package android.os {
     method public float readFloat();
     method public void readFloatArray(@NonNull float[]);
     method @Nullable public java.util.HashMap readHashMap(@Nullable ClassLoader);
+    method @Nullable public <K, V> java.util.HashMap<K,V> readHashMap(@Nullable ClassLoader, @NonNull Class<? extends K>, @NonNull Class<? extends V>);
     method public int readInt();
     method public void readIntArray(@NonNull int[]);
+    method public <T extends android.os.IInterface> void readInterfaceArray(@NonNull T[], @NonNull java.util.function.Function<android.os.IBinder,T>);
+    method public <T extends android.os.IInterface> void readInterfaceList(@NonNull java.util.List<T>, @NonNull java.util.function.Function<android.os.IBinder,T>);
     method public void readList(@NonNull java.util.List, @Nullable ClassLoader);
     method public <T> void readList(@NonNull java.util.List<? super T>, @Nullable ClassLoader, @NonNull Class<T>);
     method public long readLong();
     method public void readLongArray(@NonNull long[]);
     method public void readMap(@NonNull java.util.Map, @Nullable ClassLoader);
+    method public <K, V> void readMap(@NonNull java.util.Map<? super K,? super V>, @Nullable ClassLoader, @NonNull Class<K>, @NonNull Class<V>);
     method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader);
     method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader, @NonNull Class<T>);
     method @Nullable public android.os.Parcelable[] readParcelableArray(@Nullable ClassLoader);
@@ -31510,6 +31525,8 @@ package android.os {
     method public void writeFloatArray(@Nullable float[]);
     method public void writeInt(int);
     method public void writeIntArray(@Nullable int[]);
+    method public <T extends android.os.IInterface> void writeInterfaceArray(@Nullable T[]);
+    method public <T extends android.os.IInterface> void writeInterfaceList(@Nullable java.util.List<T>);
     method public void writeInterfaceToken(@NonNull String);
     method public void writeList(@Nullable java.util.List);
     method public void writeLong(long);
@@ -40728,11 +40745,11 @@ package android.telephony {
   }
 
   public class CarrierConfigManager {
-    method @Nullable public android.os.PersistableBundle getConfig();
-    method @Nullable public android.os.PersistableBundle getConfigByComponentForSubId(@NonNull String, int);
-    method @Nullable public android.os.PersistableBundle getConfigForSubId(int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfig();
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfigByComponentForSubId(@NonNull String, int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfigForSubId(int);
     method public static boolean isConfigForIdentifiedCarrier(android.os.PersistableBundle);
-    method public void notifyConfigChangedForSubId(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyConfigChangedForSubId(int);
     field public static final String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
     field public static final int CARRIER_NR_AVAILABILITY_NSA = 1; // 0x1
     field public static final int CARRIER_NR_AVAILABILITY_SA = 2; // 0x2
@@ -42738,7 +42755,7 @@ package android.telephony {
     method public boolean isEmergencyNumber(@NonNull String);
     method public boolean isHearingAidCompatibilitySupported();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public boolean isManualNetworkSelectionAllowed();
-    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isModemEnabledForSlot(int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public boolean isModemEnabledForSlot(int);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int isMultiSimSupported();
     method public boolean isNetworkRoaming();
     method public boolean isRadioInterfaceCapabilitySupported(@NonNull String);

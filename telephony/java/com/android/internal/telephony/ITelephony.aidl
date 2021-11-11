@@ -1002,11 +1002,6 @@ interface ITelephony {
      boolean isManualNetworkSelectionAllowed(int subId);
 
     /**
-     * Enable or disable always reporting signal strength changes from radio.
-     */
-     void setAlwaysReportSignalStrength(int subId, boolean isEnable);
-
-    /**
      * Get P-CSCF address from PCO after data connection is established or modified.
      * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
      * @param callingPackage The package making the call.
@@ -2227,6 +2222,20 @@ interface ITelephony {
      * does not exist on the SIM card.
      */
     List<String> getEquivalentHomePlmns(int subId, String callingPackage, String callingFeatureId);
+
+    /**
+     * Enable or disable Voice over NR (VoNR)
+     * @param subId the subscription ID that this action applies to.
+     * @param enabled enable or disable VoNR.
+     * @return operation result.
+     */
+    int setVoNrEnabled(int subId, boolean enabled);
+
+    /**
+     * Is voice over NR enabled
+     * @return true if VoNR is enabled else false
+     */
+    boolean isVoNrEnabled(int subId);
 
     /**
      * Enable/Disable E-UTRA-NR Dual Connectivity
