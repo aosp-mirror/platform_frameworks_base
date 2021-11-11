@@ -48,6 +48,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -79,6 +80,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     @Rule public final MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Mock private NotificationStackScrollLayout mNssl;
+    @Mock private FeatureFlags mFeatureFlags;
     @Mock private ActivityStarterDelegate mActivityStarterDelegate;
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
@@ -120,6 +122,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         when(mSilentHeaderController.getHeaderView()).thenReturn(mock(SectionHeaderView.class));
         mSectionsManager =
                 new NotificationSectionsManager(
+                        mFeatureFlags,
                         mStatusBarStateController,
                         mConfigurationController,
                         mKeyguardMediaController,
