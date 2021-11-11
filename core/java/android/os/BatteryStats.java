@@ -58,6 +58,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
@@ -859,11 +860,13 @@ public abstract class BatteryStats implements Parcelable {
         /**
          * Returns cpu times of an uid at a particular process state.
          */
-        public abstract long[] getCpuFreqTimes(int which, int procState);
+        public abstract boolean getCpuFreqTimes(@NonNull long[] timesInFreqMs, int procState);
+
         /**
          * Returns cpu times of an uid while the screen if off at a particular process state.
          */
-        public abstract long[] getScreenOffCpuFreqTimes(int which, int procState);
+        public abstract boolean getScreenOffCpuFreqTimes(@NonNull long[] timesInFreqMs,
+                int procState);
 
         // Note: the following times are disjoint.  They can be added together to find the
         // total time a uid has had any processes running at all.
@@ -1574,6 +1577,11 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getNextMinDailyDeadline();
 
     public abstract long getNextMaxDailyDeadline();
+
+    /**
+     * Returns the total number of frequencies across all CPU clusters.
+     */
+    public abstract int getCpuFreqCount();
 
     public abstract long[] getCpuFreqs();
 
@@ -4626,27 +4634,26 @@ public abstract class BatteryStats implements Parcelable {
                             cpuFreqTimeMs.length, sb.toString());
                 }
 
+                final long[] timesInFreqMs = new long[getCpuFreqCount()];
                 for (int procState = 0; procState < Uid.NUM_PROCESS_STATE; ++procState) {
-                    final long[] timesMs = u.getCpuFreqTimes(which, procState);
-                    if (timesMs != null && timesMs.length == cpuFreqs.length) {
+                    if (u.getCpuFreqTimes(timesInFreqMs, procState)) {
                         sb.setLength(0);
-                        for (int i = 0; i < timesMs.length; ++i) {
+                        for (int i = 0; i < timesInFreqMs.length; ++i) {
                             if (i != 0) sb.append(',');
-                            sb.append(timesMs[i]);
+                            sb.append(timesInFreqMs[i]);
                         }
-                        final long[] screenOffTimesMs = u.getScreenOffCpuFreqTimes(
-                                which, procState);
-                        if (screenOffTimesMs != null) {
-                            for (int i = 0; i < screenOffTimesMs.length; ++i) {
-                                sb.append(',').append(screenOffTimesMs[i]);
+                        if (u.getScreenOffCpuFreqTimes(timesInFreqMs, procState)) {
+                            for (int i = 0; i < timesInFreqMs.length; ++i) {
+                                sb.append(',').append(timesInFreqMs[i]);
                             }
                         } else {
-                            for (int i = 0; i < timesMs.length; ++i) {
+                            for (int i = 0; i < timesInFreqMs.length; ++i) {
                                 sb.append(",0");
                             }
                         }
                         dumpLine(pw, uid, category, CPU_TIMES_AT_FREQ_DATA,
-                                Uid.UID_PROCESS_TYPES[procState], timesMs.length, sb.toString());
+                                Uid.UID_PROCESS_TYPES[procState], timesInFreqMs.length,
+                                sb.toString());
                     }
                 }
             }
@@ -6243,25 +6250,24 @@ public abstract class BatteryStats implements Parcelable {
                 pw.println(sb.toString());
             }
 
+            final long[] timesInFreqMs = new long[getCpuFreqCount()];
             for (int procState = 0; procState < Uid.NUM_PROCESS_STATE; ++procState) {
-                final long[] cpuTimes = u.getCpuFreqTimes(which, procState);
-                if (cpuTimes != null) {
+                if (u.getCpuFreqTimes(timesInFreqMs, procState)) {
                     sb.setLength(0);
                     sb.append("    Cpu times per freq at state ")
                             .append(Uid.PROCESS_STATE_NAMES[procState]).append(':');
-                    for (int i = 0; i < cpuTimes.length; ++i) {
-                        sb.append(" " + cpuTimes[i]);
+                    for (int i = 0; i < timesInFreqMs.length; ++i) {
+                        sb.append(" ").append(timesInFreqMs[i]);
                     }
                     pw.println(sb.toString());
                 }
 
-                final long[] screenOffCpuTimes = u.getScreenOffCpuFreqTimes(which, procState);
-                if (screenOffCpuTimes != null) {
+                if (u.getScreenOffCpuFreqTimes(timesInFreqMs, procState)) {
                     sb.setLength(0);
                     sb.append("   Screen-off cpu times per freq at state ")
                             .append(Uid.PROCESS_STATE_NAMES[procState]).append(':');
-                    for (int i = 0; i < screenOffCpuTimes.length; ++i) {
-                        sb.append(" " + screenOffCpuTimes[i]);
+                    for (int i = 0; i < timesInFreqMs.length; ++i) {
+                        sb.append(" ").append(timesInFreqMs[i]);
                     }
                     pw.println(sb.toString());
                 }
@@ -7627,22 +7633,22 @@ public abstract class BatteryStats implements Parcelable {
                 }
             }
 
+            final long[] timesInFreqMs = new long[getCpuFreqCount()];
+            final long[] timesInFreqScreenOffMs = new long[getCpuFreqCount()];
             for (int procState = 0; procState < Uid.NUM_PROCESS_STATE; ++procState) {
-                final long[] timesMs = u.getCpuFreqTimes(which, procState);
-                if (timesMs != null && timesMs.length == cpuFreqs.length) {
-                    long[] screenOffTimesMs = u.getScreenOffCpuFreqTimes(which, procState);
-                    if (screenOffTimesMs == null) {
-                        screenOffTimesMs = new long[timesMs.length];
+                if (u.getCpuFreqTimes(timesInFreqMs, procState)) {
+                    if (!u.getScreenOffCpuFreqTimes(timesInFreqScreenOffMs, procState)) {
+                        Arrays.fill(timesInFreqScreenOffMs, 0);
                     }
                     final long procToken = proto.start(UidProto.Cpu.BY_PROCESS_STATE);
                     proto.write(UidProto.Cpu.ByProcessState.PROCESS_STATE, procState);
-                    for (int ic = 0; ic < timesMs.length; ++ic) {
+                    for (int ic = 0; ic < timesInFreqMs.length; ++ic) {
                         long cToken = proto.start(UidProto.Cpu.ByProcessState.BY_FREQUENCY);
                         proto.write(UidProto.Cpu.ByFrequency.FREQUENCY_INDEX, ic + 1);
                         proto.write(UidProto.Cpu.ByFrequency.TOTAL_DURATION_MS,
-                                timesMs[ic]);
+                                timesInFreqMs[ic]);
                         proto.write(UidProto.Cpu.ByFrequency.SCREEN_OFF_DURATION_MS,
-                                screenOffTimesMs[ic]);
+                                timesInFreqScreenOffMs[ic]);
                         proto.end(cToken);
                     }
                     proto.end(procToken);
