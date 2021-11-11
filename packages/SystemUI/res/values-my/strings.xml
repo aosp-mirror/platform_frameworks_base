@@ -90,6 +90,8 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ဖန်သားပြင်ဓာတ်ပုံရိုက်ကူးခြင်းကို ဤအက်ပ် သို့မဟုတ် သင်၏အဖွဲ့အစည်းက ခွင့်မပြုပါ"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"တည်းဖြတ်ရန်"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ဖန်သားပြင်ဓာတ်ပုံကို တည်းဖြတ်သည်"</string>
+    <!-- no translation found for screenshot_share_description (2861628935812656612) -->
+    <skip />
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"နောက်ထပ် ရိုက်ကူးရန်"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ဖန်သားပြင်ဓာတ်ပုံကို ပယ်သည်"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ဖန်သားပြင်ဓာတ်ပုံ အစမ်းကြည့်ရှုခြင်း"</string>
@@ -642,9 +644,9 @@
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s။ တုန်ခါမှုကို သတ်မှတ်ရန် တို့ပါ။ အများသုံးစွဲနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s။ အသံပိတ်ရန် တို့ပါ။ အများသုံးစွဲနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s။ တုန်ခါခြင်းသို့ သတ်မှတ်ရန်တို့ပါ။"</string>
-    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s။ အသံတိတ်ရန် တို့ပါ။"</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s။ အသံပိတ်ရန် တို့ပါ။"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ဖုန်းခေါ်သံမုဒ်သို့ ပြောင်းရန် တို့ပါ"</string>
-    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"အသံတိတ်ရန်"</string>
+    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"အသံပိတ်ရန်"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"အသံဖွင့်ရန်"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"တုန်ခါမှု"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s အသံအတိုးအလျှော့ ခလုတ်များ"</string>
@@ -725,13 +727,13 @@
     <string name="inline_block_button" msgid="479892866568378793">"ပိတ်ထားရန်"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"ဆက်ပြရန်"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"ချုံ့ရန်"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"အသံတိတ်ရန်"</string>
-    <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"ဆက်လက် အသံတိတ်ရန်"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"အသံပိတ်ရန်"</string>
+    <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"ဆက်လက် အသံပိတ်ရန်"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"သတိပေးခြင်း"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"ဆက်လက် သတိပေးရန်"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"အကြောင်းကြားချက်များ ပိတ်ရန်"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"ဤအက်ပ်ထံမှ အကြောင်းကြားချက်များကို ဆက်ပြလိုပါသလား။"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"အသံတိတ်ရန်"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"အသံပိတ်ရန်"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"မူလ"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"အလိုအလျောက်"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"အသံ သို့မဟုတ် တုန်ခါမှုမရှိပါ"</string>
@@ -1111,8 +1113,7 @@
     <string name="media_output_dialog_group" msgid="5571251347877452212">"အုပ်စု"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"စက်ပစ္စည်း ၁ ခုကို ရွေးချယ်ထားသည်"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"စက်ပစ္စည်း <xliff:g id="COUNT">%1$d</xliff:g> ခုကို ရွေးချယ်ထားသည်"</string>
-    <!-- no translation found for media_output_dialog_disconnected (7090512852817111185) -->
-    <skip />
+    <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ချိတ်ဆက်မှု မရှိပါ)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"ချိတ်ဆက်၍ မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"စက်အသစ် တွဲချိတ်ရန်"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"တည်ဆောက်မှုနံပါတ်"</string>

@@ -90,6 +90,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‎‎‎‎‎‎‎‎‏‎‎‏‎‎‎‎‎‎‎‎‏‎‎‏‏‎‏‎‎‎‎‏‎‏‏‎‎‏‎‏‏‏‎‎‎‎‎‎‎‏‏‎‏‏‎Taking screenshots isn\'t allowed by the app or your organization‎‏‎‎‏‎"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‏‏‎‎‎‎‎‎‏‎‏‎‎‎‎‎‎‏‎‏‏‏‏‏‎‎‎‎‏‏‎‏‏‏‎‏‎‎Edit‎‏‎‎‏‎"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‎‏‎‎‎‎‎‏‏‎‎‎‎‏‎‏‏‎‏‏‏‏‏‏‎‎‎‎‎‏‎‏‎‏‏‎‎‏‏‏‎‏‏‎‏‎‏‎‎‎‏‎‏‎‏‎‎Edit screenshot‎‏‎‎‏‎"</string>
+    <string name="screenshot_share_description" msgid="2861628935812656612">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‎‏‏‎‏‏‎‏‎‎‎‏‏‎‎‎‏‎‏‏‎‏‏‎‎‎‎‎‏‏‎‎‎‎‏‎‏‏‏‏‎‏‎‏‏‎‏‏‏‏‎‎‏‎‎‎Share screenshot‎‏‎‎‏‎"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‎‏‎‏‎‏‎‏‎‎‎‏‎‏‎‎‎‎‏‎‎‏‎‏‎‏‏‏‏‎‎‎‏‎‏‎‏‎‎‏‎‎‏‏‎‎‏‏‏‎‏‎‏‎‏‏‏‎Capture more‎‏‎‎‏‎"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‏‎‎‎‎‏‎‎‎‎‏‎‎‏‎‎‏‏‏‎‎‏‎‏‏‏‏‎‏‏‎‏‎‎‎‎‎‏‎‎‎‎‎‏‏‎‎‎‎‏‏‎‎‏‎‎Dismiss screenshot‎‏‎‎‏‎"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‎‎‎‏‏‏‏‏‏‎‎‎‎‎‎‏‎‏‎‏‏‎‎‎‎‎‎‎‏‎‏‏‎‏‎‏‎‏‏‎‏‎‏‏‎‎‎‏‏‎‏‏‎‏‎‎Screenshot preview‎‏‎‎‏‎"</string>
