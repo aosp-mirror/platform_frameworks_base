@@ -69,6 +69,7 @@ import android.media.tv.TvInputManager;
 import android.media.tv.TvInputService;
 import android.media.tv.TvStreamConfig;
 import android.media.tv.TvTrackInfo;
+import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -2538,6 +2539,31 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public int getClientPriority(int useCase, String sessionId) {
+            final int callingPid = Binder.getCallingPid();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                int clientPid = TvInputManager.UNKNOWN_CLIENT_PID;
+                if (sessionId != null) {
+                    synchronized (mLock) {
+                        try {
+                            clientPid = getClientPidLocked(sessionId);
+                        } catch (ClientPidNotFoundException e) {
+                            Slog.e(TAG, "error in getClientPriority", e);
+                        }
+                    }
+                } else {
+                    clientPid = callingPid;
+                }
+                TunerResourceManager trm = (TunerResourceManager)
+                        mContext.getSystemService(Context.TV_TUNER_RESOURCE_MGR_SERVICE);
+                return trm.getClientPriority(useCase, clientPid);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public List<TunedInfo> getCurrentTunedInfos(@UserIdInt int userId) {
             if (mContext.checkCallingPermission(android.Manifest.permission.ACCESS_TUNED_INFO)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -2585,9 +2611,9 @@ public final class TvInputManagerService extends SystemService {
 
         @GuardedBy("mLock")
         private int getClientPidLocked(String sessionId)
-                throws IllegalStateException {
+                throws ClientPidNotFoundException {
             if (mSessionIdToSessionStateMap.get(sessionId) == null) {
-                throw new IllegalStateException("Client Pid not found with sessionId "
+                throw new ClientPidNotFoundException("Client Pid not found with sessionId "
                         + sessionId);
             }
             return mSessionIdToSessionStateMap.get(sessionId).callingPid;
