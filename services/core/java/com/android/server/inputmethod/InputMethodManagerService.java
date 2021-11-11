@@ -260,44 +260,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final String HANDLER_THREAD_NAME = "android.imms";
 
     /**
-     * Binding flags for establishing connection to the {@link InputMethodService}.
-     */
-    private static final int IME_CONNECTION_BIND_FLAGS =
-            Context.BIND_AUTO_CREATE
-            | Context.BIND_NOT_VISIBLE
-            | Context.BIND_NOT_FOREGROUND
-            | Context.BIND_IMPORTANT_BACKGROUND;
-
-    /**
-     * Binding flags for establishing connection to the {@link InputMethodService} when
-     * config_killableInputMethods is enabled.
-     */
-    private static final int IME_CONNECTION_LOW_PRIORITY_BIND_FLAGS =
-            Context.BIND_AUTO_CREATE
-            | Context.BIND_REDUCTION_FLAGS;
-
-    /**
-     * Binding flags for establishing connection to the {@link InputMethodService}.
-     *
-     * <p>
-     * This defaults to {@link #IME_CONNECTION_BIND_FLAGS} unless config_killableInputMethods is
-     * enabled, in which case this takes the value of
-     * {@link #IME_CONNECTION_LOW_PRIORITY_BIND_FLAGS}.
-     */
-    private final int mImeConnectionBindFlags;
-
-    /**
-     * Binding flags used only while the {@link InputMethodService} is showing window.
-     */
-    private static final int IME_VISIBLE_BIND_FLAGS =
-            Context.BIND_AUTO_CREATE
-            | Context.BIND_TREAT_LIKE_ACTIVITY
-            | Context.BIND_FOREGROUND_SERVICE
-            | Context.BIND_INCLUDE_CAPABILITIES
-            | Context.BIND_SHOWING_UI
-            | Context.BIND_SCHEDULE_LIKE_TOP_APP;
-
-    /**
      * A protected broadcast intent action for internal use for {@link PendingIntent} in
      * the notification.
      */
@@ -1752,16 +1714,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mSettings, context);
         mMenuController = new InputMethodMenuController(this);
         mBindingController = new InputMethodBindingController(this);
-
-        // If configured, use low priority flags to make the IME killable by the lowmemorykiller
-        final boolean lowerIMEPriority = mRes.getBoolean(
-                com.android.internal.R.bool.config_killableInputMethods);
-
-        if (lowerIMEPriority) {
-            mImeConnectionBindFlags = IME_CONNECTION_LOW_PRIORITY_BIND_FLAGS;
-        } else {
-            mImeConnectionBindFlags = IME_CONNECTION_BIND_FLAGS;
-        }
     }
 
     @GuardedBy("mMethodMap")
@@ -2500,8 +2452,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         Intent intent = createImeBindingIntent(info.getComponent());
         setCurIntent(intent);
 
-        if (mBindingController.bindCurrentInputMethodServiceLocked(intent, getMainConnection(),
-                mImeConnectionBindFlags)) {
+        if (mBindingController.bindCurrentInputMethodServiceMainConnectionLocked()) {
             addFreshWindowTokenLocked(displayIdToShowIme, info.getId());
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
@@ -3200,8 +3151,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     showInputToken));
             mInputShown = true;
             if (hasConnection() && !isVisibleBound()) {
-                mBindingController.bindCurrentInputMethodServiceLocked(getVisibleConnection(),
-                        IME_VISIBLE_BIND_FLAGS);
+                mBindingController.bindCurrentInputMethodServiceVisibleConnectionLocked();
                 setVisibleBound(true);
             }
             res = true;
@@ -3217,8 +3167,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Slog.w(TAG, "Force disconnect/connect to the IME in showCurrentInputLocked()");
                 ServiceConnection connection = getMainConnection();
                 mContext.unbindService(connection);
-                mBindingController.bindCurrentInputMethodServiceLocked(connection,
-                        mImeConnectionBindFlags);
+                mBindingController.bindCurrentInputMethodServiceMainConnectionLocked();
             } else {
                 if (DEBUG) {
                     Slog.d(TAG, "Can't show input: connection = " + hasConnection() + ", time = "
