@@ -257,7 +257,7 @@ final class InputMethodBindingController {
                     updateCurrentMethodUidLocked();
                     if (mCurToken == null) {
                         Slog.w(TAG, "Service connected without a token!");
-                        mService.unbindCurrentMethodLocked();
+                        unbindCurrentMethodLocked();
                         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                         return;
                     }
@@ -322,4 +322,23 @@ final class InputMethodBindingController {
         }
     };
 
+    @GuardedBy("mMethodMap")
+    void unbindCurrentMethodLocked() {
+        if (mVisibleBound) {
+            mContext.unbindService(mVisibleConnection);
+            mVisibleBound = false;
+        }
+
+        if (mHasConnection) {
+            mContext.unbindService(mNonVisibleConnection);
+            mHasConnection = false;
+        }
+
+        if (mCurToken != null) {
+            mService.removeCurrentTokenLocked();
+        }
+
+        mCurId = null;
+        mService.clearCurMethodLocked();
+    }
 }

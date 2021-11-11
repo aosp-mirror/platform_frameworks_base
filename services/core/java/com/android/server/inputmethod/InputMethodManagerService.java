@@ -761,7 +761,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * </dd>
      * </dl>
      * <em>Do not update this value outside of {@link #setImeWindowStatus(IBinder, int, int)} and
-     * {@link #unbindCurrentMethodLocked()}.</em>
+     * {@link InputMethodBindingController#unbindCurrentMethodLocked()}.</em>
      */
     int mImeWindowVis;
 
@@ -2506,7 +2506,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             throw new IllegalArgumentException("Unknown id: " + getSelectedMethodId());
         }
 
-        unbindCurrentMethodLocked();
+        mBindingController.unbindCurrentMethodLocked();
 
         Intent intent = createImeBindingIntent(info.getComponent());
         setCurIntent(intent);
@@ -2675,26 +2675,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("mMethodMap")
-    void unbindCurrentMethodLocked() {
-        if (isVisibleBound()) {
-            mContext.unbindService(getVisibleConnection());
-            setVisibleBound(false);
-        }
-
-        if (hasConnection()) {
-            mContext.unbindService(getMainConnection());
-            setHasConnection(false);
-        }
-
-        if (getCurToken() != null) {
-            removeCurrentTokenLocked();
-        }
-
-        setCurId(null);
-        clearCurMethodLocked();
-    }
-
-    @GuardedBy("mMethodMap")
     void removeCurrentTokenLocked() {
         IBinder token = getCurToken();
         if (DEBUG) {
@@ -2714,7 +2694,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("mMethodMap")
     void resetCurrentMethodAndClientLocked(@UnbindReason int unbindClientReason) {
         setSelectedMethodId(null);
-        unbindCurrentMethodLocked();
+        mBindingController.unbindCurrentMethodLocked();
         unbindCurrentClientLocked(unbindClientReason);
     }
 
@@ -3583,7 +3563,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         // Note that we can trust client's display ID as long as it matches
                         // to the display ID obtained from the window.
                         if (cs.selfReportedDisplayId != mCurTokenDisplayId) {
-                            unbindCurrentMethodLocked();
+                            mBindingController.unbindCurrentMethodLocked();
                         }
                     }
                 } else if (isTextEditor && doAutoShow
@@ -5801,7 +5781,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (userId == mSettings.getCurrentUserId()) {
                     hideCurrentInputLocked(mCurFocusedWindow, 0, null,
                             SoftInputShowHideReason.HIDE_RESET_SHELL_COMMAND);
-                    unbindCurrentMethodLocked();
+                    mBindingController.unbindCurrentMethodLocked();
                     // Reset the current IME
                     resetSelectedInputMethodAndSubtypeLocked(null);
                     // Also reset the settings of the current IME
