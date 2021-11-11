@@ -146,13 +146,7 @@ import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProvider;
-
-import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.pkg.PackageStateUtils;
-import com.android.server.pm.pkg.PackageUserState;
-import com.android.server.pm.pkg.PackageUserStateInternal;
 import android.content.pm.pkg.PackageUserStateUtils;
-import com.android.server.pm.pkg.SuspendParams;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -257,6 +251,11 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackageApi;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateImpl;
+import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.PackageStateUtils;
+import com.android.server.pm.pkg.PackageUserState;
+import com.android.server.pm.pkg.PackageUserStateInternal;
+import com.android.server.pm.pkg.SuspendParams;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
@@ -1829,8 +1828,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mBroadcastHelper = new BroadcastHelper(mInjector);
         mAppDataHelper = new AppDataHelper(this);
         mRemovePackageHelper = new RemovePackageHelper(this, mAppDataHelper);
-        mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(this, mRemovePackageHelper,
-                mAppDataHelper);
+        mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(this);
         mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
                 mAppDataHelper);
         mPreferredActivityHelper = new PreferredActivityHelper(this);
@@ -11190,4 +11188,28 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         return scanFlags;
     }
+
+    Pair<Integer, Integer> getSystemPackageRescanFlagsAndReparseFlags(File scanFile,
+            int systemScanFlags, int systemParseFlags) {
+        List<ScanPartition> dirsToScanAsSystem =
+                mInitAndSystemPackageHelper.getDirsToScanAsSystem();
+        @ParsingPackageUtils.ParseFlags int reparseFlags = 0;
+        @PackageManagerService.ScanFlags int rescanFlags = 0;
+        for (int i1 = dirsToScanAsSystem.size() - 1; i1 >= 0; i1--) {
+            final ScanPartition partition = dirsToScanAsSystem.get(i1);
+            if (partition.containsPrivApp(scanFile)) {
+                reparseFlags = systemParseFlags;
+                rescanFlags = systemScanFlags | SCAN_AS_PRIVILEGED
+                        | partition.scanFlag;
+                break;
+            }
+            if (partition.containsApp(scanFile)) {
+                reparseFlags = systemParseFlags;
+                rescanFlags = systemScanFlags | partition.scanFlag;
+                break;
+            }
+        }
+        return new Pair<>(rescanFlags, reparseFlags);
+    }
+
 }
