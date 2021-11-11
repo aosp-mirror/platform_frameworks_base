@@ -103,7 +103,6 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         when(mVisualStabilityManager.areGroupChangesAllowed()).thenReturn(true);
         when(mVisualStabilityManager.isReorderingAllowed()).thenReturn(true);
 
-        when(mFeatureFlags.isNewNotifPipelineEnabled()).thenReturn(false);
         when(mFeatureFlags.checkLegacyPipelineEnabled()).thenReturn(true);
 
         mHelper = new NotificationTestHelper(mContext, mDependency, TestableLooper.get(this));
