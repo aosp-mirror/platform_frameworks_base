@@ -1099,12 +1099,12 @@
     <string name="years" msgid="5797714729103773425">"أعوام"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"الآن"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g>دقيقة</item>
-      <item quantity="two"><xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="two"><xliff:g id="COUNT_1">%d</xliff:g>  دقيقة</item>
       <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> دقائق</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g>دقيقة</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>دقيقة</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> دقيقة</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
       <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
