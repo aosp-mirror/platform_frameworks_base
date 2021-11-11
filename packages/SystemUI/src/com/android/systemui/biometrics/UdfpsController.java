@@ -583,7 +583,7 @@ public class UdfpsController implements DozeReceiver {
 
         mCoreLayoutParams = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
-                Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS,
+                0 /* flags set in computeLayoutParams() */,
                 PixelFormat.TRANSLUCENT);
         mCoreLayoutParams.setTitle(TAG);
         mCoreLayoutParams.setFitInsetsTypes(0);
@@ -678,7 +678,8 @@ public class UdfpsController implements DozeReceiver {
         final int paddingX = animation != null ? animation.getPaddingX() : 0;
         final int paddingY = animation != null ? animation.getPaddingY() : 0;
 
-        mCoreLayoutParams.flags = Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS;
+        mCoreLayoutParams.flags = Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS
+                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
         if (animation != null && animation.listenForTouchesOutsideView()) {
             mCoreLayoutParams.flags |= WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
         }
