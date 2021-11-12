@@ -28,9 +28,6 @@
     <!-- Alias used to reference framework configuration for screen rotation.  -->
     <item type="bool" name="config_enableLockScreenRotation">@*android:bool/config_enableLockScreenRotation</item>
 
-    <!-- Alias used to reference framework activity duration.  -->
-    <item type="integer" name="config_activityDefaultDur">@*android:integer/config_activityDefaultDur</item>
-
     <!-- Alias used to reference one of two possible layouts in keyguard.  -->
     <item type="layout" name="keyguard_eca">@layout/keyguard_emergency_carrier_area</item>
 </resources>
