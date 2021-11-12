@@ -262,6 +262,9 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      * Deletes the magnification window.
      */
     void deleteWindowMagnification() {
+        if (!isWindowVisible()) {
+            return;
+        }
         if (mMirrorSurface != null) {
             mTransaction.remove(mMirrorSurface).apply();
             mMirrorSurface = null;
@@ -690,7 +693,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     /**
-     * Enables window magnification with specified parameters.
+     * Enables window magnification with specified parameters. If the given scale is <strong>less
+     * than or equal to 1.0f<strong>, then
+     * {@link WindowMagnificationController#deleteWindowMagnification()} will be called instead to
+     * be consistent with the behavior of display magnification.
      *
      * @param scale   the target scale, or {@link Float#NaN} to leave unchanged
      * @param centerX the screen-relative X coordinate around which to center,
@@ -699,6 +705,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      *                or {@link Float#NaN} to leave unchanged.
      */
     void enableWindowMagnification(float scale, float centerX, float centerY) {
+        if (Float.compare(scale, 1.0f)  <= 0) {
+            deleteWindowMagnification();
+            return;
+        }
+
         final float offsetX = Float.isNaN(centerX) ? 0
                 : centerX - mMagnificationFrame.exactCenterX();
         final float offsetY = Float.isNaN(centerY) ? 0

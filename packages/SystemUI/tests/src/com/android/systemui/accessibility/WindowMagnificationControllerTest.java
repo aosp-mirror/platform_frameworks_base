@@ -469,6 +469,21 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void enableWindowMagnificationWithScaleLessThanOne_enabled_disabled() {
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN);
+        });
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(0.9f, Float.NaN,
+                    Float.NaN);
+        });
+
+        assertEquals(Float.NaN, mWindowMagnificationController.getScale(), 0);
+    }
+
+    @Test
     public void onLocaleChanged_enabled_updateA11yWindowTitle() {
         final String newA11yWindowTitle = "new a11y window title";
         mInstrumentation.runOnMainSync(() -> {
