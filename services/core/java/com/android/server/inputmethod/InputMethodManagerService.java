@@ -2356,7 +2356,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             @NonNull EditorInfo attribute, @StartInputFlags int startInputFlags,
             @StartInputReason int startInputReason) {
         // If no method is currently selected, do nothing.
-        if (getSelectedMethodId() == null) {
+        String selectedMethodId = getSelectedMethodId();
+        if (selectedMethodId == null) {
             return InputBindResult.NO_IME;
         }
 
@@ -2365,7 +2366,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // party code.
             return new InputBindResult(
                     InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
-                    null, null, getSelectedMethodId(), getSequenceNumber(), false);
+                    null, null, selectedMethodId, getSequenceNumber(), false);
         }
 
         if (!InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager, cs.uid,
@@ -2419,12 +2420,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
 
-        InputMethodInfo info = mMethodMap.get(getSelectedMethodId());
-        if (info == null) {
-            throw new IllegalArgumentException("Unknown id: " + getSelectedMethodId());
-        }
-
         mBindingController.unbindCurrentMethodLocked();
+
+        return bindCurrentMethodLocked(displayIdToShowIme);
+    }
+
+
+    @GuardedBy("mMethodMap")
+    @NonNull
+    private InputBindResult bindCurrentMethodLocked(int displayIdToShowIme) {
+        String selectedMethodId = getSelectedMethodId();
+        InputMethodInfo info = mMethodMap.get(selectedMethodId);
+        if (info == null) {
+            throw new IllegalArgumentException("Unknown id: " + selectedMethodId);
+        }
 
         Intent intent = createImeBindingIntent(info.getComponent());
         setCurIntent(intent);
@@ -2435,6 +2444,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
                     null, null, getCurId(), getSequenceNumber(), false);
         }
+
         setCurIntent(null);
         Slog.w(TAG, "Failure connecting to input method service: " + intent);
         return InputBindResult.IME_NOT_CONNECTED;
