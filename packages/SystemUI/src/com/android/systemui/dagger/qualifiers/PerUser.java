@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.tv;
+package com.android.systemui.dagger.qualifiers;
 
-import com.android.systemui.dagger.GlobalRootComponent;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import dagger.Binds;
-import dagger.Module;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 
-@Module
-interface TvSystemUIBinder {
-    @Binds
-    GlobalRootComponent bindGlobalRootComponent(TvGlobalRootComponent globalRootComponent);
+import javax.inject.Qualifier;
+
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface PerUser {
 }

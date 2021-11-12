@@ -37,7 +37,7 @@ public interface ContextComponentHelper {
     Service resolveService(String className);
 
     /** Turns a classname into an instance of the class or returns null. */
-    CoreStartable resolveCoreStartable(String className);
+    CoreStartable resolveAdditionalCoreStartable(String className);
 
     /** Turns a classname into an instance of the class or returns null. */
     BroadcastReceiver resolveBroadcastReceiver(String className);
