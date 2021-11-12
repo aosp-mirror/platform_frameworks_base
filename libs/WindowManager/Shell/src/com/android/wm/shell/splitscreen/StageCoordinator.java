@@ -389,6 +389,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         } else {
             ActivityOptions mainActivityOptions = ActivityOptions.fromBundle(mainOptions);
             mainActivityOptions.update(ActivityOptions.makeRemoteAnimation(wrappedAdapter));
+            mainOptions = mainActivityOptions.toBundle();
         }
 
         sideOptions = sideOptions != null ? sideOptions : new Bundle();
