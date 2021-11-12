@@ -25,6 +25,7 @@ import android.util.Log;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
@@ -63,6 +64,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     private final Handler mHandler = Handler.getMain();
     private final CarrierConfigTracker mCarrierConfigTracker;
     private final TunerService mTunerService;
+    private final FeatureFlags mFeatureFlags;
 
     private boolean mHideAirplane;
     private boolean mHideMobile;
@@ -82,9 +84,15 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     private WifiIconState mWifiIconState = new WifiIconState();
 
     @Inject
-    public StatusBarSignalPolicy(Context context, StatusBarIconController iconController,
-            CarrierConfigTracker carrierConfigTracker, NetworkController networkController,
-            SecurityController securityController, TunerService tunerService) {
+    public StatusBarSignalPolicy(
+            Context context,
+            StatusBarIconController iconController,
+            CarrierConfigTracker carrierConfigTracker,
+            NetworkController networkController,
+            SecurityController securityController,
+            TunerService tunerService,
+            FeatureFlags featureFlags
+    ) {
         mContext = context;
 
         mIconController = iconController;
@@ -92,6 +100,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         mNetworkController = networkController;
         mSecurityController = securityController;
         mTunerService = tunerService;
+        mFeatureFlags = featureFlags;
 
         mSlotAirplane = mContext.getString(com.android.internal.R.string.status_bar_airplane);
         mSlotMobile   = mContext.getString(com.android.internal.R.string.status_bar_mobile);
@@ -365,6 +374,9 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     @Override
     public void setConnectivityStatus(boolean noDefaultNetwork, boolean noValidatedNetwork,
             boolean noNetworksAvailable) {
+        if (!mFeatureFlags.isCombinedStatusBarSignalIconsEnabled()) {
+            return;
+        }
         if (DEBUG) {
             Log.d(TAG, "setConnectivityStatus: "
                     + "noDefaultNetwork = " + noDefaultNetwork + ","

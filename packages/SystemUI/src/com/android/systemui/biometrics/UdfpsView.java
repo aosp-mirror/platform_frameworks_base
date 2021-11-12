@@ -26,14 +26,19 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.os.Build;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.biometrics.UdfpsHbmTypes.HbmType;
 import com.android.systemui.doze.DozeReceiver;
 
 /**
@@ -43,18 +48,25 @@ import com.android.systemui.doze.DozeReceiver;
 public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIlluminator {
     private static final String TAG = "UdfpsView";
 
+    private static final String SETTING_HBM_TYPE =
+            "com.android.systemui.biometrics.UdfpsSurfaceView.hbmType";
+    private static final @HbmType int DEFAULT_HBM_TYPE = UdfpsHbmTypes.LOCAL_HBM;
+
     private static final int DEBUG_TEXT_SIZE_PX = 32;
 
     @NonNull private final RectF mSensorRect;
     @NonNull private final Paint mDebugTextPaint;
+    private final float mSensorTouchAreaCoefficient;
+    private final int mOnIlluminatedDelayMs;
+    private final @HbmType int mHbmType;
 
-    @NonNull private UdfpsSurfaceView mHbmSurfaceView;
+    // Only used for UdfpsHbmTypes.GLOBAL_HBM.
+    @Nullable private UdfpsSurfaceView mGhbmView;
+    // Can be different for enrollment, BiometricPrompt, Keyguard, etc.
     @Nullable private UdfpsAnimationViewController mAnimationViewController;
-
     // Used to obtain the sensor location.
     @NonNull private FingerprintSensorPropertiesInternal mSensorProps;
-
-    private final float mSensorTouchAreaCoefficient;
+    @Nullable private UdfpsHbmProvider mHbmProvider;
     @Nullable private String mDebugMessage;
     private boolean mIlluminationRequested;
 
@@ -81,7 +93,15 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
         mDebugTextPaint.setColor(Color.BLUE);
         mDebugTextPaint.setTextSize(DEBUG_TEXT_SIZE_PX);
 
-        mIlluminationRequested = false;
+        mOnIlluminatedDelayMs = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_udfps_illumination_transition_ms);
+
+        if (Build.IS_ENG || Build.IS_USERDEBUG) {
+            mHbmType = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    SETTING_HBM_TYPE, DEFAULT_HBM_TYPE, UserHandle.USER_CURRENT);
+        } else {
+            mHbmType = DEFAULT_HBM_TYPE;
+        }
     }
 
     // Don't propagate any touch events to the child views.
@@ -93,7 +113,9 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
 
     @Override
     protected void onFinishInflate() {
-        mHbmSurfaceView = findViewById(R.id.hbm_view);
+        if (mHbmType == UdfpsHbmTypes.GLOBAL_HBM) {
+            mGhbmView = findViewById(R.id.hbm_view);
+        }
     }
 
     void setSensorProperties(@NonNull FingerprintSensorPropertiesInternal properties) {
@@ -102,7 +124,7 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
 
     @Override
     public void setHbmProvider(@Nullable UdfpsHbmProvider hbmProvider) {
-        mHbmSurfaceView.setHbmProvider(hbmProvider);
+        mHbmProvider = hbmProvider;
     }
 
     @Override
@@ -125,7 +147,6 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
                 2 * mSensorProps.sensorRadius + paddingX,
                 2 * mSensorProps.sensorRadius + paddingY);
 
-        mHbmSurfaceView.onSensorRectUpdated(new RectF(mSensorRect));
         if (mAnimationViewController != null) {
             mAnimationViewController.onSensorRectUpdated(new RectF(mSensorRect));
         }
@@ -204,8 +225,32 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
         if (mAnimationViewController != null) {
             mAnimationViewController.onIlluminationStarting();
         }
-        mHbmSurfaceView.setVisibility(View.VISIBLE);
-        mHbmSurfaceView.startIllumination(onIlluminatedRunnable);
+
+        if (mGhbmView != null) {
+            mGhbmView.setGhbmIlluminationListener(this::doIlluminate);
+            mGhbmView.setVisibility(View.VISIBLE);
+            mGhbmView.startGhbmIllumination(onIlluminatedRunnable);
+        } else {
+            doIlluminate(null /* surface */, onIlluminatedRunnable);
+        }
+    }
+
+    private void doIlluminate(@Nullable Surface surface, @Nullable Runnable onIlluminatedRunnable) {
+        if (mGhbmView != null && surface == null) {
+            Log.e(TAG, "doIlluminate | surface must be non-null for GHBM");
+        }
+        mHbmProvider.enableHbm(mHbmType, surface, () -> {
+            if (mGhbmView != null) {
+                mGhbmView.drawIlluminationDot(mSensorRect);
+            }
+            if (onIlluminatedRunnable != null) {
+                // No framework API can reliably tell when a frame reaches the panel. A timeout
+                // is the safest solution.
+                postDelayed(onIlluminatedRunnable, mOnIlluminatedDelayMs);
+            } else {
+                Log.w(TAG, "doIlluminate | onIlluminatedRunnable is null");
+            }
+        });
     }
 
     @Override
@@ -214,7 +259,10 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
         if (mAnimationViewController != null) {
             mAnimationViewController.onIlluminationStopped();
         }
-        mHbmSurfaceView.setVisibility(View.INVISIBLE);
-        mHbmSurfaceView.stopIllumination();
+        if (mGhbmView != null) {
+            mGhbmView.setGhbmIlluminationListener(null);
+            mGhbmView.setVisibility(View.INVISIBLE);
+        }
+        mHbmProvider.disableHbm(null /* onHbmDisabled */);
     }
 }

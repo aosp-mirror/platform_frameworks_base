@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Kan nie gesig herken nie. Gebruik eerder vingerafdruk."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Gebruik jou vingerafdruk om voort te gaan"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Kan nie vingerafdruk herken nie. Gebruik eerder skermslot."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Soek tans vir jou …"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Gesig-ikoon"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Versoenbaarheid-zoem se knoppie."</string>
@@ -433,8 +435,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Dit deblokkeer toegang vir alle programme en dienste wat toegelaat word om jou kamera te gebruik."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Dit deblokkeer toegang vir alle programme en dienste wat toegelaat word om jou kamera of mikrofoon te gebruik."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Toestel"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Swiep op om programme te wissel"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Sleep regs om programme vinnig te wissel"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Wissel oorsig"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Gelaai"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Laai tans"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Tik weer om oop te maak"</string>
     <string name="tap_again" msgid="1315420114387908655">"Tik weer"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Swiep op om oop te maak"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Druk om oop te maak"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Swiep op om weer te probeer"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ontsluit om NFC te gebruik"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Hierdie toestel behoort aan jou organisasie"</string>
@@ -480,10 +481,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Voeg gebruiker by"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Nuwe gebruiker"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Verwyder gas?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"Stel gassessie terug?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle programme en data in hierdie sessie sal uitgevee word."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Verwyder"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"Stel terug"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Welkom terug, gas!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Wiil jy jou sessie voortsit?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Begin van voor af"</string>
@@ -671,7 +670,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Stel op om vinniger, veiliger aankope met jou foon te doen"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Wys alles"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Ontsluit om te betaal"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nie opgestel nie"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Voeg \'n kaart by"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Dateer tans op"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Ontsluit om te gebruik"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Kon nie jou kaarte kry nie; probeer later weer"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Sluitskerminstellings"</string>
@@ -1045,7 +1045,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Beweeg na rand en versteek"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Beweeg weg van rand en wys"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"wissel"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"Huiskontroles"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Toestelkontroles"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Kies program om kontroles by te voeg"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> kontroles bygevoeg.</item>
@@ -1117,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Maak gesprek oop"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Gespreklegstukke"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tik op \'n gesprek om dit by jou tuisskerm te voeg"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Kom kyk weer nadat jy \'n paar boodskappe gekry het"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Jou onlangse gesprekke sal hier verskyn"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioriteitgesprekke"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Onlangse gesprekke"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
@@ -1146,8 +1146,11 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Sien onlangse boodskappe, gemiste oproepe en statusopdaterings"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Gesprek"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> het \'n boodskap gestuur"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Onderbreek deur Moenie Steur nie"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> het \'n boodskap gestuur: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> het \'n prent gestuur"</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> het \'n statusopdatering: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"Beskikbaar"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Kon nie jou batterymeter lees nie"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tik vir meer inligting"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Geen wekker nie"</string>

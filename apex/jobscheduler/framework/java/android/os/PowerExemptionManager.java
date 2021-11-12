@@ -190,6 +190,8 @@ public class PowerExemptionManager {
      * @hide
      */
     public static final int REASON_TEMP_ALLOWED_WHILE_IN_USE = 70;
+    /** @hide */
+    public static final int REASON_CURRENT_INPUT_METHOD = 71;
 
     /* BG-FGS-launch is allowed by temp-allow-list or system-allow-list.
        Reason code for temp and system allow list starts here.
@@ -381,6 +383,7 @@ public class PowerExemptionManager {
             REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD,
             REASON_OP_ACTIVATE_VPN,
             REASON_OP_ACTIVATE_PLATFORM_VPN,
+            REASON_CURRENT_INPUT_METHOD,
             REASON_TEMP_ALLOWED_WHILE_IN_USE,
             // temp and system allow list reasons.
             REASON_GEOFENCING,
@@ -649,6 +652,8 @@ public class PowerExemptionManager {
                 return "OP_ACTIVATE_VPN";
             case REASON_OP_ACTIVATE_PLATFORM_VPN:
                 return "OP_ACTIVATE_PLATFORM_VPN";
+            case REASON_CURRENT_INPUT_METHOD:
+                return "CURRENT_INPUT_METHOD";
             case REASON_TEMP_ALLOWED_WHILE_IN_USE:
                 return "TEMP_ALLOWED_WHILE_IN_USE";
             case REASON_GEOFENCING:

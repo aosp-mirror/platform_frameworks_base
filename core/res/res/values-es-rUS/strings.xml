@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Servicio de Sistemas Globales de Navegación por Satélites (GNSS)"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Servicio de notificaciones del sensor"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Servicio de Twilight"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Detector de zona horaria (sin conexión)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Servicio de actualización de tiempo GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Servicio de administrador de reconocimiento de música"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Se borrarán los datos del dispositivo"</string>
@@ -349,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permite que la aplicación muestre y oculte la barra de estado."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"mostrar notificaciones como actividades de pantalla completa en un dispositivo bloqueado"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Permite que la app muestre notificaciones como actividades de pantalla completa en un dispositivo bloqueado"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalar accesos directos"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instalar accesos directos"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permite que una aplicación agregue accesos directos a la pantalla principal sin que el usuario intervenga."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"desinstalar accesos directos"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permite que la aplicación elimine accesos directos de la pantalla principal sin que el usuario intervenga."</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prueba con otra huella dactilar"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Demasiada luz"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Prueba ajustarla"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Cambia un poco la posición del dedo cada vez"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Se autenticó la huella dactilar"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"No se registraron huellas digitales."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo no tiene sensor de huellas dactilares."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Se inhabilitó temporalmente el sensor."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"No se puede usar el sensor de huellas dactilares. Consulta a un proveedor de reparaciones."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar huella digital"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Usar bloqueo de huella dactilar o pantalla"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ícono de huella dactilar"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Desbloqueo facial"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Vuelve a registrar tu rostro"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Para mejorar el reconocimiento, vuelve a registrar tu rostro"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema con el Desbloqueo facial"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Presiona para borrar el modelo de rostro y, luego, vuelve a agregar tu rostro"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configura Desbloqueo facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloquea el teléfono con solo mirarlo"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura más formas de desbloquear el dispositivo"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Presiona para agregar una huella dactilar"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueo con huellas dactilares"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"No se puede usar el sensor de huellas dactilares"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Consulta a un proveedor de reparaciones."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Datos faciales imprecisos. Vuelve a intentarlo."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Demasiado brillante. Prueba con menos iluminación."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Demasiado oscuro. Prueba con más iluminación."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Denegar"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Permiso solicitado"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Permiso solicitado\npara la cuenta <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> solicitó permiso\npara acceder a la cuenta <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Estás utilizando esta aplicación fuera del perfil de trabajo."</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Estás utilizando esta aplicación en tu perfil de trabajo."</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Método de entrada"</string>

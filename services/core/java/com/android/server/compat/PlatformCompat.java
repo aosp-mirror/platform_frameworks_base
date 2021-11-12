@@ -36,6 +36,7 @@ import android.content.pm.PackageManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -80,7 +81,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     @VisibleForTesting
     PlatformCompat(Context context, CompatConfig compatConfig,
-                   AndroidBuildClassifier buildClassifier) {
+            AndroidBuildClassifier buildClassifier) {
         mContext = context;
         mChangeReporter = new ChangeReporter(ChangeReporter.SOURCE_SYSTEM_SERVER);
         mCompatConfig = compatConfig;
@@ -177,8 +178,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
      *
      * <p>Does not perform costly permission check.
      *
-     * @param changeId the ID of the change in question
-     * @param packageName package name to check for
+     * @param changeId         the ID of the change in question
+     * @param packageName      package name to check for
      * @param targetSdkVersion target sdk version to check for
      * @return {@code true} if the change would be enabled for this package name.
      */
@@ -359,7 +360,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     private ApplicationInfo getApplicationInfo(String packageName, int userId) {
         return LocalServices.getService(PackageManagerInternal.class).getApplicationInfo(
-                packageName, 0, userId, userId);
+                packageName, 0, Process.myUid(), userId);
     }
 
     private void killPackage(String packageName) {
@@ -455,7 +456,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         }
         if (change.getEnableSinceTargetSdk() > 0) {
             return change.getEnableSinceTargetSdk() >= Build.VERSION_CODES.Q
-                && change.getEnableSinceTargetSdk() <= mBuildClassifier.platformTargetSdk();
+                    && change.getEnableSinceTargetSdk() <= mBuildClassifier.platformTargetSdk();
         }
         return true;
     }
@@ -507,7 +508,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
-        context.registerReceiver(receiver, filter);
+        context.registerReceiverForAllUsers(receiver, filter, /* broadcastPermission= */
+                null, /* scheduler= */ null);
     }
 
     /**

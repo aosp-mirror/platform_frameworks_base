@@ -89,5 +89,4 @@ public interface QSModule {
     /** */
     @Binds
     QSHost provideQsHost(QSTileHost controllerImpl);
-
 }

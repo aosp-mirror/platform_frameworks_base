@@ -34,6 +34,7 @@ interface StatusEvent {
     // Whether or not to show an animation for this event
     val showAnimation: Boolean
     val viewCreator: (context: Context) -> View
+    var contentDescription: String?
 
     // Update this event with values from another event.
     fun updateFromEvent(other: StatusEvent?) {
@@ -50,6 +51,7 @@ class BatteryEvent : StatusEvent {
     override val priority = 50
     override val forceVisible = false
     override val showAnimation = true
+    override var contentDescription: String? = ""
 
     override val viewCreator: (context: Context) -> View = { context ->
         val iv = ImageView(context)
@@ -62,7 +64,9 @@ class BatteryEvent : StatusEvent {
         return javaClass.simpleName
     }
 }
+
 class PrivacyEvent(override val showAnimation: Boolean = true) : StatusEvent {
+    override var contentDescription: String? = null
     override val priority = 100
     override val forceVisible = true
     var privacyItems: List<PrivacyItem> = listOf()
@@ -72,6 +76,7 @@ class PrivacyEvent(override val showAnimation: Boolean = true) : StatusEvent {
         val v = LayoutInflater.from(context)
                 .inflate(R.layout.ongoing_privacy_chip, null) as OngoingPrivacyChip
         v.privacyList = privacyItems
+        v.contentDescription = contentDescription
         privacyChip = v
         v
     }
@@ -81,7 +86,9 @@ class PrivacyEvent(override val showAnimation: Boolean = true) : StatusEvent {
     }
 
     override fun shouldUpdateFromEvent(other: StatusEvent?): Boolean {
-        return other is PrivacyEvent && other.privacyItems != privacyItems
+        return other is PrivacyEvent &&
+                (other.privacyItems != privacyItems ||
+                other.contentDescription != contentDescription)
     }
 
     override fun updateFromEvent(other: StatusEvent?) {
@@ -90,6 +97,9 @@ class PrivacyEvent(override val showAnimation: Boolean = true) : StatusEvent {
         }
 
         privacyItems = other.privacyItems
+        contentDescription = other.contentDescription
+
+        privacyChip?.contentDescription = other.contentDescription
         privacyChip?.privacyList = other.privacyItems
     }
 }

@@ -367,6 +367,14 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
     }
 
     /**
+     * Same as {@link AudioSystem#setHotwordDetectionServiceUid(int)}
+     * Communicate UID of current HotwordDetectionService to audio policy service.
+     */
+    public int setHotwordDetectionServiceUid(int uid) {
+        return AudioSystem.setHotwordDetectionServiceUid(uid);
+    }
+
+    /**
      * Same as {@link AudioSystem#setCurrentImeUid(int)}
      * Communicate UID of current InputMethodService to audio policy service.
      */

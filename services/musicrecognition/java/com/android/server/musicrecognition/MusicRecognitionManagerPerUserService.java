@@ -208,6 +208,24 @@ public final class MusicRecognitionManagerPerUserService extends
             @NonNull RecognitionRequest recognitionRequest,
             IMusicRecognitionManagerCallback clientCallback,
             ParcelFileDescriptor audioSink) {
+        int maxAudioLengthSeconds = Math.min(recognitionRequest.getMaxAudioLengthSeconds(),
+                MAX_STREAMING_SECONDS);
+        if (maxAudioLengthSeconds <= 0) {
+            // TODO(b/192992319): A request to stream 0s of audio can be used to initialize the
+            //  music recognition service implementation, hence not reporting an error here.
+            // The TODO for Android T is to move this functionality into an init() API call.
+            Slog.i(TAG, "No audio requested. Closing stream.");
+            try {
+                audioSink.close();
+                clientCallback.onAudioStreamClosed();
+            } catch (IOException e) {
+                Slog.e(TAG, "Problem closing stream.", e);
+            } catch (RemoteException ignored) {
+                // Ignored.
+            }
+            return;
+        }
+
         try {
             startRecordAudioOp(attributionTag);
         } catch (SecurityException e) {
@@ -224,8 +242,6 @@ public final class MusicRecognitionManagerPerUserService extends
             return;
         }
 
-        int maxAudioLengthSeconds = Math.min(recognitionRequest.getMaxAudioLengthSeconds(),
-                MAX_STREAMING_SECONDS);
         AudioRecord audioRecord = createAudioRecord(recognitionRequest, maxAudioLengthSeconds);
         try (OutputStream fos =
                      new ParcelFileDescriptor.AutoCloseOutputStream(audioSink)) {

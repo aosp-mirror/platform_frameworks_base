@@ -48,6 +48,64 @@ public abstract class LoggableMonitor {
     private boolean mLightSensorEnabled = false;
     private boolean mShouldLogMetrics = true;
 
+    /**
+     * Probe for loggable attributes that can be continuously monitored, such as ambient light.
+     *
+     * Disable probes when the sensors are in states that are not interesting for monitoring
+     * purposes to save power.
+     */
+    protected interface Probe {
+        /** Ensure the probe is actively sampling for new data. */
+        void enable();
+        /** Stop sampling data. */
+        void disable();
+    }
+
+    /**
+     * Client monitor callback that exposes a probe.
+     *
+     * Disables the probe when the operation completes.
+     */
+    protected static class CallbackWithProbe<T extends Probe>
+            implements BaseClientMonitor.Callback {
+        private final boolean mStartWithClient;
+        private final T mProbe;
+
+        public CallbackWithProbe(@NonNull T probe, boolean startWithClient) {
+            mProbe = probe;
+            mStartWithClient = startWithClient;
+        }
+
+        @Override
+        public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
+            if (mStartWithClient) {
+                mProbe.enable();
+            }
+        }
+
+        @Override
+        public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
+            mProbe.disable();
+        }
+
+        @NonNull
+        public T getProbe() {
+            return mProbe;
+        }
+    }
+
+    private class ALSProbe implements Probe {
+        @Override
+        public void enable() {
+            setLightSensorLoggingEnabled(getAmbientLightSensor(mSensorManager));
+        }
+
+        @Override
+        public void disable() {
+            setLightSensorLoggingEnabled(null);
+        }
+    }
+
     // report only the most recent value
     // consider com.android.server.display.utils.AmbientFilter or similar if need arises
     private volatile float mLastAmbientLux = 0;
@@ -285,21 +343,17 @@ public abstract class LoggableMonitor {
         return latency;
     }
 
-    /** Get a callback to start/stop ALS capture when client runs. */
+    /**
+     * Get a callback to start/stop ALS capture when client runs.
+     *
+     * If the probe should not run for the entire operation, do not set startWithClient and
+     * start/stop the problem when needed.
+     *
+     * @param startWithClient if probe should start automatically when the operation starts.
+     */
     @NonNull
-    protected BaseClientMonitor.Callback createALSCallback() {
-        return new BaseClientMonitor.Callback() {
-            @Override
-            public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
-                setLightSensorLoggingEnabled(getAmbientLightSensor(mSensorManager));
-            }
-
-            @Override
-            public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
-                    boolean success) {
-                setLightSensorLoggingEnabled(null);
-            }
-        };
+    protected CallbackWithProbe<Probe> createALSCallback(boolean startWithClient) {
+        return new CallbackWithProbe<>(new ALSProbe(), startWithClient);
     }
 
     /** The sensor to use for ALS logging. */

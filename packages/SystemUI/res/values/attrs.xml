@@ -143,6 +143,8 @@
     <attr name="handleThickness" format="dimension" />
     <attr name="handleColor" format="color" />
     <attr name="scrimColor" format="color" />
+    <!-- Int [0,255] for the alpha to be applied to scrimColor -->
+    <attr name="scrimAlpha" format="integer" />
     <attr name="containerBackgroundColor" format="color" />
 
     <attr name="isVertical" format="boolean" />
@@ -179,6 +181,7 @@
         <attr name="handleThickness" />
         <attr name="handleColor" />
         <attr name="scrimColor" />
+        <attr name="scrimAlpha" />
         <attr name="containerBackgroundColor" />
     </declare-styleable>
 
@@ -186,6 +189,7 @@
         <attr name="handleThickness" />
         <attr name="handleColor" />
         <attr name="scrimColor" />
+        <attr name="scrimAlpha" />
         <attr name="borderThickness" format="dimension" />
         <attr name="borderColor" format="color" />
     </declare-styleable>

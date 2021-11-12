@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.startingsurface;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
@@ -81,7 +82,8 @@ public class TaskSnapshotWindowTest {
         mWindow = new TaskSnapshotWindow(new SurfaceControl(), snapshot, "Test",
                 createTaskDescription(Color.WHITE, Color.RED, Color.BLUE),
                 0 /* appearance */, windowFlags /* windowFlags */, 0 /* privateWindowFlags */,
-                taskBounds, ORIENTATION_PORTRAIT, new InsetsState(),
+                taskBounds, ORIENTATION_PORTRAIT, ACTIVITY_TYPE_STANDARD,
+                100 /* delayRemovalTime */, new InsetsState(),
                 null /* clearWindow */, new TestShellExecutor());
     }
 

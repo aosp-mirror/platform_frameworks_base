@@ -25,13 +25,16 @@ import android.provider.Settings;
 import android.service.quickaccesswallet.GetWalletCardsRequest;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.QuickAccessWalletClientImpl;
+import android.util.Log;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.time.SystemClock;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -51,9 +54,11 @@ public class QuickAccessWalletController {
     }
 
     private static final String TAG = "QAWController";
+    private static final long RECREATION_TIME_WINDOW = TimeUnit.MINUTES.toMillis(10L);
     private final Context mContext;
     private final Executor mExecutor;
     private final SecureSettings mSecureSettings;
+    private final SystemClock mClock;
 
     private QuickAccessWalletClient mQuickAccessWalletClient;
     private ContentObserver mWalletPreferenceObserver;
@@ -61,17 +66,21 @@ public class QuickAccessWalletController {
     private int mWalletPreferenceChangeEvents = 0;
     private int mDefaultPaymentAppChangeEvents = 0;
     private boolean mWalletEnabled = false;
+    private long mQawClientCreatedTimeMillis;
 
     @Inject
     public QuickAccessWalletController(
             Context context,
             @Main Executor executor,
             SecureSettings secureSettings,
-            QuickAccessWalletClient quickAccessWalletClient) {
+            QuickAccessWalletClient quickAccessWalletClient,
+            SystemClock clock) {
         mContext = context;
         mExecutor = executor;
         mSecureSettings = secureSettings;
         mQuickAccessWalletClient = quickAccessWalletClient;
+        mClock = clock;
+        mQawClientCreatedTimeMillis = mClock.elapsedRealtime();
     }
 
     /**
@@ -142,6 +151,15 @@ public class QuickAccessWalletController {
      */
     public void queryWalletCards(
             QuickAccessWalletClient.OnWalletCardsRetrievedCallback cardsRetriever) {
+        if (mClock.elapsedRealtime() - mQawClientCreatedTimeMillis
+                > RECREATION_TIME_WINDOW) {
+            Log.i(TAG, "Re-creating the QAW client to avoid stale.");
+            reCreateWalletClient();
+        }
+        if (!mQuickAccessWalletClient.isWalletFeatureAvailable()) {
+            Log.d(TAG, "QuickAccessWallet feature is not available.");
+            return;
+        }
         int cardWidth =
                 mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_width);
         int cardHeight =
@@ -157,6 +175,7 @@ public class QuickAccessWalletController {
      */
     public void reCreateWalletClient() {
         mQuickAccessWalletClient = QuickAccessWalletClient.create(mContext);
+        mQawClientCreatedTimeMillis = mClock.elapsedRealtime();
     }
 
     private void setupDefaultPaymentAppObserver(

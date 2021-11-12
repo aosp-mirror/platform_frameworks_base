@@ -17,17 +17,16 @@
 package com.android.server.biometrics.sensors;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
 import android.media.AudioAttributes;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.text.TextUtils;
 import android.util.Slog;
 
 /**
@@ -39,24 +38,20 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
 
     private static final String TAG = "Biometrics/AcquisitionClient";
 
-    private static final AudioAttributes VIBRATION_SONFICATION_ATTRIBUTES =
+    private static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
             new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
                     .build();
 
-    private final VibrationEffect mEffectTick = VibrationEffect.get(VibrationEffect.EFFECT_TICK);
-    private final VibrationEffect mEffectTextureTick =
-            VibrationEffect.get(VibrationEffect.EFFECT_TEXTURE_TICK);
-    private final VibrationEffect mEffectClick = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
-    private final VibrationEffect mEffectHeavy =
-            VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK);
-    private final VibrationEffect mDoubleClick =
+    private static final VibrationEffect SUCCESS_VIBRATION_EFFECT =
+            VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+    private static final VibrationEffect ERROR_VIBRATION_EFFECT =
             VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
 
     private final PowerManager mPowerManager;
-    private final VibrationEffect mSuccessVibrationEffect;
-    private final VibrationEffect mErrorVibrationEffect;
+    // If haptics should occur when auth result (success/reject) is known
+    protected final boolean mShouldVibrate;
     private boolean mShouldSendErrorToClient = true;
     private boolean mAlreadyCancelled;
 
@@ -67,13 +62,12 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
 
     public AcquisitionClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
-            @NonNull String owner, int cookie, int sensorId, int statsModality,
-            int statsAction, int statsClient) {
+            @NonNull String owner, int cookie, int sensorId, boolean shouldVibrate,
+            int statsModality, int statsAction, int statsClient) {
         super(context, lazyDaemon, token, listener, userId, owner, cookie, sensorId, statsModality,
                 statsAction, statsClient);
         mPowerManager = context.getSystemService(PowerManager.class);
-        mSuccessVibrationEffect = mEffectClick;
-        mErrorVibrationEffect = mDoubleClick;
+        mShouldVibrate = shouldVibrate;
     }
 
     @Override
@@ -97,6 +91,8 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
      * operation still needs to wait for the HAL to send ERROR_CANCELED.
      */
     public void onUserCanceled() {
+        Slog.d(TAG, "onUserCanceled");
+
         // Send USER_CANCELED, but do not finish. Wait for the HAL to respond with ERROR_CANCELED,
         // which then finishes the AcquisitionClient's lifecycle.
         onErrorInternal(BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED, 0 /* vendorCode */,
@@ -105,6 +101,8 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
     }
 
     protected void onErrorInternal(int errorCode, int vendorCode, boolean finish) {
+        Slog.d(TAG, "onErrorInternal code: " + errorCode + ", finish: " + finish);
+
         // In some cases, the framework will send an error to the caller before a true terminal
         // case (success, failure, or error) is received from the HAL (e.g. versions of fingerprint
         // that do not handle lockout under the HAL. In these cases, ensure that the framework only
@@ -143,6 +141,8 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
 
     @Override
     public void cancelWithoutStarting(@NonNull Callback callback) {
+        Slog.d(TAG, "cancelWithoutStarting: " + this);
+
         final int errorCode = BiometricConstants.BIOMETRIC_ERROR_CANCELED;
         try {
             if (getListener() != null) {
@@ -192,47 +192,25 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
         mPowerManager.userActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
     }
 
-    protected @NonNull VibrationEffect getSuccessVibrationEffect() {
-        return mSuccessVibrationEffect;
-    }
-
-    protected @NonNull VibrationEffect getErrorVibrationEffect() {
-        return mErrorVibrationEffect;
-    }
-
     protected final void vibrateSuccess() {
         Vibrator vibrator = getContext().getSystemService(Vibrator.class);
         if (vibrator != null) {
-            vibrator.vibrate(getSuccessVibrationEffect(), VIBRATION_SONFICATION_ATTRIBUTES);
+            vibrator.vibrate(Process.myUid(),
+                    getContext().getOpPackageName(),
+                    SUCCESS_VIBRATION_EFFECT,
+                    getClass().getSimpleName() + "::success",
+                    VIBRATION_SONIFICATION_ATTRIBUTES);
         }
     }
 
     protected final void vibrateError() {
         Vibrator vibrator = getContext().getSystemService(Vibrator.class);
         if (vibrator != null) {
-            vibrator.vibrate(getErrorVibrationEffect(), VIBRATION_SONFICATION_ATTRIBUTES);
-        }
-    }
-
-    protected final @NonNull VibrationEffect getVibration(@Nullable String effect,
-            @NonNull VibrationEffect defaultEffect) {
-        if (TextUtils.isEmpty(effect)) {
-            return defaultEffect;
-        }
-
-        switch (effect.toLowerCase()) {
-            case "click":
-                return mEffectClick;
-            case "heavy":
-                return mEffectHeavy;
-            case "texture_tick":
-                return mEffectTextureTick;
-            case "tick":
-                return mEffectTick;
-            case "double_click":
-                return mDoubleClick;
-            default:
-                return defaultEffect;
+            vibrator.vibrate(Process.myUid(),
+                    getContext().getOpPackageName(),
+                    ERROR_VIBRATION_EFFECT,
+                    getClass().getSimpleName() + "::error",
+                    VIBRATION_SONIFICATION_ATTRIBUTES);
         }
     }
 }

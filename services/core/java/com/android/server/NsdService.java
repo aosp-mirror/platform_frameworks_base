@@ -61,7 +61,7 @@ public class NsdService extends INsdManager.Stub {
     private static final String MDNS_TAG = "mDnsConnector";
 
     private static final boolean DBG = true;
-    private static final long CLEANUP_DELAY_MS = 3000;
+    private static final long CLEANUP_DELAY_MS = 10000;
 
     private final Context mContext;
     private final NsdSettings mNsdSettings;
@@ -82,6 +82,8 @@ public class NsdService extends INsdManager.Stub {
 
     private static final int INVALID_ID = 0;
     private int mUniqueId = 1;
+    // The count of the connected legacy clients.
+    private int mLegacyClientCount = 0;
 
     private class NsdStateMachine extends StateMachine {
 
@@ -94,19 +96,27 @@ public class NsdService extends INsdManager.Stub {
             return NsdManager.nameOf(what);
         }
 
-        void maybeStartDaemon() {
+        private void maybeStartDaemon() {
             mDaemon.maybeStart();
             maybeScheduleStop();
         }
 
-        void maybeScheduleStop() {
-            if (!isAnyRequestActive()) {
-                cancelStop();
-                sendMessageDelayed(NsdManager.DAEMON_CLEANUP, mCleanupDelayMs);
+        private boolean isAnyRequestActive() {
+            return mIdToClientInfoMap.size() != 0;
+        }
+
+        private void scheduleStop() {
+            sendMessageDelayed(NsdManager.DAEMON_CLEANUP, mCleanupDelayMs);
+        }
+        private void maybeScheduleStop() {
+            // The native daemon should stay alive and can't be cleanup
+            // if any legacy client connected.
+            if (!isAnyRequestActive() && mLegacyClientCount == 0) {
+                scheduleStop();
             }
         }
 
-        void cancelStop() {
+        private void cancelStop() {
             this.removeMessages(NsdManager.DAEMON_CLEANUP);
         }
 
@@ -164,11 +174,16 @@ public class NsdService extends INsdManager.Stub {
                                 if (DBG) Slog.d(TAG, "Client connection lost with reason: " + msg.arg1);
                                 break;
                         }
+
                         cInfo = mClients.get(msg.replyTo);
                         if (cInfo != null) {
                             cInfo.expungeAllRequests();
                             mClients.remove(msg.replyTo);
+                            if (cInfo.isLegacy()) {
+                                mLegacyClientCount -= 1;
+                            }
                         }
+                        maybeScheduleStop();
                         break;
                     case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION:
                         AsyncChannel ac = new AsyncChannel();
@@ -196,6 +211,17 @@ public class NsdService extends INsdManager.Stub {
                         break;
                     case NsdManager.DAEMON_CLEANUP:
                         mDaemon.maybeStop();
+                        break;
+                    // This event should be only sent by the legacy (target SDK < S) clients.
+                    // Mark the sending client as legacy.
+                    case NsdManager.DAEMON_STARTUP:
+                        cInfo = mClients.get(msg.replyTo);
+                        if (cInfo != null) {
+                            cancelStop();
+                            cInfo.setLegacy();
+                            mLegacyClientCount += 1;
+                            maybeStartDaemon();
+                        }
                         break;
                     case NsdManager.NATIVE_DAEMON_EVENT:
                     default:
@@ -235,7 +261,7 @@ public class NsdService extends INsdManager.Stub {
             public void exit() {
                 // TODO: it is incorrect to stop the daemon without expunging all requests
                 // and sending error callbacks to clients.
-                maybeScheduleStop();
+                scheduleStop();
             }
 
             private boolean requestLimitReached(ClientInfo clientInfo) {
@@ -271,9 +297,6 @@ public class NsdService extends INsdManager.Stub {
                         return NOT_HANDLED;
                     case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
                         return NOT_HANDLED;
-                }
-
-                switch (msg.what) {
                     case NsdManager.DISABLE:
                         //TODO: cleanup clients
                         transitionTo(mDisabledState);
@@ -529,10 +552,6 @@ public class NsdService extends INsdManager.Stub {
                 return true;
             }
        }
-    }
-
-    private boolean isAnyRequestActive() {
-        return mIdToClientInfoMap.size() != 0;
     }
 
     private String unescape(String s) {
@@ -859,6 +878,9 @@ public class NsdService extends INsdManager.Stub {
         /* A map from client id to the type of the request we had received */
         private final SparseIntArray mClientRequests = new SparseIntArray();
 
+        // The target SDK of this client < Build.VERSION_CODES.S
+        private boolean mIsLegacy = false;
+
         private ClientInfo(AsyncChannel c, Messenger m) {
             mChannel = c;
             mMessenger = m;
@@ -871,6 +893,7 @@ public class NsdService extends INsdManager.Stub {
             sb.append("mChannel ").append(mChannel).append("\n");
             sb.append("mMessenger ").append(mMessenger).append("\n");
             sb.append("mResolvedService ").append(mResolvedService).append("\n");
+            sb.append("mIsLegacy ").append(mIsLegacy).append("\n");
             for(int i = 0; i< mClientIds.size(); i++) {
                 int clientID = mClientIds.keyAt(i);
                 sb.append("clientId ").append(clientID).
@@ -878,6 +901,14 @@ public class NsdService extends INsdManager.Stub {
                     append(" type ").append(mClientRequests.get(clientID)).append("\n");
             }
             return sb.toString();
+        }
+
+        private boolean isLegacy() {
+            return mIsLegacy;
+        }
+
+        private void setLegacy() {
+            mIsLegacy = true;
         }
 
         // Remove any pending requests from the global map when we get rid of a client,
@@ -907,7 +938,6 @@ public class NsdService extends INsdManager.Stub {
             }
             mClientIds.clear();
             mClientRequests.clear();
-            mNsdStateMachine.maybeScheduleStop();
         }
 
         // mClientIds is a sparse array of listener id -> mDnsClient id.  For a given mDnsClient id,

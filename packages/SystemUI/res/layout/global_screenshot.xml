@@ -19,12 +19,15 @@
     android:id="@+id/global_screenshot_frame"
     android:theme="@style/Screenshot"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:importantForAccessibility="no">
     <ImageView
         android:id="@+id/screenshot_scrolling_scrim"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        android:clickable="true"
+        android:importantForAccessibility="no"/>
     <ImageView
         android:id="@+id/global_screenshot_actions_background"
         android:layout_height="@dimen/screenshot_bg_protection_height"

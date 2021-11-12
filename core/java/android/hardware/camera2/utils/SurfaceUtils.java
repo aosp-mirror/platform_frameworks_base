@@ -105,6 +105,20 @@ public class SurfaceUtils {
     }
 
     /**
+     * Get the surface usage bits.
+     *
+     * @param surface The surface to be queried for usage.
+     * @return the native object id of the surface, 0 if surface is not backed by a native object.
+     */
+    public static long getSurfaceUsage(Surface surface) {
+        checkNotNull(surface);
+        try {
+            return nativeDetectSurfaceUsageFlags(surface);
+        } catch (IllegalArgumentException e) {
+            return 0;
+        }
+    }
+    /**
      * Get the Surface size.
      *
      * @param surface The surface to be queried for size.
@@ -142,6 +156,23 @@ public class SurfaceUtils {
                 && surfaceType <= BGRA_8888)) {
             surfaceType = ImageFormat.PRIVATE;
         }
+        return surfaceType;
+    }
+
+    /**
+     * Detect and retrieve the Surface format without any
+     * additional overrides.
+     *
+     * @param surface The surface to be queried for format.
+     * @return format of the surface.
+     *
+     * @throws IllegalArgumentException if the surface is already abandoned.
+     */
+    public static int detectSurfaceFormat(Surface surface) {
+        checkNotNull(surface);
+        int surfaceType = nativeDetectSurfaceType(surface);
+        if (surfaceType == BAD_VALUE) throw new IllegalArgumentException("Surface was abandoned");
+
         return surfaceType;
     }
 

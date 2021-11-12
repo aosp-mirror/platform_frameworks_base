@@ -135,8 +135,8 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                 SystemProperties.getInt(ONE_HANDED_MODE_TRANSLATE_ANIMATION_DURATION,
                         animationDurationConfig);
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
-        mTutorialHandler = tutorialHandler;
         mBackgroundPanelOrganizer = oneHandedBackgroundGradientOrganizer;
+        mTutorialHandler = tutorialHandler;
     }
 
     @Override
@@ -249,9 +249,8 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         if (animator != null) {
             animator.setTransitionDirection(direction)
                     .addOneHandedAnimationCallback(mOneHandedAnimationCallback)
-                    .addOneHandedAnimationCallback(mTutorialHandler.getAnimationCallback())
-                    .addOneHandedAnimationCallback(
-                            mBackgroundPanelOrganizer.getOneHandedAnimationCallback())
+                    .addOneHandedAnimationCallback(mTutorialHandler)
+                    .addOneHandedAnimationCallback(mBackgroundPanelOrganizer)
                     .setDuration(durationMs)
                     .start();
         }
@@ -267,7 +266,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         mLastVisualDisplayBounds.offsetTo(0, Math.round(mLastVisualOffset));
         for (int i = mTransitionCallbacks.size() - 1; i >= 0; i--) {
             final OneHandedTransitionCallback cb = mTransitionCallbacks.get(i);
-            cb.onStartTransition(false /* isTransitioning */);
             if (direction == TRANSITION_DIRECTION_TRIGGER) {
                 cb.onStartFinished(getLastVisualDisplayBounds());
             } else {

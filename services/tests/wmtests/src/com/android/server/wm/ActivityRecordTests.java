@@ -39,6 +39,7 @@ import static android.os.Process.NOBODY_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -46,6 +47,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
@@ -111,11 +113,13 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.provider.DeviceConfig;
 import android.util.MergedConfiguration;
 import android.util.MutableBoolean;
 import android.view.DisplayInfo;
@@ -135,6 +139,7 @@ import androidx.test.filters.MediumTest;
 import com.android.internal.R;
 import com.android.server.wm.Task.ActivityState;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -2457,6 +2462,40 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertNoStartingWindow(activity);
     }
 
+    private void testLegacySplashScreen(int targetSdk, int verifyType) {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity.mTargetSdk = targetSdk;
+        activity.addStartingWindow(mPackageName,
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
+                false, false);
+        waitUntilHandlersIdle();
+        assertHasStartingWindow(activity);
+        assertEquals(activity.mStartingData.mTypeParams & TYPE_PARAMETER_LEGACY_SPLASH_SCREEN,
+                verifyType);
+        activity.removeStartingWindow();
+        waitUntilHandlersIdle();
+        assertNoStartingWindow(activity);
+    }
+
+    @Test
+    public void testCreateRemoveLegacySplashScreenWindow() {
+        registerTestStartingWindowOrganizer();
+        DeviceConfig.Properties properties = DeviceConfig.getProperties(
+                DeviceConfig.NAMESPACE_WINDOW_MANAGER);
+        try {
+            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                    "splash_screen_exception_list", DEFAULT_COMPONENT_PACKAGE_NAME, false);
+            testLegacySplashScreen(Build.VERSION_CODES.R, TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
+            testLegacySplashScreen(Build.VERSION_CODES.S, 0);
+        } finally {
+            try {
+                DeviceConfig.setProperties(properties);
+            } catch (DeviceConfig.BadConfigException e) {
+                Assert.fail(e.getMessage());
+            }
+        }
+    }
+
     @Test
     public void testTransferStartingWindow() {
         registerTestStartingWindowOrganizer();
@@ -2523,19 +2562,19 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord sourceRecord = new ActivityBuilder(mAtm)
                 .setCreateTask(true).setLaunchedFromUid(Process.SYSTEM_UID).build();
         sourceRecord.showStartingWindow(null /* prev */, true /* newTask */, false,
-                0 /* splashScreenTheme */, null);
+                true /* startActivity */, null);
 
         final ActivityRecord secondRecord = new ActivityBuilder(mAtm)
                 .setTask(sourceRecord.getTask()).build();
         secondRecord.showStartingWindow(null /* prev */, true /* newTask */, false,
-                0 /* splashScreenTheme */, sourceRecord);
+                true /* startActivity */, sourceRecord);
         assertFalse(secondRecord.mSplashScreenStyleEmpty);
         secondRecord.onStartingWindowDrawn();
 
         final ActivityRecord finalRecord = new ActivityBuilder(mAtm)
                 .setTask(sourceRecord.getTask()).build();
         finalRecord.showStartingWindow(null /* prev */, true /* newTask */, false,
-                0 /* splashScreenTheme */, secondRecord);
+                true /* startActivity */, secondRecord);
         assertTrue(finalRecord.mSplashScreenStyleEmpty);
     }
 
@@ -2776,6 +2815,73 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(activity.mVisibleRequested);
         assertFalse(activity.mDisplayContent.mOpeningApps.contains(activity));
         assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
+    }
+
+    @Test
+    public void testImeInsetsFrozenFlag_resetWhenReparented() {
+        final ActivityRecord activity = createActivityWithTask();
+        final WindowState app = createWindow(null, TYPE_APPLICATION, activity, "app");
+        final WindowState imeWindow = createWindow(null, TYPE_APPLICATION, "imeWindow");
+        final Task newTask = new TaskBuilder(mSupervisor).build();
+        makeWindowVisible(app, imeWindow);
+        mDisplayContent.mInputMethodWindow = imeWindow;
+        mDisplayContent.setImeLayeringTarget(app);
+        mDisplayContent.setImeInputTarget(app);
+
+        // Simulate app is closing and expect the last IME is shown and IME insets is frozen.
+        app.mActivityRecord.commitVisibility(false, false);
+        assertTrue(app.mActivityRecord.mLastImeShown);
+        assertTrue(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+
+        // Expect IME insets frozen state will reset when the activity is reparent to the new task.
+        activity.setState(RESUMED, "test");
+        activity.reparent(newTask, 0 /* top */, "test");
+        assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+    }
+
+    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @Test
+    public void testImeInsetsFrozenFlag_resetWhenResized() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        makeWindowVisibleAndDrawn(app, mImeWindow);
+        mDisplayContent.setImeLayeringTarget(app);
+        mDisplayContent.setImeInputTarget(app);
+
+        // Simulate app is closing and expect the last IME is shown and IME insets is frozen.
+        app.mActivityRecord.commitVisibility(false, false);
+        assertTrue(app.mActivityRecord.mLastImeShown);
+        assertTrue(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+
+        // Expect IME insets frozen state will reset when the activity is reparent to the new task.
+        app.mActivityRecord.onResize();
+        assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+    }
+
+    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @Test
+    public void testImeInsetsFrozenFlag_resetWhenNoImeFocusableInActivity() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        makeWindowVisibleAndDrawn(app, mImeWindow);
+        mDisplayContent.setImeLayeringTarget(app);
+        mDisplayContent.setImeInputTarget(app);
+
+        // Simulate app is closing and expect the last IME is shown and IME insets is frozen.
+        app.mActivityRecord.commitVisibility(false, false);
+        app.mActivityRecord.onWindowsGone();
+
+        assertTrue(app.mActivityRecord.mLastImeShown);
+        assertTrue(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+
+        // Expect IME insets frozen state will reset when the activity has no IME focusable window.
+        app.mActivityRecord.forAllWindowsUnchecked(w -> {
+            w.mAttrs.flags |= FLAG_ALT_FOCUSABLE_IM;
+            return true;
+        }, true);
+
+        app.mActivityRecord.commitVisibility(true, false);
+        app.mActivityRecord.onWindowsVisible();
+
+        assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
     }
 
     private void assertHasStartingWindow(ActivityRecord atoken) {

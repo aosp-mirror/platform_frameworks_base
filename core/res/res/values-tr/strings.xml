@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS Hizmeti"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Sensör Bildirim Hizmeti"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Alacakaranlık Hizmeti"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Zaman Dilimi Algılayıcı (Bağlantı yok)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS Zaman Güncelleme Hizmeti"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Müzik Tanıma Yöneticisi Hizmeti"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Cihazınız silinecek"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Başka bir parmak izi deneyin"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Çok parlak"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Ayarlamayı deneyin"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Her defasında parmağınızın konumunu biraz değiştirin"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Parmak izi kimlik doğrulaması yapıldı"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Parmak izi kaydedilmedi."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Bu cihazda parmak izi sensörü yok."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensör geçici olarak devre dışı bırakıldı."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Parmak izi sensörü kullanılamıyor. Bir onarım hizmeti sağlayıcıyı ziyaret edin"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>. parmak"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Parmak izi kullan"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Parmak izi veya ekran kilidi kullan"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Parmak izi simgesi"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Yüz Tanıma Kilidi"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Yüzünüzü yeniden kaydedin"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Daha iyi tanınmasını sağlamak için lütfen yüzünüzü yeniden kaydedin"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Yüz Tanıma Kilidi sorunu"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Yüz modelinizi silmek için dokunup ardından yüzünüzü yeniden ekleyin"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Yüz Tanıma Kilidi\'ni kurma"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefonunuza bakarak kilidini açın"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Kilidi açmak için daha fazla yöntem ayarlayın"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Parmak izi eklemek için dokunun"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Parmak İzi Kilidi"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Parmak izi sensörü kullanılamıyor"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Bir onarım hizmeti sağlayıcıyı ziyaret edin."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Doğru yüz verileri yakalanamadı. Tekrar deneyin."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Çok parlak. Parlaklığı daha az bir ışıklandırma deneyin."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Çok karanlık. Daha parlak ışıkta deneyin."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Reddet"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"İzin istendi"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> hesabı için\nizin isteğinde bulunuldu."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> uygulaması, <xliff:g id="ACCOUNT">%2$s</xliff:g> hesabı\niçin izin istedi"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Bu uygulamayı iş profilinizin dışında kullanıyorsunuz"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Bu uygulamayı iş profilinizde kullanıyorsunuz"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Giriş yöntemi"</string>
@@ -1950,8 +1953,8 @@
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Video"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Reddet"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Kapat"</string>
-    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Gelen çağrı"</string>
-    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Devam eden çağrı"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Gelen arama"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Devam eden arama"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Gelen arama süzülüyor"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> öğe seçildi</item>

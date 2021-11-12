@@ -29,7 +29,6 @@ import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.FeatureFlagUtils;
 import android.widget.Button;
 
 import com.android.systemui.R;
@@ -42,6 +41,7 @@ import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.util.leak.GarbageMonitor;
 
 import java.util.ArrayList;
@@ -63,17 +63,24 @@ public class TileQueryHelper {
     private final Executor mBgExecutor;
     private final Context mContext;
     private final UserTracker mUserTracker;
+    private final FeatureFlags mFeatureFlags;
     private TileStateListener mListener;
 
     private boolean mFinished;
 
     @Inject
-    public TileQueryHelper(Context context, UserTracker userTracker,
-            @Main Executor mainExecutor, @Background Executor bgExecutor) {
+    public TileQueryHelper(
+            Context context,
+            UserTracker userTracker,
+            @Main Executor mainExecutor,
+            @Background Executor bgExecutor,
+            FeatureFlags featureFlags
+    ) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
         mUserTracker = userTracker;
+        mFeatureFlags = featureFlags;
     }
 
     public void setListener(TileStateListener listener) {
@@ -114,19 +121,15 @@ public class TileQueryHelper {
         }
 
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
-        // TODO(b/174753536): Move it into the config file.
-        if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
+        if (mFeatureFlags.isProviderModelSettingEnabled()) {
             possibleTiles.remove("cell");
             possibleTiles.remove("wifi");
-        } else {
-            possibleTiles.remove("internet");
         }
 
         for (String spec : possibleTiles) {
             // Only add current and stock tiles that can be created from QSFactoryImpl.
             // Do not include CustomTile. Those will be created by `addPackageTiles`.
             if (spec.startsWith(CustomTile.PREFIX)) continue;
-            // TODO(b/174753536): Move it into the config file.
             final QSTile tile = host.createTile(spec);
             if (tile == null) {
                 continue;

@@ -567,6 +567,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
         public void clearDrag() {
             itemView.clearAnimation();
+            itemView.setScaleX(1);
+            itemView.setScaleY(1);
         }
 
         public void startDrag() {
@@ -811,6 +813,13 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
         @Override
         public void onSwiped(ViewHolder viewHolder, int direction) {
+        }
+
+        // Just in case, make sure to animate to base state.
+        @Override
+        public void clearView(@NonNull RecyclerView recyclerView, @NonNull ViewHolder viewHolder) {
+            ((Holder) viewHolder).stopDrag();
+            super.clearView(recyclerView, viewHolder);
         }
     };
 }

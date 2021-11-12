@@ -27,6 +27,7 @@ public class PresTupleInfo implements Parcelable {
     private String mFeatureTag = "";
     private String mContactUri = "";
     private String mTimestamp = "";
+    private String mVersion = "";
 
 
     /**
@@ -80,6 +81,22 @@ public class PresTupleInfo implements Parcelable {
     }
 
     /**
+     * Gets the version.
+     * @hide
+     */
+    public String getVersion() {
+        return mVersion;
+    }
+
+    /**
+     * Sets the version.
+     * @hide
+     */
+    public void setVersion(String version) {
+        this.mVersion = version;
+    }
+
+    /**
      * Constructor for the PresTupleInfo class.
      * @hide
      */
@@ -96,6 +113,7 @@ public class PresTupleInfo implements Parcelable {
         dest.writeString(mFeatureTag);
         dest.writeString(mContactUri);
         dest.writeString(mTimestamp);
+        dest.writeString(mVersion);
     }
 
     /** @hide */
@@ -121,5 +139,6 @@ public class PresTupleInfo implements Parcelable {
         mFeatureTag = source.readString();
         mContactUri = source.readString();
         mTimestamp = source.readString();
+        mVersion = source.readString();
     }
 }

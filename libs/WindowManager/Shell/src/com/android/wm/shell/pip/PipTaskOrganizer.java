@@ -107,6 +107,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     private static final int ONE_SHOT_ALPHA_ANIMATION_TIMEOUT_MS = 1000;
 
+    /**
+     * The fixed start delay in ms when fading out the content overlay from bounds animation.
+     * This is to overcome the flicker caused by configuration change when rotating from landscape
+     * to portrait PiP in button navigation mode.
+     */
+    private static final int CONTENT_OVERLAY_FADE_OUT_DELAY_MS = 500;
+
     // Not a complete set of states but serves what we want right now.
     private enum State {
         UNDEFINED(0),
@@ -176,6 +183,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             final int direction = animator.getTransitionDirection();
             final int animationType = animator.getAnimationType();
             final Rect destinationBounds = animator.getDestinationBounds();
+            if (isInPipDirection(direction) && animator.getContentOverlay() != null) {
+                fadeOutAndRemoveOverlay(animator.getContentOverlay(),
+                        animator::clearContentOverlay, true /* withStartDelay*/);
+            }
             if (mWaitForFixedRotation && animationType == ANIM_TYPE_BOUNDS
                     && direction == TRANSITION_DIRECTION_TO_PIP) {
                 // Notify the display to continue the deferred orientation change.
@@ -199,17 +210,17 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 finishResize(tx, destinationBounds, direction, animationType);
                 sendOnPipTransitionFinished(direction);
             }
-            if (direction == TRANSITION_DIRECTION_TO_PIP) {
-                // TODO (b//169221267): Add jank listener for transactions without buffer updates.
-                //InteractionJankMonitor.getInstance().end(
-                //        InteractionJankMonitor.CUJ_LAUNCHER_APP_CLOSE_TO_PIP);
-            }
         }
 
         @Override
         public void onPipAnimationCancel(TaskInfo taskInfo,
                 PipAnimationController.PipTransitionAnimator animator) {
-            sendOnPipTransitionCancelled(animator.getTransitionDirection());
+            final int direction = animator.getTransitionDirection();
+            if (isInPipDirection(direction) && animator.getContentOverlay() != null) {
+                fadeOutAndRemoveOverlay(animator.getContentOverlay(),
+                        animator::clearContentOverlay, true /* withStartDelay */);
+            }
+            sendOnPipTransitionCancelled(direction);
         }
     };
 
@@ -640,7 +651,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
             // Remove the swipe to home overlay
             if (swipeToHomeOverlay != null) {
-                fadeOutAndRemoveOverlay(swipeToHomeOverlay);
+                fadeOutAndRemoveOverlay(swipeToHomeOverlay,
+                        null /* callback */, false /* withStartDelay */);
             }
         }, tx);
         mInSwipePipToHomeTransition = false;
@@ -721,6 +733,17 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
         if (info.displayId != Display.DEFAULT_DISPLAY && mOnDisplayIdChangeCallback != null) {
             mOnDisplayIdChangeCallback.accept(Display.DEFAULT_DISPLAY);
+        }
+
+        final PipAnimationController.PipTransitionAnimator<?> animator =
+                mPipAnimationController.getCurrentAnimator();
+        if (animator != null) {
+            if (animator.getContentOverlay() != null) {
+                removeContentOverlay(animator.getContentOverlay(), animator::clearContentOverlay);
+            }
+            animator.removeAllUpdateListeners();
+            animator.removeAllListeners();
+            animator.cancel();
         }
     }
 
@@ -1188,7 +1211,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                             snapshotDest);
 
                     // Start animation to fade out the snapshot.
-                    fadeOutAndRemoveOverlay(snapshotSurface);
+                    fadeOutAndRemoveOverlay(snapshotSurface,
+                            null /* callback */, false /* withStartDelay */);
                 });
             } else {
                 applyFinishBoundsResize(wct, direction);
@@ -1279,15 +1303,20 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         animator.setTransitionDirection(direction)
                 .setPipAnimationCallback(mPipAnimationCallback)
                 .setPipTransactionHandler(mPipTransactionHandler)
-                .setDuration(durationMs)
-                .start();
-        if (rotationDelta != Surface.ROTATION_0 && direction == TRANSITION_DIRECTION_TO_PIP) {
+                .setDuration(durationMs);
+        if (isInPipDirection(direction)) {
+            // Similar to auto-enter-pip transition, we use content overlay when there is no
+            // source rect hint to enter PiP use bounds animation.
+            if (sourceHintRect == null) animator.setUseContentOverlay(mContext);
             // The destination bounds are used for the end rect of animation and the final bounds
             // after animation finishes. So after the animation is started, the destination bounds
             // can be updated to new rotation (computeRotatedBounds has changed the DisplayLayout
             // without affecting the animation.
-            animator.setDestinationBounds(mPipBoundsAlgorithm.getEntryDestinationBounds());
+            if (rotationDelta != Surface.ROTATION_0) {
+                animator.setDestinationBounds(mPipBoundsAlgorithm.getEntryDestinationBounds());
+            }
         }
+        animator.start();
         return animator;
     }
 
@@ -1300,6 +1329,14 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             outDestinationBounds.set(mPipBoundsAlgorithm.getEntryDestinationBounds());
             // Transform the destination bounds to current display coordinates.
             rotateBounds(outDestinationBounds, displayBounds, mNextRotation, mCurrentRotation);
+            // When entering PiP (from button navigation mode), adjust the source rect hint by
+            // display cutout if applicable.
+            if (sourceHintRect != null && mTaskInfo.displayCutoutInsets != null) {
+                if (rotationDelta == Surface.ROTATION_270) {
+                    sourceHintRect.offset(mTaskInfo.displayCutoutInsets.left,
+                            mTaskInfo.displayCutoutInsets.top);
+                }
+            }
         } else if (direction == TRANSITION_DIRECTION_LEAVE_PIP) {
             final Rect rotatedDestinationBounds = new Rect(outDestinationBounds);
             rotateBounds(rotatedDestinationBounds, mPipBoundsState.getDisplayBounds(),
@@ -1338,7 +1375,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     /**
      * Fades out and removes an overlay surface.
      */
-    private void fadeOutAndRemoveOverlay(SurfaceControl surface) {
+    private void fadeOutAndRemoveOverlay(SurfaceControl surface, Runnable callback,
+            boolean withStartDelay) {
         if (surface == null) {
             return;
         }
@@ -1346,22 +1384,41 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final ValueAnimator animator = ValueAnimator.ofFloat(1.0f, 0.0f);
         animator.setDuration(mCrossFadeAnimationDuration);
         animator.addUpdateListener(animation -> {
-            final float alpha = (float) animation.getAnimatedValue();
-            final SurfaceControl.Transaction transaction =
-                    mSurfaceControlTransactionFactory.getTransaction();
-            transaction.setAlpha(surface, alpha);
-            transaction.apply();
+            if (mState == State.UNDEFINED) {
+                // Could happen if onTaskVanished happens during the animation since we may have
+                // set a start delay on this animation.
+                Log.d(TAG, "Task vanished, skip fadeOutAndRemoveOverlay");
+                animation.removeAllListeners();
+                animation.removeAllUpdateListeners();
+                animation.cancel();
+            } else {
+                final float alpha = (float) animation.getAnimatedValue();
+                final SurfaceControl.Transaction transaction =
+                        mSurfaceControlTransactionFactory.getTransaction();
+                transaction.setAlpha(surface, alpha);
+                transaction.apply();
+            }
         });
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                final SurfaceControl.Transaction tx =
-                        mSurfaceControlTransactionFactory.getTransaction();
-                tx.remove(surface);
-                tx.apply();
+                removeContentOverlay(surface, callback);
             }
         });
+        animator.setStartDelay(withStartDelay ? CONTENT_OVERLAY_FADE_OUT_DELAY_MS : 0);
         animator.start();
+    }
+
+    private void removeContentOverlay(SurfaceControl surface, Runnable callback) {
+        if (mState == State.UNDEFINED) {
+            // Avoid double removal, which is fatal.
+            return;
+        }
+        final SurfaceControl.Transaction tx =
+                mSurfaceControlTransactionFactory.getTransaction();
+        tx.remove(surface);
+        tx.apply();
+        if (callback != null) callback.run();
     }
 
     /**

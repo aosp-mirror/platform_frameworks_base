@@ -221,8 +221,22 @@ public final class MediaRouter2Manager {
         Objects.requireNonNull(packageName, "packageName must not be null");
 
         List<RoutingSessionInfo> sessions = getRoutingSessions(packageName);
-        return getAvailableRoutesForRoutingSession(sessions.get(sessions.size() - 1));
+        return getAvailableRoutes(sessions.get(sessions.size() - 1));
     }
+
+    /**
+     * Gets routes that can be transferable seamlessly for an application.
+     *
+     * @param packageName the package name of the application
+     */
+    @NonNull
+    public List<MediaRoute2Info> getTransferableRoutes(@NonNull String packageName) {
+        Objects.requireNonNull(packageName, "packageName must not be null");
+
+        List<RoutingSessionInfo> sessions = getRoutingSessions(packageName);
+        return getTransferableRoutes(sessions.get(sessions.size() - 1));
+    }
+
 
     /**
      * Gets available routes for the given routing session.
@@ -232,8 +246,7 @@ public final class MediaRouter2Manager {
      * @param sessionInfo the routing session that would be transferred
      */
     @NonNull
-    public List<MediaRoute2Info> getAvailableRoutesForRoutingSession(
-            @NonNull RoutingSessionInfo sessionInfo) {
+    public List<MediaRoute2Info> getAvailableRoutes(@NonNull RoutingSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
         List<MediaRoute2Info> routes = new ArrayList<>();
@@ -248,6 +261,44 @@ public final class MediaRouter2Manager {
                 if (route.hasAnyFeatures(preferredFeatures)
                         || sessionInfo.getSelectedRoutes().contains(route.getId())
                         || sessionInfo.getTransferableRoutes().contains(route.getId())) {
+                    routes.add(route);
+                }
+            }
+        }
+        return routes;
+    }
+
+    /**
+     * Gets routes that can be transferable seamlessly for the given routing session.
+     * The returned routes can be passed to
+     * {@link #transfer(RoutingSessionInfo, MediaRoute2Info)} for transferring the routing session.
+     * <p>
+     * This includes routes that are {@link RoutingSessionInfo#getTransferableRoutes() transferable}
+     * by provider itself and routes that are different playback type (e.g. local/remote)
+     * from the given routing session.
+     *
+     * @param sessionInfo the routing session that would be transferred
+     */
+    @NonNull
+    public List<MediaRoute2Info> getTransferableRoutes(@NonNull RoutingSessionInfo sessionInfo) {
+        Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
+
+        List<MediaRoute2Info> routes = new ArrayList<>();
+
+        String packageName = sessionInfo.getClientPackageName();
+        List<String> preferredFeatures = mPreferredFeaturesMap.get(packageName);
+        if (preferredFeatures == null) {
+            preferredFeatures = Collections.emptyList();
+        }
+        synchronized (mRoutesLock) {
+            for (MediaRoute2Info route : mRoutes.values()) {
+                if (sessionInfo.getTransferableRoutes().contains(route.getId())) {
+                    routes.add(route);
+                    continue;
+                }
+                // Add Phone -> Cast and Cast -> Phone
+                if (route.hasAnyFeatures(preferredFeatures)
+                        && (sessionInfo.isSystemSession() ^ route.isSystemRoute())) {
                     routes.add(route);
                 }
             }

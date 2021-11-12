@@ -39,4 +39,5 @@ message GlobalLevelHibernationStatesProto {
 message GlobalLevelHibernationStateProto {
   optional string package_name = 1;
   optional bool hibernated = 2;
+  optional int64 saved_byte = 3;
 }

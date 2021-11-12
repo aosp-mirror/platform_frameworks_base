@@ -24,6 +24,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -33,6 +34,9 @@ import android.view.Display;
 import com.android.systemui.doze.dagger.BrightnessSensor;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.doze.dagger.WrappedService;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 
 import java.io.PrintWriter;
@@ -52,14 +56,27 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
             "com.android.systemui.doze.AOD_BRIGHTNESS";
     protected static final String BRIGHTNESS_BUCKET = "brightness_bucket";
 
+    /**
+     * Just before the screen times out from user inactivity, DisplayPowerController dims the screen
+     * brightness to the lower of {@link #mScreenBrightnessDim}, or the current brightness minus
+     * DisplayPowerController#SCREEN_DIM_MINIMUM_REDUCTION_FLOAT.
+     *
+     * This value is 0.04f * 255, which converts SCREEN_DIM_MINIMUM_REDUCTION_FLOAT to the integer
+     * brightness values used by doze.
+     */
+    private static final int SCREEN_DIM_MINIMUM_REDUCTION_INT = 10;
+
     private final Context mContext;
     private final DozeMachine.Service mDozeService;
     private final DozeHost mDozeHost;
     private final Handler mHandler;
     private final SensorManager mSensorManager;
     private final Optional<Sensor> mLightSensorOptional;
+    private final WakefulnessLifecycle mWakefulnessLifecycle;
+    private final DozeParameters mDozeParameters;
     private final int[] mSensorToBrightness;
     private final int[] mSensorToScrimOpacity;
+    private final int mScreenBrightnessDim;
 
     private boolean mRegistered;
     private int mDefaultDozeBrightness;
@@ -75,19 +92,28 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
      */
     private int mDebugBrightnessBucket = -1;
 
+    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+
     @Inject
     public DozeScreenBrightness(Context context, @WrappedService DozeMachine.Service service,
             AsyncSensorManager sensorManager,
             @BrightnessSensor Optional<Sensor> lightSensorOptional, DozeHost host, Handler handler,
-            AlwaysOnDisplayPolicy alwaysOnDisplayPolicy) {
+            AlwaysOnDisplayPolicy alwaysOnDisplayPolicy,
+            WakefulnessLifecycle wakefulnessLifecycle,
+            DozeParameters dozeParameters,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         mContext = context;
         mDozeService = service;
         mSensorManager = sensorManager;
         mLightSensorOptional = lightSensorOptional;
+        mWakefulnessLifecycle = wakefulnessLifecycle;
+        mDozeParameters = dozeParameters;
         mDozeHost = host;
         mHandler = handler;
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
 
         mDefaultDozeBrightness = alwaysOnDisplayPolicy.defaultDozeBrightness;
+        mScreenBrightnessDim = alwaysOnDisplayPolicy.dimBrightness;
         mSensorToBrightness = alwaysOnDisplayPolicy.screenBrightnessArray;
         mSensorToScrimOpacity = alwaysOnDisplayPolicy.dimmingScrimArray;
     }
@@ -135,14 +161,15 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
         }
     }
 
-    private void updateBrightnessAndReady(boolean force) {
+    public void updateBrightnessAndReady(boolean force) {
         if (force || mRegistered || mDebugBrightnessBucket != -1) {
             int sensorValue = mDebugBrightnessBucket == -1
                     ? mLastSensorValue : mDebugBrightnessBucket;
             int brightness = computeBrightness(sensorValue);
             boolean brightnessReady = brightness > 0;
             if (brightnessReady) {
-                mDozeService.setDozeScreenBrightness(clampToUserSetting(brightness));
+                mDozeService.setDozeScreenBrightness(
+                        clampToDimBrightnessForScreenOff(clampToUserSetting(brightness)));
             }
 
             int scrimOpacity = -1;
@@ -178,7 +205,9 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     }
 
     private void resetBrightnessToDefault() {
-        mDozeService.setDozeScreenBrightness(clampToUserSetting(mDefaultDozeBrightness));
+        mDozeService.setDozeScreenBrightness(
+                clampToDimBrightnessForScreenOff(
+                        clampToUserSetting(mDefaultDozeBrightness)));
         mDozeHost.setAodDimmingScrim(0f);
     }
     //TODO: brightnessfloat change usages to float.
@@ -187,6 +216,29 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
                 Settings.System.SCREEN_BRIGHTNESS, Integer.MAX_VALUE,
                 UserHandle.USER_CURRENT);
         return Math.min(brightness, userSetting);
+    }
+
+    /**
+     * Clamp the brightness to the dim brightness value used by PowerManagerService just before the
+     * device times out and goes to sleep, if we are sleeping from a timeout. This ensures that we
+     * don't raise the brightness back to the user setting before or during the screen off
+     * animation.
+     */
+    private int clampToDimBrightnessForScreenOff(int brightness) {
+        if (mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
+                && mWakefulnessLifecycle.getLastSleepReason()
+                == PowerManager.GO_TO_SLEEP_REASON_TIMEOUT) {
+            return Math.max(
+                    PowerManager.BRIGHTNESS_OFF,
+                    // Use the lower of either the dim brightness, or the current brightness reduced
+                    // by the minimum dim amount. This is the same logic used in
+                    // DisplayPowerController#updatePowerState to apply a minimum dim amount.
+                    Math.min(
+                            brightness - SCREEN_DIM_MINIMUM_REDUCTION_INT,
+                            mScreenBrightnessDim));
+        } else {
+            return brightness;
+        }
     }
 
     private void setLightSensorEnabled(boolean enabled) {

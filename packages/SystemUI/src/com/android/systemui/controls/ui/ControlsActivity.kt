@@ -64,16 +64,12 @@ class ControlsActivity @Inject constructor(
         }
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
 
         parent = requireViewById<ViewGroup>(R.id.global_actions_controls)
         parent.alpha = 0f
         uiController.show(parent, { finish() }, this)
-    }
-
-    override fun onResume() {
-        super.onResume()
 
         ControlsAnimations.enterAnimation(parent).start()
     }
@@ -82,8 +78,8 @@ class ControlsActivity @Inject constructor(
         finish()
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        super.onPause()
 
         uiController.hide()
     }

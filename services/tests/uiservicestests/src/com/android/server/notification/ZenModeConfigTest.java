@@ -281,6 +281,34 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertNull(fromXml.pkg);
     }
 
+    @Test
+    public void testRuleXml_getPkg_nullPkg() throws Exception {
+        String tag = "tag";
+
+        ZenModeConfig.ZenRule rule = new ZenModeConfig.ZenRule();
+        rule.enabled = true;
+        rule.configurationActivity = new ComponentName("a", "a");
+
+        TypedXmlSerializer out = Xml.newFastSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        out.setOutput(new BufferedOutputStream(baos), "utf-8");
+        out.startDocument(null, true);
+        out.startTag(null, tag);
+        ZenModeConfig.writeRuleXml(rule, out);
+        out.endTag(null, tag);
+        out.endDocument();
+
+        TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), null);
+        parser.nextTag();
+        ZenModeConfig.ZenRule fromXml = ZenModeConfig.readRuleXml(parser);
+        assertEquals("a", fromXml.getPkg());
+
+        fromXml.condition = new Condition(Uri.EMPTY, "", Condition.STATE_TRUE);
+        assertTrue(fromXml.isAutomaticActive());
+    }
+
     private ZenModeConfig getMutedRingerConfig() {
         ZenModeConfig config = new ZenModeConfig();
         // Allow alarms, media

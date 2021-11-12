@@ -38,6 +38,17 @@ public abstract class AudioManagerInternal {
 
     public abstract void updateRingerModeAffectedStreamsInternal();
 
+    /**
+     * Notify the UID of the currently active {@link android.service.voice.HotwordDetectionService}.
+     *
+     * <p>The caller is expected to take care of any performance implications, e.g. by using a
+     * background thread to call this method.</p>
+     *
+     * @param uid UID of the currently active service or {@link android.os.Process#INVALID_UID} if
+     *            none.
+     */
+    public abstract void setHotwordDetectionServiceUid(int uid);
+
     public abstract void setAccessibilityServiceUids(IntArray uids);
 
     /**

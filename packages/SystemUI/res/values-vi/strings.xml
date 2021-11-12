@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Không thể nhận dạng khuôn mặt. Hãy dùng vân tay."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Hãy dùng vân tay để tiếp tục"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Không thể nhận dạng vân tay. Hãy dùng phương thức khóa màn hình."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Đang tìm kiếm bạn…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Biểu tượng khuôn mặt"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Nút thu phóng khả năng tương thích."</string>
@@ -433,8 +435,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Thao tác này sẽ bỏ chặn quyền truy cập cho mọi ứng dụng và dịch vụ được phép sử dụng máy ảnh của bạn."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Thao tác này sẽ bỏ chặn quyền truy cập cho mọi ứng dụng và dịch vụ được phép sử dụng máy ảnh hoặc micrô của bạn."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Thiết bị"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Vuốt lên để chuyển đổi ứng dụng"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Kéo sang phải để chuyển đổi nhanh giữa các ứng dụng"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Bật/tắt chế độ xem Tổng quan"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Đã sạc đầy"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Đang sạc"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Nhấn lại để mở"</string>
     <string name="tap_again" msgid="1315420114387908655">"Nhấn lại"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Vuốt lên để mở"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Nhấn để mở"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Vuốt lên để thử lại"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Mở khóa để sử dụng NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Thiết bị này thuộc về tổ chức của bạn"</string>
@@ -480,12 +481,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Thêm người dùng"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Người dùng mới"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Xóa phiên khách?"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
-    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tất cả ứng dụng và dữ liệu trong phiên này sẽ bị xóa."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Xóa"</string>
-    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
-    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Chào mừng bạn trở lại!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Bạn có muốn tiếp tục phiên của mình không?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Bắt đầu lại"</string>
@@ -673,7 +670,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Thiết lập để mua hàng nhanh hơn và an toàn hơn bằng điện thoại"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Hiện tất cả"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Mở khóa để thanh toán"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Chưa thiết lập"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Thêm thẻ"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Đang cập nhật"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Mở khóa để sử dụng"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Đã xảy ra sự cố khi tải thẻ của bạn. Vui lòng thử lại sau"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Cài đặt màn hình khóa"</string>
@@ -738,7 +736,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Không phát âm thanh hoặc rung"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Không phát âm thanh hoặc rung và xuất hiện phía dưới trong phần cuộc trò chuyện"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại. Theo mặc định, các cuộc trò chuyện từ <xliff:g id="APP_NAME">%1$s</xliff:g> được phép hiển thị dưới dạng bong bóng."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại. Các cuộc trò chuyện từ <xliff:g id="APP_NAME">%1$s</xliff:g> sẽ hiện ở dạng bong bóng theo mặc định."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Luôn chú ý vào nội dung này bằng phím tắt nổi."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Cho phép hệ thống quyết định xem thông báo này phát âm thanh hay rung"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Trạng thái:&lt;/b&gt; Đã thay đổi thành Mặc định"</string>
@@ -1047,7 +1045,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Chuyển đến cạnh và ẩn"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Chuyển ra xa cạnh và hiển thị"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"bật/tắt"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"Điều khiển nhà"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Điều khiển thiết bị"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Chọn ứng dụng để thêm các tùy chọn điều khiển"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other">Đã thêm <xliff:g id="NUMBER_1">%s</xliff:g> tùy chọn điều khiển.</item>
@@ -1119,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Mở cuộc trò chuyện"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Tiện ích trò chuyện"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Nhấn vào một cuộc trò chuyện để thêm cuộc trò chuyện đó vào Màn hình chính"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Hãy quay lại đây khi bạn nhận được tin nhắn"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Các cuộc trò chuyện gần đây của bạn sẽ xuất hiện ở đây"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Cuộc trò chuyện ưu tiên"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Cuộc trò chuyện gần đây"</string>
     <string name="okay" msgid="6490552955618608554">"Ok"</string>
@@ -1148,8 +1146,11 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"Hơn <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Xem các tin nhắn, cuộc gọi nhỡ và thông tin cập nhật trạng thái gần đây"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Cuộc trò chuyện"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> đã gửi một tin nhắn"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Đã tạm dừng do chế độ Không làm phiền"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> đã gửi một tin nhắn: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> đã gửi một hình ảnh"</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> đã cập nhật trạng thái: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"Đang trực tuyến"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Đã xảy ra vấn đề khi đọc dung lượng pin của bạn"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Nhấn để biết thêm thông tin"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Chưa đặt chuông báo"</string>

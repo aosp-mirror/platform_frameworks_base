@@ -19,7 +19,6 @@ package com.android.server.biometrics.sensors.face.aidl;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.NotificationManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -33,18 +32,16 @@ import android.hardware.face.FaceAuthenticationFrame;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.VibrationEffect;
-import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
+import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
 import com.android.server.biometrics.sensors.LockoutTracker;
-import com.android.server.biometrics.sensors.face.ReEnrollNotificationUtils;
 import com.android.server.biometrics.sensors.face.UsageStats;
 
 import java.util.ArrayList;
@@ -60,9 +57,6 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
     @Nullable private final NotificationManager mNotificationManager;
     @Nullable private ICancellationSignal mCancellationSignal;
 
-    @NonNull private final ContentResolver mContentResolver;
-    private final boolean mCustomHaptics;
-
     private final int[] mBiometricPromptIgnoreList;
     private final int[] mBiometricPromptIgnoreListVendor;
     private final int[] mKeyguardIgnoreList;
@@ -75,11 +69,13 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
             boolean isStrongBiometric, int statsClient, @NonNull UsageStats usageStats,
-            @NonNull LockoutCache lockoutCache, boolean allowBackgroundAuthentication) {
+            @NonNull LockoutCache lockoutCache, boolean allowBackgroundAuthentication,
+            boolean isKeyguardBypassEnabled) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FACE, statsClient, null /* taskStackListener */,
-                lockoutCache, allowBackgroundAuthentication);
+                lockoutCache, allowBackgroundAuthentication, true /* shouldVibrate */,
+                isKeyguardBypassEnabled);
         mUsageStats = usageStats;
         mLockoutCache = lockoutCache;
         mNotificationManager = context.getSystemService(NotificationManager.class);
@@ -93,16 +89,18 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
                 R.array.config_face_acquire_keyguard_ignorelist);
         mKeyguardIgnoreListVendor = resources.getIntArray(
                 R.array.config_face_acquire_vendor_keyguard_ignorelist);
+    }
 
-        mContentResolver = context.getContentResolver();
-        mCustomHaptics = Settings.Global.getInt(mContentResolver,
-                "face_custom_success_error", 0) == 1;
+    @Override
+    public void start(@NonNull Callback callback) {
+        super.start(callback);
+        mState = STATE_STARTED;
     }
 
     @NonNull
     @Override
     protected Callback wrapCallbackForStart(@NonNull Callback callback) {
-        return new CompositeCallback(createALSCallback(), callback);
+        return new CompositeCallback(createALSCallback(true /* startWithClient */), callback);
     }
 
     @Override
@@ -129,7 +127,8 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
         }
     }
 
-    private boolean wasUserDetected() {
+    @Override
+    public boolean wasUserDetected() {
         // Do not provide haptic feedback if the user was not detected, and an error (usually
         // ERROR_TIMEOUT) is received.
         return mLastAcquire != FaceManager.FACE_ACQUIRED_NOT_DETECTED
@@ -138,18 +137,7 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
     }
 
     @Override
-    public void onAuthenticated(BiometricAuthenticator.Identifier identifier,
-            boolean authenticated, ArrayList<Byte> token) {
-        super.onAuthenticated(identifier, authenticated, token);
-
-        mUsageStats.addEvent(new UsageStats.AuthenticationEvent(
-                getStartTimeMs(),
-                System.currentTimeMillis() - getStartTimeMs() /* latency */,
-                authenticated,
-                0 /* error */,
-                0 /* vendorError */,
-                getTargetUserId()));
-
+    protected void handleLifecycleAfterAuth(boolean authenticated) {
         // For face, the authentication lifecycle ends either when
         // 1) Authenticated == true
         // 2) Error occurred
@@ -158,7 +146,22 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
     }
 
     @Override
-    public void onError(int error, int vendorCode) {
+    public void onAuthenticated(BiometricAuthenticator.Identifier identifier,
+            boolean authenticated, ArrayList<Byte> token) {
+        super.onAuthenticated(identifier, authenticated, token);
+
+        mState = STATE_STOPPED;
+        mUsageStats.addEvent(new UsageStats.AuthenticationEvent(
+                getStartTimeMs(),
+                System.currentTimeMillis() - getStartTimeMs() /* latency */,
+                authenticated,
+                0 /* error */,
+                0 /* vendorError */,
+                getTargetUserId()));
+    }
+
+    @Override
+    public void onError(@BiometricConstants.Errors int error, int vendorCode) {
         mUsageStats.addEvent(new UsageStats.AuthenticationEvent(
                 getStartTimeMs(),
                 System.currentTimeMillis() - getStartTimeMs() /* latency */,
@@ -167,25 +170,8 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
                 vendorCode,
                 getTargetUserId()));
 
-        switch (error) {
-            case BiometricConstants.BIOMETRIC_ERROR_TIMEOUT:
-                if (!wasUserDetected() && !isBiometricPrompt()) {
-                    // No vibration if user was not detected on keyguard
-                    break;
-                }
-            case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT:
-            case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT:
-                if (mAuthAttempted) {
-                    // Only vibrate if auth was attempted. If the user was already locked out prior
-                    // to starting authentication, do not vibrate.
-                    vibrateError();
-                }
-                break;
-            case BiometricConstants.BIOMETRIC_ERROR_RE_ENROLL:
-                ReEnrollNotificationUtils.showReEnrollmentNotification(getContext());
-                break;
-            default:
-                break;
+        if (error == BiometricConstants.BIOMETRIC_ERROR_RE_ENROLL) {
+            BiometricNotificationUtils.showReEnrollmentNotification(getContext());
         }
 
         super.onError(error, vendorCode);
@@ -261,25 +247,5 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
-    }
-
-    @Override
-    protected @NonNull VibrationEffect getSuccessVibrationEffect() {
-        if (!mCustomHaptics) {
-            return super.getSuccessVibrationEffect();
-        }
-
-        return getVibration(Settings.Global.getString(mContentResolver,
-                "face_success_type"), super.getSuccessVibrationEffect());
-    }
-
-    @Override
-    protected @NonNull VibrationEffect getErrorVibrationEffect() {
-        if (!mCustomHaptics) {
-            return super.getErrorVibrationEffect();
-        }
-
-        return getVibration(Settings.Global.getString(mContentResolver,
-                "face_error_type"), super.getErrorVibrationEffect());
     }
 }

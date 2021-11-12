@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.TaskInfo;
+import android.content.pm.ActivityInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.InsetsState;
@@ -55,6 +56,9 @@ public final class StartingWindowInfo implements Parcelable {
      */
     public static final int STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN = 3;
 
+    /** @hide **/
+    public static final int STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN = 4;
+
     /**
      * @hide
      */
@@ -62,7 +66,8 @@ public final class StartingWindowInfo implements Parcelable {
             STARTING_WINDOW_TYPE_NONE,
             STARTING_WINDOW_TYPE_SPLASH_SCREEN,
             STARTING_WINDOW_TYPE_SNAPSHOT,
-            STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
+            STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN,
+            STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
     })
     public @interface StartingWindowType {}
 
@@ -72,6 +77,14 @@ public final class StartingWindowInfo implements Parcelable {
      */
     @NonNull
     public ActivityManager.RunningTaskInfo taskInfo;
+
+    /**
+     * The {@link ActivityInfo} of the target activity which to create the starting window.
+     * It can be null if the info is the same as the top in task info.
+     * @hide
+     */
+    @Nullable
+    public ActivityInfo targetActivityInfo;
 
     /**
      * InsetsState of TopFullscreenOpaqueWindow
@@ -103,7 +116,8 @@ public final class StartingWindowInfo implements Parcelable {
             TYPE_PARAMETER_PROCESS_RUNNING,
             TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT,
             TYPE_PARAMETER_ACTIVITY_CREATED,
-            TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN
+            TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN,
+            TYPE_PARAMETER_LEGACY_SPLASH_SCREEN
     })
     public @interface StartingTypeParams {}
 
@@ -122,6 +136,11 @@ public final class StartingWindowInfo implements Parcelable {
     public static final int TYPE_PARAMETER_ACTIVITY_CREATED = 0x00000010;
     /** @hide */
     public static final int TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN = 0x00000020;
+    /**
+     * Application is allowed to use the legacy splash screen
+     * @hide
+     */
+    public static final int TYPE_PARAMETER_LEGACY_SPLASH_SCREEN = 0x80000000;
 
     /**
      * The parameters which effect the starting window type.
@@ -164,6 +183,7 @@ public final class StartingWindowInfo implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeTypedObject(taskInfo, flags);
+        dest.writeTypedObject(targetActivityInfo, flags);
         dest.writeInt(startingWindowTypeParameter);
         dest.writeTypedObject(topOpaqueWindowInsetsState, flags);
         dest.writeTypedObject(topOpaqueWindowLayoutParams, flags);
@@ -175,6 +195,7 @@ public final class StartingWindowInfo implements Parcelable {
 
     void readFromParcel(@NonNull Parcel source) {
         taskInfo = source.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
+        targetActivityInfo = source.readTypedObject(ActivityInfo.CREATOR);
         startingWindowTypeParameter = source.readInt();
         topOpaqueWindowInsetsState = source.readTypedObject(InsetsState.CREATOR);
         topOpaqueWindowLayoutParams = source.readTypedObject(
@@ -188,6 +209,7 @@ public final class StartingWindowInfo implements Parcelable {
     @Override
     public String toString() {
         return "StartingWindowInfo{taskId=" + taskInfo.taskId
+                + " targetActivityInfo=" + targetActivityInfo
                 + " displayId=" + taskInfo.displayId
                 + " topActivityType=" + taskInfo.topActivityType
                 + " preferredStartingWindowType="

@@ -88,8 +88,8 @@
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Vnosna naprava"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internetni dostop"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Deljenje stikov"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Uporabi za dajanje stikov v skupno rabo"</string>
-    <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Skupna raba internetne povezave"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Uporabi za deljenje stikov"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Deljenje internetne povezave"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Sporočila SMS"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Dostop do kartice SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Zvok visoke kakovosti: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
@@ -104,7 +104,7 @@
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"Povezava s strežnikom za prenos datotek ni vzpostavljena"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"Povezava z vnosno napravo je vzpostavljena"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Povezava z napravo za internetni dostop"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"Skupna raba lok. internetne povezave z napravo"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"Deljenje lok. internetne povezave z napravo"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Uporabi za dostop do interneta"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Uporabi za zemljevid"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"Uporablja se za dostop do kartice SIM"</string>
@@ -570,6 +570,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Odstranitev gosta"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Ponastavi gosta"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gost"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Želite ponastaviti gosta?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Ponastavi"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Ponastavljanje gosta …"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fotografiranje"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Izberi sliko"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Izbira fotografije"</string>

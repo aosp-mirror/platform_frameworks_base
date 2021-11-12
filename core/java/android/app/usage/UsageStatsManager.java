@@ -1287,7 +1287,7 @@ public final class UsageStatsManager {
             android.Manifest.permission.PACKAGE_USAGE_STATS})
     public long getLastTimeAnyComponentUsed(@NonNull String packageName) {
         try {
-            return mService.getLastTimeAnyComponentUsed(packageName);
+            return mService.getLastTimeAnyComponentUsed(packageName, mContext.getOpPackageName());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

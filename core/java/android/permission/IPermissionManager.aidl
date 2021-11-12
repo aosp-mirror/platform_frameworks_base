@@ -16,7 +16,7 @@
 
 package android.permission;
 
-import android.content.AttributionSource;
+import android.content.AttributionSourceState;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
@@ -87,7 +87,7 @@ interface IPermissionManager {
 
     boolean isAutoRevokeExempted(String packageName, int userId);
 
-    void registerAttributionSource(in AttributionSource source);
+    void registerAttributionSource(in AttributionSourceState source);
 
-    boolean isRegisteredAttributionSource(in AttributionSource source);
+    boolean isRegisteredAttributionSource(in AttributionSourceState source);
 }

@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"얼굴을 인식할 수 없습니다. 대신 지문을 사용하세요."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"계속하려면 지문을 사용하세요."</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"지문을 인식할 수 없습니다. 화면 잠금을 대신 사용하세요."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"찾는 중..."</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"얼굴 아이콘"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"호환성 확대/축소 버튼입니다."</string>
@@ -353,7 +355,7 @@
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"위치 사용 중지"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"카메라 액세스"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"마이크 액세스"</string>
-    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"허용됨"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"사용 가능"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"차단됨"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"미디어 기기"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
@@ -433,8 +435,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"카메라를 사용할 수 있는 모든 앱 및 서비스에 대해 액세스가 차단 해제됩니다."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"카메라 또는 마이크를 사용할 수 있는 모든 앱 및 서비스에 대해 액세스가 차단 해제됩니다."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"기기"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"위로 스와이프하여 앱 전환"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"앱을 빠르게 전환하려면 오른쪽으로 드래그"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"최근 사용 버튼 전환"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"충전됨"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"충전 중"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"다시 탭하여 열기"</string>
     <string name="tap_again" msgid="1315420114387908655">"다시 탭하세요."</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"위로 스와이프하여 열기"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"열려면 누르세요"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"위로 스와이프하여 다시 시도해 주세요"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"잠금 해제하여 NFC 사용"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"내 조직에 속한 기기입니다."</string>
@@ -480,10 +481,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"사용자 추가"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"신규 사용자"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"게스트를 삭제하시겠습니까?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"게스트를 초기화하시겠습니까?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"이 세션에 있는 모든 앱과 데이터가 삭제됩니다."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"삭제"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"초기화"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"게스트 세션 진행"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"세션을 계속 진행하시겠습니까?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"다시 시작"</string>
@@ -671,7 +670,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"설정하여 휴대전화로 더욱 빠르고 안전하게 구매하세요."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"모두 표시"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"잠금 해제하여 결제"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"설정되지 않음"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"카드 추가"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"업데이트 중"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"잠금 해제하여 사용"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"카드를 가져오는 중에 문제가 발생했습니다. 나중에 다시 시도해 보세요."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"잠금 화면 설정"</string>
@@ -1035,9 +1035,9 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"전체 화면 확대"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"화면 일부 확대"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"전환"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"접근성 동작이 접근성 버튼으로 대체되었습니다\n\n"<annotation id="link">"설정 보기"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"접근성 동작이 접근성 버튼으로 대체되었습니다.\n\n"<annotation id="link">"설정 보기"</annotation></string>
     <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"접근성 동작을 버튼으로 전환할 수 있습니다.\n\n"<annotation id="link">"설정"</annotation></string>
-    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"버튼을 가장자리로 옮겨서 일시적으로 숨기세요"</string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"버튼을 가장자리로 옮겨서 일시적으로 숨기세요."</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"왼쪽 상단으로 이동"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"오른쪽 상단으로 이동"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"왼쪽 하단으로 이동"</string>
@@ -1045,7 +1045,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"가장자리로 옮겨서 숨기기"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"가장자리 바깥으로 옮겨서 표시"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"전환"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"홈 컨트롤"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"기기 컨트롤"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"컨트롤을 추가할 앱을 선택하세요"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other">제어 기능 <xliff:g id="NUMBER_1">%s</xliff:g>개가 추가되었습니다.</item>
@@ -1117,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"대화 열기"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"대화 위젯"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"대화를 탭하여 홈 화면에 추가하세요."</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"메시지를 받으면 여기서 다시 확인해 주세요."</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"최근 대화가 여기에 표시됩니다."</string>
     <string name="priority_conversations" msgid="3967482288896653039">"우선순위 대화"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"최근 대화"</string>
     <string name="okay" msgid="6490552955618608554">"확인"</string>
@@ -1146,8 +1146,11 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"최근 메시지, 부재중 전화, 상태 업데이트 보기"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"대화"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g>님이 메시지를 보냈습니다."</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"방해 금지 모드로 인해 일시중지됨"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g>님이 메시지를 보냈습니다: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g>님이 이미지를 보냈습니다."</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g>님의 상태가 업데이트되었습니다: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"사용 가능"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"배터리 수준을 읽는 중에 문제가 발생함"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"탭하여 자세한 정보를 확인하세요."</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"설정된 알람 없음"</string>

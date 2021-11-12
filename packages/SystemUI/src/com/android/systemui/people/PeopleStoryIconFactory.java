@@ -211,7 +211,8 @@ class PeopleStoryIconFactory implements AutoCloseable {
 
         @Override
         public void setColorFilter(ColorFilter colorFilter) {
-            // unimplemented
+            if (mAvatar != null) mAvatar.setColorFilter(colorFilter);
+            if (mBadgeIcon != null) mBadgeIcon.setColorFilter(colorFilter);
         }
 
         @Override

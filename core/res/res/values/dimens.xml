@@ -886,7 +886,7 @@
     <dimen name="seekbar_thumb_exclusion_max_size">48dp</dimen>
 
     <!-- chooser/resolver (sharesheet) spacing -->
-    <dimen name="chooser_corner_radius">8dp</dimen>
+    <dimen name="chooser_corner_radius">16dp</dimen>
     <dimen name="chooser_row_text_option_translate">25dp</dimen>
     <dimen name="chooser_view_spacing">18dp</dimen>
     <dimen name="chooser_edge_margin_thin">16dp</dimen>

@@ -74,6 +74,20 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
     boolean setState(int state, boolean force);
 
     /**
+     * Provides a hint that the status bar has started to transition to another
+     * {@link StatusBarState}. This suggests that a matching call to setState() with the same value
+     * will happen in the near future, although that may not happen if the animation is canceled,
+     * etc.
+     */
+    void setUpcomingState(int state);
+
+    /**
+     * If the status bar is in the process of transitioning to a new state, returns that state.
+     * Otherwise, returns the current state.
+     */
+    int getCurrentOrUpcomingState();
+
+    /**
      * Update the dozing state from {@link StatusBar}'s perspective
      * @param isDozing well, are we dozing?
      * @return {@code true} if the state changed, else {@code false}

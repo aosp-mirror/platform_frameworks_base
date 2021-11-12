@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.hardware.biometrics.BiometricSourceType;
 import android.icu.text.NumberFormat;
 
 import com.android.settingslib.Utils;
@@ -94,7 +93,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         @Override
         public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
             if (mKeyguardShowing && !mIsCharging && charging) {
-                mView.animateCharge(mIsDozing);
+                mView.animateCharge(mStatusBarStateController::isDozing);
             }
             mIsCharging = charging;
         }
@@ -125,36 +124,28 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
         @Override
-        public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType,
-                boolean isStrongBiometric) {
-            // Strong auth will force the bouncer regardless of a successful face auth
-            if (biometricSourceType == BiometricSourceType.FACE
-                    && mBypassController.canBypass()
-                    && !mKeyguardUpdateMonitor.userNeedsStrongAuth()) {
-                mView.animateDisappear();
-            }
-        }
-
-        @Override
         public void onKeyguardVisibilityChanged(boolean showing) {
             mKeyguardShowing = showing;
             if (!mKeyguardShowing) {
-                // reset state (ie: after animateDisappear)
+                // reset state (ie: after weight animations)
                 reset();
             }
         }
     };
 
     @Override
+    protected void onInit() {
+        mIsDozing = mStatusBarStateController.isDozing();
+    }
+
+    @Override
     protected void onViewAttached() {
         updateLocale();
         mBroadcastDispatcher.registerReceiver(mLocaleBroadcastReceiver,
                 new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
-        mIsDozing = mStatusBarStateController.isDozing();
         mDozeAmount = mStatusBarStateController.getDozeAmount();
         mBatteryController.addCallback(mBatteryCallback);
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
-        mKeyguardShowing = true;
 
         mStatusBarStateController.removeCallback(mStatusBarStatePersistentListener);
         mStatusBarStateController.addCallback(mStatusBarStatePersistentListener);
@@ -210,6 +201,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
             } else {
                 mView.setLineSpacingScale(mDefaultLineSpacing);
             }
+            mView.refreshFormat();
         }
     }
 

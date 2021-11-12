@@ -7,6 +7,7 @@ import android.app.ActivityManager
 import android.app.ActivityTaskManager
 import android.app.AppGlobals
 import android.app.PendingIntent
+import android.app.TaskInfo
 import android.content.Context
 import android.graphics.Matrix
 import android.graphics.PorterDuff
@@ -16,7 +17,6 @@ import android.graphics.RectF
 import android.graphics.drawable.GradientDrawable
 import android.os.Looper
 import android.os.RemoteException
-import android.os.UserHandle
 import android.util.Log
 import android.util.MathUtils
 import android.view.IRemoteAnimationFinishedCallback
@@ -31,20 +31,18 @@ import android.view.animation.AnimationUtils
 import android.view.animation.PathInterpolator
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
-import com.android.wm.shell.startingsurface.SplashscreenContentDrawer
-import com.android.wm.shell.startingsurface.SplashscreenContentDrawer.SplashScreenWindowAttrs
 import kotlin.math.roundToInt
+
+private const val TAG = "ActivityLaunchAnimator"
 
 /**
  * A class that allows activities to be started in a seamless way from a view that is transforming
  * nicely into the starting window.
  */
 class ActivityLaunchAnimator(
-    private val keyguardHandler: KeyguardHandler,
+    private val callback: Callback,
     context: Context
 ) {
-    private val TAG = this::class.java.simpleName
-
     companion object {
         const val ANIMATION_DURATION = 500L
         private const val ANIMATION_DURATION_FADE_OUT_CONTENT = 150L
@@ -120,7 +118,7 @@ class ActivityLaunchAnimator(
 
         Log.d(TAG, "Starting intent with a launch animation")
         val runner = Runner(controller)
-        val isOnKeyguard = keyguardHandler.isOnKeyguard()
+        val isOnKeyguard = callback.isOnKeyguard()
 
         // Pass the RemoteAnimationAdapter to the intent starter only if we are not on the keyguard.
         val animationAdapter = if (!isOnKeyguard) {
@@ -159,12 +157,11 @@ class ActivityLaunchAnimator(
         // If we expect an animation, post a timeout to cancel it in case the remote animation is
         // never started.
         if (willAnimate) {
-            keyguardHandler.disableKeyguardBlurs()
             runner.postTimeout()
 
             // Hide the keyguard using the launch animation instead of the default unlock animation.
             if (isOnKeyguard) {
-                keyguardHandler.hideKeyguardWithAnimation(runner)
+                callback.hideKeyguardWithAnimation(runner)
             }
         }
     }
@@ -213,15 +210,18 @@ class ActivityLaunchAnimator(
         fun startPendingIntent(animationAdapter: RemoteAnimationAdapter?): Int
     }
 
-    interface KeyguardHandler {
+    interface Callback {
         /** Whether we are currently on the keyguard or not. */
         fun isOnKeyguard(): Boolean
 
         /** Hide the keyguard and animate using [runner]. */
         fun hideKeyguardWithAnimation(runner: IRemoteAnimationRunner)
 
-        /** Disable window blur so they don't overlap with the window launch animation **/
-        fun disableKeyguardBlurs()
+        /** Enable/disable window blur so they don't overlap with the window launch animation **/
+        fun setBlursDisabledForAppLaunch(disabled: Boolean)
+
+        /* Get the background color of [task]. */
+        fun getBackgroundColor(task: TaskInfo): Int
     }
 
     /**
@@ -234,11 +234,21 @@ class ActivityLaunchAnimator(
             /**
              * Return a [Controller] that will animate and expand [view] into the opening window.
              *
-             * Important: The view must be attached to the window when calling this function and
-             * during the animation.
+             * Important: The view must be attached to a [ViewGroup] when calling this function and
+             * during the animation. For safety, this method will return null when it is not.
              */
             @JvmStatic
-            fun fromView(view: View, cujType: Int? = null): Controller {
+            fun fromView(view: View, cujType: Int? = null): Controller? {
+                if (view.parent !is ViewGroup) {
+                    // TODO(b/192194319): Throw instead of just logging.
+                    Log.wtf(
+                        TAG,
+                        "Skipping animation as view $view is not attached to a ViewGroup",
+                        Exception()
+                    )
+                    return null
+                }
+
                 return GhostedViewLaunchAnimatorController(view, cujType)
             }
         }
@@ -475,7 +485,7 @@ class ActivityLaunchAnimator(
             // which is usually the same color of the app background. We first fade in this layer
             // to hide the expanding view, then we fade it out with SRC mode to draw a hole in the
             // launch container and reveal the opening window.
-            val windowBackgroundColor = extractSplashScreenBackgroundColor(window)
+            val windowBackgroundColor = callback.getBackgroundColor(window.taskInfo)
             val windowBackgroundLayer = GradientDrawable().apply {
                 setColor(windowBackgroundColor)
                 alpha = 0
@@ -491,6 +501,7 @@ class ActivityLaunchAnimator(
             animator.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
                     Log.d(TAG, "Animation started")
+                    callback.setBlursDisabledForAppLaunch(true)
                     controller.onLaunchAnimationStart(isExpandingFullyAbove)
 
                     // Add the drawable to the launch container overlay. Overlays always draw
@@ -501,6 +512,7 @@ class ActivityLaunchAnimator(
 
                 override fun onAnimationEnd(animation: Animator?) {
                     Log.d(TAG, "Animation ended")
+                    callback.setBlursDisabledForAppLaunch(false)
                     iCallback?.invoke()
                     controller.onLaunchAnimationEnd(isExpandingFullyAbove)
                     launchContainerOverlay.remove(windowBackgroundLayer)
@@ -550,36 +562,6 @@ class ActivityLaunchAnimator(
             }
 
             animator.start()
-        }
-
-        /** Extract the background color of the app splash screen. */
-        private fun extractSplashScreenBackgroundColor(window: RemoteAnimationTarget): Int {
-            val taskInfo = window.taskInfo
-            val windowPackage = taskInfo.topActivity.packageName
-            val userId = taskInfo.userId
-            val windowContext = context.createPackageContextAsUser(
-                    windowPackage, Context.CONTEXT_RESTRICTED, UserHandle.of(userId))
-            val activityInfo = taskInfo.topActivityInfo
-            val splashScreenThemeName = packageManager.getSplashScreenTheme(windowPackage, userId)
-            val splashScreenThemeId = if (splashScreenThemeName != null) {
-                windowContext.resources.getIdentifier(splashScreenThemeName, null, null)
-            } else {
-                0
-            }
-
-            val themeResId = when {
-                splashScreenThemeId != 0 -> splashScreenThemeId
-                activityInfo.themeResource != 0 -> activityInfo.themeResource
-                else -> com.android.internal.R.style.Theme_DeviceDefault_DayNight
-            }
-
-            if (themeResId != windowContext.themeResId) {
-                windowContext.setTheme(themeResId)
-            }
-
-            val windowAttrs = SplashScreenWindowAttrs()
-            SplashscreenContentDrawer.getWindowAttrs(windowContext, windowAttrs)
-            return SplashscreenContentDrawer.peekWindowBGColor(windowContext, windowAttrs)
         }
 
         private fun applyStateToWindow(window: RemoteAnimationTarget, state: State) {

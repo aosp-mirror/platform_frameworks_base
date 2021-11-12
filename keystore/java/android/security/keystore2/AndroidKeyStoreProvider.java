@@ -151,7 +151,7 @@ public class AndroidKeyStoreProvider extends Provider {
      * Gets the {@link KeyStore} operation handle corresponding to the provided JCA crypto
      * primitive.
      *
-     * <p>The following primitives are supported: {@link Cipher} and {@link Mac}.
+     * <p>The following primitives are supported: {@link Cipher}, {@link Signature} and {@link Mac}.
      *
      * @return KeyStore operation handle or {@code 0} if the provided primitive's KeyStore operation
      *         is not in progress.

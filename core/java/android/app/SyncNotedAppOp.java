@@ -21,13 +21,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.Parcelable;
-import android.os.Process;
 
 import com.android.internal.annotations.Immutable;
 import com.android.internal.util.DataClass;
 
 /**
  * Description of an app-op that was noted for the current process.
+ *
+ * Note: package name is currently unused in the system.
  *
  * <p>This is either delivered after a
  * {@link AppOpsManager.OnOpNotedCallback#onNoted(SyncNotedAppOp) two way binder call} or

@@ -34,6 +34,7 @@ import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEME
 import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+import static android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -55,6 +56,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -444,7 +446,7 @@ public class WindowManagerService extends IWindowManager.Stub
             "persist.wm.enable_remote_keyguard_animation";
 
     private static final int sEnableRemoteKeyguardAnimation =
-            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 1);
+            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 0);
 
     /**
      * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
@@ -482,10 +484,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private final DisplayAreaPolicy.Provider mDisplayAreaPolicyProvider;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
-    // TODO: eventually unify all keyguard state in a common place instead of having it spread over
-    // AM's KeyguardController and the policy's KeyguardServiceDelegate.
-    boolean mKeyguardGoingAway;
-    boolean mKeyguardOrAodShowingOnDefaultDisplay;
+
     // VR Vr2d Display Id.
     int mVr2dDisplayId = INVALID_DISPLAY;
     boolean mVrModeEnabled = false;
@@ -2545,12 +2544,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 // We will leave the critical section before returning the leash to the client,
                 // so we need to copy the leash to prevent others release the one that we are
                 // about to return.
-                // TODO: We will have an extra copy if the client is not local.
-                //       For now, we rely on GC to release it.
-                //       Maybe we can modify InsetsSourceControl.writeToParcel so it can release
-                //       the extra leash as soon as possible.
-                outControls[i] = controls[i] != null
-                        ? new InsetsSourceControl(controls[i]) : null;
+                if (controls[i] != null) {
+                    // This source control is an extra copy if the client is not local. By setting
+                    // PARCELABLE_WRITE_RETURN_VALUE, the leash will be released at the end of
+                    // SurfaceControl.writeToParcel.
+                    outControls[i] = new InsetsSourceControl(controls[i]);
+                    outControls[i].setParcelableFlags(PARCELABLE_WRITE_RETURN_VALUE);
+                }
             }
         }
     }
@@ -2817,6 +2817,31 @@ public class WindowManagerService extends IWindowManager.Stub
 
     }
 
+    void removeWindowToken(IBinder binder, boolean removeWindows, boolean animateExit,
+            int displayId) {
+        synchronized (mGlobalLock) {
+            final DisplayContent dc = mRoot.getDisplayContent(displayId);
+
+            if (dc == null) {
+                ProtoLog.w(WM_ERROR, "removeWindowToken: Attempted to remove token: %s"
+                        + " for non-exiting displayId=%d", binder, displayId);
+                return;
+            }
+            final WindowToken token = dc.removeWindowToken(binder, animateExit);
+            if (token == null) {
+                ProtoLog.w(WM_ERROR,
+                        "removeWindowToken: Attempted to remove non-existing token: %s",
+                        binder);
+                return;
+            }
+
+            if (removeWindows) {
+                token.removeAllWindowsIfPossible();
+            }
+            dc.getInputMonitor().updateInputWindowsLw(true /* force */);
+        }
+    }
+
     @Override
     public void removeWindowToken(IBinder binder, int displayId) {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "removeWindowToken()")) {
@@ -2824,23 +2849,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         final long origId = Binder.clearCallingIdentity();
         try {
-            synchronized (mGlobalLock) {
-                final DisplayContent dc = mRoot.getDisplayContent(displayId);
-
-                if (dc == null) {
-                    ProtoLog.w(WM_ERROR, "removeWindowToken: Attempted to remove token: %s"
-                            + " for non-exiting displayId=%d", binder, displayId);
-                    return;
-                }
-                final WindowToken token = dc.removeWindowToken(binder);
-                if (token == null) {
-                    ProtoLog.w(WM_ERROR,
-                            "removeWindowToken: Attempted to remove non-existing token: %s",
-                            binder);
-                    return;
-                }
-                dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
-            }
+            removeWindowToken(binder, false /* removeWindows */, true /* animateExit */, displayId);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
@@ -3070,17 +3079,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mAtmInternal.notifyKeyguardFlagsChanged(callback, displayId);
     }
 
-    public void setKeyguardGoingAway(boolean keyguardGoingAway) {
-        synchronized (mGlobalLock) {
-            mKeyguardGoingAway = keyguardGoingAway;
-        }
-    }
-
-    public void setKeyguardOrAodShowingOnDefaultDisplay(boolean showing) {
-        synchronized (mGlobalLock) {
-            mKeyguardOrAodShowingOnDefaultDisplay = showing;
-        }
-    }
 
     // -------------------------------------------------------------
     // Misc IWindowSession methods
@@ -7548,28 +7546,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void removeWindowToken(IBinder binder, boolean removeWindows, int displayId) {
-            synchronized (mGlobalLock) {
-                if (removeWindows) {
-                    final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                    if (dc == null) {
-                        ProtoLog.w(WM_ERROR, "removeWindowToken: Attempted to remove token: %s"
-                                + " for non-exiting displayId=%d", binder, displayId);
-                        return;
-                    }
-
-                    final WindowToken token = dc.removeWindowToken(binder);
-                    if (token == null) {
-                        ProtoLog.w(WM_ERROR,
-                                "removeWindowToken: Attempted to remove non-existing token: %s",
-                                binder);
-                        return;
-                    }
-
-                    token.removeAllWindowsIfPossible();
-                }
-                WindowManagerService.this.removeWindowToken(binder, displayId);
-            }
+        public void removeWindowToken(IBinder binder, boolean removeWindows, boolean animateExit,
+                int displayId) {
+            WindowManagerService.this.removeWindowToken(binder, removeWindows, animateExit,
+                    displayId);
         }
 
         @Override
@@ -8236,8 +8216,10 @@ public class WindowManagerService extends IWindowManager.Stub
         h.token = channelToken;
         h.name = name;
 
+        flags = DisplayPolicy.sanitizeFlagSlippery(flags, privateFlags, name);
+
         final int sanitizedFlags = flags & (LayoutParams.FLAG_NOT_TOUCHABLE
-                | LayoutParams.FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE);
+                | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE);
         h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | sanitizedFlags;
         h.layoutParamsType = type;
         h.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;

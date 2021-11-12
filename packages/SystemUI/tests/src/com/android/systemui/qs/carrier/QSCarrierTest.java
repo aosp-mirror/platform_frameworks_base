@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.carrier;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -23,6 +24,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.FeatureFlagUtils;
 import android.view.LayoutInflater;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
@@ -62,27 +64,66 @@ public class QSCarrierTest extends SysuiTestCase {
 
     @Test
     public void testUpdateState_first() {
-        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
 
-        assertTrue(mQSCarrier.updateState(c));
+        assertTrue(mQSCarrier.updateState(c, false));
     }
 
     @Test
     public void testUpdateState_same() {
-        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
 
-        assertTrue(mQSCarrier.updateState(c));
-        assertFalse(mQSCarrier.updateState(c));
+        assertTrue(mQSCarrier.updateState(c, false));
+        assertFalse(mQSCarrier.updateState(c, false));
     }
 
     @Test
     public void testUpdateState_changed() {
-        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
 
-        assertTrue(mQSCarrier.updateState(c));
+        assertTrue(mQSCarrier.updateState(c, false));
 
         CellSignalState other = c.changeVisibility(false);
 
-        assertTrue(mQSCarrier.updateState(other));
+        assertTrue(mQSCarrier.updateState(other, false));
+    }
+
+    @Test
+    public void testUpdateState_singleCarrier_first() {
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
+
+        assertTrue(mQSCarrier.updateState(c, true));
+    }
+
+    @Test
+    public void testUpdateState_singleCarrier_noShowIcon() {
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
+
+        mQSCarrier.updateState(c, true);
+
+        assertEquals(View.GONE, mQSCarrier.getRSSIView().getVisibility());
+    }
+
+    @Test
+    public void testUpdateState_multiCarrier_showIcon() {
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
+
+        mQSCarrier.updateState(c, false);
+
+        assertEquals(View.VISIBLE, mQSCarrier.getRSSIView().getVisibility());
+    }
+
+    @Test
+    public void testUpdateState_changeSingleMultiSingle() {
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
+
+        mQSCarrier.updateState(c, true);
+        assertEquals(View.GONE, mQSCarrier.getRSSIView().getVisibility());
+
+        mQSCarrier.updateState(c, false);
+        assertEquals(View.VISIBLE, mQSCarrier.getRSSIView().getVisibility());
+
+        mQSCarrier.updateState(c, true);
+        assertEquals(View.GONE, mQSCarrier.getRSSIView().getVisibility());
     }
 }

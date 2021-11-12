@@ -144,6 +144,10 @@ public class TaskOrganizer extends WindowOrganizer {
     @BinderThread
     public void onBackPressedOnTaskRoot(@NonNull ActivityManager.RunningTaskInfo taskInfo) {}
 
+    /** @hide */
+    @BinderThread
+    public void onImeDrawnOnTask(int taskId) {}
+
     /**
      * Creates a persistent root task in WM for a particular windowing-mode.
      * @param displayId The display to create the root task on.
@@ -223,6 +227,19 @@ public class TaskOrganizer extends WindowOrganizer {
     }
 
     /**
+     * Restarts the top activity in the given task by killing its process if it is visible.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    public void restartTaskTopActivityProcessIfVisible(@NonNull WindowContainerToken task) {
+        try {
+            mTaskOrganizerController.restartTaskTopActivityProcessIfVisible(task);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets the executor to run callbacks on.
      * @hide
      */
@@ -273,6 +290,11 @@ public class TaskOrganizer extends WindowOrganizer {
         @Override
         public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo info) {
             mExecutor.execute(() -> TaskOrganizer.this.onBackPressedOnTaskRoot(info));
+        }
+
+        @Override
+        public void onImeDrawnOnTask(int taskId) {
+            mExecutor.execute(() -> TaskOrganizer.this.onImeDrawnOnTask(taskId));
         }
     };
 
