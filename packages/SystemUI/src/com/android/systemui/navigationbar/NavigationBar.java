@@ -97,6 +97,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowInsets;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 import android.view.WindowManager;
@@ -901,7 +902,17 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         if (displayId != mDisplayId) {
             return;
         }
-        boolean imeShown = (vis & InputMethodService.IME_VISIBLE) != 0;
+        boolean imeVisibleOnShade = mStatusBarOptionalLazy.get().map(statusBar -> {
+            View shadeWindowView = statusBar.getNotificationShadeWindowView();
+            return shadeWindowView.isAttachedToWindow()
+                    && shadeWindowView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
+        }).orElse(false);
+        boolean isKeyguardShowing = mStatusBarOptionalLazy.get().map(
+                StatusBar::isKeyguardShowing).orElse(false);
+        boolean imeShown = imeVisibleOnShade
+                || (!isKeyguardShowing && (vis & InputMethodService.IME_VISIBLE) != 0);
+        showImeSwitcher = imeShown && showImeSwitcher;
+
         int hints = Utilities.calculateBackDispositionHints(mNavigationIconHints, backDisposition,
                 imeShown, showImeSwitcher);
         if (hints == mNavigationIconHints) return;
