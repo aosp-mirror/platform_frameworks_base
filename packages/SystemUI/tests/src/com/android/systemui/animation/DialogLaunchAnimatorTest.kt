@@ -86,7 +86,14 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         assertFalse(dialog.isShowing)
 
         assertFalse(dialog.onStopCalled)
-        runOnMainThreadAndWaitForIdleSync { dialog.dismiss() }
+        runOnMainThreadAndWaitForIdleSync {
+            // TODO(b/204561691): Remove this call to disableAllCurrentDialogsExitAnimations() and
+            // make sure that the test still pass on git_master/cf_x86_64_phone-userdebug in
+            // Forrest.
+            dialogLaunchAnimator.disableAllCurrentDialogsExitAnimations()
+
+            dialog.dismiss()
+        }
         assertFalse(hostDialog.isShowing)
         assertFalse(dialog.isShowing)
         assertTrue(hostDialog.wasDismissed)
