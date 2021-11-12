@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.user
 
+import android.app.Dialog
 import android.content.Intent
 import android.provider.Settings
 import android.testing.AndroidTestingRunner
@@ -27,7 +28,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PseudoGridView
 import com.android.systemui.qs.tiles.UserDetailView
-import com.android.systemui.statusbar.policy.UserSwitcherController
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
@@ -39,15 +40,13 @@ import org.mockito.ArgumentMatcher
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.any
+import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.argThat
 import org.mockito.Mockito.inOrder
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import java.util.function.Consumer
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -71,6 +70,8 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     private lateinit var gridView: PseudoGridView
     @Mock
     private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock
+    private lateinit var hostDialog: Dialog
     @Captor
     private lateinit var clickCaptor: ArgumentCaptor<View.OnClickListener>
 
@@ -85,6 +86,8 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
         `when`(dialog.grid).thenReturn(gridView)
 
         `when`(launchView.context).thenReturn(mContext)
+        `when`(dialogLaunchAnimator.showFromView(any(), any(), anyBoolean()))
+                .thenReturn(hostDialog)
 
         controller = UserSwitchDialogController(
                 { userDetailViewAdapter },
@@ -188,15 +191,15 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun callbackFromDetailView_dismissesDialog() {
-        val captor = argumentCaptor<Consumer<UserSwitcherController.UserRecord>>()
+    fun callbackFromDialogShower_dismissesDialog() {
+        val captor = argumentCaptor<UserSwitchDialogController.DialogShower>()
 
         controller.showDialog(launchView)
-        verify(userDetailViewAdapter).injectCallback(capture(captor))
+        verify(userDetailViewAdapter).injectDialogShower(capture(captor))
 
-        captor.value.accept(mock(UserSwitcherController.UserRecord::class.java))
+        captor.value.dismiss()
 
-        verify(dialog).dismiss()
+        verify(hostDialog).dismiss()
     }
 
     private class IntentMatcher(private val action: String) : ArgumentMatcher<Intent> {

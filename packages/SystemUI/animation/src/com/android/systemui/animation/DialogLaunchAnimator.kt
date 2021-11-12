@@ -40,6 +40,7 @@ import android.widget.FrameLayout
 import kotlin.math.roundToInt
 
 private const val TAG = "DialogLaunchAnimator"
+private val DIALOG_CONTENT_PARENT_ID = R.id.dialog_content_parent
 
 /**
  * A class that allows dialogs to be started in a seamless way from a view that is transforming
@@ -86,10 +87,10 @@ class DialogLaunchAnimator(
         // If the parent of the view we are launching from is the background of some other animated
         // dialog, then this means the caller intent is to launch a dialog from another dialog. In
         // this case, we also animate the parent (which is the dialog background).
-        val dialogContentParent = openedDialogs
+        val animatedParent = openedDialogs
             .firstOrNull { it.dialogContentParent == view.parent }
-            ?.dialogContentParent
-        val animateFrom = dialogContentParent ?: view
+        val parentHostDialog = animatedParent?.hostDialog
+        val animateFrom = animatedParent?.dialogContentParent ?: view
 
         // Make sure we don't run the launch animation from the same view twice at the same time.
         if (animateFrom.getTag(TAG_LAUNCH_ANIMATION_RUNNING) != null) {
@@ -100,12 +101,18 @@ class DialogLaunchAnimator(
 
         animateFrom.setTag(TAG_LAUNCH_ANIMATION_RUNNING, true)
 
-        val launchAnimation = AnimatedDialog(
-            context, launchAnimator, hostDialogProvider, animateFrom,
-            onDialogDismissed = { openedDialogs.remove(it) }, originalDialog = dialog,
-            animateBackgroundBoundsChange)
-        val hostDialog = launchAnimation.hostDialog
-        openedDialogs.add(launchAnimation)
+        val animatedDialog = AnimatedDialog(
+                context,
+                launchAnimator,
+                hostDialogProvider,
+                animateFrom,
+                onDialogDismissed = { openedDialogs.remove(it) },
+                originalDialog = dialog,
+                animateBackgroundBoundsChange,
+                openedDialogs.firstOrNull { it.hostDialog == parentHostDialog }
+        )
+        val hostDialog = animatedDialog.hostDialog
+        openedDialogs.add(animatedDialog)
 
         // If the dialog is dismissed/hidden/shown, then we should actually dismiss/hide/show the
         // host dialog.
@@ -119,15 +126,15 @@ class DialogLaunchAnimator(
                     // If AOD is disabled the screen will directly becomes black and we won't see
                     // the animation anyways.
                     if (reason == DialogListener.DismissReason.DEVICE_LOCKED) {
-                        launchAnimation.exitAnimationDisabled = true
+                        animatedDialog.exitAnimationDisabled = true
                     }
 
                     hostDialog.dismiss()
                 }
 
                 override fun onHide() {
-                    if (launchAnimation.ignoreNextCallToHide) {
-                        launchAnimation.ignoreNextCallToHide = false
+                    if (animatedDialog.ignoreNextCallToHide) {
+                        animatedDialog.ignoreNextCallToHide = false
                         return
                     }
 
@@ -138,18 +145,41 @@ class DialogLaunchAnimator(
                     hostDialog.show()
 
                     // We don't actually want to show the original dialog, so hide it.
-                    launchAnimation.ignoreNextCallToHide = true
+                    animatedDialog.ignoreNextCallToHide = true
                     dialog.hide()
                 }
 
                 override fun onSizeChanged() {
-                    launchAnimation.onOriginalDialogSizeChanged()
+                    animatedDialog.onOriginalDialogSizeChanged()
+                }
+
+                override fun prepareForStackDismiss() {
+                    animatedDialog.touchSurface = animatedDialog.prepareForStackDismiss()
                 }
             })
         }
 
-        launchAnimation.start()
+        animatedDialog.start()
         return hostDialog
+    }
+
+    /**
+     * Launch [dialog] from a [parentHostDialog] as returned by [showFromView]. This will allow
+     * for dismissing the whole stack.
+     *
+     * This will return a new host dialog, with the same caveat as [showFromView].
+     *
+     * @see DialogListener.prepareForStackDismiss
+     */
+    fun showFromDialog(
+        dialog: Dialog,
+        parentHostDialog: Dialog,
+        animateBackgroundBoundsChange: Boolean = false
+    ): Dialog {
+        val view = parentHostDialog.findViewById<ViewGroup>(DIALOG_CONTENT_PARENT_ID)
+                ?.getChildAt(0)
+                ?: throw IllegalStateException("No dialog content parent found in host dialog")
+        return showFromView(dialog, view, animateBackgroundBoundsChange)
     }
 
     /**
@@ -214,6 +244,12 @@ interface DialogListener {
     /** Called when this dialog show() is called. */
     fun onShow()
 
+    /**
+     * Call before dismissing a stack of dialogs (dialogs launched from dialogs), so the topmost
+     * can animate directly into the original `touchSurface`.
+     */
+    fun prepareForStackDismiss()
+
     /** Called when this dialog size might have changed, e.g. because of configuration changes. */
     fun onSizeChanged()
 }
@@ -224,7 +260,7 @@ private class AnimatedDialog(
     hostDialogProvider: HostDialogProvider,
 
     /** The view that triggered the dialog after being tapped. */
-    private val touchSurface: View,
+    var touchSurface: View,
 
     /**
      * A callback that will be called with this [AnimatedDialog] after the dialog was
@@ -236,7 +272,10 @@ private class AnimatedDialog(
     private val originalDialog: Dialog,
 
     /** Whether we should animate the dialog background when its bounds change. */
-    private val animateBackgroundBoundsChange: Boolean
+    private val animateBackgroundBoundsChange: Boolean,
+
+    /** Launch animation corresponding to the parent [hostDialog]. */
+    private val parentAnimatedDialog: AnimatedDialog? = null
 ) {
     /**
      * The fullscreen dialog to which we will add the content view [originalDialogView] of
@@ -253,7 +292,9 @@ private class AnimatedDialog(
      * the same size as the original dialog window and to which we will set the original dialog
      * window background.
      */
-    val dialogContentParent = FrameLayout(context)
+    val dialogContentParent = FrameLayout(context).apply {
+        id = DIALOG_CONTENT_PARENT_ID
+    }
 
     /**
      * The background color of [originalDialogView], taking into consideration the [originalDialog]
@@ -359,9 +400,7 @@ private class AnimatedDialog(
         // Make the touch surface invisible and make sure that it stays invisible as long as the
         // dialog is shown or animating.
         touchSurface.visibility = View.INVISIBLE
-        if (touchSurface is LaunchableView) {
-            touchSurface.setShouldBlockVisibilityChanges(true)
-        }
+        (touchSurface as? LaunchableView)?.setShouldBlockVisibilityChanges(true)
 
         // Add a pre draw listener to (maybe) start the animation once the touch surface is
         // actually invisible.
@@ -576,9 +615,7 @@ private class AnimatedDialog(
             Log.i(TAG, "Skipping animation of dialog into the touch surface")
 
             // Make sure we allow the touch surface to change its visibility again.
-            if (touchSurface is LaunchableView) {
-                touchSurface.setShouldBlockVisibilityChanges(false)
-            }
+            (touchSurface as? LaunchableView)?.setShouldBlockVisibilityChanges(false)
 
             // If the view is invisible it's probably because of us, so we make it visible again.
             if (touchSurface.visibility == View.INVISIBLE) {
@@ -598,9 +635,7 @@ private class AnimatedDialog(
             },
             onLaunchAnimationEnd = {
                 // Make sure we allow the touch surface to change its visibility again.
-                if (touchSurface is LaunchableView) {
-                    touchSurface.setShouldBlockVisibilityChanges(false)
-                }
+                (touchSurface as? LaunchableView)?.setShouldBlockVisibilityChanges(false)
 
                 touchSurface.visibility = View.VISIBLE
                 dialogContentParent.visibility = View.INVISIBLE
@@ -795,5 +830,19 @@ private class AnimatedDialog(
             currentAnimator = animator
             animator.start()
         }
+    }
+
+    fun prepareForStackDismiss(): View {
+        if (parentAnimatedDialog == null) {
+            return touchSurface
+        }
+        parentAnimatedDialog.exitAnimationDisabled = true
+        parentAnimatedDialog.originalDialog.hide()
+        val view = parentAnimatedDialog.prepareForStackDismiss()
+        parentAnimatedDialog.originalDialog.dismiss()
+        // Make the touch surface invisible, so we end up animating to it when we actually
+        // dismiss the stack
+        view.visibility = View.INVISIBLE
+        return view
     }
 }
