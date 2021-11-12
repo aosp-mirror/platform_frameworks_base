@@ -18,12 +18,14 @@ package com.android.systemui;
 
 import android.app.ActivityThread;
 import android.app.Application;
+import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.os.Bundle;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -275,4 +277,15 @@ public class SystemUIApplication extends Application implements
         mContextAvailableCallback = callback;
     }
 
+    /** Update a notifications application name. */
+    public static void overrideNotificationAppName(Context context, Notification.Builder n,
+            boolean system) {
+        final Bundle extras = new Bundle();
+        String appName = system
+                ? context.getString(com.android.internal.R.string.notification_app_name_system)
+                : context.getString(com.android.internal.R.string.notification_app_name_settings);
+        extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME, appName);
+
+        n.addExtras(extras);
+    }
 }
