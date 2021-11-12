@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * MtpStorageManager provides functionality for listing, tracking, and notifying MtpServer of
@@ -208,7 +209,7 @@ public class MtpStorageManager {
 
         private long maybeApplyTranscodeLengthWorkaround(long length) {
             // Windows truncates transferred files to the size advertised in the object property.
-            if (isTranscodeMtpEnabled() && isFileTranscodeSupported()) {
+            if (mStorage.isHostWindows() && isTranscodeMtpEnabled() && isFileTranscodeSupported()) {
                 // If the file supports transcoding, we double the returned size to accommodate
                 // the increase in size from transcoding to AVC. This is the same heuristic
                 // applied in the FUSE daemon (MediaProvider).
@@ -455,10 +456,12 @@ public class MtpStorageManager {
      * @param volume Storage to add.
      * @return the associated MtpStorage
      */
-    public synchronized MtpStorage addMtpStorage(StorageVolume volume) {
+    public synchronized MtpStorage addMtpStorage(StorageVolume volume,
+                                                 Supplier<Boolean> isHostWindows) {
         int storageId = ((getNextStorageId() & 0x0000FFFF) << 16) + 1;
-        MtpStorage storage = new MtpStorage(volume, storageId);
-        MtpObject root = new MtpObject(storage.getPath(), storageId, storage, null, true);
+        MtpStorage storage = new MtpStorage(volume, storageId, isHostWindows);
+        MtpObject root = new MtpObject(storage.getPath(), storageId, storage, /* parent= */ null,
+                                       /* isDir= */ true);
         mRoots.put(storageId, root);
         return storage;
     }
