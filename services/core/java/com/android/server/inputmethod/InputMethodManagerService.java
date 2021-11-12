@@ -313,21 +313,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private int mMethodMapUpdateCount = 0;
 
     /**
-     * Indicates whether {@link #getVisibleConnection} is currently in use.
+     * Indicates whether {@link InputMethodBindingController#getVisibleConnection} is currently
+     * in use.
      */
     private boolean isVisibleBound() {
         return mBindingController.isVisibleBound();
-    }
-
-    private void setVisibleBound(boolean visibleBound) {
-        mBindingController.setVisibleBound(visibleBound);
-    }
-
-    /**
-     * Used to bring IME service up to visible adjustment while it is being shown.
-     */
-    private ServiceConnection getVisibleConnection() {
-        return mBindingController.getVisibleConnection();
     }
 
     /**
@@ -3254,8 +3244,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             res = false;
         }
         if (hasConnection() && isVisibleBound()) {
-            mContext.unbindService(getVisibleConnection());
-            setVisibleBound(false);
+            mBindingController.unbindVisibleConnectionLocked();
         }
         mInputShown = false;
         mShowRequested = false;

@@ -269,8 +269,7 @@ final class InputMethodBindingController {
         @Override public void onBindingDied(ComponentName name) {
             synchronized (mMethodMap) {
                 if (mVisibleBound) {
-                    mContext.unbindService(mVisibleConnection);
-                    mVisibleBound = false;
+                    unbindVisibleConnectionLocked();
                 }
             }
         }
@@ -368,8 +367,7 @@ final class InputMethodBindingController {
     @GuardedBy("mMethodMap")
     void unbindCurrentMethodLocked() {
         if (mVisibleBound) {
-            mContext.unbindService(mVisibleConnection);
-            mVisibleBound = false;
+            unbindVisibleConnectionLocked();
         }
 
         if (mHasConnection) {
@@ -383,6 +381,13 @@ final class InputMethodBindingController {
 
         mCurId = null;
         mService.clearCurMethodLocked();
+    }
+
+
+    @GuardedBy("mMethodMap")
+    void unbindVisibleConnectionLocked() {
+        mContext.unbindService(mVisibleConnection);
+        mVisibleBound = false;
     }
 
     @GuardedBy("mMethodMap")
