@@ -36,8 +36,10 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_RESTORE;
 import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_SETUP;
+import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
+import static android.content.pm.parsing.ApkLiteParseUtils.isApkFile;
 import static android.os.PowerExemptionManager.REASON_PACKAGE_REPLACED;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.incremental.IncrementalManager.isIncrementalPath;
@@ -159,9 +161,9 @@ import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.Permission;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
-import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.rollback.RollbackManagerInternal;
+import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.WatchedLongSparseArray;
 
 import dalvik.system.VMRuntime;
@@ -185,6 +187,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 final class InstallPackageHelper {
     /**
@@ -196,6 +199,8 @@ final class InstallPackageHelper {
     private final AppDataHelper mAppDataHelper;
     private final PackageManagerServiceInjector mInjector;
     private final BroadcastHelper mBroadcastHelper;
+    private final RemovePackageHelper mRemovePackageHelper;
+    private final ScanPackageHelper mScanPackageHelper;
 
     // TODO(b/198166813): remove PMS dependency
     InstallPackageHelper(PackageManagerService pm, AppDataHelper appDataHelper) {
@@ -203,6 +208,8 @@ final class InstallPackageHelper {
         mInjector = pm.mInjector;
         mAppDataHelper = appDataHelper;
         mBroadcastHelper = new BroadcastHelper(mInjector);
+        mRemovePackageHelper = new RemovePackageHelper(pm);
+        mScanPackageHelper = new ScanPackageHelper(pm);
     }
 
     InstallPackageHelper(PackageManagerService pm) {
@@ -214,6 +221,8 @@ final class InstallPackageHelper {
         mInjector = injector;
         mAppDataHelper = new AppDataHelper(pm, mInjector);
         mBroadcastHelper = new BroadcastHelper(injector);
+        mRemovePackageHelper = new RemovePackageHelper(pm);
+        mScanPackageHelper = new ScanPackageHelper(pm);
     }
 
     @GuardedBy("mPm.mLock")
@@ -1132,7 +1141,6 @@ final class InstallPackageHelper {
                 new ArrayMap<>(requests.size());
         final Map<String, Boolean> createdAppId = new ArrayMap<>(requests.size());
         boolean success = false;
-        final ScanPackageHelper scanPackageHelper = new ScanPackageHelper(mPm);
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackagesLI");
             for (InstallRequest request : requests) {
@@ -1161,7 +1169,7 @@ final class InstallPackageHelper {
                 installResults.put(packageName, request.mInstallResult);
                 installArgs.put(packageName, request.mArgs);
                 try {
-                    final ScanResult result = scanPackageHelper.scanPackageTracedLI(
+                    final ScanResult result = mScanPackageHelper.scanPackageTracedLI(
                             prepareResult.mPackageToScan, prepareResult.mParseFlags,
                             prepareResult.mScanFlags, System.currentTimeMillis(),
                             request.mArgs.mUser, request.mArgs.mAbiOverride);
@@ -1174,8 +1182,7 @@ final class InstallPackageHelper {
                                         + " in multi-package install request.");
                         return;
                     }
-                    createdAppId.put(packageName,
-                            scanPackageHelper.optimisticallyRegisterAppId(result));
+                    createdAppId.put(packageName, optimisticallyRegisterAppId(result));
                     versionInfos.put(result.mPkgSetting.getPkg().getPackageName(),
                             mPm.getSettingsVersionForPackage(result.mPkgSetting.getPkg()));
                     if (result.mStaticSharedLibraryInfo != null) {
@@ -1253,7 +1260,7 @@ final class InstallPackageHelper {
                 for (ScanResult result : preparedScans.values()) {
                     if (createdAppId.getOrDefault(result.mRequest.mParsedPackage.getPackageName(),
                             false)) {
-                        scanPackageHelper.cleanUpAppIdCreation(result);
+                        cleanUpAppIdCreation(result);
                     }
                 }
                 // TODO(b/194319951): create a more descriptive reason than unknown
@@ -3357,9 +3364,8 @@ final class InstallPackageHelper {
         }
         final RemovePackageHelper removePackageHelper = new RemovePackageHelper(mPm);
         removePackageHelper.removePackageLI(stubPkg, true /*chatty*/);
-        final ScanPackageHelper scanPackageHelper = new ScanPackageHelper(mPm);
         try {
-            return scanPackageHelper.scanPackageTracedLI(scanFile, parseFlags, scanFlags, 0, null);
+            return scanSystemPackageTracedLI(scanFile, parseFlags, scanFlags, 0, null);
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to install compressed system package:" + stubPkg.getPackageName(),
                     e);
@@ -3509,9 +3515,7 @@ final class InstallPackageHelper {
                         | ParsingPackageUtils.PARSE_MUST_BE_APK
                         | ParsingPackageUtils.PARSE_IS_SYSTEM_DIR;
         @PackageManagerService.ScanFlags int scanFlags = mPm.getSystemPackageScanFlags(codePath);
-        final ScanPackageHelper scanPackageHelper = new ScanPackageHelper(mPm);
-        final AndroidPackage pkg =
-                scanPackageHelper.scanPackageTracedLI(
+        final AndroidPackage pkg = scanSystemPackageTracedLI(
                         codePath, parseFlags, scanFlags, 0 /*currentTime*/, null);
 
         PackageSetting pkgSetting = mPm.mSettings.getPackageLPr(pkg.getPackageName());
@@ -3581,5 +3585,389 @@ final class InstallPackageHelper {
             }
         }
     }
+
+    @GuardedBy("mPm.mLock")
+    public void prepareSystemPackageCleanUp(
+            WatchedArrayMap<String, PackageSetting> packageSettings,
+            List<String> possiblyDeletedUpdatedSystemApps,
+            ArrayMap<String, File> expectingBetter, int[] userIds) {
+        // Iterates PackageSettings in reversed order because the item could be removed
+        // during the iteration.
+        for (int index = packageSettings.size() - 1; index >= 0; index--) {
+            final PackageSetting ps = packageSettings.valueAt(index);
+            final String packageName = ps.getPackageName();
+            /*
+             * If this is not a system app, it can't be a
+             * disable system app.
+             */
+            if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                continue;
+            }
+
+            /*
+             * If the package is scanned, it's not erased.
+             */
+            final AndroidPackage scannedPkg = mPm.mPackages.get(packageName);
+            final PackageSetting disabledPs =
+                    mPm.mSettings.getDisabledSystemPkgLPr(packageName);
+            if (scannedPkg != null) {
+                /*
+                 * If the system app is both scanned and in the
+                 * disabled packages list, then it must have been
+                 * added via OTA. Remove it from the currently
+                 * scanned package so the previously user-installed
+                 * application can be scanned.
+                 */
+                if (disabledPs != null) {
+                    logCriticalInfo(Log.WARN,
+                            "Expecting better updated system app for "
+                                    + packageName
+                                    + "; removing system app.  Last known"
+                                    + " codePath=" + ps.getPathString()
+                                    + ", versionCode=" + ps.getVersionCode()
+                                    + "; scanned versionCode="
+                                    + scannedPkg.getLongVersionCode());
+                    mRemovePackageHelper.removePackageLI(scannedPkg, true);
+                    expectingBetter.put(ps.getPackageName(), ps.getPath());
+                }
+
+                continue;
+            }
+
+            if (disabledPs == null) {
+                logCriticalInfo(Log.WARN, "System package " + packageName
+                        + " no longer exists; its data will be wiped");
+                mRemovePackageHelper.removePackageDataLIF(ps, userIds, null, 0, false);
+            } else {
+                // we still have a disabled system package, but, it still might have
+                // been removed. check the code path still exists and check there's
+                // still a package. the latter can happen if an OTA keeps the same
+                // code path, but, changes the package name.
+                if (disabledPs.getPath() == null || !disabledPs.getPath().exists()
+                        || disabledPs.getPkg() == null) {
+                    possiblyDeletedUpdatedSystemApps.add(packageName);
+                } else {
+                    // We're expecting that the system app should remain disabled, but add
+                    // it to expecting better to recover in case the data version cannot
+                    // be scanned.
+                    expectingBetter.put(disabledPs.getPackageName(), disabledPs.getPath());
+                }
+            }
+        }
+    }
+
+    @GuardedBy("mPm.mLock")
+    // Remove disable package settings for updated system apps that were
+    // removed via an OTA. If the update is no longer present, remove the
+    // app completely. Otherwise, revoke their system privileges.
+    public void cleanupDisabledPackageSettings(List<String> possiblyDeletedUpdatedSystemApps,
+            int[] userIds, int scanFlags) {
+        for (int i = possiblyDeletedUpdatedSystemApps.size() - 1; i >= 0; --i) {
+            final String packageName = possiblyDeletedUpdatedSystemApps.get(i);
+            final AndroidPackage pkg = mPm.mPackages.get(packageName);
+            final String msg;
+
+            // remove from the disabled system list; do this first so any future
+            // scans of this package are performed without this state
+            mPm.mSettings.removeDisabledSystemPackageLPw(packageName);
+
+            if (pkg == null) {
+                // should have found an update, but, we didn't; remove everything
+                msg = "Updated system package " + packageName
+                        + " no longer exists; removing its data";
+                // Actual deletion of code and data will be handled by later
+                // reconciliation step
+            } else {
+                // found an update; revoke system privileges
+                msg = "Updated system package " + packageName
+                        + " no longer exists; rescanning package on data";
+
+                // NOTE: We don't do anything special if a stub is removed from the
+                // system image. But, if we were [like removing the uncompressed
+                // version from the /data partition], this is where it'd be done.
+
+                // remove the package from the system and re-scan it without any
+                // special privileges
+                mRemovePackageHelper.removePackageLI(pkg, true);
+                try {
+                    final File codePath = new File(pkg.getPath());
+                    scanSystemPackageTracedLI(codePath, 0, scanFlags, 0, null);
+                } catch (PackageManagerException e) {
+                    Slog.e(TAG, "Failed to parse updated, ex-system package: "
+                            + e.getMessage());
+                }
+            }
+
+            // one final check. if we still have a package setting [ie. it was
+            // previously scanned and known to the system], but, we don't have
+            // a package [ie. there was an error scanning it from the /data
+            // partition], completely remove the package data.
+            final PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
+            if (ps != null && mPm.mPackages.get(packageName) == null) {
+                mRemovePackageHelper.removePackageDataLIF(ps, userIds, null, 0, false);
+            }
+            logCriticalInfo(Log.WARN, msg);
+        }
+    }
+
+    @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
+    public void installSystemPackagesFromDir(File scanDir, int parseFlags, int scanFlags,
+            long currentTime, PackageParser2 packageParser, ExecutorService executorService) {
+        final File[] files = scanDir.listFiles();
+        if (ArrayUtils.isEmpty(files)) {
+            Log.d(TAG, "No files in app dir " + scanDir);
+            return;
+        }
+
+        if (DEBUG_PACKAGE_SCANNING) {
+            Log.d(TAG, "Scanning app dir " + scanDir + " scanFlags=" + scanFlags
+                    + " flags=0x" + Integer.toHexString(parseFlags));
+        }
+        ParallelPackageParser parallelPackageParser =
+                new ParallelPackageParser(packageParser, executorService);
+
+        // Submit files for parsing in parallel
+        int fileCount = 0;
+        for (File file : files) {
+            final boolean isPackage = (isApkFile(file) || file.isDirectory())
+                    && !PackageInstallerService.isStageName(file.getName());
+            if (!isPackage) {
+                // Ignore entries which are not packages
+                continue;
+            }
+            parallelPackageParser.submit(file, parseFlags);
+            fileCount++;
+        }
+
+        // Process results one by one
+        for (; fileCount > 0; fileCount--) {
+            ParallelPackageParser.ParseResult parseResult = parallelPackageParser.take();
+            Throwable throwable = parseResult.throwable;
+            int errorCode = PackageManager.INSTALL_SUCCEEDED;
+            String errorMsg = null;
+
+            if (throwable == null) {
+                // TODO(b/194319951): move lower in the scan chain
+                // Static shared libraries have synthetic package names
+                if (parseResult.parsedPackage.isStaticSharedLibrary()) {
+                    PackageManagerService.renameStaticSharedLibraryPackage(
+                            parseResult.parsedPackage);
+                }
+                try {
+                    addForInitLI(parseResult.parsedPackage, parseFlags, scanFlags, currentTime,
+                            null);
+                } catch (PackageManagerException e) {
+                    errorCode = e.error;
+                    errorMsg = "Failed to scan " + parseResult.scanFile + ": " + e.getMessage();
+                    Slog.w(TAG, errorMsg);
+                }
+            } else if (throwable instanceof PackageManagerException) {
+                PackageManagerException e = (PackageManagerException) throwable;
+                errorCode = e.error;
+                errorMsg = "Failed to parse " + parseResult.scanFile + ": " + e.getMessage();
+                Slog.w(TAG, errorMsg);
+            } else {
+                throw new IllegalStateException("Unexpected exception occurred while parsing "
+                        + parseResult.scanFile, throwable);
+            }
+
+            if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0 && errorCode != INSTALL_SUCCEEDED) {
+                mPm.mApexManager.reportErrorWithApkInApex(scanDir.getAbsolutePath(), errorMsg);
+            }
+
+            // Delete invalid userdata apps
+            if ((scanFlags & SCAN_AS_SYSTEM) == 0
+                    && errorCode != PackageManager.INSTALL_SUCCEEDED) {
+                logCriticalInfo(Log.WARN,
+                        "Deleting invalid package at " + parseResult.scanFile);
+                mRemovePackageHelper.removeCodePathLI(parseResult.scanFile);
+            }
+        }
+    }
+
+    /**
+     * Make sure all system apps that we expected to appear on
+     * the userdata partition actually showed up. If they never
+     * appeared, crawl back and revive the system version.
+     */
+    @GuardedBy("mPm.mLock")
+    public void checkExistingBetterPackages(ArrayMap<String, File> expectingBetterPackages,
+            List<String> stubSystemApps, int systemScanFlags, int systemParseFlags) {
+        for (int i = 0; i < expectingBetterPackages.size(); i++) {
+            final String packageName = expectingBetterPackages.keyAt(i);
+            if (mPm.mPackages.containsKey(packageName)) {
+                continue;
+            }
+            final File scanFile = expectingBetterPackages.valueAt(i);
+
+            logCriticalInfo(Log.WARN, "Expected better " + packageName
+                    + " but never showed up; reverting to system");
+
+            final Pair<Integer, Integer> rescanAndReparseFlags =
+                    mPm.getSystemPackageRescanFlagsAndReparseFlags(scanFile,
+                            systemScanFlags, systemParseFlags);
+            @PackageManagerService.ScanFlags int rescanFlags = rescanAndReparseFlags.first;
+            @ParsingPackageUtils.ParseFlags int reparseFlags = rescanAndReparseFlags.second;
+
+            if (rescanFlags == 0) {
+                Slog.e(TAG, "Ignoring unexpected fallback path " + scanFile);
+                continue;
+            }
+            mPm.mSettings.enableSystemPackageLPw(packageName);
+
+            try {
+                final AndroidPackage newPkg = scanSystemPackageTracedLI(
+                        scanFile, reparseFlags, rescanFlags, 0, null);
+                // We rescanned a stub, add it to the list of stubbed system packages
+                if (newPkg.isStub()) {
+                    stubSystemApps.add(packageName);
+                }
+            } catch (PackageManagerException e) {
+                Slog.e(TAG, "Failed to parse original system package: "
+                        + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     *  Traces a package scan.
+     *  @see #scanSystemPackageLI(File, int, int, long, UserHandle)
+     */
+    @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
+    public AndroidPackage scanSystemPackageTracedLI(File scanFile, final int parseFlags,
+            int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage [" + scanFile.toString() + "]");
+        try {
+            return scanSystemPackageLI(scanFile, parseFlags, scanFlags, currentTime, user);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+    }
+
+    /**
+     *  Scans a package and returns the newly parsed package.
+     *  Returns {@code null} in case of errors and the error code is stored in mLastScanError
+     */
+    @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
+    private AndroidPackage scanSystemPackageLI(File scanFile, int parseFlags, int scanFlags,
+            long currentTime, UserHandle user) throws PackageManagerException {
+        if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanFile);
+
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
+        final ParsedPackage parsedPackage;
+        try (PackageParser2 pp = mInjector.getScanningPackageParser()) {
+            parsedPackage = pp.parsePackage(scanFile, parseFlags, false);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+
+        // Static shared libraries have synthetic package names
+        if (parsedPackage.isStaticSharedLibrary()) {
+            PackageManagerService.renameStaticSharedLibraryPackage(parsedPackage);
+        }
+
+        return addForInitLI(parsedPackage, parseFlags, scanFlags, currentTime, user);
+    }
+
+    /**
+     * Adds a new package to the internal data structures during platform initialization.
+     * <p>After adding, the package is known to the system and available for querying.
+     * <p>For packages located on the device ROM [eg. packages located in /system, /vendor,
+     * etc...], additional checks are performed. Basic verification [such as ensuring
+     * matching signatures, checking version codes, etc...] occurs if the package is
+     * identical to a previously known package. If the package fails a signature check,
+     * the version installed on /data will be removed. If the version of the new package
+     * is less than or equal than the version on /data, it will be ignored.
+     * <p>Regardless of the package location, the results are applied to the internal
+     * structures and the package is made available to the rest of the system.
+     * <p>NOTE: The return value should be removed. It's the passed in package object.
+     */
+    @GuardedBy({"mPm.mLock", "mPm.mInstallLock"})
+    private AndroidPackage addForInitLI(ParsedPackage parsedPackage,
+            @ParsingPackageUtils.ParseFlags int parseFlags,
+            @PackageManagerService.ScanFlags int scanFlags, long currentTime,
+            @Nullable UserHandle user) throws PackageManagerException {
+
+        final Pair<ScanResult, Boolean> scanResultPair = mScanPackageHelper.scanSystemPackageLI(
+                parsedPackage, parseFlags, scanFlags, currentTime, user);
+        final ScanResult scanResult = scanResultPair.first;
+        boolean shouldHideSystemApp = scanResultPair.second;
+        if (scanResult.mSuccess) {
+            synchronized (mPm.mLock) {
+                boolean appIdCreated = false;
+                try {
+                    final String pkgName = scanResult.mPkgSetting.getPackageName();
+                    final Map<String, ReconciledPackage> reconcileResult =
+                            reconcilePackagesLocked(
+                                    new ReconcileRequest(
+                                            Collections.singletonMap(pkgName, scanResult),
+                                            mPm.mSharedLibraries,
+                                            mPm.mPackages,
+                                            Collections.singletonMap(
+                                                    pkgName,
+                                                    mPm.getSettingsVersionForPackage(
+                                                            parsedPackage)),
+                                            Collections.singletonMap(pkgName,
+                                                    mPm.getSharedLibLatestVersionSetting(
+                                                            scanResult))),
+                                    mPm.mSettings.getKeySetManagerService(), mInjector);
+                    appIdCreated = optimisticallyRegisterAppId(scanResult);
+                    commitReconciledScanResultLocked(
+                            reconcileResult.get(pkgName), mPm.mUserManager.getUserIds());
+                } catch (PackageManagerException e) {
+                    if (appIdCreated) {
+                        cleanUpAppIdCreation(scanResult);
+                    }
+                    throw e;
+                }
+            }
+        }
+
+        if (shouldHideSystemApp) {
+            synchronized (mPm.mLock) {
+                mPm.mSettings.disableSystemPackageLPw(parsedPackage.getPackageName(), true);
+            }
+        }
+        if (mPm.mIncrementalManager != null && isIncrementalPath(parsedPackage.getPath())) {
+            if (scanResult.mPkgSetting != null && scanResult.mPkgSetting.isPackageLoading()) {
+                // Continue monitoring loading progress of active incremental packages
+                mPm.mIncrementalManager.registerLoadingProgressCallback(parsedPackage.getPath(),
+                        new IncrementalProgressListener(parsedPackage.getPackageName(), mPm));
+            }
+        }
+        return scanResult.mPkgSetting.getPkg();
+    }
+
+    /**
+     * Prepares the system to commit a {@link ScanResult} in a way that will not fail by registering
+     * the app ID required for reconcile.
+     * @return {@code true} if a new app ID was registered and will need to be cleaned up on
+     *         failure.
+     */
+    private boolean optimisticallyRegisterAppId(@NonNull ScanResult result)
+            throws PackageManagerException {
+        if (!result.mExistingSettingCopied || result.needsNewAppId()) {
+            synchronized (mPm.mLock) {
+                // THROWS: when we can't allocate a user id. add call to check if there's
+                // enough space to ensure we won't throw; otherwise, don't modify state
+                return mPm.mSettings.registerAppIdLPw(result.mPkgSetting, result.needsNewAppId());
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Reverts any app ID creation that were made by
+     * {@link #optimisticallyRegisterAppId(ScanResult)}. Note: this is only necessary if the
+     * referenced method returned true.
+     */
+    private void cleanUpAppIdCreation(@NonNull ScanResult result) {
+        // iff we've acquired an app ID for a new package setting, remove it so that it can be
+        // acquired by another request.
+        if (result.mPkgSetting.getAppId() > 0) {
+            mPm.mSettings.removeAppIdLPw(result.mPkgSetting.getAppId());
+        }
+    }
+
 
 }

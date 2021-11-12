@@ -259,8 +259,7 @@ public class CommunalManagerServiceTest {
         mAInfo.flags = 0;
 
         allowPackages(TEST_PACKAGE_NAME);
-        // TODO(b/191994709): Fix this assertion once we start checking showWhenLocked
-        assertDoesNotIntercept();
+        assertDoesIntercept();
     }
 
     @Test

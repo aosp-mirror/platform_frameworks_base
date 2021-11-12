@@ -3697,6 +3697,49 @@ public class CarrierConfigManager {
             "show_wifi_calling_icon_in_status_bar_bool";
 
     /**
+     * Configuration to indicate that the carrier supports opportunistic data
+     * auto provisioning. Based on this flag, the device downloads and activates
+     * corresponding opportunistic profile.
+     */
+    public static final String KEY_CARRIER_SUPPORTS_OPP_DATA_AUTO_PROVISIONING_BOOL =
+            "carrier_supports_opp_data_auto_provisioning_bool";
+
+    /**
+     * SMDP+ server address for downloading opportunistic eSIM profile.
+     * FQDN (Fully Qualified Domain Name) of the SM-DP+ (e.g., smdp.gsma.com) restricted to the
+     * Alphanumeric mode character set defined in table 5 of ISO/IEC 18004 [15] excluding '$'.
+     */
+    public static final String KEY_SMDP_SERVER_ADDRESS_STRING =
+            "smdp_server_address_string";
+
+    /**
+     * This timer value is used in the eSIM Exponential Backoff download retry algorithm.
+     * Value should be in seconds.
+     * <OL>
+     *     <LI>When the first download failure occurs, retry download after BACKOFF_TIMER_VALUE
+     * seconds.</LI>
+     *
+     * <LI>If download fails again then, retry after either BACKOFF_TIMER_VALUE,
+     * 2xBACKOFF_TIMER_VALUE, or 3xBACKOFF_TIMER_VALUE seconds.</LI>
+     *
+     * <LI>In general after the cth failed attempt, retry after k * BACKOFF_TIMER_VALUE
+     * seconds, where k is a random integer between 1 and 2^c − 1. Max c value is
+     * {@link #KEY_ESIM_MAX_DOWNLOAD_RETRY_ATTEMPTS_INT}</LI>
+     * </OL>
+     */
+    public static final String KEY_ESIM_DOWNLOAD_RETRY_BACKOFF_TIMER_SEC_INT =
+            "esim_download_retry_backoff_timer_sec_int";
+
+    /**
+     * If eSIM profile download fails then, the number of retry attempts by UE
+     * will be based on this configuration. If download still fails even after the
+     * MAX attempts configured by this item then the retry is postponed until next
+     * device bootup.
+     */
+    public static final String KEY_ESIM_MAX_DOWNLOAD_RETRY_ATTEMPTS_INT =
+            "esim_max_download_retry_attempts_int";
+
+    /**
      * Controls RSRP threshold at which OpportunisticNetworkService will decide whether
      * the opportunistic network is good enough for internet data.
      */
@@ -3905,6 +3948,30 @@ public class CarrierConfigManager {
      */
     public static final String KEY_ENABLE_4G_OPPORTUNISTIC_NETWORK_SCAN_BOOL =
             "enabled_4g_opportunistic_network_scan_bool";
+
+  /**
+   * Only relevant when the device supports opportunistic networks but does not support
+   * simultaneuous 5G+5G. Controls how long, in milliseconds, to wait before opportunistic network
+   * goes out of service before switching the 5G capability back to primary stack. The idea of
+   * waiting a few seconds is to minimize the calling of the expensive capability switching
+   * operation in the case where CBRS goes back into service shortly after going out of it.
+   *
+   * @hide
+   */
+  public static final String KEY_TIME_TO_SWITCH_BACK_TO_PRIMARY_IF_OPPORTUNISTIC_OOS_LONG =
+            "time_to_switch_back_to_primary_if_opportunistic_oos_long";
+
+  /**
+   * Only relevant when the device supports opportunistic networks but does not support
+   * simultaneuous 5G+5G. Controls how long, in milliseconds, after 5G capability has switched back
+   * to primary stack due to opportunistic network being OOS. The idea is to minimizing the
+   * 'ping-ponging' effect where device is constantly witching capability back and forth between
+   * primary and opportunistic stack.
+   *
+   * @hide
+   */
+  public static final String KEY_OPPORTUNISTIC_TIME_TO_SCAN_AFTER_CAPABILITY_SWITCH_TO_PRIMARY_LONG
+          = "opportunistic_time_to_scan_after_capability_switch_to_primary_long";
 
     /**
      * Indicates zero or more emergency number prefix(es), because some carrier requires
@@ -5781,6 +5848,10 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_UNMETERED_NR_SA_SUB6_BOOL, false);
         sDefaults.putBoolean(KEY_ASCII_7_BIT_SUPPORT_FOR_LONG_MESSAGE_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_WIFI_CALLING_ICON_IN_STATUS_BAR_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_OPP_DATA_AUTO_PROVISIONING_BOOL, false);
+        sDefaults.putString(KEY_SMDP_SERVER_ADDRESS_STRING, "");
+        sDefaults.putInt(KEY_ESIM_MAX_DOWNLOAD_RETRY_ATTEMPTS_INT, 5);
+        sDefaults.putInt(KEY_ESIM_DOWNLOAD_RETRY_BACKOFF_TIMER_SEC_INT, 60);
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_GOOD */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT, -108);
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_MODERATE */
@@ -5824,6 +5895,10 @@ public class CarrierConfigManager {
         /* Default value is 2 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 2000);
         sDefaults.putBoolean(KEY_ENABLE_4G_OPPORTUNISTIC_NETWORK_SCAN_BOOL, true);
+        sDefaults.putInt(KEY_TIME_TO_SWITCH_BACK_TO_PRIMARY_IF_OPPORTUNISTIC_OOS_LONG, 60000);
+        sDefaults.putInt(
+                KEY_OPPORTUNISTIC_TIME_TO_SCAN_AFTER_CAPABILITY_SWITCH_TO_PRIMARY_LONG,
+                120000);
         sDefaults.putAll(Gps.getDefaults());
         sDefaults.putIntArray(KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY,
                 new int[] {

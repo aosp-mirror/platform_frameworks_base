@@ -186,7 +186,7 @@ class ShortcutUser {
         final ShortcutPackage removed = mPackages.remove(packageName);
 
         if (removed != null) {
-            removed.removeShortcuts();
+            removed.removeAllShortcutsAsync();
         }
         mService.cleanupBitmapsForPackage(mUserId, packageName);
 
@@ -577,7 +577,7 @@ class ShortcutUser {
                 Log.w(TAG, "Shortcuts for package " + sp.getPackageName() + " are being restored."
                         + " Existing non-manifeset shortcuts will be overwritten.");
             }
-            sp.restoreParsedShortcuts();
+            sp.removeAllShortcutsAsync();
             addPackage(sp);
             restoredPackages[0]++;
             restoredShortcuts[0] += sp.getShortcutCount();
@@ -714,6 +714,7 @@ class ShortcutUser {
                 .setSubtype(totalSharingShortcutCount));
     }
 
+    @NonNull
     AndroidFuture<AppSearchSession> getAppSearch(
             @NonNull final AppSearchManager.SearchContext searchContext) {
         final AndroidFuture<AppSearchSession> future = new AndroidFuture<>();

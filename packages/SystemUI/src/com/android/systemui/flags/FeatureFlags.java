@@ -65,10 +65,6 @@ public class FeatureFlags {
         return false;
     }
 
-    public boolean isNewNotifPipelineEnabled() {
-        return isEnabled(Flags.NEW_NOTIFICATION_PIPELINE);
-    }
-
     public boolean isNewNotifPipelineRenderingEnabled() {
         return isEnabled(Flags.NEW_NOTIFICATION_PIPELINE_RENDERING);
     }

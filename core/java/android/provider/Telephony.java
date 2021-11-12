@@ -5374,5 +5374,21 @@ public final class Telephony {
         */
         public static final String COLUMN_NR_ADVANCED_CALLING_ENABLED =
                 "nr_advanced_calling_enabled";
+
+        /**
+         * TelephonyProvider column name for the phone number from source CARRIER
+         *
+         * @hide
+         */
+        public static final String COLUMN_PHONE_NUMBER_SOURCE_CARRIER =
+                "phone_number_source_carrier";
+
+        /**
+         * TelephonyProvider column name for the phone number from source IMS
+         *
+         * @hide
+         */
+        public static final String COLUMN_PHONE_NUMBER_SOURCE_IMS =
+                "phone_number_source_ims";
     }
 }

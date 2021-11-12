@@ -40,9 +40,6 @@ public class Flags {
 
     /***************************************/
     // 100 - notification
-    public static final BooleanFlag NEW_NOTIFICATION_PIPELINE =
-            new BooleanFlag(100, true);
-
     public static final BooleanFlag NEW_NOTIFICATION_PIPELINE_RENDERING =
             new BooleanFlag(101, false);
 

@@ -79,6 +79,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     private final DialogLaunchAnimator mDialogLaunchAnimator;
     private final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     private final boolean mAboveStatusbar;
+    private final boolean mVolumeAdjustmentForRemoteGroupSessions;
     private final NotificationEntryManager mNotificationEntryManager;
     @VisibleForTesting
     final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
@@ -111,6 +112,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mUiEventLogger = uiEventLogger;
         mDialogLaunchAnimator = dialogLaunchAnimator;
+        mVolumeAdjustmentForRemoteGroupSessions = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
     }
 
     void start(@NonNull Callback cb) {
@@ -477,7 +480,9 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     }
 
     boolean isVolumeControlEnabled(@NonNull MediaDevice device) {
-        return !isActiveRemoteDevice(device);
+        // TODO(b/202500642): Also enable volume control for remote non-group sessions.
+        return !isActiveRemoteDevice(device)
+            || mVolumeAdjustmentForRemoteGroupSessions;
     }
 
     private final MediaController.Callback mCb = new MediaController.Callback() {

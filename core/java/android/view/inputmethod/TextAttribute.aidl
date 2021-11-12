@@ -14,28 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.systemui.idle;
+package android.view.inputmethod;
 
-import android.content.Context;
-import android.service.dreams.Sandman;
-
-import javax.inject.Inject;
-
-/**
- * A helper class to the idle mode for requests related to the
- * {@link DreamService}.
- */
-public class DreamHelper {
-    @Inject
-    protected DreamHelper() {
-    }
-
-    /**
-     * Requests the system to start dreaming.
-     *
-     * @param context The context within which the dream request is sent.
-     */
-    public void startDreaming(Context context) {
-        Sandman.startDreamByUserRequest(context);
-    }
-}
+parcelable TextAttribute;

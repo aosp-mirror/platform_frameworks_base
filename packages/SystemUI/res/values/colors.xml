@@ -77,7 +77,7 @@
     <!-- The color of the gear shown behind a notification -->
     <color name="notification_gear_color">@color/GM2_grey_700</color>
 
-    <color name="notification_guts_link_icon_tint">@color/GM2_grey_700</color>
+    <color name="notification_guts_link_icon_tint">@*android:color/accent_device_default</color>
     <color name="notification_guts_sub_text_color">@color/GM2_grey_700</color>
     <color name="notification_guts_header_text_color">@color/GM2_grey_900</color>
     <color name="notification_guts_priority_button_content_color">@color/GM2_grey_700</color>

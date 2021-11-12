@@ -212,6 +212,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
     @Test
     public void testUpdateFingerprintLocationOnAuthenticatorsRegistered() {
         // GIVEN fp sensor location is not available pre-init
+        when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(false);
         when(mAuthController.getFingerprintSensorLocation()).thenReturn(null);
         when(mAuthController.getUdfpsProps()).thenReturn(null);
         mLockIconViewController.init();
@@ -232,7 +233,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testLockIconViewBackgroundEnabledWhenUdfpsIsAvailable() {
+    public void testLockIconViewBackgroundEnabledWhenUdfpsIsSupported() {
         // GIVEN Udpfs sensor location is available
         setupUdfps();
 
@@ -247,9 +248,9 @@ public class LockIconViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testLockIconViewBackgroundDisabledWhenUdfpsIsUnavailable() {
-        // GIVEN Udfps sensor location is not available
-        when(mAuthController.getUdfpsSensorLocation()).thenReturn(null);
+    public void testLockIconViewBackgroundDisabledWhenUdfpsIsNotSupported() {
+        // GIVEN Udfps sensor location is not supported
+        when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(false);
 
         mLockIconViewController.init();
         captureAttachListener();
@@ -365,6 +366,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
     }
 
     private Pair<Integer, PointF> setupUdfps() {
+        when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(true);
         final PointF udfpsLocation = new PointF(50, 75);
         final int radius = 33;
         final FingerprintSensorPropertiesInternal fpProps =

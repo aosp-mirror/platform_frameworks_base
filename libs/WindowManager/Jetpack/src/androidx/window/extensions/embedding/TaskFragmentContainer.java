@@ -228,6 +228,9 @@ class TaskFragmentContainer {
 
         // Finish dependent containers
         for (TaskFragmentContainer container : mContainersToFinishOnExit) {
+            if (controller.shouldRetainAssociatedContainer(this, container)) {
+                continue;
+            }
             container.finish(true /* shouldFinishDependent */, presenter,
                     wct, controller);
         }
@@ -235,6 +238,9 @@ class TaskFragmentContainer {
 
         // Finish associated activities
         for (Activity activity : mActivitiesToFinishOnExit) {
+            if (controller.shouldRetainAssociatedActivity(this, activity)) {
+                continue;
+            }
             activity.finish();
         }
         mActivitiesToFinishOnExit.clear();

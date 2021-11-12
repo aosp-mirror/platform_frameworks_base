@@ -145,7 +145,6 @@ public class NotifCollectionTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(true);
-        when(mFeatureFlags.isNewNotifPipelineEnabled()).thenReturn(true);
 
         when(mEulogizer.record(any(Exception.class))).thenAnswer(i -> i.getArguments()[0]);
 

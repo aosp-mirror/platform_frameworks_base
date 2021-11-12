@@ -99,7 +99,7 @@ public class PipMenuView extends FrameLayout {
     private static final float MENU_BACKGROUND_ALPHA = 0.3f;
     private static final float DISABLED_ACTION_ALPHA = 0.54f;
 
-    private static final boolean ENABLE_RESIZE_HANDLE = false;
+    private static final boolean ENABLE_ENTER_SPLIT = false;
 
     private int mMenuState;
     private boolean mAllowMenuTimeout = true;
@@ -139,7 +139,7 @@ public class PipMenuView extends FrameLayout {
     protected View mViewRoot;
     protected View mSettingsButton;
     protected View mDismissButton;
-    protected View mResizeHandle;
+    protected View mEnterSplitButton;
     protected View mTopEndContainer;
     protected PipMenuIconsAlgorithm mPipMenuIconsAlgorithm;
 
@@ -177,14 +177,23 @@ public class PipMenuView extends FrameLayout {
             }
         });
 
-        mResizeHandle = findViewById(R.id.resize_handle);
-        mResizeHandle.setAlpha(0);
+        mEnterSplitButton = findViewById(R.id.enter_split);
+        mEnterSplitButton.setAlpha(0);
+        mEnterSplitButton.setOnClickListener(v -> {
+            if (mMenuContainer.getAlpha() != 0) {
+                enterSplit();
+            }
+        });
+
+        findViewById(R.id.resize_handle).setAlpha(0);
+
         mActionsGroup = findViewById(R.id.actions_group);
         mBetweenActionPaddingLand = getResources().getDimensionPixelSize(
                 R.dimen.pip_between_action_padding_land);
         mPipMenuIconsAlgorithm = new PipMenuIconsAlgorithm(mContext);
         mPipMenuIconsAlgorithm.bindViews((ViewGroup) mViewRoot, (ViewGroup) mTopEndContainer,
-                mResizeHandle, mSettingsButton, mDismissButton);
+                findViewById(R.id.resize_handle), mEnterSplitButton, mSettingsButton,
+                mDismissButton);
         mDismissFadeOutDurationMs = context.getResources()
                 .getInteger(R.integer.config_pipExitAnimationDuration);
 
@@ -268,14 +277,13 @@ public class PipMenuView extends FrameLayout {
                     mSettingsButton.getAlpha(), 1f);
             ObjectAnimator dismissAnim = ObjectAnimator.ofFloat(mDismissButton, View.ALPHA,
                     mDismissButton.getAlpha(), 1f);
-            ObjectAnimator resizeAnim = ObjectAnimator.ofFloat(mResizeHandle, View.ALPHA,
-                    mResizeHandle.getAlpha(),
-                    ENABLE_RESIZE_HANDLE && showResizeHandle ? 1f : 0f);
+            ObjectAnimator enterSplitAnim = ObjectAnimator.ofFloat(mEnterSplitButton, View.ALPHA,
+                    mEnterSplitButton.getAlpha(), ENABLE_ENTER_SPLIT ? 1f : 0f);
             if (menuState == MENU_STATE_FULL) {
                 mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim,
-                        resizeAnim);
+                        enterSplitAnim);
             } else {
-                mMenuContainerAnimator.playTogether(resizeAnim);
+                mMenuContainerAnimator.playTogether(enterSplitAnim);
             }
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_IN);
             mMenuContainerAnimator.setDuration(ANIMATION_HIDE_DURATION_MS);
@@ -328,7 +336,7 @@ public class PipMenuView extends FrameLayout {
         mMenuContainer.setAlpha(0f);
         mSettingsButton.setAlpha(0f);
         mDismissButton.setAlpha(0f);
-        mResizeHandle.setAlpha(0f);
+        mEnterSplitButton.setAlpha(0f);
     }
 
     void pokeMenu() {
@@ -368,9 +376,10 @@ public class PipMenuView extends FrameLayout {
                     mSettingsButton.getAlpha(), 0f);
             ObjectAnimator dismissAnim = ObjectAnimator.ofFloat(mDismissButton, View.ALPHA,
                     mDismissButton.getAlpha(), 0f);
-            ObjectAnimator resizeAnim = ObjectAnimator.ofFloat(mResizeHandle, View.ALPHA,
-                    mResizeHandle.getAlpha(), 0f);
-            mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim, resizeAnim);
+            ObjectAnimator enterSplitAnim = ObjectAnimator.ofFloat(mEnterSplitButton, View.ALPHA,
+                    mEnterSplitButton.getAlpha(), 0f);
+            mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim,
+                    enterSplitAnim);
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_OUT);
             mMenuContainerAnimator.setDuration(getFadeOutDuration(animationType));
             mMenuContainerAnimator.addListener(new AnimatorListenerAdapter() {
@@ -521,6 +530,14 @@ public class PipMenuView extends FrameLayout {
             mController.onPipDismiss();
         }
     }
+
+    private void enterSplit() {
+        // Do not notify menu visibility when hiding the menu, the controller will do this when it
+        // handles the message
+        hideMenu(mController::onEnterSplit, false /* notifyMenuVisibility */, true /* resize */,
+                ANIM_TYPE_HIDE);
+    }
+
 
     private void showSettings() {
         final Pair<ComponentName, Integer> topPipActivityInfo =

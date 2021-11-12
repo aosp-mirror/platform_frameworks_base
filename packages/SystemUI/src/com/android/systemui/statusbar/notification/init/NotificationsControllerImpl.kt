@@ -108,7 +108,7 @@ class NotificationsControllerImpl @Inject constructor(
         notifBindPipelineInitializer.initialize()
         animatedImageNotificationManager.bind()
 
-        if (featureFlags.isNewNotifPipelineEnabled) {
+        if (INITIALIZE_NEW_PIPELINE) {
             newNotifPipeline.get().initialize(
                     notificationListener,
                     notificationRowBinder,
@@ -169,5 +169,10 @@ class NotificationsControllerImpl @Inject constructor(
 
     override fun getActiveNotificationsCount(): Int {
         return entryManager.activeNotificationsCount
+    }
+
+    companion object {
+        // NOTE: The new pipeline is always active, even if the old pipeline is *rendering*.
+        private const val INITIALIZE_NEW_PIPELINE = true
     }
 }

@@ -81,6 +81,7 @@ import android.os.ServiceSpecificException;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.incremental.V4Signature;
@@ -2629,6 +2630,7 @@ class PackageManagerShellCommand extends ShellCommand {
         if (userType == null) {
             userType = UserInfo.getDefaultUserType(flags);
         }
+        Trace.traceBegin(Trace.TRACE_TAG_PACKAGE_MANAGER, "shell_runCreateUser");
         try {
             if (UserManager.isUserTypeRestricted(userType)) {
                 // In non-split user mode, userId can only be SYSTEM
@@ -2645,6 +2647,8 @@ class PackageManagerShellCommand extends ShellCommand {
             }
         } catch (ServiceSpecificException e) {
             getErrPrintWriter().println("Error: " + e);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_PACKAGE_MANAGER);
         }
 
         if (info != null) {

@@ -192,7 +192,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntry = createNotification();
         mSbn = mEntry.getSbn();
 
-        when(mFeatureFlags.isNewNotifPipelineEnabled()).thenReturn(false);
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
         mEntryManager = new NotificationEntryManager(
                 mLogger,

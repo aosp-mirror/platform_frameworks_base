@@ -42,6 +42,7 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.TextAttribute;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AndroidFuture;
@@ -385,6 +386,23 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
 
     @Dispatching(cancellable = true)
     @Override
+    public void commitTextWithTextAttribute(InputConnectionCommandHeader header, CharSequence text,
+            int newCursorPosition, @Nullable TextAttribute textAttribute) {
+        dispatchWithTracing("commitTextWithTextAttribute", () -> {
+            if (header.mSessionId != mCurrentSessionId.get()) {
+                return;  // cancelled
+            }
+            InputConnection ic = getInputConnection();
+            if (ic == null || !isActive()) {
+                Log.w(TAG, "commitText on inactive InputConnection");
+                return;
+            }
+            ic.commitText(text, newCursorPosition, textAttribute);
+        });
+    }
+
+    @Dispatching(cancellable = true)
+    @Override
     public void commitCompletion(InputConnectionCommandHeader header, CompletionInfo text) {
         dispatchWithTracing("commitCompletion", () -> {
             if (header.mSessionId != mCurrentSessionId.get()) {
@@ -489,6 +507,23 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
 
     @Dispatching(cancellable = true)
     @Override
+    public void setComposingRegionWithTextAttribute(InputConnectionCommandHeader header, int start,
+            int end, @Nullable TextAttribute textAttribute) {
+        dispatchWithTracing("setComposingRegionWithTextAttribute", () -> {
+            if (header.mSessionId != mCurrentSessionId.get()) {
+                return;  // cancelled
+            }
+            InputConnection ic = getInputConnection();
+            if (ic == null || !isActive()) {
+                Log.w(TAG, "setComposingRegion on inactive InputConnection");
+                return;
+            }
+            ic.setComposingRegion(start, end, textAttribute);
+        });
+    }
+
+    @Dispatching(cancellable = true)
+    @Override
     public void setComposingText(InputConnectionCommandHeader header, CharSequence text,
             int newCursorPosition) {
         dispatchWithTracing("setComposingText", () -> {
@@ -501,6 +536,23 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                 return;
             }
             ic.setComposingText(text, newCursorPosition);
+        });
+    }
+
+    @Dispatching(cancellable = true)
+    @Override
+    public void setComposingTextWithTextAttribute(InputConnectionCommandHeader header,
+            CharSequence text, int newCursorPosition, @Nullable TextAttribute textAttribute) {
+        dispatchWithTracing("setComposingTextWithTextAttribute", () -> {
+            if (header.mSessionId != mCurrentSessionId.get()) {
+                return;  // cancelled
+            }
+            InputConnection ic = getInputConnection();
+            if (ic == null || !isActive()) {
+                Log.w(TAG, "setComposingText on inactive InputConnection");
+                return;
+            }
+            ic.setComposingText(text, newCursorPosition, textAttribute);
         });
     }
 

@@ -1965,13 +1965,12 @@ public class ShortcutService extends IShortcutService.Stub {
 
             ArrayList<ShortcutInfo> cachedOrPinned = new ArrayList<>();
             ps.findAll(cachedOrPinned,
-                    AppSearchShortcutInfo.QUERY_IS_VISIBLE_CACHED_OR_PINNED,
                     (ShortcutInfo si) -> si.isVisibleToPublisher()
                             && si.isDynamic() && (si.isCached() || si.isPinned()),
                     ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO);
 
             // First, remove all un-pinned and non-cached; dynamic shortcuts
-            removedShortcuts = ps.deleteAllDynamicShortcuts(/*ignoreInvisible=*/ true);
+            removedShortcuts = ps.deleteAllDynamicShortcuts();
 
             // Then, add/update all.  We need to make sure to take over "pinned" flag.
             for (int i = 0; i < size; i++) {
@@ -2381,7 +2380,8 @@ public class ShortcutService extends IShortcutService.Stub {
                 if (!ps.isShortcutExistsAndVisibleToPublisher(id)) {
                     continue;
                 }
-                ShortcutInfo removed = ps.deleteDynamicWithId(id, /*ignoreInvisible=*/ true);
+                ShortcutInfo removed = ps.deleteDynamicWithId(id, /*ignoreInvisible=*/ true,
+                        /*wasPushedOut*/ false);
                 if (removed == null) {
                     if (changedShortcuts == null) {
                         changedShortcuts = new ArrayList<>(1);
@@ -2412,11 +2412,10 @@ public class ShortcutService extends IShortcutService.Stub {
                     userId);
             // Dynamic shortcuts that are either cached or pinned will not get deleted.
             ps.findAll(changedShortcuts,
-                    AppSearchShortcutInfo.QUERY_IS_VISIBLE_CACHED_OR_PINNED,
                     (ShortcutInfo si) -> si.isVisibleToPublisher()
                             && si.isDynamic() && (si.isCached() || si.isPinned()),
                     ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO);
-            removedShortcuts = ps.deleteAllDynamicShortcuts(/*ignoreInvisible=*/ true);
+            removedShortcuts = ps.deleteAllDynamicShortcuts();
             changedShortcuts = prepareChangedShortcuts(
                     changedShortcuts, null, removedShortcuts, ps);
         }
@@ -2475,10 +2474,8 @@ public class ShortcutService extends IShortcutService.Stub {
                     | (matchPinned ? ShortcutInfo.FLAG_PINNED : 0)
                     | (matchManifest ? ShortcutInfo.FLAG_MANIFEST : 0)
                     | (matchCached ? ShortcutInfo.FLAG_CACHED_ALL : 0);
-            final String query = AppSearchShortcutInfo.QUERY_IS_VISIBLE_TO_PUBLISHER + " "
-                    + createQuery(matchDynamic, matchPinned, matchManifest, matchCached);
             return getShortcutsWithQueryLocked(
-                    packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR, query,
+                    packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
                     (ShortcutInfo si) ->
                             si.isVisibleToPublisher()
                                     && (si.getFlags() & shortcutFlags) != 0);
@@ -2542,13 +2539,12 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @GuardedBy("mLock")
     private ParceledListSlice<ShortcutInfo> getShortcutsWithQueryLocked(@NonNull String packageName,
-            @UserIdInt int userId, int cloneFlags, @NonNull final String query,
-            @NonNull Predicate<ShortcutInfo> filter) {
+            @UserIdInt int userId, int cloneFlags, @NonNull Predicate<ShortcutInfo> filter) {
 
         final ArrayList<ShortcutInfo> ret = new ArrayList<>();
 
         final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
-        ps.findAll(ret, query, filter, cloneFlags);
+        ps.findAll(ret, filter, cloneFlags);
         return new ParceledListSlice<>(setReturnedByServer(ret));
     }
 
@@ -2955,27 +2951,14 @@ public class ShortcutService extends IShortcutService.Stub {
                     ((queryFlags & ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER) != 0);
             queryFlags |= (getPinnedByAnyLauncher ? ShortcutQuery.FLAG_MATCH_PINNED : 0);
 
-            final boolean matchPinnedOnly =
-                    ((queryFlags & ShortcutQuery.FLAG_MATCH_PINNED) != 0)
-                            && ((queryFlags & ShortcutQuery.FLAG_MATCH_CACHED) == 0)
-                            && ((queryFlags & ShortcutQuery.FLAG_MATCH_DYNAMIC) == 0)
-                            && ((queryFlags & ShortcutQuery.FLAG_MATCH_MANIFEST) == 0);
-
             final Predicate<ShortcutInfo> filter = getFilterFromQuery(ids, locusIds, changedSince,
                     componentName, queryFlags, getPinnedByAnyLauncher);
-            if (matchPinnedOnly) {
-                p.findAllPinned(ret, filter, cloneFlag, callingPackage, launcherUserId,
-                        getPinnedByAnyLauncher);
-            } else if (ids != null && !ids.isEmpty()) {
+            if (ids != null && !ids.isEmpty()) {
                 p.findAllByIds(ret, ids, filter, cloneFlag, callingPackage, launcherUserId,
                         getPinnedByAnyLauncher);
             } else {
-                final boolean matchDynamic = (queryFlags & ShortcutQuery.FLAG_MATCH_DYNAMIC) != 0;
-                final boolean matchPinned = (queryFlags & ShortcutQuery.FLAG_MATCH_PINNED) != 0;
-                final boolean matchManifest = (queryFlags & ShortcutQuery.FLAG_MATCH_MANIFEST) != 0;
-                final boolean matchCached = (queryFlags & ShortcutQuery.FLAG_MATCH_CACHED) != 0;
-                p.findAll(ret, createQuery(matchDynamic, matchPinned, matchManifest, matchCached),
-                        filter, cloneFlag, callingPackage, launcherUserId, getPinnedByAnyLauncher);
+                p.findAll(ret, filter, cloneFlag, callingPackage, launcherUserId,
+                        getPinnedByAnyLauncher);
             }
         }
 
@@ -3090,8 +3073,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 if (sp != null) {
                     // List the shortcuts that are pinned only, these will get removed.
                     removedShortcuts = new ArrayList<>();
-                    sp.findAll(removedShortcuts, AppSearchShortcutInfo.QUERY_IS_VISIBLE_PINNED_ONLY,
-                            (ShortcutInfo si) -> si.isVisibleToPublisher()
+                    sp.findAll(removedShortcuts, (ShortcutInfo si) -> si.isVisibleToPublisher()
                                     && si.isPinned() && !si.isCached() && !si.isDynamic()
                                     && !si.isDeclaredInManifest(),
                             ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO,
@@ -3183,8 +3165,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
                     if (doCache) {
                         if (si.isLongLived()) {
-                            sp.mutateShortcut(si.getId(), si,
-                                    shortcut -> shortcut.addFlags(cacheFlags));
+                            si.addFlags(cacheFlags);
                             if (changedShortcuts == null) {
                                 changedShortcuts = new ArrayList<>(1);
                             }
@@ -3195,21 +3176,20 @@ public class ShortcutService extends IShortcutService.Stub {
                         }
                     } else {
                         ShortcutInfo removed = null;
-                        sp.mutateShortcut(si.getId(), si, shortcut ->
-                                shortcut.clearFlags(cacheFlags));
+                        si.clearFlags(cacheFlags);
                         if (!si.isDynamic() && !si.isCached()) {
                             removed = sp.deleteLongLivedWithId(id, /*ignoreInvisible=*/ true);
                         }
-                        if (removed != null) {
-                            if (removedShortcuts == null) {
-                                removedShortcuts = new ArrayList<>(1);
-                            }
-                            removedShortcuts.add(removed);
-                        } else {
+                        if (removed == null) {
                             if (changedShortcuts == null) {
                                 changedShortcuts = new ArrayList<>(1);
                             }
                             changedShortcuts.add(si);
+                        } else {
+                            if (removedShortcuts == null) {
+                                removedShortcuts = new ArrayList<>(1);
+                            }
+                            removedShortcuts.add(removed);
                         }
                     }
                 }
@@ -5084,8 +5064,7 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             final ShortcutPackage pkg = getPackageShortcutForTest(packageName, userId);
             if (pkg == null) return;
-
-            pkg.mutateShortcut(shortcutId, null, cb);
+            cb.accept(pkg.findShortcutById(shortcutId));
         }
     }
 

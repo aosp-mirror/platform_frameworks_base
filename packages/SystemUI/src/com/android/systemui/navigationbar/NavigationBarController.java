@@ -16,10 +16,14 @@
 
 package com.android.systemui.navigationbar;
 
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.systemui.shared.recents.utilities.Utilities.isTablet;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -27,6 +31,8 @@ import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -46,6 +52,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -142,6 +149,8 @@ public class NavigationBarController implements
         }
         final int oldMode = mNavMode;
         mNavMode = mode;
+        updateAccessibilityButtonModeIfNeeded();
+
         mHandler.post(() -> {
             // create/destroy nav bar based on nav mode only in unfolded state
             if (oldMode != mNavMode) {
@@ -155,6 +164,35 @@ public class NavigationBarController implements
                 navBar.getView().updateStates();
             }
         });
+    }
+
+    private void updateAccessibilityButtonModeIfNeeded() {
+        ContentResolver contentResolver = mContext.getContentResolver();
+        final int mode = Settings.Secure.getIntForUser(contentResolver,
+                Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
+                ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR, UserHandle.USER_CURRENT);
+
+        // ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU is compatible under gestural or non-gestural
+        // mode, so we don't need to update it.
+        if (mode == ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
+            return;
+        }
+
+        // ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR is incompatible under gestural mode. Need to
+        // force update to ACCESSIBILITY_BUTTON_MODE_GESTURE.
+        if (QuickStepContract.isGesturalMode(mNavMode)
+                && mode == ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR) {
+            Settings.Secure.putIntForUser(contentResolver,
+                    Settings.Secure.ACCESSIBILITY_BUTTON_MODE, ACCESSIBILITY_BUTTON_MODE_GESTURE,
+                    UserHandle.USER_CURRENT);
+            // ACCESSIBILITY_BUTTON_MODE_GESTURE is incompatible under non gestural mode. Need to
+            // force update to ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR.
+        } else if (!QuickStepContract.isGesturalMode(mNavMode)
+                && mode == ACCESSIBILITY_BUTTON_MODE_GESTURE) {
+            Settings.Secure.putIntForUser(contentResolver,
+                    Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
+                    ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR, UserHandle.USER_CURRENT);
+        }
     }
 
     /** @see #initializeTaskbarIfNecessary() */
@@ -222,6 +260,8 @@ public class NavigationBarController implements
      */
     public void createNavigationBars(final boolean includeDefaultDisplay,
             RegisterStatusBarResult result) {
+        updateAccessibilityButtonModeIfNeeded();
+
         // Don't need to create nav bar on the default display if we initialize TaskBar.
         final boolean shouldCreateDefaultNavbar = includeDefaultDisplay
                 && !initializeTaskbarIfNecessary();
