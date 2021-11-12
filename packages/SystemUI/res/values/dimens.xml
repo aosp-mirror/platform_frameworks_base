@@ -753,6 +753,9 @@
     <!-- Minimum distance the user has to drag down to go to the full shade. -->
     <dimen name="keyguard_drag_down_min_distance">100dp</dimen>
 
+    <!-- The margin from the top of the screen to notifications and keyguard status view in
+         split shade on keyguard-->
+    <dimen name="keyguard_split_shade_top_margin">68dp</dimen>
     <!-- The margin between the status view and the notifications on Keyguard.-->
     <dimen name="keyguard_status_view_bottom_margin">20dp</dimen>
     <!-- Minimum margin between clock and status bar -->
