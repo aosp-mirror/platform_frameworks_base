@@ -3143,7 +3143,7 @@ public class AccountManagerService
                 GrantCredentialsPermissionActivity.EXTRAS_AUTH_TOKEN_TYPE);
         final String titleAndSubtitle =
                 mContext.getString(R.string.permission_request_notification_for_app_with_subtitle,
-                getApplicationLabel(packageName), account.name);
+                getApplicationLabel(packageName, userId), account.name);
         final int index = titleAndSubtitle.indexOf('\n');
         String title = titleAndSubtitle;
         String subtitle = "";
@@ -3169,10 +3169,10 @@ public class AccountManagerService
                 account, authTokenType, uid), n, "android", user.getIdentifier());
     }
 
-    private String getApplicationLabel(String packageName) {
+    private String getApplicationLabel(String packageName, int userId) {
         try {
             return mPackageManager.getApplicationLabel(
-                    mPackageManager.getApplicationInfo(packageName, 0)).toString();
+                    mPackageManager.getApplicationInfoAsUser(packageName, 0, userId)).toString();
         } catch (PackageManager.NameNotFoundException e) {
             return packageName;
         }
