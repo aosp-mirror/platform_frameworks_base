@@ -274,6 +274,17 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return mSideStageListener.mVisible && mMainStageListener.mVisible;
     }
 
+    @SplitScreen.StageType
+    int getStageOfTask(int taskId) {
+        if (mMainStage.containsTask(taskId)) {
+            return STAGE_TYPE_MAIN;
+        } else if (mSideStage.containsTask(taskId)) {
+            return STAGE_TYPE_SIDE;
+        }
+
+        return STAGE_TYPE_UNDEFINED;
+    }
+
     boolean moveToStage(ActivityManager.RunningTaskInfo task, @SplitScreen.StageType int stageType,
             @SplitPosition int stagePosition, WindowContainerTransaction wct) {
         StageTaskListener targetStage;
