@@ -123,6 +123,8 @@ public class CommunalManagerServiceTest {
 
         doNothing().when(mContextSpy).enforceCallingPermission(
                 eq(Manifest.permission.WRITE_COMMUNAL_STATE), anyString());
+        doNothing().when(mContextSpy).enforceCallingPermission(
+                eq(Manifest.permission.READ_COMMUNAL_STATE), anyString());
 
         mService = new CommunalManagerService(mContextSpy);
         mService.onBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
@@ -200,6 +202,18 @@ public class CommunalManagerServiceTest {
 
     private Intent createPackageIntent(String packageName, @Nullable String action) {
         return new Intent(action, Uri.parse("package:" + packageName));
+    }
+
+    @Test
+    public void testIsCommunalMode_isTrue() throws RemoteException {
+        mBinder.setCommunalViewShowing(true);
+        assertThat(mBinder.isCommunalMode()).isTrue();
+    }
+
+    @Test
+    public void testIsCommunalMode_isFalse() throws RemoteException {
+        mBinder.setCommunalViewShowing(false);
+        assertThat(mBinder.isCommunalMode()).isFalse();
     }
 
     @Test

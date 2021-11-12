@@ -254,6 +254,18 @@ public final class CommunalManagerService extends SystemService {
                             + "permission required to modify communal state.");
             mCommunalViewIsShowing.set(isShowing);
         }
+
+        /**
+         * Checks whether or not we are in communal mode.
+         */
+        @RequiresPermission(Manifest.permission.READ_COMMUNAL_STATE)
+        @Override
+        public boolean isCommunalMode() {
+            mContext.enforceCallingPermission(Manifest.permission.READ_COMMUNAL_STATE,
+                    Manifest.permission.READ_COMMUNAL_STATE
+                            + "permission required to read communal state.");
+            return mCommunalViewIsShowing.get();
+        }
     }
 
     /**

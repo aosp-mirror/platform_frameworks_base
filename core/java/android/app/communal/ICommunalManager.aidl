@@ -22,6 +22,7 @@ package android.app.communal;
  *
  * @hide
  */
-oneway interface ICommunalManager {
-    void setCommunalViewShowing(boolean isShowing);
+interface ICommunalManager {
+    oneway void setCommunalViewShowing(boolean isShowing);
+    boolean isCommunalMode();
 }

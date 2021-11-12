@@ -1309,6 +1309,14 @@ package android.app.backup {
 
 }
 
+package android.app.communal {
+
+  public final class CommunalManager {
+    method @RequiresPermission("android.permission.READ_COMMUNAL_STATE") public boolean isCommunalMode();
+  }
+
+}
+
 package android.app.compat {
 
   public final class CompatChanges {

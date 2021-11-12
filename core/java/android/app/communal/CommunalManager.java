@@ -19,6 +19,7 @@ package android.app.communal;
 import android.Manifest;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
@@ -33,6 +34,7 @@ import android.os.RemoteException;
  *
  * @hide
  */
+@SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
 @SystemService(Context.COMMUNAL_MANAGER_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_COMMUNAL_MODE)
 public final class CommunalManager {
@@ -59,6 +61,7 @@ public final class CommunalManager {
     @Disabled
     public static final long ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT = 200324021L;
 
+    /** @hide */
     public CommunalManager(ICommunalManager service) {
         mService = service;
     }
@@ -67,11 +70,25 @@ public final class CommunalManager {
      * Updates whether or not the communal view is currently showing over the lockscreen.
      *
      * @param isShowing Whether communal view is showing.
+     *
+     * @hide
      */
     @RequiresPermission(Manifest.permission.WRITE_COMMUNAL_STATE)
     public void setCommunalViewShowing(boolean isShowing) {
         try {
             mService.setCommunalViewShowing(isShowing);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Check whether or not the communal view is currently showing over the lockscreen.
+     */
+    @RequiresPermission(Manifest.permission.READ_COMMUNAL_STATE)
+    public boolean isCommunalMode() {
+        try {
+            return mService.isCommunalMode();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
