@@ -46,6 +46,7 @@ import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -1788,6 +1789,11 @@ public class AccountManagerService
                     if (accounts.accountsDb.findCeAccountId(account) >= 0) {
                         Log.w(TAG, "insertAccountIntoDatabase: " + account
                                 + ", skipping since the account already exists");
+                        return false;
+                    }
+                    if (accounts.accountsDb.findAllDeAccounts().size() > 100) {
+                        Log.w(TAG, "insertAccountIntoDatabase: " + account
+                                + ", skipping since more than 50 accounts on device exist");
                         return false;
                     }
                     long accountId = accounts.accountsDb.insertCeAccount(account, password);
@@ -4754,6 +4760,11 @@ public class AccountManagerService
          * supplied entries in the system Settings app.
          */
          protected boolean checkKeyIntent(int authUid, Intent intent) {
+            // Explicitly set an empty ClipData to ensure that we don't offer to
+            // promote any Uris contained inside for granting purposes
+            if (intent.getClipData() == null) {
+                intent.setClipData(ClipData.newPlainText(null, null));
+            }
             intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_READ_URI_PERMISSION
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION

@@ -794,6 +794,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     /**
+     * Check if the caller is the owner of this session. Otherwise throw a
+     * {@link SecurityException}.
+     */
+    @GuardedBy("mLock")
+    private void assertCallerIsOwnerOrRootOrSystemLocked() {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.ROOT_UID && callingUid != mInstallerUid
+                && callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException("Session does not belong to uid " + callingUid);
+        }
+    }
+
+    /**
      * If anybody is reading or writing data of the session, throw an {@link SecurityException}.
      */
     @GuardedBy("mLock")
@@ -1564,7 +1577,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Override
     public void abandon() {
         synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
+            assertCallerIsOwnerOrRootOrSystemLocked();
 
             if (mRelinquished) {
                 Slog.d(TAG, "Ignoring abandon after commit relinquished control");
