@@ -99,7 +99,7 @@ public class PipMenuView extends FrameLayout {
     private static final float MENU_BACKGROUND_ALPHA = 0.3f;
     private static final float DISABLED_ACTION_ALPHA = 0.54f;
 
-    private static final boolean ENABLE_ENTER_SPLIT = false;
+    private static final boolean ENABLE_ENTER_SPLIT = true;
 
     private int mMenuState;
     private boolean mAllowMenuTimeout = true;
