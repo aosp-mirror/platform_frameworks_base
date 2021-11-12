@@ -818,7 +818,7 @@ public class KeyguardIndicationController {
     }
 
     private void showTryFingerprintMsg(int msgId, String a11yString) {
-        if (mKeyguardUpdateMonitor.isUdfpsAvailable()) {
+        if (mKeyguardUpdateMonitor.isUdfpsSupported()) {
             // if udfps available, there will always be a tappable affordance to unlock
             // For example, the lock icon
             if (mKeyguardBypassController.getUserHasDeviceEntryIntent()) {

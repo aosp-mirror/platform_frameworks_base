@@ -217,7 +217,7 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase
             }
 
             @Override
-            public void onTaskAppeared(RemoteAnimationTarget app) throws RemoteException {
+            public void onTasksAppeared(RemoteAnimationTarget[] app) throws RemoteException {
                 /* no-op */
             }
         };

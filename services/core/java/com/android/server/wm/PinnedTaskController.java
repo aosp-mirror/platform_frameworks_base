@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -173,10 +172,8 @@ class PinnedTaskController {
      * to avoid flickering when running PiP animation across different orientations.
      */
     void deferOrientationChangeForEnteringPipFromFullScreenIfNeeded() {
-        final Task topFullscreenTask = mDisplayContent.getDefaultTaskDisplayArea()
-                .getTopRootTaskInWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        final ActivityRecord topFullscreen = topFullscreenTask != null
-                ? topFullscreenTask.topRunningActivity() : null;
+        final ActivityRecord topFullscreen = mDisplayContent.getActivity(
+                a -> a.fillsParent() && !a.getTask().inMultiWindowMode());
         if (topFullscreen == null || topFullscreen.hasFixedRotationTransform()) {
             return;
         }

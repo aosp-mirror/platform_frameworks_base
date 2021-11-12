@@ -96,6 +96,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController.ExitReason;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.util.StagedSplitBounds;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -691,11 +692,25 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         mRecentTasks.ifPresent(recentTasks -> {
+            Rect topLeftBounds = mSplitLayout.getBounds1();
+            Rect bottomRightBounds = mSplitLayout.getBounds2();
             int mainStageTopTaskId = mMainStage.getTopVisibleChildTaskId();
             int sideStageTopTaskId = mSideStage.getTopVisibleChildTaskId();
+            boolean sideStageTopLeft = mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT;
+            int leftTopTaskId;
+            int rightBottomTaskId;
+            if (sideStageTopLeft) {
+                leftTopTaskId = sideStageTopTaskId;
+                rightBottomTaskId = mainStageTopTaskId;
+            } else {
+                leftTopTaskId = mainStageTopTaskId;
+                rightBottomTaskId = sideStageTopTaskId;
+            }
+            StagedSplitBounds splitBounds = new StagedSplitBounds(topLeftBounds, bottomRightBounds,
+                    leftTopTaskId, rightBottomTaskId);
             if (mainStageTopTaskId != INVALID_TASK_ID && sideStageTopTaskId != INVALID_TASK_ID) {
                 // Update the pair for the top tasks
-                recentTasks.addSplitPair(mainStageTopTaskId, sideStageTopTaskId);
+                recentTasks.addSplitPair(mainStageTopTaskId, sideStageTopTaskId, splitBounds);
             }
         });
     }

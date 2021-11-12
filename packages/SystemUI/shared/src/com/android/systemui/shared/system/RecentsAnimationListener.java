@@ -39,5 +39,5 @@ public interface RecentsAnimationListener {
      * Called when the task of an activity that has been started while the recents animation
      * was running becomes ready for control.
      */
-    void onTaskAppeared(RemoteAnimationTargetCompat app);
+    void onTasksAppeared(RemoteAnimationTargetCompat[] app);
 }
