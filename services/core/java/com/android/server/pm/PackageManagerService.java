@@ -146,13 +146,7 @@ import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProvider;
-
-import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.pkg.PackageStateUtils;
-import com.android.server.pm.pkg.PackageUserState;
-import com.android.server.pm.pkg.PackageUserStateInternal;
 import android.content.pm.pkg.PackageUserStateUtils;
-import com.android.server.pm.pkg.SuspendParams;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -257,6 +251,11 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackageApi;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateImpl;
+import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.PackageStateUtils;
+import com.android.server.pm.pkg.PackageUserState;
+import com.android.server.pm.pkg.PackageUserStateInternal;
+import com.android.server.pm.pkg.SuspendParams;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
@@ -1829,8 +1828,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mBroadcastHelper = new BroadcastHelper(mInjector);
         mAppDataHelper = new AppDataHelper(this);
         mRemovePackageHelper = new RemovePackageHelper(this, mAppDataHelper);
-        mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(this, mRemovePackageHelper,
-                mAppDataHelper);
+        mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(this);
         mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
                 mAppDataHelper);
         mPreferredActivityHelper = new PreferredActivityHelper(this);
@@ -2909,7 +2907,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     volumeUuid);
             final boolean aggressive = (storageFlags
                     & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0;
-            final long reservedBytes = storage.getStorageCacheBytes(file, storageFlags);
 
             // 1. Pre-flight to determine if we have any chance to succeed
             // 2. Consider preloaded data (after 1w honeymoon, unless aggressive)
@@ -2926,10 +2923,11 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             // 4. Consider cached app data (above quotas)
-            try {
-                mInstaller.freeCache(volumeUuid, bytes, reservedBytes,
-                        Installer.FLAG_FREE_CACHE_V2);
-            } catch (InstallerException ignored) {
+            synchronized (mInstallLock) {
+                try {
+                    mInstaller.freeCache(volumeUuid, bytes, Installer.FLAG_FREE_CACHE_V2);
+                } catch (InstallerException ignored) {
+                }
             }
             if (file.getUsableSpace() >= bytes) return;
 
@@ -2953,10 +2951,12 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             // 8. Consider cached app data (below quotas)
-            try {
-                mInstaller.freeCache(volumeUuid, bytes, reservedBytes,
-                        Installer.FLAG_FREE_CACHE_V2 | Installer.FLAG_FREE_CACHE_V2_DEFY_QUOTA);
-            } catch (InstallerException ignored) {
+            synchronized (mInstallLock) {
+                try {
+                    mInstaller.freeCache(volumeUuid, bytes,
+                            Installer.FLAG_FREE_CACHE_V2 | Installer.FLAG_FREE_CACHE_V2_DEFY_QUOTA);
+                } catch (InstallerException ignored) {
+                }
             }
             if (file.getUsableSpace() >= bytes) return;
 
@@ -2982,9 +2982,11 @@ public class PackageManagerService extends IPackageManager.Stub
             // 12. Clear temp install session files
             mInstallerService.freeStageDirs(volumeUuid);
         } else {
-            try {
-                mInstaller.freeCache(volumeUuid, bytes, 0, 0);
-            } catch (InstallerException ignored) {
+            synchronized (mInstallLock) {
+                try {
+                    mInstaller.freeCache(volumeUuid, bytes, 0);
+                } catch (InstallerException ignored) {
+                }
             }
         }
         if (file.getUsableSpace() >= bytes) return;
@@ -11186,4 +11188,28 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         return scanFlags;
     }
+
+    Pair<Integer, Integer> getSystemPackageRescanFlagsAndReparseFlags(File scanFile,
+            int systemScanFlags, int systemParseFlags) {
+        List<ScanPartition> dirsToScanAsSystem =
+                mInitAndSystemPackageHelper.getDirsToScanAsSystem();
+        @ParsingPackageUtils.ParseFlags int reparseFlags = 0;
+        @PackageManagerService.ScanFlags int rescanFlags = 0;
+        for (int i1 = dirsToScanAsSystem.size() - 1; i1 >= 0; i1--) {
+            final ScanPartition partition = dirsToScanAsSystem.get(i1);
+            if (partition.containsPrivApp(scanFile)) {
+                reparseFlags = systemParseFlags;
+                rescanFlags = systemScanFlags | SCAN_AS_PRIVILEGED
+                        | partition.scanFlag;
+                break;
+            }
+            if (partition.containsApp(scanFile)) {
+                reparseFlags = systemParseFlags;
+                rescanFlags = systemScanFlags | partition.scanFlag;
+                break;
+            }
+        }
+        return new Pair<>(rescanFlags, reparseFlags);
+    }
+
 }

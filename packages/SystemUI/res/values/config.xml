@@ -638,9 +638,6 @@
          screen on inactivity. -->
     <bool name="config_enableIdleMode">false</bool>
 
-    <!-- Timeout to idle mode duration in milliseconds. -->
-    <integer name="config_idleModeTimeout">10000</integer>
-
     <!-- This value is used when calculating whether the device is in ambient light mode. It is
         light mode when the light sensor sample value exceeds above this value. -->
     <integer name="config_ambientLightModeThreshold">5</integer>

@@ -1827,7 +1827,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 broadcastFilterForAllUsers.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
                 mContext.registerReceiverAsUser(new ImmsBroadcastReceiverForAllUsers(),
                         UserHandle.ALL, broadcastFilterForAllUsers, null, null,
-                        Context.RECEIVER_NOT_EXPORTED);
+                        Context.RECEIVER_EXPORTED);
 
                 final String defaultImiId = mSettings.getSelectedInputMethod();
                 final boolean imeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);
@@ -2916,7 +2916,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
             if (mStatusBar != null) {
                 mStatusBar.setImeWindowStatus(mCurTokenDisplayId, mCurToken, vis, backDisposition,
-                        needsToShowImeSwitcher, false /*isMultiClientImeEnabled*/);
+                        needsToShowImeSwitcher);
             }
             final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
             if (imi != null && needsToShowImeSwitcher) {

@@ -22,6 +22,7 @@ import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputContentInfo;
+import android.view.inputmethod.TextAttribute;
 
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.InputConnectionCommandHeader;
@@ -52,10 +53,16 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
     void setComposingText(in InputConnectionCommandHeader header, CharSequence text,
             int newCursorPosition);
 
+    void setComposingTextWithTextAttribute(in InputConnectionCommandHeader header,
+                CharSequence text, int newCursorPosition, in TextAttribute textAttribute);
+
     void finishComposingText(in InputConnectionCommandHeader header);
 
     void commitText(in InputConnectionCommandHeader header, CharSequence text,
-            int newCursorPosition);
+                int newCursorPosition);
+
+    void commitTextWithTextAttribute(in InputConnectionCommandHeader header, CharSequence text,
+            int newCursorPosition, in TextAttribute textAttribute);
 
     void commitCompletion(in InputConnectionCommandHeader header, in CompletionInfo completion);
 
@@ -81,6 +88,9 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
             in Bundle data);
 
     void setComposingRegion(in InputConnectionCommandHeader header, int start, int end);
+
+    void setComposingRegionWithTextAttribute(in InputConnectionCommandHeader header, int start,
+            int end, in TextAttribute textAttribute);
 
     void getSelectedText(in InputConnectionCommandHeader header, int flags,
             in AndroidFuture future /* T=CharSequence */);

@@ -435,7 +435,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         boolean wasUdfpsSupported = mUdfpsSupported;
         boolean wasUdfpsEnrolled = mUdfpsEnrolled;
 
-        mUdfpsSupported = mAuthController.getUdfpsSensorLocation() != null;
+        mUdfpsSupported = mKeyguardUpdateMonitor.isUdfpsSupported();
         mView.setUseBackground(mUdfpsSupported);
 
         mUdfpsEnrolled = mKeyguardUpdateMonitor.isUdfpsEnrolled();

@@ -18,6 +18,7 @@ package com.android.internal.inputmethod;
 
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.view.KeyEvent;
@@ -27,6 +28,7 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.SurroundingText;
+import android.view.inputmethod.TextAttribute;
 
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.view.IInputContext;
@@ -211,6 +213,28 @@ public final class IInputContextInvoker {
     }
 
     /**
+     * Invokes {@link IInputContext#commitTextWithTextAttribute(InputConnectionCommandHeader, int,
+     * CharSequence)}.
+     *
+     * @param text {@code text} parameter to be passed.
+     * @param newCursorPosition {@code newCursorPosition} parameter to be passed.
+     * @param textAttribute The extra information about the text.
+     * @return {@code true} if the invocation is completed without {@link RemoteException}.
+     *         {@code false} otherwise.
+     */
+    @AnyThread
+    public boolean commitText(CharSequence text, int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        try {
+            mIInputContext.commitTextWithTextAttribute(
+                    createHeader(), text, newCursorPosition, textAttribute);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Invokes {@link IInputContext#commitCompletion(InputConnectionCommandHeader, CompletionInfo)}.
      *
      * @param text {@code text} parameter to be passed.
@@ -315,6 +339,27 @@ public final class IInputContextInvoker {
     }
 
     /**
+     * Invokes {@link IInputContext#setComposingRegionWithTextAttribute(
+     * InputConnectionCommandHeader, int, int, TextAttribute)}.
+     *
+     * @param start {@code id} parameter to be passed.
+     * @param end {@code id} parameter to be passed.
+     * @param textAttribute The extra information about the text.
+     * @return {@code true} if the invocation is completed without {@link RemoteException}.
+     *         {@code false} otherwise.
+     */
+    @AnyThread
+    public boolean setComposingRegion(int start, int end, @Nullable TextAttribute textAttribute) {
+        try {
+            mIInputContext.setComposingRegionWithTextAttribute(
+                    createHeader(), start, end, textAttribute);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Invokes
      * {@link IInputContext#setComposingText(InputConnectionCommandHeader, CharSequence, int)}.
      *
@@ -327,6 +372,28 @@ public final class IInputContextInvoker {
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
         try {
             mIInputContext.setComposingText(createHeader(), text, newCursorPosition);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Invokes {@link IInputContext#setComposingTextWithTextAttribute(InputConnectionCommandHeader,
+     * CharSequence, int, TextAttribute)}.
+     *
+     * @param text {@code text} parameter to be passed.
+     * @param newCursorPosition {@code newCursorPosition} parameter to be passed.
+     * @param textAttribute The extra information about the text.
+     * @return {@code true} if the invocation is completed without {@link RemoteException}.
+     *         {@code false} otherwise.
+     */
+    @AnyThread
+    public boolean setComposingText(CharSequence text, int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        try {
+            mIInputContext.setComposingTextWithTextAttribute(
+                    createHeader(), text, newCursorPosition, textAttribute);
             return true;
         } catch (RemoteException e) {
             return false;

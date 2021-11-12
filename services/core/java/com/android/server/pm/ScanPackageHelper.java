@@ -23,7 +23,6 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PROCESS_NOT_DEFINED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
-import static android.os.incremental.IncrementalManager.isIncrementalPath;
 
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.PackageManagerService.DEBUG_ABI_SELECTION;
@@ -92,7 +91,6 @@ import com.android.internal.security.VerityUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.library.PackageBackwardCompatibility;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
@@ -106,7 +104,6 @@ import java.io.IOException;
 import java.security.DigestException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -118,66 +115,17 @@ import java.util.UUID;
  */
 final class ScanPackageHelper {
     final PackageManagerService mPm;
-    final InstallPackageHelper mInstallPackageHelper;
     final PackageManagerServiceInjector mInjector;
 
     // TODO(b/198166813): remove PMS dependency
     public ScanPackageHelper(PackageManagerService pm) {
         mPm = pm;
         mInjector = pm.mInjector;
-        mInstallPackageHelper = new InstallPackageHelper(mPm, mInjector);
     }
 
     ScanPackageHelper(PackageManagerService pm, PackageManagerServiceInjector injector) {
         mPm = pm;
         mInjector = injector;
-        mInstallPackageHelper = new InstallPackageHelper(mPm, injector);
-    }
-
-    /**
-     * Prepares the system to commit a {@link ScanResult} in a way that will not fail by registering
-     * the app ID required for reconcile.
-     * @return {@code true} if a new app ID was registered and will need to be cleaned up on
-     *         failure.
-     */
-    public boolean optimisticallyRegisterAppId(@NonNull ScanResult result)
-            throws PackageManagerException {
-        if (!result.mExistingSettingCopied || result.needsNewAppId()) {
-            synchronized (mPm.mLock) {
-                // THROWS: when we can't allocate a user id. add call to check if there's
-                // enough space to ensure we won't throw; otherwise, don't modify state
-                return mPm.mSettings.registerAppIdLPw(result.mPkgSetting, result.needsNewAppId());
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Reverts any app ID creation that were made by
-     * {@link #optimisticallyRegisterAppId(ScanResult)}. Note: this is only necessary if the
-     * referenced method returned true.
-     */
-    public void cleanUpAppIdCreation(@NonNull ScanResult result) {
-        // iff we've acquired an app ID for a new package setting, remove it so that it can be
-        // acquired by another request.
-        if (result.mPkgSetting.getAppId() > 0) {
-            mPm.mSettings.removeAppIdLPw(result.mPkgSetting.getAppId());
-        }
-    }
-
-    /**
-     *  Traces a package scan.
-     *  @see #scanPackageLI(File, int, int, long, UserHandle)
-     */
-    @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
-    public AndroidPackage scanPackageTracedLI(File scanFile, final int parseFlags,
-            int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage [" + scanFile.toString() + "]");
-        try {
-            return scanPackageLI(scanFile, parseFlags, scanFlags, currentTime, user);
-        } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        }
     }
 
     /**
@@ -195,31 +143,6 @@ final class ScanPackageHelper {
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
-    }
-
-    /**
-     *  Scans a package and returns the newly parsed package.
-     *  Returns {@code null} in case of errors and the error code is stored in mLastScanError
-     */
-    @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
-    private AndroidPackage scanPackageLI(File scanFile, int parseFlags, int scanFlags,
-            long currentTime, UserHandle user) throws PackageManagerException {
-        if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanFile);
-
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
-        final ParsedPackage parsedPackage;
-        try (PackageParser2 pp = mInjector.getScanningPackageParser()) {
-            parsedPackage = pp.parsePackage(scanFile, parseFlags, false);
-        } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        }
-
-        // Static shared libraries have synthetic package names
-        if (parsedPackage.isStaticSharedLibrary()) {
-            PackageManagerService.renameStaticSharedLibraryPackage(parsedPackage);
-        }
-
-        return addForInitLI(parsedPackage, parseFlags, scanFlags, currentTime, user);
     }
 
     // TODO(b/199937291): scanPackageNewLI() and scanPackageOnlyLI() should be merged.
@@ -748,22 +671,7 @@ final class ScanPackageHelper {
         return scanFlags;
     }
 
-
-    /**
-     * Adds a new package to the internal data structures during platform initialization.
-     * <p>After adding, the package is known to the system and available for querying.
-     * <p>For packages located on the device ROM [eg. packages located in /system, /vendor,
-     * etc...], additional checks are performed. Basic verification [such as ensuring
-     * matching signatures, checking version codes, etc...] occurs if the package is
-     * identical to a previously known package. If the package fails a signature check,
-     * the version installed on /data will be removed. If the version of the new package
-     * is less than or equal than the version on /data, it will be ignored.
-     * <p>Regardless of the package location, the results are applied to the internal
-     * structures and the package is made available to the rest of the system.
-     * <p>NOTE: The return value should be removed. It's the passed in package object.
-     */
-    @GuardedBy({"mPm.mLock", "mPm.mInstallLock"})
-    public AndroidPackage addForInitLI(ParsedPackage parsedPackage,
+    public Pair<ScanResult, Boolean> scanSystemPackageLI(ParsedPackage parsedPackage,
             @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user) throws PackageManagerException {
@@ -828,7 +736,7 @@ final class ScanPackageHelper {
                     // we're updating the disabled package, so, scan it as the package setting
                     boolean isPlatformPackage = platformPackage != null
                             && platformPackage.getPackageName().equals(
-                                    parsedPackage.getPackageName());
+                            parsedPackage.getPackageName());
                     final ScanRequest request = new ScanRequest(parsedPackage, sharedUserSetting,
                             null, disabledPkgSetting /* pkgSetting */,
                             null /* disabledPkgSetting */, null /* originalPkgSetting */,
@@ -872,7 +780,7 @@ final class ScanPackageHelper {
 
             final InstallArgs args = new FileInstallArgs(
                     pkgSetting.getPathString(), getAppDexInstructionSets(
-                            pkgSetting.getPrimaryCpuAbi(), pkgSetting.getSecondaryCpuAbi()), mPm);
+                    pkgSetting.getPrimaryCpuAbi(), pkgSetting.getSecondaryCpuAbi()), mPm);
             args.cleanUpResourcesLI();
             synchronized (mPm.mLock) {
                 mPm.mSettings.enableSystemPackageLPw(pkgSetting.getPackageName());
@@ -957,7 +865,7 @@ final class ScanPackageHelper {
                                 + parsedPackage.getPath());
                 InstallArgs args = new FileInstallArgs(
                         pkgSetting.getPathString(), getAppDexInstructionSets(
-                                pkgSetting.getPrimaryCpuAbi(), pkgSetting.getSecondaryCpuAbi()),
+                        pkgSetting.getPrimaryCpuAbi(), pkgSetting.getSecondaryCpuAbi()),
                         mPm);
                 synchronized (mPm.mInstallLock) {
                     args.cleanUpResourcesLI();
@@ -977,52 +885,9 @@ final class ScanPackageHelper {
             }
         }
 
-        final ScanResult scanResult = scanPackageNewLI(parsedPackage, parseFlags, scanFlags
-                | SCAN_UPDATE_SIGNATURE, currentTime, user, null);
-        if (scanResult.mSuccess) {
-            synchronized (mPm.mLock) {
-                boolean appIdCreated = false;
-                try {
-                    final String pkgName = scanResult.mPkgSetting.getPackageName();
-                    final Map<String, ReconciledPackage> reconcileResult =
-                            mInstallPackageHelper.reconcilePackagesLocked(
-                                    new ReconcileRequest(
-                                            Collections.singletonMap(pkgName, scanResult),
-                                            mPm.mSharedLibraries,
-                                            mPm.mPackages,
-                                            Collections.singletonMap(
-                                                    pkgName,
-                                                    mPm.getSettingsVersionForPackage(
-                                                            parsedPackage)),
-                                            Collections.singletonMap(pkgName,
-                                                    mPm.getSharedLibLatestVersionSetting(
-                                                            scanResult))),
-                                    mPm.mSettings.getKeySetManagerService(), mInjector);
-                    appIdCreated = optimisticallyRegisterAppId(scanResult);
-                    mInstallPackageHelper.commitReconciledScanResultLocked(
-                            reconcileResult.get(pkgName), mPm.mUserManager.getUserIds());
-                } catch (PackageManagerException e) {
-                    if (appIdCreated) {
-                        cleanUpAppIdCreation(scanResult);
-                    }
-                    throw e;
-                }
-            }
-        }
-
-        if (shouldHideSystemApp) {
-            synchronized (mPm.mLock) {
-                mPm.mSettings.disableSystemPackageLPw(parsedPackage.getPackageName(), true);
-            }
-        }
-        if (mPm.mIncrementalManager != null && isIncrementalPath(parsedPackage.getPath())) {
-            if (pkgSetting != null && pkgSetting.isPackageLoading()) {
-                // Continue monitoring loading progress of active incremental packages
-                mPm.mIncrementalManager.registerLoadingProgressCallback(parsedPackage.getPath(),
-                        new IncrementalProgressListener(parsedPackage.getPackageName(), mPm));
-            }
-        }
-        return scanResult.mPkgSetting.getPkg();
+        final ScanResult scanResult = scanPackageNewLI(parsedPackage, parseFlags,
+                scanFlags | SCAN_UPDATE_SIGNATURE, currentTime, user, null);
+        return new Pair<>(scanResult, shouldHideSystemApp);
     }
 
     /**
@@ -1085,7 +950,7 @@ final class ScanPackageHelper {
                 && ps.getLastModifiedTime() == lastModifiedTime
                 && !InstallPackageHelper.isCompatSignatureUpdateNeeded(settingsVersionForPackage)
                 && !InstallPackageHelper.isRecoverSignatureUpdateNeeded(
-                        settingsVersionForPackage)) {
+                settingsVersionForPackage)) {
             if (ps.getSigningDetails().getSignatures() != null
                     && ps.getSigningDetails().getSignatures().length != 0
                     && ps.getSigningDetails().getSignatureSchemeVersion()

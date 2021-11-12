@@ -4631,6 +4631,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     public void addContainerViewAt(View v, int index) {
         Assert.isMainThread();
+        ensureRemovedFromTransientContainer(v);
         addView(v, index);
         if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
             mController.updateShowEmptyShadeView();
@@ -4638,6 +4639,22 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
 
         updateSpeedBumpIndex();
+    }
+
+    private void ensureRemovedFromTransientContainer(View v) {
+        if (v.getParent() == this && v instanceof SectionHeaderView) {
+            ExpandableView expandableView = (ExpandableView) v;
+            ViewGroup transientContainer = expandableView.getTransientContainer();
+            // If the child is animating away, it will still have a parent, so
+            // detach it first
+            // TODO: We should really cancel the active animations here. This will
+            //  happen automatically when the view's intro animation starts, but
+            //  it's a fragile link.
+            if (transientContainer != null) {
+                transientContainer.removeTransientView(v);
+                expandableView.setTransientContainer(null);
+            }
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)

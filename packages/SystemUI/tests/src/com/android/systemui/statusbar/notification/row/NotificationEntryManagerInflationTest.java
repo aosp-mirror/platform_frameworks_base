@@ -179,7 +179,6 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 .setNotification(notification)
                 .build();
 
-        when(mFeatureFlags.isNewNotifPipelineEnabled()).thenReturn(false);
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
 
         mEntryManager = new NotificationEntryManager(

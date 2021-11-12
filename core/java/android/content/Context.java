@@ -3000,12 +3000,17 @@ public abstract class Context {
      *
      * @param receiver The BroadcastReceiver to handle the broadcast.
      * @param filter Selects the Intent broadcasts to be received.
-     * @param flags Additional options for the receiver. As of
-     * Android T, either {@link #RECEIVER_EXPORTED} or
+     * @param flags Additional options for the receiver. For apps targeting
+     * {@link android.os.Build.VERSION_CODES#TIRAMISU},
+     *              either {@link #RECEIVER_EXPORTED} or
      * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
-     *            for protected broadcasts, and may additionally specify
-     *            {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS} if {@link #RECEIVER_EXPORTED} is
-     *            specified.
+     *              for protected broadcasts or an exception will be thrown. If
+     *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
+     *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
+     *              protected broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
+     *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
+     *              {@link #RECEIVER_NOT_EXPORTED} are specified, an exception will be thrown as
+     *              well.
      *
      * @return The first sticky intent found that matches <var>filter</var>,
      *         or null if there are none.

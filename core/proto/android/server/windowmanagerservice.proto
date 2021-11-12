@@ -262,6 +262,7 @@ message DisplayRotationProto {
     optional int32 user_rotation = 3 [(.android.typedef) = "android.view.Surface.Rotation"];
     optional int32 fixed_to_user_rotation_mode = 4;
     optional int32 last_orientation = 5 [(.android.typedef) = "android.content.pm.ActivityInfo.ScreenOrientation"];
+    optional bool is_fixed_to_user_rotation = 6;
 }
 
 /* represents DockedTaskDividerController */

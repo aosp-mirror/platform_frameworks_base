@@ -1495,7 +1495,7 @@
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50]-->
     <string name="permlab_nearby_wifi_devices">interact with nearby Wi\u2011Fi devices</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=120]-->
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=140]-->
     <string name="permdesc_nearby_wifi_devices">Allows the app to advertise, connect, and determine the relative position of nearby Wi\u2011Fi devices</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

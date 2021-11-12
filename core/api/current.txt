@@ -411,6 +411,7 @@ package android {
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
     field public static final int canControlMagnification = 16844039; // 0x1010507
+    field public static final int canDisplayOnRemoteDevices;
     field public static final int canPauseRecording = 16844314; // 0x101061a
     field public static final int canPerformGestures = 16844045; // 0x101050d
     field public static final int canRecord = 16844060; // 0x101051c
@@ -40939,12 +40940,21 @@ package android.telephony {
     method @NonNull public java.util.List<java.lang.Integer> getBands();
     method @NonNull public java.util.List<java.lang.String> getMccMncs();
     method public int getPriority();
+    method @NonNull public java.util.List<android.telephony.RadioAccessSpecifier> getRadioAccessSpecifiers();
     method public int getSubId();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.AvailableNetworkInfo> CREATOR;
     field public static final int PRIORITY_HIGH = 1; // 0x1
     field public static final int PRIORITY_LOW = 3; // 0x3
     field public static final int PRIORITY_MED = 2; // 0x2
+  }
+
+  public static final class AvailableNetworkInfo.Builder {
+    ctor public AvailableNetworkInfo.Builder(int);
+    method @NonNull public android.telephony.AvailableNetworkInfo build();
+    method @NonNull public android.telephony.AvailableNetworkInfo.Builder setMccMncs(@NonNull java.util.List<java.lang.String>);
+    method @NonNull public android.telephony.AvailableNetworkInfo.Builder setPriority(int);
+    method @NonNull public android.telephony.AvailableNetworkInfo.Builder setRadioAccessSpecifiers(@NonNull java.util.List<android.telephony.RadioAccessSpecifier>);
   }
 
   public final class BarringInfo implements android.os.Parcelable {
@@ -41055,6 +41065,7 @@ package android.telephony {
     field public static final String KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL = "carrier_rcs_provisioning_required_bool";
     field public static final String KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING = "carrier_settings_activity_component_name_string";
     field public static final String KEY_CARRIER_SETTINGS_ENABLE_BOOL = "carrier_settings_enable_bool";
+    field public static final String KEY_CARRIER_SUPPORTS_OPP_DATA_AUTO_PROVISIONING_BOOL = "carrier_supports_opp_data_auto_provisioning_bool";
     field public static final String KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL = "carrier_supports_ss_over_ut_bool";
     field public static final String KEY_CARRIER_USE_IMS_FIRST_FOR_EMERGENCY_BOOL = "carrier_use_ims_first_for_emergency_bool";
     field public static final String KEY_CARRIER_USSD_METHOD_INT = "carrier_ussd_method_int";
@@ -41116,6 +41127,8 @@ package android.telephony {
     field public static final String KEY_ENABLE_DIALER_KEY_VIBRATION_BOOL = "enable_dialer_key_vibration_bool";
     field public static final String KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL = "enhanced_4g_lte_on_by_default_bool";
     field public static final String KEY_ENHANCED_4G_LTE_TITLE_VARIANT_INT = "enhanced_4g_lte_title_variant_int";
+    field public static final String KEY_ESIM_DOWNLOAD_RETRY_BACKOFF_TIMER_SEC_INT = "esim_download_retry_backoff_timer_sec_int";
+    field public static final String KEY_ESIM_MAX_DOWNLOAD_RETRY_ATTEMPTS_INT = "esim_max_download_retry_attempts_int";
     field public static final String KEY_FORCE_HOME_NETWORK_BOOL = "force_home_network_bool";
     field public static final String KEY_GSM_DTMF_TONE_DELAY_INT = "gsm_dtmf_tone_delay_int";
     field public static final String KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY = "gsm_nonroaming_networks_string_array";
@@ -41218,6 +41231,7 @@ package android.telephony {
     field public static final String KEY_SHOW_WFC_LOCATION_PRIVACY_POLICY_BOOL = "show_wfc_location_privacy_policy_bool";
     field public static final String KEY_SIMPLIFIED_NETWORK_SETTINGS_BOOL = "simplified_network_settings_bool";
     field public static final String KEY_SIM_NETWORK_UNLOCK_ALLOW_DISMISS_BOOL = "sim_network_unlock_allow_dismiss_bool";
+    field public static final String KEY_SMDP_SERVER_ADDRESS_STRING = "smdp_server_address_string";
     field public static final String KEY_SMS_REQUIRES_DESTINATION_NUMBER_CONVERSION_BOOL = "sms_requires_destination_number_conversion_bool";
     field public static final String KEY_SUPPORTS_CALL_COMPOSER_BOOL = "supports_call_composer_bool";
     field public static final String KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_DTMF_BOOL = "supports_device_to_device_communication_using_dtmf_bool";
@@ -52258,6 +52272,7 @@ package android.view.inputmethod {
     method public boolean commitContent(@NonNull android.view.inputmethod.InputContentInfo, int, @Nullable android.os.Bundle);
     method public boolean commitCorrection(android.view.inputmethod.CorrectionInfo);
     method public boolean commitText(CharSequence, int);
+    method public default boolean commitText(@NonNull CharSequence, int, @Nullable android.view.inputmethod.TextAttribute);
     method public boolean deleteSurroundingText(int, int);
     method public boolean deleteSurroundingTextInCodePoints(int, int);
     method public boolean endBatchEdit();
@@ -52277,7 +52292,9 @@ package android.view.inputmethod {
     method public boolean requestCursorUpdates(int);
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
+    method public default boolean setComposingRegion(int, int, @Nullable android.view.inputmethod.TextAttribute);
     method public boolean setComposingText(CharSequence, int);
+    method public default boolean setComposingText(@NonNull CharSequence, int, @Nullable android.view.inputmethod.TextAttribute);
     method public default boolean setImeConsumesInput(boolean);
     method public boolean setSelection(int, int);
     method @Nullable public default android.view.inputmethod.TextSnapshot takeSnapshot();
@@ -52491,6 +52508,21 @@ package android.view.inputmethod {
     method @NonNull public CharSequence getText();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.SurroundingText> CREATOR;
+  }
+
+  public final class TextAttribute implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.os.PersistableBundle getExtras();
+    method @NonNull public java.util.List<java.lang.String> getTextConversionSuggestions();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.TextAttribute> CREATOR;
+  }
+
+  public static final class TextAttribute.TextAttributeBuilder {
+    ctor public TextAttribute.TextAttributeBuilder();
+    method @NonNull public android.view.inputmethod.TextAttribute build();
+    method @NonNull public android.view.inputmethod.TextAttribute.TextAttributeBuilder setExtras(@NonNull android.os.PersistableBundle);
+    method @NonNull public android.view.inputmethod.TextAttribute.TextAttributeBuilder setTextConversionSuggestions(@NonNull java.util.List<java.lang.String>);
   }
 
   public final class TextSnapshot {
