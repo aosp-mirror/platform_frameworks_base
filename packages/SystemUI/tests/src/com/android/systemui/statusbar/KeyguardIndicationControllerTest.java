@@ -710,8 +710,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED, faceHelpMsg,
                 BiometricSourceType.FACE);
 
-        // THEN "try fingerprint" message appears (and not the face help message)
-        verifyTransientMessage(mKeyguardTryFingerprintMsg);
+        // THEN no help message appears
+        verify(mRotateTextViewController, never()).showTransient(anyString());
 
         // THEN the face help message is still announced for a11y
         verify(mIndicationAreaBottom).announceForAccessibility(eq(faceHelpMsg));
