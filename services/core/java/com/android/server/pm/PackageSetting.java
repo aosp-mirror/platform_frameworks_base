@@ -443,6 +443,22 @@ public class PackageSetting extends SettingBase implements PackageState {
         return this;
     }
 
+    /**
+     * Notify {@link #onChanged()}  if the parameter {@code usesLibraryFiles} is different from
+     * {@link #getUsesLibraryFiles()}.
+     * @param usesLibraryFiles the new uses library files
+     * @return {@code this}
+     */
+    public PackageSetting setPkgStateLibraryFiles(@NonNull Collection<String> usesLibraryFiles) {
+        final Collection<String> oldUsesLibraryFiles = getUsesLibraryFiles();
+        if (oldUsesLibraryFiles.size() != usesLibraryFiles.size()
+                || !oldUsesLibraryFiles.containsAll(usesLibraryFiles)) {
+            pkgState.setUsesLibraryFiles(new ArrayList<>(usesLibraryFiles));
+            onChanged();
+        }
+        return this;
+    }
+
     public PackageSetting setPrimaryCpuAbi(String primaryCpuAbiString) {
         this.mPrimaryCpuAbi = primaryCpuAbiString;
         onChanged();

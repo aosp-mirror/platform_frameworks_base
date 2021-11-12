@@ -5226,7 +5226,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 addSharedLibraryLPr(pkg, usesLibraryFiles, libInfo, changingLib,
                         changingLibSetting);
             }
-            pkgSetting.getPkgState().setUsesLibraryFiles(new ArrayList<>(usesLibraryFiles));
+            pkgSetting.setPkgStateLibraryFiles(usesLibraryFiles);
+
             // let's make sure we mark all static shared libraries as installed for the same users
             // that its dependent packages are installed for.
             int[] installedUsers = new int[allUsers.length];
