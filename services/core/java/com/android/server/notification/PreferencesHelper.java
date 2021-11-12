@@ -2043,6 +2043,7 @@ public class PreferencesHelper implements RankingConfig {
                     pw.print(" importance=");
                     pw.print(NotificationListenerService.Ranking.importanceToString(
                             packagePermissions.get(p) ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE));
+                    pw.println();
                 }
             }
         }
