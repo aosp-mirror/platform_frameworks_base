@@ -43,6 +43,7 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -85,7 +86,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private static final float sDefaultDensity =
             (float) DisplayMetrics.DENSITY_DEVICE_STABLE / (float) DisplayMetrics.DENSITY_DEFAULT;
     private static final int sLockIconRadiusPx = (int) (sDefaultDensity * 36);
-    private static final float sDistAboveKgBottomAreaPx = sDefaultDensity * 12;
     private static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
             new AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -126,7 +126,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean mUdfpsSupported;
     private float mHeightPixels;
     private float mWidthPixels;
-    private int mBottomPadding; // in pixels
+    private int mBottomPaddingPx;
 
     private boolean mShowUnlockIcon;
     private boolean mShowLockIcon;
@@ -347,11 +347,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     private void updateConfiguration() {
-        final DisplayMetrics metrics = mView.getContext().getResources().getDisplayMetrics();
-        mWidthPixels = metrics.widthPixels;
-        mHeightPixels = metrics.heightPixels;
-        mBottomPadding = mView.getContext().getResources().getDimensionPixelSize(
-                R.dimen.lock_icon_margin_bottom);
+        WindowManager windowManager = getContext().getSystemService(WindowManager.class);
+        Rect bounds = windowManager.getCurrentWindowMetrics().getBounds();
+        mWidthPixels = bounds.right;
+        mHeightPixels = bounds.bottom;
+        mBottomPaddingPx = getResources().getDimensionPixelSize(R.dimen.lock_icon_margin_bottom);
 
         mUnlockedLabel = mView.getContext().getResources().getString(
                 R.string.accessibility_unlock_button);
@@ -370,8 +370,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         } else {
             mView.setCenterLocation(
                     new PointF(mWidthPixels / 2,
-                        mHeightPixels - mBottomPadding - sDistAboveKgBottomAreaPx
-                            - sLockIconRadiusPx), sLockIconRadiusPx);
+                        mHeightPixels - mBottomPaddingPx - sLockIconRadiusPx),
+                        sLockIconRadiusPx);
         }
 
         mView.getHitRect(mSensorTouchLocation);

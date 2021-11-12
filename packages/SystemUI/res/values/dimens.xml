@@ -713,7 +713,9 @@
     <dimen name="keyguard_lock_padding">20dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">32dp</dimen>
-    <dimen name="lock_icon_margin_bottom">98dp</dimen>
+    <dimen name="lock_icon_margin_bottom">110dp</dimen>
+    <dimen name="ambient_indication_margin_bottom">71dp</dimen>
+
 
     <!-- How much two taps can be apart to still be recognized as a double tap on the lockscreen -->
     <dimen name="double_tap_slop">32dp</dimen>
