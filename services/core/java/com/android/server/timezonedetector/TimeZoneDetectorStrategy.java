@@ -30,7 +30,7 @@ import android.util.IndentingPrintWriter;
  * Suggestions are acted on or ignored as needed, depending on previously received suggestions and
  * the current user's configuration (see {@link ConfigurationInternal}).
  *
- * <p>Devices can have zero, one or two automatic time zone detection algorithm available at any
+ * <p>Devices can have zero, one or two automatic time zone detection algorithms available at any
  * point in time.
  *
  * <p>The two automatic detection algorithms supported are "telephony" and "geolocation". Algorithm
@@ -63,6 +63,13 @@ import android.util.IndentingPrintWriter;
  * have an empty suggestion submitted in order to "withdraw" their previous suggestion otherwise it
  * will remain in use.
  *
+ * <p>The strategy uses only one algorithm at a time and does not attempt consensus even when
+ * more than one is available on a device. This "use only one" behavior is deliberate as different
+ * algorithms have edge cases and blind spots that lead to incorrect answers or uncertainty;
+ * different algorithms aren't guaranteed to agree, and algorithms may frequently lose certainty as
+ * users enter areas without the necessary signals. Ultimately, with no perfect algorithm available,
+ * the user is left to choose which algorithm works best for their circumstances.
+ *
  * <p>Threading:
  *
  * <p>Suggestion calls with a void return type may be handed off to a separate thread and handled
@@ -73,7 +80,7 @@ import android.util.IndentingPrintWriter;
  *
  * @hide
  */
-public interface TimeZoneDetectorStrategy extends Dumpable, Dumpable.Container {
+public interface TimeZoneDetectorStrategy extends Dumpable {
 
     /**
      * Adds a listener that will be triggered whenever {@link ConfigurationInternal} may have

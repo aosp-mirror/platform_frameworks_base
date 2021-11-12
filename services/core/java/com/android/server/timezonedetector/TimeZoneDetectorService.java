@@ -45,6 +45,8 @@ import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -59,6 +61,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         implements IBinder.DeathRecipient {
 
     static final String TAG = "time_zone_detector";
+    static final boolean DBG = false;
 
     /**
      * Handles the service lifecycle for {@link TimeZoneDetectorService} and
@@ -112,17 +115,22 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
      */
     @GuardedBy("mListeners")
     @NonNull
-    private final ArrayMap<IBinder, ITimeZoneDetectorListener> mListeners =
-            new ArrayMap<>();
+    private final ArrayMap<IBinder, ITimeZoneDetectorListener> mListeners = new ArrayMap<>();
+
+    /**
+     * References to components that should be dumped when {@link
+     * #dump(FileDescriptor, PrintWriter, String[])} is called on the service.
+     */
+    @GuardedBy("mDumpables")
+    private final List<Dumpable> mDumpables = new ArrayList<>();
 
     private static TimeZoneDetectorService create(
             @NonNull Context context, @NonNull Handler handler,
             @NonNull TimeZoneDetectorStrategy timeZoneDetectorStrategy) {
 
         CallerIdentityInjector callerIdentityInjector = CallerIdentityInjector.REAL;
-        TimeZoneDetectorService service = new TimeZoneDetectorService(
+        return new TimeZoneDetectorService(
                 context, handler, callerIdentityInjector, timeZoneDetectorStrategy);
-        return service;
     }
 
     @VisibleForTesting
@@ -251,7 +259,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             if (!removedListener) {
                 Slog.w(TAG, "Notified of binder death for who=" + who
                         + ", but did not remove any listeners."
-                        + " mConfigurationListeners=" + mListeners);
+                        + " mListeners=" + mListeners);
             }
         }
     }
@@ -314,8 +322,17 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     boolean isGeoTimeZoneDetectionSupported() {
         enforceManageTimeZoneDetectorPermission();
 
-        return ServiceConfigAccessor.getInstance(mContext)
-                .isGeoTimeZoneDetectionFeatureSupported();
+        return ServiceConfigAccessor.getInstance(mContext).isGeoTimeZoneDetectionFeatureSupported();
+    }
+
+    /**
+     * Registers the supplied {@link Dumpable} for dumping. When the service is dumped
+     * {@link Dumpable#dump(IndentingPrintWriter, String[])} will be called on the {@code dumpable}.
+     */
+    void addDumpable(@NonNull Dumpable dumpable) {
+        synchronized (mDumpables) {
+            mDumpables.add(dumpable);
+        }
     }
 
     @Override
@@ -325,6 +342,13 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
         mTimeZoneDetectorStrategy.dump(ipw, args);
+
+        synchronized (mDumpables) {
+            for (Dumpable dumpable : mDumpables) {
+                dumpable.dump(ipw, args);
+            }
+        }
+
         ipw.flush();
     }
 

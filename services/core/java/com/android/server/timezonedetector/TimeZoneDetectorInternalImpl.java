@@ -57,11 +57,6 @@ public final class TimeZoneDetectorInternalImpl implements TimeZoneDetectorInter
     }
 
     @Override
-    public void addDumpable(@NonNull Dumpable dumpable) {
-        mTimeZoneDetectorStrategy.addDumpable(dumpable);
-    }
-
-    @Override
     public void addConfigurationListener(ConfigurationChangeListener listener) {
         synchronized (mConfigurationListeners) {
             mConfigurationListeners.add(Objects.requireNonNull(listener));

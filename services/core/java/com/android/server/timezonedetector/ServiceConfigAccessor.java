@@ -21,7 +21,6 @@ import android.annotation.StringDef;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.os.SystemProperties;
 import android.util.ArraySet;
 
 import com.android.internal.R;
@@ -64,11 +63,11 @@ public final class ServiceConfigAccessor {
     public static final @ProviderMode String PROVIDER_MODE_ENABLED = "enabled";
 
     /**
-     * Device config keys that affect the {@link TimeZoneDetectorService} service and {@link
-     * com.android.server.timezonedetector.location.LocationTimeZoneManagerService}.
+     * Device config keys that can affect {@link
+     * com.android.server.timezonedetector.location.LocationTimeZoneManagerService} behavior.
      */
-    private static final Set<String> SERVER_FLAGS_KEYS_TO_WATCH = Collections.unmodifiableSet(
-            new ArraySet<>(new String[] {
+    private static final Set<String> LOCATION_TIME_ZONE_MANAGER_SERVER_FLAGS_KEYS_TO_WATCH =
+            Collections.unmodifiableSet(new ArraySet<>(new String[] {
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
@@ -93,14 +92,6 @@ public final class ServiceConfigAccessor {
     private static ServiceConfigAccessor sInstance;
 
     @NonNull private final Context mContext;
-
-    /**
-     * An ultimate "feature switch" for location-based time zone detection. If this is
-     * {@code false}, the device cannot support the feature without a config change or a reboot:
-     * This affects what services are started on boot to minimize expense when the feature is not
-     * wanted.
-     */
-    private final boolean mGeoDetectionFeatureSupportedInConfig;
 
     @NonNull private final ServerFlags mServerFlags;
 
@@ -148,14 +139,6 @@ public final class ServiceConfigAccessor {
     private ServiceConfigAccessor(@NonNull Context context) {
         mContext = Objects.requireNonNull(context);
 
-        // The config value is expected to be the main feature flag. Platform developers can also
-        // force enable the feature using a persistent system property. Because system properties
-        // can change, this value is cached and only changes on reboot.
-        mGeoDetectionFeatureSupportedInConfig = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_enableGeolocationTimeZoneDetection)
-                || SystemProperties.getBoolean(
-                "persist.sys.location_time_zone_detection_feature_supported", false);
-
         mServerFlags = ServerFlags.getInstance(mContext);
     }
 
@@ -170,14 +153,15 @@ public final class ServiceConfigAccessor {
     }
 
     /**
-     * Adds a listener that will be called when server flags related to this class change. The
-     * callbacks are delivered on the main looper thread.
+     * Adds a listener that will be called when server flags related to location_time_zone_manager
+     * change. The callbacks are delivered on the main looper thread.
      *
      * <p>Note: Only for use by long-lived objects. There is deliberately no associated remove
      * method.
      */
-    public void addListener(@NonNull ConfigurationChangeListener listener) {
-        mServerFlags.addListener(listener, SERVER_FLAGS_KEYS_TO_WATCH);
+    public void addLocationTimeZoneManagerConfigListener(
+            @NonNull ConfigurationChangeListener listener) {
+        mServerFlags.addListener(listener, LOCATION_TIME_ZONE_MANAGER_SERVER_FLAGS_KEYS_TO_WATCH);
     }
 
     /** Returns {@code true} if any form of automatic time zone detection is supported. */
@@ -197,11 +181,19 @@ public final class ServiceConfigAccessor {
     /**
      * Returns {@code true} if the location-based time zone detection feature can be supported on
      * this device at all according to config. When {@code false}, implies that various other
-     * location-based settings will be turned off or rendered meaningless. Typically {@link
-     * #isGeoTimeZoneDetectionFeatureSupported()} should be used instead.
+     * location-based services and settings will be turned off or rendered meaningless.
+     *
+     * <p>This is the ultimate "feature switch" for location-based time zone detection. If this is
+     * {@code false}, the device cannot support the feature without a config change or a reboot:
+     * This affects what services are started on boot to minimize expense when the feature is not
+     * wanted.
+     *
+     * Typically {@link #isGeoTimeZoneDetectionFeatureSupported()} should be used except during
+     * boot.
      */
     public boolean isGeoTimeZoneDetectionFeatureSupportedInConfig() {
-        return mGeoDetectionFeatureSupportedInConfig;
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableGeolocationTimeZoneDetection);
     }
 
     /**
@@ -213,7 +205,7 @@ public final class ServiceConfigAccessor {
         // 1) Be turned on in config.
         // 2) Not be turned off via a server flag.
         // 3) There must be at least one location time zone provider enabled / configured.
-        return mGeoDetectionFeatureSupportedInConfig
+        return isGeoTimeZoneDetectionFeatureSupportedInConfig()
                 && isGeoTimeZoneDetectionFeatureSupportedInternal()
                 && atLeastOneProviderIsEnabled();
     }

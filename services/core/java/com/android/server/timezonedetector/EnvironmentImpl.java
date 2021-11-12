@@ -72,8 +72,8 @@ final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Environment 
         mLocationManager = context.getSystemService(LocationManager.class);
         mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
 
-        // Wire up the config change listeners. All invocations are performed on the mHandler
-        // thread.
+        // Wire up the config change listeners for anything that could affect the return values from
+        // this object. All listener invocations are performed on the mHandler thread.
 
         // Listen for the user changing / the user's location mode changing.
         IntentFilter filter = new IntentFilter();
@@ -88,25 +88,19 @@ final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Environment 
 
         // Add async callbacks for global settings being changed.
         ContentResolver contentResolver = mContext.getContentResolver();
+        ContentObserver contentObserver = new ContentObserver(mHandler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                handleConfigChangeOnHandlerThread();
+            }
+        };
         contentResolver.registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.AUTO_TIME_ZONE), true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        handleConfigChangeOnHandlerThread();
-                    }
-                });
+                Settings.Global.getUriFor(Settings.Global.AUTO_TIME_ZONE), true, contentObserver);
 
         // Add async callbacks for user scoped location settings being changed.
         contentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED),
-                true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        handleConfigChangeOnHandlerThread();
-                    }
-                }, UserHandle.USER_ALL);
+                true, contentObserver, UserHandle.USER_ALL);
     }
 
     private void handleConfigChangeOnHandlerThread() {
