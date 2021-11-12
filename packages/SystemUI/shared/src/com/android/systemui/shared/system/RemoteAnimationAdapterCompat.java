@@ -205,20 +205,17 @@ public class RemoteAnimationAdapterCompat {
                     @Override
                     @SuppressLint("NewApi")
                     public void run() {
+                        counterLauncher.cleanUp(info.getRootLeash());
+                        counterWallpaper.cleanUp(info.getRootLeash());
+                        // Release surface references now. This is apparently to free GPU memory
+                        // while doing quick operations (eg. during CTS).
+                        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+                            info.getChanges().get(i).getLeash().release();
+                        }
+                        for (int i = leashMap.size() - 1; i >= 0; --i) {
+                            leashMap.valueAt(i).release();
+                        }
                         try {
-                            counterLauncher.cleanUp(info.getRootLeash());
-                            counterWallpaper.cleanUp(info.getRootLeash());
-                            // Release surface references now. This is apparently to free GPU
-                            // memory while doing quick operations (eg. during CTS).
-                            for (int i = 0; i < info.getChanges().size(); ++i) {
-                                info.getChanges().get(i).getLeash().release();
-                            }
-                            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                            for (int i = 0; i < leashMap.size(); ++i) {
-                                if (leashMap.keyAt(i) == leashMap.valueAt(i)) continue;
-                                t.remove(leashMap.valueAt(i));
-                            }
-                            t.apply();
                             finishCallback.onTransitionFinished(null /* wct */, null /* sct */);
                         } catch (RemoteException e) {
                             Log.e("ActivityOptionsCompat", "Failed to call app controlled animation"
