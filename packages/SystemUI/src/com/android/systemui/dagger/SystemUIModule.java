@@ -30,6 +30,7 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.biometrics.UdfpsHbmProvider;
+import com.android.systemui.biometrics.dagger.BiometricsModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.communal.dagger.CommunalModule;
 import com.android.systemui.controls.dagger.ControlsModule;
@@ -103,6 +104,7 @@ import dagger.Provides;
 @Module(includes = {
             AppOpsModule.class,
             AssistModule.class,
+            BiometricsModule.class,
             ClockModule.class,
             CommunalModule.class,
             DreamModule.class,
