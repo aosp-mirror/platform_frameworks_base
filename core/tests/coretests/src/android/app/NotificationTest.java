@@ -43,6 +43,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Spannable;
@@ -543,6 +544,29 @@ public class NotificationTest {
     @Test
     public void testColors_ensureColors_colorized_producesValidPalette_black() {
         validateColorizedPaletteForColor(Color.BLACK);
+    }
+
+    @Test
+    public void testIsMediaNotification_nullSession_returnsFalse() {
+        // Null media session
+        Notification.MediaStyle mediaStyle = new Notification.MediaStyle();
+        Notification notification = new Notification.Builder(mContext, "test id")
+                .setStyle(mediaStyle)
+                .build();
+        assertFalse(notification.isMediaNotification());
+    }
+
+    @Test
+    public void testIsMediaNotification_invalidSession_returnsFalse() {
+        // Extra was set manually to an invalid type
+        Bundle extras = new Bundle();
+        extras.putParcelable(Notification.EXTRA_MEDIA_SESSION, new Intent());
+        Notification.MediaStyle mediaStyle = new Notification.MediaStyle();
+        Notification notification = new Notification.Builder(mContext, "test id")
+                .setStyle(mediaStyle)
+                .addExtras(extras)
+                .build();
+        assertFalse(notification.isMediaNotification());
     }
 
     public void validateColorizedPaletteForColor(int rawColor) {

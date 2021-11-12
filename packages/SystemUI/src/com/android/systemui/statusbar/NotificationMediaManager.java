@@ -468,7 +468,8 @@ public class NotificationMediaManager implements Dumpable {
         NotificationEntry mediaNotification = null;
         MediaController controller = null;
         for (NotificationEntry entry : allNotifications) {
-            if (entry.isMediaNotification()) {
+            Notification notif = entry.getSbn().getNotification();
+            if (notif.isMediaNotification()) {
                 final MediaSession.Token token =
                         entry.getSbn().getNotification().extras.getParcelable(
                                 Notification.EXTRA_MEDIA_SESSION);
