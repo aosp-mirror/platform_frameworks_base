@@ -20,6 +20,11 @@ package com.android.systemui.flags
  */
 interface FlagReader {
     /** Returns a boolean value for the given flag.  */
+    fun isEnabled(flag: BooleanFlag): Boolean {
+        return flag.default
+    }
+
+    /** Returns a boolean value for the given flag.  */
     fun isEnabled(id: Int, def: Boolean): Boolean {
         return def
     }

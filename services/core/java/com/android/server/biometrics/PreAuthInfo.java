@@ -83,6 +83,7 @@ class PreAuthInfo {
     final List<Pair<BiometricSensor, Integer>> ineligibleSensors;
     final boolean credentialAvailable;
     final boolean confirmationRequested;
+    final boolean ignoreEnrollmentState;
 
     static PreAuthInfo create(ITrustManager trustManager,
             DevicePolicyManager devicePolicyManager,
@@ -114,7 +115,8 @@ class PreAuthInfo {
                 @AuthenticatorStatus int status = getStatusForBiometricAuthenticator(
                         devicePolicyManager, settingObserver, sensor, userId, opPackageName,
                         checkDevicePolicyManager, requestedStrength,
-                        promptInfo.getAllowedSensorIds());
+                        promptInfo.getAllowedSensorIds(),
+                        promptInfo.isIgnoreEnrollmentState());
 
                 Slog.d(TAG, "Package: " + opPackageName
                         + " Sensor ID: " + sensor.id
@@ -130,7 +132,8 @@ class PreAuthInfo {
         }
 
         return new PreAuthInfo(biometricRequested, requestedStrength, credentialRequested,
-                eligibleSensors, ineligibleSensors, credentialAvailable, confirmationRequested);
+                eligibleSensors, ineligibleSensors, credentialAvailable, confirmationRequested,
+                promptInfo.isIgnoreEnrollmentState());
     }
 
     /**
@@ -145,7 +148,8 @@ class PreAuthInfo {
             BiometricService.SettingObserver settingObserver,
             BiometricSensor sensor, int userId, String opPackageName,
             boolean checkDevicePolicyManager, int requestedStrength,
-            @NonNull List<Integer> requestedSensorIds) {
+            @NonNull List<Integer> requestedSensorIds,
+            boolean ignoreEnrollmentState) {
 
         if (!requestedSensorIds.isEmpty() && !requestedSensorIds.contains(sensor.id)) {
             return BIOMETRIC_NO_HARDWARE;
@@ -167,7 +171,8 @@ class PreAuthInfo {
                 return BIOMETRIC_HARDWARE_NOT_DETECTED;
             }
 
-            if (!sensor.impl.hasEnrolledTemplates(userId, opPackageName)) {
+            if (!sensor.impl.hasEnrolledTemplates(userId, opPackageName)
+                    && !ignoreEnrollmentState) {
                 return BIOMETRIC_NOT_ENROLLED;
             }
 
@@ -238,7 +243,7 @@ class PreAuthInfo {
     private PreAuthInfo(boolean biometricRequested, int biometricStrengthRequested,
             boolean credentialRequested, List<BiometricSensor> eligibleSensors,
             List<Pair<BiometricSensor, Integer>> ineligibleSensors, boolean credentialAvailable,
-            boolean confirmationRequested) {
+            boolean confirmationRequested, boolean ignoreEnrollmentState) {
         mBiometricRequested = biometricRequested;
         mBiometricStrengthRequested = biometricStrengthRequested;
         this.credentialRequested = credentialRequested;
@@ -247,6 +252,7 @@ class PreAuthInfo {
         this.ineligibleSensors = ineligibleSensors;
         this.credentialAvailable = credentialAvailable;
         this.confirmationRequested = confirmationRequested;
+        this.ignoreEnrollmentState = ignoreEnrollmentState;
     }
 
     private Pair<BiometricSensor, Integer> calculateErrorByPriority() {

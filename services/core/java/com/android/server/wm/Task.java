@@ -2377,6 +2377,16 @@ class Task extends TaskFragment {
         return true;
     }
 
+    /** Return the top-most leaf-task under this one, or this task if it is a leaf. */
+    public Task getTopLeafTask() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final Task child = mChildren.get(i).asTask();
+            if (child == null) continue;
+            return child.getTopLeafTask();
+        }
+        return this;
+    }
+
     int getDescendantTaskCount() {
         final int[] currentCount = {0};
         final PooledConsumer c = PooledLambda.obtainConsumer((t, count) -> { count[0]++; },

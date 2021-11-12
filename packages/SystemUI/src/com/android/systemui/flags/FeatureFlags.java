@@ -17,22 +17,11 @@
 package com.android.systemui.flags;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
-import android.util.SparseArray;
 import android.widget.Toast;
 
-import androidx.annotation.BoolRes;
-
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -43,31 +32,13 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class FeatureFlags {
-    private final Resources mResources;
     private final FlagReader mFlagReader;
     private final Context mContext;
-    private final Map<Integer, Flag<?>> mFlagMap = new HashMap<>();
-    private final Map<Integer, List<Listener>> mListeners = new HashMap<>();
-    private final SparseArray<Boolean> mCachedFlags = new SparseArray<>();
 
     @Inject
-    public FeatureFlags(@Main Resources resources, FlagReader flagReader, Context context) {
-        mResources = resources;
+    public FeatureFlags(FlagReader flagReader, Context context) {
         mFlagReader = flagReader;
         mContext = context;
-
-        flagReader.addListener(mListener);
-    }
-
-    private final FlagReader.Listener mListener = id -> {
-        if (mListeners.containsKey(id) && mFlagMap.containsKey(id)) {
-            mListeners.get(id).forEach(listener -> listener.onFlagChanged(mFlagMap.get(id)));
-        }
-    };
-
-    @VisibleForTesting
-    void addFlag(Flag<?> flag) {
-        mFlagMap.put(flag.getId(), flag);
     }
 
     /**
@@ -75,32 +46,7 @@ public class FeatureFlags {
      * @return The value of the flag.
      */
     public boolean isEnabled(BooleanFlag flag) {
-        boolean def = flag.getDefault();
-        if (flag.hasResourceOverride()) {
-            try {
-                def = isEnabledInOverlay(flag.getResourceOverride());
-            } catch (Resources.NotFoundException e) {
-                // no-op
-            }
-        }
-        return mFlagReader.isEnabled(flag.getId(), def);
-    }
-
-    /**
-     * @param flag The {@link IntFlag} of interest.
-
-    /** Add a listener for a specific flag. */
-    public void addFlagListener(Flag<?> flag, Listener listener) {
-        mListeners.putIfAbsent(flag.getId(), new ArrayList<>());
-        mListeners.get(flag.getId()).add(listener);
-        mFlagMap.putIfAbsent(flag.getId(), flag);
-    }
-
-    /** Remove a listener for a specific flag. */
-    public void removeFlagListener(Flag<?> flag, Listener listener) {
-        if (mListeners.containsKey(flag.getId())) {
-            mListeners.get(flag.getId()).remove(listener);
-        }
+        return mFlagReader.isEnabled(flag);
     }
 
     public void assertLegacyPipelineEnabled() {
@@ -204,21 +150,5 @@ public class FeatureFlags {
     /** static method for the system setting */
     public static boolean isProviderModelSettingEnabled(Context context) {
         return FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);
-    }
-
-    private boolean isEnabledInOverlay(@BoolRes int resId) {
-        synchronized (mCachedFlags) {
-            if (!mCachedFlags.contains(resId)) {
-                mCachedFlags.put(resId, mResources.getBoolean(resId));
-            }
-
-            return mCachedFlags.get(resId);
-        }
-    }
-
-    /** Simple interface for beinga alerted when a specific flag changes value. */
-    public interface Listener {
-        /** */
-        void onFlagChanged(Flag<?> flag);
     }
 }

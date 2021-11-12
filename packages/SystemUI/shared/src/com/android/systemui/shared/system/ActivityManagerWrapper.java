@@ -195,8 +195,13 @@ public class ActivityManagerWrapper {
                     }
 
                     @Override
-                    public void onTaskAppeared(RemoteAnimationTarget app) {
-                        animationHandler.onTaskAppeared(new RemoteAnimationTargetCompat(app));
+                    public void onTasksAppeared(RemoteAnimationTarget[] apps) {
+                        final RemoteAnimationTargetCompat[] compats =
+                                new RemoteAnimationTargetCompat[apps.length];
+                        for (int i = 0; i < apps.length; ++i) {
+                            compats[i] = new RemoteAnimationTargetCompat(apps[i]);
+                        }
+                        animationHandler.onTasksAppeared(compats);
                     }
                 };
             }
