@@ -211,6 +211,8 @@ message WakeLockProto {
         // When this wake lock is released, poke the user activity timer
         // so the screen stays on for a little longer.
         optional bool is_on_after_release = 2;
+        // The wakelock is held by the system server on request by another app.
+        optional bool system_wakelock = 3;
     }
 
     optional .android.os.WakeLockLevelEnum lock_level = 1;

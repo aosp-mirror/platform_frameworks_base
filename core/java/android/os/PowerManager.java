@@ -216,6 +216,17 @@ public final class PowerManager {
     public static final int UNIMPORTANT_FOR_LOGGING = 0x40000000;
 
     /**
+     * Wake lock flag: This wake lock should be held by the system.
+     *
+     * <p>Meant to allow tests to keep the device awake even when power restrictions are active.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public static final int SYSTEM_WAKELOCK = 0x80000000;
+
+    /**
      * Flag for {@link WakeLock#release WakeLock.release(int)}: Defer releasing a
      * {@link #PROXIMITY_SCREEN_OFF_WAKE_LOCK} wake lock until the proximity sensor
      * indicates that an object is not in close proximity.

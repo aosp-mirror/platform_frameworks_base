@@ -5155,6 +5155,8 @@ public final class PowerManagerService extends SystemService
                     (mFlags & PowerManager.ACQUIRE_CAUSES_WAKEUP)!=0);
             proto.write(WakeLockProto.WakeLockFlagsProto.IS_ON_AFTER_RELEASE,
                     (mFlags & PowerManager.ON_AFTER_RELEASE)!=0);
+            proto.write(WakeLockProto.WakeLockFlagsProto.SYSTEM_WAKELOCK,
+                    (mFlags & PowerManager.SYSTEM_WAKELOCK) != 0);
             proto.end(wakeLockFlagsToken);
 
             proto.write(WakeLockProto.IS_DISABLED, mDisabled);
@@ -5200,6 +5202,9 @@ public final class PowerManagerService extends SystemService
             }
             if ((mFlags & PowerManager.ON_AFTER_RELEASE) != 0) {
                 result += " ON_AFTER_RELEASE";
+            }
+            if ((mFlags & PowerManager.SYSTEM_WAKELOCK) != 0) {
+                result += " SYSTEM_WAKELOCK";
             }
             return result;
         }
@@ -5362,8 +5367,22 @@ public final class PowerManagerService extends SystemService
                 ws = null;
             }
 
-            final int uid = Binder.getCallingUid();
-            final int pid = Binder.getCallingPid();
+            int uid = Binder.getCallingUid();
+            int pid = Binder.getCallingPid();
+
+            if ((flags & PowerManager.SYSTEM_WAKELOCK) != 0) {
+                mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
+                        null);
+                WorkSource workSource = new WorkSource(Binder.getCallingUid(), packageName);
+                if (ws != null && !ws.isEmpty()) {
+                    workSource.add(ws);
+                }
+                ws = workSource;
+
+                uid = Process.myUid();
+                pid = Process.myPid();
+            }
+
             final long ident = Binder.clearCallingIdentity();
             try {
                 acquireWakeLockInternal(lock, displayId, flags, tag, packageName, ws, historyTag,
