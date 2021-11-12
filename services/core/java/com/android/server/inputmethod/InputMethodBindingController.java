@@ -284,11 +284,6 @@ final class InputMethodBindingController {
     /**
      * Used to bind the IME while it is not currently being shown.
      */
-    @NonNull
-    ServiceConnection getMainConnection() {
-        return mMainConnection;
-    }
-
     private final ServiceConnection mMainConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -371,8 +366,7 @@ final class InputMethodBindingController {
         }
 
         if (mHasConnection) {
-            mContext.unbindService(mNonVisibleConnection);
-            mHasConnection = false;
+            unbindMainConnectionLocked();
         }
 
         if (mCurToken != null) {
@@ -383,6 +377,11 @@ final class InputMethodBindingController {
         mService.clearCurMethodLocked();
     }
 
+    @GuardedBy("mMethodMap")
+    void unbindMainConnectionLocked() {
+        mContext.unbindService(mMainConnection);
+        mHasConnection = false;
+    }
 
     @GuardedBy("mMethodMap")
     void unbindVisibleConnectionLocked() {

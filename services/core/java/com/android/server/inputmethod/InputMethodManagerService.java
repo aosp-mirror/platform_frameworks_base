@@ -77,7 +77,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -318,14 +317,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     private boolean isVisibleBound() {
         return mBindingController.isVisibleBound();
-    }
-
-    /**
-     * Used to bind the IME while it is not currently being shown.
-     */
-    @NonNull
-    private ServiceConnection getMainConnection() {
-        return mBindingController.getMainConnection();
     }
 
     // Ongoing notification
@@ -3149,8 +3140,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME, getSelectedMethodId(),
                         bindingDuration, 1);
                 Slog.w(TAG, "Force disconnect/connect to the IME in showCurrentInputLocked()");
-                ServiceConnection connection = getMainConnection();
-                mContext.unbindService(connection);
+                mBindingController.unbindMainConnectionLocked();
                 mBindingController.bindCurrentInputMethodServiceMainConnectionLocked();
             } else {
                 if (DEBUG) {
