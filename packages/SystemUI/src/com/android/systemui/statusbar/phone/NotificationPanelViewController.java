@@ -1000,7 +1000,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
 
         mTapAgainViewController.init();
-        mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mNotificationContainerParent));
+        mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mView));
     }
 
     @Override
@@ -1252,7 +1252,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
         setKeyguardBottomAreaVisibility(mBarState, false);
 
-        mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mNotificationContainerParent));
+        mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mView));
     }
 
     private void attachSplitShadeMediaPlayerContainer(FrameLayout container) {
