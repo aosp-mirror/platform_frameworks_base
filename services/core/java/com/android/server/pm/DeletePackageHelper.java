@@ -829,7 +829,7 @@ final class DeletePackageHelper {
             }
             final String packageName = ps.getPkg().getPackageName();
             // Skip over if system app or static shared library
-            if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0
+            if ((ps.getFlags() & ApplicationInfo.FLAG_SYSTEM) != 0
                     || !TextUtils.isEmpty(ps.getPkg().getStaticSharedLibName())) {
                 continue;
             }

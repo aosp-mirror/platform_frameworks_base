@@ -53,8 +53,8 @@ public interface PackageStateInternal extends PackageState {
     SharedUserSetting getSharedUser();
 
     // TODO: Remove this in favor of boolean APIs
-    int getPkgFlags();
-    int getPkgPrivateFlags();
+    int getFlags();
+    int getPrivateFlags();
 
     @NonNull
     SparseArray<? extends PackageUserStateInternal> getUserStates();

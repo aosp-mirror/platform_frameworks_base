@@ -2192,15 +2192,16 @@ final class InstallPackageHelper {
                             reconciledPkg.mPrepareResult.mExistingPackage.getPackageName());
                     if ((reconciledPkg.mInstallArgs.mInstallFlags & PackageManager.DONT_KILL_APP)
                             == 0) {
-                        if (ps1.mOldCodePaths == null) {
-                            ps1.mOldCodePaths = new ArraySet<>();
+                        if (ps1.getOldCodePaths() == null) {
+                            ps1.setOldCodePaths(new ArraySet<>());
                         }
-                        Collections.addAll(ps1.mOldCodePaths, oldPackage.getBaseApkPath());
+                        Collections.addAll(ps1.getOldCodePaths(), oldPackage.getBaseApkPath());
                         if (oldPackage.getSplitCodePaths() != null) {
-                            Collections.addAll(ps1.mOldCodePaths, oldPackage.getSplitCodePaths());
+                            Collections.addAll(ps1.getOldCodePaths(),
+                                    oldPackage.getSplitCodePaths());
                         }
                     } else {
-                        ps1.mOldCodePaths = null;
+                        ps1.setOldCodePaths(null);
                     }
 
                     if (reconciledPkg.mInstallResult.mReturnCode
@@ -3600,7 +3601,7 @@ final class InstallPackageHelper {
              * If this is not a system app, it can't be a
              * disable system app.
              */
-            if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+            if (!ps.isSystem()) {
                 continue;
             }
 
