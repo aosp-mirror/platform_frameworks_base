@@ -29,6 +29,8 @@ import com.android.server.criticalevents.nano.CriticalEventLogStorageProto;
 import com.android.server.criticalevents.nano.CriticalEventProto;
 import com.android.server.criticalevents.nano.CriticalEventProto.AppNotResponding;
 import com.android.server.criticalevents.nano.CriticalEventProto.HalfWatchdog;
+import com.android.server.criticalevents.nano.CriticalEventProto.JavaCrash;
+import com.android.server.criticalevents.nano.CriticalEventProto.NativeCrash;
 import com.android.server.criticalevents.nano.CriticalEventProto.Watchdog;
 
 import org.junit.Before;
@@ -255,24 +257,39 @@ public class CriticalEventLogTest {
     }
 
     @Test
-    public void privacyRedaction_anr() {
+    public void logJavaCrash() {
         mCriticalEventLog.incTimeSeconds(1);
-        mCriticalEventLog.logAnr("Subject 1", ServerProtoEnums.SYSTEM_SERVER, "AID_SYSTEM",
-                SYSTEM_SERVER_UID, 0);
-        mCriticalEventLog.incTimeSeconds(1);
-        mCriticalEventLog.logAnr("Subject 2", ServerProtoEnums.SYSTEM_APP, "AID_RADIO",
-                SYSTEM_APP_UID, 1);
-        mCriticalEventLog.incTimeSeconds(1);
-        mCriticalEventLog.logAnr("Subject 3", ServerProtoEnums.DATA_APP, "com.foo",
-                DATA_APP_UID, 2);
-        mCriticalEventLog.incTimeSeconds(1);
-        mCriticalEventLog.logAnr("Subject 4", ServerProtoEnums.DATA_APP, "com.foo",
-                DATA_APP_UID_2, 3);
-        mCriticalEventLog.incTimeSeconds(1);
-        mCriticalEventLog.logAnr("Subject 5", ServerProtoEnums.DATA_APP, "com.bar",
-                DATA_APP_UID_3, 4);
+        mCriticalEventLog.logJavaCrash("com.android.MyClass", ServerProtoEnums.SYSTEM_APP,
+                "AID_RADIO", SYSTEM_APP_UID, 1);
         mCriticalEventLog.incTimeSeconds(1);
 
+        CriticalEventLogProto logProto = getLogOutput();
+
+        assertThat(logProto.timestampMs).isEqualTo(START_TIME_MS + 2000);
+        assertProtoArrayEquals(logProto.events, new CriticalEventProto[]{
+                javaCrash(START_TIME_MS + 1000, "com.android.MyClass", ServerProtoEnums.SYSTEM_APP,
+                        "AID_RADIO", SYSTEM_APP_UID, 1)
+        });
+    }
+
+    @Test
+    public void logNativeCrash() {
+        mCriticalEventLog.incTimeSeconds(1);
+        mCriticalEventLog.logNativeCrash(ServerProtoEnums.SYSTEM_APP, "AID_RADIO", SYSTEM_APP_UID,
+                1);
+        mCriticalEventLog.incTimeSeconds(1);
+
+        CriticalEventLogProto logProto = getLogOutput();
+
+        assertThat(logProto.timestampMs).isEqualTo(START_TIME_MS + 2000);
+        assertProtoArrayEquals(logProto.events, new CriticalEventProto[]{
+                nativeCrash(START_TIME_MS + 1000, ServerProtoEnums.SYSTEM_APP, "AID_RADIO",
+                        SYSTEM_APP_UID, 1)
+        });
+    }
+
+    @Test
+    public void privacyRedaction_anr() {
         CriticalEventProto systemServerAnr = anr(START_TIME_MS + 1000, "Subject 1",
                 CriticalEventProto.SYSTEM_SERVER, "AID_SYSTEM", SYSTEM_SERVER_UID, 0);
         CriticalEventProto systemAppAnr = anr(START_TIME_MS + 2000, "Subject 2",
@@ -288,6 +305,8 @@ public class CriticalEventLogTest {
                 CriticalEventProto.DATA_APP, "com.bar", DATA_APP_UID_3, 4);
         CriticalEventProto barAppAnrRedacted = anr(START_TIME_MS + 5000, "",
                 CriticalEventProto.DATA_APP, "", DATA_APP_UID_3, 4);
+
+        addToLog(systemServerAnr, systemAppAnr, fooAppAnr, fooAppAnrUid2, barAppAnr);
 
         assertProtoArrayEquals(
                 getLogOutput(ServerProtoEnums.DATA_APP, "com.foo", DATA_APP_UID).events,
@@ -325,9 +344,123 @@ public class CriticalEventLogTest {
     }
 
     @Test
-    public void privacyRedaction_anr_doesNotMutateLogState() {
-        mCriticalEventLog.logAnr("Subject", ServerProtoEnums.DATA_APP, "com.foo",
+    public void privacyRedaction_javaCrash() {
+        CriticalEventProto systemServerCrash = javaCrash(START_TIME_MS + 1000, "Exception class 1",
+                CriticalEventProto.SYSTEM_SERVER, "AID_SYSTEM",
+                SYSTEM_SERVER_UID, 0);
+        CriticalEventProto systemAppCrash = javaCrash(START_TIME_MS + 2000, "Exception class 2",
+                CriticalEventProto.SYSTEM_APP, "AID_RADIO", SYSTEM_APP_UID, 1);
+        CriticalEventProto fooAppCrash = javaCrash(START_TIME_MS + 3000, "Exception class 3",
+                CriticalEventProto.DATA_APP, "com.foo", DATA_APP_UID, 2);
+        CriticalEventProto fooAppCrashUid2 = javaCrash(START_TIME_MS + 4000, "Exception class 4",
+                CriticalEventProto.DATA_APP, "com.foo", DATA_APP_UID_2, 3);
+        CriticalEventProto fooAppCrashUid2Redacted = javaCrash(START_TIME_MS + 4000, "",
+                CriticalEventProto.DATA_APP, "", DATA_APP_UID_2, 3);
+        CriticalEventProto barAppCrash = javaCrash(START_TIME_MS + 5000, "Exception class 5",
+                CriticalEventProto.DATA_APP, "com.bar", DATA_APP_UID_3, 4);
+        CriticalEventProto barAppCrashRedacted = javaCrash(START_TIME_MS + 5000, "",
+                CriticalEventProto.DATA_APP, "", DATA_APP_UID_3, 4);
+
+        addToLog(systemServerCrash, systemAppCrash, fooAppCrash, fooAppCrashUid2, barAppCrash);
+
+        assertProtoArrayEquals(
+                getLogOutput(ServerProtoEnums.DATA_APP, "com.foo", DATA_APP_UID).events,
+                new CriticalEventProto[]{
+                        systemServerCrash,
+                        systemAppCrash,
+                        fooAppCrash,
+                        // Redacted since the trace file and crash are for different uids.
+                        fooAppCrashUid2Redacted,
+                        // Redacted since the trace file and crash are for different data apps.
+                        barAppCrashRedacted
+                });
+
+        assertProtoArrayEquals(
+                getLogOutput(ServerProtoEnums.SYSTEM_SERVER, "AID_SYSTEM",
+                        SYSTEM_SERVER_UID).events,
+                new CriticalEventProto[]{
+                        systemServerCrash,
+                        systemAppCrash,
+                        fooAppCrash,
+                        fooAppCrashUid2,
+                        barAppCrash
+                });
+
+        assertProtoArrayEquals(
+                getLogOutput(ServerProtoEnums.SYSTEM_APP, "AID_RADIO",
+                        SYSTEM_APP_UID).events,
+                new CriticalEventProto[]{
+                        systemServerCrash,
+                        systemAppCrash,
+                        fooAppCrash,
+                        fooAppCrashUid2,
+                        barAppCrash
+                });
+    }
+
+    @Test
+    public void privacyRedaction_nativeCrash() {
+        CriticalEventProto systemServerCrash = nativeCrash(START_TIME_MS + 1000,
+                CriticalEventProto.SYSTEM_SERVER, "AID_SYSTEM",
+                SYSTEM_SERVER_UID, 0);
+        CriticalEventProto systemAppCrash = nativeCrash(START_TIME_MS + 2000,
+                CriticalEventProto.SYSTEM_APP, "AID_RADIO", SYSTEM_APP_UID, 1);
+        CriticalEventProto fooAppCrash = nativeCrash(START_TIME_MS + 3000,
+                CriticalEventProto.DATA_APP, "com.foo", DATA_APP_UID, 2);
+        CriticalEventProto fooAppCrashUid2 = nativeCrash(START_TIME_MS + 4000,
+                CriticalEventProto.DATA_APP, "com.foo", DATA_APP_UID_2, 3);
+        CriticalEventProto fooAppCrashUid2Redacted = nativeCrash(START_TIME_MS + 4000,
+                CriticalEventProto.DATA_APP, "", DATA_APP_UID_2, 3);
+        CriticalEventProto barAppCrash = nativeCrash(START_TIME_MS + 5000,
+                CriticalEventProto.DATA_APP, "com.bar", DATA_APP_UID_3, 4);
+        CriticalEventProto barAppCrashRedacted = nativeCrash(START_TIME_MS + 5000,
+                CriticalEventProto.DATA_APP, "", DATA_APP_UID_3, 4);
+
+        addToLog(systemServerCrash, systemAppCrash, fooAppCrash, fooAppCrashUid2, barAppCrash);
+
+        assertProtoArrayEquals(
+                getLogOutput(ServerProtoEnums.DATA_APP, "com.foo", DATA_APP_UID).events,
+                new CriticalEventProto[]{
+                        systemServerCrash,
+                        systemAppCrash,
+                        fooAppCrash,
+                        // Redacted since the trace file and crash are for different uids.
+                        fooAppCrashUid2Redacted,
+                        // Redacted since the trace file and crash are for different data apps.
+                        barAppCrashRedacted
+                });
+
+        assertProtoArrayEquals(
+                getLogOutput(ServerProtoEnums.SYSTEM_SERVER, "AID_SYSTEM",
+                        SYSTEM_SERVER_UID).events,
+                new CriticalEventProto[]{
+                        systemServerCrash,
+                        systemAppCrash,
+                        fooAppCrash,
+                        fooAppCrashUid2,
+                        barAppCrash
+                });
+
+        assertProtoArrayEquals(
+                getLogOutput(ServerProtoEnums.SYSTEM_APP, "AID_RADIO",
+                        SYSTEM_APP_UID).events,
+                new CriticalEventProto[]{
+                        systemServerCrash,
+                        systemAppCrash,
+                        fooAppCrash,
+                        fooAppCrashUid2,
+                        barAppCrash
+                });
+    }
+
+    @Test
+    public void privacyRedaction_doesNotMutateLogState() {
+        mCriticalEventLog.logAnr("ANR Subject", ServerProtoEnums.DATA_APP, "com.foo",
                 10_001, DATA_APP_UID);
+        mCriticalEventLog.logJavaCrash("com.foo.MyClass", ServerProtoEnums.DATA_APP, "com.foo",
+                10_001, DATA_APP_UID);
+        mCriticalEventLog.logNativeCrash(ServerProtoEnums.DATA_APP, "com.foo", 10_001,
+                DATA_APP_UID);
 
         CriticalEventLogProto unredactedLogBefore = getLogOutput(ServerProtoEnums.SYSTEM_SERVER,
                 "AID_SYSTEM", SYSTEM_SERVER_UID);
@@ -488,6 +621,12 @@ public class CriticalEventLogTest {
                 ServerProtoEnums.SYSTEM_SERVER);
     }
 
+    private void addToLog(CriticalEventProto... events) {
+        for (CriticalEventProto event : events) {
+            mCriticalEventLog.appendAndSave(event);
+        }
+    }
+
     private CriticalEventLogProto getLogOutput() {
         return getLogOutput(mCriticalEventLog);
     }
@@ -533,9 +672,29 @@ public class CriticalEventLogTest {
         }
     }
 
+    private static CriticalEventProto watchdog(long timestampMs, String subject) {
+        return watchdog(timestampMs, subject, "A UUID");
+    }
+
+    private static CriticalEventProto watchdog(long timestampMs, String subject, String uuid) {
+        CriticalEventProto event = new CriticalEventProto();
+        event.timestampMs = timestampMs;
+        event.setWatchdog(new Watchdog());
+        event.getWatchdog().subject = subject;
+        event.getWatchdog().uuid = uuid;
+        return event;
+    }
+
+    private static CriticalEventProto halfWatchdog(long timestampMs, String subject) {
+        CriticalEventProto event = new CriticalEventProto();
+        event.timestampMs = timestampMs;
+        event.setHalfWatchdog(new HalfWatchdog());
+        event.getHalfWatchdog().subject = subject;
+        return event;
+    }
+
     private static CriticalEventProto anr(long timestampMs, String subject, int processClass,
-            String processName,
-            int uid, int pid) {
+            String processName, int uid, int pid) {
         CriticalEventProto event = new CriticalEventProto();
         event.timestampMs = timestampMs;
         event.setAnr(new AppNotResponding());
@@ -547,24 +706,28 @@ public class CriticalEventLogTest {
         return event;
     }
 
-    private CriticalEventProto watchdog(long timestampMs, String subject) {
-        return watchdog(timestampMs, subject, "A UUID");
-    }
-
-    private CriticalEventProto watchdog(long timestampMs, String subject, String uuid) {
+    private static CriticalEventProto javaCrash(long timestampMs, String exceptionClass,
+            int processClass, String processName, int uid, int pid) {
         CriticalEventProto event = new CriticalEventProto();
         event.timestampMs = timestampMs;
-        event.setWatchdog(new Watchdog());
-        event.getWatchdog().subject = subject;
-        event.getWatchdog().uuid = uuid;
+        event.setJavaCrash(new JavaCrash());
+        event.getJavaCrash().exceptionClass = exceptionClass;
+        event.getJavaCrash().processClass = processClass;
+        event.getJavaCrash().process = processName;
+        event.getJavaCrash().uid = uid;
+        event.getJavaCrash().pid = pid;
         return event;
     }
 
-    private CriticalEventProto halfWatchdog(long timestampMs, String subject) {
+    private static CriticalEventProto nativeCrash(long timestampMs, int processClass,
+            String processName, int uid, int pid) {
         CriticalEventProto event = new CriticalEventProto();
         event.timestampMs = timestampMs;
-        event.setHalfWatchdog(new HalfWatchdog());
-        event.getHalfWatchdog().subject = subject;
+        event.setNativeCrash(new NativeCrash());
+        event.getNativeCrash().processClass = processClass;
+        event.getNativeCrash().process = processName;
+        event.getNativeCrash().uid = uid;
+        event.getNativeCrash().pid = pid;
         return event;
     }
 

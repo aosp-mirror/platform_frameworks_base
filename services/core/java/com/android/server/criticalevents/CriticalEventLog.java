@@ -29,6 +29,8 @@ import com.android.server.criticalevents.nano.CriticalEventLogStorageProto;
 import com.android.server.criticalevents.nano.CriticalEventProto;
 import com.android.server.criticalevents.nano.CriticalEventProto.AppNotResponding;
 import com.android.server.criticalevents.nano.CriticalEventProto.HalfWatchdog;
+import com.android.server.criticalevents.nano.CriticalEventProto.JavaCrash;
+import com.android.server.criticalevents.nano.CriticalEventProto.NativeCrash;
 import com.android.server.criticalevents.nano.CriticalEventProto.Watchdog;
 
 import java.io.File;
@@ -179,8 +181,56 @@ public class CriticalEventLog {
         log(event);
     }
 
+    /**
+     * Logs a java crash.
+     *
+     * @param exceptionClass   the crash exception class.
+     * @param processClassEnum {@link android.server.ServerProtoEnums} value for the crashed
+     *                         process.
+     * @param processName      name of the crashed process.
+     * @param uid              uid of the crashed process.
+     * @param pid              pid of the crashed process.
+     */
+    public void logJavaCrash(String exceptionClass, int processClassEnum, String processName,
+            int uid, int pid) {
+        JavaCrash crash = new JavaCrash();
+        crash.exceptionClass = exceptionClass;
+        crash.processClass = processClassEnum;
+        crash.process = processName;
+        crash.uid = uid;
+        crash.pid = pid;
+        CriticalEventProto event = new CriticalEventProto();
+        event.setJavaCrash(crash);
+        log(event);
+    }
+
+    /**
+     * Logs a native crash.
+     *
+     * @param processClassEnum {@link android.server.ServerProtoEnums} value for the crashed
+     *                         process.
+     * @param processName      name of the crashed process.
+     * @param uid              uid of the crashed process.
+     * @param pid              pid of the crashed process.
+     */
+    public void logNativeCrash(int processClassEnum, String processName, int uid, int pid) {
+        NativeCrash crash = new NativeCrash();
+        crash.processClass = processClassEnum;
+        crash.process = processName;
+        crash.uid = uid;
+        crash.pid = pid;
+        CriticalEventProto event = new CriticalEventProto();
+        event.setNativeCrash(crash);
+        log(event);
+    }
+
     private void log(CriticalEventProto event) {
         event.timestampMs = getWallTimeMillis();
+        appendAndSave(event);
+    }
+
+    @VisibleForTesting
+    void appendAndSave(CriticalEventProto event) {
         mEvents.append(event);
         saveLogToFile();
     }
@@ -420,7 +470,18 @@ public class CriticalEventLog {
                 if (shouldSanitize(anr.processClass, anr.process, anr.uid)) {
                     return sanitizeAnr(event);
                 }
+            } else if (event.hasJavaCrash()) {
+                JavaCrash crash = event.getJavaCrash();
+                if (shouldSanitize(crash.processClass, crash.process, crash.uid)) {
+                    return sanitizeJavaCrash(event);
+                }
+            } else if (event.hasNativeCrash()) {
+                NativeCrash crash = event.getNativeCrash();
+                if (shouldSanitize(crash.processClass, crash.process, crash.uid)) {
+                    return sanitizeNativeCrash(event);
+                }
             }
+            // No redaction needed.
             return event;
         }
 
@@ -428,21 +489,52 @@ public class CriticalEventLog {
             boolean sameApp = processName != null && processName.equals(mTraceProcessName)
                     && mTraceUid == uid;
 
-            // Only sanitize when both the ANR event and trace file are for different data apps.
+            // Only sanitize when both the critical event and trace file are for different data
+            // apps.
             return processClassEnum == CriticalEventProto.DATA_APP
                     && mTraceProcessClassEnum == CriticalEventProto.DATA_APP
                     && !sameApp;
         }
 
         private static CriticalEventProto sanitizeAnr(CriticalEventProto base) {
-            CriticalEventProto sanitized = new CriticalEventProto();
-            sanitized.timestampMs = base.timestampMs;
             AppNotResponding anr = new AppNotResponding();
-            sanitized.setAnr(anr);
             // Do not set subject and process.
             anr.processClass = base.getAnr().processClass;
             anr.uid = base.getAnr().uid;
             anr.pid = base.getAnr().pid;
+
+            CriticalEventProto sanitized = sanitizeCriticalEventProto(base);
+            sanitized.setAnr(anr);
+            return sanitized;
+        }
+
+        private static CriticalEventProto sanitizeJavaCrash(CriticalEventProto base) {
+            JavaCrash crash = new JavaCrash();
+            // Do not set exceptionClass and process.
+            crash.processClass = base.getJavaCrash().processClass;
+            crash.uid = base.getJavaCrash().uid;
+            crash.pid = base.getJavaCrash().pid;
+
+            CriticalEventProto sanitized = sanitizeCriticalEventProto(base);
+            sanitized.setJavaCrash(crash);
+            return sanitized;
+        }
+
+        private static CriticalEventProto sanitizeNativeCrash(CriticalEventProto base) {
+            NativeCrash crash = new NativeCrash();
+            // Do not set process.
+            crash.processClass = base.getNativeCrash().processClass;
+            crash.uid = base.getNativeCrash().uid;
+            crash.pid = base.getNativeCrash().pid;
+
+            CriticalEventProto sanitized = sanitizeCriticalEventProto(base);
+            sanitized.setNativeCrash(crash);
+            return sanitized;
+        }
+
+        private static CriticalEventProto sanitizeCriticalEventProto(CriticalEventProto base) {
+            CriticalEventProto sanitized = new CriticalEventProto();
+            sanitized.timestampMs = base.timestampMs;
             return sanitized;
         }
     }
