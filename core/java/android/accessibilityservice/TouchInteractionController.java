@@ -100,8 +100,8 @@ public final class TouchInteractionController {
     private final Object mLock;
     private final int mDisplayId;
     private boolean mServiceDetectsGestures;
-    /** Map of listeners to executors. Lazily created when adding the first listener. */
-    private ArrayMap<Listener, Executor> mListeners;
+    /** Map of callbacks to executors. Lazily created when adding the first callback. */
+    private ArrayMap<Callback, Executor> mCallbacks;
 
     // The current state of the display.
     private int mState = STATE_CLEAR;
@@ -114,38 +114,38 @@ public final class TouchInteractionController {
     }
 
     /**
-     * Adds the specified change listener to the list of motion event listeners. The callback will
+     * Adds the specified callback to the list of callbacks. The callback will
      * run using on the specified {@link Executor}', or on the service's main thread if the
      * Executor is {@code null}.
-     * @param listener the listener to add, must be non-null
+     * @param callback the callback to add, must be non-null
      * @param executor the executor for this callback, or {@code null} to execute on the service's
      *     main thread
      */
-    public void addListener(@Nullable Executor executor, @NonNull Listener listener) {
+    public void registerCallback(@Nullable Executor executor, @NonNull Callback callback) {
         synchronized (mLock) {
-            if (mListeners == null) {
-                mListeners = new ArrayMap<>();
+            if (mCallbacks == null) {
+                mCallbacks = new ArrayMap<>();
             }
-            mListeners.put(listener, executor);
-            if (mListeners.size() == 1) {
+            mCallbacks.put(callback, executor);
+            if (mCallbacks.size() == 1) {
                 setServiceDetectsGestures(true);
             }
         }
     }
 
     /**
-     * Removes the specified listener from the list of motion event listeners.
+     * Unregisters the specified callback.
      *
-     * @param listener the listener to remove, must be non-null
-     * @return {@code true} if the listener was removed, {@code false} otherwise
+     * @param callback the callback to remove, must be non-null
+     * @return {@code true} if the callback was removed, {@code false} otherwise
      */
-    public boolean removeListener(@NonNull Listener listener) {
-        if (mListeners == null) {
+    public boolean unregisterCallback(@NonNull Callback callback) {
+        if (mCallbacks == null) {
             return false;
         }
         synchronized (mLock) {
-            boolean result = mListeners.remove(listener) != null;
-            if (result && mListeners.size() == 0) {
+            boolean result = mCallbacks.remove(callback) != null;
+            if (result && mCallbacks.size() == 0) {
                 setServiceDetectsGestures(false);
             }
             return result;
@@ -153,60 +153,60 @@ public final class TouchInteractionController {
     }
 
     /**
-     * Removes all listeners and returns control of touch interactions to the framework.
+     * Removes all callbacks and returns control of touch interactions to the framework.
      */
-    public void removeAllListeners() {
-        if (mListeners != null) {
+    public void unregisterAllCallbacks() {
+        if (mCallbacks != null) {
             synchronized (mLock) {
-                mListeners.clear();
+                mCallbacks.clear();
                 setServiceDetectsGestures(false);
             }
         }
     }
 
     /**
-     * Dispatches motion events to any registered listeners. This should be called on the service's
+     * Dispatches motion events to any registered callbacks. This should be called on the service's
      * main thread.
      */
     void onMotionEvent(MotionEvent event) {
-        final ArrayMap<Listener, Executor> entries;
+        final ArrayMap<Callback, Executor> entries;
         synchronized (mLock) {
-            // Listeners may remove themselves. Perform a shallow copy to avoid concurrent
+            // callbacks may remove themselves. Perform a shallow copy to avoid concurrent
             // modification.
-            entries = new ArrayMap<>(mListeners);
+            entries = new ArrayMap<>(mCallbacks);
         }
         for (int i = 0, count = entries.size(); i < count; i++) {
-            final Listener listener = entries.keyAt(i);
+            final Callback callback = entries.keyAt(i);
             final Executor executor = entries.valueAt(i);
             if (executor != null) {
-                executor.execute(() -> listener.onMotionEvent(event));
+                executor.execute(() -> callback.onMotionEvent(event));
             } else {
-                // We're already on the main thread, just run the listener.
-                listener.onMotionEvent(event);
+                // We're already on the main thread, just run the callback.
+                callback.onMotionEvent(event);
             }
         }
     }
 
     /**
-     * Dispatches motion events to any registered listeners. This should be called on the service's
+     * Dispatches motion events to any registered callbacks. This should be called on the service's
      * main thread.
      */
     void onStateChanged(@State int state) {
         mState = state;
-        final ArrayMap<Listener, Executor> entries;
+        final ArrayMap<Callback, Executor> entries;
         synchronized (mLock) {
-            // Listeners may remove themselves. Perform a shallow copy to avoid concurrent
+            // callbacks may remove themselves. Perform a shallow copy to avoid concurrent
             // modification.
-            entries = new ArrayMap<>(mListeners);
+            entries = new ArrayMap<>(mCallbacks);
         }
         for (int i = 0, count = entries.size(); i < count; i++) {
-            final Listener listener = entries.keyAt(i);
+            final Callback callback = entries.keyAt(i);
             final Executor executor = entries.valueAt(i);
             if (executor != null) {
-                executor.execute(() -> listener.onStateChanged(state));
+                executor.execute(() -> callback.onStateChanged(state));
             } else {
-                // We're already on the main thread, just run the listener.
-                listener.onStateChanged(state);
+                // We're already on the main thread, just run the callback.
+                callback.onStateChanged(state);
             }
         }
     }
@@ -238,7 +238,7 @@ public final class TouchInteractionController {
 
     /**
      * If {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is enabled and at
-     * least one listener has been added for this display this function tells the framework to
+     * least one callback has been added for this display this function tells the framework to
      * initiate touch exploration. Touch exploration will continue for the duration of this
      * interaction.
      */
@@ -259,7 +259,7 @@ public final class TouchInteractionController {
     /**
      * If {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} and {@link If
      * {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is enabled and at least
-     * one listener has been added, this function tells the framework to initiate a dragging
+     * one callback has been added, this function tells the framework to initiate a dragging
      * interaction using the specified pointer. The pointer's movements will be passed through to
      * the rest of the input pipeline. Dragging is often used to perform two-finger scrolling.
      *
@@ -287,7 +287,7 @@ public final class TouchInteractionController {
     /**
      * If {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} and {@link If
      * {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is enabled and at least
-     * one listener has been added, this function tells the framework to initiate a delegating
+     * one callback has been added, this function tells the framework to initiate a delegating
      * interaction. Motion events will be passed through as-is to the rest of the input pipeline for
      * the duration of this interaction.
      */
@@ -308,7 +308,7 @@ public final class TouchInteractionController {
     /**
      * If {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} and {@link If
      * {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is enabled and at least
-     * one listener has been added, this function tells the framework to perform a click.
+     * one callback has been added, this function tells the framework to perform a click.
      * The framework will first try to perform
      * {@link AccessibilityNodeInfo.AccessibilityAction#ACTION_CLICK} on the item with
      * accessibility focus. If that fails, the framework will simulate a click using motion events
@@ -330,7 +330,7 @@ public final class TouchInteractionController {
     /**
      * If {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} and {@link If
      * {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is enabled and at least
-     * one listener has been added, this function tells the framework to perform a long click.
+     * one callback has been added, this function tells the framework to perform a long click.
      * The framework will simulate a long click using motion events on the last location with
      * accessibility focus and will delegate any movements to the rest of the input pipeline. This
      * allows a user to double-tap and hold to trigger a drag and then execute that drag by moving
@@ -350,9 +350,9 @@ public final class TouchInteractionController {
     }
 
     private void checkState() {
-        if (!mServiceDetectsGestures || mListeners.size() == 0) {
+        if (!mServiceDetectsGestures || mCallbacks.size() == 0) {
             throw new IllegalStateException(
-                    "State transitions are not allowed without first adding a listener.");
+                    "State transitions are not allowed without first adding a callback.");
         }
         if (mState != STATE_TOUCH_INTERACTING) {
             throw new IllegalStateException(
@@ -402,8 +402,8 @@ public final class TouchInteractionController {
         }
     }
 
-    /** Listeners allow services to receive motion events and state change updates. */
-    public interface Listener {
+    /** callbacks allow services to receive motion events and state change updates. */
+    public interface Callback {
         /**
          * Called when the framework has sent a motion event to the service.
          *
