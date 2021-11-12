@@ -6092,6 +6092,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mExpandHelperCallback;
     }
 
+    float getAppearFraction() {
+        return mLastSentAppear;
+    }
+
+    float getExpandedHeight() {
+        return mLastSentExpandedHeight;
+    }
+
     /** Enum for selecting some or all notification rows (does not included non-notif views). */
     @Retention(SOURCE)
     @IntDef({ROWS_ALL, ROWS_HIGH_PRIORITY, ROWS_GENTLE})
