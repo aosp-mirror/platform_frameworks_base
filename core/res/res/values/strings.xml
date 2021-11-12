@@ -64,16 +64,74 @@
     <!-- Displayed when a carrier does not support call forwarding queries when roaming. -->
     <string name="mmiErrorWhileRoaming">Can not change call forwarding settings from your phone while you are roaming.</string>
 
-    <!-- Displayed when a phone feature such as call barring was activated. -->
+    <!-- Displayed when a phone feature such as call forwarding, call waiting, or call barring was
+         activated.
+         Used to build messages of the form:
+         <X>
+         <Y>
+
+         Where <X> is the name of the service which was enabled.  Can be one of:
+         {@link #BaMmi Call barring}, {@link #CfMmi Call forwarding},
+         {@link #PwdMmi Password change},  {@link #CwMmi Call waiting},
+         {@link #ClipMmi Incoming Caller ID}, {@link #ClirMmi Hide Outgoing Caller ID},
+         {@link #ColpMmi Connected Line ID}, {@link #ColrMmi Connected Line ID Restriction}.
+         And <Y> is {@link #serviceEnabled} (this string).
+          -->
     <string name="serviceEnabled">Service was enabled.</string>
     <!-- Displayed in front of the list of a set of service classes
-         (voice, data, fax, etc.) that were enabled. -->
+         (voice, data, fax, etc.) that call waiting were enabled for.
+         Will be used with messages of the form:
+         <X>
+         <Y1>
+         ...
+         <Yn>
+         Where <X> is {@link #serviceEnabledFor} (this string) and <Y>..<Yn> can be:
+         {@link #serviceClassData}, {@link #serviceClassVoice}, {@link #serviceClassFAX},
+         {@link #serviceClassSMS}, {@link #serviceClassDataAsync}, {@link #serviceClassDataSync},
+         {@link #serviceClassPacket}, {@link #serviceClassPAD}.
+         -->
     <string name="serviceEnabledFor">Service was enabled for:</string>
-    <!-- Displayed when a phone feature such as call forwarding was deactivated. -->
+    <!-- Displayed when a phone feature such as call forwarding was deactivated.
+         Used to build messages of the form:
+         <X>
+         <Y>
+
+         Where <X> is the name of the service which was disabled.  Can be one of:
+         {@link #BaMmi Call barring}, {@link #CfMmi Call forwarding},
+         {@link #PwdMmi Password change},  {@link #CwMmi Call waiting},
+         {@link #ClipMmi Incoming Caller ID}, {@link #ClirMmi Hide Outgoing Caller ID},
+         {@link #ColpMmi Connected Line ID}, {@link #ColrMmi Connected Line ID Restriction}.
+         And <Y> is {@link #serviceDisabled} (this string).
+         -->
     <string name="serviceDisabled">Service has been disabled.</string>
-    <!-- Displayed when a phone property such as a SIM password was registered. -->
+    <!-- Displayed when a phone property such as a SIM password was registered.  Registration
+         entails setting up a service for use, where {@link #serviceEnabled} entails enabling a
+         previously registered service.
+         Used to build messages of the form:
+         <X>
+         <Y>
+
+         Where <X> is the name of the service which was registered.  Can be one of:
+         {@link #BaMmi Call barring}, {@link #CfMmi Call forwarding},
+         {@link #PwdMmi Password change},  {@link #CwMmi Call waiting},
+         {@link #ClipMmi Incoming Caller ID}, {@link #ClirMmi Hide Outgoing Caller ID},
+         {@link #ColpMmi Connected Line ID}, {@link #ColrMmi Connected Line ID Restriction}.
+         And <Y> is {@link #serviceRegistered} (this string). -->
     <string name="serviceRegistered">Registration was successful.</string>
-    <!-- Displayed when a phone property such as a SIM password was erased. -->
+    <!-- Displayed when a phone property such as a SIM password was erased.
+         Erasure is the opposite of {@link #serviceRegistered} and entails removal of a service.
+
+         Used to build messages of the form:
+         <X>
+         <Y>
+
+         Where <X> is the name of the service which was registered.  Can be one of:
+         {@link #BaMmi Call barring}, {@link #CfMmi Call forwarding},
+         {@link #PwdMmi Password change},  {@link #CwMmi Call waiting},
+         {@link #ClipMmi Incoming Caller ID}, {@link #ClirMmi Hide Outgoing Caller ID},
+         {@link #ColpMmi Connected Line ID}, {@link #ColrMmi Connected Line ID Restriction}.
+         And <Y> is {@link #serviceErased} (this string).
+         -->
     <string name="serviceErased">Erasure was successful.</string>
     <!-- Displayed when a SIM password was entered incorrectly. -->
     <string name="passwordIncorrect">Incorrect password.</string>
@@ -107,23 +165,32 @@
          [CHAR LIMIT=10] -->
     <string name="meid">MEID</string>
 
-    <!-- Displayed as the title for a success/failure report enabling/disabling caller ID. -->
+    <!-- Displayed as the title for a success/failure report enabling/disabling caller ID.
+         See {@link #serviceEnabled}, {@link #serviceDisabled}. -->
     <string name="ClipMmi">Incoming Caller ID</string>
-    <!-- Displayed as the title for a success/failure report enabling/disabling caller ID. -->
+    <!-- Displayed as the title for a success/failure report enabling/disabling caller ID.
+         See {@link #serviceEnabled}, {@link #serviceDisabled}. -->
     <string name="ClirMmi">Hide Outgoing Caller ID</string>
-    <!-- Displayed as the title for a success/failure report enabling/disabling connected line ID. -->
+    <!-- Displayed as the title for a success/failure report enabling/disabling connected line ID.
+         See {@link #serviceEnabled}, {@link #serviceDisabled}. -->
     <string name="ColpMmi">Connected Line ID</string>
-    <!-- Displayed as the title for a success/failure report enabling/disabling connected line ID restriction. -->
+    <!-- Displayed as the title for a success/failure report enabling/disabling connected line ID restriction.
+         See {@link #serviceEnabled}, {@link #serviceDisabled}. -->
     <string name="ColrMmi">Connected Line ID Restriction</string>
-    <!-- Displayed as the title for a success/failure report enabling/disabling call forwarding. -->
+    <!-- Displayed as the title for a success/failure report enabling/disabling call forwarding.
+         See {@link #serviceEnabled}, {@link #serviceDisabled}. -->
     <string name="CfMmi">Call forwarding</string>
-    <!-- Displayed as the title for a success/failure report enabling/disabling call waiting. -->
+    <!-- Displayed as the title for a success/failure report enabling/disabling call waiting.
+         See {@link #serviceEnabled}, {@link #serviceDisabled}. -->
     <string name="CwMmi">Call waiting</string>
-    <!-- Displayed as the title for a success/failure report enabling/disabling call barring. -->
+    <!-- Displayed as the title for a success/failure report enabling/disabling call barring.
+         See {@link #serviceEnabled}, {@link #serviceDisabled}. -->
     <string name="BaMmi">Call barring</string>
-    <!-- Displayed as the title for a success/failure report changing the SIM password. -->
+    <!-- Displayed as the title for a success/failure report changing the SIM password.
+         See {@link #serviceEnabled}, {@link #serviceDisabled}. -->
     <string name="PwdMmi">Password change</string>
-    <!-- Displayed as the title for a success/failure report changing the SIM PIN. -->
+    <!-- Displayed as the title for a success/failure report changing the SIM PIN.
+         See {@link #serviceEnabled}, {@link #serviceDisabled}. -->
     <string name="PinMmi">PIN change</string>
     <string name="CnipMmi">Calling number present</string>
     <string name="CnirMmi">Calling number restricted</string>
@@ -198,21 +265,29 @@
     <string name="peerTtyModeOff">Peer requested TTY Mode OFF</string>
 
     <!-- Mappings between TS 27.007 +CFCC/+CLCK "service classes" and human-readable strings--> <skip />
-    <!-- Example: Service was enabled for: Voice, Data -->
+    <!-- Example: Service was enabled for: Voice, Data
+         See {@link #serviceEnabledFor}.-->
     <string name="serviceClassVoice">Voice</string>
-    <!-- Example: Service was enabled for: Voice, Data -->
+    <!-- Example: Service was enabled for: Voice, Data.
+         See {@link #serviceEnabledFor}. -->
     <string name="serviceClassData">Data</string>
-    <!-- Example: Service was enabled for: Voice, FAX -->
+    <!-- Example: Service was enabled for: Voice, FAX
+         See {@link #serviceEnabledFor}. -->
     <string name="serviceClassFAX">FAX</string>
-    <!-- Example: Service was enabled for: Voice, SMS -->
+    <!-- Example: Service was enabled for: Voice, SMS
+         See {@link #serviceEnabledFor}. -->
     <string name="serviceClassSMS">SMS</string>
-    <!-- Meaning: asynchronous data.  Example: Service was enabled for: Voice, Async -->
+    <!-- Meaning: asynchronous data.  Example: Service was enabled for: Voice, Async
+         See {@link #serviceEnabledFor}. -->
     <string name="serviceClassDataAsync">Async</string>
-    <!-- Meaning: synchronous data.  Example: Service was enabled for: Voice, Async -->
+    <!-- Meaning: synchronous data.  Example: Service was enabled for: Voice, Async
+         See {@link #serviceEnabledFor}. -->
     <string name="serviceClassDataSync">Sync</string>
-    <!-- Meaning: packet data.  Example: Service was enabled for: Voice, Packet -->
+    <!-- Meaning: packet data.  Example: Service was enabled for: Voice, Packet
+         See {@link #serviceEnabledFor}. -->
     <string name="serviceClassPacket">Packet</string>
-    <!-- Meaning: unknown.  Example: Service was enabled for: Voice, PAD -->
+    <!-- Meaning: unknown.  Example: Service was enabled for: Voice, PAD
+        See {@link #serviceEnabledFor}. -->
     <string name="serviceClassPAD">PAD</string>
 
     <!-- CDMA Roaming Indicator Strings (non ERI)--> <skip />
