@@ -27,7 +27,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
@@ -140,6 +142,16 @@ public class TileServicesTest extends SysuiTestCase {
         verify(mBroadcastDispatcher).registerReceiver(any(), captor.capture(), any(), eq(
                 UserHandle.ALL));
         assertTrue(captor.getValue().hasAction(TileService.ACTION_REQUEST_LISTENING));
+    }
+
+    @Test
+    public void testBadComponentName_doesntCrash() {
+        ArgumentCaptor<BroadcastReceiver> captor = ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mBroadcastDispatcher).registerReceiver(captor.capture(), any(), any(), eq(
+                UserHandle.ALL));
+        Intent intent = new Intent(TileService.ACTION_REQUEST_LISTENING)
+                .putExtra(Intent.EXTRA_COMPONENT_NAME, "abc");
+        captor.getValue().onReceive(mContext, intent);
     }
 
     @Test
