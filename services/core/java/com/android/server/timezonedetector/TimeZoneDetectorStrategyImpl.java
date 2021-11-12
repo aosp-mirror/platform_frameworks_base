@@ -289,18 +289,19 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         }
         Objects.requireNonNull(suggestion);
 
-        if (currentUserConfig.getGeoDetectionEnabledBehavior()) {
-            // Only store a geolocation suggestion if geolocation detection is currently enabled.
-            // See also handleConfigChanged(), which can clear mLatestGeoLocationSuggestion.
-            // The suggestion's "effective from" time is ignored: we currently assume suggestions
-            // are made in a sensible order and the most recent is always the best one to use.
-            mLatestGeoLocationSuggestion.set(suggestion);
+        // Geolocation suggestions may be stored but not used during time zone detection if the
+        // configuration doesn't have geo time zone detection enabled. The caller is expected to
+        // withdraw a previous suggestion (i.e. submit an "uncertain" suggestion, when geo time zone
+        // detection is disabled.
 
-            // Now perform auto time zone detection. The new suggestion may be used to modify the
-            // time zone setting.
-            String reason = "New geolocation time zone suggested. suggestion=" + suggestion;
-            doAutoTimeZoneDetection(currentUserConfig, reason);
-        }
+        // The suggestion's "effective from" time is ignored: we currently assume suggestions
+        // are made in a sensible order and the most recent is always the best one to use.
+        mLatestGeoLocationSuggestion.set(suggestion);
+
+        // Now perform auto time zone detection. The new suggestion may be used to modify the
+        // time zone setting.
+        String reason = "New geolocation time zone suggested. suggestion=" + suggestion;
+        doAutoTimeZoneDetection(currentUserConfig, reason);
     }
 
     @Override
@@ -365,10 +366,8 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
 
         // Now perform auto time zone detection. The new suggestion may be used to modify the time
         // zone setting.
-        if (!currentUserConfig.getGeoDetectionEnabledBehavior()) {
-            String reason = "New telephony time zone suggested. suggestion=" + suggestion;
-            doAutoTimeZoneDetection(currentUserConfig, reason);
-        }
+        String reason = "New telephony time zone suggested. suggestion=" + suggestion;
+        doAutoTimeZoneDetection(currentUserConfig, reason);
     }
 
     @Override
@@ -427,7 +426,8 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
             return;
         }
 
-        // Use the correct algorithm based on the user's current configuration.
+        // Use the correct algorithm based on the user's current configuration. If it changes, then
+        // detection will be re-run.
         if (currentUserConfig.getGeoDetectionEnabledBehavior()) {
             doGeolocationTimeZoneDetection(detectionReason);
         } else  {
@@ -604,18 +604,6 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         int currentUserId = mEnvironment.getCurrentUserId();
         ConfigurationInternal currentUserConfig =
                 mEnvironment.getConfigurationInternal(currentUserId);
-
-        GeolocationTimeZoneSuggestion latestGeoLocationSuggestion =
-                mLatestGeoLocationSuggestion.get();
-        if (latestGeoLocationSuggestion != null
-                && !currentUserConfig.getGeoDetectionEnabledBehavior()) {
-            // The current user's config has geodetection disabled, so clear the latest suggestion.
-            // This is done to ensure we only ever keep a geolocation suggestion if the user has
-            // said it is ok to do so.
-            mLatestGeoLocationSuggestion.set(null);
-            mTimeZoneChangesLog.log(
-                    "handleConfigChanged: Cleared latest Geolocation suggestion.");
-        }
 
         // The configuration change may have changed available suggestions or the way suggestions
         // are used, so re-run detection.
