@@ -788,6 +788,7 @@ public class CameraServiceProxy extends SystemService
                     streamProtos[i].histogramType = streamStats.getHistogramType();
                     streamProtos[i].histogramBins = streamStats.getHistogramBins();
                     streamProtos[i].histogramCounts = streamStats.getHistogramCounts();
+                    streamProtos[i].dynamicRangeProfile = streamStats.getDynamicRangeProfile();
 
                     if (CameraServiceProxy.DEBUG) {
                         String histogramTypeName =
@@ -807,7 +808,8 @@ public class CameraServiceProxy extends SystemService
                                 + ", histogramBins "
                                 + Arrays.toString(streamProtos[i].histogramBins)
                                 + ", histogramCounts "
-                                + Arrays.toString(streamProtos[i].histogramCounts));
+                                + Arrays.toString(streamProtos[i].histogramCounts)
+                                + ", dynamicRangeProfile " + streamProtos[i].dynamicRangeProfile);
                     }
                 }
             }
