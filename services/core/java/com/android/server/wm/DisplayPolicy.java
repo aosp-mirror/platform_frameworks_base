@@ -132,6 +132,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -1908,7 +1909,7 @@ public class DisplayPolicy {
         applyKeyguardPolicy(win, imeTarget);
 
         // Check if the freeform window overlaps with the navigation bar area.
-        final boolean isOverlappingWithNavBar = isOverlappingWithNavBar(win, mNavigationBar);
+        final boolean isOverlappingWithNavBar = isOverlappingWithNavBar(win);
         if (isOverlappingWithNavBar && !mIsFreeformWindowOverlappingWithNavBar
                 && win.inFreeformWindowingMode()) {
             mIsFreeformWindowOverlappingWithNavBar = true;
@@ -2770,7 +2771,7 @@ public class DisplayPolicy {
     private int getStatusBarAppearance(WindowState opaque, WindowState opaqueOrDimming) {
         final boolean onKeyguard = isKeyguardShowing() && !isKeyguardOccluded();
         final WindowState colorWin = onKeyguard ? mNotificationShade : opaqueOrDimming;
-        return isLightBarAllowed(colorWin, ITYPE_STATUS_BAR) && (colorWin == opaque || onKeyguard)
+        return isLightBarAllowed(colorWin, Type.statusBars()) && (colorWin == opaque || onKeyguard)
                 ? (colorWin.mAttrs.insetsFlags.appearance & APPEARANCE_LIGHT_STATUS_BARS)
                 : 0;
     }
@@ -2818,7 +2819,7 @@ public class DisplayPolicy {
     @VisibleForTesting
     int updateLightNavigationBarLw(int appearance, WindowState navColorWin) {
         if (navColorWin == null || navColorWin.isDimming()
-                || !isLightBarAllowed(navColorWin, ITYPE_NAVIGATION_BAR)) {
+                || !isLightBarAllowed(navColorWin, Type.navigationBars())) {
             // Clear the light flag while not allowed.
             appearance &= ~APPEARANCE_LIGHT_NAVIGATION_BARS;
             return appearance;
@@ -2883,12 +2884,11 @@ public class DisplayPolicy {
         return appearance;
     }
 
-    private boolean isLightBarAllowed(WindowState win, @InternalInsetsType int type) {
+    private static boolean isLightBarAllowed(WindowState win, @InsetsType int type) {
         if (win == null) {
             return false;
         }
-        final InsetsSource source = win.getInsetsState().peekSource(type);
-        return source != null && Rect.intersects(win.getFrame(), source.getFrame());
+        return intersectsAnyInsets(win.getFrame(), win.getInsetsState(), type);
     }
 
     private Rect getBarContentFrameForWindow(WindowState win, int windowType) {
@@ -3268,17 +3268,34 @@ public class DisplayPolicy {
     }
 
     @VisibleForTesting
-    static boolean isOverlappingWithNavBar(@NonNull WindowState targetWindow,
-            WindowState navBarWindow) {
-        if (navBarWindow == null || !navBarWindow.isVisible()
-                || targetWindow.mActivityRecord == null || !targetWindow.isVisible()) {
+    static boolean isOverlappingWithNavBar(@NonNull WindowState win) {
+        if (win.mActivityRecord == null || !win.isVisible()) {
             return false;
         }
 
         // When the window is dimming means it's requesting dim layer to its host container, so
-        // checking whether it's overlapping with navigation bar by its container's bounds.
-        return Rect.intersects(targetWindow.isDimming()
-                ? targetWindow.getBounds() : targetWindow.getFrame(), navBarWindow.getFrame());
+        // checking whether it's overlapping with a navigation bar by its container's bounds.
+        return intersectsAnyInsets(win.isDimming() ? win.getBounds() : win.getFrame(),
+                win.getInsetsState(), Type.navigationBars());
+    }
+
+    /**
+     * Returns whether the given {@param bounds} intersects with any insets of the
+     * provided {@param insetsType}.
+     */
+    private static boolean intersectsAnyInsets(Rect bounds, InsetsState insetsState,
+            @InsetsType int insetsType) {
+        final ArraySet<Integer> internalTypes = InsetsState.toInternalType(insetsType);
+        for (int i = 0; i < internalTypes.size(); i++) {
+            final InsetsSource source = insetsState.peekSource(internalTypes.valueAt(i));
+            if (source == null || !source.isVisible()) {
+                continue;
+            }
+            if (Rect.intersects(bounds, source.getFrame())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

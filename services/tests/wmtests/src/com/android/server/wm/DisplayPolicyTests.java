@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.RoundedCorners.NO_ROUNDED_CORNERS;
@@ -251,28 +252,38 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
     @Test
     public void testOverlappingWithNavBar() {
+        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
+        navSource.setFrame(new Rect(100, 200, 200, 300));
+        testOverlappingWithNavBarType(navSource);
+    }
+
+    @Test
+    public void testOverlappingWithExtraNavBar() {
+        final InsetsSource navSource = new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR);
+        navSource.setFrame(new Rect(100, 200, 200, 300));
+        testOverlappingWithNavBarType(navSource);
+    }
+
+    private void testOverlappingWithNavBarType(InsetsSource navSource) {
         final WindowState targetWin = createApplicationWindow();
         final WindowFrames winFrame = targetWin.getWindowFrames();
         winFrame.mFrame.set(new Rect(100, 100, 200, 200));
-
-        final WindowState navigationBar = createNavigationBarWindow();
-
-        navigationBar.getFrame().set(new Rect(100, 200, 200, 300));
+        targetWin.mAboveInsetsState.addSource(navSource);
 
         assertFalse("Freeform is overlapping with navigation bar",
-                DisplayPolicy.isOverlappingWithNavBar(targetWin, navigationBar));
+                DisplayPolicy.isOverlappingWithNavBar(targetWin));
 
         winFrame.mFrame.set(new Rect(100, 101, 200, 201));
         assertTrue("Freeform should be overlapping with navigation bar (bottom)",
-                DisplayPolicy.isOverlappingWithNavBar(targetWin, navigationBar));
+                DisplayPolicy.isOverlappingWithNavBar(targetWin));
 
         winFrame.mFrame.set(new Rect(99, 200, 199, 300));
         assertTrue("Freeform should be overlapping with navigation bar (right)",
-                DisplayPolicy.isOverlappingWithNavBar(targetWin, navigationBar));
+                DisplayPolicy.isOverlappingWithNavBar(targetWin));
 
         winFrame.mFrame.set(new Rect(199, 200, 299, 300));
         assertTrue("Freeform should be overlapping with navigation bar (left)",
-                DisplayPolicy.isOverlappingWithNavBar(targetWin, navigationBar));
+                DisplayPolicy.isOverlappingWithNavBar(targetWin));
     }
 
     private WindowState createNavigationBarWindow() {
