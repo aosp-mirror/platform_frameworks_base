@@ -17,6 +17,7 @@
 package com.android.systemui.unfold
 
 import com.android.keyguard.KeyguardUnfoldTransition
+import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.phone.StatusBarMoveFromCenterAnimationController
@@ -38,6 +39,7 @@ annotation class SysUIUnfoldScope
  * [@SysUIUnfoldScope]. Since [SysUIUnfoldComponent] depends upon:
  * * [Optional<UnfoldTransitionProgressProvider>]
  * * [Optional<ScopedUnfoldTransitionProgressProvider>]
+ * * [Optional<NaturalRotationProgressProvider>]
  * no objects will get constructed if these parameters are empty.
  */
 @Module(subcomponents = [SysUIUnfoldComponent::class])
@@ -48,11 +50,14 @@ class SysUIUnfoldModule {
     @SysUISingleton
     fun provideSysUIUnfoldComponent(
         provider: Optional<UnfoldTransitionProgressProvider>,
+        rotationProvider: Optional<NaturalRotationUnfoldProgressProvider>,
         @Named(UNFOLD_STATUS_BAR) scopedProvider: Optional<ScopedUnfoldTransitionProgressProvider>,
         factory: SysUIUnfoldComponent.Factory
     ) =
-        provider.flatMap {
-            p -> scopedProvider.map { sp -> factory.create(p, sp) }
+        provider.flatMap { p1 ->
+            rotationProvider.flatMap { p2 ->
+                scopedProvider.map { p3 -> factory.create(p1, p2, p3) }
+            }
         }
 }
 
@@ -63,8 +68,9 @@ interface SysUIUnfoldComponent {
     @Subcomponent.Factory
     interface Factory {
         fun create(
-            @BindsInstance provider: UnfoldTransitionProgressProvider,
-            @BindsInstance scopedProvider: ScopedUnfoldTransitionProgressProvider
+            @BindsInstance p1: UnfoldTransitionProgressProvider,
+            @BindsInstance p2: NaturalRotationUnfoldProgressProvider,
+            @BindsInstance p3: ScopedUnfoldTransitionProgressProvider
         ): SysUIUnfoldComponent
     }
 

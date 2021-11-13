@@ -4117,7 +4117,7 @@ public class ActivityManager {
      */
     @TestApi
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
     public void setStopUserOnSwitch(@StopUserOnSwitch int value) {
         try {
             getService().setStopUserOnSwitch(value);

@@ -905,7 +905,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
 
         mTapAgainViewController.init();
-        mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mNotificationContainerParent));
+        mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mView));
     }
 
     @Override
@@ -1150,7 +1150,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
         setKeyguardBottomAreaVisibility(mBarState, false);
 
-        mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mNotificationContainerParent));
+        mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mView));
     }
 
     private void attachSplitShadeMediaPlayerContainer(FrameLayout container) {
@@ -3558,7 +3558,12 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationStackScrollLayoutController.setPulsing(pulsing, animatePulse);
     }
 
-    public void setAmbientIndicationBottomPadding(int ambientIndicationBottomPadding) {
+    public void setAmbientIndicationTop(int ambientIndicationTop, boolean ambientTextVisible) {
+        int ambientIndicationBottomPadding = 0;
+        if (ambientTextVisible) {
+            int stackBottom = mNotificationStackScrollLayoutController.getView().getBottom();
+            ambientIndicationBottomPadding = stackBottom - ambientIndicationTop;
+        }
         if (mAmbientIndicationBottomPadding != ambientIndicationBottomPadding) {
             mAmbientIndicationBottomPadding = ambientIndicationBottomPadding;
             updateMaxDisplayedNotifications(true);
