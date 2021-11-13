@@ -705,6 +705,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @GuardedBy("getLockObject()")
     private @UserIdInt int mLogoutUserId = UserHandle.USER_NULL;
 
+    /**
+     * User the network logging notification was sent to.
+     */
+    // Guarded by mHandler
+    private @UserIdInt int mNetworkLoggingNotificationUserId = UserHandle.USER_NULL;
+
     private static final boolean ENABLE_LOCK_GUARD = true;
 
     /**
@@ -9575,7 +9581,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private @UserIdInt int getCurrentForegroundUserId() {
         try {
-            return mInjector.getIActivityManager().getCurrentUser().id;
+            UserInfo currentUser = mInjector.getIActivityManager().getCurrentUser();
+            if (currentUser == null) {
+                // TODO(b/206107460): should not happen on production, but it's happening on unit
+                // tests that are not properly setting the expectation (because they don't need it)
+                Slogf.wtf(LOG_TAG, "getCurrentForegroundUserId(): mInjector.getIActivityManager()"
+                        + ".getCurrentUser() returned null, please ignore when running unit tests");
+                return ActivityManager.getCurrentUser();
+            }
+            return currentUser.id;
         } catch (RemoteException e) {
             Slogf.wtf(LOG_TAG, "cannot get current user");
         }
@@ -9709,7 +9723,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mStateCache.dump(pw);
                 pw.println();
             }
+            mHandler.post(() -> handleDump(pw));
             dumpResources(pw);
+        }
+    }
+
+    // Dump state that is guarded by the handler
+    private void handleDump(IndentingPrintWriter pw) {
+        if (mNetworkLoggingNotificationUserId != UserHandle.USER_NULL) {
+            pw.println("mNetworkLoggingNotificationUserId:  " + mNetworkLoggingNotificationUserId);
         }
     }
 
@@ -15199,11 +15221,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             if (active) {
                 if (shouldSendNotification) {
-                    mHandler.post(() -> sendNetworkLoggingNotification());
+                    mHandler.post(() -> handleSendNetworkLoggingNotification());
                 }
             } else {
-                mHandler.post(() -> mInjector.getNotificationManager().cancel(
-                        SystemMessage.NOTE_NETWORK_LOGGING));
+                mHandler.post(() -> handleCancelNetworkLoggingNotification());
             }
         });
     }
@@ -15394,10 +15415,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return true;
     }
 
-    private void sendNetworkLoggingNotification() {
+    private void handleSendNetworkLoggingNotification() {
         final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
         final Intent intent = new Intent(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
         intent.setPackage(pm.getSystemUiServiceComponent().getPackageName());
+        mNetworkLoggingNotificationUserId = getCurrentForegroundUserId();
         // Simple notification clicks are immutable
         final PendingIntent pendingIntent = PendingIntent.getBroadcastAsUser(mContext, 0, intent,
                 PendingIntent.FLAG_IMMUTABLE, UserHandle.CURRENT);
@@ -15412,7 +15434,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .setStyle(new Notification.BigTextStyle()
                         .bigText(mContext.getString(R.string.network_logging_notification_text)))
                 .build();
-        mInjector.getNotificationManager().notify(SystemMessage.NOTE_NETWORK_LOGGING, notification);
+        Slogf.i(LOG_TAG, "Sending network logging notification to user %d",
+                mNetworkLoggingNotificationUserId);
+        mInjector.getNotificationManager().notifyAsUser(/* tag= */ null,
+                SystemMessage.NOTE_NETWORK_LOGGING, notification,
+                UserHandle.of(mNetworkLoggingNotificationUserId));
+    }
+
+    private void handleCancelNetworkLoggingNotification() {
+        if (mNetworkLoggingNotificationUserId == UserHandle.USER_NULL) {
+            // Happens when setNetworkLoggingActive(false) is called before called with true
+            Slogf.d(LOG_TAG, "Not cancelling network logging notification for USER_NULL");
+            return;
+        }
+
+        Slogf.i(LOG_TAG, "Cancelling network logging notification for user %d",
+                mNetworkLoggingNotificationUserId);
+        mInjector.getNotificationManager().cancelAsUser(/* tag= */ null,
+                SystemMessage.NOTE_NETWORK_LOGGING,
+                UserHandle.of(mNetworkLoggingNotificationUserId));
+        mNetworkLoggingNotificationUserId = UserHandle.USER_NULL;
     }
 
     /**
