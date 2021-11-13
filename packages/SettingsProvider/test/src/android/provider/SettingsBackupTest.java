@@ -631,7 +631,6 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.SYSTEM_CAPABILITIES,
                     Settings.Global.Wearable.SYSTEM_EDITION,
                     Settings.Global.Wearable.WEAR_PLATFORM_MR_NUMBER,
-                    Settings.Global.Wearable.SCREEN_BRIGHTNESS_LEVEL,
                     Settings.Global.Wearable.MOBILE_SIGNAL_DETECTOR,
                     Settings.Global.Wearable.AMBIENT_ENABLED,
                     Settings.Global.Wearable.AMBIENT_TILT_TO_WAKE,

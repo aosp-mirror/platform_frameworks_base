@@ -16608,12 +16608,6 @@ public final class Settings {
             public static final String WEAR_PLATFORM_MR_NUMBER = "wear_platform_mr_number";
 
             /**
-             * The different levels of screen brightness the user can select.
-             * @hide
-             */
-            public static final String SCREEN_BRIGHTNESS_LEVEL = "screen_brightness_level";
-
-            /**
              * The mobile signal detector setting.
              * @hide
              */

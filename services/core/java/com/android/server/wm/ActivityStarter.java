@@ -1328,26 +1328,23 @@ class ActivityStarter {
                 : (realCallingAppId == Process.SYSTEM_UID)
                         || realCallingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
 
-        // If caller a legacy app, we won't check if caller has BAL permission.
-        final boolean isPiBalOptionEnabled = CompatChanges.isChangeEnabled(
-                ENABLE_PENDING_INTENT_BAL_OPTION, callingUid);
-
         // Legacy behavior allows to use caller foreground state to bypass BAL restriction.
         final boolean balAllowedByPiSender =
                 PendingIntentRecord.isPendingIntentBalAllowedByCaller(checkedOptions);
 
         if (balAllowedByPiSender && realCallingUid != callingUid) {
-            if (isPiBalOptionEnabled) {
-                if (ActivityManager.checkComponentPermission(
-                        android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
-                        realCallingUid, -1, true)
-                        == PackageManager.PERMISSION_GRANTED) {
-                    if (DEBUG_ACTIVITY_STARTS) {
-                        Slog.d(TAG, "Activity start allowed: realCallingUid (" + realCallingUid
-                                + ") has BAL permission.");
-                    }
-                    return false;
+            // If the caller is a legacy app, we won't check if the caller has BAL permission.
+            final boolean isPiBalOptionEnabled = CompatChanges.isChangeEnabled(
+                    ENABLE_PENDING_INTENT_BAL_OPTION, realCallingUid);
+            if (isPiBalOptionEnabled && ActivityManager.checkComponentPermission(
+                    android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
+                    realCallingUid, -1, true)
+                    == PackageManager.PERMISSION_GRANTED) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "Activity start allowed: realCallingUid (" + realCallingUid
+                            + ") has BAL permission.");
                 }
+                return false;
             }
 
             // don't abort if the realCallingUid has a visible window

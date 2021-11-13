@@ -16,10 +16,38 @@
 
 package com.android.systemui.statusbar.policy
 
+import android.view.View
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewScope
 import javax.inject.Inject
 
-interface RemoteInputViewController
+interface RemoteInputViewController {
+    fun bind()
+    fun unbind()
+}
 
 @RemoteInputViewScope
-class RemoteInputViewControllerImpl @Inject constructor() : RemoteInputViewController
+class RemoteInputViewControllerImpl @Inject constructor(
+    private val view: RemoteInputView,
+    private val remoteInputQuickSettingsDisabler: RemoteInputQuickSettingsDisabler
+) : RemoteInputViewController {
+
+    private var isBound = false
+
+    override fun bind() {
+        if (isBound) return
+        isBound = true
+
+        view.addOnEditTextFocusChangedListener(onFocusChangeListener)
+    }
+
+    override fun unbind() {
+        if (!isBound) return
+        isBound = false
+
+        view.removeOnEditTextFocusChangedListener(onFocusChangeListener)
+    }
+
+    private val onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+        remoteInputQuickSettingsDisabler.setRemoteInputActive(hasFocus)
+    }
+}

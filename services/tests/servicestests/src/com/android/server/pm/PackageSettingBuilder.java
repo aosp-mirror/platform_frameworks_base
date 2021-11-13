@@ -17,7 +17,6 @@
 package com.android.server.pm;
 
 import android.content.pm.SigningDetails;
-import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -25,6 +24,7 @@ import com.android.server.pm.pkg.PackageUserStateImpl;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class PackageSettingBuilder {
@@ -46,7 +46,7 @@ public class PackageSettingBuilder {
     private InstallSource mInstallSource;
     private String[] mUsesStaticLibraries;
     private long[] mUsesStaticLibrariesVersions;
-    private Map<String, ArraySet<String>> mMimeGroups;
+    private Map<String, Set<String>> mMimeGroups;
     private SigningDetails mSigningDetails;
     private UUID mDomainSetId = UUID.randomUUID();
 
@@ -127,7 +127,7 @@ public class PackageSettingBuilder {
         return this;
     }
 
-    public PackageSettingBuilder setMimeGroups(Map<String, ArraySet<String>> mimeGroups) {
+    public PackageSettingBuilder setMimeGroups(Map<String, Set<String>> mimeGroups) {
         this.mMimeGroups = mimeGroups;
         return this;
     }

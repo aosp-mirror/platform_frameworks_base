@@ -80,8 +80,8 @@ static void native_setState(jlong nativePtr, jint state, jlong timestamp) {
     asLongMultiStateCounter(nativePtr)->setState(state, timestamp);
 }
 
-static void native_updateValue(jlong nativePtr, jlong value, jlong timestamp) {
-    asLongMultiStateCounter(nativePtr)->updateValue((int64_t)value, timestamp);
+static jlong native_updateValue(jlong nativePtr, jlong value, jlong timestamp) {
+    return (jlong)asLongMultiStateCounter(nativePtr)->updateValue((int64_t)value, timestamp);
 }
 
 static void native_addCount(jlong nativePtr, jlong count) {
@@ -170,7 +170,7 @@ static const JNINativeMethod g_methods[] = {
         // @CriticalNative
         {"native_setState", "(JIJ)V", (void *)native_setState},
         // @CriticalNative
-        {"native_updateValue", "(JJJ)V", (void *)native_updateValue},
+        {"native_updateValue", "(JJJ)J", (void *)native_updateValue},
         // @CriticalNative
         {"native_addCount", "(JJ)V", (void *)native_addCount},
         // @CriticalNative
