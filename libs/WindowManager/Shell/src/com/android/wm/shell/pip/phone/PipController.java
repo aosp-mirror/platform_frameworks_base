@@ -463,6 +463,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     }
 
     private void onOverlayChanged() {
+        mTouchHandler.onOverlayChanged();
         onDisplayChanged(new DisplayLayout(mContext, mContext.getDisplay()),
                 false /* saveRestoreSnapFraction */);
     }

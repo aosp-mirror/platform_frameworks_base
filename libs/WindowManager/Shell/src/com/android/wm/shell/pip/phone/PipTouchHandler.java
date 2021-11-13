@@ -259,6 +259,11 @@ public class PipTouchHandler {
         mPipDismissTargetHandler.updateMagneticTargetSize();
     }
 
+    public void onOverlayChanged() {
+        // onOverlayChanged is triggered upon theme change, update the dismiss target accordingly.
+        mPipDismissTargetHandler.init();
+    }
+
     private boolean shouldShowResizeHandle() {
         return false;
     }
