@@ -9610,6 +9610,37 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Gets the user a {@link #logoutUser(ComponentName)} call would switch to,
+     * or {@link UserHandle#USER_NULL} if the current user is not in a session.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public @UserIdInt int getLogoutUserId() {
+        try {
+            return mService.getLogoutUserId();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears the user that {@link #logoutUser(ComponentName)} would switch to.
+     *
+     * <p>Typically used by system UI after it logout a session.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public void clearLogoutUser() {
+        try {
+            mService.clearLogoutUser();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Called by a device owner to list all secondary users on the device. Managed profiles are not
      * considered as secondary users.
      * <p> Used for various user management APIs, including {@link #switchUser}, {@link #removeUser}

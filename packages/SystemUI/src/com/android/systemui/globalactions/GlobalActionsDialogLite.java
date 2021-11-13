@@ -607,6 +607,9 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             } else if (GLOBAL_ACTION_KEY_SCREENSHOT.equals(actionKey)) {
                 addIfShouldShowAction(tempActions, new ScreenshotAction());
             } else if (GLOBAL_ACTION_KEY_LOGOUT.equals(actionKey)) {
+                // TODO(b/206032495): should call mDevicePolicyManager.getLogoutUserId() instead of
+                // hardcode it to USER_SYSTEM so it properly supports headless system user mode
+                // (and then call mDevicePolicyManager.clearLogoutUser() after switched)
                 if (mDevicePolicyManager.isLogoutEnabled()
                         && currentUser.get() != null
                         && currentUser.get().id != UserHandle.USER_SYSTEM) {

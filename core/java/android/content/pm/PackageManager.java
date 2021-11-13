@@ -2474,6 +2474,16 @@ public abstract class PackageManager {
     public static final String FEATURE_CTS = "android.software.cts";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * is opted-in to render the application using Automotive App Host
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CAR_TEMPLATES_HOST =
+            "android.software.car.templates_host";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature(String, int)}: If this feature is supported, the device supports
      * {@link android.security.identity.IdentityCredentialStore} implemented in secure hardware
