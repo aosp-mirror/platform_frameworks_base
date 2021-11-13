@@ -9692,7 +9692,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mStatLogger.dump(pw);
                 pw.println();
                 pw.println("Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
-                pw.println("Logout user: " + getLogoutUserId());
+                pw.println("Logout user: " + getLogoutUserIdUnchecked());
                 pw.println();
 
                 if (mPendingUserCreatedCallbackTokens.isEmpty()) {
@@ -10805,7 +10805,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         boolean switched = false;
         // Save previous logout user id in case of failure
-        int logoutUserId = getLogoutUserId();
+        int logoutUserId = getLogoutUserIdUnchecked();
         synchronized (getLockObject()) {
             long id = mInjector.binderClearCallingIdentity();
             try {
@@ -10832,7 +10832,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private @UserIdInt int getLogoutUserId() {
+    @Override
+    public int getLogoutUserId() {
+        Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity()));
+
+        return getLogoutUserIdUnchecked();
+    }
+
+    private @UserIdInt int getLogoutUserIdUnchecked() {
         if (!mInjector.userManagerIsHeadlessSystemUserMode()) {
             // mLogoutUserId is USER_SYSTEM as well, but there's no need to acquire the lock
             return UserHandle.USER_SYSTEM;
@@ -10842,11 +10849,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void setLogoutUserId(@UserIdInt int userId) {
+    @Override
+    public void clearLogoutUser() {
+        CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(canManageUsers(caller));
+
+        Slogf.i(LOG_TAG, "Clearing logout user as requested by %s", caller);
+        clearLogoutUserUnchecked();
+    }
+
+    private void clearLogoutUserUnchecked() {
         if (!mInjector.userManagerIsHeadlessSystemUserMode()) return; // ignore
 
         synchronized (getLockObject()) {
-            setLogoutUserIdLocked(userId);
+            setLogoutUserIdLocked(UserHandle.USER_NULL);
         }
     }
 
@@ -10943,7 +10959,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return stopUserUnchecked(callingUserId);
         }
 
-        int logoutUserId = getLogoutUserId();
+        int logoutUserId = getLogoutUserIdUnchecked();
         if (logoutUserId == UserHandle.USER_NULL) {
             // Could happen on devices using headless system user mode when called before calling
             // switchUser() or startUserInBackground() first
@@ -10958,7 +10974,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // This should never happen as target user is determined by getPreviousUserId()
                 return UserManager.USER_OPERATION_ERROR_UNKNOWN;
             }
-            setLogoutUserId(UserHandle.USER_CURRENT);
+            clearLogoutUserUnchecked();
         } catch (RemoteException e) {
             // Same process, should not happen.
             return UserManager.USER_OPERATION_ERROR_UNKNOWN;
