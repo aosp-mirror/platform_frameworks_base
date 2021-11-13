@@ -377,7 +377,13 @@ public class InteractionJankMonitor {
 
         // Notify the receivers if necessary.
         if (session.shouldNotify()) {
-            notifyEvents(context, action, session);
+            if (context != null) {
+                notifyEvents(context, action, session);
+            } else {
+                throw new IllegalArgumentException(
+                        "Can't notify cuj events due to lack of context: cuj="
+                        + session.getName() + ", action=" + action);
+            }
         }
     }
 
@@ -739,7 +745,8 @@ public class InteractionJankMonitor {
              * @return builder
              */
             public static Builder withView(@CujType int cuj, @NonNull View view) {
-                return new Builder(cuj).setView(view);
+                return new Builder(cuj).setView(view)
+                        .setContext(view.getContext());
             }
 
             private Builder(@CujType int cuj) {
