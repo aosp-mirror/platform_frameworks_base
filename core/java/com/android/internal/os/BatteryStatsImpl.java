@@ -491,7 +491,8 @@ public class BatteryStatsImpl extends BatteryStats {
                     isolatedUidTimeInFreqCounters = new LongArrayMultiStateCounter[childUidCount];
                     for (int j = childUidCount - 1; j >= 0; --j) {
                         isolatedUids[j] = u.mChildUids.keyAt(j);
-                        isolatedUidTimeInFreqCounters[j] = u.mChildUids.valueAt(j);
+                        isolatedUidTimeInFreqCounters[j] =
+                                u.mChildUids.valueAt(j).cpuTimeInFreqCounter;
                     }
                 }
             }
@@ -574,7 +575,8 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             for (int i = allUidCpuFreqTimesMs.size() - 1; i >= 0; --i) {
                 final int uid = allUidCpuFreqTimesMs.keyAt(i);
-                final Uid u = getAvailableUidStatsLocked(mapUid(uid));
+                final int parentUid = mapUid(uid);
+                final Uid u = getAvailableUidStatsLocked(parentUid);
                 if (u == null) {
                     continue;
                 }
@@ -599,16 +601,22 @@ public class BatteryStatsImpl extends BatteryStats {
                         u.getProcStateScreenOffTimeCounter().getCounter();
 
                 onBatteryCounter.setState(procState, timestampMs);
-                mKernelSingleUidTimeReader.addDelta(uid, onBatteryCounter, timestampMs);
+                if (uid == parentUid) {
+                    mKernelSingleUidTimeReader.addDelta(uid, onBatteryCounter, timestampMs);
+                }
 
                 onBatteryScreenOffCounter.setState(procState, timestampMs);
-                mKernelSingleUidTimeReader.addDelta(uid, onBatteryScreenOffCounter, timestampMs);
+                if (uid == parentUid) {
+                    mKernelSingleUidTimeReader.addDelta(uid, onBatteryScreenOffCounter,
+                            timestampMs);
+                }
 
                 if (u.mChildUids != null) {
                     final LongArrayMultiStateCounter.LongArrayContainer deltaContainer =
                             new LongArrayMultiStateCounter.LongArrayContainer(getCpuFreqCount());
                     for (int j = u.mChildUids.size() - 1; j >= 0; --j) {
-                        final LongArrayMultiStateCounter counter = u.mChildUids.valueAt(j);
+                        final LongArrayMultiStateCounter counter =
+                                u.mChildUids.valueAt(j).cpuTimeInFreqCounter;
                         if (counter != null) {
                             final int isolatedUid = u.mChildUids.keyAt(j);
                             mKernelSingleUidTimeReader.addDelta(isolatedUid,
@@ -1836,8 +1844,12 @@ public class BatteryStatsImpl extends BatteryStats {
             mCounter.setState(processState, elapsedRealtimeMs);
         }
 
-        private void update(long value, long timestampMs) {
-            mCounter.updateValue(value, timestampMs);
+        private long update(long value, long timestampMs) {
+            return mCounter.updateValue(value, timestampMs);
+        }
+
+        public void addCount(long delta) {
+            mCounter.addCount(delta);
         }
 
         /**
@@ -8116,7 +8128,7 @@ public class BatteryStatsImpl extends BatteryStats {
         TimeInFreqMultiStateCounter mProcStateTimeMs;
         TimeInFreqMultiStateCounter mProcStateScreenOffTimeMs;
 
-        SparseArray<LongArrayMultiStateCounter> mChildUids;
+        SparseArray<ChildUid> mChildUids;
 
         /**
          * The statistics we have collected for this uid's wake locks.
@@ -8386,18 +8398,7 @@ public class BatteryStatsImpl extends BatteryStats {
             } else if (mChildUids.indexOfKey(isolatedUid) >= 0) {
                 return;
             }
-            if (mBsi.trackPerProcStateCpuTimes()) {
-                LongArrayMultiStateCounter counter =
-                        new LongArrayMultiStateCounter(1, mBsi.getCpuFreqCount());
-                // Set initial values to all 0. This is a child UID and we want to include
-                // the entirety of its CPU time-in-freq stats into the parent's stats.
-                counter.updateValues(
-                        new LongArrayMultiStateCounter.LongArrayContainer(mBsi.getCpuFreqCount()),
-                        mBsi.mClock.elapsedRealtime());
-                mChildUids.put(isolatedUid, counter);
-            } else {
-                mChildUids.put(isolatedUid, null);
-            }
+            mChildUids.put(isolatedUid, new ChildUid());
         }
 
         public void removeIsolatedUid(int isolatedUid) {
@@ -11193,6 +11194,32 @@ public class BatteryStatsImpl extends BatteryStats {
 
             final Serv newServiceStatsLocked() {
                 return new Serv(mBsi);
+            }
+        }
+
+        private class ChildUid {
+            public final TimeMultiStateCounter cpuActiveCounter;
+            public final LongArrayMultiStateCounter cpuTimeInFreqCounter;
+
+            ChildUid() {
+                final long timestampMs = mBsi.mClock.elapsedRealtime();
+                cpuActiveCounter =
+                        new TimeMultiStateCounter(mBsi.mOnBatteryTimeBase, 1, timestampMs);
+                cpuActiveCounter.setState(0, timestampMs);
+
+                if (mBsi.trackPerProcStateCpuTimes()) {
+                    final int cpuFreqCount = mBsi.getCpuFreqCount();
+
+                    cpuTimeInFreqCounter = new LongArrayMultiStateCounter(1, cpuFreqCount);
+
+                    // Set initial values to all 0. This is a child UID and we want to include
+                    // the entirety of its CPU time-in-freq stats into the parent's stats.
+                    cpuTimeInFreqCounter.updateValues(
+                            new LongArrayMultiStateCounter.LongArrayContainer(cpuFreqCount),
+                            timestampMs);
+                } else {
+                    cpuTimeInFreqCounter = null;
+                }
             }
         }
 
@@ -14474,8 +14501,8 @@ public class BatteryStatsImpl extends BatteryStats {
         final long startTimeMs = mClock.uptimeMillis();
         final long elapsedRealtimeMs = mClock.elapsedRealtime();
         mCpuUidActiveTimeReader.readAbsolute((uid, cpuActiveTimesMs) -> {
-            uid = mapUid(uid);
-            if (Process.isIsolated(uid)) {
+            final int parentUid = mapUid(uid);
+            if (Process.isIsolated(parentUid)) {
                 if (DEBUG) Slog.w(TAG, "Got active times for an isolated uid: " + uid);
                 return;
             }
@@ -14483,8 +14510,22 @@ public class BatteryStatsImpl extends BatteryStats {
                 if (DEBUG) Slog.w(TAG, "Got active times for an invalid user's uid " + uid);
                 return;
             }
-            final Uid u = getUidStatsLocked(uid, elapsedRealtimeMs, startTimeMs);
-            u.getCpuActiveTimeCounter().update(cpuActiveTimesMs, mClock.elapsedRealtime());
+            final Uid u = getUidStatsLocked(parentUid, elapsedRealtimeMs, startTimeMs);
+            if (parentUid == uid) {
+                u.getCpuActiveTimeCounter().update(cpuActiveTimesMs, elapsedRealtimeMs);
+            } else {
+                final SparseArray<Uid.ChildUid> childUids = u.mChildUids;
+                if (childUids == null) {
+                    return;
+                }
+
+                Uid.ChildUid childUid = childUids.get(uid);
+                if (childUid != null) {
+                    final long delta =
+                            childUid.cpuActiveCounter.update(cpuActiveTimesMs, elapsedRealtimeMs);
+                    u.getCpuActiveTimeCounter().addCount(delta);
+                }
+            }
         });
 
         final long elapsedTimeMs = mClock.uptimeMillis() - startTimeMs;
