@@ -36,11 +36,8 @@ import android.content.pm.UserInfo;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedActivityImpl;
-import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedInstrumentationImpl;
-import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedIntentInfoImpl;
-import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedProviderImpl;
 import android.os.Build;
 import android.os.Process;
@@ -958,7 +955,7 @@ public class AppsFilterTest {
 
         PackageSetting targetSetting = simulateAddPackage(appsFilter, target, DUMMY_TARGET_APPID);
         SharedUserSetting actorSharedSetting = new SharedUserSetting("actorSharedUser",
-                targetSetting.pkgFlags, targetSetting.pkgPrivateFlags);
+                targetSetting.getFlags(), targetSetting.getPrivateFlags());
         PackageSetting overlaySetting =
                 simulateAddPackage(appsFilter, overlay, DUMMY_OVERLAY_APPID);
         simulateAddPackage(appsFilter, actorOne, DUMMY_ACTOR_APPID,

@@ -17,6 +17,8 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_ROW_SWIPE;
+
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.res.Resources;
@@ -28,6 +30,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.FalsingManager;
@@ -264,6 +267,22 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     }
 
     @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        final boolean previousIsSwiping = isSwiping();
+        boolean ret = super.onInterceptTouchEvent(ev);
+        final View swipedView = getSwipedView();
+        if (!previousIsSwiping && swipedView != null) {
+            InteractionJankMonitor.getInstance().begin(swipedView,
+                    CUJ_NOTIFICATION_SHADE_ROW_SWIPE);
+        }
+        return ret;
+    }
+
+    protected void onDismissChildWithAnimationFinished() {
+        InteractionJankMonitor.getInstance().end(CUJ_NOTIFICATION_SHADE_ROW_SWIPE);
+    }
+
+    @Override
     public void dismissChild(final View view, float velocity,
             boolean useAccelerateInterpolator) {
         superDismissChild(view, velocity, useAccelerateInterpolator);
@@ -279,6 +298,11 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     @VisibleForTesting
     protected void superDismissChild(final View view, float velocity, boolean useAccelerateInterpolator) {
         super.dismissChild(view, velocity, useAccelerateInterpolator);
+    }
+
+    @Override
+    protected void onSnapChildWithAnimationFinished() {
+        InteractionJankMonitor.getInstance().end(CUJ_NOTIFICATION_SHADE_ROW_SWIPE);
     }
 
     @VisibleForTesting

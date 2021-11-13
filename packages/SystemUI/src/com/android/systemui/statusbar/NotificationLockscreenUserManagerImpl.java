@@ -93,9 +93,11 @@ public class NotificationLockscreenUserManagerImpl implements
     private final Lazy<CommonNotifCollection> mCommonNotifCollectionLazy;
     private final DevicePolicyManager mDevicePolicyManager;
     private final SparseBooleanArray mLockscreenPublicMode = new SparseBooleanArray();
-    private final SparseBooleanArray mUsersWithSeperateWorkChallenge = new SparseBooleanArray();
+    private final SparseBooleanArray mUsersWithSeparateWorkChallenge = new SparseBooleanArray();
     private final SparseBooleanArray mUsersAllowingPrivateNotifications = new SparseBooleanArray();
     private final SparseBooleanArray mUsersAllowingNotifications = new SparseBooleanArray();
+    private final SparseBooleanArray mUsersInLockdownLatestResult = new SparseBooleanArray();
+    private final SparseBooleanArray mShouldHideNotifsLatestResult = new SparseBooleanArray();
     private final UserManager mUserManager;
     private final List<UserChangedListener> mListeners = new ArrayList<>();
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -321,7 +323,9 @@ public class NotificationLockscreenUserManagerImpl implements
         if (userId == UserHandle.USER_ALL) {
             userId = mCurrentUserId;
         }
-        return Dependency.get(KeyguardUpdateMonitor.class).isUserInLockdown(userId);
+        boolean inLockdown = Dependency.get(KeyguardUpdateMonitor.class).isUserInLockdown(userId);
+        mUsersInLockdownLatestResult.put(userId, inLockdown);
+        return inLockdown;
     }
 
     /**
@@ -329,9 +333,11 @@ public class NotificationLockscreenUserManagerImpl implements
      * If so, notifications should be hidden.
      */
     public boolean shouldHideNotifications(int userId) {
-        return isLockscreenPublicMode(userId) && !userAllowsNotificationsInPublic(userId)
+        boolean hide = isLockscreenPublicMode(userId) && !userAllowsNotificationsInPublic(userId)
                 || (userId != mCurrentUserId && shouldHideNotifications(mCurrentUserId))
                 || shouldTemporarilyHideNotifications(userId);
+        mShouldHideNotifsLatestResult.put(userId, hide);
+        return hide;
     }
 
     /**
@@ -472,7 +478,7 @@ public class NotificationLockscreenUserManagerImpl implements
 
     @Override
     public boolean needsSeparateWorkChallenge(int userId) {
-        return mUsersWithSeperateWorkChallenge.get(userId, false);
+        return mUsersWithSeparateWorkChallenge.get(userId, false);
     }
 
     /**
@@ -611,7 +617,7 @@ public class NotificationLockscreenUserManagerImpl implements
         //   - device keyguard is shown in secure mode;
         //   - profile is locked with a work challenge.
         SparseArray<UserInfo> currentProfiles = getCurrentProfiles();
-        mUsersWithSeperateWorkChallenge.clear();
+        mUsersWithSeparateWorkChallenge.clear();
         for (int i = currentProfiles.size() - 1; i >= 0; i--) {
             final int userId = currentProfiles.valueAt(i).id;
             boolean isProfilePublic = devicePublic;
@@ -625,7 +631,7 @@ public class NotificationLockscreenUserManagerImpl implements
                 isProfilePublic = showingKeyguard || mKeyguardManager.isDeviceLocked(userId);
             }
             setLockscreenPublicMode(isProfilePublic, userId);
-            mUsersWithSeperateWorkChallenge.put(userId, needsSeparateChallenge);
+            mUsersWithSeparateWorkChallenge.put(userId, needsSeparateChallenge);
         }
         getEntryManager().updateNotifications("NotificationLockscreenUserManager.updatePublicMode");
     }
@@ -692,6 +698,7 @@ public class NotificationLockscreenUserManagerImpl implements
                 pw.print("" + userId + " ");
             }
         }
+        pw.println();
         pw.print("  mCurrentManagedProfiles=");
         synchronized (mLock) {
             for (int i = mCurrentManagedProfiles.size() - 1; i >= 0; i--) {
@@ -699,5 +706,17 @@ public class NotificationLockscreenUserManagerImpl implements
             }
         }
         pw.println();
+        pw.print("  mLockscreenPublicMode=");
+        pw.println(mLockscreenPublicMode);
+        pw.print("  mUsersWithSeparateWorkChallenge=");
+        pw.println(mUsersWithSeparateWorkChallenge);
+        pw.print("  mUsersAllowingPrivateNotifications=");
+        pw.println(mUsersAllowingPrivateNotifications);
+        pw.print("  mUsersAllowingNotifications=");
+        pw.println(mUsersAllowingNotifications);
+        pw.print("  mUsersInLockdownLatestResult=");
+        pw.println(mUsersInLockdownLatestResult);
+        pw.print("  mShouldHideNotifsLatestResult=");
+        pw.println(mShouldHideNotifsLatestResult);
     }
 }

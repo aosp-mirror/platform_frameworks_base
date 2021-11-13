@@ -372,6 +372,11 @@ public class SwipeHelper implements Gefingerpoken {
     }
 
     /**
+     * After dismissChild() and related animation finished, this function will be called.
+     */
+    protected void onDismissChildWithAnimationFinished() {}
+
+    /**
      * @param view The view to be dismissed
      * @param velocity The desired pixels/second speed at which the view should move
      * @param useAccelerateInterpolator Should an accelerating Interpolator be used
@@ -436,6 +441,7 @@ public class SwipeHelper implements Gefingerpoken {
 
         Animator anim = getViewTranslationAnimator(animView, newPos, updateListener);
         if (anim == null) {
+            onDismissChildWithAnimationFinished();
             return;
         }
         if (useAccelerateInterpolator) {
@@ -481,6 +487,7 @@ public class SwipeHelper implements Gefingerpoken {
                 if (!mDisableHwLayers) {
                     animView.setLayerType(View.LAYER_TYPE_NONE, null);
                 }
+                onDismissChildWithAnimationFinished();
             }
         });
 
@@ -505,6 +512,11 @@ public class SwipeHelper implements Gefingerpoken {
         // Do nothing
     }
 
+    /**
+     * After snapChild() and related animation finished, this function will be called.
+     */
+    protected void onSnapChildWithAnimationFinished() {}
+
     public void snapChild(final View animView, final float targetLeft, float velocity) {
         final boolean canBeDismissed = mCallback.canChildBeDismissed(animView);
         AnimatorUpdateListener updateListener = animation -> onTranslationUpdate(animView,
@@ -512,6 +524,7 @@ public class SwipeHelper implements Gefingerpoken {
 
         Animator anim = getViewTranslationAnimator(animView, targetLeft, updateListener);
         if (anim == null) {
+            onSnapChildWithAnimationFinished();
             return;
         }
         anim.addListener(new AnimatorListenerAdapter() {
@@ -529,6 +542,7 @@ public class SwipeHelper implements Gefingerpoken {
                     updateSwipeProgressFromOffset(animView, canBeDismissed);
                     resetSwipeState();
                 }
+                onSnapChildWithAnimationFinished();
             }
         });
         prepareSnapBackAnimation(animView, anim);

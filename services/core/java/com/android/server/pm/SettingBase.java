@@ -29,15 +29,11 @@ import com.android.server.utils.Watcher;
 
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public abstract class SettingBase implements Watchable, Snappable {
-    // TODO: make this variable protected, or even private with a getter and setter.
-    // Simply making it protected or private requires that the name be changed to conformm
-    // to the Android naming convention, and that touches quite a few files.
-    int pkgFlags;
 
-    // TODO: make this variable protected, or even private with a getter and setter.
-    // Simply making it protected or private requires that the name be changed to conformm
-    // to the Android naming convention, and that touches quite a few files.
-    int pkgPrivateFlags;
+    // TODO: Remove in favor of individual boolean APIs. It's not clear what flag values are saved
+    //  and bugs exist where callers query for an unsaved flag.
+    private int mPkgFlags;
+    private int mPkgPrivateFlags;
 
     /**
      * Watchable machinery
@@ -115,8 +111,8 @@ public abstract class SettingBase implements Watchable, Snappable {
     }
 
     public final void copySettingBase(SettingBase orig) {
-        pkgFlags = orig.pkgFlags;
-        pkgPrivateFlags = orig.pkgPrivateFlags;
+        mPkgFlags = orig.mPkgFlags;
+        mPkgPrivateFlags = orig.mPkgPrivateFlags;
         mLegacyPermissionsState.copyFrom(orig.mLegacyPermissionsState);
         onChanged();
     }
@@ -126,15 +122,17 @@ public abstract class SettingBase implements Watchable, Snappable {
         return mLegacyPermissionsState;
     }
 
-    void setFlags(int pkgFlags) {
-        this.pkgFlags = pkgFlags
+    SettingBase setFlags(int pkgFlags) {
+        this.mPkgFlags = pkgFlags
                 & (ApplicationInfo.FLAG_SYSTEM
-                        | ApplicationInfo.FLAG_EXTERNAL_STORAGE);
+                        | ApplicationInfo.FLAG_EXTERNAL_STORAGE
+                        | ApplicationInfo.FLAG_TEST_ONLY);
         onChanged();
+        return this;
     }
 
-    void setPrivateFlags(int pkgPrivateFlags) {
-        this.pkgPrivateFlags = pkgPrivateFlags
+    SettingBase setPrivateFlags(int pkgPrivateFlags) {
+        this.mPkgPrivateFlags = pkgPrivateFlags
                 & (ApplicationInfo.PRIVATE_FLAG_PRIVILEGED
                 | ApplicationInfo.PRIVATE_FLAG_OEM
                 | ApplicationInfo.PRIVATE_FLAG_VENDOR
@@ -143,5 +141,14 @@ public abstract class SettingBase implements Watchable, Snappable {
                 | ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER
                 | ApplicationInfo.PRIVATE_FLAG_ODM);
         onChanged();
+        return this;
+    }
+
+    public int getFlags() {
+        return mPkgFlags;
+    }
+
+    public int getPrivateFlags() {
+        return mPkgPrivateFlags;
     }
 }

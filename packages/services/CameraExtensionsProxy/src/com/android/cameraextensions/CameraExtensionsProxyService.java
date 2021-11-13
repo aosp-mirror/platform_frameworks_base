@@ -19,15 +19,16 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraExtensionCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.extension.CameraOutputConfig;
 import android.hardware.camera2.extension.CameraSessionConfig;
 import android.hardware.camera2.extension.CaptureBundle;
@@ -37,14 +38,14 @@ import android.hardware.camera2.extension.IAdvancedExtenderImpl;
 import android.hardware.camera2.extension.ICameraExtensionsProxyService;
 import android.hardware.camera2.extension.ICaptureCallback;
 import android.hardware.camera2.extension.ICaptureProcessorImpl;
+import android.hardware.camera2.extension.IImageCaptureExtenderImpl;
+import android.hardware.camera2.extension.IImageProcessorImpl;
+import android.hardware.camera2.extension.IInitializeSessionCallback;
 import android.hardware.camera2.extension.IPreviewExtenderImpl;
 import android.hardware.camera2.extension.IPreviewImageProcessorImpl;
 import android.hardware.camera2.extension.IRequestCallback;
 import android.hardware.camera2.extension.IRequestProcessorImpl;
 import android.hardware.camera2.extension.IRequestUpdateProcessorImpl;
-import android.hardware.camera2.extension.IImageCaptureExtenderImpl;
-import android.hardware.camera2.extension.IImageProcessorImpl;
-import android.hardware.camera2.extension.IInitializeSessionCallback;
 import android.hardware.camera2.extension.ISessionProcessorImpl;
 import android.hardware.camera2.extension.LatencyRange;
 import android.hardware.camera2.extension.OutputConfigId;
@@ -55,8 +56,6 @@ import android.hardware.camera2.extension.ParcelTotalCaptureResult;
 import android.hardware.camera2.extension.Request;
 import android.hardware.camera2.extension.SizeList;
 import android.hardware.camera2.impl.CameraMetadataNative;
-import android.hardware.camera2.TotalCaptureResult;
-import android.hardware.HardwareBuffer;
 import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
 import android.media.Image;
 import android.media.ImageReader;
@@ -111,11 +110,11 @@ import androidx.camera.extensions.impl.advanced.SurfaceOutputConfigImpl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.List;
 
 public class CameraExtensionsProxyService extends Service {
     private static final String TAG = "CameraExtensionsProxyService";
@@ -420,7 +419,7 @@ public class CameraExtensionsProxyService extends Service {
             case CameraExtensionCharacteristics.EXTENSION_AUTOMATIC:
                 return new Pair<>(new AutoPreviewExtenderImpl(),
                         new AutoImageCaptureExtenderImpl());
-            case CameraExtensionCharacteristics.EXTENSION_BEAUTY:
+            case CameraExtensionCharacteristics.EXTENSION_FACE_RETOUCH:
                 return new Pair<>(new BeautyPreviewExtenderImpl(),
                         new BeautyImageCaptureExtenderImpl());
             case CameraExtensionCharacteristics.EXTENSION_BOKEH:
@@ -443,7 +442,7 @@ public class CameraExtensionsProxyService extends Service {
         switch (extensionType) {
             case CameraExtensionCharacteristics.EXTENSION_AUTOMATIC:
                 return new AutoAdvancedExtenderImpl();
-            case CameraExtensionCharacteristics.EXTENSION_BEAUTY:
+            case CameraExtensionCharacteristics.EXTENSION_FACE_RETOUCH:
                 return new BeautyAdvancedExtenderImpl();
             case CameraExtensionCharacteristics.EXTENSION_BOKEH:
                 return new BokehAdvancedExtenderImpl();

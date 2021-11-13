@@ -1821,14 +1821,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * Same as isVisible(), but we also count it as visible between the
-     * call to IWindowSession.add() and the first relayout().
+     * Is this window capable of being visible (policy and content), in a visible part of the
+     * hierarchy, and, if an activity window, the activity is visible-requested. Note, this means
+     * if the activity is going-away, this will be {@code false} even when the window is visible.
+     *
+     * The 'adding' part refers to the period of time between IWindowSession.add() and the first
+     * relayout() -- which, for activities, is the same as visibleRequested.
+     *
+     * TODO(b/206005136): This is very similar to isVisibleRequested(). Investigate merging them.
      */
-    boolean isVisibleOrAdding() {
+    boolean isVisibleRequestedOrAdding() {
         final ActivityRecord atoken = mActivityRecord;
         return (mHasSurface || (!mRelayoutCalled && mViewVisibility == View.VISIBLE))
                 && isVisibleByPolicy() && !isParentWindowHidden()
-                && (atoken == null || atoken.isVisible())
+                && (atoken == null || atoken.mVisibleRequested)
                 && !mAnimatingExit && !mDestroying;
     }
 
@@ -2537,8 +2543,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (DEBUG_INPUT_METHOD) {
-            Slog.i(TAG_WM, "isVisibleOrAdding " + this + ": " + isVisibleOrAdding());
-            if (!isVisibleOrAdding()) {
+            Slog.i(TAG_WM, "isVisibleRequestedOrAdding " + this + ": "
+                    + isVisibleRequestedOrAdding());
+            if (!isVisibleRequestedOrAdding()) {
                 Slog.i(TAG_WM, "  mSurfaceController=" + mWinAnimator.mSurfaceController
                         + " relayoutCalled=" + mRelayoutCalled
                         + " viewVis=" + mViewVisibility
@@ -2552,7 +2559,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
         }
-        return isVisibleOrAdding();
+        return isVisibleRequestedOrAdding();
     }
 
     private final class DeadWindowEventReceiver extends InputEventReceiver {
@@ -2978,7 +2985,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     public String canReceiveKeysReason(boolean fromUserTouch) {
         return "fromTouch= " + fromUserTouch
-                + " isVisibleOrAdding=" + isVisibleOrAdding()
+                + " isVisibleRequestedOrAdding=" + isVisibleRequestedOrAdding()
                 + " mViewVisibility=" + mViewVisibility
                 + " mRemoveOnExit=" + mRemoveOnExit
                 + " flags=" + mAttrs.flags
@@ -2990,7 +2997,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     public boolean canReceiveKeys(boolean fromUserTouch) {
-        final boolean canReceiveKeys = isVisibleOrAdding()
+        final boolean canReceiveKeys = isVisibleRequestedOrAdding()
                 && (mViewVisibility == View.VISIBLE) && !mRemoveOnExit
                 && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0)
                 && (mActivityRecord == null || mActivityRecord.windowsAreFocusable(fromUserTouch))
@@ -3256,7 +3263,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     public void pokeDrawLockLw(long timeout) {
-        if (isVisibleOrAdding()) {
+        if (isVisibleRequestedOrAdding()) {
             if (mDrawLock == null) {
                 // We want the tag name to be somewhat stable so that it is easier to correlate
                 // in wake lock statistics.  So in particular, we don't want to include the

@@ -1499,8 +1499,8 @@ public class ComputerEngine implements Computer {
             ai.primaryCpuAbi = ps.getPrimaryCpuAbi();
             ai.secondaryCpuAbi = ps.getSecondaryCpuAbi();
             ai.setVersionCode(ps.getVersionCode());
-            ai.flags = ps.getPkgFlags();
-            ai.privateFlags = ps.getPkgPrivateFlags();
+            ai.flags = ps.getFlags();
+            ai.privateFlags = ps.getPrivateFlags();
             pi.applicationInfo = PackageInfoWithoutStateUtils.generateDelegateApplicationInfo(
                     ai, flags, state, userId);
 

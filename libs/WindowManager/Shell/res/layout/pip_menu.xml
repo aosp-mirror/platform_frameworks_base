@@ -81,12 +81,13 @@
 
         <ImageButton
             android:id="@+id/enter_split"
-            android:layout_width="@dimen/pip_action_size"
-            android:layout_height="@dimen/pip_action_size"
+            android:layout_width="@dimen/pip_split_icon_size"
+            android:layout_height="@dimen/pip_split_icon_size"
             android:layout_gravity="top|start"
+            android:layout_margin="@dimen/pip_split_icon_margin"
             android:gravity="center"
             android:contentDescription="@string/pip_phone_enter_split"
-            android:src="@drawable/pip_expand"
+            android:src="@drawable/pip_split"
             android:background="?android:selectableItemBackgroundBorderless" />
     </LinearLayout>
 

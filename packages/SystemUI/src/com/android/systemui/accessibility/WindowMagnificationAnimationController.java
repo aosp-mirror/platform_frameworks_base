@@ -106,6 +106,15 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     void enableWindowMagnification(float scale, float centerX, float centerY,
             @Nullable IRemoteMagnificationAnimationCallback animationCallback) {
         sendAnimationCallback(false);
+        // Enable window magnification without animation immediately.
+        if (animationCallback == null) {
+            if (mState == STATE_ENABLING || mState == STATE_DISABLING) {
+                mValueAnimator.cancel();
+            }
+            mController.enableWindowMagnification(scale, centerX, centerY);
+            setState(STATE_ENABLED);
+            return;
+        }
         mAnimationCallback = animationCallback;
         setupEnableAnimationSpecs(scale, centerX, centerY);
         if (mEndSpec.equals(mStartSpec)) {
@@ -173,6 +182,16 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     void deleteWindowMagnification(
             @Nullable IRemoteMagnificationAnimationCallback animationCallback) {
         sendAnimationCallback(false);
+        // Delete window magnification without animation.
+        if (animationCallback == null) {
+            if (mState == STATE_ENABLING || mState == STATE_DISABLING) {
+                mValueAnimator.cancel();
+            }
+            mController.deleteWindowMagnification();
+            setState(STATE_DISABLED);
+            return;
+        }
+
         mAnimationCallback = animationCallback;
         if (mState == STATE_DISABLED || mState == STATE_DISABLING) {
             if (mState == STATE_DISABLED) {
@@ -223,8 +242,7 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
         if (mEndAnimationCanceled) {
             return;
         }
-        if (isReverse) {
-            mController.deleteWindowMagnification();
+        if (Float.isNaN(mController.getScale())) {
             setState(STATE_DISABLED);
         } else {
             setState(STATE_ENABLED);

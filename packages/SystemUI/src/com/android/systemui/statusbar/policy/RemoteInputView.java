@@ -128,7 +128,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     // TODO(b/193539698): move these to a Controller
     private RemoteInputController mController;
-    private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final UiEventLogger mUiEventLogger;
     private NotificationEntry mEntry;
     private PendingIntent mPendingIntent;
@@ -170,7 +169,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         super(context, attrs);
         mTextWatcher = new SendButtonTextWatcher();
         mEditorActionHandler = new EditorActionHandler();
-        mRemoteInputQuickSettingsDisabler = Dependency.get(RemoteInputQuickSettingsDisabler.class);
         mUiEventLogger = Dependency.get(UiEventLogger.class);
         TypedArray ta = getContext().getTheme().obtainStyledAttributes(new int[]{
                 com.android.internal.R.attr.colorAccent,
@@ -522,8 +520,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             }
         }
 
-        mRemoteInputQuickSettingsDisabler.setRemoteInputActive(false);
-
         if (logClose) {
             mUiEventLogger.logWithInstanceId(
                     NotificationRemoteInputEvent.NOTIFICATION_REMOTE_INPUT_CLOSE,
@@ -622,8 +618,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.requestFocus();
         mController.addRemoteInput(mEntry, mToken);
         setAttachment(mEntry.remoteInputAttachment);
-
-        mRemoteInputQuickSettingsDisabler.setRemoteInputActive(true);
 
         updateSendButton();
     }

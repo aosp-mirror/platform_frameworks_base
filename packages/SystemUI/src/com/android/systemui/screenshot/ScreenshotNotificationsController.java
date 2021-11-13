@@ -30,8 +30,8 @@ import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
 import com.android.internal.messages.nano.SystemMessageProto;
-import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIApplication;
 import com.android.systemui.util.NotificationChannels;
 
 import javax.inject.Inject;
@@ -86,7 +86,7 @@ public class ScreenshotNotificationsController {
             b.setContentIntent(pendingIntent);
         }
 
-        CoreStartable.overrideNotificationAppName(mContext, b, true);
+        SystemUIApplication.overrideNotificationAppName(mContext, b, true);
 
         Notification n = new Notification.BigTextStyle(b)
                 .bigText(errorMsg)

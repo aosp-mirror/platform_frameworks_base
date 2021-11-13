@@ -421,6 +421,9 @@ public class NotificationContentView extends FrameLayout {
             mExpandedChild.animate().cancel();
             removeView(mExpandedChild);
             mExpandedRemoteInput = null;
+            if (mExpandedRemoteInputController != null) {
+                mExpandedRemoteInputController.unbind();
+            }
             mExpandedRemoteInputController = null;
         }
         if (child == null) {
@@ -465,6 +468,9 @@ public class NotificationContentView extends FrameLayout {
             mHeadsUpChild.animate().cancel();
             removeView(mHeadsUpChild);
             mHeadsUpRemoteInput = null;
+            if (mHeadsUpRemoteInputController != null) {
+                mHeadsUpRemoteInputController.unbind();
+            }
             mHeadsUpRemoteInputController = null;
         }
         if (child == null) {
@@ -1211,8 +1217,14 @@ public class NotificationContentView extends FrameLayout {
                     mExpandedWrapper);
             mExpandedRemoteInput = expandedData.mView;
             mExpandedRemoteInputController = expandedData.mController;
+            if (mExpandedRemoteInputController != null) {
+                mExpandedRemoteInputController.bind();
+            }
         } else {
             mExpandedRemoteInput = null;
+            if (mExpandedRemoteInputController != null) {
+                mExpandedRemoteInputController.unbind();
+            }
             mExpandedRemoteInputController = null;
         }
         if (mCachedExpandedRemoteInput != null
@@ -1230,8 +1242,14 @@ public class NotificationContentView extends FrameLayout {
                     mHeadsUpWrapper);
             mHeadsUpRemoteInput = headsUpData.mView;
             mHeadsUpRemoteInputController = headsUpData.mController;
+            if (mHeadsUpRemoteInputController != null) {
+                mHeadsUpRemoteInputController.bind();
+            }
         } else {
             mHeadsUpRemoteInput = null;
+            if (mHeadsUpRemoteInputController != null) {
+                mHeadsUpRemoteInputController.unbind();
+            }
             mHeadsUpRemoteInputController = null;
         }
         if (mCachedHeadsUpRemoteInput != null
@@ -1272,7 +1290,7 @@ public class NotificationContentView extends FrameLayout {
                     // Create a new controller for the view. The lifetime of the controller is 1:1
                     // with that of the view.
                     RemoteInputViewSubcomponent subcomponent =
-                            mRemoteInputSubcomponentFactory.create();
+                            mRemoteInputSubcomponentFactory.create(result.mView);
                     result.mController = subcomponent.getController();
                     result.mView.setController(result.mController);
                 } else {

@@ -912,7 +912,11 @@ public class KeyguardIndicationController {
             } else if (mKeyguardUpdateMonitor.isScreenOn()) {
                 if (biometricSourceType == BiometricSourceType.FACE
                         && shouldSuppressFaceMsgAndShowTryFingerprintMsg()) {
-                    showTryFingerprintMsg(msgId, helpString);
+                    // don't show any help messages, b/c they can come in right before a success
+                    // However, continue to announce help messages for a11y
+                    if (!TextUtils.isEmpty(helpString)) {
+                        mLockScreenIndicationView.announceForAccessibility(helpString);
+                    }
                     return;
                 }
                 showTransientIndication(helpString, false /* isError */, showActionToUnlock);

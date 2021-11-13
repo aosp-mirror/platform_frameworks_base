@@ -421,10 +421,10 @@ class UserController implements Handler.Callback {
     void setStopUserOnSwitch(@StopUserOnSwitch int value) {
         if (mInjector.checkCallingPermission(android.Manifest.permission.MANAGE_USERS)
                 == PackageManager.PERMISSION_DENIED && mInjector.checkCallingPermission(
-                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                android.Manifest.permission.INTERACT_ACROSS_USERS)
                 == PackageManager.PERMISSION_DENIED) {
             throw new SecurityException(
-                    "You either need MANAGE_USERS or INTERACT_ACROSS_USERS_FULL permission to "
+                    "You either need MANAGE_USERS or INTERACT_ACROSS_USERS permission to "
                             + "call setStopUserOnSwitch()");
         }
 

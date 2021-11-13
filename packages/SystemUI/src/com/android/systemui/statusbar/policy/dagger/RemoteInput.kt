@@ -16,9 +16,11 @@
 
 package com.android.systemui.statusbar.policy.dagger
 
+import com.android.systemui.statusbar.policy.RemoteInputView
 import com.android.systemui.statusbar.policy.RemoteInputViewController
 import com.android.systemui.statusbar.policy.RemoteInputViewControllerImpl
 import dagger.Binds
+import dagger.BindsInstance
 import dagger.Module
 import dagger.Subcomponent
 import javax.inject.Qualifier
@@ -30,7 +32,7 @@ interface RemoteInputViewSubcomponent {
 
     @Subcomponent.Factory
     interface Factory {
-        fun create(): RemoteInputViewSubcomponent
+        fun create(@BindsInstance view: RemoteInputView): RemoteInputViewSubcomponent
     }
 }
 

@@ -534,10 +534,10 @@ final class ScanPackageHelper {
         }
         pkgSetting.setLastModifiedTime(scanFileTime);
         // TODO(b/135203078): Remove, move to constructor
-        pkgSetting.setPkg(parsedPackage);
-        pkgSetting.pkgFlags = PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting);
-        pkgSetting.pkgPrivateFlags =
-                PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting);
+        pkgSetting.setPkg(parsedPackage)
+                .setFlags(PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting))
+                .setPrivateFlags(
+                        PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting));
         if (parsedPackage.getLongVersionCode() != pkgSetting.getVersionCode()) {
             pkgSetting.setLongVersionCode(parsedPackage.getLongVersionCode());
         }
@@ -603,27 +603,27 @@ final class ScanPackageHelper {
         if (systemPkgSetting != null)  {
             // updated system application, must at least have SCAN_AS_SYSTEM
             scanFlags |= SCAN_AS_SYSTEM;
-            if ((systemPkgSetting.pkgPrivateFlags
+            if ((systemPkgSetting.getPrivateFlags()
                     & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0) {
                 scanFlags |= SCAN_AS_PRIVILEGED;
             }
-            if ((systemPkgSetting.pkgPrivateFlags
+            if ((systemPkgSetting.getPrivateFlags()
                     & ApplicationInfo.PRIVATE_FLAG_OEM) != 0) {
                 scanFlags |= SCAN_AS_OEM;
             }
-            if ((systemPkgSetting.pkgPrivateFlags
+            if ((systemPkgSetting.getPrivateFlags()
                     & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0) {
                 scanFlags |= SCAN_AS_VENDOR;
             }
-            if ((systemPkgSetting.pkgPrivateFlags
+            if ((systemPkgSetting.getPrivateFlags()
                     & ApplicationInfo.PRIVATE_FLAG_PRODUCT) != 0) {
                 scanFlags |= SCAN_AS_PRODUCT;
             }
-            if ((systemPkgSetting.pkgPrivateFlags
+            if ((systemPkgSetting.getPrivateFlags()
                     & ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT) != 0) {
                 scanFlags |= SCAN_AS_SYSTEM_EXT;
             }
-            if ((systemPkgSetting.pkgPrivateFlags
+            if ((systemPkgSetting.getPrivateFlags()
                     & ApplicationInfo.PRIVATE_FLAG_ODM) != 0) {
                 scanFlags |= SCAN_AS_ODM;
             }
@@ -1056,7 +1056,7 @@ final class ScanPackageHelper {
 
     @GuardedBy("mPm.mLock")
     private boolean verifyPackageUpdateLPr(PackageSetting oldPkg, AndroidPackage newPkg) {
-        if ((oldPkg.pkgFlags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+        if ((oldPkg.getFlags() & ApplicationInfo.FLAG_SYSTEM) == 0) {
             Slog.w(TAG, "Unable to update from " + oldPkg.getPackageName()
                     + " to " + newPkg.getPackageName()
                     + ": old package not in system partition");
