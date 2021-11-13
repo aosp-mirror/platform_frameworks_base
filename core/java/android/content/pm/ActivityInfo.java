@@ -1015,7 +1015,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      */
     @ChangeId
     @Overridable
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S_V2)
     @TestApi
     public static final long OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY = 203647190L; // buganizer id
 

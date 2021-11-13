@@ -3893,6 +3893,30 @@ public class CarrierConfigManager {
     public static final String KEY_ENABLE_4G_OPPORTUNISTIC_NETWORK_SCAN_BOOL =
             "enabled_4g_opportunistic_network_scan_bool";
 
+  /**
+   * Only relevant when the device supports opportunistic networks but does not support
+   * simultaneuous 5G+5G. Controls how long, in milliseconds, to wait before opportunistic network
+   * goes out of service before switching the 5G capability back to primary stack. The idea of
+   * waiting a few seconds is to minimize the calling of the expensive capability switching
+   * operation in the case where CBRS goes back into service shortly after going out of it.
+   *
+   * @hide
+   */
+  public static final String KEY_TIME_TO_SWITCH_BACK_TO_PRIMARY_IF_OPPORTUNISTIC_OOS_LONG =
+            "time_to_switch_back_to_primary_if_opportunistic_oos_long";
+
+  /**
+   * Only relevant when the device supports opportunistic networks but does not support
+   * simultaneuous 5G+5G. Controls how long, in milliseconds, after 5G capability has switched back
+   * to primary stack due to opportunistic network being OOS. The idea is to minimizing the
+   * 'ping-ponging' effect where device is constantly witching capability back and forth between
+   * primary and opportunistic stack.
+   *
+   * @hide
+   */
+  public static final String KEY_OPPORTUNISTIC_TIME_TO_SCAN_AFTER_CAPABILITY_SWITCH_TO_PRIMARY_LONG
+          = "opportunistic_time_to_scan_after_capability_switch_to_primary_long";
+
     /**
      * Indicates zero or more emergency number prefix(es), because some carrier requires
      * if users dial an emergency number address with a specific prefix, the combination of the
@@ -5766,6 +5790,10 @@ public class CarrierConfigManager {
         /* Default value is 2 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 2000);
         sDefaults.putBoolean(KEY_ENABLE_4G_OPPORTUNISTIC_NETWORK_SCAN_BOOL, true);
+        sDefaults.putInt(KEY_TIME_TO_SWITCH_BACK_TO_PRIMARY_IF_OPPORTUNISTIC_OOS_LONG, 60000);
+        sDefaults.putInt(
+                KEY_OPPORTUNISTIC_TIME_TO_SCAN_AFTER_CAPABILITY_SWITCH_TO_PRIMARY_LONG,
+                120000);
         sDefaults.putAll(Gps.getDefaults());
         sDefaults.putIntArray(KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY,
                 new int[] {

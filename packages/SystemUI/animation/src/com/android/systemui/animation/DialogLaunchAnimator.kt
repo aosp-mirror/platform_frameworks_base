@@ -54,8 +54,12 @@ class DialogLaunchAnimator(
         private val TAG_LAUNCH_ANIMATION_RUNNING = R.id.launch_animation_running
     }
 
+    /**
+     * The set of dialogs that were animated using this animator and that are still opened (not
+     * dismissed, but can be hidden).
+     */
     // TODO(b/201264644): Remove this set.
-    private val currentAnimations = hashSetOf<DialogLaunchAnimation>()
+    private val openedDialogs = hashSetOf<AnimatedDialog>()
 
     /**
      * Show [dialog] by expanding it from [view]. If [animateBackgroundBoundsChange] is true, then
@@ -79,21 +83,29 @@ class DialogLaunchAnimator(
                     "the main thread")
         }
 
+        // If the parent of the view we are launching from is the background of some other animated
+        // dialog, then this means the caller intent is to launch a dialog from another dialog. In
+        // this case, we also animate the parent (which is the dialog background).
+        val dialogContentParent = openedDialogs
+            .firstOrNull { it.dialogContentParent == view.parent }
+            ?.dialogContentParent
+        val animateFrom = dialogContentParent ?: view
+
         // Make sure we don't run the launch animation from the same view twice at the same time.
-        if (view.getTag(TAG_LAUNCH_ANIMATION_RUNNING) != null) {
+        if (animateFrom.getTag(TAG_LAUNCH_ANIMATION_RUNNING) != null) {
             Log.e(TAG, "Not running dialog launch animation as there is already one running")
             dialog.show()
             return dialog
         }
 
-        view.setTag(TAG_LAUNCH_ANIMATION_RUNNING, true)
+        animateFrom.setTag(TAG_LAUNCH_ANIMATION_RUNNING, true)
 
-        val launchAnimation = DialogLaunchAnimation(
-            context, launchAnimator, hostDialogProvider, view,
-            onDialogDismissed = { currentAnimations.remove(it) }, originalDialog = dialog,
+        val launchAnimation = AnimatedDialog(
+            context, launchAnimator, hostDialogProvider, animateFrom,
+            onDialogDismissed = { openedDialogs.remove(it) }, originalDialog = dialog,
             animateBackgroundBoundsChange)
         val hostDialog = launchAnimation.hostDialog
-        currentAnimations.add(launchAnimation)
+        openedDialogs.add(launchAnimation)
 
         // If the dialog is dismissed/hidden/shown, then we should actually dismiss/hide/show the
         // host dialog.
@@ -151,7 +163,7 @@ class DialogLaunchAnimator(
      * TODO(b/193634619): Remove this function and animate dialog into opening activity instead.
      */
     fun disableAllCurrentDialogsExitAnimations() {
-        currentAnimations.forEach { it.exitAnimationDisabled = true }
+        openedDialogs.forEach { it.exitAnimationDisabled = true }
     }
 }
 
@@ -206,7 +218,7 @@ interface DialogListener {
     fun onSizeChanged()
 }
 
-private class DialogLaunchAnimation(
+private class AnimatedDialog(
     private val context: Context,
     private val launchAnimator: LaunchAnimator,
     hostDialogProvider: HostDialogProvider,
@@ -215,10 +227,10 @@ private class DialogLaunchAnimation(
     private val touchSurface: View,
 
     /**
-     * A callback that will be called with this [DialogLaunchAnimation] after the dialog was
+     * A callback that will be called with this [AnimatedDialog] after the dialog was
      * dismissed and the exit animation is done.
      */
-    private val onDialogDismissed: (DialogLaunchAnimation) -> Unit,
+    private val onDialogDismissed: (AnimatedDialog) -> Unit,
 
     /** The original dialog whose content will be shown and animate in/out in [hostDialog]. */
     private val originalDialog: Dialog,
@@ -241,7 +253,7 @@ private class DialogLaunchAnimation(
      * the same size as the original dialog window and to which we will set the original dialog
      * window background.
      */
-    private val dialogContentParent = FrameLayout(context)
+    val dialogContentParent = FrameLayout(context)
 
     /**
      * The background color of [originalDialogView], taking into consideration the [originalDialog]
@@ -574,7 +586,7 @@ private class DialogLaunchAnimation(
             }
 
             dismissDialogs(false /* instantDismiss */)
-            onDialogDismissed(this@DialogLaunchAnimation)
+            onDialogDismissed(this@AnimatedDialog)
             return
         }
 
@@ -610,7 +622,7 @@ private class DialogLaunchAnimation(
                         // and instantly dismiss the dialog.
                         GhostView.removeGhost(touchSurface)
                         dismissDialogs(true /* instantDismiss */)
-                        onDialogDismissed(this@DialogLaunchAnimation)
+                        onDialogDismissed(this@AnimatedDialog)
 
                         return true
                     }

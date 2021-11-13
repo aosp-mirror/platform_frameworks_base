@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.Manifest.permission.ACTIVITY_EMBEDDING;
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
@@ -2506,7 +2507,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 activityType = activityOptions.getLaunchActivityType();
                 final int windowingMode = activityOptions.getLaunchWindowingMode();
                 if (activityOptions.freezeRecentTasksReordering()
-                        && mRecentTasks.isCallerRecents(callingUid)) {
+                        && mService.checkPermission(MANAGE_ACTIVITY_TASKS, callingPid, callingUid)
+                                == PERMISSION_GRANTED) {
                     mRecentTasks.setFreezeTaskListReordering();
                 }
                 if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
