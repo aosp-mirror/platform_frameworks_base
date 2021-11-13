@@ -31,9 +31,12 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.any
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations.initMocks
+import java.util.concurrent.Executor
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -48,13 +51,18 @@ class ShadeEventCoordinatorTest : SysuiTestCase() {
 
     @Mock private lateinit var pipeline: NotifPipeline
     @Mock private lateinit var logger: ShadeEventCoordinatorLogger
+    @Mock private lateinit var executor: Executor
     @Mock private lateinit var notifRemovedByUserCallback: Runnable
     @Mock private lateinit var shadeEmptiedCallback: Runnable
 
     @Before
     fun setUp() {
         initMocks(this)
-        coordinator = ShadeEventCoordinator(logger)
+        whenever(executor.execute(any())).then {
+            (it.arguments[0] as Runnable).run()
+            true
+        }
+        coordinator = ShadeEventCoordinator(executor, logger)
         coordinator.attach(pipeline)
         notifCollectionListener = withArgCaptor {
             verify(pipeline).addCollectionListener(capture())
