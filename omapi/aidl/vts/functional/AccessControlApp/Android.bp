@@ -38,7 +38,7 @@ cc_test {
     ],
     static_libs: [
         "VtsHalHidlTargetTestBase",
-        "android.se.omapi-V1-ndk_platform",
+        "android.se.omapi-V1-ndk",
     ],
     cflags: [
         "-O0",

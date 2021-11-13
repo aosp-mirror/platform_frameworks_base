@@ -28,5 +28,8 @@ aidl_interface {
         rust: {
             enabled: true,
         },
+        ndk: {
+            separate_platform_variant: false,
+        },
     },
 }
