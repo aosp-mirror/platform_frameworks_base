@@ -18,6 +18,7 @@ package com.android.server;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerInternal.AppBackgroundRestrictionListener;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.PackageOps;
 import android.app.IActivityManager;
@@ -280,6 +281,14 @@ public class AppStateTrackerImpl implements AppStateTracker {
         }
     }
 
+    private final AppBackgroundRestrictionListener mAppBackgroundRestrictionListener =
+            new AppBackgroundRestrictionListener() {
+        @Override
+        public void onAutoRestrictedBucketFeatureFlagChanged(boolean autoRestrictedBucket) {
+            mHandler.notifyAutoRestrictedBucketFeatureFlagChanged(autoRestrictedBucket);
+        }
+    };
+
     /**
      * Listener for any state changes that affect any app's eligibility to run.
      */
@@ -367,6 +376,18 @@ public class AppStateTrackerImpl implements AppStateTracker {
         private void onForceAllAppsStandbyChanged(AppStateTrackerImpl sender) {
             updateAllJobs();
             updateAllAlarms();
+        }
+
+        /**
+         * Called when toggling the feature flag of moving to restricted standby bucket
+         * automatically on background-restricted.
+         */
+        private void onAutoRestrictedBucketFeatureFlagChanged(AppStateTrackerImpl sender,
+                boolean autoRestrictedBucket) {
+            updateAllJobs();
+            if (autoRestrictedBucket) {
+                unblockAllUnrestrictedAlarms();
+            }
         }
 
         /**
@@ -499,6 +520,8 @@ public class AppStateTrackerImpl implements AppStateTracker {
                     mFlagsObserver.isForcedAppStandbyForSmallBatteryEnabled();
             mStandbyTracker = new StandbyTracker();
             mAppStandbyInternal.addListener(mStandbyTracker);
+            mActivityManagerInternal.addAppBackgroundRestrictionListener(
+                    mAppBackgroundRestrictionListener);
 
             try {
                 mIActivityManager.registerUidObserver(new UidObserver(),
@@ -802,6 +825,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
         private static final int MSG_USER_REMOVED = 8;
         private static final int MSG_FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED = 9;
         private static final int MSG_EXEMPTED_BUCKET_CHANGED = 10;
+        private static final int MSG_AUTO_RESTRICTED_BUCKET_FEATURE_FLAG_CHANGED = 11;
 
         private static final int MSG_ON_UID_ACTIVE = 12;
         private static final int MSG_ON_UID_GONE = 13;
@@ -847,6 +871,12 @@ public class AppStateTrackerImpl implements AppStateTracker {
         public void notifyExemptedBucketChanged() {
             removeMessages(MSG_EXEMPTED_BUCKET_CHANGED);
             obtainMessage(MSG_EXEMPTED_BUCKET_CHANGED).sendToTarget();
+        }
+
+        public void notifyAutoRestrictedBucketFeatureFlagChanged(boolean autoRestrictedBucket) {
+            removeMessages(MSG_AUTO_RESTRICTED_BUCKET_FEATURE_FLAG_CHANGED);
+            obtainMessage(MSG_AUTO_RESTRICTED_BUCKET_FEATURE_FLAG_CHANGED,
+                    autoRestrictedBucket ? 1 : 0, 0).sendToTarget();
         }
 
         public void doUserRemoved(int userId) {
@@ -950,6 +980,13 @@ public class AppStateTrackerImpl implements AppStateTracker {
 
                 case MSG_USER_REMOVED:
                     handleUserRemoved(msg.arg1);
+                    return;
+
+                case MSG_AUTO_RESTRICTED_BUCKET_FEATURE_FLAG_CHANGED:
+                    final boolean autoRestrictedBucket = msg.arg1 == 1;
+                    for (Listener l : cloneListeners()) {
+                        l.onAutoRestrictedBucketFeatureFlagChanged(sender, autoRestrictedBucket);
+                    }
                     return;
 
                 case MSG_ON_UID_ACTIVE:
@@ -1120,7 +1157,12 @@ public class AppStateTrackerImpl implements AppStateTracker {
             if (ArrayUtils.contains(mPowerExemptAllAppIds, appId)) {
                 return false;
             }
-            return (mForcedAppStandbyEnabled && isRunAnyRestrictedLocked(uid, packageName));
+            // If apps will be put into restricted standby bucket automatically on user-forced
+            // app standby, instead of blocking alarms completely, let the restricted standby bucket
+            // policy take care of it.
+            return (mForcedAppStandbyEnabled
+                    && !mActivityManagerInternal.isBgAutoRestrictedBucketFeatureFlagEnabled()
+                    && isRunAnyRestrictedLocked(uid, packageName));
         }
     }
 
@@ -1161,7 +1203,12 @@ public class AppStateTrackerImpl implements AppStateTracker {
                     || ArrayUtils.contains(mTempExemptAppIds, appId)) {
                 return false;
             }
-            if (mForcedAppStandbyEnabled && isRunAnyRestrictedLocked(uid, packageName)) {
+            // If apps will be put into restricted standby bucket automatically on user-forced
+            // app standby, instead of blocking jobs completely, let the restricted standby bucket
+            // policy take care of it.
+            if (mForcedAppStandbyEnabled
+                    && !mActivityManagerInternal.isBgAutoRestrictedBucketFeatureFlagEnabled()
+                    && isRunAnyRestrictedLocked(uid, packageName)) {
                 return true;
             }
             if (hasForegroundExemption) {

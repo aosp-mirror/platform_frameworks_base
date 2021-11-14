@@ -724,4 +724,35 @@ public abstract class ActivityManagerInternal {
      * Get the restriction level of the given package for given user id.
      */
     public abstract @RestrictionLevel int getRestrictionLevel(String pkg, @UserIdInt int userId);
+
+    /**
+     * Get whether or not apps would be put into restricted standby bucket automatically
+     * when it's background-restricted.
+     */
+    public abstract boolean isBgAutoRestrictedBucketFeatureFlagEnabled();
+
+    /**
+     * A listener interface, which will be notified on background restriction changes.
+     */
+    public interface AppBackgroundRestrictionListener {
+        /**
+         * Called when the background restriction level of given uid/package is changed.
+         */
+        default void onRestrictionLevelChanged(int uid, String packageName,
+                @RestrictionLevel int newLevel) {
+        }
+
+        /**
+         * Called when toggling the feature flag of moving to restricted standby bucket
+         * automatically on background-restricted.
+         */
+        default void onAutoRestrictedBucketFeatureFlagChanged(boolean autoRestrictedBucket) {
+        }
+    }
+
+    /**
+     * Register the background restriction listener callback.
+     */
+    public abstract void addAppBackgroundRestrictionListener(
+            @NonNull AppBackgroundRestrictionListener listener);
 }

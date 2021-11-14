@@ -34,6 +34,7 @@ import static android.app.usage.UsageStatsManager.REASON_SUB_DEFAULT_UNDEFINED;
 import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_UNDEFINED;
 import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_USER_FLAG_INTERACTION;
 import static android.app.usage.UsageStatsManager.REASON_SUB_MASK;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SYSTEM_UPDATE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_USER_INTERACTION;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_EXEMPTED;
@@ -55,6 +56,7 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RestrictionLevel;
+import android.app.ActivityManagerInternal.AppBackgroundRestrictionListener;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -62,11 +64,13 @@ import android.app.IUidObserver;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -78,6 +82,7 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
+import android.provider.Settings.Global;
 import android.util.Slog;
 import android.util.SparseArrayMap;
 import android.util.TimeUtils;
@@ -99,6 +104,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Consumer;
 
 /**
  * This class tracks various state of the apps and mutates their restriction levels accordingly.
@@ -126,7 +132,7 @@ public final class AppRestrictionController {
     @GuardedBy("mLock")
     private final RestrictionSettings mRestrictionSettings = new RestrictionSettings();
 
-    private final CopyOnWriteArraySet<AppRestrictionLevelListener> mRestrictionLevelListeners =
+    private final CopyOnWriteArraySet<AppBackgroundRestrictionListener> mRestrictionListeners =
             new CopyOnWriteArraySet<>();
 
     /**
@@ -312,6 +318,13 @@ public final class AppRestrictionController {
             }
         }
 
+        @GuardedBy("mLock")
+        void forEachUidLocked(@NonNull Consumer<Integer> consumer) {
+            for (int i = mRestrictionLevels.numMaps() - 1; i >= 0; i--) {
+                consumer.accept(mRestrictionLevels.keyAt(i));
+            }
+        }
+
         void removeUser(@UserIdInt int userId) {
             synchronized (mLock) {
                 for (int i = mRestrictionLevels.numMaps() - 1; i >= 0; i--) {
@@ -353,18 +366,80 @@ public final class AppRestrictionController {
         }
     }
 
-    private final OnPropertiesChangedListener mOnDeviceConfigChangedListener =
-            new OnPropertiesChangedListener() {
-                @Override
-                public void onPropertiesChanged(Properties properties) {
-                    for (String name : properties.getKeyset()) {
-                        if (name == null || !name.startsWith(DEVICE_CONFIG_SUBNAMESPACE_PREFIX)) {
-                            return;
-                        }
-                        AppRestrictionController.this.onPropertiesChanged(name);
-                    }
+    final class ConstantsObserver extends ContentObserver implements
+            OnPropertiesChangedListener {
+        /**
+         * Whether or not to set the app to restricted standby bucket automatically
+         * when it's background-restricted.
+         */
+        static final String KEY_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION =
+                    DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "auto_restricted_bucket_on_bg_restricted";
+
+        static final boolean DEFAULT_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION = true;
+
+        volatile boolean mBgAutoRestrictedBucket;
+
+        volatile boolean mRestrictedBucketEnabled;
+
+        ConstantsObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onPropertiesChanged(Properties properties) {
+            for (String name : properties.getKeyset()) {
+                if (name == null || !name.startsWith(DEVICE_CONFIG_SUBNAMESPACE_PREFIX)) {
+                    return;
                 }
-            };
+                switch (name) {
+                    case KEY_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION:
+                        updateBgAutoRestrictedBucketChanged();
+                        break;
+                }
+                AppRestrictionController.this.onPropertiesChanged(name);
+            }
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            updateSettings();
+        }
+
+        public void start() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.registerContentObserver(Global.getUriFor(Global.ENABLE_RESTRICTED_BUCKET),
+                    false, this);
+            updateSettings();
+            updateDeviceConfig();
+        }
+
+        void updateSettings() {
+            mRestrictedBucketEnabled = isRestrictedBucketEnabled();
+        }
+
+        private boolean isRestrictedBucketEnabled() {
+            return Global.getInt(mContext.getContentResolver(),
+                    Global.ENABLE_RESTRICTED_BUCKET,
+                    Global.DEFAULT_ENABLE_RESTRICTED_BUCKET) == 1;
+        }
+
+        void updateDeviceConfig() {
+            updateBgAutoRestrictedBucketChanged();
+        }
+
+        private void updateBgAutoRestrictedBucketChanged() {
+            boolean oldValue = mBgAutoRestrictedBucket;
+            mBgAutoRestrictedBucket = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION,
+                    DEFAULT_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION);
+            if (oldValue != mBgAutoRestrictedBucket) {
+                dispatchAutoRestrictedBucketFeatureFlagChanged(mBgAutoRestrictedBucket);
+            }
+        }
+    }
+
+    private final ConstantsObserver mConstantsObserver;
 
     private final AppStateTracker.BackgroundRestrictedAppListener mBackgroundRestrictionListener =
             new AppStateTracker.BackgroundRestrictedAppListener() {
@@ -422,20 +497,11 @@ public final class AppRestrictionController {
             };
 
     /**
-     * A listener interface, which will be notified on restriction level changes.
+     * Register the background restriction listener callback.
      */
-    public interface AppRestrictionLevelListener {
-        /**
-         * Called when the restriction level of given uid/package is changed.
-         */
-        void onRestrictionLevelChanged(int uid, String packageName, @RestrictionLevel int newLevel);
-    }
-
-    /**
-     * Register the restriction level listener callback.
-     */
-    public void addAppRestrictionLevelListener(@NonNull AppRestrictionLevelListener listener) {
-        mRestrictionLevelListeners.add(listener);
+    public void addAppBackgroundRestrictionListener(
+            @NonNull AppBackgroundRestrictionListener listener) {
+        mRestrictionListeners.add(listener);
     }
 
     AppRestrictionController(final Context context) {
@@ -448,13 +514,14 @@ public final class AppRestrictionController {
         mBgHandlerThread = new HandlerThread("bgres-controller");
         mBgHandlerThread.start();
         mBgHandler = new BgHandler(mBgHandlerThread.getLooper(), injector);
+        mConstantsObserver = new ConstantsObserver(mBgHandler);
         injector.initAppStateTrackers(this);
     }
 
     void onSystemReady() {
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                ActivityThread.currentApplication().getMainExecutor(),
-                mOnDeviceConfigChangedListener);
+                ActivityThread.currentApplication().getMainExecutor(), mConstantsObserver);
+        mConstantsObserver.start();
         initRestrictionStates();
         registerForUidObservers();
         registerForSystemBroadcasts();
@@ -559,7 +626,8 @@ public final class AppRestrictionController {
                         .isAppBackgroundRestricted(uid, packageName)) {
                     return RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
                 }
-                level = standbyBucket == STANDBY_BUCKET_RESTRICTED
+                level = mConstantsObserver.mRestrictedBucketEnabled
+                        && standbyBucket == STANDBY_BUCKET_RESTRICTED
                         ? RESTRICTION_LEVEL_RESTRICTED_BUCKET
                         : RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
                 if (calcTrackers) {
@@ -594,9 +662,13 @@ public final class AppRestrictionController {
      */
     private @RestrictionLevel int calcAppRestrictionLevelFromTackers(int uid, String packageName) {
         @RestrictionLevel int level = RESTRICTION_LEVEL_UNKNOWN;
+        final boolean isRestrictedBucketEnabled = mConstantsObserver.mRestrictedBucketEnabled;
         for (int i = mAppStateTrackers.size() - 1; i >= 0; i--) {
             @RestrictionLevel int l = mAppStateTrackers.get(i).getPolicy()
                     .getProposedRestrictionLevel(packageName, uid);
+            if (!isRestrictedBucketEnabled && l == RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
+                l = RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
+            }
             level = Math.max(level, l);
         }
         return level;
@@ -660,6 +732,10 @@ public final class AppRestrictionController {
         final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
         if (level >= RESTRICTION_LEVEL_RESTRICTED_BUCKET
                 && curLevel < RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
+            if (!mConstantsObserver.mRestrictedBucketEnabled
+                    || !mConstantsObserver.mBgAutoRestrictedBucket) {
+                return;
+            }
             // Moving the app standby bucket to restricted in the meanwhile.
             if (DEBUG_BG_RESTRICTION_CONTROLLER
                     && level == RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {
@@ -736,8 +812,34 @@ public final class AppRestrictionController {
 
     private void dispatchAppRestrictionLevelChanges(int uid, String pkgName,
             @RestrictionLevel int newLevel) {
-        mRestrictionLevelListeners.forEach(
+        mRestrictionListeners.forEach(
                 l -> l.onRestrictionLevelChanged(uid, pkgName, newLevel));
+    }
+
+    private void dispatchAutoRestrictedBucketFeatureFlagChanged(boolean newValue) {
+        final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
+        final ArrayList<Runnable> pendingTasks = new ArrayList<>();
+        synchronized (mLock) {
+            mRestrictionSettings.forEachUidLocked(uid -> {
+                mRestrictionSettings.forEachPackageInUidLocked(uid, (pkgName, level, reason) -> {
+                    if (level == RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {
+                        pendingTasks.add(newValue
+                                ? () -> appStandbyInternal.restrictApp(pkgName,
+                                UserHandle.getUserId(uid), reason & REASON_MAIN_MASK,
+                                reason & REASON_SUB_MASK)
+                                : () -> appStandbyInternal.maybeUnrestrictApp(pkgName,
+                                UserHandle.getUserId(uid), reason & REASON_MAIN_MASK,
+                                reason & REASON_SUB_MASK, REASON_MAIN_USAGE,
+                                REASON_SUB_USAGE_SYSTEM_UPDATE));
+                    }
+                });
+            });
+        }
+        for (int i = 0; i < pendingTasks.size(); i++) {
+            pendingTasks.get(i).run();
+        }
+        mRestrictionListeners.forEach(
+                l -> l.onAutoRestrictedBucketFeatureFlagChanged(newValue));
     }
 
     private void handleAppStandbyBucketChanged(int bucket, String packageName,
@@ -1062,6 +1164,10 @@ public final class AppRestrictionController {
             mAppStateTrackers.get(i).onUidRemoved(uid);
         }
         mRestrictionSettings.removeUid(uid);
+    }
+
+    boolean isBgAutoRestrictedBucketFeatureFlagEnabled() {
+        return mConstantsObserver.mBgAutoRestrictedBucket;
     }
 
     private void onPropertiesChanged(String name) {

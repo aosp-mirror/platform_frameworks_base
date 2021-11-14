@@ -60,6 +60,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerInternal.AppBackgroundRestrictionListener;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
@@ -84,7 +85,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.am.AppBatteryTracker.AppBatteryPolicy;
-import com.android.server.am.AppRestrictionController.AppRestrictionLevelListener;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
@@ -272,7 +272,7 @@ public final class BackgroundRestrictionTest {
         final TestAppRestrictionLevelListener listener = new TestAppRestrictionLevelListener();
         final long timeout = 1_000; // ms
 
-        mBgRestrictionController.addAppRestrictionLevelListener(listener);
+        mBgRestrictionController.addAppBackgroundRestrictionListener(listener);
 
         setBackgroundRestrict(testPkgName, testUid, false, listener);
 
@@ -368,7 +368,7 @@ public final class BackgroundRestrictionTest {
         final TestAppRestrictionLevelListener listener = new TestAppRestrictionLevelListener();
         final long timeout = 1_000; // ms
 
-        mBgRestrictionController.addAppRestrictionLevelListener(listener);
+        mBgRestrictionController.addAppBackgroundRestrictionListener(listener);
 
         setBackgroundRestrict(testPkgName, testUid, false, listener);
 
@@ -435,7 +435,7 @@ public final class BackgroundRestrictionTest {
         DeviceConfigSession<Float> bgCurrentDrainRestrictedBucketThreshold = null;
         DeviceConfigSession<Float> bgCurrentDrainBgRestrictedThreshold = null;
 
-        mBgRestrictionController.addAppRestrictionLevelListener(listener);
+        mBgRestrictionController.addAppBackgroundRestrictionListener(listener);
 
         setBackgroundRestrict(testPkgName, testUid, false, listener);
 
@@ -699,7 +699,7 @@ public final class BackgroundRestrictionTest {
         waitForIdleHandler(mBgRestrictionController.getBackgroundHandler());
     }
 
-    private class TestAppRestrictionLevelListener implements AppRestrictionLevelListener {
+    private class TestAppRestrictionLevelListener implements AppBackgroundRestrictionListener {
         final CountDownLatch[] mLatchHolder = new CountDownLatch[1];
         final int[] mUidHolder = new int[1];
         final String[] mPkgNameHolder = new String[1];

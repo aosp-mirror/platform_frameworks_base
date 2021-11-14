@@ -16838,6 +16838,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         public @RestrictionLevel int getRestrictionLevel(String pkg, @UserIdInt int userId) {
             return mAppRestrictionController.getRestrictionLevel(pkg, userId);
         }
+
+        @Override
+        public boolean isBgAutoRestrictedBucketFeatureFlagEnabled() {
+            return mAppRestrictionController.isBgAutoRestrictedBucketFeatureFlagEnabled();
+        }
+
+        @Override
+        public void addAppBackgroundRestrictionListener(
+                @NonNull ActivityManagerInternal.AppBackgroundRestrictionListener listener) {
+            mAppRestrictionController.addAppBackgroundRestrictionListener(listener);
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {
