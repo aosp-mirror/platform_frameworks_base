@@ -949,6 +949,15 @@ public class SubscriptionManager {
     public static final String VOIMS_OPT_IN_STATUS = SimInfo.COLUMN_VOIMS_OPT_IN_STATUS;
 
     /**
+     * TelephonyProvider column name for NR Advanced calling
+     * Determines if the user has enabled VoNR settings for this subscription.
+     *
+     * @hide
+     */
+    public static final String NR_ADVANCED_CALLING_ENABLED =
+            SimInfo.COLUMN_NR_ADVANCED_CALLING_ENABLED;
+
+    /**
      * Profile class of the subscription
      * @hide
      */
