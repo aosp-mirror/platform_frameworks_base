@@ -2195,7 +2195,7 @@ package android.provider {
     field public static final String USER_PREFERRED_REFRESH_RATE = "user_preferred_refresh_rate";
     field public static final String USER_PREFERRED_RESOLUTION_HEIGHT = "user_preferred_resolution_height";
     field public static final String USER_PREFERRED_RESOLUTION_WIDTH = "user_preferred_resolution_width";
-    field public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
+    field @Deprecated public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
   }
 
   public static final class Settings.Secure extends android.provider.Settings.NameValueTable {

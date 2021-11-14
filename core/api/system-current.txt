@@ -257,7 +257,7 @@ package android {
     field public static final String REQUEST_COMPANION_PROFILE_APP_STREAMING = "android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING";
     field public static final String REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION = "android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION";
     field public static final String REQUEST_COMPANION_SELF_MANAGED = "android.permission.REQUEST_COMPANION_SELF_MANAGED";
-    field public static final String REQUEST_NETWORK_SCORES = "android.permission.REQUEST_NETWORK_SCORES";
+    field @Deprecated public static final String REQUEST_NETWORK_SCORES = "android.permission.REQUEST_NETWORK_SCORES";
     field public static final String REQUEST_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE";
     field public static final String RESET_PASSWORD = "android.permission.RESET_PASSWORD";
     field public static final String RESTART_WIFI_SUBSYSTEM = "android.permission.RESTART_WIFI_SUBSYSTEM";
@@ -268,7 +268,7 @@ package android {
     field public static final String REVOKE_RUNTIME_PERMISSIONS = "android.permission.REVOKE_RUNTIME_PERMISSIONS";
     field public static final String ROTATE_SURFACE_FLINGER = "android.permission.ROTATE_SURFACE_FLINGER";
     field public static final String SCHEDULE_PRIORITIZED_ALARM = "android.permission.SCHEDULE_PRIORITIZED_ALARM";
-    field public static final String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
+    field @Deprecated public static final String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
     field public static final String SECURE_ELEMENT_PRIVILEGED_OPERATION = "android.permission.SECURE_ELEMENT_PRIVILEGED_OPERATION";
     field public static final String SEND_CATEGORY_CAR_NOTIFICATIONS = "android.permission.SEND_CATEGORY_CAR_NOTIFICATIONS";
     field public static final String SEND_DEVICE_CUSTOMIZATION_READY = "android.permission.SEND_DEVICE_CUSTOMIZATION_READY";
@@ -2458,7 +2458,7 @@ package android.content {
     field public static final String MEDIA_TRANSCODING_SERVICE = "media_transcoding";
     field public static final String MUSIC_RECOGNITION_SERVICE = "music_recognition";
     field public static final String NETD_SERVICE = "netd";
-    field public static final String NETWORK_SCORE_SERVICE = "network_score";
+    field @Deprecated public static final String NETWORK_SCORE_SERVICE = "network_score";
     field public static final String OEM_LOCK_SERVICE = "oem_lock";
     field public static final String PERMISSION_CONTROLLER_SERVICE = "permission_controller";
     field public static final String PERMISSION_SERVICE = "permission";
@@ -7694,15 +7694,15 @@ package android.net {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.MatchAllNetworkSpecifier> CREATOR;
   }
 
-  public class NetworkKey implements android.os.Parcelable {
-    ctor public NetworkKey(android.net.WifiKey);
-    method @Nullable public static android.net.NetworkKey createFromScanResult(@NonNull android.net.wifi.ScanResult);
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkKey> CREATOR;
-    field public static final int TYPE_WIFI = 1; // 0x1
-    field public final int type;
-    field public final android.net.WifiKey wifiKey;
+  @Deprecated public class NetworkKey implements android.os.Parcelable {
+    ctor @Deprecated public NetworkKey(android.net.WifiKey);
+    method @Deprecated @Nullable public static android.net.NetworkKey createFromScanResult(@NonNull android.net.wifi.ScanResult);
+    method @Deprecated public int describeContents();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkKey> CREATOR;
+    field @Deprecated public static final int TYPE_WIFI = 1; // 0x1
+    field @Deprecated public final int type;
+    field @Deprecated public final android.net.WifiKey wifiKey;
   }
 
   public abstract class NetworkRecommendationProvider {
@@ -7711,31 +7711,31 @@ package android.net {
     method public abstract void onRequestScores(android.net.NetworkKey[]);
   }
 
-  public class NetworkScoreManager {
-    method @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, android.Manifest.permission.REQUEST_NETWORK_SCORES}) public boolean clearScores() throws java.lang.SecurityException;
-    method @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, android.Manifest.permission.REQUEST_NETWORK_SCORES}) public void disableScoring() throws java.lang.SecurityException;
-    method @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, android.Manifest.permission.REQUEST_NETWORK_SCORES}) public String getActiveScorerPackage();
-    method @RequiresPermission(android.Manifest.permission.REQUEST_NETWORK_SCORES) public void registerNetworkScoreCallback(int, int, @NonNull java.util.concurrent.Executor, @NonNull android.net.NetworkScoreManager.NetworkScoreCallback) throws java.lang.SecurityException;
-    method @RequiresPermission(android.Manifest.permission.REQUEST_NETWORK_SCORES) public boolean requestScores(@NonNull java.util.Collection<android.net.NetworkKey>) throws java.lang.SecurityException;
-    method @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, android.Manifest.permission.REQUEST_NETWORK_SCORES}) public boolean setActiveScorer(String) throws java.lang.SecurityException;
-    method @RequiresPermission(android.Manifest.permission.SCORE_NETWORKS) public boolean updateScores(@NonNull android.net.ScoredNetwork[]) throws java.lang.SecurityException;
+  @Deprecated public class NetworkScoreManager {
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, android.Manifest.permission.REQUEST_NETWORK_SCORES}) public boolean clearScores() throws java.lang.SecurityException;
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, android.Manifest.permission.REQUEST_NETWORK_SCORES}) public void disableScoring() throws java.lang.SecurityException;
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, android.Manifest.permission.REQUEST_NETWORK_SCORES}) public String getActiveScorerPackage();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.REQUEST_NETWORK_SCORES) public void registerNetworkScoreCallback(int, int, @NonNull java.util.concurrent.Executor, @NonNull android.net.NetworkScoreManager.NetworkScoreCallback) throws java.lang.SecurityException;
+    method @Deprecated @RequiresPermission(android.Manifest.permission.REQUEST_NETWORK_SCORES) public boolean requestScores(@NonNull java.util.Collection<android.net.NetworkKey>) throws java.lang.SecurityException;
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, android.Manifest.permission.REQUEST_NETWORK_SCORES}) public boolean setActiveScorer(String) throws java.lang.SecurityException;
+    method @Deprecated @RequiresPermission(android.Manifest.permission.SCORE_NETWORKS) public boolean updateScores(@NonNull android.net.ScoredNetwork[]) throws java.lang.SecurityException;
     field @Deprecated public static final String ACTION_CHANGE_ACTIVE = "android.net.scoring.CHANGE_ACTIVE";
-    field public static final String ACTION_CUSTOM_ENABLE = "android.net.scoring.CUSTOM_ENABLE";
-    field public static final String ACTION_RECOMMEND_NETWORKS = "android.net.action.RECOMMEND_NETWORKS";
-    field public static final String ACTION_SCORER_CHANGED = "android.net.scoring.SCORER_CHANGED";
+    field @Deprecated public static final String ACTION_CUSTOM_ENABLE = "android.net.scoring.CUSTOM_ENABLE";
+    field @Deprecated public static final String ACTION_RECOMMEND_NETWORKS = "android.net.action.RECOMMEND_NETWORKS";
+    field @Deprecated public static final String ACTION_SCORER_CHANGED = "android.net.scoring.SCORER_CHANGED";
     field @Deprecated public static final String ACTION_SCORE_NETWORKS = "android.net.scoring.SCORE_NETWORKS";
     field @Deprecated public static final String EXTRA_NETWORKS_TO_SCORE = "networksToScore";
-    field public static final String EXTRA_NEW_SCORER = "newScorer";
+    field @Deprecated public static final String EXTRA_NEW_SCORER = "newScorer";
     field @Deprecated public static final String EXTRA_PACKAGE_NAME = "packageName";
-    field public static final int SCORE_FILTER_CURRENT_NETWORK = 1; // 0x1
-    field public static final int SCORE_FILTER_NONE = 0; // 0x0
-    field public static final int SCORE_FILTER_SCAN_RESULTS = 2; // 0x2
+    field @Deprecated public static final int SCORE_FILTER_CURRENT_NETWORK = 1; // 0x1
+    field @Deprecated public static final int SCORE_FILTER_NONE = 0; // 0x0
+    field @Deprecated public static final int SCORE_FILTER_SCAN_RESULTS = 2; // 0x2
   }
 
-  public abstract static class NetworkScoreManager.NetworkScoreCallback {
-    ctor public NetworkScoreManager.NetworkScoreCallback();
-    method public abstract void onScoresInvalidated();
-    method public abstract void onScoresUpdated(@NonNull java.util.Collection<android.net.ScoredNetwork>);
+  @Deprecated public abstract static class NetworkScoreManager.NetworkScoreCallback {
+    ctor @Deprecated public NetworkScoreManager.NetworkScoreCallback();
+    method @Deprecated public abstract void onScoresInvalidated();
+    method @Deprecated public abstract void onScoresUpdated(@NonNull java.util.Collection<android.net.ScoredNetwork>);
   }
 
   public abstract class NetworkSpecifier {
@@ -7774,35 +7774,35 @@ package android.net {
     ctor public NetworkStats.Entry(@Nullable String, int, int, int, int, int, int, long, long, long, long, long);
   }
 
-  public class RssiCurve implements android.os.Parcelable {
-    ctor public RssiCurve(int, int, byte[]);
-    ctor public RssiCurve(int, int, byte[], int);
-    method public int describeContents();
-    method public byte lookupScore(int);
-    method public byte lookupScore(int, boolean);
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.RssiCurve> CREATOR;
-    field public final int activeNetworkRssiBoost;
-    field public final int bucketWidth;
-    field public final byte[] rssiBuckets;
-    field public final int start;
+  @Deprecated public class RssiCurve implements android.os.Parcelable {
+    ctor @Deprecated public RssiCurve(int, int, byte[]);
+    ctor @Deprecated public RssiCurve(int, int, byte[], int);
+    method @Deprecated public int describeContents();
+    method @Deprecated public byte lookupScore(int);
+    method @Deprecated public byte lookupScore(int, boolean);
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.net.RssiCurve> CREATOR;
+    field @Deprecated public final int activeNetworkRssiBoost;
+    field @Deprecated public final int bucketWidth;
+    field @Deprecated public final byte[] rssiBuckets;
+    field @Deprecated public final int start;
   }
 
-  public class ScoredNetwork implements android.os.Parcelable {
-    ctor public ScoredNetwork(android.net.NetworkKey, android.net.RssiCurve);
-    ctor public ScoredNetwork(android.net.NetworkKey, android.net.RssiCurve, boolean);
-    ctor public ScoredNetwork(android.net.NetworkKey, android.net.RssiCurve, boolean, @Nullable android.os.Bundle);
-    method public int calculateBadge(int);
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final String ATTRIBUTES_KEY_BADGING_CURVE = "android.net.attributes.key.BADGING_CURVE";
-    field public static final String ATTRIBUTES_KEY_HAS_CAPTIVE_PORTAL = "android.net.attributes.key.HAS_CAPTIVE_PORTAL";
-    field public static final String ATTRIBUTES_KEY_RANKING_SCORE_OFFSET = "android.net.attributes.key.RANKING_SCORE_OFFSET";
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.ScoredNetwork> CREATOR;
-    field @Nullable public final android.os.Bundle attributes;
-    field public final boolean meteredHint;
-    field public final android.net.NetworkKey networkKey;
-    field public final android.net.RssiCurve rssiCurve;
+  @Deprecated public class ScoredNetwork implements android.os.Parcelable {
+    ctor @Deprecated public ScoredNetwork(android.net.NetworkKey, android.net.RssiCurve);
+    ctor @Deprecated public ScoredNetwork(android.net.NetworkKey, android.net.RssiCurve, boolean);
+    ctor @Deprecated public ScoredNetwork(android.net.NetworkKey, android.net.RssiCurve, boolean, @Nullable android.os.Bundle);
+    method @Deprecated public int calculateBadge(int);
+    method @Deprecated public int describeContents();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated public static final String ATTRIBUTES_KEY_BADGING_CURVE = "android.net.attributes.key.BADGING_CURVE";
+    field @Deprecated public static final String ATTRIBUTES_KEY_HAS_CAPTIVE_PORTAL = "android.net.attributes.key.HAS_CAPTIVE_PORTAL";
+    field @Deprecated public static final String ATTRIBUTES_KEY_RANKING_SCORE_OFFSET = "android.net.attributes.key.RANKING_SCORE_OFFSET";
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.net.ScoredNetwork> CREATOR;
+    field @Deprecated @Nullable public final android.os.Bundle attributes;
+    field @Deprecated public final boolean meteredHint;
+    field @Deprecated public final android.net.NetworkKey networkKey;
+    field @Deprecated public final android.net.RssiCurve rssiCurve;
   }
 
   public class TrafficStats {
@@ -7829,13 +7829,13 @@ package android.net {
     ctor public WebAddress(String) throws android.net.ParseException;
   }
 
-  public class WifiKey implements android.os.Parcelable {
-    ctor public WifiKey(String, String);
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.WifiKey> CREATOR;
-    field public final String bssid;
-    field public final String ssid;
+  @Deprecated public class WifiKey implements android.os.Parcelable {
+    ctor @Deprecated public WifiKey(String, String);
+    method @Deprecated public int describeContents();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.net.WifiKey> CREATOR;
+    field @Deprecated public final String bssid;
+    field @Deprecated public final String ssid;
   }
 
 }
