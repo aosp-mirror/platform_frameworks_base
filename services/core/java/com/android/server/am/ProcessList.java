@@ -5143,8 +5143,7 @@ public final class ProcessList {
         }
 
         Watchdog.getInstance().processDied(app.processName, app.getPid());
-        if (app.getDeathRecipient() == null
-                && mDyingProcesses.get(app.processName, app.uid) == app) {
+        if (app.getDeathRecipient() == null) {
             // If we've done unlinkDeathRecipient before calling into this, remove from dying list.
             mDyingProcesses.remove(app.processName, app.uid);
             app.setDyingPid(0);
