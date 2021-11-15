@@ -1289,8 +1289,8 @@ public class NotificationContentView extends FrameLayout {
                     result.mView = riv;
                     // Create a new controller for the view. The lifetime of the controller is 1:1
                     // with that of the view.
-                    RemoteInputViewSubcomponent subcomponent =
-                            mRemoteInputSubcomponentFactory.create(result.mView);
+                    RemoteInputViewSubcomponent subcomponent = mRemoteInputSubcomponentFactory
+                            .create(result.mView, mRemoteInputController);
                     result.mController = subcomponent.getController();
                     result.mView.setController(result.mController);
                 } else {
@@ -1311,8 +1311,9 @@ public class NotificationContentView extends FrameLayout {
                     Notification.Action[] actions = entry.getSbn().getNotification().actions;
                     if (existingPendingIntent != null) {
                         result.mView.setPendingIntent(existingPendingIntent);
+                        result.mController.setPendingIntent(existingPendingIntent);
                     }
-                    if (result.mView.updatePendingIntentFromActions(actions)) {
+                    if (result.mController.updatePendingIntentFromActions(actions)) {
                         if (!result.mView.isActive()) {
                             result.mView.focus();
                         }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy.dagger
 
+import com.android.systemui.statusbar.RemoteInputController
 import com.android.systemui.statusbar.policy.RemoteInputView
 import com.android.systemui.statusbar.policy.RemoteInputViewController
 import com.android.systemui.statusbar.policy.RemoteInputViewControllerImpl
@@ -32,7 +33,10 @@ interface RemoteInputViewSubcomponent {
 
     @Subcomponent.Factory
     interface Factory {
-        fun create(@BindsInstance view: RemoteInputView): RemoteInputViewSubcomponent
+        fun create(
+            @BindsInstance view: RemoteInputView,
+            @BindsInstance remoteInputController: RemoteInputController
+        ): RemoteInputViewSubcomponent
     }
 }
 
