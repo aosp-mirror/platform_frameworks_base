@@ -211,7 +211,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             return false;
         }
 
-        if (mUdfpsRequested && !mNotificationShadeExpanded
+        if (mUdfpsRequested && !mNotificationShadeVisible
                 && (!mIsBouncerVisible
                 || mInputBouncerHiddenAmount != KeyguardBouncer.EXPANSION_VISIBLE)) {
             return false;
