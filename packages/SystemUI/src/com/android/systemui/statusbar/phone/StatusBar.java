@@ -1856,10 +1856,6 @@ public class StatusBar extends SystemUI implements
         return mDozeServiceHost.isPulsing();
     }
 
-    public boolean hideStatusBarIconsWhenExpanded() {
-        return mNotificationPanelViewController.hideStatusBarIconsWhenExpanded();
-    }
-
     @Nullable
     public View getAmbientIndicationContainer() {
         return mAmbientIndicationContainer;
