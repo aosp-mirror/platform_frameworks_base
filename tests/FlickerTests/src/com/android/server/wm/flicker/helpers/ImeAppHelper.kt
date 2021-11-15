@@ -84,4 +84,20 @@ open class ImeAppHelper @JvmOverloads constructor(
             wmHelper.waitImeGone()
         }
     }
+
+    @JvmOverloads
+    open fun finishActivity(device: UiDevice, wmHelper: WindowManagerStateHelper? = null) {
+        val finishButton = device.wait(
+                Until.findObject(By.res(getPackage(), "finish_activity_btn")),
+                FIND_TIMEOUT)
+        require(finishButton != null) {
+            "Finish activity button not found, probably IME activity is not on the screen ?"
+        }
+        finishButton.click()
+        if (wmHelper == null) {
+            device.waitForIdle()
+        } else {
+            wmHelper.waitForActivityRemoved(component)
+        }
+    }
 }
