@@ -385,8 +385,7 @@ final class InputMethodBindingController {
             throw new IllegalArgumentException("Unknown id: " + mSelectedMethodId);
         }
 
-        Intent intent = createImeBindingIntent(info.getComponent());
-        mCurIntent = intent;
+        mCurIntent = createImeBindingIntent(info.getComponent());
 
         if (bindCurrentInputMethodServiceMainConnectionLocked()) {
             mService.addFreshWindowTokenLocked(displayIdToShowIme, info.getId());
@@ -395,9 +394,9 @@ final class InputMethodBindingController {
                     null, null, mCurId, mCurSeq, false);
         }
 
-        mCurIntent = null;
         Slog.w(InputMethodManagerService.TAG,
-                "Failure connecting to input method service: " + intent);
+                "Failure connecting to input method service: " + mCurIntent);
+        mCurIntent = null;
         return InputBindResult.IME_NOT_CONNECTED;
     }
 
