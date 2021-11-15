@@ -1688,7 +1688,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("mMethodMap")
     private void resetDefaultImeLocked(Context context) {
         // Do not reset the default (current) IME when it is a 3rd-party IME
-        if (getSelectedMethodId() != null && !mMethodMap.get(getSelectedMethodId()).isSystem()) {
+        String selectedMethodId = getSelectedMethodId();
+        if (selectedMethodId != null && !mMethodMap.get(selectedMethodId).isSystem()) {
             return;
         }
         final List<InputMethodInfo> suitableImes = InputMethodUtils.getDefaultEnabledImes(
@@ -1987,10 +1988,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback callback) {
         final InputMethodInfo imi = mMethodMap.get(getSelectedMethodId());
         try {
+            IInputMethod curMethod = getCurMethod();
             if (userId == mSettings.getCurrentUserId() && imi != null
-                    && imi.isInlineSuggestionsEnabled() && getCurMethod() != null) {
-                executeOrSendMessage(getCurMethod(),
-                        mCaller.obtainMessageOOO(MSG_INLINE_SUGGESTIONS_REQUEST, getCurMethod(),
+                    && imi.isInlineSuggestionsEnabled() && curMethod != null) {
+                executeOrSendMessage(curMethod,
+                        mCaller.obtainMessageOOO(MSG_INLINE_SUGGESTIONS_REQUEST, curMethod,
                                 requestInfo, new InlineSuggestionsRequestCallbackDecorator(callback,
                                         imi.getPackageName(), mCurTokenDisplayId, getCurToken(),
                                         this)));
@@ -2128,8 +2130,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             boolean allowsImplicitlySelectedSubtypes, @UserIdInt int userId) {
         if (userId == mSettings.getCurrentUserId()) {
             final InputMethodInfo imi;
-            if (imiId == null && getSelectedMethodId() != null) {
-                imi = mMethodMap.get(getSelectedMethodId());
+            String selectedMethodId = getSelectedMethodId();
+            if (imiId == null && selectedMethodId != null) {
+                imi = mMethodMap.get(selectedMethodId);
             } else {
                 imi = mMethodMap.get(imiId);
             }
@@ -2226,9 +2229,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             mCurFocusedWindow, 0, null, SoftInputShowHideReason.HIDE_REMOVE_CLIENT);
                     if (mBoundToMethod) {
                         mBoundToMethod = false;
-                        if (getCurMethod() != null) {
-                            executeOrSendMessage(getCurMethod(), mCaller.obtainMessageO(
-                                    MSG_UNBIND_INPUT, getCurMethod()));
+                        IInputMethod curMethod = getCurMethod();
+                        if (curMethod != null) {
+                            executeOrSendMessage(curMethod, mCaller.obtainMessageO(
+                                    MSG_UNBIND_INPUT, curMethod));
                         }
                     }
                     mCurClient = null;
@@ -2256,9 +2260,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + mCurClient.client.asBinder());
             if (mBoundToMethod) {
                 mBoundToMethod = false;
-                if (getCurMethod() != null) {
-                    executeOrSendMessage(getCurMethod(), mCaller.obtainMessageO(
-                            MSG_UNBIND_INPUT, getCurMethod()));
+                IInputMethod curMethod = getCurMethod();
+                if (curMethod != null) {
+                    executeOrSendMessage(curMethod, mCaller.obtainMessageO(
+                            MSG_UNBIND_INPUT, curMethod));
                 }
             }
 
@@ -2300,8 +2305,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     InputBindResult attachNewInputLocked(@StartInputReason int startInputReason, boolean initial) {
         if (!mBoundToMethod) {
-            executeOrSendMessage(getCurMethod(), mCaller.obtainMessageOO(
-                    MSG_BIND_INPUT, getCurMethod(), mCurClient.binding));
+            IInputMethod curMethod = getCurMethod();
+            executeOrSendMessage(curMethod, mCaller.obtainMessageOO(
+                    MSG_BIND_INPUT, curMethod, mCurClient.binding));
             mBoundToMethod = true;
         }
 
@@ -2334,12 +2340,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             showCurrentInputLocked(mCurFocusedWindow, getAppShowFlagsLocked(), null,
                     SoftInputShowHideReason.ATTACH_NEW_INPUT);
         }
-        final InputMethodInfo curInputMethodInfo = mMethodMap.get(getCurId());
+
+        String curId = getCurId();
+        final InputMethodInfo curInputMethodInfo = mMethodMap.get(curId);
         final boolean suppressesSpellChecker =
                 curInputMethodInfo != null && curInputMethodInfo.suppressesSpellChecker();
         return new InputBindResult(InputBindResult.ResultCode.SUCCESS_WITH_IME_SESSION,
                 session.session, (session.channel != null ? session.channel.dup() : null),
-                getCurId(), getSequenceNumber(), suppressesSpellChecker);
+                curId, getSequenceNumber(), suppressesSpellChecker);
     }
 
     @GuardedBy("mMethodMap")
@@ -2514,8 +2522,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 channel.dispose();
                 return;
             }
-            if (getCurMethod() != null && method != null
-                    && getCurMethod().asBinder() == method.asBinder()) {
+            IInputMethod curMethod = getCurMethod();
+            if (curMethod != null && method != null
+                    && curMethod.asBinder() == method.asBinder()) {
                 if (mCurClient != null) {
                     clearClientSessionLocked(mCurClient);
                     mCurClient.curSession = new SessionState(mCurClient,
@@ -2558,9 +2567,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (DEBUG) Slog.v(TAG, "Creating new session for client " + cs);
             InputChannel[] channels = InputChannel.openInputChannelPair(cs.toString());
             cs.sessionRequested = true;
-            executeOrSendMessage(getCurMethod(), mCaller.obtainMessageOOO(
-                    MSG_CREATE_SESSION, getCurMethod(), channels[1],
-                    new MethodCallback(this, getCurMethod(), channels[0])));
+            IInputMethod curMethod = getCurMethod();
+            executeOrSendMessage(curMethod, mCaller.obtainMessageOOO(
+                    MSG_CREATE_SESSION, curMethod, channels[1],
+                    new MethodCallback(this, curMethod, channels[0])));
         }
     }
 
@@ -2940,10 +2950,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             if (newSubtype != oldSubtype) {
                 setSelectedInputMethodAndSubtypeLocked(info, subtypeId, true);
-                if (getCurMethod() != null) {
+                IInputMethod curMethod = getCurMethod();
+                if (curMethod != null) {
                     try {
                         updateSystemUiLocked(mImeWindowVis, mBackDisposition);
-                        getCurMethod().changeInputMethodSubtype(newSubtype);
+                        curMethod.changeInputMethodSubtype(newSubtype);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed to call changeInputMethodSubtype");
                     }
@@ -3055,13 +3066,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         boolean res = false;
-        if (getCurMethod() != null) {
+        IInputMethod curMethod = getCurMethod();
+        if (curMethod != null) {
             if (DEBUG) Slog.d(TAG, "showCurrentInputLocked: mCurToken=" + getCurToken());
             // create a placeholder token for IMS so that IMS cannot inject windows into client app.
             Binder showInputToken = new Binder();
             mShowRequestWindowMap.put(showInputToken, windowToken);
-            executeOrSendMessage(getCurMethod(), mCaller.obtainMessageIIOOO(MSG_SHOW_SOFT_INPUT,
-                    getImeShowFlagsLocked(), reason, getCurMethod(), resultReceiver,
+            executeOrSendMessage(curMethod, mCaller.obtainMessageIIOOO(MSG_SHOW_SOFT_INPUT,
+                    getImeShowFlagsLocked(), reason, curMethod, resultReceiver,
                     showInputToken));
             mInputShown = true;
             if (hasConnection() && !isVisibleBound()) {
@@ -3155,7 +3167,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // since Android Eclair.  That's why we need to accept IMM#hideSoftInput() even when only
         // IMMS#InputShown indicates that the software keyboard is shown.
         // TODO: Clean up, IMMS#mInputShown, IMMS#mImeWindowVis and mShowRequested.
-        final boolean shouldHideSoftInput = (getCurMethod() != null) && (mInputShown
+        IInputMethod curMethod = getCurMethod();
+        final boolean shouldHideSoftInput = (curMethod != null) && (mInputShown
                 || (mImeWindowVis & InputMethodService.IME_ACTIVE) != 0);
         boolean res;
         if (shouldHideSoftInput) {
@@ -3165,8 +3178,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // delivered to the IME process as an IPC.  Hence the inconsistency between
             // IMMS#mInputShown and IMMS#mImeWindowVis should be resolved spontaneously in
             // the final state.
-            executeOrSendMessage(getCurMethod(), mCaller.obtainMessageIOOO(MSG_HIDE_SOFT_INPUT,
-                    reason, getCurMethod(), resultReceiver, hideInputToken));
+            executeOrSendMessage(curMethod, mCaller.obtainMessageIOOO(MSG_HIDE_SOFT_INPUT,
+                    reason, curMethod, resultReceiver, hideInputToken));
             res = true;
         } else {
             res = false;
@@ -4755,17 +4768,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("mMethodMap")
     InputMethodSubtype getCurrentInputMethodSubtypeLocked() {
-        if (getSelectedMethodId() == null) {
+        String selectedMethodId = getSelectedMethodId();
+        if (selectedMethodId == null) {
             return null;
         }
         final boolean subtypeIsSelected = mSettings.isSubtypeSelected();
-        final InputMethodInfo imi = mMethodMap.get(getSelectedMethodId());
+        final InputMethodInfo imi = mMethodMap.get(selectedMethodId);
         if (imi == null || imi.getSubtypeCount() == 0) {
             return null;
         }
         if (!subtypeIsSelected || mCurrentSubtype == null
                 || !InputMethodUtils.isValidSubtypeId(imi, mCurrentSubtype.hashCode())) {
-            int subtypeId = mSettings.getSelectedInputMethodSubtypeId(getSelectedMethodId());
+            int subtypeId = mSettings.getSelectedInputMethodSubtypeId(selectedMethodId);
             if (subtypeId == NOT_A_SUBTYPE_ID) {
                 // If there are no selected subtypes, the framework will try to find
                 // the most applicable subtype from explicitly or implicitly enabled
