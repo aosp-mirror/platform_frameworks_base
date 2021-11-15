@@ -29,9 +29,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
@@ -64,8 +64,10 @@ import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.SuspendParams;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
+import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchableTester;
 import com.android.server.utils.WatchedArrayMap;
+import com.android.server.utils.Watcher;
 
 import com.google.common.truth.Truth;
 
@@ -87,6 +89,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -875,6 +878,95 @@ public class PackageManagerSettingsTests {
         final PackageUserState userState = testPkgSetting01.readUserState(0);
         verifyUserState(userState, null /*oldUserState*/, false /*userStateChanged*/,
                 false /*notLaunched*/, false /*stopped*/, true /*installed*/);
+    }
+
+    @Test
+    public void testSetPkgStateLibraryFiles_addNewFiles() {
+        final PackageSetting packageSetting = createPackageSetting("com.foo");
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        packageSetting.registerObserver(new Watcher() {
+            @Override
+            public void onChange(Watchable what) {
+                countDownLatch.countDown();
+            }
+        });
+
+        final List<String> newUsesLibraryFiles = new ArrayList<>();
+        newUsesLibraryFiles.add("code/path/A.apk");
+        newUsesLibraryFiles.add("code/path/B.apk");
+        packageSetting.setPkgStateLibraryFiles(newUsesLibraryFiles);
+
+        assertThat(countDownLatch.getCount(), is(0L));
+    }
+
+    @Test
+    public void testSetPkgStateLibraryFiles_removeOneExistingFile() {
+        final PackageSetting packageSetting = createPackageSetting("com.foo");
+        final List<String> oldUsesLibraryFiles = new ArrayList<>();
+        oldUsesLibraryFiles.add("code/path/A.apk");
+        oldUsesLibraryFiles.add("code/path/B.apk");
+        oldUsesLibraryFiles.add("code/path/C.apk");
+        packageSetting.setPkgStateLibraryFiles(oldUsesLibraryFiles);
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        packageSetting.registerObserver(new Watcher() {
+            @Override
+            public void onChange(Watchable what) {
+                countDownLatch.countDown();
+            }
+        });
+
+        final List<String> newUsesLibraryFiles = new ArrayList<>();
+        oldUsesLibraryFiles.add("code/path/A.apk");
+        oldUsesLibraryFiles.add("code/path/B.apk");
+        packageSetting.setPkgStateLibraryFiles(newUsesLibraryFiles);
+
+        assertThat(countDownLatch.getCount(), is(0L));
+    }
+
+    @Test
+    public void testSetPkgStateLibraryFiles_changeOneOfFile() {
+        final PackageSetting packageSetting = createPackageSetting("com.foo");
+        final List<String> oldUsesLibraryFiles = new ArrayList<>();
+        oldUsesLibraryFiles.add("code/path/A.apk");
+        oldUsesLibraryFiles.add("code/path/B.apk");
+        packageSetting.setPkgStateLibraryFiles(oldUsesLibraryFiles);
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        packageSetting.registerObserver(new Watcher() {
+            @Override
+            public void onChange(Watchable what) {
+                countDownLatch.countDown();
+            }
+        });
+
+        final List<String> newUsesLibraryFiles = new ArrayList<>();
+        newUsesLibraryFiles.add("code/path/A.apk");
+        newUsesLibraryFiles.add("code/path/B-1.apk");
+        packageSetting.setPkgStateLibraryFiles(newUsesLibraryFiles);
+
+        assertThat(countDownLatch.getCount(), is(0L));
+    }
+
+    @Test
+    public void testSetPkgStateLibraryFiles_nothingChanged() {
+        final PackageSetting packageSetting = createPackageSetting("com.foo");
+        final List<String> oldUsesLibraryFiles = new ArrayList<>();
+        oldUsesLibraryFiles.add("code/path/A.apk");
+        oldUsesLibraryFiles.add("code/path/B.apk");
+        packageSetting.setPkgStateLibraryFiles(oldUsesLibraryFiles);
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        packageSetting.registerObserver(new Watcher() {
+            @Override
+            public void onChange(Watchable what) {
+                countDownLatch.countDown();
+            }
+        });
+
+        final List<String> newUsesLibraryFiles = new ArrayList<>();
+        newUsesLibraryFiles.add("code/path/A.apk");
+        newUsesLibraryFiles.add("code/path/B.apk");
+        packageSetting.setPkgStateLibraryFiles(newUsesLibraryFiles);
+
+        assertThat(countDownLatch.getCount(), is(1L));
     }
 
     private <T> void assertArrayEquals(T[] a, T[] b) {
