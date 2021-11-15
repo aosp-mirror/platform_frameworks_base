@@ -749,32 +749,6 @@ public class RingtoneManager {
     }
 
     /**
-     * Disables Settings.System.SYNC_PARENT_SOUNDS.
-     *
-     * @hide
-     */
-    public static void disableSyncFromParent(Context userContext) {
-        IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
-        IAudioService audioService = IAudioService.Stub.asInterface(b);
-        try {
-            audioService.disableRingtoneSync(userContext.getUserId());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Unable to disable ringtone sync.");
-        }
-    }
-
-    /**
-     * Enables Settings.System.SYNC_PARENT_SOUNDS for the content's user
-     *
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
-    public static void enableSyncFromParent(Context userContext) {
-        Settings.Secure.putIntForUser(userContext.getContentResolver(),
-                Settings.Secure.SYNC_PARENT_SOUNDS, 1 /* true */, userContext.getUserId());
-    }
-
-    /**
      * Gets the current default sound's {@link Uri}. This will give the actual
      * sound {@link Uri}, instead of using this, most clients can use
      * {@link System#DEFAULT_RINGTONE_URI}.
@@ -818,11 +792,6 @@ public class RingtoneManager {
         if (setting == null) return;
 
         final ContentResolver resolver = context.getContentResolver();
-        if (Settings.Secure.getIntForUser(resolver, Settings.Secure.SYNC_PARENT_SOUNDS, 0,
-                    context.getUserId()) == 1) {
-            // Parent sound override is enabled. Disable it using the audio service.
-            disableSyncFromParent(context);
-        }
         if(!isInternalRingtoneUri(ringtoneUri)) {
             ringtoneUri = ContentProvider.maybeAddUserId(ringtoneUri, context.getUserId());
         }
