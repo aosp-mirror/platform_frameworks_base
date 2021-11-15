@@ -1,5 +1,7 @@
 package com.android.systemui.qs;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -20,6 +22,7 @@ import android.widget.Scroller;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile;
@@ -533,6 +536,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     private final ViewPager.OnPageChangeListener mOnPageChangeListener =
             new ViewPager.SimpleOnPageChangeListener() {
+
+                private int mCurrentScrollState = SCROLL_STATE_IDLE;
+                // Flag to avoid redundant call InteractionJankMonitor::begin()
+                private boolean mIsScrollJankTraceBegin = false;
+
                 @Override
                 public void onPageSelected(int position) {
                     updateSelected();
@@ -546,6 +554,13 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 @Override
                 public void onPageScrolled(int position, float positionOffset,
                         int positionOffsetPixels) {
+
+                    if (!mIsScrollJankTraceBegin && mCurrentScrollState == SCROLL_STATE_DRAGGING) {
+                        InteractionJankMonitor.getInstance().begin(PagedTileLayout.this,
+                                CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE);
+                        mIsScrollJankTraceBegin = true;
+                    }
+
                     if (mPageIndicator == null) return;
                     mPageIndicatorPosition = position + positionOffset;
                     mPageIndicator.setLocation(mPageIndicatorPosition);
@@ -553,6 +568,16 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                         mPageListener.onPageChanged(positionOffsetPixels == 0 &&
                                 (isLayoutRtl() ? position == mPages.size() - 1 : position == 0));
                     }
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+                    if (state != mCurrentScrollState && state == SCROLL_STATE_IDLE) {
+                        InteractionJankMonitor.getInstance().end(
+                                CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE);
+                        mIsScrollJankTraceBegin = false;
+                    }
+                    mCurrentScrollState = state;
                 }
             };
 
