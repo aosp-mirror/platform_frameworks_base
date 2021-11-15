@@ -151,8 +151,7 @@ public final class AccessibilityInteractionController {
             if (interrogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId
                     && mHandler.hasAccessibilityCallback(message)) {
                 AccessibilityInteractionClient.getInstanceForThread(
-                        interrogatingTid, /* initializeCache= */true)
-                        .setSameThreadMessage(message);
+                        interrogatingTid).setSameThreadMessage(message);
             } else {
                 // For messages without callback of interrogating client, just handle the
                 // message immediately if this is UI thread.
