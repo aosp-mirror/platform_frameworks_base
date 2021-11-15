@@ -916,6 +916,17 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * Returns the system preferred display mode.
+     */
+    public Display.Mode getSystemPreferredDisplayMode(int displayId) {
+        try {
+            return mDm.getSystemPreferredDisplayMode(displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * When enabled the app requested display resolution and refresh rate is always selected
      * in DisplayModeDirector regardless of user settings and policies for low brightness, low
      * battery etc.

@@ -197,6 +197,9 @@ public final class SurfaceControl implements Parcelable {
     private static native int[] nativeGetCompositionDataspaces();
     private static native boolean nativeSetActiveColorMode(IBinder displayToken,
             int colorMode);
+    private static native boolean nativeGetBootDisplayModeSupport();
+    private static native void nativeSetBootDisplayMode(IBinder displayToken, int displayMode);
+    private static native void nativeClearBootDisplayMode(IBinder displayToken);
     private static native void nativeSetAutoLowLatencyMode(IBinder displayToken, boolean on);
     private static native void nativeSetGameContentType(IBinder displayToken, boolean on);
     private static native void nativeSetDisplayPowerMode(
@@ -1874,6 +1877,8 @@ public final class SurfaceControl implements Parcelable {
         public boolean autoLowLatencyModeSupported;
         public boolean gameContentTypeSupported;
 
+        public int preferredBootDisplayMode;
+
         @Override
         public String toString() {
             return "DynamicDisplayInfo{"
@@ -1883,7 +1888,8 @@ public final class SurfaceControl implements Parcelable {
                     + ", activeColorMode=" + activeColorMode
                     + ", hdrCapabilities=" + hdrCapabilities
                     + ", autoLowLatencyModeSupported=" + autoLowLatencyModeSupported
-                    + ", gameContentTypeSupported" + gameContentTypeSupported + "}";
+                    + ", gameContentTypeSupported" + gameContentTypeSupported
+                    + ", preferredBootDisplayMode" + preferredBootDisplayMode + "}";
         }
 
         @Override
@@ -1895,7 +1901,8 @@ public final class SurfaceControl implements Parcelable {
                 && activeDisplayModeId == that.activeDisplayModeId
                 && Arrays.equals(supportedColorModes, that.supportedColorModes)
                 && activeColorMode == that.activeColorMode
-                && Objects.equals(hdrCapabilities, that.hdrCapabilities);
+                && Objects.equals(hdrCapabilities, that.hdrCapabilities)
+                && preferredBootDisplayMode == that.preferredBootDisplayMode;
         }
 
         @Override
@@ -2257,6 +2264,36 @@ public final class SurfaceControl implements Parcelable {
             }
         }
         return colorSpaces;
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean getBootDisplayModeSupport() {
+        return nativeGetBootDisplayModeSupport();
+    }
+
+    /** There is no associated getter for this method.  When this is set, the display is expected
+     * to start up in this mode next time the device reboots.
+     * @hide
+     */
+    public static void setBootDisplayMode(IBinder displayToken, int displayModeId) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+
+        nativeSetBootDisplayMode(displayToken, displayModeId);
+    }
+
+    /**
+     * @hide
+     */
+    public static void clearBootDisplayMode(IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+
+        nativeClearBootDisplayMode(displayToken);
     }
 
     /**
