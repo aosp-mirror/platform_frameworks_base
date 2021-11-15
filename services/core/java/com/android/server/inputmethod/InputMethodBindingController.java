@@ -50,6 +50,7 @@ import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.view.IInputMethod;
 import com.android.server.inputmethod.InputMethodManagerService.ClientState;
+import com.android.server.wm.WindowManagerInternal;
 
 /**
  * A controller managing the state of the input method binding.
@@ -64,6 +65,7 @@ final class InputMethodBindingController {
     @NonNull private final InputMethodUtils.InputMethodSettings mSettings;
     @NonNull private final PackageManagerInternal mPackageManagerInternal;
     @NonNull private final IWindowManager mIWindowManager;
+    @NonNull private final WindowManagerInternal mWindowManagerInternal;
     @NonNull private final Resources mRes;
 
     private long mLastBindTime;
@@ -120,6 +122,7 @@ final class InputMethodBindingController {
         mSettings = mService.mSettings;
         mPackageManagerInternal = mService.mPackageManagerInternal;
         mIWindowManager = mService.mIWindowManager;
+        mWindowManagerInternal = mService.mWindowManagerInternal;
         mRes = mService.mRes;
 
         // If configured, use low priority flags to make the IME killable by the lowmemorykiller
@@ -191,10 +194,6 @@ final class InputMethodBindingController {
      */
     IBinder getCurToken() {
         return mCurToken;
-    }
-
-    void setCurToken(IBinder curToken) {
-        mCurToken = curToken;
     }
 
     /**
@@ -368,11 +367,25 @@ final class InputMethodBindingController {
         }
 
         if (mCurToken != null) {
-            mService.removeCurrentTokenLocked();
+            removeCurrentTokenLocked();
+            mService.resetSystemUiLocked();
         }
 
         mCurId = null;
         mService.clearCurMethodLocked();
+    }
+
+    @GuardedBy("mMethodMap")
+    private void removeCurrentTokenLocked() {
+        int curTokenDisplayId = mService.getCurTokenDisplayId();
+
+        if (DEBUG) {
+            Slog.v(TAG,
+                    "Removing window token: " + mCurToken + " for display: " + curTokenDisplayId);
+        }
+        mWindowManagerInternal.removeWindowToken(mCurToken, false /* removeWindows */,
+                false /* animateExit */, curTokenDisplayId);
+        mCurToken = null;
     }
 
     @GuardedBy("mMethodMap")

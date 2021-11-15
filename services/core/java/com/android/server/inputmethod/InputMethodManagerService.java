@@ -593,17 +593,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return mBindingController.getCurToken();
     }
 
-    private void setCurToken(IBinder curToken) {
-        mBindingController.setCurToken(curToken);
+    /**
+     * The displayId of current active input method.
+     */
+    int getCurTokenDisplayId() {
+        return mCurTokenDisplayId;
     }
 
     void setCurTokenDisplayId(int curTokenDisplayId) {
         mCurTokenDisplayId = curTokenDisplayId;
     }
 
-    /**
-     * The displayId of current active input method.
-     */
     int mCurTokenDisplayId = INVALID_DISPLAY;
 
     /**
@@ -2536,18 +2536,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("mMethodMap")
-    void removeCurrentTokenLocked() {
-        IBinder token = getCurToken();
-        if (DEBUG) {
-            Slog.v(TAG, "Removing window token: " + token + " for display: " + mCurTokenDisplayId);
-        }
-        mWindowManagerInternal.removeWindowToken(token, false /* removeWindows */,
-                false /* animateExit */, mCurTokenDisplayId);
-        // Set IME window status as invisible when unbind current method.
+    void resetSystemUiLocked() {
+        // Set IME window status as invisible when unbinding current method.
         mImeWindowVis = 0;
         mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
         updateSystemUiLocked(mImeWindowVis, mBackDisposition);
-        setCurToken(null);
         mCurTokenDisplayId = INVALID_DISPLAY;
         mCurHostInputToken = null;
     }
