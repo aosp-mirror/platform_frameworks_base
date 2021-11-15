@@ -46,7 +46,7 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
     @NonNull final PanelExpansionStateManager mPanelExpansionStateManager;
     @NonNull final DumpManager mDumpManger;
 
-    boolean mNotificationShadeExpanded;
+    boolean mNotificationShadeVisible;
 
     protected UdfpsAnimationViewController(
             T view,
@@ -85,7 +85,7 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("mNotificationShadeExpanded=" + mNotificationShadeExpanded);
+        pw.println("mNotificationShadeVisible=" + mNotificationShadeVisible);
         pw.println("shouldPauseAuth()=" + shouldPauseAuth());
         pw.println("isPauseAuth=" + mView.isPauseAuth());
     }
@@ -95,7 +95,7 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
      * authentication.
      */
     boolean shouldPauseAuth() {
-        return mNotificationShadeExpanded;
+        return mNotificationShadeVisible;
     }
 
     /**
@@ -182,8 +182,10 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
         @Override
         public void onPanelExpansionChanged(
                 float fraction, boolean expanded, boolean tracking) {
-            mNotificationShadeExpanded = expanded;
-            mView.onExpansionChanged(fraction, expanded);
+            // Notification shade can be expanded but not visible (fraction: 0.0), for example
+            // when a heads-up notification (HUN) is showing.
+            mNotificationShadeVisible = expanded && fraction > 0f;
+            mView.onExpansionChanged(fraction);
             updatePauseAuth();
         }
     };
