@@ -24,6 +24,7 @@ import android.media.AudioFocusInfo;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
+import android.media.BtProfileConnectionInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioModeDispatcher;
 import android.media.IAudioRoutesObserver;
@@ -207,8 +208,6 @@ interface IAudioService {
     void setWiredDeviceConnectionState(int type, int state, String address, String name,
             String caller);
 
-    void handleBluetoothA2dpDeviceConfigChange(in BluetoothDevice device);
-
     @UnsupportedAppUsage
     AudioRoutesInfo startWatchingRoutes(in IAudioRoutesObserver observer);
 
@@ -268,16 +267,8 @@ interface IAudioService {
 
     oneway void playerHasOpPlayAudio(in int piid, in boolean hasOpPlayAudio);
 
-    void setBluetoothHearingAidDeviceConnectionState(in BluetoothDevice device,
-            int state, boolean suppressNoisyIntent, int musicDevice);
-
-    void setBluetoothLeAudioOutDeviceConnectionState(in BluetoothDevice device, int state,
-            boolean suppressNoisyIntent);
-
-    void setBluetoothLeAudioInDeviceConnectionState(in BluetoothDevice device, int state);
-
-    void setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(in BluetoothDevice device,
-            int state, int profile, boolean suppressNoisyIntent, int a2dpVolume);
+    void handleBluetoothActiveDeviceChanged(in BluetoothDevice newDevice,
+            in BluetoothDevice previousDevice, in BtProfileConnectionInfo info);
 
     oneway void setFocusRequestResultFromExtPolicy(in AudioFocusInfo afi, int requestResult,
             in IAudioPolicyCallback pcb);
