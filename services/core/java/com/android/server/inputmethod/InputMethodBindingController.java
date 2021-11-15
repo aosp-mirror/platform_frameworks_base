@@ -49,7 +49,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.view.IInputMethod;
-import com.android.server.inputmethod.InputMethodManagerService.ClientState;
 import com.android.server.wm.WindowManagerInternal;
 
 /**
@@ -302,11 +301,7 @@ final class InputMethodBindingController {
                                     mMethodMap.get(mSelectedMethodId).getConfigChanges(),
                                     mCurMethod, mCurToken));
                     mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);
-                    ClientState curClient = mService.getCurClient();
-                    if (curClient != null) {
-                        mService.clearClientSessionLocked(curClient);
-                        mService.requestClientSessionLocked(curClient);
-                    }
+                    mService.reRequestCurrentClientSessionLocked();
                 }
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -344,12 +339,11 @@ final class InputMethodBindingController {
                 }
                 if (mCurMethod != null && mCurIntent != null
                         && name.equals(mCurIntent.getComponent())) {
-                    mService.clearCurMethodLocked();
                     // We consider this to be a new bind attempt, since the system
                     // should now try to restart the service for us.
                     mLastBindTime = SystemClock.uptimeMillis();
-                    mService.setShowRequested(mService.isInputShown());
-                    mService.setInputShown(false);
+                    mService.clearCurMethodLocked();
+                    mService.clearInputShowRequestLocked();
                     mService.unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME);
                 }
             }

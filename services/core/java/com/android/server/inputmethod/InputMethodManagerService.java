@@ -455,14 +455,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     boolean mImeHiddenByDisplayPolicy;
 
-    ClientState getCurClient() {
-        return mCurClient;
-    }
-
-    void setCurClient(ClientState curClient) {
-        mCurClient = curClient;
-    }
-
     /**
      * The client that is currently bound to an input method.
      */
@@ -536,14 +528,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return mBindingController.hasConnection();
     }
 
-    boolean isShowRequested() {
-        return mShowRequested;
-    }
-
-    void setShowRequested(boolean showRequested) {
-        mShowRequested = showRequested;
-    }
-
     /**
      * Set if the client has asked for the input method to be shown.
      */
@@ -558,14 +542,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * Set if we were forced to be shown.
      */
     boolean mShowForced;
-
-    boolean isInputShown() {
-        return mInputShown;
-    }
-
-    void setInputShown(boolean inputShown) {
-        mInputShown = inputShown;
-    }
 
     /**
      * Set if we last told the input method to show itself.
@@ -2279,6 +2255,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("mMethodMap")
+    void clearInputShowRequestLocked() {
+        mShowRequested = mInputShown;
+        mInputShown = false;
+    }
+
+    @GuardedBy("mMethodMap")
     private int getImeShowFlagsLocked() {
         int flags = 0;
         if (mShowForced) {
@@ -2559,6 +2541,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         setSelectedMethodId(null);
         mBindingController.unbindCurrentMethodLocked();
         unbindCurrentClientLocked(unbindClientReason);
+    }
+
+    @GuardedBy("mMethodMap")
+    void reRequestCurrentClientSessionLocked() {
+        if (mCurClient != null) {
+            clearClientSessionLocked(mCurClient);
+            requestClientSessionLocked(mCurClient);
+        }
     }
 
     @GuardedBy("mMethodMap")
