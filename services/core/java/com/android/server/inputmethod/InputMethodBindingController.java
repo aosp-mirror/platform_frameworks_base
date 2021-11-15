@@ -428,20 +428,19 @@ final class InputMethodBindingController {
 
     @GuardedBy("mMethodMap")
     private void addFreshWindowTokenLocked(int displayIdToShowIme) {
-        Binder token = new Binder();
-        mCurToken = token;
+        mCurToken = new Binder();
 
         mService.setCurTokenDisplayId(displayIdToShowIme);
 
         try {
             if (DEBUG) {
-                Slog.v(TAG, "Adding window token: " + token + " for display: "
+                Slog.v(TAG, "Adding window token: " + mCurToken + " for display: "
                         + displayIdToShowIme);
             }
-            mIWindowManager.addWindowToken(token, WindowManager.LayoutParams.TYPE_INPUT_METHOD,
+            mIWindowManager.addWindowToken(mCurToken, WindowManager.LayoutParams.TYPE_INPUT_METHOD,
                     displayIdToShowIme, null /* options */);
         } catch (RemoteException e) {
-            Slog.e(TAG, "Could not add window token " + token + " for display "
+            Slog.e(TAG, "Could not add window token " + mCurToken + " for display "
                     + displayIdToShowIme, e);
         }
     }
