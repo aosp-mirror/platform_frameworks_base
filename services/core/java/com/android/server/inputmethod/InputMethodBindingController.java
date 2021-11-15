@@ -399,7 +399,10 @@ final class InputMethodBindingController {
         mCurIntent = createImeBindingIntent(info.getComponent());
 
         if (bindCurrentInputMethodServiceMainConnectionLocked()) {
-            addFreshWindowTokenLocked(displayIdToShowIme, info.getId());
+            mCurId = info.getId();
+            mLastBindTime = SystemClock.uptimeMillis();
+
+            addFreshWindowTokenLocked(displayIdToShowIme);
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
                     null, null, mCurId, mCurSeq, false);
@@ -424,11 +427,9 @@ final class InputMethodBindingController {
     }
 
     @GuardedBy("mMethodMap")
-    private void addFreshWindowTokenLocked(int displayIdToShowIme, String methodId) {
+    private void addFreshWindowTokenLocked(int displayIdToShowIme) {
         Binder token = new Binder();
         mCurToken = token;
-        mLastBindTime = SystemClock.uptimeMillis();
-        mCurId = methodId;
 
         mService.setCurTokenDisplayId(displayIdToShowIme);
 
