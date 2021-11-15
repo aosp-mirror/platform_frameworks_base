@@ -21,6 +21,7 @@ import static android.content.pm.parsing.ParsingPackageUtils.parsePublicKey;
 
 import static com.android.server.pm.PackageManagerService.SCAN_INITIAL;
 
+import android.annotation.NonNull;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Base64;
@@ -116,9 +117,17 @@ public class KeySetManagerService {
     }
 
     public KeySetManagerService(WatchedArrayMap<String, PackageSetting> packages) {
-        mKeySets = new LongSparseArray<KeySetHandle>();
-        mPublicKeys = new LongSparseArray<PublicKeyHandle>();
-        mKeySetMapping = new LongSparseArray<ArraySet<Long>>();
+        mKeySets = new LongSparseArray<>();
+        mPublicKeys = new LongSparseArray<>();
+        mKeySetMapping = new LongSparseArray<>();
+        mPackages = packages;
+    }
+
+    public KeySetManagerService(@NonNull KeySetManagerService other,
+            @NonNull WatchedArrayMap<String, PackageSetting> packages) {
+        mKeySets = other.mKeySets.clone();
+        mPublicKeys = other.mPublicKeys.clone();
+        mKeySetMapping = other.mKeySetMapping.clone();
         mPackages = packages;
     }
 

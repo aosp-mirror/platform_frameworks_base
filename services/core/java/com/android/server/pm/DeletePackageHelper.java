@@ -165,7 +165,7 @@ final class DeletePackageHelper {
             allUsers = mUserManagerInternal.getUserIds();
 
             if (pkg != null && pkg.getStaticSharedLibName() != null) {
-                SharedLibraryInfo libraryInfo = mPm.getSharedLibraryInfoLPr(
+                SharedLibraryInfo libraryInfo = mPm.getSharedLibraryInfo(
                         pkg.getStaticSharedLibName(), pkg.getStaticSharedLibVersion());
                 if (libraryInfo != null) {
                     for (int currUserId : allUsers) {
@@ -173,7 +173,7 @@ final class DeletePackageHelper {
                             continue;
                         }
                         List<VersionedPackage> libClientPackages =
-                                mPm.getPackagesUsingSharedLibraryLPr(libraryInfo,
+                                mPm.getPackagesUsingSharedLibrary(libraryInfo,
                                         MATCH_KNOWN_PACKAGES, Process.SYSTEM_UID, currUserId);
                         if (!ArrayUtils.isEmpty(libClientPackages)) {
                             Slog.w(TAG, "Not removing package " + pkg.getManifestPackageName()

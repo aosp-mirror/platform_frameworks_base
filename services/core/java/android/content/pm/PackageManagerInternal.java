@@ -663,6 +663,9 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
 
     public abstract @Nullable PackageState getPackageState(@NonNull String packageName);
 
+    @NonNull
+    public abstract ArrayMap<String, ? extends PackageStateInternal> getPackageStates();
+
     /**
      * Returns a package for the given UID. If the UID is part of a shared user ID, one
      * of the packages will be chosen to be returned.
@@ -909,7 +912,7 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      *               functionality of the other forEach methods, for eventual migration.
      * @param action action to be performed
      */
-    public abstract void forEachPackageState(boolean locked, Consumer<PackageState> action);
+    public abstract void forEachPackageState(boolean locked, Consumer<PackageStateInternal> action);
 
     /**
      * Perform the given action for each installed package for a user.

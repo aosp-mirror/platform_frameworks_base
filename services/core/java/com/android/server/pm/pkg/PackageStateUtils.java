@@ -16,7 +16,14 @@
 
 package com.android.server.pm.pkg;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.parsing.component.ParsedMainComponent;
+import android.content.pm.pkg.PackageUserStateUtils;
+
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 public class PackageStateUtils {
 
@@ -44,5 +51,28 @@ public class PackageStateUtils {
             }
         }
         return res;
+    }
+
+    public static boolean isEnabledAndMatches(@Nullable PackageStateInternal packageState,
+            ComponentInfo componentInfo, int flags, int userId) {
+        if (packageState == null) return false;
+
+        final PackageUserState userState = packageState.getUserStateOrDefault(userId);
+        return PackageUserStateUtils.isMatch(userState, componentInfo, flags);
+    }
+
+    public static boolean isEnabledAndMatches(@Nullable PackageStateInternal packageState,
+            @NonNull ParsedMainComponent component, int flags, int userId) {
+        if (packageState == null) {
+            return false;
+        }
+
+        final AndroidPackage pkg = packageState.getPkg();
+        if (pkg == null) {
+            return false;
+        }
+        final PackageUserState userState = packageState.getUserStateOrDefault(userId);
+        return PackageUserStateUtils.isMatch(userState, packageState.isSystem(),
+                pkg.isEnabled(), component, flags);
     }
 }

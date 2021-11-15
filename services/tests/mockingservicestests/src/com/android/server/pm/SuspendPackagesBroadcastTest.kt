@@ -19,13 +19,13 @@ package com.android.server.pm
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.ArrayMap
 import android.util.SparseArray
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
 import com.android.server.testutils.nullable
 import com.android.server.testutils.whenever
-import com.android.server.utils.WatchedArrayMap
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -35,6 +35,7 @@ import org.junit.runners.JUnit4
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Captor
+import org.mockito.Mockito.argThat
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -155,8 +156,10 @@ class SuspendPackagesBroadcastTest {
     }
 
     private fun mockAllowList(pkgSetting: PackageStateInternal, list: SparseArray<IntArray>?) {
-        whenever(rule.mocks().injector.appsFilter.getVisibilityAllowList(eq(pkgSetting),
-            any(IntArray::class.java), any() as WatchedArrayMap<String, out PackageStateInternal>))
+        whenever(rule.mocks().appsFilter.getVisibilityAllowList(
+            argThat { it?.packageName == pkgSetting.packageName }, any(IntArray::class.java),
+            any() as ArrayMap<String, out PackageStateInternal>
+        ))
             .thenReturn(list)
     }
 
@@ -173,7 +176,8 @@ class SuspendPackagesBroadcastTest {
                 false /*isEngBuild*/,
                 false /*isUserDebugBuild*/,
                 Build.VERSION_CODES.CUR_DEVELOPMENT,
-                Build.VERSION.INCREMENTAL)
+                Build.VERSION.INCREMENTAL,
+                false /*snapshotEnabled*/)
         rule.system().validateFinalState()
         return pms
     }

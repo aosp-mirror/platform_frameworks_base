@@ -62,7 +62,8 @@ class PackageManagerServiceBootTest {
                 false /*isEngBuild*/,
                 false /*isUserDebugBuild*/,
                 Build.VERSION_CODES.CUR_DEVELOPMENT,
-                Build.VERSION.INCREMENTAL)
+                Build.VERSION.INCREMENTAL,
+                false /*snapshotEnabled*/)
     }
 
     @Test

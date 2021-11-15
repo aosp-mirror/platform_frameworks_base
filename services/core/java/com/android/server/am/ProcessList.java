@@ -136,6 +136,7 @@ import com.android.server.am.ActivityManagerService.ProcessChangeItem;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowManagerService;
 import com.android.server.wm.WindowProcessController;
@@ -2296,13 +2297,13 @@ public final class ProcessList {
         Map<String, Pair<String, Long>> result = new ArrayMap<>(packages.length);
         int userId = UserHandle.getUserId(uid);
         for (String packageName : packages) {
-            AndroidPackage androidPackage = pmInt.getPackage(packageName);
-            if (androidPackage == null) {
+            final PackageStateInternal packageState = pmInt.getPackageStateInternal(packageName);
+            if (packageState == null) {
                 Slog.w(TAG, "Unknown package:" + packageName);
                 continue;
             }
-            String volumeUuid = androidPackage.getVolumeUuid();
-            long inode = pmInt.getCeDataInode(packageName, userId);
+            String volumeUuid = packageState.getVolumeUuid();
+            long inode = packageState.getUserStateOrDefault(userId).getCeDataInode();
             if (inode == 0) {
                 Slog.w(TAG, packageName + " inode == 0 (b/152760674)");
                 return null;
