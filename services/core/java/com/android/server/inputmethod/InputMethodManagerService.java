@@ -518,10 +518,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return mBindingController.getCurId();
     }
 
-    private void setCurId(@Nullable String curId) {
-        mBindingController.setCurId(curId);
-    }
-
     /**
      * The current subtype of the current input method.
      */
@@ -601,6 +597,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mBindingController.setCurToken(curToken);
     }
 
+    void setCurTokenDisplayId(int curTokenDisplayId) {
+        mCurTokenDisplayId = curTokenDisplayId;
+    }
+
     /**
      * The displayId of current active input method.
      */
@@ -651,10 +651,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     private long getLastBindTime() {
         return mBindingController.getLastBindTime();
-    }
-
-    private void setLastBindTime(long lastBindTime) {
-        mBindingController.setLastBindTime(lastBindTime);
     }
 
     /**
@@ -2470,26 +2466,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         return null;
-    }
-
-    @GuardedBy("mMethodMap")
-    void addFreshWindowTokenLocked(int displayIdToShowIme, String methodId) {
-        Binder token = new Binder();
-        setCurToken(token);
-        setLastBindTime(SystemClock.uptimeMillis());
-        setCurId(methodId);
-        mCurTokenDisplayId = displayIdToShowIme;
-        try {
-            if (DEBUG) {
-                Slog.v(TAG, "Adding window token: " + token + " for display: "
-                        + displayIdToShowIme);
-            }
-            mIWindowManager.addWindowToken(token, LayoutParams.TYPE_INPUT_METHOD,
-                    displayIdToShowIme, null /* options */);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Could not add window token " + token + " for display "
-                    + displayIdToShowIme, e);
-        }
     }
 
     @FunctionalInterface

@@ -30,14 +30,18 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
 import android.inputmethodservice.InputMethodService;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.view.IWindowManager;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 
@@ -59,6 +63,7 @@ final class InputMethodBindingController {
     @NonNull private final ArrayMap<String, InputMethodInfo> mMethodMap;
     @NonNull private final InputMethodUtils.InputMethodSettings mSettings;
     @NonNull private final PackageManagerInternal mPackageManagerInternal;
+    @NonNull private final IWindowManager mIWindowManager;
     @NonNull private final Resources mRes;
 
     private long mLastBindTime;
@@ -114,6 +119,7 @@ final class InputMethodBindingController {
         mMethodMap = mService.mMethodMap;
         mSettings = mService.mSettings;
         mPackageManagerInternal = mService.mPackageManagerInternal;
+        mIWindowManager = mService.mIWindowManager;
         mRes = mService.mRes;
 
         // If configured, use low priority flags to make the IME killable by the lowmemorykiller
@@ -136,10 +142,6 @@ final class InputMethodBindingController {
         return mLastBindTime;
     }
 
-    void setLastBindTime(long lastBindTime) {
-        mLastBindTime = lastBindTime;
-    }
-
     /**
      * Set to true if our ServiceConnection is currently actively bound to
      * a service (whether or not we have gotten its IBinder back yet).
@@ -159,10 +161,6 @@ final class InputMethodBindingController {
     @Nullable
     String getCurId() {
         return mCurId;
-    }
-
-    void setCurId(@Nullable String curId) {
-        mCurId = curId;
     }
 
     /**
@@ -388,7 +386,7 @@ final class InputMethodBindingController {
         mCurIntent = createImeBindingIntent(info.getComponent());
 
         if (bindCurrentInputMethodServiceMainConnectionLocked()) {
-            mService.addFreshWindowTokenLocked(displayIdToShowIme, info.getId());
+            addFreshWindowTokenLocked(displayIdToShowIme, info.getId());
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
                     null, null, mCurId, mCurSeq, false);
@@ -410,6 +408,28 @@ final class InputMethodBindingController {
                 mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS),
                 PendingIntent.FLAG_IMMUTABLE));
         return intent;
+    }
+
+    @GuardedBy("mMethodMap")
+    private void addFreshWindowTokenLocked(int displayIdToShowIme, String methodId) {
+        Binder token = new Binder();
+        mCurToken = token;
+        mLastBindTime = SystemClock.uptimeMillis();
+        mCurId = methodId;
+
+        mService.setCurTokenDisplayId(displayIdToShowIme);
+
+        try {
+            if (DEBUG) {
+                Slog.v(TAG, "Adding window token: " + token + " for display: "
+                        + displayIdToShowIme);
+            }
+            mIWindowManager.addWindowToken(token, WindowManager.LayoutParams.TYPE_INPUT_METHOD,
+                    displayIdToShowIme, null /* options */);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Could not add window token " + token + " for display "
+                    + displayIdToShowIme, e);
+        }
     }
 
     @GuardedBy("mMethodMap")
