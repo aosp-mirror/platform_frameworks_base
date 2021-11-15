@@ -239,9 +239,10 @@ class LocationTimeZoneProviderController implements Dumpable {
                 if (newConfig.getUserId() != oldConfig.getUserId()) {
                     // If the user changed, stop the providers if needed. They may be re-started
                     // for the new user immediately afterwards if their settings allow.
-                    debugLog("User changed. old=" + oldConfig.getUserId()
-                            + ", new=" + newConfig.getUserId() + ": Stopping providers");
-                    stopProviders();
+                    String reason = "User changed. old=" + oldConfig.getUserId()
+                            + ", new=" + newConfig.getUserId();
+                    debugLog("Stopping providers: " + reason);
+                    stopProviders(reason);
 
                     alterProvidersStartedStateIfRequired(null /* oldConfiguration */, newConfig);
                 } else {
@@ -267,7 +268,7 @@ class LocationTimeZoneProviderController implements Dumpable {
         mThreadingDomain.assertCurrentThread();
 
         synchronized (mSharedLock) {
-            stopProviders();
+            stopProviders("destroy()");
 
             // Enter destroyed state.
             mPrimaryProvider.destroy();
@@ -292,7 +293,7 @@ class LocationTimeZoneProviderController implements Dumpable {
     }
 
     @GuardedBy("mSharedLock")
-    private void stopProviders() {
+    private void stopProviders(@NonNull String reason) {
         stopProviderIfStarted(mPrimaryProvider);
         stopProviderIfStarted(mSecondaryProvider);
 
@@ -305,7 +306,8 @@ class LocationTimeZoneProviderController implements Dumpable {
         // re-started).
         if (Objects.equals(mState.get(), STATE_CERTAIN)) {
             GeolocationTimeZoneSuggestion suggestion = createUncertainSuggestion(
-                    mEnvironment.elapsedRealtimeMillis(), "Providers are stopping");
+                    mEnvironment.elapsedRealtimeMillis(),
+                    "Withdraw previous suggestion, providers are stopping: " + reason);
             makeSuggestion(suggestion, STATE_UNCERTAIN);
         }
         setState(STATE_STOPPED);
@@ -404,7 +406,7 @@ class LocationTimeZoneProviderController implements Dumpable {
                 }
             }
         } else {
-            stopProviders();
+            stopProviders("Geo detection behavior disabled");
         }
     }
 

@@ -341,14 +341,15 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         // Only do any work if fallback is currently not enabled.
         if (!mTelephonyTimeZoneFallbackEnabled.getValue()) {
             ConfigurationInternal currentUserConfig = mCurrentConfigurationInternal;
-            if (DBG) {
-                Slog.d(LOG_TAG, "enableTelephonyTimeZoneFallbackMode"
-                        + ": currentUserConfig=" + currentUserConfig);
-            }
-
             final boolean fallbackEnabled = true;
             mTelephonyTimeZoneFallbackEnabled = new TimestampedValue<>(
                     mEnvironment.elapsedRealtimeMillis(), fallbackEnabled);
+
+            String logMsg = "enableTelephonyTimeZoneFallbackMode"
+                    + ": currentUserConfig=" + currentUserConfig
+                    + ", mTelephonyTimeZoneFallbackEnabled="
+                    + mTelephonyTimeZoneFallbackEnabled;
+            logTimeZoneDetectorChange(logMsg);
 
             // mTelephonyTimeZoneFallbackEnabled and mLatestGeoLocationSuggestion interact.
             // If there is currently a certain geolocation suggestion, then the telephony fallback
@@ -533,8 +534,20 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
                 final boolean fallbackEnabled = false;
                 mTelephonyTimeZoneFallbackEnabled = new TimestampedValue<>(
                         mEnvironment.elapsedRealtimeMillis(), fallbackEnabled);
+
+                String logMsg = "disableTelephonyFallbackIfNeeded"
+                        + ": mTelephonyTimeZoneFallbackEnabled="
+                        + mTelephonyTimeZoneFallbackEnabled;
+                logTimeZoneDetectorChange(logMsg);
             }
         }
+    }
+
+    private void logTimeZoneDetectorChange(@NonNull String logMsg) {
+        if (DBG) {
+            Slog.d(LOG_TAG, logMsg);
+        }
+        mTimeZoneChangesLog.log(logMsg);
     }
 
     /**
@@ -603,14 +616,11 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         }
 
         mEnvironment.setDeviceTimeZone(newZoneId);
-        String msg = "Set device time zone."
+        String logMsg = "Set device time zone."
                 + ", currentZoneId=" + currentZoneId
                 + ", newZoneId=" + newZoneId
                 + ", cause=" + cause;
-        if (DBG) {
-            Slog.d(LOG_TAG, msg);
-        }
-        mTimeZoneChangesLog.log(msg);
+        logTimeZoneDetectorChange(logMsg);
     }
 
     @GuardedBy("this")
@@ -662,9 +672,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         String logMsg = "handleConfigurationInternalChanged:"
                 + " oldConfiguration=" + mCurrentConfigurationInternal
                 + ", newConfiguration=" + currentUserConfig;
-        if (DBG) {
-            Slog.d(LOG_TAG, logMsg);
-        }
+        logTimeZoneDetectorChange(logMsg);
         mCurrentConfigurationInternal = currentUserConfig;
 
         // The configuration change may have changed available suggestions or the way suggestions
