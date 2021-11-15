@@ -560,7 +560,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 // Ignore the orientation of keyguard if it is going away or is not showing while
                 // the device is fully awake. In other words, use the orientation of keyguard if
                 // its window is visible while the device is going to sleep or is sleeping.
-                if (!mWmService.mAtmService.isKeyguardLocked()
+                if (!mDisplayContent.isKeyguardLocked()
                         && mDisplayContent.getDisplayPolicy().isAwake()
                         // Device is not going to sleep.
                         && policy.okToAnimate(true /* ignoreScreenOn */)) {

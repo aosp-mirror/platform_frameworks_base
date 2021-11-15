@@ -827,12 +827,12 @@ public class DisplayContentTests extends WindowTestsBase {
                 SCREEN_ORIENTATION_LANDSCAPE, dc.getOrientation());
 
         keyguard.mAttrs.screenOrientation = SCREEN_ORIENTATION_PORTRAIT;
-        mAtm.mKeyguardController.setKeyguardShown(true /* keyguardShowing */,
+        mAtm.mKeyguardController.setKeyguardShown(window.getDisplayId(), true /* keyguardShowing */,
                 false /* aodShowing */);
         assertEquals("Visible keyguard must influence device orientation",
                 SCREEN_ORIENTATION_PORTRAIT, dc.getOrientation());
 
-        mAtm.mKeyguardController.keyguardGoingAway(0 /* flags */);
+        mAtm.mKeyguardController.keyguardGoingAway(window.getDisplayId(), 0 /* flags */);
         assertEquals("Keyguard that is going away must not influence device orientation",
                 SCREEN_ORIENTATION_LANDSCAPE, dc.getOrientation());
     }
@@ -2137,7 +2137,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTopRunningActivity(activity, display);
 
         // Check to make sure activity not reported when it cannot show on lock and lock is on.
-        doReturn(true).when(keyguard).isKeyguardLocked();
+        doReturn(true).when(keyguard).isKeyguardLocked(anyInt());
         assertEquals(activity, display.topRunningActivity());
         assertNull(display.topRunningActivity(true /* considerKeyguardState */));
 
@@ -2175,11 +2175,11 @@ public class DisplayContentTests extends WindowTestsBase {
         final WindowState appWin = createWindow(null, TYPE_APPLICATION, mDisplayContent, "appWin");
         final ActivityRecord activity = appWin.mActivityRecord;
 
-        mAtm.mKeyguardController.setKeyguardShown(true /* keyguardShowing */,
+        mAtm.mKeyguardController.setKeyguardShown(appWin.getDisplayId(), true /* keyguardShowing */,
                 true /* aodShowing */);
         assertFalse(activity.isVisibleRequested());
 
-        mAtm.mKeyguardController.keyguardGoingAway(0 /* flags */);
+        mAtm.mKeyguardController.keyguardGoingAway(appWin.getDisplayId(), 0 /* flags */);
         assertTrue(activity.isVisibleRequested());
     }
 

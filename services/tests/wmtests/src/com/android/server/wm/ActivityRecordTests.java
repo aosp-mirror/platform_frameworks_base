@@ -1389,7 +1389,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Task task = activity.getTask();
         // Make keyguard locked and set the top activity show-when-locked.
         KeyguardController keyguardController = activity.mTaskSupervisor.getKeyguardController();
-        doReturn(true).when(keyguardController).isKeyguardLocked();
+        int displayId = activity.getDisplayId();
+        doReturn(true).when(keyguardController).isKeyguardLocked(eq(displayId));
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task).build();
         topActivity.mVisibleRequested = true;
         topActivity.nowVisible = true;

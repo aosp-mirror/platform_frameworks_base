@@ -1728,7 +1728,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // the locked state, the keyguard isn't locked, or we can show when locked.
         if (topRunning != null && considerKeyguardState
                 && mRootWindowContainer.mTaskSupervisor.getKeyguardController()
-                .isKeyguardLocked()
+                .isKeyguardLocked(topRunning.getDisplayId())
                 && !topRunning.canShowWhenLocked()) {
             return null;
         }
