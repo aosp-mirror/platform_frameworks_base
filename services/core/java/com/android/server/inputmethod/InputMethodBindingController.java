@@ -22,6 +22,7 @@ import static com.android.server.inputmethod.InputMethodManagerService.MSG_INITI
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -34,11 +35,14 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.view.IInputMethod;
 import com.android.server.inputmethod.InputMethodManagerService.ClientState;
@@ -201,10 +205,6 @@ final class InputMethodBindingController {
     @Nullable
     Intent getCurIntent() {
         return mCurIntent;
-    }
-
-    void setCurIntent(@Nullable Intent curIntent) {
-        mCurIntent = curIntent;
     }
 
     /**
@@ -378,6 +378,42 @@ final class InputMethodBindingController {
     }
 
     @GuardedBy("mMethodMap")
+    @NonNull
+    InputBindResult bindCurrentMethodLocked(int displayIdToShowIme) {
+        InputMethodInfo info = mMethodMap.get(mSelectedMethodId);
+        if (info == null) {
+            throw new IllegalArgumentException("Unknown id: " + mSelectedMethodId);
+        }
+
+        Intent intent = createImeBindingIntent(info.getComponent());
+        mCurIntent = intent;
+
+        if (bindCurrentInputMethodServiceMainConnectionLocked()) {
+            mService.addFreshWindowTokenLocked(displayIdToShowIme, info.getId());
+            return new InputBindResult(
+                    InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
+                    null, null, mCurId, mCurSeq, false);
+        }
+
+        mCurIntent = null;
+        Slog.w(InputMethodManagerService.TAG,
+                "Failure connecting to input method service: " + intent);
+        return InputBindResult.IME_NOT_CONNECTED;
+    }
+
+    @NonNull
+    private Intent createImeBindingIntent(ComponentName component) {
+        Intent intent = new Intent(InputMethod.SERVICE_INTERFACE);
+        intent.setComponent(component);
+        intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
+                com.android.internal.R.string.input_method_binding_label);
+        intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
+                mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS),
+                PendingIntent.FLAG_IMMUTABLE));
+        return intent;
+    }
+
+    @GuardedBy("mMethodMap")
     void unbindMainConnectionLocked() {
         mContext.unbindService(mMainConnection);
         mHasConnection = false;
@@ -412,7 +448,5 @@ final class InputMethodBindingController {
                 mImeConnectionBindFlags);
         return mHasConnection;
     }
-
-
 
 }

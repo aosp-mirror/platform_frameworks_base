@@ -589,10 +589,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return mBindingController.getCurIntent();
     }
 
-    private void setCurIntent(@Nullable Intent curIntent) {
-        mBindingController.setCurIntent(curIntent);
-    }
-
     /**
      * The token we have made for the currently active input method, to
      * identify it in the future.
@@ -2422,32 +2418,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         mBindingController.unbindCurrentMethodLocked();
 
-        return bindCurrentMethodLocked(displayIdToShowIme);
-    }
-
-
-    @GuardedBy("mMethodMap")
-    @NonNull
-    private InputBindResult bindCurrentMethodLocked(int displayIdToShowIme) {
-        String selectedMethodId = getSelectedMethodId();
-        InputMethodInfo info = mMethodMap.get(selectedMethodId);
-        if (info == null) {
-            throw new IllegalArgumentException("Unknown id: " + selectedMethodId);
-        }
-
-        Intent intent = createImeBindingIntent(info.getComponent());
-        setCurIntent(intent);
-
-        if (mBindingController.bindCurrentInputMethodServiceMainConnectionLocked()) {
-            addFreshWindowTokenLocked(displayIdToShowIme, info.getId());
-            return new InputBindResult(
-                    InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
-                    null, null, getCurId(), getSequenceNumber(), false);
-        }
-
-        setCurIntent(null);
-        Slog.w(TAG, "Failure connecting to input method service: " + intent);
-        return InputBindResult.IME_NOT_CONNECTED;
+        return mBindingController.bindCurrentMethodLocked(displayIdToShowIme);
     }
 
     private boolean isSelectedMethodBound(int displayIdToShowIme) {
@@ -2501,20 +2472,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return null;
     }
 
-    @NonNull
-    private Intent createImeBindingIntent(ComponentName component) {
-        Intent intent = new Intent(InputMethod.SERVICE_INTERFACE);
-        intent.setComponent(component);
-        intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
-                com.android.internal.R.string.input_method_binding_label);
-        intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
-                mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS),
-                PendingIntent.FLAG_IMMUTABLE));
-        return intent;
-    }
-
     @GuardedBy("mMethodMap")
-    private void addFreshWindowTokenLocked(int displayIdToShowIme, String methodId) {
+    void addFreshWindowTokenLocked(int displayIdToShowIme, String methodId) {
         Binder token = new Binder();
         setCurToken(token);
         setLastBindTime(SystemClock.uptimeMillis());
