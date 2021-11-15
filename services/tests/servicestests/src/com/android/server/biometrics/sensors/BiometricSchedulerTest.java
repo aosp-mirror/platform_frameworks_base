@@ -348,6 +348,17 @@ public class BiometricSchedulerTest {
         verify((Interruptable) interruptableMonitor, never()).cancel();
     }
 
+    @Test
+    public void testClientDestroyed_afterFinish() {
+        final HalClientMonitor.LazyDaemon<Object> nonNullDaemon = () -> mock(Object.class);
+        final TestClientMonitor client =
+                new TestClientMonitor(mContext, mToken, nonNullDaemon);
+        mScheduler.scheduleClientMonitor(client);
+        client.mCallback.onClientFinished(client, true /* success */);
+        waitForIdle();
+        assertTrue(client.wasDestroyed());
+    }
+
     private BiometricSchedulerProto getDump(boolean clearSchedulerBuffer) throws Exception {
         return BiometricSchedulerProto.parseFrom(mScheduler.dumpProtoState(clearSchedulerBuffer));
     }
@@ -360,7 +371,8 @@ public class BiometricSchedulerTest {
                     false /* restricted */, TAG, 1 /* cookie */, false /* requireConfirmation */,
                     TEST_SENSOR_ID, true /* isStrongBiometric */, 0 /* statsModality */,
                     0 /* statsClient */, null /* taskStackListener */, mock(LockoutTracker.class),
-                    false /* isKeyguard */, true /* shouldVibrate */);
+                    false /* isKeyguard */, true /* shouldVibrate */,
+                    false /* isKeyguardBypassEnabled */);
         }
 
         @Override
@@ -371,6 +383,16 @@ public class BiometricSchedulerTest {
         @Override
         protected void startHalOperation() {
 
+        }
+
+        @Override
+        protected void handleLifecycleAfterAuth(boolean authenticated) {
+
+        }
+
+        @Override
+        public boolean wasUserDetected() {
+            return false;
         }
     }
 
@@ -383,7 +405,8 @@ public class BiometricSchedulerTest {
                     false /* restricted */, TAG, 1 /* cookie */, false /* requireConfirmation */,
                     TEST_SENSOR_ID, true /* isStrongBiometric */, 0 /* statsModality */,
                     0 /* statsClient */, null /* taskStackListener */, mock(LockoutTracker.class),
-                    false /* isKeyguard */, true /* shouldVibrate */);
+                    false /* isKeyguard */, true /* shouldVibrate */,
+                    false /* isKeyguardBypassEnabled */);
         }
 
         @Override
@@ -394,6 +417,16 @@ public class BiometricSchedulerTest {
         @Override
         protected void startHalOperation() {
 
+        }
+
+        @Override
+        protected void handleLifecycleAfterAuth(boolean authenticated) {
+
+        }
+
+        @Override
+        public boolean wasUserDetected() {
+            return false;
         }
     }
 
@@ -415,6 +448,7 @@ public class BiometricSchedulerTest {
     private static class TestClientMonitor extends HalClientMonitor<Object> {
         private boolean mUnableToStart;
         private boolean mStarted;
+        private boolean mDestroyed;
 
         public TestClientMonitor(@NonNull Context context, @NonNull IBinder token,
                 @NonNull LazyDaemon<Object> lazyDaemon) {
@@ -453,6 +487,11 @@ public class BiometricSchedulerTest {
 
         }
 
+        @Override
+        public void destroy() {
+            mDestroyed = true;
+        }
+
         public boolean wasUnableToStart() {
             return mUnableToStart;
         }
@@ -460,6 +499,11 @@ public class BiometricSchedulerTest {
         public boolean hasStarted() {
             return mStarted;
         }
+
+        public boolean wasDestroyed() {
+            return mDestroyed;
+        }
+
     }
 
     private static void waitForIdle() {

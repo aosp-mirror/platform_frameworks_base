@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Lice nije prepoznato. Koristite otisak prsta."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Nastavite pomoću otiska prsta"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Prepoznavanje otiska prsta nije uspelo. Koristite zaključavanje ekrana umesto toga."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Tražimo vas…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ikona lica"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Dugme Zum kompatibilnosti."</string>
@@ -454,6 +456,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Dodirnite ponovo da biste otvorili"</string>
     <string name="tap_again" msgid="1315420114387908655">"Dodirnite ponovo"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Prevucite nagore da biste otvorili"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Pritisnite da biste otvorili"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Prevucite nagore da biste probali ponovo"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Otključajte da biste koristili NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Ovaj uređaj pripada organizaciji"</string>
@@ -1010,7 +1013,7 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikacije koriste <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" i "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Koristi <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Koristi: <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Nedavno koristio/la <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(posao)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefonski poziv"</string>
@@ -1156,7 +1159,7 @@
     <string name="person_available" msgid="2318599327472755472">"Dostupno"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problem sa očitavanjem merača baterije"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dodirnite za više informacija"</string>
-    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Alarm nije podešen"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nije podešen"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Senzor za otisak prsta"</string>
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Senzor za otisak prsta je onemogućen"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"potvrdite identitet"</string>

@@ -3285,6 +3285,9 @@ public final class DisplayManagerService extends SystemService {
 
             synchronized (mSyncRoot) {
                 final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(displayId);
+                if (display == null) {
+                    return null;
+                }
                 final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
                 if (device == null) {
                     return null;

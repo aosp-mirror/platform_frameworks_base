@@ -44,9 +44,15 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     private static final String TAG = "BiometricPrompt/AuthBiometricFaceToFingerprintView";
 
     protected static class UdfpsIconController extends IconController {
+        @BiometricState private int mIconState = STATE_IDLE;
+
         protected UdfpsIconController(
                 @NonNull Context context, @NonNull ImageView iconView, @NonNull TextView textView) {
             super(context, iconView, textView);
+        }
+
+        void updateState(@BiometricState int newState) {
+            updateState(mIconState, newState);
         }
 
         @Override
@@ -86,6 +92,7 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
             }
 
             mState = newState;
+            mIconState = newState;
         }
     }
 
@@ -93,6 +100,8 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     @Nullable private ModalityListener mModalityListener;
     @Nullable private FingerprintSensorPropertiesInternal mFingerprintSensorProps;
     @Nullable private UdfpsDialogMeasureAdapter mUdfpsMeasureAdapter;
+    @Nullable @VisibleForTesting UdfpsIconController mUdfpsIconController;
+
 
     public AuthBiometricFaceToFingerprintView(Context context) {
         super(context);
@@ -105,6 +114,12 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     @VisibleForTesting
     AuthBiometricFaceToFingerprintView(Context context, AttributeSet attrs, Injector injector) {
         super(context, attrs, injector);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mUdfpsIconController = new UdfpsIconController(mContext, mIconView, mIndicatorView);
     }
 
     @Modality
@@ -168,35 +183,26 @@ public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
     }
 
     @Override
-    @NonNull
-    protected IconController getIconController() {
-        if (mActiveSensorType == TYPE_FINGERPRINT) {
-            if (!(mIconController instanceof UdfpsIconController)) {
-                mIconController = createUdfpsIconController();
-            }
-            return mIconController;
-        }
-        return super.getIconController();
-    }
-
-    @NonNull
-    protected IconController createUdfpsIconController() {
-        return new UdfpsIconController(getContext(), mIconView, mIndicatorView);
-    }
-
-    @Override
     public void updateState(@BiometricState int newState) {
-        if (mState == STATE_HELP || mState == STATE_ERROR) {
-            @Modality final int currentType = mActiveSensorType;
-            mActiveSensorType = TYPE_FINGERPRINT;
+        if (mActiveSensorType == TYPE_FACE) {
+            if (newState == STATE_HELP || newState == STATE_ERROR) {
+                mActiveSensorType = TYPE_FINGERPRINT;
 
-            setRequireConfirmation(false);
-            mConfirmButton.setEnabled(false);
-            mConfirmButton.setVisibility(View.GONE);
+                setRequireConfirmation(false);
+                mConfirmButton.setEnabled(false);
+                mConfirmButton.setVisibility(View.GONE);
 
-            if (mModalityListener != null && currentType != mActiveSensorType) {
-                mModalityListener.onModalitySwitched(currentType, mActiveSensorType);
+                if (mModalityListener != null) {
+                    mModalityListener.onModalitySwitched(TYPE_FACE, mActiveSensorType);
+                }
+
+                // Deactivate the face icon controller so it stops drawing to the view
+                mFaceIconController.deactivate();
+                // Then, activate this icon controller. We need to start in the "idle" state
+                mUdfpsIconController.updateState(STATE_IDLE);
             }
+        } else { // Fingerprint
+            mUdfpsIconController.updateState(newState);
         }
 
         super.updateState(newState);

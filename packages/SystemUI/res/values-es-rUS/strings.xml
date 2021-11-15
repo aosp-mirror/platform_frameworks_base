@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"No se reconoce el rostro. Usa la huella dactilar."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Utiliza tu huella dactilar para continuar"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"No se reconoce la huella dactilar. Utiliza el bloqueo de pantalla en su lugar."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Autenticando tu rostro…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ícono de rostro"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Botón de zoom de compatibilidad"</string>
@@ -452,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Presiona de nuevo para abrir"</string>
     <string name="tap_again" msgid="1315420114387908655">"Presiona otra vez"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Desliza el dedo hacia arriba para abrir"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Presiona para abrir"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Desliza el dedo hacia arriba para volver a intentarlo"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquea el dispositivo para usar NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertenece a tu organización"</string>
@@ -534,7 +537,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Este dispositivo pertenece a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> y está conectado a VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Tu organización puede controlar el tráfico de red en tu perfil de trabajo"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Es posible que <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> controle el tráfico de red en tu perfil de trabajo"</string>
-    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"El administrador de IT puede ver la actividad de red de tu perfil de trabajo"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"El administrador de TI puede ver la actividad de red de tu perfil de trabajo"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Es posible que la red esté supervisada"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Este dispositivo está conectado a VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Tu perfil de trabajo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -803,7 +806,7 @@
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Ahorro de batería"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Reduce el rendimiento y el uso de datos en segundo plano"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Botón <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="keyboard_key_home" msgid="3734400625170020657">"Página principal"</string>
+    <string name="keyboard_key_home" msgid="3734400625170020657">"Inicio"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Atrás"</string>
     <string name="keyboard_key_dpad_up" msgid="2164184320424941416">"Arriba"</string>
     <string name="keyboard_key_dpad_down" msgid="2110172278574325796">"Abajo"</string>
@@ -823,7 +826,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Re Pág"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Av Pág"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Borrar"</string>
-    <string name="keyboard_key_move_home" msgid="3496502501803911971">"Página principal"</string>
+    <string name="keyboard_key_move_home" msgid="3496502501803911971">"Inicio"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"Fin"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insertar"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Bloqueo numérico"</string>

@@ -26,7 +26,6 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
-import android.content.Context;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
@@ -36,7 +35,6 @@ import android.view.IWindowManager;
 import android.view.ScrollCaptureResponse;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.screenshot.ScrollCaptureClient.CaptureResult;
@@ -83,7 +81,7 @@ public class ScrollCaptureClientTest extends SysuiTestCase {
                 /* taskId */ anyInt(), any(IScrollCaptureResponseListener.class));
 
         // Create client
-        ScrollCaptureClient client = new ScrollCaptureClient(mContext, mWm);
+        ScrollCaptureClient client = new ScrollCaptureClient(mWm, Runnable::run, mContext);
 
         // Request scroll capture
         ListenableFuture<ScrollCaptureResponse> requestFuture =

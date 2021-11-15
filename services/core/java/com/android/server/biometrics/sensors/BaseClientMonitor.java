@@ -206,7 +206,6 @@ public abstract class BaseClientMonitor extends LoggableMonitor
             }
             mToken = null;
         }
-        mListener = null;
     }
 
     @Override

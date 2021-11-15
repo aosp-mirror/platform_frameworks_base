@@ -48,8 +48,8 @@
   </string-array>
   <string-array name="tile_states_battery">
     <item msgid="6311253873330062961">"이용 불가"</item>
-    <item msgid="7838121007534579872">"꺼짐"</item>
-    <item msgid="1578872232501319194">"켜짐"</item>
+    <item msgid="7838121007534579872">"사용 안함"</item>
+    <item msgid="1578872232501319194">"사용"</item>
   </string-array>
   <string-array name="tile_states_dnd">
     <item msgid="467587075903158357">"이용 불가"</item>

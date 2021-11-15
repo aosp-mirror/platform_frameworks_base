@@ -222,6 +222,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         pw.println("  launchingAffordance: $launchingAffordance")
         pw.println("  qSExpanded: $qSExpanded")
         pw.println("  hasFaceFeature: $hasFaceFeature")
+        pw.println("  userHasDeviceEntryIntent: $userHasDeviceEntryIntent")
     }
 
     companion object {

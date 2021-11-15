@@ -58,7 +58,7 @@
     <string name="always_use_device" msgid="210535878779644679">"Ireki <xliff:g id="APPLICATION">%1$s</xliff:g> <xliff:g id="USB_DEVICE">%2$s</xliff:g> konektatzen den guztietan"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Ireki <xliff:g id="APPLICATION">%1$s</xliff:g> <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> konektatzen den guztietan"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"USB bidezko arazketa onartu?"</string>
-    <string name="usb_debugging_message" msgid="5794616114463921773">"Ordenagailuaren RSA gakoaren erreferentzia-gako digitala hau da:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="5794616114463921773">"Ordenagailuaren RSA gakoaren aztarna digitala hau da:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Eman beti ordenagailu honetatik arazteko baimena"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Eman baimena"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Ez da onartzen USB bidezko arazketa"</string>
@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ez da hauteman aurpegia. Erabili hatz-marka."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Aurrera egiteko, erabili hatz-marka"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Ez da hauteman hatz-marka. Erabili pantailaren blokeoa."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Zure bila…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Aurpegiaren ikonoa"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Zoom-bateragarritasunaren botoia."</string>
@@ -302,7 +304,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1490779000057752281">"4G datuen erabilera pausatu da"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Datu-konexioa pausatu egin da"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Datuen erabilera pausatu da"</string>
-    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Iritsi zara ezarri zenuen datu-mugara. Datu-konexioa erabiltzeari utzi diozu.\n\nDatu-konexioa erabiltzeari berrekiten badiozu, datuen erabileragatiko gastuak izango dituzu."</string>
+    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Iritsi zara ezarri zenuen datu-mugara. Datu-konexioa erabiltzeari utzi diozu.\n\nDatu-konexioa erabiltzeari berrekiten badiozu, baliteke zerbait ordaindu behar izatea datuak erabiltzeagatik."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"Jarraitu erabiltzen"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"GPS seinalearen bila"</string>
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Kokapena GPS bidez ezarri da"</string>
@@ -452,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Irekitzeko, ukitu berriro"</string>
     <string name="tap_again" msgid="1315420114387908655">"Sakatu berriro"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Pasatu hatza gora irekitzeko"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Sakatu irekitzeko"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Berriro saiatzeko, pasatu hatza gora"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desblokea ezazu NFC erabiltzeko"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Gailu hau zure erakundearena da"</string>
@@ -574,7 +577,7 @@
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Ireki kredentzial fidagarriak"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Administratzaileak sarearen erregistroak aktibatu ditu; horrela, zure gailuko trafikoa gainbegira dezake.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan."</string>
-    <string name="monitoring_description_vpn" msgid="1685428000684586870">"Aplikazio bati VPN konexio bat konfiguratzeko baimena eman diozu.\n\nAplikazio horrek gailuko eta sareko jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
+    <string name="monitoring_description_vpn" msgid="1685428000684586870">"Aplikazio bati VPN bidezko konexio bat konfiguratzeko baimena eman diozu.\n\nAplikazio horrek gailuko eta sareko jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> erakundeak kudeatzen du zure laneko profila.\n\nAdministratzaileak sareko jarduerak kontrola diezazkizuke, besteak beste, posta elektronikoa, aplikazioak eta webguneak.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan.\n\nHorrez gain, VPN batera zaude konektatuta, eta hark ere kontrola ditzake zure sareko jarduerak."</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Zure gurasoak kudeatzen du gailua. Zure gurasoak gailuko informazioa ikusi eta kudea dezake; besteak beste, zer aplikazio erabiltzen dituzun, zure kokapena zein den eta pantaila aurrean zenbat eta noiz egoten zaren."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN konexioa"</string>
@@ -841,7 +844,7 @@
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Arakatzailea"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Kontaktuak"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Posta"</string>
-    <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS mezuak"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMSak"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musika"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
@@ -995,7 +998,7 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"Ukatu"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Sakatu bateria-aurrezlea noiz aktibatu programatzeko"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Aktibatu aurrezlea bateria agortzeko arriskua dagoenean"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"Ez"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"Ez, eskerrik asko"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Bateria-aurrezlea aktibatu da"</string>
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Bateria-aurrezlea automatikoki aktibatuko da bateriaren %% <xliff:g id="PERCENTAGE">%d</xliff:g> gelditzen denean."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Ezarpenak"</string>

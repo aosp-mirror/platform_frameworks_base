@@ -1949,7 +1949,7 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"بزرگ کردن"</string>
     <string name="close_button_text" msgid="10603510034455258">"بستن"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>:‏ <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
-    <string name="call_notification_answer_action" msgid="5999246836247132937">"پاسخ"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"پاسخ دادن"</string>
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"ویدیو"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"رد کردن"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"قطع تماس"</string>

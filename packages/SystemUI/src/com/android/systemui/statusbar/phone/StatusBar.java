@@ -441,6 +441,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final OngoingCallController mOngoingCallController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
     private final StatusBarLocationPublisher mStatusBarLocationPublisher;
+    private final StatusBarIconController mStatusBarIconController;
 
     // expanded notifications
     // the sliding/resizing panel within the notification window
@@ -591,6 +592,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
             mNotificationShadeWindowController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
             mScrimController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
+            mKeyguardViewMediator.setWallpaperSupportsAmbientMode(supportsAmbientMode);
         }
     };
 
@@ -803,6 +805,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
+            StatusBarIconController statusBarIconController,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             FeatureFlags featureFlags,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
@@ -889,6 +892,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
         mStatusBarLocationPublisher = locationPublisher;
+        mStatusBarIconController = statusBarIconController;
         mFeatureFlags = featureFlags;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
@@ -1145,6 +1149,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mStatusBarView.setPanel(mNotificationPanelViewController);
                     mStatusBarView.setScrimController(mScrimController);
                     mStatusBarView.setExpansionChangedListeners(mExpansionChangedListeners);
+                    for (ExpansionChangedListener listener : mExpansionChangedListeners) {
+                        sendInitialExpansionAmount(listener);
+                    }
 
                     // CollapsedStatusBarFragment re-inflated PhoneStatusBarView and both of
                     // mStatusBarView.mExpanded and mStatusBarView.mBouncerShowing are false.
@@ -1190,7 +1197,14 @@ public class StatusBar extends SystemUI implements DemoMode,
                                 mAnimationScheduler,
                                 mStatusBarLocationPublisher,
                                 mNotificationIconAreaController,
-                                mFeatureFlags),
+                                mFeatureFlags,
+                                mStatusBarIconController,
+                                mKeyguardStateController,
+                                mNetworkController,
+                                mStatusBarStateController,
+                                this,
+                                mCommandQueue
+                        ),
                         CollapsedStatusBarFragment.TAG)
                 .commit();
 
@@ -2737,6 +2751,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             mScrimController.dump(fd, pw, args);
         }
 
+        if (mLightRevealScrim != null) {
+            pw.println(
+                    "mLightRevealScrim.getRevealAmount(): " + mLightRevealScrim.getRevealAmount());
+        }
+
         if (mStatusBarKeyguardViewManager != null) {
             mStatusBarKeyguardViewManager.dump(pw);
         }
@@ -3564,6 +3583,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void animateKeyguardUnoccluding() {
         mNotificationPanelViewController.setExpandedFraction(0f);
         animateExpandNotificationsPanel();
+        mScrimController.setUnocclusionAnimationRunning(true);
     }
 
     /**
@@ -3601,6 +3621,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mIsKeyguard = false;
         Trace.beginSection("StatusBar#hideKeyguard");
         boolean staying = mStatusBarStateController.leaveOpenOnKeyguardHide();
+        int previousState = mStatusBarStateController.getState();
         if (!(mStatusBarStateController.setState(StatusBarState.SHADE, force))) {
             //TODO: StatusBarStateController should probably know about hiding the keyguard and
             // notify listeners.
@@ -3613,7 +3634,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
             }
             long delay = mKeyguardStateController.calculateGoingToFullShadeDelay();
-            mLockscreenShadeTransitionController.onHideKeyguard(delay);
+            mLockscreenShadeTransitionController.onHideKeyguard(delay, previousState);
 
             // Disable layout transitions in navbar for this transition because the load is just
             // too heavy for the CPU and GPU on any device.
@@ -3893,7 +3914,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onDozeAmountChanged(float linear, float eased) {
         if (mFeatureFlags.useNewLockscreenAnimations()
-                && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
+                && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)
+                && !mBiometricUnlockController.isWakeAndUnlock()) {
             mLightRevealScrim.setRevealAmount(1f - linear);
         }
     }
@@ -3935,7 +3957,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                 || !wakingUp && mWakefulnessLifecycle.getLastSleepReason()
                 == PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON) {
             mLightRevealScrim.setRevealEffect(mPowerButtonReveal);
-        } else if (!(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
+        } else if (!wakingUp || !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
+            // If we're going to sleep, but it's not from the power button, use the default reveal.
+            // If we're waking up, only use the default reveal if the biometric controller didn't
+            // already set it to the circular reveal because we're waking up from a fingerprint/face
+            // auth.
             mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
         }
     }
@@ -3964,7 +3990,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void onUnlockHintStarted() {
         mFalsingCollector.onUnlockHintStarted();
-        mKeyguardIndicationController.showTransientIndication(R.string.keyguard_unlock);
+        mKeyguardIndicationController.showActionToUnlock();
     }
 
     public void onHintFinished() {
@@ -4445,10 +4471,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             ScrimState state = mStatusBarKeyguardViewManager.bouncerNeedsScrimming()
                     ? ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
             mScrimController.transitionTo(state);
-        } else if (isInLaunchTransition()
-                || mLaunchCameraWhenFinishedWaking
-                || launchingAffordanceWithPreview) {
-            // TODO(b/170133395) Investigate whether Emergency Gesture flag should be included here.
+        } else if (launchingAffordanceWithPreview) {
+            // We want to avoid animating when launching with a preview.
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         } else if (mBrightnessMirrorVisible) {
             mScrimController.transitionTo(ScrimState.BRIGHTNESS_MIRROR);
@@ -4913,6 +4937,14 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void addExpansionChangedListener(@NonNull ExpansionChangedListener listener) {
         mExpansionChangedListeners.add(listener);
+        sendInitialExpansionAmount(listener);
+    }
+
+    private void sendInitialExpansionAmount(ExpansionChangedListener expansionChangedListener) {
+        if (mStatusBarView != null) {
+            expansionChangedListener.onExpansionChanged(mStatusBarView.getExpansionFraction(),
+                    mStatusBarView.isExpanded());
+        }
     }
 
     public void removeExpansionChangedListener(@NonNull ExpansionChangedListener listener) {

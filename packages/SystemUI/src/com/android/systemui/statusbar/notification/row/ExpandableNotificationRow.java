@@ -287,7 +287,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mGroupExpansionChanging = true;
                 final boolean wasExpanded = mGroupExpansionManager.isGroupExpanded(mEntry);
                 boolean nowExpanded = mGroupExpansionManager.toggleGroupExpansion(mEntry);
-                mOnExpandClickListener.onExpandClicked(mEntry, nowExpanded);
+                mOnExpandClickListener.onExpandClicked(mEntry, v, nowExpanded);
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTIFICATION_GROUP_EXPANDER,
                         nowExpanded);
                 onExpansionChanged(true /* userAction */, wasExpanded);
@@ -310,7 +310,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     setUserExpanded(nowExpanded);
                 }
                 notifyHeightChanged(true);
-                mOnExpandClickListener.onExpandClicked(mEntry, nowExpanded);
+                mOnExpandClickListener.onExpandClicked(mEntry, v, nowExpanded);
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTIFICATION_EXPANDER,
                         nowExpanded);
             }
@@ -3064,7 +3064,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public interface OnExpandClickListener {
-        void onExpandClicked(NotificationEntry clickedEntry, boolean nowExpanded);
+        void onExpandClicked(NotificationEntry clickedEntry, View clickedView, boolean nowExpanded);
     }
 
     @Override

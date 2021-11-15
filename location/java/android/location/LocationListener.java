@@ -38,9 +38,9 @@ import java.util.concurrent.Executor;
 public interface LocationListener {
 
     /**
-     * Called when the location has changed. A wakelock is held on behalf on the listener for some
-     * brief amount of time as this callback executes. If this callback performs long running
-     * operations, it is the client's responsibility to obtain their own wakelock.
+     * Called when the location has changed. A wakelock may be held on behalf on the listener for
+     * some brief amount of time as this callback executes. If this callback performs long running
+     * operations, it is the client's responsibility to obtain their own wakelock if necessary.
      *
      * @param location the updated location
      */
@@ -48,7 +48,7 @@ public interface LocationListener {
 
     /**
      * Called when the location has changed and locations are being delivered in batches. The
-     * default implementation calls through to ({@link #onLocationChanged(Location)} with all
+     * default implementation calls through to {@link #onLocationChanged(Location)} with all
      * locations in the batch. The list of locations is always guaranteed to be non-empty, and is
      * always guaranteed to be ordered from earliest location to latest location (so that the
      * earliest location in the batch is at index 0 in the list, and the latest location in the
@@ -76,6 +76,11 @@ public interface LocationListener {
      * This callback will never be invoked on Android Q and above, and providers can be considered
      * as always in the {@link LocationProvider#AVAILABLE} state.
      *
+     * <p class="note">Note that this method only has a default implementation on Android R and
+     * above, and this method must still be overridden in order to run successfully on Android
+     * versions below R. LocationListenerCompat from the compat libraries may be used to avoid the
+     * need to override for older platforms.
+     *
      * @deprecated This callback will never be invoked on Android Q and above.
      */
     @Deprecated
@@ -84,6 +89,11 @@ public interface LocationListener {
     /**
      * Called when a provider this listener is registered with becomes enabled.
      *
+     * <p class="note">Note that this method only has a default implementation on Android R and
+     * above, and this method must still be overridden in order to run successfully on Android
+     * versions below R. LocationListenerCompat from the compat libraries may be used to avoid the
+     * need to override for older platforms.
+     *
      * @param provider the name of the location provider
      */
     default void onProviderEnabled(@NonNull String provider) {}
@@ -91,6 +101,11 @@ public interface LocationListener {
     /**
      * Called when the provider this listener is registered with becomes disabled. If a provider is
      * disabled when this listener is registered, this callback will be invoked immediately.
+     *
+     * <p class="note">Note that this method only has a default implementation on Android R and
+     * above, and this method must still be overridden in order to run successfully on Android
+     * versions below R. LocationListenerCompat from the compat libraries may be used to avoid the
+     * need to override for older platforms.
      *
      * @param provider the name of the location provider
      */

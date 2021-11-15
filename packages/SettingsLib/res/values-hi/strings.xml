@@ -527,7 +527,7 @@
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"कनेक्ट करने में समस्या हो रही है. डिवाइस को बंद करके चालू करें"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"वायर वाला ऑडियो डिवाइस"</string>
     <string name="help_label" msgid="3528360748637781274">"सहायता और सुझाव"</string>
-    <string name="storage_category" msgid="2287342585424631813">"डिवाइस की मेमोरी"</string>
+    <string name="storage_category" msgid="2287342585424631813">"डिवाइस का स्टोरेज"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"शेयर किया गया डेटा"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"शेयर किए गए डेटा को देखें और उसमें बदलाव करें"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"इस उपयोगकर्ता के साथ किसी तरह का डेटा शेयर नहीं किया गया है."</string>

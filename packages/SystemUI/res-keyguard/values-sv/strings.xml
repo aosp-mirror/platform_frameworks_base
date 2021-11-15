@@ -61,7 +61,7 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Det gick inte att inaktivera eSIM-kortet på grund av ett fel."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Retur"</string>
     <string name="kg_forgot_pattern_button_text" msgid="3304688032024541260">"Har du glömt ditt grafiska lösenord?"</string>
-    <string name="kg_wrong_pattern" msgid="5907301342430102842">"Fel grafiskt lösenord"</string>
+    <string name="kg_wrong_pattern" msgid="5907301342430102842">"Fel mönster"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Fel lösenord"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Fel pinkod"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
@@ -82,7 +82,7 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Ange en pinkod med fyra till åtta siffror."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK-koden ska vara minst åtta siffror."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"Ange rätt PUK-kod. Om försöken upprepas inaktiveras SIM-kortet permanent."</string>
-    <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"För många försök med grafiskt lösenord"</string>
+    <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"För många försök med mönster"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Du har angett fel pinkod <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Du har angett fel lösenord <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
@@ -102,13 +102,13 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"Ingen tjänst."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Byt inmatningsmetod"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Flygplansläge"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Du måste ange grafiskt lösenord när du har startat om enheten"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Du måste rita mönster när du har startat om enheten"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Du måste ange pinkod när du har startat om enheten"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Du måste ange lösenord när du har startat om enheten"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Du måste ange grafiskt lösenord för ytterligare säkerhet"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Du måste rita mönster för ytterligare säkerhet"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Du måste ange pinkod för ytterligare säkerhet"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Du måste ange lösenord för ytterligare säkerhet"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="1922016914701991230">"Du måste ange grafiskt lösenord när du byter profil"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="1922016914701991230">"Du måste rita mönster när du byter profil"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="6490434826361055400">"Du måste ange pinkod när du byter profil"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1680374696393804441">"Du måste ange lösenord när du byter profil"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administratören har låst enheten"</string>

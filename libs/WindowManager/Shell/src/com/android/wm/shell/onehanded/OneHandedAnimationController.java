@@ -182,10 +182,10 @@ public class OneHandedAnimationController {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
             final SurfaceControl.Transaction tx = newSurfaceControlTransaction();
-            applySurfaceControlTransaction(mLeash, tx, animation.getAnimatedFraction());
             mOneHandedAnimationCallbacks.forEach(
-                    (callback) -> callback.onAnimationUpdate(0f, mCurrentValue)
+                    (callback) -> callback.onAnimationUpdate(tx, 0f, mCurrentValue)
             );
+            applySurfaceControlTransaction(mLeash, tx, animation.getAnimatedFraction());
         }
 
         void onStartTransaction(SurfaceControl leash, SurfaceControl.Transaction tx) {

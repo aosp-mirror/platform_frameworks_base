@@ -180,6 +180,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 public void onStopFinished(Rect bounds) {
                     mState.setState(STATE_NONE);
                     notifyShortcutStateChanged(STATE_NONE);
+                    mBackgroundPanelOrganizer.onStopFinished();
                 }
             };
 
@@ -223,13 +224,14 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         OneHandedTimeoutHandler timeoutHandler = new OneHandedTimeoutHandler(mainExecutor);
         OneHandedState transitionState = new OneHandedState();
         OneHandedTutorialHandler tutorialHandler = new OneHandedTutorialHandler(context,
-                windowManager);
+                settingsUtil, windowManager);
         OneHandedAnimationController animationController =
                 new OneHandedAnimationController(context);
         OneHandedTouchHandler touchHandler = new OneHandedTouchHandler(timeoutHandler,
                 mainExecutor);
         OneHandedBackgroundPanelOrganizer oneHandedBackgroundPanelOrganizer =
-                new OneHandedBackgroundPanelOrganizer(context, displayLayout, mainExecutor);
+                new OneHandedBackgroundPanelOrganizer(context, displayLayout, settingsUtil,
+                        mainExecutor);
         OneHandedDisplayAreaOrganizer organizer = new OneHandedDisplayAreaOrganizer(
                 context, displayLayout, settingsUtil, animationController, tutorialHandler,
                 oneHandedBackgroundPanelOrganizer, mainExecutor);
@@ -305,6 +307,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         mAccessibilityManager.addAccessibilityStateChangeListener(
                 mAccessibilityStateChangeListener);
 
+        mState.addSListeners(mBackgroundPanelOrganizer);
         mState.addSListeners(mTutorialHandler);
     }
 
@@ -386,6 +389,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 mDisplayAreaOrganizer.getDisplayLayout().height() * mOffSetFraction);
         mOneHandedAccessibilityUtil.announcementForScreenReader(
                 mOneHandedAccessibilityUtil.getOneHandedStartDescription());
+        mBackgroundPanelOrganizer.onStart();
         mDisplayAreaOrganizer.scheduleOffset(0, yOffSet);
         mTimeoutHandler.resetTimer();
         mOneHandedUiEventLogger.writeEvent(
@@ -423,7 +427,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 stopOneHanded(OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_OVERSPACE_OUT));
         mDisplayAreaOrganizer.registerTransitionCallback(mTouchHandler);
         mDisplayAreaOrganizer.registerTransitionCallback(mTutorialHandler);
-        mDisplayAreaOrganizer.registerTransitionCallback(mBackgroundPanelOrganizer);
         mDisplayAreaOrganizer.registerTransitionCallback(mTransitionCallBack);
         if (mTaskChangeToExit) {
             mTaskStackListener.addListener(mTaskStackListenerCallback);
@@ -469,6 +472,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         final DisplayLayout newDisplayLayout = mDisplayController.getDisplayLayout(displayId);
         mDisplayAreaOrganizer.setDisplayLayout(newDisplayLayout);
         mTutorialHandler.onDisplayChanged(newDisplayLayout);
+        mBackgroundPanelOrganizer.onDisplayChanged(newDisplayLayout);
     }
 
     private ContentObserver getObserver(Runnable onChangeRunnable) {
@@ -606,7 +610,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                     OneHandedDisplayAreaOrganizer.FEATURE_ONE_HANDED);
         }
 
-        if (mBackgroundPanelOrganizer.getBackgroundSurface() == null) {
+        if (!mBackgroundPanelOrganizer.isRegistered()) {
             mBackgroundPanelOrganizer.registerOrganizer(
                     OneHandedBackgroundPanelOrganizer.FEATURE_ONE_HANDED_BACKGROUND_PANEL);
         }
@@ -658,12 +662,13 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     }
 
     private void onConfigChanged(Configuration newConfig) {
-        if (mTutorialHandler == null) {
+        if (mTutorialHandler == null || mBackgroundPanelOrganizer == null) {
             return;
         }
         if (!mIsOneHandedEnabled || newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             return;
         }
+        mBackgroundPanelOrganizer.onConfigurationChanged();
         mTutorialHandler.onConfigurationChanged();
     }
 

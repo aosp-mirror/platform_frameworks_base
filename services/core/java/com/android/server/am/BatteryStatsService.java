@@ -841,6 +841,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteEvent(final int code, final String name, final int uid) {
         enforceCallingPermission();
+        if (name == null) {
+            // TODO(b/194733136): Replace with an IllegalArgumentException throw.
+            Slog.wtfStack(TAG, "noteEvent called with null name. code = " + code);
+            return;
+        }
+
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();

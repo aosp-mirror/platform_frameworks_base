@@ -327,13 +327,13 @@
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensori del corpo"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"accedere ai dati dei sensori relativi ai tuoi parametri vitali"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Recuperare contenuti della finestra"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Esaminare i contenuti di una finestra con cui interagisci."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Esamina i contenuti di una finestra con cui interagisci."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Attivare Esplora al tocco"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Gli elementi toccati verranno pronunciati ad alta voce e sarà possibile esplorare lo schermo utilizzando i gesti."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Gli elementi toccati verranno pronunciati ad alta voce e sarà possibile esplorare lo schermo con i gesti."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Osservare il testo digitato"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Sono inclusi dati personali come numeri di carte di credito e password."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Controllare l\'ingrandimento del display"</string>
-    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Controlla il livello di zoom e la posizione del display."</string>
+    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Controlla la posizione e il livello di zoom del display."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Eseguire gesti"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Consente di toccare, far scorrere, pizzicare ed eseguire altri gesti."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gesti con sensore di impronte"</string>

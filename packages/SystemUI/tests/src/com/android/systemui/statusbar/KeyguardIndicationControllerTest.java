@@ -81,6 +81,7 @@ import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -146,6 +147,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private LockPatternUtils mLockPatternUtils;
     @Mock
     private IActivityManager mIActivityManager;
+    @Mock
+    private KeyguardBypassController mKeyguardBypassController;
     @Captor
     private ArgumentCaptor<DockManager.AlignmentStateListener> mAlignmentListener;
     @Captor
@@ -216,7 +219,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController = new KeyguardIndicationController(mContext, mWakeLockBuilder,
                 mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor,
                 mDockManager, mBroadcastDispatcher, mDevicePolicyManager, mIBatteryStats,
-                mUserManager, mExecutor, mFalsingManager, mLockPatternUtils, mIActivityManager);
+                mUserManager, mExecutor, mFalsingManager, mLockPatternUtils, mIActivityManager,
+                mKeyguardBypassController);
         mController.init();
         mController.setIndicationArea(mIndicationArea);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
@@ -507,6 +511,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         createController();
         String message = mContext.getString(R.string.keyguard_retry);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isFaceEnrolled()).thenReturn(true);
 
         mController.setVisible(true);
         mController.getKeyguardCallback().onBiometricError(FaceManager.FACE_ERROR_TIMEOUT,

@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Твар не распазнаны. Скарыстайце адбітак пальца."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Каб працягнуць, скарыстайце адбітак пальца"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Не ўдалося распазнаць адбітак пальца. Разблакіруйце экран іншым спосабам."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Ідзе пошук вашага твару…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Значок твару"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Кнопка сумяшчальнасці маштаба."</string>
@@ -456,6 +458,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Дакраніцеся яшчэ раз, каб адкрыць"</string>
     <string name="tap_again" msgid="1315420114387908655">"Націсніце яшчэ раз"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Каб адкрыць, прагарніце ўверх"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Націсніце, каб адкрыць"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Прагартайце ўверх, каб паўтарыць спробу"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Разблакіруйце, каб выкарыстоўваць NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Гэта прылада належыць вашай арганізацыі"</string>
@@ -699,8 +702,8 @@
     <string name="activity_not_found" msgid="8711661533828200293">"Праграма не ўсталявана на вашым тэлефоне"</string>
     <string name="clock_seconds" msgid="8709189470828542071">"Паказваць секунды гадзінніка"</string>
     <string name="clock_seconds_desc" msgid="2415312788902144817">"Паказваць секунды гадзінніка на панэлі стану. Можа паўплываць на рэсурс акумулятара."</string>
-    <string name="qs_rearrange" msgid="484816665478662911">"Змяніць парадак Хуткіх налад"</string>
-    <string name="show_brightness" msgid="6700267491672470007">"Паказваць яркасць у Хуткіх наладах"</string>
+    <string name="qs_rearrange" msgid="484816665478662911">"Змяніць парадак хуткіх налад"</string>
+    <string name="show_brightness" msgid="6700267491672470007">"Паказваць яркасць у хуткіх наладах"</string>
     <string name="experimental" msgid="3549865454812314826">"Эксперыментальныя"</string>
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Уключыць Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Для падлучэння клавіятуры да планшэта трэба спачатку ўключыць Bluetooth."</string>
@@ -1068,7 +1071,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"выдаліць з абранага"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Перамясціць у пазіцыю <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Сродкі кіравання"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Выберыце элементы кіравання, да якіх вы хочаце мець доступ з Хуткіх налад"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Выберыце элементы кіравання, да якіх вы хочаце мець доступ з хуткіх налад"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Каб змяніць парадак элементаў кіравання, утрымлівайце і перацягвайце іх"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Усе элементы кіравання выдалены"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Змяненні не захаваны"</string>

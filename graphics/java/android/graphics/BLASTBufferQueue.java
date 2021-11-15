@@ -33,7 +33,7 @@ public final class BLASTBufferQueue {
     private static native Surface nativeGetSurface(long ptr, boolean includeSurfaceControlHandle);
     private static native void nativeSetNextTransaction(long ptr, long transactionPtr);
     private static native void nativeUpdate(long ptr, long surfaceControl, long width, long height,
-            int format);
+            int format, long transactionPtr);
     private static native void nativeFlushShadowQueue(long ptr);
     private static native void nativeMergeWithNextTransaction(long ptr, long transactionPtr,
                                                               long frameNumber);
@@ -92,9 +92,15 @@ public final class BLASTBufferQueue {
      * @param width The new width for the buffer.
      * @param height The new height for the buffer.
      * @param format The new format for the buffer.
+     * @param t Adds destination frame changes to the passed in transaction.
      */
+    public void update(SurfaceControl sc, int width, int height, @PixelFormat.Format int format,
+            SurfaceControl.Transaction t) {
+        nativeUpdate(mNativeObject, sc.mNativeObject, width, height, format, t.mNativeObject);
+    }
+
     public void update(SurfaceControl sc, int width, int height, @PixelFormat.Format int format) {
-        nativeUpdate(mNativeObject, sc.mNativeObject, width, height, format);
+        nativeUpdate(mNativeObject, sc.mNativeObject, width, height, format, 0);
     }
 
     /**

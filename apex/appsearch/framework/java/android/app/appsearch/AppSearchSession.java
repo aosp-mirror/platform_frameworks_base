@@ -25,7 +25,6 @@ import android.app.appsearch.aidl.IAppSearchManager;
 import android.app.appsearch.aidl.IAppSearchResultCallback;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.app.appsearch.util.SchemaMigrationUtil;
-import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -309,19 +308,6 @@ public final class AppSearchSession implements Closeable {
     }
 
     /**
-     * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
-     * @hide
-     */
-    @Deprecated
-    @UnsupportedAppUsage
-    public void getByUri(
-            @NonNull GetByUriRequest request,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull BatchResultCallback<String, GenericDocument> callback) {
-        getByDocumentId(request.toGetByDocumentIdRequest(), executor, callback);
-    }
-
-    /**
      * Gets {@link GenericDocument} objects by document IDs in a namespace from the {@link
      * AppSearchSession} database.
      *
@@ -518,19 +504,6 @@ public final class AppSearchSession implements Closeable {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
-     * @hide
-     */
-    @Deprecated
-    @UnsupportedAppUsage
-    public void remove(
-            @NonNull RemoveByUriRequest request,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull BatchResultCallback<String, Void> callback) {
-        remove(request.toRemoveByDocumentIdRequest(), executor, callback);
     }
 
     /**

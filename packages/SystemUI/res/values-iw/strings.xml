@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"לא ניתן לזהות את הפנים. יש להשתמש בטביעת אצבע במקום."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"יש להשתמש בטביעת האצבע כדי להמשיך"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"לא ניתן לזהות את טביעת האצבע. יש להשתמש בנעילת המסך במקום."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"מתבצע חיפוש…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"סמל הפנים"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"לחצן מרחק מתצוגה של תאימות."</string>
@@ -456,6 +458,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"יש להקיש שוב כדי לפתוח את ההתראה"</string>
     <string name="tap_again" msgid="1315420114387908655">"צריך להקיש פעם נוספת"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"צריך להחליק כדי לפתוח"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"יש להקיש כדי לפתוח"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"יש להחליק למעלה כדי לנסות שוב"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏יש לבטל את הנעילה כדי להשתמש ב-NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"המכשיר הזה שייך לארגון שלך"</string>
@@ -1162,7 +1165,7 @@
     <string name="person_available" msgid="2318599327472755472">"אונליין"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"בעיה בקריאת מדדי הסוללה"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"יש להקיש כדי להציג מידע נוסף"</string>
-    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"לא הוגדרה התראה"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"לא הוגדרה"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"חיישן טביעות אצבע"</string>
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"חיישן טביעות האצבע מושבת"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"אימות"</string>

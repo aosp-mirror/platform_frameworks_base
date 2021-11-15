@@ -256,6 +256,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private boolean mExpandedInThisMotion;
     private boolean mShouldShowShelfOnly;
     protected boolean mScrollingEnabled;
+    private boolean mIsCurrentUserSetup;
     protected FooterView mFooterView;
     protected EmptyShadeView mEmptyShadeView;
     private boolean mDismissAllInProgress;
@@ -683,6 +684,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 mController.hasActiveClearableNotifications(ROWS_ALL);
         RemoteInputController remoteInputController = mRemoteInputManager.getController();
         boolean showFooterView = (showDismissView || getVisibleNotificationCount() > 0)
+                && mIsCurrentUserSetup  // see: b/193149550
                 && mStatusBarState != StatusBarState.KEYGUARD
                 && !mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
                 && (remoteInputController == null || !remoteInputController.isRemoteInputActive());
@@ -4231,7 +4233,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         final @ColorInt int textColor =
                 Utils.getColorAttrDefaultColor(mContext, android.R.attr.textColorPrimary);
         mSectionsManager.setHeaderForegroundColor(textColor);
-        mFooterView.setTextColor(textColor);
+        mFooterView.updateColors();
         mEmptyShadeView.setTextColor(textColor);
     }
 
@@ -5138,12 +5140,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @return the overflow how much the height is further than he lowest notification
      */
     public float setPulseHeight(float height) {
+        float overflow;
         mAmbientState.setPulseHeight(height);
         if (mKeyguardBypassEnabledProvider.getBypassEnabled()) {
             notifyAppearChangedListeners();
+            overflow = Math.max(0, height - getIntrinsicPadding());
+        } else {
+            overflow = Math.max(0, height
+                    - mAmbientState.getInnerHeight(true /* ignorePulseHeight */));
         }
         requestChildrenUpdate();
-        return Math.max(0, height - mAmbientState.getInnerHeight(true /* ignorePulseHeight */));
+        return overflow;
     }
 
     public float getPulseHeight() {
@@ -5203,12 +5210,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     public float calculateAppearFractionBypass() {
         float pulseHeight = getPulseHeight();
-        float wakeUpHeight = getWakeUpHeight();
-        float dragDownAmount = pulseHeight - wakeUpHeight;
-
         // The total distance required to fully reveal the header
         float totalDistance = getIntrinsicPadding();
-        return MathUtils.smoothStep(0, totalDistance, dragDownAmount);
+        return MathUtils.smoothStep(0, totalDistance, pulseHeight);
     }
 
     public void setController(
@@ -5562,6 +5566,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     public void animateNextTopPaddingChange() {
         mAnimateNextTopPaddingChange = true;
+    }
+
+    /**
+     * Sets whether the current user is set up, which is required to show the footer (b/193149550)
+     */
+    public void setCurrentUserSetup(boolean isCurrentUserSetup) {
+        if (mIsCurrentUserSetup != isCurrentUserSetup) {
+            mIsCurrentUserSetup = isCurrentUserSetup;
+            updateFooter();
+        }
     }
 
     /**

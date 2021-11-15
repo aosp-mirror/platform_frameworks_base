@@ -64,11 +64,14 @@ public final class LmkdStatsReporter {
             final int freeMemKb = inputData.readInt();
             final int freeSwapKb = inputData.readInt();
             final int killReason = inputData.readInt();
+            final int thrashing = inputData.readInt();
+            final int maxThrashing = inputData.readInt();
             final String procName = inputData.readUTF();
 
             FrameworkStatsLog.write(FrameworkStatsLog.LMK_KILL_OCCURRED, uid, procName, oomScore,
                     pgFault, pgMajFault, rssInBytes, cacheInBytes, swapInBytes, processStartTimeNS,
-                    minOomScore, freeMemKb, freeSwapKb, mapKillReason(killReason));
+                    minOomScore, freeMemKb, freeSwapKb, mapKillReason(killReason), thrashing,
+                    maxThrashing);
         } catch (IOException e) {
             Slog.e(TAG, "Invalid buffer data. Failed to log LMK_KILL_OCCURRED");
             return;

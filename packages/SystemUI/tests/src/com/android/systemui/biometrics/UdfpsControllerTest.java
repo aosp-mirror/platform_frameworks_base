@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,6 +63,7 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
@@ -143,12 +145,18 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private DisplayManager mDisplayManager;
     @Mock
     private Handler mHandler;
+    @Mock
+    private ConfigurationController mConfigurationController;
 
     private FakeExecutor mFgExecutor;
 
     // Stuff for configuring mocks
     @Mock
     private UdfpsView mUdfpsView;
+    @Mock
+    private UdfpsEnrollView mEnrollView;
+    @Mock
+    private UdfpsKeyguardView mKeyguardView;
     @Mock
     private UdfpsKeyguardViewController mUdfpsKeyguardViewController;
     @Mock
@@ -171,7 +179,13 @@ public class UdfpsControllerTest extends SysuiTestCase {
         setUpResources();
         mExecution = new FakeExecution();
 
-        when(mLayoutInflater.inflate(R.layout.udfps_view, null, false)).thenReturn(mUdfpsView);
+        when(mLayoutInflater.inflate(R.layout.udfps_view, null, false))
+                .thenReturn(mUdfpsView);
+        when(mLayoutInflater.inflate(R.layout.udfps_enroll_view, null))
+                .thenReturn(mEnrollView); // for showOverlay REASON_ENROLL_ENROLLING
+        when(mLayoutInflater.inflate(R.layout.udfps_keyguard_view, null))
+                .thenReturn(mKeyguardView); // for showOverlay REASON_AUTH_FPM_KEYGUARD
+        when(mEnrollView.getContext()).thenReturn(mContext);
         final List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
 
         final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
@@ -214,7 +228,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mKeyguardBypassController,
                 mDisplayManager,
-                mHandler);
+                mHandler,
+                mConfigurationController);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
@@ -261,6 +276,75 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // THEN notify keyguard authenticate to dismiss the keyguard
         verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(anyBoolean());
+    }
+
+    @Test
+    public void onActionMove_dozing_setDeviceEntryIntent() throws RemoteException {
+        // GIVEN the current animation is UdfpsKeyguardViewController and device IS dozing
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
+        when(mUdfpsView.getAnimationViewController()).thenReturn(mUdfpsKeyguardViewController);
+        when(mStatusBarStateController.isDozing()).thenReturn(true);
+
+        // GIVEN that the overlay is showing
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        // WHEN ACTION_DOWN is received
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        moveEvent.recycle();
+
+        // THEN device entry intent is never to true b/c device was dozing on touch
+        verify(mKeyguardBypassController, never()).setUserHasDeviceEntryIntent(true);
+    }
+
+    @Test
+    public void onActionMove_onKeyguard_setDeviceEntryIntent() throws RemoteException {
+        // GIVEN the current animation is UdfpsKeyguardViewController and device isn't dozing
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
+        when(mUdfpsView.getAnimationViewController()).thenReturn(mUdfpsKeyguardViewController);
+        when(mStatusBarStateController.isDozing()).thenReturn(false);
+
+        // GIVEN that the overlay is showing
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        // WHEN ACTION_DOWN is received
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        moveEvent.recycle();
+
+        // THEN device entry intent is set to true
+        verify(mKeyguardBypassController).setUserHasDeviceEntryIntent(true);
+    }
+
+    @Test
+    public void onActionMove_onEnrollment_neverSetDeviceEntryIntent() throws RemoteException {
+        // GIVEN the current animation is UdfpsEnrollViewController
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
+        when(mUdfpsView.getAnimationViewController()).thenReturn(
+                mock(UdfpsEnrollViewController.class));
+
+        // GIVEN that the overlay is showing
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_ENROLL_ENROLLING, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        // WHEN ACTION_DOWN is received
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        moveEvent.recycle();
+
+        // THEN device entry intent is never set
+        verify(mKeyguardBypassController, never()).setUserHasDeviceEntryIntent(anyBoolean());
     }
 
     @Test
@@ -372,11 +456,12 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
     @Test
     public void aodInterrupt() throws RemoteException {
-        // GIVEN that the overlay is showing and screen is on
+        // GIVEN that the overlay is showing and screen is on and fp is running
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
                 IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
         // WHEN fingerprint is requested because of AOD interrupt
         mUdfpsController.onAodInterrupt(0, 0, 2f, 3f);
         // THEN illumination begins
@@ -394,6 +479,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         when(mUdfpsView.isIlluminationRequested()).thenReturn(true);
         // WHEN it is cancelled
@@ -409,6 +495,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         when(mUdfpsView.isIlluminationRequested()).thenReturn(true);
         // WHEN it times out
@@ -427,6 +514,23 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mFgExecutor.runAllReady();
 
         // WHEN aod interrupt is received
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
+        mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
+
+        // THEN no illumination because screen is off
+        verify(mUdfpsView, never()).startIllumination(any());
+    }
+
+    @Test
+    public void aodInterrupt_fingerprintNotRunning() throws RemoteException {
+        // GIVEN showing overlay
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mScreenObserver.onScreenTurnedOn();
+        mFgExecutor.runAllReady();
+
+        // WHEN aod interrupt is received when the fingerprint service isn't running
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(false);
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
 
         // THEN no illumination because screen is off

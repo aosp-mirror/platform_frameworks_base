@@ -56,6 +56,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -2816,6 +2817,31 @@ public class WindowManagerService extends IWindowManager.Stub
 
     }
 
+    void removeWindowToken(IBinder binder, boolean removeWindows, boolean animateExit,
+            int displayId) {
+        synchronized (mGlobalLock) {
+            final DisplayContent dc = mRoot.getDisplayContent(displayId);
+
+            if (dc == null) {
+                ProtoLog.w(WM_ERROR, "removeWindowToken: Attempted to remove token: %s"
+                        + " for non-exiting displayId=%d", binder, displayId);
+                return;
+            }
+            final WindowToken token = dc.removeWindowToken(binder, animateExit);
+            if (token == null) {
+                ProtoLog.w(WM_ERROR,
+                        "removeWindowToken: Attempted to remove non-existing token: %s",
+                        binder);
+                return;
+            }
+
+            if (removeWindows) {
+                token.removeAllWindowsIfPossible();
+            }
+            dc.getInputMonitor().updateInputWindowsLw(true /* force */);
+        }
+    }
+
     @Override
     public void removeWindowToken(IBinder binder, int displayId) {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "removeWindowToken()")) {
@@ -2823,23 +2849,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         final long origId = Binder.clearCallingIdentity();
         try {
-            synchronized (mGlobalLock) {
-                final DisplayContent dc = mRoot.getDisplayContent(displayId);
-
-                if (dc == null) {
-                    ProtoLog.w(WM_ERROR, "removeWindowToken: Attempted to remove token: %s"
-                            + " for non-exiting displayId=%d", binder, displayId);
-                    return;
-                }
-                final WindowToken token = dc.removeWindowToken(binder);
-                if (token == null) {
-                    ProtoLog.w(WM_ERROR,
-                            "removeWindowToken: Attempted to remove non-existing token: %s",
-                            binder);
-                    return;
-                }
-                dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
-            }
+            removeWindowToken(binder, false /* removeWindows */, true /* animateExit */, displayId);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
@@ -7536,28 +7546,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void removeWindowToken(IBinder binder, boolean removeWindows, int displayId) {
-            synchronized (mGlobalLock) {
-                if (removeWindows) {
-                    final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                    if (dc == null) {
-                        ProtoLog.w(WM_ERROR, "removeWindowToken: Attempted to remove token: %s"
-                                + " for non-exiting displayId=%d", binder, displayId);
-                        return;
-                    }
-
-                    final WindowToken token = dc.removeWindowToken(binder);
-                    if (token == null) {
-                        ProtoLog.w(WM_ERROR,
-                                "removeWindowToken: Attempted to remove non-existing token: %s",
-                                binder);
-                        return;
-                    }
-
-                    token.removeAllWindowsIfPossible();
-                }
-                WindowManagerService.this.removeWindowToken(binder, displayId);
-            }
+        public void removeWindowToken(IBinder binder, boolean removeWindows, boolean animateExit,
+                int displayId) {
+            WindowManagerService.this.removeWindowToken(binder, removeWindows, animateExit,
+                    displayId);
         }
 
         @Override
@@ -8224,8 +8216,10 @@ public class WindowManagerService extends IWindowManager.Stub
         h.token = channelToken;
         h.name = name;
 
+        flags = DisplayPolicy.sanitizeFlagSlippery(flags, privateFlags, name);
+
         final int sanitizedFlags = flags & (LayoutParams.FLAG_NOT_TOUCHABLE
-                | LayoutParams.FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE);
+                | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE);
         h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | sanitizedFlags;
         h.layoutParamsType = type;
         h.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;

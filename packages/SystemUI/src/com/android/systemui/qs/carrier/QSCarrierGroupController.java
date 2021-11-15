@@ -37,6 +37,7 @@ import com.android.keyguard.CarrierTextManager;
 import com.android.settingslib.AccessibilityContentDescriptions;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -62,7 +63,8 @@ public class QSCarrierGroupController {
     private final NetworkController mNetworkController;
     private final CarrierTextManager mCarrierTextManager;
     private final TextView mNoSimTextView;
-    private final H mMainHandler;
+    // Non final for testing
+    private H mMainHandler;
     private final Callback mCallback;
     private boolean mListening;
     private final CellSignalState[] mInfos =
@@ -73,6 +75,11 @@ public class QSCarrierGroupController {
     private String[] mLastSignalLevelDescription = new String[SIM_SLOTS];
     private final boolean mProviderModel;
     private final CarrierConfigTracker mCarrierConfigTracker;
+
+    private boolean mIsSingleCarrier;
+    private OnSingleCarrierChangedListener mOnSingleCarrierChangedListener;
+
+    private final SlotIndexResolver mSlotIndexResolver;
 
     private final NetworkController.SignalCallback mSignalCallback =
             new NetworkController.SignalCallback() {
@@ -207,7 +214,8 @@ public class QSCarrierGroupController {
             @Background Handler bgHandler, @Main Looper mainLooper,
             NetworkController networkController,
             CarrierTextManager.Builder carrierTextManagerBuilder, Context context,
-            CarrierConfigTracker carrierConfigTracker, FeatureFlags featureFlags) {
+            CarrierConfigTracker carrierConfigTracker, FeatureFlags featureFlags,
+            SlotIndexResolver slotIndexResolver) {
 
         if (featureFlags.isCombinedStatusBarSignalIconsEnabled()) {
             mProviderModel = true;
@@ -222,6 +230,7 @@ public class QSCarrierGroupController {
                 .setShowMissingSim(false)
                 .build();
         mCarrierConfigTracker = carrierConfigTracker;
+        mSlotIndexResolver = slotIndexResolver;
         View.OnClickListener onClickListener = v -> {
             if (!v.isVisibleToUser()) {
                 return;
@@ -256,6 +265,7 @@ public class QSCarrierGroupController {
                             .toString();
             mCarrierGroups[i].setOnClickListener(onClickListener);
         }
+        mIsSingleCarrier = computeIsSingleCarrier();
         view.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
 
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
@@ -272,10 +282,24 @@ public class QSCarrierGroupController {
 
     @VisibleForTesting
     protected int getSlotIndex(int subscriptionId) {
-        return SubscriptionManager.getSlotIndex(subscriptionId);
+        return mSlotIndexResolver.getSlotIndex(subscriptionId);
     }
 
-    private boolean isSingleCarrier() {
+    /**
+     * Sets a {@link OnSingleCarrierChangedListener}.
+     *
+     * This will get notified when the number of carriers changes between 1 and "not one".
+     * @param listener
+     */
+    public void setOnSingleCarrierChangedListener(OnSingleCarrierChangedListener listener) {
+        mOnSingleCarrierChangedListener = listener;
+    }
+
+    public boolean isSingleCarrier() {
+        return mIsSingleCarrier;
+    }
+
+    private boolean computeIsSingleCarrier() {
         int carrierCount = 0;
         for (int i = 0; i < SIM_SLOTS; i++) {
 
@@ -315,7 +339,9 @@ public class QSCarrierGroupController {
             return;
         }
 
-        if (isSingleCarrier()) {
+        boolean singleCarrier = computeIsSingleCarrier();
+
+        if (singleCarrier) {
             for (int i = 0; i < SIM_SLOTS; i++) {
                 if (mInfos[i].visible
                         && mInfos[i].mobileSignalIconId == R.drawable.ic_qs_sim_card) {
@@ -326,7 +352,7 @@ public class QSCarrierGroupController {
         }
 
         for (int i = 0; i < SIM_SLOTS; i++) {
-            mCarrierGroups[i].updateState(mInfos[i]);
+            mCarrierGroups[i].updateState(mInfos[i], singleCarrier);
         }
 
         mCarrierDividers[0].setVisibility(
@@ -337,6 +363,12 @@ public class QSCarrierGroupController {
         mCarrierDividers[1].setVisibility(
                 (mInfos[1].visible && mInfos[2].visible)
                         || (mInfos[0].visible && mInfos[2].visible) ? View.VISIBLE : View.GONE);
+        if (mIsSingleCarrier != singleCarrier) {
+            mIsSingleCarrier = singleCarrier;
+            if (mOnSingleCarrierChangedListener != null) {
+                mOnSingleCarrierChangedListener.onSingleCarrierChanged(singleCarrier);
+            }
+        }
     }
 
     @MainThread
@@ -433,12 +465,14 @@ public class QSCarrierGroupController {
         private final Context mContext;
         private final CarrierConfigTracker mCarrierConfigTracker;
         private final FeatureFlags mFeatureFlags;
+        private final SlotIndexResolver mSlotIndexResolver;
 
         @Inject
         public Builder(ActivityStarter activityStarter, @Background Handler handler,
                 @Main Looper looper, NetworkController networkController,
                 CarrierTextManager.Builder carrierTextControllerBuilder, Context context,
-                CarrierConfigTracker carrierConfigTracker, FeatureFlags featureFlags) {
+                CarrierConfigTracker carrierConfigTracker, FeatureFlags featureFlags,
+                SlotIndexResolver slotIndexResolver) {
             mActivityStarter = activityStarter;
             mHandler = handler;
             mLooper = looper;
@@ -447,6 +481,7 @@ public class QSCarrierGroupController {
             mContext = context;
             mCarrierConfigTracker = carrierConfigTracker;
             mFeatureFlags = featureFlags;
+            mSlotIndexResolver = slotIndexResolver;
         }
 
         public Builder setQSCarrierGroup(QSCarrierGroup view) {
@@ -457,7 +492,43 @@ public class QSCarrierGroupController {
         public QSCarrierGroupController build() {
             return new QSCarrierGroupController(mView, mActivityStarter, mHandler, mLooper,
                     mNetworkController, mCarrierTextControllerBuilder, mContext,
-                    mCarrierConfigTracker, mFeatureFlags);
+                    mCarrierConfigTracker, mFeatureFlags, mSlotIndexResolver);
+        }
+    }
+
+    /**
+     * Notify when the state changes from 1 carrier to "not one" and viceversa
+     */
+    @FunctionalInterface
+    public interface OnSingleCarrierChangedListener {
+        void onSingleCarrierChanged(boolean isSingleCarrier);
+    }
+
+    /**
+     * Interface for resolving slot index from subscription ID.
+     */
+    @FunctionalInterface
+    public interface SlotIndexResolver {
+        /**
+         * Get slot index for given sub id.
+         */
+        int getSlotIndex(int subscriptionId);
+    }
+
+    /**
+     * Default implementation for {@link SlotIndexResolver}.
+     *
+     * It retrieves the slot index using {@link SubscriptionManager#getSlotIndex}.
+     */
+    @SysUISingleton
+    public static class SubscriptionManagerSlotIndexResolver implements SlotIndexResolver {
+
+        @Inject
+        public SubscriptionManagerSlotIndexResolver() {}
+
+        @Override
+        public int getSlotIndex(int subscriptionId) {
+            return SubscriptionManager.getSlotIndex(subscriptionId);
         }
     }
 }

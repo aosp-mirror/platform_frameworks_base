@@ -16,148 +16,107 @@
 
 package com.android.systemui.biometrics;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
-import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
-import android.util.TypedValue;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.systemui.R;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * UDFPS enrollment progress bar.
  */
 public class UdfpsEnrollProgressBarDrawable extends Drawable {
+    private static final String TAG = "UdfpsProgressBar";
 
-    private static final String TAG = "UdfpsEnrollProgressBarDrawable";
+    private static final float SEGMENT_GAP_ANGLE = 12f;
 
-    private static final float PROGRESS_BAR_THICKNESS_DP = 12;
+    @NonNull private final List<UdfpsEnrollProgressBarSegment> mSegments;
 
-    @NonNull private final Context mContext;
-    @NonNull private final UdfpsEnrollDrawable mParent;
-    @NonNull private final Paint mBackgroundCirclePaint;
-    @NonNull private final Paint mProgressPaint;
-
-    @Nullable private ValueAnimator mProgressAnimator;
-    private float mProgress;
-    private int mRotation; // After last step, rotate the progress bar once
-    private boolean mLastStepAcquired;
-
-    public UdfpsEnrollProgressBarDrawable(@NonNull Context context,
-            @NonNull UdfpsEnrollDrawable parent) {
-        mContext = context;
-        mParent = parent;
-
-        mBackgroundCirclePaint = new Paint();
-        mBackgroundCirclePaint.setStrokeWidth(Utils.dpToPixels(context, PROGRESS_BAR_THICKNESS_DP));
-        mBackgroundCirclePaint.setColor(context.getColor(R.color.white_disabled));
-        mBackgroundCirclePaint.setAntiAlias(true);
-        mBackgroundCirclePaint.setStyle(Paint.Style.STROKE);
-
-        // Background circle color + alpha
-        TypedArray tc = context.obtainStyledAttributes(
-                new int[] {android.R.attr.colorControlNormal});
-        int tintColor = tc.getColor(0, mBackgroundCirclePaint.getColor());
-        mBackgroundCirclePaint.setColor(tintColor);
-        tc.recycle();
-        TypedValue alpha = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.disabledAlpha, alpha, true);
-        mBackgroundCirclePaint.setAlpha((int) (alpha.getFloat() * 255));
-
-        // Progress should not be color extracted
-        mProgressPaint = new Paint();
-        mProgressPaint.setStrokeWidth(Utils.dpToPixels(context, PROGRESS_BAR_THICKNESS_DP));
-        mProgressPaint.setColor(context.getColor(R.color.udfps_enroll_progress));
-        mProgressPaint.setAntiAlias(true);
-        mProgressPaint.setStyle(Paint.Style.STROKE);
-        mProgressPaint.setStrokeCap(Paint.Cap.ROUND);
+    public UdfpsEnrollProgressBarDrawable(@NonNull Context context) {
+        mSegments = new ArrayList<>(UdfpsEnrollHelper.ENROLL_STAGE_COUNT);
+        float startAngle = SEGMENT_GAP_ANGLE / 2f;
+        final float sweepAngle = (360f / UdfpsEnrollHelper.ENROLL_STAGE_COUNT) - SEGMENT_GAP_ANGLE;
+        final Runnable invalidateRunnable = this::invalidateSelf;
+        for (int index = 0; index < UdfpsEnrollHelper.ENROLL_STAGE_COUNT; index++) {
+            mSegments.add(new UdfpsEnrollProgressBarSegment(context, getBounds(), startAngle,
+                    sweepAngle, SEGMENT_GAP_ANGLE, invalidateRunnable));
+            startAngle += sweepAngle + SEGMENT_GAP_ANGLE;
+        }
     }
 
     void setEnrollmentProgress(int remaining, int totalSteps) {
-        // Add one so that the first steps actually changes progress, but also so that the last
-        // step ends at 1.0
-        final float progress = (totalSteps - remaining + 1) / (float) (totalSteps + 1);
-        setEnrollmentProgress(progress);
+        if (remaining == totalSteps) {
+            // Show some progress for the initial touch.
+            setEnrollmentProgress(1);
+        } else {
+            setEnrollmentProgress(totalSteps - remaining);
+        }
     }
 
-    private void setEnrollmentProgress(float progress) {
-        if (mLastStepAcquired) {
-            return;
+    private void setEnrollmentProgress(int progressSteps) {
+        Log.d(TAG, "setEnrollmentProgress: progressSteps = " + progressSteps);
+
+        int segmentIndex = 0;
+        int prevThreshold = 0;
+        while (segmentIndex < mSegments.size()) {
+            final UdfpsEnrollProgressBarSegment segment = mSegments.get(segmentIndex);
+            final int threshold = UdfpsEnrollHelper.getStageThreshold(segmentIndex);
+
+            if (progressSteps >= threshold && !segment.isFilledOrFilling()) {
+                Log.d(TAG, "setEnrollmentProgress: segment[" + segmentIndex + "] complete");
+                segment.updateProgress(1f);
+                break;
+            } else if (progressSteps >= prevThreshold && progressSteps < threshold) {
+                final int relativeSteps = progressSteps - prevThreshold;
+                final int relativeThreshold = threshold - prevThreshold;
+                final float segmentProgress = (float) relativeSteps / (float) relativeThreshold;
+                Log.d(TAG, "setEnrollmentProgress: segment[" + segmentIndex + "] progress = "
+                        + segmentProgress);
+                segment.updateProgress(segmentProgress);
+                break;
+            }
+
+            segmentIndex++;
+            prevThreshold = threshold;
         }
 
-        long animationDuration = 150;
-
-        if (progress == 1.f) {
-            animationDuration = 400;
-            final ValueAnimator rotationAnimator = ValueAnimator.ofInt(0, 400);
-            rotationAnimator.setDuration(animationDuration);
-            rotationAnimator.addUpdateListener(animation -> {
-                Log.d(TAG, "Rotation: " + mRotation);
-                mRotation = (int) animation.getAnimatedValue();
-                mParent.invalidateSelf();
-            });
-            rotationAnimator.start();
+        if (progressSteps >= UdfpsEnrollHelper.getLastStageThreshold()) {
+            Log.d(TAG, "setEnrollmentProgress: startCompletionAnimation");
+            for (final UdfpsEnrollProgressBarSegment segment : mSegments) {
+                segment.startCompletionAnimation();
+            }
+        } else {
+            Log.d(TAG, "setEnrollmentProgress: cancelCompletionAnimation");
+            for (final UdfpsEnrollProgressBarSegment segment : mSegments) {
+                segment.cancelCompletionAnimation();
+            }
         }
-
-        if (mProgressAnimator != null && mProgressAnimator.isRunning()) {
-            mProgressAnimator.cancel();
-        }
-
-        mProgressAnimator = ValueAnimator.ofFloat(mProgress, progress);
-        mProgressAnimator.setDuration(animationDuration);
-        mProgressAnimator.addUpdateListener(animation -> {
-            mProgress = (float) animation.getAnimatedValue();
-            // Use the parent to invalidate, since it's the one that's attached as the view's
-            // drawable and has its callback set automatically. Invalidating via
-            // `this.invalidateSelf` actually does not invoke draw(), since this drawable's callback
-            // is not really set.
-            mParent.invalidateSelf();
-        });
-        mProgressAnimator.start();
     }
 
     void onLastStepAcquired() {
-        setEnrollmentProgress(1.f);
-        mLastStepAcquired = true;
+        Log.d(TAG, "setEnrollmentProgress: onLastStepAcquired");
+        setEnrollmentProgress(UdfpsEnrollHelper.getLastStageThreshold());
     }
 
     @Override
     public void draw(@NonNull Canvas canvas) {
+        Log.d(TAG, "setEnrollmentProgress: draw");
+
         canvas.save();
 
         // Progress starts from the top, instead of the right
-        canvas.rotate(-90 + mRotation, getBounds().centerX(), getBounds().centerY());
+        canvas.rotate(-90f, getBounds().centerX(), getBounds().centerY());
 
-        // Progress bar "background track"
-        final float halfPaddingPx = Utils.dpToPixels(mContext, PROGRESS_BAR_THICKNESS_DP) / 2;
-        canvas.drawArc(halfPaddingPx,
-                halfPaddingPx,
-                getBounds().right - halfPaddingPx,
-                getBounds().bottom - halfPaddingPx,
-                0,
-                360,
-                false,
-                mBackgroundCirclePaint
-        );
-
-        final float progress = 360.f * mProgress;
-        // Progress
-        canvas.drawArc(halfPaddingPx,
-                halfPaddingPx,
-                getBounds().right - halfPaddingPx,
-                getBounds().bottom - halfPaddingPx,
-                0,
-                progress,
-                false,
-                mProgressPaint
-        );
+        // Draw each of the enroll segments.
+        for (final UdfpsEnrollProgressBarSegment segment : mSegments) {
+            segment.draw(canvas);
+        }
 
         canvas.restore();
     }

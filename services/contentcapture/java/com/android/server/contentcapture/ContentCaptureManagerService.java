@@ -70,6 +70,7 @@ import android.provider.Settings;
 import android.service.contentcapture.ActivityEvent.ActivityEventType;
 import android.service.contentcapture.IDataShareCallback;
 import android.service.contentcapture.IDataShareReadAdapter;
+import android.service.voice.VoiceInteractionManagerInternal;
 import android.util.ArraySet;
 import android.util.LocalLog;
 import android.util.Pair;
@@ -300,6 +301,37 @@ public final class ContentCaptureManagerService extends
     protected boolean isDisabledLocked(@UserIdInt int userId) {
         return mDisabledByDeviceConfig || isDisabledBySettingsLocked(userId)
                 || super.isDisabledLocked(userId);
+    }
+
+    @Override
+    protected void assertCalledByPackageOwner(@NonNull String packageName) {
+        try {
+            super.assertCalledByPackageOwner(packageName);
+        } catch (SecurityException e) {
+            final int callingUid = Binder.getCallingUid();
+
+            VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity
+                    hotwordDetectionServiceIdentity =
+                    LocalServices.getService(VoiceInteractionManagerInternal.class)
+                            .getHotwordDetectionServiceIdentity();
+
+            if (callingUid != hotwordDetectionServiceIdentity.getIsolatedUid()) {
+                super.assertCalledByPackageOwner(packageName);
+                return;
+            }
+
+            final String[] packages =
+                    getContext()
+                            .getPackageManager()
+                            .getPackagesForUid(hotwordDetectionServiceIdentity.getOwnerUid());
+            if (packages != null) {
+                for (String candidate : packages) {
+                    if (packageName.equals(candidate)) return; // Found it
+                }
+            }
+
+            throw e;
+        }
     }
 
     private boolean isDisabledBySettingsLocked(@UserIdInt int userId) {

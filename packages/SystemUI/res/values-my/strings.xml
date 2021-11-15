@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"မျက်နှာကို မမှတ်မိပါ။ လက်ဗွေကို အစားထိုးသုံးပါ။"</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"ရှေ့ဆက်ရန် သင့်လက်ဗွေကို သုံးပါ"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"လက်ဗွေကို မမှတ်မိပါ။ ဖန်သားပြင်လော့ခ်ချခြင်းကို အစားထိုးသုံးပါ။"</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"သင့်ကို ရှာဖွေနေသည်…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"မျက်နှာသင်္ကေတ"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"အံဝင်ခွင်ကျ ဇူးမ်ခလုတ်"</string>
@@ -452,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ဖွင့်ရန် ထပ်ပြီး ပုတ်ပါ"</string>
     <string name="tap_again" msgid="1315420114387908655">"ထပ်တို့ပါ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ဖွင့်ရန် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"ဖွင့်ရန် နှိပ်ပါ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ထပ်စမ်းကြည့်ရန် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ကို အသုံးပြုရန် လော့ခ်ဖွင့်ပါ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ဤစက်ကို သင့်အဖွဲ့အစည်းက ပိုင်ဆိုင်သည်"</string>
@@ -508,7 +511,7 @@
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ရိုက်ကူးဖမ်းယူခြင်း (သို့) ကာစ်လုပ်ခြင်း စတင်မလား။"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> နှင့် ဖမ်းယူခြင်း သို့မဟုတ် ကာစ်လုပ်ခြင်း စတင်မလား။"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"နောက်ထပ် မပြပါနှင့်"</string>
-    <string name="clear_all_notifications_text" msgid="348312370303046130">"အားလုံးထုတ်ပစ်ရန်"</string>
+    <string name="clear_all_notifications_text" msgid="348312370303046130">"အားလုံးရှင်းရန်"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"စီမံရန်"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"မှတ်တမ်း"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"အသစ်"</string>

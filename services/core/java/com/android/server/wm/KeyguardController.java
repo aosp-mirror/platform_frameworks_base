@@ -106,13 +106,13 @@ class KeyguardController {
     }
 
     /**
-     * @return {@code true} for default display when AOD is showing. Otherwise, same as
-     *         {@link #isKeyguardOrAodShowing(int)}
+     * @return {@code true} for default display when AOD is showing, not going away. Otherwise, same
+     *         as {@link #isKeyguardOrAodShowing(int)}
      * TODO(b/125198167): Replace isKeyguardOrAodShowing() by this logic.
      */
     boolean isKeyguardUnoccludedOrAodShowing(int displayId) {
         if (displayId == DEFAULT_DISPLAY && mAodShowing) {
-            return true;
+            return !mKeyguardGoingAway;
         }
         return isKeyguardOrAodShowing(displayId);
     }
@@ -374,7 +374,9 @@ class KeyguardController {
                 // can be committed before KEYGUARD_OCCLUDE transition is handled.
                 // Set mRequestForceTransition flag to make sure that the app transition animation
                 // is applied for such case.
-                if (topActivity != null) {
+                // TODO(b/194243906): Fix this before enabling the remote keyguard animation.
+                if (WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation
+                        && topActivity != null) {
                     topActivity.mRequestForceTransition = true;
                 }
                 updateKeyguardSleepToken(DEFAULT_DISPLAY);
@@ -475,7 +477,7 @@ class KeyguardController {
         final KeyguardDisplayState state = getDisplayState(displayId);
         if (isKeyguardUnoccludedOrAodShowing(displayId)) {
             state.mSleepTokenAcquirer.acquire(displayId);
-        } else if (!isKeyguardUnoccludedOrAodShowing(displayId)) {
+        } else {
             state.mSleepTokenAcquirer.release(displayId);
         }
     }

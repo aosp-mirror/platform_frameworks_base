@@ -885,6 +885,7 @@ public class JobSchedulerServiceTest {
         //   * E jobs test that expedited jobs don't skip the line when the app has no regular jobs
         //   * F jobs test correct expedited/regular ordering doesn't push jobs too high in list
         //   * G jobs test correct ordering for regular jobs
+        //   * H job tests correct behavior when enqueue times are the same
         JobStatus rA1 = createJobStatus("testPendingJobSorting", createJobInfo(1), 1);
         JobStatus rB2 = createJobStatus("testPendingJobSorting", createJobInfo(2), 2);
         JobStatus eC3 = createJobStatus("testPendingJobSorting",
@@ -896,6 +897,7 @@ public class JobSchedulerServiceTest {
                 createJobInfo(6).setExpedited(true), 2);
         JobStatus eA7 = createJobStatus("testPendingJobSorting",
                 createJobInfo(7).setExpedited(true), 1);
+        JobStatus rH8 = createJobStatus("testPendingJobSorting", createJobInfo(8), 14);
         JobStatus rF8 = createJobStatus("testPendingJobSorting", createJobInfo(8), 6);
         JobStatus eF9 = createJobStatus("testPendingJobSorting",
                 createJobInfo(9).setExpedited(true), 6);
@@ -915,6 +917,7 @@ public class JobSchedulerServiceTest {
         eB6.enqueueTime = 6;
         eA7.enqueueTime = 7;
         rF8.enqueueTime = 8;
+        rH8.enqueueTime = 8;
         eF9.enqueueTime = 9;
         rC10.enqueueTime = 10;
         eC11.enqueueTime = 11;
@@ -931,6 +934,7 @@ public class JobSchedulerServiceTest {
         mService.mPendingJobs.add(rD4);
         mService.mPendingJobs.add(eA7);
         mService.mPendingJobs.add(rG12);
+        mService.mPendingJobs.add(rH8);
         mService.mPendingJobs.add(rF8);
         mService.mPendingJobs.add(eB6);
         mService.mPendingJobs.add(eE14);
@@ -943,7 +947,7 @@ public class JobSchedulerServiceTest {
         mService.mPendingJobs.sort(mService.mPendingJobComparator);
 
         final JobStatus[] expectedOrder = new JobStatus[]{
-                eA7, rA1, eB6, rB2, eC3, rD4, eE5, eF9, rF8, eC11, rC10, rG12, rG13, eE14};
+                eA7, rA1, eB6, rB2, eC3, rD4, eE5, eF9, rH8, rF8, eC11, rC10, rG12, rG13, eE14};
         for (int i = 0; i < expectedOrder.length; ++i) {
             assertEquals("List wasn't correctly sorted @ index " + i,
                     expectedOrder[i].getJobId(), mService.mPendingJobs.get(i).getJobId());
@@ -995,7 +999,7 @@ public class JobSchedulerServiceTest {
         for (int i = 0; i < 2500; ++i) {
             JobStatus job = createJobStatus("testPendingJobSorting_Random",
                     createJobInfo(i).setExpedited(random.nextBoolean()), random.nextInt(250));
-            job.enqueueTime = Math.abs(random.nextInt(1_000_000));
+            job.enqueueTime = random.nextInt(1_000_000);
             mService.mPendingJobs.add(job);
 
             mService.mPendingJobComparator.refreshLocked();
@@ -1023,18 +1027,48 @@ public class JobSchedulerServiceTest {
 
     @Test
     public void testPendingJobSortingTransitivity() {
-        Random random = new Random(1); // Always use the same series of pseudo random values.
+        // Always use the same series of pseudo random values.
+        for (int seed : new int[]{1337, 7357, 606, 6357, 41106010, 3, 2, 1}) {
+            Random random = new Random(seed);
 
-        mService.mPendingJobs.clear();
+            mService.mPendingJobs.clear();
 
-        for (int i = 0; i < 250; ++i) {
-            JobStatus job = createJobStatus("testPendingJobSortingTransitivity",
-                    createJobInfo(i).setExpedited(random.nextBoolean()), random.nextInt(50));
-            job.enqueueTime = Math.abs(random.nextInt(1_000_000));
-            job.overrideState = random.nextInt(4);
-            mService.mPendingJobs.add(job);
+            for (int i = 0; i < 300; ++i) {
+                JobStatus job = createJobStatus("testPendingJobSortingTransitivity",
+                        createJobInfo(i).setExpedited(random.nextBoolean()), random.nextInt(50));
+                job.enqueueTime = random.nextInt(1_000_000);
+                job.overrideState = random.nextInt(4);
+                mService.mPendingJobs.add(job);
+            }
+
+            verifyPendingJobComparatorTransitivity();
         }
+    }
 
+    @Test
+    public void testPendingJobSortingTransitivity_Concentrated() {
+        // Always use the same series of pseudo random values.
+        for (int seed : new int[]{1337, 6000, 637739, 6357, 1, 7, 13}) {
+            Random random = new Random(seed);
+
+            mService.mPendingJobs.clear();
+
+            for (int i = 0; i < 300; ++i) {
+                JobStatus job = createJobStatus("testPendingJobSortingTransitivity_Concentrated",
+                        createJobInfo(i).setExpedited(random.nextFloat() < .03),
+                        random.nextInt(20));
+                job.enqueueTime = random.nextInt(250);
+                job.overrideState = random.nextFloat() < .01
+                        ? JobStatus.OVERRIDE_SORTING : JobStatus.OVERRIDE_NONE;
+                mService.mPendingJobs.add(job);
+                Log.d(TAG, sortedJobToString(job));
+            }
+
+            verifyPendingJobComparatorTransitivity();
+        }
+    }
+
+    private void verifyPendingJobComparatorTransitivity() {
         mService.mPendingJobComparator.refreshLocked();
 
         for (int i = 0; i < mService.mPendingJobs.size(); ++i) {

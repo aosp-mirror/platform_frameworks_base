@@ -77,7 +77,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     @NonNull
     @Override
     protected Callback wrapCallbackForStart(@NonNull Callback callback) {
-        return new CompositeCallback(createALSCallback(), callback);
+        return new CompositeCallback(createALSCallback(true /* startWithClient */), callback);
     }
 
     @Override

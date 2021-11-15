@@ -295,6 +295,7 @@ public class BiometricScheduler {
         @Override
         public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
             mHandler.post(() -> {
+                clientMonitor.destroy();
                 if (mCurrentOperation == null) {
                     Slog.e(getTag(), "[Finishing] " + clientMonitor
                             + " but current operation is null, success: " + success
@@ -355,7 +356,6 @@ public class BiometricScheduler {
 
     /**
      * Creates a new scheduler.
-     * @param context system_server context.
      * @param tag for the specific instance of the scheduler. Should be unique.
      * @param sensorType the sensorType that this scheduler is handling.
      * @param gestureAvailabilityDispatcher may be null if the sensor does not support gestures

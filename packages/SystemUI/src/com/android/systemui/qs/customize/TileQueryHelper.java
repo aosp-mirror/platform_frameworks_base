@@ -121,19 +121,15 @@ public class TileQueryHelper {
         }
 
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
-        // TODO(b/174753536): Move it into the config file.
         if (mFeatureFlags.isProviderModelSettingEnabled()) {
             possibleTiles.remove("cell");
             possibleTiles.remove("wifi");
-        } else {
-            possibleTiles.remove("internet");
         }
 
         for (String spec : possibleTiles) {
             // Only add current and stock tiles that can be created from QSFactoryImpl.
             // Do not include CustomTile. Those will be created by `addPackageTiles`.
             if (spec.startsWith(CustomTile.PREFIX)) continue;
-            // TODO(b/174753536): Move it into the config file.
             final QSTile tile = host.createTile(spec);
             if (tile == null) {
                 continue;

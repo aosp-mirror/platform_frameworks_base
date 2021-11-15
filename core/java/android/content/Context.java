@@ -3195,7 +3195,7 @@ public abstract class Context {
      * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#O}
      * or higher are not allowed to start background services from the background.
      * See
-     * <a href="{@docRoot}/about/versions/oreo/background">
+     * <a href="/about/versions/oreo/background">
      * Background Execution Limits</a>
      * for more details.
      *
@@ -3204,7 +3204,7 @@ public abstract class Context {
      * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#S}
      * or higher are not allowed to start foreground services from the background.
      * See
-     * <a href="{@docRoot}/about/versions/12/behavior-changes-12">
+     * <a href="/about/versions/12/behavior-changes-12">
      * Behavior changes: Apps targeting Android 12
      * </a>
      * for more details.
@@ -3258,7 +3258,7 @@ public abstract class Context {
      * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#S}
      * or higher are not allowed to start foreground services from the background.
      * See
-     * <a href="{@docRoot}/about/versions/12/behavior-changes-12">
+     * <a href="/about/versions/12/behavior-changes-12">
      * Behavior changes: Apps targeting Android 12
      * </a>
      * for more details.
@@ -4464,11 +4464,11 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
-     * android.media.MediaTranscodeManager} for transcoding media.
+     * android.media.MediaTranscodingManager} for transcoding media.
      *
      * @hide
      * @see #getSystemService(String)
-     * @see android.media.MediaTranscodeManager
+     * @see android.media.MediaTranscodingManager
      */
     @SystemApi
     public static final String MEDIA_TRANSCODING_SERVICE = "media_transcoding";

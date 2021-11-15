@@ -3538,7 +3538,7 @@ public class CarrierConfigManager {
             "nr_advanced_capable_pco_id_int";
 
     /**
-     * This configuration allows the framework to use user data communication to detect RRC state,
+     * This configuration allows the framework to use user data communication to detect Idle state,
      * and this is used on the 5G icon.
      *
      * There is a new way for for RRC state detection at Android 12. If
@@ -3546,16 +3546,23 @@ public class CarrierConfigManager {
      * {@link TelephonyManager#CAPABILITY_PHYSICAL_CHANNEL_CONFIG_1_6_SUPPORTED}) returns true,
      * then framework can use PHYSICAL_CHANNEL_CONFIG for RRC state detection. Based on this
      * condition, some carriers want to use the legacy behavior that way is using user data
-     * communication to detect the RRC state. Therefore, this configuration allows the framework
-     * to use user data communication to detect RRC state.
+     * communication to detect the Idle state. Therefore, this configuration allows the framework
+     * to use user data communication to detect Idle state.
      *
-     * The precondition is
+     * There are 3 situations reflects the carrier define Idle state.
+     * 1. using PHYSICAL_CHANNEL_CONFIG to detect RRC Idle
+     * 2. using all of data connections to detect RRC Idle.
+     * 3. using data communication(consider internet data connection only) to detect data Idle.
+     *
+     * How to setup for above 3 cases?
+     * For below part, we call the condition#1 is device support
      * {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}(
-     * {@link TelephonyManager#CAPABILITY_PHYSICAL_CHANNEL_CONFIG_1_6_SUPPORTED}) returns true,
-     * otherwise this config is not working.
-     * If this is true, framework uses the user data communication for RRC state detection.
-     * If this is false, framework uses the PHYSICAL_CHANNEL_CONFIG for RRC state detection.
+     * {@link TelephonyManager#CAPABILITY_PHYSICAL_CHANNEL_CONFIG_1_6_SUPPORTED}).
+     * The condition#2 is carrier enable the KEY_LTE_ENDC_USING_USER_DATA_FOR_RRC_DETECTION_BOOL.
      *
+     * For case#1, the condition#1 is true and the condition#2 is false.
+     * For case#2, the condition#1 is false and the condition#2 is false.
+     * For case#3, the condition#2 is true.
      * @hide
      */
     public static final String KEY_LTE_ENDC_USING_USER_DATA_FOR_RRC_DETECTION_BOOL =

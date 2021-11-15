@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Obličej se nepodařilo rozpoznat. Použijte místo něj otisk prstu."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Pokračujte přiložením prstu"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Otisk prstu se nepodařilo rozpoznat. Použijte místo něj zámek obrazovky."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Hledáme vás…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ikona obličeje"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Tlačítko úpravy velikosti z důvodu kompatibility"</string>
@@ -456,6 +458,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Oznámení otevřete opětovným klepnutím"</string>
     <string name="tap_again" msgid="1315420114387908655">"Znovu klepněte"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Otevřete přejetím prstem nahoru"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Stisknutím otevřete"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Přejetím nahoru to zkusíte znovu"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC vyžaduje odemknutou obrazovku"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Toto zařízení patří vaší organizaci"</string>
@@ -712,7 +715,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Rozšířené ovládací prvky oznámení"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Zapnuto"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Vypnuto"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Rozšířené ovládací prvky oznámení umožňují nastavit úroveň důležitosti oznámení aplikace od 0 do 5. \n\n"<b>"Úroveň 5"</b>" \n– Zobrazit na začátku seznamu oznámení \n– Povolit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 4"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 3"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n\n"<b>"Úroveň 2"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat žádný zvukový signál ani nevibrovat \n\n"<b>"Úroveň 1"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat zvukový signál ani nevibrovat \n– Skrýt z obrazovky uzamčení a stavového řádku \n– Zobrazovat na konci seznamu oznámení \n\n"<b>";Úroveň 0"</b>" \n– Blokovat všechna oznámení z aplikace"</string>
+    <string name="power_notification_controls_description" msgid="1334963837572708952">"Rozšířené ovládací prvky oznámení umožňují nastavit úroveň důležitosti oznámení aplikace od 0 do 5. \n\n"<b>"Úroveň 5"</b>" \n– Zobrazit na začátku seznamu oznámení \n– Povolit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 4"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 3"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n\n"<b>"Úroveň 2"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat žádný zvukový signál ani nevibrovat \n\n"<b>"Úroveň 1"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat zvukový signál ani nevibrovat \n– Skrýt na obrazovce uzamčení a stavového řádku \n– Zobrazovat na konci seznamu oznámení \n\n"<b>";Úroveň 0"</b>" \n– Blokovat všechna oznámení z aplikace"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Oznámení"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Tato oznámení již nebudete dostávat"</string>
     <string name="notification_channel_minimized" msgid="6892672757877552959">"Tato oznámení budou minimalizována"</string>

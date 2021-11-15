@@ -2248,6 +2248,11 @@ public class VolumeDialogImpl implements VolumeDialog,
 
         @Override
         public void onClick(View view) {
+            // If the ringer drawer isn't open, don't let anything in it be clicked.
+            if (!mIsRingerDrawerOpen) {
+                return;
+            }
+
             setRingerMode(mClickedRingerMode);
 
             mRingerDrawerIconAnimatingSelected = getDrawerIconViewForMode(mClickedRingerMode);

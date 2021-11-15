@@ -520,6 +520,12 @@ public class VoiceInteractionService extends Service {
             // Ignore.
         }
 
+        try {
+            mSystemService.shutdownHotwordDetectionService();
+        } catch (Exception ex) {
+            // Ignore.
+        }
+
         mSoftwareHotwordDetector = null;
     }
 

@@ -79,8 +79,7 @@ import java.util.List;
 
 class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConnection.Callback {
     final static String TAG = "VoiceInteractionServiceManager";
-    // TODO (b/177502877): Set the Debug flag to false before shipping.
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     final static String CLOSE_REASON_VOICE_INTERACTION = "voiceinteraction";
 
@@ -420,9 +419,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
             IHotwordRecognitionStatusCallback callback) {
-        if (DEBUG) {
-            Slog.d(TAG, "updateStateLocked");
-        }
+        Slog.v(TAG, "updateStateLocked");
         if (mHotwordDetectionComponentName == null) {
             Slog.w(TAG, "Hotword detection service name not found");
             throw new IllegalStateException("Hotword detection service name not found");
@@ -582,6 +579,14 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             return;
         }
         mHotwordDetectionConnection.forceRestart();
+    }
+
+    void setDebugHotwordLoggingLocked(boolean logging) {
+        if (mHotwordDetectionConnection == null) {
+            Slog.w(TAG, "Failed to set temporary debug logging: no hotword detection active");
+            return;
+        }
+        mHotwordDetectionConnection.setDebugHotwordLoggingLocked(logging);
     }
 
     void resetHotwordDetectionConnectionLocked() {

@@ -269,6 +269,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private OngoingCallController mOngoingCallController;
     @Mock private SystemStatusAnimationScheduler mAnimationScheduler;
     @Mock private StatusBarLocationPublisher mLocationPublisher;
+    @Mock private StatusBarIconController mIconController;
     @Mock private LockscreenShadeTransitionController mLockscreenTransitionController;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private IWallpaperManager mWallpaperManager;
@@ -442,6 +443,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mOngoingCallController,
                 mAnimationScheduler,
                 mLocationPublisher,
+                mIconController,
                 mLockscreenTransitionController,
                 mFeatureFlags,
                 mKeyguardUnlockAnimationController,
@@ -807,6 +809,30 @@ public class StatusBarTest extends SysuiTestCase {
                 .thenReturn(BiometricUnlockController.MODE_WAKE_AND_UNLOCK);
         mStatusBar.updateScrimController();
         verify(mScrimController).transitionTo(eq(ScrimState.UNLOCKED), any());
+    }
+
+    @Test
+    public void testTransitionLaunch_goesToUnlocked() {
+        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
+        mStatusBar.showKeyguardImpl();
+
+        // Starting a pulse should change the scrim controller to the pulsing state
+        when(mNotificationPanelViewController.isLaunchTransitionRunning()).thenReturn(true);
+        when(mNotificationPanelViewController.isLaunchingAffordanceWithPreview()).thenReturn(true);
+        mStatusBar.updateScrimController();
+        verify(mScrimController).transitionTo(eq(ScrimState.UNLOCKED), any());
+    }
+
+    @Test
+    public void testTransitionLaunch_noPreview_doesntGoUnlocked() {
+        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
+        mStatusBar.showKeyguardImpl();
+
+        // Starting a pulse should change the scrim controller to the pulsing state
+        when(mNotificationPanelViewController.isLaunchTransitionRunning()).thenReturn(true);
+        when(mNotificationPanelViewController.isLaunchingAffordanceWithPreview()).thenReturn(false);
+        mStatusBar.updateScrimController();
+        verify(mScrimController).transitionTo(eq(ScrimState.KEYGUARD));
     }
 
     @Test

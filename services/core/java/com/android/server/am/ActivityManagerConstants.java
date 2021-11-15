@@ -108,6 +108,8 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_FG_TO_BG_FGS_GRACE_DURATION = "fg_to_bg_fgs_grace_duration";
     static final String KEY_FGS_START_FOREGROUND_TIMEOUT = "fgs_start_foreground_timeout";
     static final String KEY_FGS_ATOM_SAMPLE_RATE = "fgs_atom_sample_rate";
+    static final String KEY_FGS_START_ALLOWED_LOG_SAMPLE_RATE = "fgs_start_allowed_log_sample_rate";
+    static final String KEY_FGS_START_DENIED_LOG_SAMPLE_RATE = "fgs_start_denied_log_sample_rate";
     static final String KEY_FGS_ALLOW_OPT_OUT = "fgs_allow_opt_out";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
@@ -152,6 +154,8 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_FG_TO_BG_FGS_GRACE_DURATION = 5 * 1000;
     private static final int DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS = 10 * 1000;
     private static final float DEFAULT_FGS_ATOM_SAMPLE_RATE = 1; // 100 %
+    private static final float DEFAULT_FGS_START_ALLOWED_LOG_SAMPLE_RATE = 0.25f; // 25%
+    private static final float DEFAULT_FGS_START_DENIED_LOG_SAMPLE_RATE = 1; // 100%
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
      */
@@ -496,6 +500,20 @@ final class ActivityManagerConstants extends ContentObserver {
     volatile float mFgsAtomSampleRate = DEFAULT_FGS_ATOM_SAMPLE_RATE;
 
     /**
+     * Sample rate for the allowed FGS start WTF logs.
+     *
+     * If the value is 0.1, 10% of the logs would be sampled.
+     */
+    volatile float mFgsStartAllowedLogSampleRate = DEFAULT_FGS_START_ALLOWED_LOG_SAMPLE_RATE;
+
+    /**
+     * Sample rate for the denied FGS start WTF logs.
+     *
+     * If the value is 0.1, 10% of the logs would be sampled.
+     */
+    volatile float mFgsStartDeniedLogSampleRate = DEFAULT_FGS_START_DENIED_LOG_SAMPLE_RATE;
+
+    /**
      * Whether to allow "opt-out" from the foreground service restrictions.
      * (https://developer.android.com/about/versions/12/foreground-services)
      */
@@ -710,6 +728,12 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_FGS_ATOM_SAMPLE_RATE:
                                 updateFgsAtomSamplePercent();
+                                break;
+                            case KEY_FGS_START_ALLOWED_LOG_SAMPLE_RATE:
+                                updateFgsStartAllowedLogSamplePercent();
+                                break;
+                            case KEY_FGS_START_DENIED_LOG_SAMPLE_RATE:
+                                updateFgsStartDeniedLogSamplePercent();
                                 break;
                             case KEY_FGS_ALLOW_OPT_OUT:
                                 updateFgsAllowOptOut();
@@ -1057,6 +1081,20 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_FGS_ATOM_SAMPLE_RATE);
     }
 
+    private void updateFgsStartAllowedLogSamplePercent() {
+        mFgsStartAllowedLogSampleRate = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FGS_START_ALLOWED_LOG_SAMPLE_RATE,
+                DEFAULT_FGS_START_ALLOWED_LOG_SAMPLE_RATE);
+    }
+
+    private void updateFgsStartDeniedLogSamplePercent() {
+        mFgsStartDeniedLogSampleRate = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FGS_START_DENIED_LOG_SAMPLE_RATE,
+                DEFAULT_FGS_START_DENIED_LOG_SAMPLE_RATE);
+    }
+
     private void updateFgsAllowOptOut() {
         mFgsAllowOptOut = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -1285,6 +1323,10 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mFgsStartRestrictionCheckCallerTargetSdk);
         pw.print("  "); pw.print(KEY_FGS_ATOM_SAMPLE_RATE);
         pw.print("="); pw.println(mFgsAtomSampleRate);
+        pw.print("  "); pw.print(KEY_FGS_START_ALLOWED_LOG_SAMPLE_RATE);
+        pw.print("="); pw.println(mFgsStartAllowedLogSampleRate);
+        pw.print("  "); pw.print(KEY_FGS_START_DENIED_LOG_SAMPLE_RATE);
+        pw.print("="); pw.println(mFgsStartDeniedLogSampleRate);
         pw.print("  "); pw.print(KEY_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR);
         pw.print("="); pw.println(mPushMessagingOverQuotaBehavior);
         pw.print("  "); pw.print(KEY_FGS_ALLOW_OPT_OUT);

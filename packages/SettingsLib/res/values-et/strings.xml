@@ -507,7 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmid ja meeldetuletused"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Luba alarmide ja meeldetuletuste määramine"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmid ja meeldetuletused"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Lubage sellel rakendusel määrata alarme ja ajastada kiire tähtajaga toiminguid. See võimaldab rakendusel töötada taustal, mistõttu võib akukasutus olla suurem.\n\nKui see luba on välja lülitatud, siis olemasolevad alarmid ja selle rakenduse ajastatud ajapõhised sündmused ei tööta."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Lubage sellel rakendusel määrata alarme ja ajastada ajakriitilisi toiminguid. See võimaldab rakendusel töötada taustal, mistõttu võib akukasutus olla suurem.\n\nKui see luba on välja lülitatud, siis olemasolevad alarmid ja selle rakenduse ajastatud ajapõhised sündmused ei tööta."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ajakava, äratus, meeldetuletus, kell"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Lülita sisse"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Valiku Mitte segada sisselülitamine"</string>
