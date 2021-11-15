@@ -558,7 +558,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 Slog.d(TAG, "Marking session " + sessionId + " as failed: " + errorMessage);
                 childSessions = getChildSessionsLocked();
             }
-            cleanStageDir(childSessions);
+            destroyInternal();
+            for (PackageInstallerSession child : childSessions) {
+                child.destroyInternal();
+            }
             mCallback.onStagedSessionChanged(PackageInstallerSession.this);
         }
 
@@ -576,7 +579,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 Slog.d(TAG, "Marking session " + sessionId + " as applied");
                 childSessions = getChildSessionsLocked();
             }
-            cleanStageDir(childSessions);
+            destroyInternal();
+            for (PackageInstallerSession child : childSessions) {
+                child.destroyInternal();
+            }
             mCallback.onStagedSessionChanged(PackageInstallerSession.this);
         }
 
@@ -699,13 +705,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     return;
                 }
                 mDestroyed = true;
-                List<PackageInstallerSession> childSessions = getChildSessionsLocked();
                 r = () -> {
                     assertNotLocked("abandonStaged");
                     if (mCommitted.get()) {
                         mStagingManager.abortCommittedSession(this);
                     }
-                    cleanStageDir(childSessions);
                     destroyInternal();
                     dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
                     maybeCleanUpChildSessions();
@@ -2102,10 +2106,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         destroyInternal();
         // Dispatch message to remove session from PackageInstallerService.
         dispatchSessionFinished(error, detailMessage, null);
-        // TODO(b/173194203): clean up staged session in destroyInternal() call instead
-        if (isStaged() && stageDir != null) {
-            cleanStageDir();
-        }
     }
 
     private void onSessionVerificationFailure(int error, String msg) {
@@ -4282,41 +4282,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             incrementalFileStorages = mIncrementalFileStorages;
             mIncrementalFileStorages = null;
         }
-        // For staged sessions, we don't delete the directory where the packages have been copied,
-        // since these packages are supposed to be read on reboot.
-        // Those dirs are deleted when the staged session has reached a final state.
-        if (stageDir != null && !params.isStaged) {
-            try {
-                if (incrementalFileStorages != null) {
-                    incrementalFileStorages.cleanUpAndMarkComplete();
-                }
-                mInstaller.rmPackageDir(stageDir.getAbsolutePath());
-            } catch (InstallerException ignored) {
-            }
-        }
-    }
-
-    private void cleanStageDir(List<PackageInstallerSession> childSessions) {
-        if (isMultiPackage()) {
-            for (PackageInstallerSession childSession : childSessions) {
-                childSession.cleanStageDir();
-            }
-        } else {
-            cleanStageDir();
-        }
-    }
-
-    private void cleanStageDir() {
-        final IncrementalFileStorages incrementalFileStorages;
-        synchronized (mLock) {
-            incrementalFileStorages = mIncrementalFileStorages;
-            mIncrementalFileStorages = null;
-        }
         try {
             if (incrementalFileStorages != null) {
                 incrementalFileStorages.cleanUpAndMarkComplete();
             }
-            mInstaller.rmPackageDir(stageDir.getAbsolutePath());
+            if (stageDir != null) {
+                mInstaller.rmPackageDir(stageDir.getAbsolutePath());
+            }
         } catch (InstallerException ignored) {
         }
     }
