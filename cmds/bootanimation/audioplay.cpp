@@ -334,6 +334,11 @@ class AudioAnimationCallbacks : public android::BootAnimation::Callbacks {
 public:
     void init(const Vector<Animation::Part>& parts) override {
         const Animation::Part* partWithAudio = nullptr;
+
+        if (!playSoundsAllowed()) {
+            return;
+        }
+
         for (const Animation::Part& part : parts) {
             if (part.audioData != nullptr) {
                 partWithAudio = &part;
