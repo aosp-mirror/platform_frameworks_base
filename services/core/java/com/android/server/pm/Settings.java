@@ -42,6 +42,7 @@ import android.content.pm.ComponentInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackagePartitions;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
@@ -437,7 +438,7 @@ public final class Settings implements Watchable, Snappable {
         public void forceCurrent() {
             sdkVersion = Build.VERSION.SDK_INT;
             databaseVersion = CURRENT_DATABASE_VERSION;
-            fingerprint = Build.FINGERPRINT;
+            fingerprint = PackagePartitions.FINGERPRINT;
         }
     }
 
@@ -5357,7 +5358,7 @@ public final class Settings implements Watchable, Snappable {
         }
 
         private String getExtendedFingerprint(long version) {
-            return Build.FINGERPRINT + "?pc_version=" + version;
+            return PackagePartitions.FINGERPRINT + "?pc_version=" + version;
         }
 
         public void writeStateForUserAsyncLPr(int userId) {

@@ -1493,8 +1493,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         PackageManagerService m = new PackageManagerService(injector, onlyCore, factoryTest,
-                Build.FINGERPRINT, Build.IS_ENG, Build.IS_USERDEBUG, Build.VERSION.SDK_INT,
-                Build.VERSION.INCREMENTAL, SNAPSHOT_ENABLED);
+                PackagePartitions.FINGERPRINT, Build.IS_ENG, Build.IS_USERDEBUG,
+                Build.VERSION.SDK_INT, Build.VERSION.INCREMENTAL, SNAPSHOT_ENABLED);
         t.traceEnd(); // "create package manager"
 
         final CompatChange.ChangeListener selinuxChangeListener = packageName -> {
@@ -1904,8 +1904,8 @@ public class PackageManagerService extends IPackageManager.Stub
             mIsUpgrade =
                     !buildFingerprint.equals(ver.fingerprint);
             if (mIsUpgrade) {
-                PackageManagerServiceUtils.logCriticalInfo(Log.INFO,
-                        "Upgrading from " + ver.fingerprint + " to " + Build.FINGERPRINT);
+                PackageManagerServiceUtils.logCriticalInfo(Log.INFO, "Upgrading from "
+                        + ver.fingerprint + " to " + PackagePartitions.FINGERPRINT);
             }
 
             // when upgrading from pre-M, promote system app permissions from install to runtime
@@ -2003,7 +2003,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // this situation.
             if (mIsUpgrade) {
                 Slog.i(TAG, "Build fingerprint changed from " + ver.fingerprint + " to "
-                        + Build.FINGERPRINT + "; regranting permissions for internal storage");
+                        + PackagePartitions.FINGERPRINT
+                        + "; regranting permissions for internal storage");
             }
             mPermissionManager.onStorageVolumeMounted(
                     StorageManager.UUID_PRIVATE_INTERNAL, mIsUpgrade);
@@ -2037,7 +2038,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                         | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES);
                     }
                 }
-                ver.fingerprint = Build.FINGERPRINT;
+                ver.fingerprint = PackagePartitions.FINGERPRINT;
             }
 
             // Legacy existing (installed before Q) non-system apps to hide
