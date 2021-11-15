@@ -19,7 +19,6 @@ package com.android.systemui.media.dialog;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
@@ -41,6 +40,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.settingslib.Utils;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
@@ -165,7 +165,7 @@ public abstract class MediaOutputBaseAdapter extends
                 boolean showProgressBar, boolean showStatus) {
             mTwoLineLayout.setVisibility(View.GONE);
             final Drawable backgroundDrawable =
-                    showSeekBar
+                    showSeekBar || showProgressBar
                             ? mContext.getDrawable(R.drawable.media_output_item_background_active)
                                     .mutate() : mContext.getDrawable(
                             R.drawable.media_output_item_background)
@@ -177,15 +177,6 @@ public abstract class MediaOutputBaseAdapter extends
             mStatusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
             mTitleText.setText(title);
             mTitleText.setVisibility(View.VISIBLE);
-            mTitleText.setTranslationY(0);
-            if (bFocused) {
-                mTitleText.setTypeface(Typeface.create(mContext.getString(
-                        com.android.internal.R.string.config_headlineFontFamilyMedium),
-                        Typeface.NORMAL));
-            } else {
-                mTitleText.setTypeface(Typeface.create(mContext.getString(
-                        com.android.internal.R.string.config_headlineFontFamily), Typeface.NORMAL));
-            }
         }
 
         void setTwoLineLayout(MediaDevice device, boolean bFocused, boolean showSeekBar,
@@ -359,10 +350,10 @@ public abstract class MediaOutputBaseAdapter extends
         Drawable getSpeakerDrawable() {
             final Drawable drawable = mContext.getDrawable(R.drawable.ic_speaker_group_black_24dp)
                     .mutate();
-            final ColorStateList list = mContext.getResources().getColorStateList(
-                    R.color.advanced_icon_color, mContext.getTheme());
-            drawable.setColorFilter(new PorterDuffColorFilter(list.getDefaultColor(),
-                    PorterDuff.Mode.SRC_IN));
+            drawable.setColorFilter(
+                    new PorterDuffColorFilter(Utils.getColorStateListDefaultColor(mContext,
+                            R.color.media_dialog_active_item_main_content),
+                            PorterDuff.Mode.SRC_IN));
             return drawable;
         }
 
