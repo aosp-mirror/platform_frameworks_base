@@ -114,7 +114,8 @@ protected:
     virtual ~SpriteController();
 
 public:
-    SpriteController(const sp<Looper>& looper, int32_t overlayLayer);
+    using ParentSurfaceProvider = std::function<sp<SurfaceControl>(int /*displayId*/)>;
+    SpriteController(const sp<Looper>& looper, int32_t overlayLayer, ParentSurfaceProvider parent);
 
     /* Creates a new sprite, initially invisible. */
     virtual sp<Sprite> createSprite();
@@ -245,6 +246,7 @@ private:
     sp<Looper> mLooper;
     const int32_t mOverlayLayer;
     sp<WeakMessageHandler> mHandler;
+    ParentSurfaceProvider mParentSurfaceProvider;
 
     sp<SurfaceComposerClient> mSurfaceComposerClient;
 
