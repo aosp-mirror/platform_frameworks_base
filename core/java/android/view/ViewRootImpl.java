@@ -9740,14 +9740,6 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        @Override
-        public void windowFocusChanged(boolean hasFocus) {
-            final ViewRootImpl viewAncestor = mViewAncestor.get();
-            if (viewAncestor != null) {
-                viewAncestor.windowFocusChanged(hasFocus);
-            }
-        }
-
         private static int checkCallingPermission(String permission) {
             try {
                 return ActivityManager.getService().checkPermission(
