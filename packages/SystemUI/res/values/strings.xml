@@ -266,6 +266,8 @@
     <string name="accessibility_voice_assist_button">Voice Assist</string>
     <!-- Content description of the wallet button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wallet_button">Wallet</string>
+    <!-- Content description of the QR Code scanner for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qr_code_scanner_button">QR Code Scanner</string>
     <!-- Content description of the unlock button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_unlock_button">Unlock</string>
     <!-- Content description of the lock icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -1195,6 +1197,12 @@
     <string name="wallet_error_generic">There was a problem getting your cards, please try again later</string>
     <!-- Overflow menu item label to open the lockscreen settings in wallet activity. [CHAR LIMIT=NONE] -->
     <string name="wallet_lockscreen_settings_label">Lock screen settings</string>
+
+    <!-- QR Code Scanner label, title [CHAR LIMIT=32] -->
+    <string name="qr_code_scanner_title">Scan QR</string>
+
+    <!-- QR Code Scanner description [CHAR LIMIT=NONE] -->
+    <string name="qr_code_scanner_description">Click to scan a QR code</string>
 
     <!-- Name of the work status bar icon. -->
     <string name="status_bar_work">Work profile</string>
