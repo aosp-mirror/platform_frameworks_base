@@ -40,7 +40,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
-import static com.android.wm.shell.bubbles.BubbleController.TASKBAR_CHANGED_BROADCAST;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -918,8 +917,6 @@ public class StatusBar extends SystemUI implements
         mBypassHeadsUpNotifier.setUp();
         if (mBubblesOptional.isPresent()) {
             mBubblesOptional.get().setExpandListener(mBubbleExpandListener);
-            IntentFilter filter = new IntentFilter(TASKBAR_CHANGED_BROADCAST);
-            mBroadcastDispatcher.registerReceiver(mTaskbarChangeReceiver, filter);
         }
 
         mKeyguardIndicationController.init();
@@ -4267,13 +4264,6 @@ public class StatusBar extends SystemUI implements
             mNotificationShadeWindowController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
             mScrimController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
             mKeyguardViewMediator.setWallpaperSupportsAmbientMode(supportsAmbientMode);
-        }
-    };
-
-    BroadcastReceiver mTaskbarChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mBubblesOptional.ifPresent(bubbles -> bubbles.onTaskbarChanged(intent.getExtras()));
         }
     };
 
