@@ -306,12 +306,8 @@ public class InternetDialog extends SystemUIDialog implements
         final boolean isWifiScanEnabled = mInternetDialogController.isWifiScanEnabled();
         updateWifiToggle(isWifiEnabled, isDeviceLocked);
         updateConnectedWifi(isWifiEnabled, isDeviceLocked);
+        updateWifiListAndSeeAll(isWifiEnabled, isDeviceLocked);
         updateWifiScanNotify(isWifiEnabled, isWifiScanEnabled, isDeviceLocked);
-
-        final int visibility = (isDeviceLocked || !isWifiEnabled || mWifiEntriesCount <= 0)
-                ? View.GONE : View.VISIBLE;
-        mWifiRecyclerView.setVisibility(visibility);
-        mSeeAllLayout.setVisibility(visibility);
     }
 
     private void setOnClickListener() {
@@ -411,6 +407,18 @@ public class InternetDialog extends SystemUIDialog implements
                 mInternetDialogController.getInternetWifiDrawable(mConnectedWifiEntry));
         mWifiSettingsIcon.setColorFilter(
                 mContext.getColor(R.color.connected_network_primary_color));
+    }
+
+    @MainThread
+    private void updateWifiListAndSeeAll(boolean isWifiEnabled, boolean isDeviceLocked) {
+        if (!isWifiEnabled || isDeviceLocked) {
+            mWifiRecyclerView.setVisibility(View.GONE);
+            mSeeAllLayout.setVisibility(View.GONE);
+            return;
+        }
+        mWifiRecyclerView.setVisibility(mWifiEntriesCount > 0 ? View.VISIBLE : View.GONE);
+        mSeeAllLayout.setVisibility(
+                (mConnectedWifiEntry != null || mWifiEntriesCount > 0) ? View.VISIBLE : View.GONE);
     }
 
     @MainThread
