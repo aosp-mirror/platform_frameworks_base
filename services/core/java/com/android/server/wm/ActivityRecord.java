@@ -2131,20 +2131,25 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
             boolean allowTaskSnapshot, boolean activityCreated, boolean activityAllDrawn,
             TaskSnapshot snapshot) {
-        if ((newTask || !processRunning || (taskSwitch && !activityCreated)
-                || (taskSwitch && !activityAllDrawn)) && !isActivityTypeHome()) {
+        final boolean isActivityHome = isActivityTypeHome();
+        if ((newTask || !processRunning || (taskSwitch && !activityCreated))
+                && !isActivityHome) {
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
-        } else if (taskSwitch && allowTaskSnapshot) {
-            if (isSnapshotCompatible(snapshot)) {
-                return STARTING_WINDOW_TYPE_SNAPSHOT;
+        }
+        if (taskSwitch) {
+            if (allowTaskSnapshot) {
+                if (isSnapshotCompatible(snapshot)) {
+                    return STARTING_WINDOW_TYPE_SNAPSHOT;
+                }
+                if (!isActivityHome) {
+                    return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+                }
             }
-            if (!isActivityTypeHome()) {
+            if (!activityAllDrawn && !isActivityHome) {
                 return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
             }
-            return STARTING_WINDOW_TYPE_NONE;
-        } else {
-            return STARTING_WINDOW_TYPE_NONE;
         }
+        return STARTING_WINDOW_TYPE_NONE;
     }
 
     /**
@@ -6433,14 +6438,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return sourceRecord.mSplashScreenStyleEmpty;
         }
 
-        // If this activity was launched from a system surface, never use an empty splash screen
-        // Need to check sourceRecord before in case this activity is launched from service.
-        if (launchedFromSystemSurface()) {
-            return false;
-        }
-
+        // If this activity was launched from a system surface for first start, never use an empty
+        // splash screen. Need to check sourceRecord before in case this activity is launched from
+        // service.
         // Otherwise use empty.
-        return true;
+        return !startActivity || !launchedFromSystemSurface();
     }
 
     private int getSplashscreenTheme() {
