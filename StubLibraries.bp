@@ -324,6 +324,7 @@ java_library {
     defaults: ["android-non-updatable_defaults_stubs_current"],
     srcs: [":module-lib-api-stubs-docs-non-updatable"],
     libs: [
+        "sdk_module-lib_current_framework-tethering",
         "sdk_system_current_android",
         // NOTE: The below can be removed once the prebuilt stub contains IKE.
         "sdk_system_current_android.net.ipsec.ike",
