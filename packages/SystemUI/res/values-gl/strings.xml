@@ -90,6 +90,8 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"A aplicación ou a túa organización non permite realizar capturas de pantalla"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Editar"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Editar a captura de pantalla"</string>
+    <!-- no translation found for screenshot_share_description (2861628935812656612) -->
+    <skip />
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Capturar máis"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ignorar a captura de pantalla"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Vista previa da captura de pantalla"</string>

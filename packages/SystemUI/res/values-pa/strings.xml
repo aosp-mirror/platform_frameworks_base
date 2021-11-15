@@ -90,6 +90,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ਐਪ ਜਾਂ ਤੁਹਾਡੀ ਸੰਸਥਾ ਵੱਲੋਂ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲੈਣ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੱਤੀ ਗਈ ਹੈ"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
+    <string name="screenshot_share_description" msgid="2861628935812656612">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ਹੋਰ ਕੈਪਚਰ ਕਰੋ"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਖਾਰਜ ਕਰੋ"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਪੂਰਵ-ਝਲਕ"</string>

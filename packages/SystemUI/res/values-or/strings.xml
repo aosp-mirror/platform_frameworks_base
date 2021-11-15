@@ -90,6 +90,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ଆପ୍‍ କିମ୍ବା ସଂସ୍ଥା ଦ୍ୱାରା ସ୍କ୍ରୀନଶଟ୍‍ ନେବାକୁ ଅନୁମତି ଦିଆଯାଇ ନାହିଁ"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ଏଡିଟ୍ କରନ୍ତୁ"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ସ୍କ୍ରିନସଟ୍ ଏଡିଟ୍ କରନ୍ତୁ"</string>
+    <string name="screenshot_share_description" msgid="2861628935812656612">"ସ୍କ୍ରିନସଟ ସେୟାର କରନ୍ତୁ"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ଅଧିକ କ୍ୟାପଚର୍ କରନ୍ତୁ"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ସ୍କ୍ରିନସଟ୍ ଖାରଜ କରନ୍ତୁ"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ସ୍କ୍ରିନସଟର ପ୍ରିଭ୍ୟୁ"</string>

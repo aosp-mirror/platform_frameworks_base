@@ -90,6 +90,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"තිර රූ ගැනීමට යෙදුම හෝ ඔබගේ සංවිධානය ඉඩ නොදේ"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"සංස්කරණය කරන්න"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"තිර රුව සංස්කරණය කරන්න"</string>
+    <string name="screenshot_share_description" msgid="2861628935812656612">"තිර රුව බෙදා ගන්න"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"තව ග්‍රහණය කරන්න"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"තිර රුව ඉවත ලන්න"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"තිර රූ පෙර දසුන"</string>

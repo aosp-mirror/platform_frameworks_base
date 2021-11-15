@@ -90,6 +90,8 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ایپ یا آپ کی تنظیم کی جانب سے اسکرین شاٹس لینے کی اجازت نہیں ہے"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ترمیم کریں"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"اسکرین شاٹ میں ترمیم کریں"</string>
+    <!-- no translation found for screenshot_share_description (2861628935812656612) -->
+    <skip />
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"مزید کیپچر کریں"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"اسکرین شاٹ برخاست کریں"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"اسکرین شاٹ کا پیش منظر"</string>

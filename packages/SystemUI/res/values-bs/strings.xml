@@ -90,6 +90,8 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Ova aplikacija ili vaša organizacija ne dozvoljavaju snimanje ekrana"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Uredite"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Uredite snimak ekrana"</string>
+    <!-- no translation found for screenshot_share_description (2861628935812656612) -->
+    <skip />
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Snimite više"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Odbacite snimak ekrana"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pregled snimka ekrana"</string>

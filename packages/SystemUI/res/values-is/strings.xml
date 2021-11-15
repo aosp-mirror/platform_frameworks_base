@@ -90,6 +90,8 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Forritið eða fyrirtækið þitt leyfir ekki skjámyndatöku"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Breyta"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Breyta skjámynd"</string>
+    <!-- no translation found for screenshot_share_description (2861628935812656612) -->
+    <skip />
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Mynda meira"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Loka skjámynd"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Forskoðun skjámyndar"</string>

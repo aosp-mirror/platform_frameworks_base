@@ -90,6 +90,8 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Het maken van screenshots wordt niet toegestaan door de app of je organisatie"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Bewerken"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Screenshot bewerken"</string>
+    <!-- no translation found for screenshot_share_description (2861628935812656612) -->
+    <skip />
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Meer opnemen"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Screenshot sluiten"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Voorbeeld van screenshot"</string>
