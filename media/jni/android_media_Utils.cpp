@@ -65,6 +65,7 @@ bool isPossiblyYUV(PixelFormat format) {
         case HAL_PIXEL_FORMAT_Y8:
         case HAL_PIXEL_FORMAT_Y16:
         case HAL_PIXEL_FORMAT_RAW16:
+        case HAL_PIXEL_FORMAT_RAW12:
         case HAL_PIXEL_FORMAT_RAW10:
         case HAL_PIXEL_FORMAT_RAW_OPAQUE:
         case HAL_PIXEL_FORMAT_BLOB:
