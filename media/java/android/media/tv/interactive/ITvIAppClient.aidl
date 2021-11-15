@@ -16,13 +16,15 @@
 
 package android.media.tv.interactive;
 
+import android.view.InputChannel;
+
 /**
  * Interface a client of the ITvIAppManager implements, to identify itself and receive information
  * about changes to the state of each TV interactive application service.
  * @hide
  */
 oneway interface ITvIAppClient {
-    void onSessionCreated(in String iAppServiceId, IBinder token, int seq);
+    void onSessionCreated(in String iAppServiceId, IBinder token, in InputChannel channel, int seq);
     void onSessionReleased(int seq);
     void onLayoutSurface(int left, int top, int right, int bottom, int seq);
 }

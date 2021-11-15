@@ -47,6 +47,7 @@ import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.InputChannel;
 import android.view.Surface;
 
 import com.android.internal.annotations.GuardedBy;
@@ -611,14 +612,14 @@ public class TvIAppManagerService extends SystemService {
                     if (userId != mCurrentUserId && !mRunningProfiles.contains(userId)) {
                         // Only current user and its running profiles can create sessions.
                         // Let the client get onConnectionFailed callback for this case.
-                        sendSessionTokenToClientLocked(client, iAppServiceId, null, seq);
+                        sendSessionTokenToClientLocked(client, iAppServiceId, null, null, seq);
                         return;
                     }
                     UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     TvIAppState iAppState = userState.mIAppMap.get(iAppServiceId);
                     if (iAppState == null) {
                         Slogf.w(TAG, "Failed to find state for iAppServiceId=" + iAppServiceId);
-                        sendSessionTokenToClientLocked(client, iAppServiceId, null, seq);
+                        sendSessionTokenToClientLocked(client, iAppServiceId, null, null, seq);
                         return;
                     }
                     ServiceState serviceState =
@@ -631,7 +632,7 @@ public class TvIAppManagerService extends SystemService {
                     }
                     // Send a null token immediately while reconnecting.
                     if (serviceState.mReconnecting) {
-                        sendSessionTokenToClientLocked(client, iAppServiceId, null, seq);
+                        sendSessionTokenToClientLocked(client, iAppServiceId, null, null, seq);
                         return;
                     }
 
@@ -780,9 +781,9 @@ public class TvIAppManagerService extends SystemService {
 
     @GuardedBy("mLock")
     private void sendSessionTokenToClientLocked(ITvIAppClient client, String iAppServiceId,
-            IBinder sessionToken, int seq) {
+            IBinder sessionToken, InputChannel channel, int seq) {
         try {
-            client.onSessionCreated(iAppServiceId, sessionToken, seq);
+            client.onSessionCreated(iAppServiceId, sessionToken, channel, seq);
         } catch (RemoteException e) {
             Slogf.e(TAG, "error in onSessionCreated", e);
         }
@@ -797,20 +798,23 @@ public class TvIAppManagerService extends SystemService {
             Slogf.d(TAG, "createSessionInternalLocked(iAppServiceId="
                     + sessionState.mIAppServiceId + ")");
         }
+        InputChannel[] channels = InputChannel.openInputChannelPair(sessionToken.toString());
 
         // Set up a callback to send the session token.
-        ITvIAppSessionCallback callback = new SessionCallback(sessionState);
+        ITvIAppSessionCallback callback = new SessionCallback(sessionState, channels);
 
         boolean created = true;
         // Create a session. When failed, send a null token immediately.
         try {
-            service.createSession(callback, sessionState.mIAppServiceId, sessionState.mType);
+            service.createSession(
+                    channels[1], callback, sessionState.mIAppServiceId, sessionState.mType);
         } catch (RemoteException e) {
             Slogf.e(TAG, "error in createSession", e);
             sendSessionTokenToClientLocked(sessionState.mClient, sessionState.mIAppServiceId, null,
-                    sessionState.mSeq);
+                    null, sessionState.mSeq);
             created = false;
         }
+        channels[1].dispose();
         return created;
     }
 
@@ -883,7 +887,7 @@ public class TvIAppManagerService extends SystemService {
         for (SessionState sessionState : sessionsToAbort) {
             removeSessionStateLocked(sessionState.mSessionToken, sessionState.mUserId);
             sendSessionTokenToClientLocked(sessionState.mClient,
-                    sessionState.mIAppServiceId, null, sessionState.mSeq);
+                    sessionState.mIAppServiceId, null, null, sessionState.mSeq);
         }
         updateServiceConnectionLocked(serviceState.mComponent, userId);
     }
@@ -1136,9 +1140,11 @@ public class TvIAppManagerService extends SystemService {
 
     private final class SessionCallback extends ITvIAppSessionCallback.Stub {
         private final SessionState mSessionState;
+        private final InputChannel[] mInputChannels;
 
-        SessionCallback(SessionState sessionState) {
+        SessionCallback(SessionState sessionState, InputChannel[] channels) {
             mSessionState = sessionState;
+            mInputChannels = channels;
         }
 
         @Override
@@ -1154,12 +1160,14 @@ public class TvIAppManagerService extends SystemService {
                             mSessionState.mClient,
                             mSessionState.mIAppServiceId,
                             mSessionState.mSessionToken,
+                            mInputChannels[0],
                             mSessionState.mSeq);
                 } else {
                     removeSessionStateLocked(mSessionState.mSessionToken, mSessionState.mUserId);
                     sendSessionTokenToClientLocked(mSessionState.mClient,
-                            mSessionState.mIAppServiceId, null, mSessionState.mSeq);
+                            mSessionState.mIAppServiceId, null, null, mSessionState.mSeq);
                 }
+                mInputChannels[0].dispose();
             }
         }
 
