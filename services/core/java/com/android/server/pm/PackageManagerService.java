@@ -22051,8 +22051,10 @@ public class PackageManagerService extends IPackageManager.Stub
             ApexManager.ActiveApexInfo apexInfo) {
         for (int i = 0, size = SYSTEM_PARTITIONS.size(); i < size; i++) {
             ScanPartition sp = SYSTEM_PARTITIONS.get(i);
-            if (apexInfo.preInstalledApexPath.getAbsolutePath().startsWith(
-                    sp.getFolder().getAbsolutePath() + File.separator)) {
+            if (apexInfo.preInstalledApexPath.getAbsolutePath().equals(
+                    sp.getFolder().getAbsolutePath())
+                    || apexInfo.preInstalledApexPath.getAbsolutePath().startsWith(
+                        sp.getFolder().getAbsolutePath() + File.separator)) {
                 return new ScanPartition(apexInfo.apexDirectory, sp, SCAN_AS_APK_IN_APEX);
             }
         }
