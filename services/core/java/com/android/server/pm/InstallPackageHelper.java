@@ -2349,10 +2349,9 @@ final class InstallPackageHelper {
                 // Set install reason for users that are having the package newly installed.
                 final int[] allUsersList = mPm.mUserManager.getUserIds();
                 if (userId == UserHandle.USER_ALL) {
-                    // TODO(b/152629990): It appears that the package doesn't actually get newly
-                    //  installed in this case, so the installReason shouldn't get modified?
                     for (int currentUserId : allUsersList) {
-                        if (!previousUserIds.contains(currentUserId)) {
+                        if (!previousUserIds.contains(currentUserId)
+                                && ps.getInstalled(currentUserId)) {
                             ps.setInstallReason(installReason, currentUserId);
                         }
                     }
