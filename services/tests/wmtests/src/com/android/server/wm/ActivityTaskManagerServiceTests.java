@@ -39,6 +39,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.times;
@@ -246,7 +247,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         doReturn(true).when(record)
                 .checkEnterPictureInPictureState("enterPictureInPictureMode", false);
         doReturn(false).when(record).inPinnedWindowingMode();
-        doReturn(false).when(mAtm).isKeyguardLocked();
+        doReturn(false).when(mAtm).isKeyguardLocked(anyInt());
 
         //to simulate NPE
         doReturn(null).when(record).getParent();

@@ -2131,20 +2131,25 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
             boolean allowTaskSnapshot, boolean activityCreated, boolean activityAllDrawn,
             TaskSnapshot snapshot) {
-        if ((newTask || !processRunning || (taskSwitch && !activityCreated)
-                || (taskSwitch && !activityAllDrawn)) && !isActivityTypeHome()) {
+        final boolean isActivityHome = isActivityTypeHome();
+        if ((newTask || !processRunning || (taskSwitch && !activityCreated))
+                && !isActivityHome) {
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
-        } else if (taskSwitch && allowTaskSnapshot) {
-            if (isSnapshotCompatible(snapshot)) {
-                return STARTING_WINDOW_TYPE_SNAPSHOT;
+        }
+        if (taskSwitch) {
+            if (allowTaskSnapshot) {
+                if (isSnapshotCompatible(snapshot)) {
+                    return STARTING_WINDOW_TYPE_SNAPSHOT;
+                }
+                if (!isActivityHome) {
+                    return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+                }
             }
-            if (!isActivityTypeHome()) {
+            if (!activityAllDrawn && !isActivityHome) {
                 return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
             }
-            return STARTING_WINDOW_TYPE_NONE;
-        } else {
-            return STARTING_WINDOW_TYPE_NONE;
         }
+        return STARTING_WINDOW_TYPE_NONE;
     }
 
     /**
@@ -2750,14 +2755,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        boolean isKeyguardLocked = mAtmService.isKeyguardLocked();
         boolean isCurrentAppLocked =
                 mAtmService.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
         boolean hasRootPinnedTask = taskDisplayArea != null && taskDisplayArea.hasPinnedTask();
         // Don't return early if !isNotLocked, since we want to throw an exception if the activity
         // is in an incorrect state
-        boolean isNotLockedOrOnKeyguard = !isKeyguardLocked && !isCurrentAppLocked;
+        boolean isNotLockedOrOnKeyguard = !isKeyguardLocked() && !isCurrentAppLocked;
 
         // We don't allow auto-PiP when something else is already pipped.
         if (beforeStopping && hasRootPinnedTask) {
@@ -3156,7 +3160,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // If the current activity is not opaque, we need to make sure the visibilities of
                 // activities be updated, they may be seen by users.
                 ensureVisibility = true;
-            } else if (mTaskSupervisor.getKeyguardController().isKeyguardLocked()
+            } else if (isKeyguardLocked()
                     && mTaskSupervisor.getKeyguardController().topActivityOccludesKeyguard(this)) {
                 // Ensure activity visibilities and update lockscreen occluded/dismiss state when
                 // finishing the top activity that occluded keyguard. So that, the
@@ -3983,6 +3987,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (fromActivity == this) return true;
             return !fromActivity.mVisibleRequested && transferStartingWindow(fromActivity);
         });
+    }
+
+    boolean isKeyguardLocked() {
+        return (mDisplayContent != null) ? mDisplayContent.isKeyguardLocked() :
+                mRootWindowContainer.getDefaultDisplay().isKeyguardLocked();
     }
 
     void checkKeyguardFlagsChanged() {
@@ -5174,7 +5183,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void notifyUnknownVisibilityLaunchedForKeyguardTransition() {
         // No display activities never add a window, so there is no point in waiting them for
         // relayout.
-        if (noDisplay || !mTaskSupervisor.getKeyguardController().isKeyguardLocked()) {
+        if (noDisplay || !isKeyguardLocked()) {
             return;
         }
 
@@ -6433,14 +6442,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return sourceRecord.mSplashScreenStyleEmpty;
         }
 
-        // If this activity was launched from a system surface, never use an empty splash screen
-        // Need to check sourceRecord before in case this activity is launched from service.
-        if (launchedFromSystemSurface()) {
-            return false;
-        }
-
+        // If this activity was launched from a system surface for first start, never use an empty
+        // splash screen. Need to check sourceRecord before in case this activity is launched from
+        // service.
         // Otherwise use empty.
-        return true;
+        return !startActivity || !launchedFromSystemSurface();
     }
 
     private int getSplashscreenTheme() {

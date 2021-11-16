@@ -55,11 +55,7 @@ import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedProcess;
-
-import com.android.server.pm.pkg.PackageUserState;
-import com.android.server.pm.pkg.PackageUserStateInternal;
 import android.content.pm.pkg.PackageUserStateUtils;
-import com.android.server.pm.pkg.SuspendParams;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -117,6 +113,9 @@ import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.permission.LegacyPermissionSettings;
 import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.permission.LegacyPermissionState.PermissionState;
+import com.android.server.pm.pkg.PackageUserState;
+import com.android.server.pm.pkg.PackageUserStateInternal;
+import com.android.server.pm.pkg.SuspendParams;
 import com.android.server.pm.verify.domain.DomainVerificationLegacySettings;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationPersistence;
@@ -666,7 +665,7 @@ public final class Settings implements Watchable, Snappable {
         mKernelMappingSnapshot = new SnapshotCache.Sealed<>();
         mInstallerPackages = r.mInstallerPackagesSnapshot.snapshot();
         mInstallerPackagesSnapshot = new SnapshotCache.Sealed<>();
-        mKeySetManagerService = new KeySetManagerService(mPackages);
+        mKeySetManagerService = new KeySetManagerService(r.mKeySetManagerService, mPackages);
 
         // The following assignments satisfy Java requirements but are not
         // needed by the read-only methods.  Note especially that the lock
@@ -2779,7 +2778,7 @@ public final class Settings implements Watchable, Snappable {
         if (pkg.isForceQueryableOverride()) {
             serializer.attributeBoolean(null, "forceQueryable", true);
         }
-        if (pkg.isPackageLoading()) {
+        if (pkg.isLoading()) {
             serializer.attributeBoolean(null, "isLoading", true);
         }
         serializer.attributeFloat(null, "loadingProgress", pkg.getLoadingProgress());
@@ -3293,7 +3292,7 @@ public final class Settings implements Watchable, Snappable {
         int systemMatch = 0;
         int thirdPartyMatch = 0;
         final int numMatches = (ri == null ? 0 : ri.size());
-        if (numMatches <= 1) {
+        if (numMatches < 1) {
             Slog.w(TAG, "No potential matches found for " + intent
                     + " while setting preferred " + cn.flattenToShortString());
             return;
@@ -4197,14 +4196,6 @@ public final class Settings implements Watchable, Snappable {
         return pkg.getCurrentEnabledStateLPr(classNameStr, userId);
     }
 
-    boolean wasPackageEverLaunchedLPr(String packageName, int userId) {
-        final PackageSetting pkgSetting = mPackages.get(packageName);
-        if (pkgSetting == null) {
-            throw new IllegalArgumentException("Unknown package: " + packageName);
-        }
-        return !pkgSetting.getNotLaunched(userId);
-    }
-
     boolean setPackageStoppedStateLPw(PackageManagerService pm, String packageName,
             boolean stopped, int userId) {
         final PackageSetting pkgSetting = mPackages.get(packageName);
@@ -4673,7 +4664,7 @@ public final class Settings implements Watchable, Snappable {
             pw.print(prefix); pw.print("  installerAttributionTag=");
             pw.println(ps.getInstallSource().installerAttributionTag);
         }
-        if (ps.isPackageLoading()) {
+        if (ps.isLoading()) {
             pw.print(prefix); pw.println("  loadingProgress=" +
                     (int) (ps.getLoadingProgress() * 100) + "%");
         }
@@ -4762,7 +4753,9 @@ public final class Settings implements Watchable, Snappable {
             pw.print(" instant=");
             pw.print(ps.getInstantApp(user.id));
             pw.print(" virtual=");
-            pw.println(ps.getVirtualPreload(user.id));
+            pw.print(ps.getVirtualPreload(user.id));
+            pw.print(" installReason=");
+            pw.println(ps.getInstallReason(user.id));
 
             if (ps.getSuspended(user.id)) {
                 pw.print(prefix);

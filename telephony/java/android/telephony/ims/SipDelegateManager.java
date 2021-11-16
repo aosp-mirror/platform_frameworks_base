@@ -484,7 +484,8 @@ public class SipDelegateManager {
 
         try {
             telephony.registerImsStateCallback(
-                    mSubId, ImsFeature.FEATURE_RCS, callback.getCallbackBinder());
+                    mSubId, ImsFeature.FEATURE_RCS,
+                    callback.getCallbackBinder(), mContext.getOpPackageName());
         } catch (ServiceSpecificException e) {
             throw new ImsException(e.getMessage(), e.errorCode);
         } catch (RemoteException | IllegalStateException e) {

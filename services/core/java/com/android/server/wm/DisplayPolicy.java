@@ -1730,7 +1730,7 @@ public class DisplayPolicy {
         // drawing. This way, we know that the IME can be safely shown since the other windows are
         // now shown.
         final boolean hideIme = win.mIsImWindow
-                && (mService.mAtmService.mKeyguardController.isAodShowing()
+                && (mDisplayContent.isAodShowing()
                         || (mDisplayContent.isDefaultDisplay && !mWindowManagerDrawComplete));
         if (hideIme) {
             return true;

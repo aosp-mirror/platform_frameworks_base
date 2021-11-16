@@ -41,11 +41,13 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.policy.AttributeCache;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -344,14 +346,14 @@ public final class StorageEventHelper extends StorageEventListener {
     }
 
     private List<String> collectAbsoluteCodePaths() {
-        synchronized (mPm.mLock) {
-            List<String> codePaths = new ArrayList<>();
-            final int packageCount = mPm.mSettings.getPackagesLocked().size();
-            for (int i = 0; i < packageCount; i++) {
-                final PackageSetting ps = mPm.mSettings.getPackagesLocked().valueAt(i);
-                codePaths.add(ps.getPath().getAbsolutePath());
-            }
-            return codePaths;
+        List<String> codePaths = new ArrayList<>();
+        final ArrayMap<String, ? extends PackageStateInternal> packageStates =
+                mPm.getPackageStates();
+        final int packageCount = packageStates.size();
+        for (int i = 0; i < packageCount; i++) {
+            final PackageStateInternal ps = packageStates.valueAt(i);
+            codePaths.add(ps.getPath().getAbsolutePath());
         }
+        return codePaths;
     }
 }

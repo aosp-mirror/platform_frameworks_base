@@ -25,6 +25,7 @@ import android.util.SparseArray;
 import com.android.server.pm.InstallSource;
 import com.android.server.pm.SharedUserSetting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.permission.LegacyPermissionState;
 
 import java.util.UUID;
 
@@ -68,4 +69,17 @@ public interface PackageStateInternal extends PackageState {
         PackageUserStateInternal userState = getUserStates().get(userId);
         return userState == null ? PackageUserStateInternal.DEFAULT : userState;
     }
+
+    @NonNull
+    LegacyPermissionState getLegacyPermissionState();
+
+    @Nullable
+    String getRealName();
+
+    boolean isLoading();
+
+    @NonNull
+    String getPathString();
+
+    float getLoadingProgress();
 }

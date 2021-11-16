@@ -500,10 +500,16 @@ public class AppsFilter implements Watchable, Snappable {
                 forcedQueryablePackageNames[i] = forcedQueryablePackageNames[i].intern();
             }
         }
-        final StateProvider stateProvider = command -> {
-            synchronized (injector.getLock()) {
-                command.currentState(injector.getSettings().getPackagesLocked().untrackedStorage(),
-                        injector.getUserManagerInternal().getUserInfos());
+        final StateProvider stateProvider = new StateProvider() {
+            // TODO: This lock and its handling should be owned by AppsFilter
+            private final Object mLock = new Object();
+
+            @Override
+            public void runWithState(CurrentStateCallback command) {
+                synchronized (mLock) {
+                    command.currentState(pms.getPackageStates(),
+                            injector.getUserManagerInternal().getUserInfos());
+                }
             }
         };
         AppsFilter appsFilter = new AppsFilter(stateProvider, featureConfig,

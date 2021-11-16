@@ -20,7 +20,7 @@ package com.android.server.pm;
  * This class records the Computer being used by a thread and the Computer's reference
  * count.  There is a thread-local copy of this class.
  */
-public final class ThreadComputer {
+public final class ThreadComputer implements AutoCloseable {
     Computer mComputer = null;
     int mRefCount = 0;
 
@@ -43,5 +43,10 @@ public final class ThreadComputer {
         if (--mRefCount == 0) {
             mComputer = null;
         }
+    }
+
+    @Override
+    public void close() {
+        release();
     }
 }

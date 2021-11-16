@@ -19,6 +19,7 @@ package com.android.server.pm;
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.util.Slog;
@@ -27,6 +28,7 @@ import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
+import com.android.server.pm.pkg.PackageUserState;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -197,7 +199,7 @@ public class PreferredComponent {
         }
     }
 
-    public boolean sameSet(List<ResolveInfo> query, boolean excludeSetupWizardPackage) {
+    public boolean sameSet(List<ResolveInfo> query, boolean excludeSetupWizardPackage, int userId) {
         if (mSetPackages == null) {
             return query == null;
         }
@@ -206,6 +208,7 @@ public class PreferredComponent {
         }
         final int NQ = query.size();
         final int NS = mSetPackages.length;
+        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
         int numMatch = 0;
         for (int i=0; i<NQ; i++) {
             ResolveInfo ri = query.get(i);
@@ -215,6 +218,15 @@ public class PreferredComponent {
             // ignore SetupWizard package's launcher capability because it is only existed
             // during SetupWizard is running
             if (excludeSetupWizardPackage && ai.packageName.equals(mSetupWizardPackageName)) {
+                continue;
+            }
+
+            // Avoid showing the disambiguation dialog if the package which is installed with
+            // reason INSTALL_REASON_DEVICE_SETUP.
+            final PackageUserState pkgUserState =
+                    pmi.getPackageStateInternal(ai.packageName).getUserStates().get(userId);
+            if (pkgUserState != null && pkgUserState.getInstallReason()
+                    == PackageManager.INSTALL_REASON_DEVICE_SETUP) {
                 continue;
             }
 

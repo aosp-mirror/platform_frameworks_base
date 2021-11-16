@@ -135,7 +135,7 @@ public class ImsManager {
             throw new IllegalArgumentException("Invalid subscription ID: " + subscriptionId);
         }
 
-        return new ImsMmTelManager(subscriptionId, sTelephonyCache);
+        return new ImsMmTelManager(mContext, subscriptionId, sTelephonyCache);
     }
 
     /**

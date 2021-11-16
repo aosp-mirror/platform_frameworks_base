@@ -2497,7 +2497,8 @@ interface ITelephony {
     /**
      * Register an IMS connection state callback
      */
-    void registerImsStateCallback(int subId, int feature, in IImsStateCallback cb);
+    void registerImsStateCallback(int subId, int feature, in IImsStateCallback cb,
+            in String callingPackage);
 
     /**
      * Unregister an IMS connection state callback

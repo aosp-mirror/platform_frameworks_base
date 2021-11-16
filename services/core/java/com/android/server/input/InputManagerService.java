@@ -98,6 +98,7 @@ import android.view.InputMonitor;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.VerifiedInputEvent;
 import android.view.ViewConfiguration;
 import android.widget.Toast;
@@ -2906,6 +2907,15 @@ public class InputManagerService extends IInputManager.Stub
         return PointerIcon.getDefaultIcon(getContextForPointerIcon(displayId));
     }
 
+    // Native callback.
+    private long getParentSurfaceForPointers(int displayId) {
+        final SurfaceControl sc = mWindowManagerCallbacks.getParentSurfaceForPointers(displayId);
+        if (sc == null) {
+            return 0;
+        }
+        return sc.mNativeObject;
+    }
+
     @NonNull
     private Context getContextForPointerIcon(int displayId) {
         if (mPointerIconDisplayContext != null
@@ -3105,6 +3115,12 @@ public class InputManagerService extends IInputManager.Stub
          * Called when the drag over window has changed.
          */
         void notifyDropWindow(IBinder token, float x, float y);
+
+        /**
+         * Get the {@link SurfaceControl} that should be the parent for the surfaces created for
+         * pointers such as the mouse cursor and touch spots for the given display.
+         */
+        SurfaceControl getParentSurfaceForPointers(int displayId);
     }
 
     /**

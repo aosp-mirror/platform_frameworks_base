@@ -3930,7 +3930,7 @@ final class InstallPackageHelper {
             }
         }
         if (mPm.mIncrementalManager != null && isIncrementalPath(parsedPackage.getPath())) {
-            if (scanResult.mPkgSetting != null && scanResult.mPkgSetting.isPackageLoading()) {
+            if (scanResult.mPkgSetting != null && scanResult.mPkgSetting.isLoading()) {
                 // Continue monitoring loading progress of active incremental packages
                 mPm.mIncrementalManager.registerLoadingProgressCallback(parsedPackage.getPath(),
                         new IncrementalProgressListener(parsedPackage.getPackageName(), mPm));

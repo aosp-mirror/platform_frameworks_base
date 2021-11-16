@@ -154,7 +154,7 @@ final class ResolveIntentHelper {
                     // If we have an ephemeral app, use it
                     if (ri.activityInfo.applicationInfo.isInstantApp()) {
                         final String packageName = ri.activityInfo.packageName;
-                        final PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
+                        final PackageStateInternal ps = mPm.getPackageStateInternal(packageName);
                         if (ps != null && PackageManagerServiceUtils.hasAnyDomainApproval(
                                 mPm.mDomainVerificationManager, ps, intent, flags, userId)) {
                             return ri;
@@ -428,7 +428,7 @@ final class ResolveIntentHelper {
                                 || (matchVisibleToInstantAppOnly && isCallerInstantApp
                                 && isTargetHiddenFromInstantApp));
                 final boolean blockNormalResolution = !isTargetInstantApp && !isCallerInstantApp
-                        && mPm.shouldFilterApplicationLocked(
+                        && mPm.shouldFilterApplication(
                         mPm.getPackageStateInternal(pi.applicationInfo.packageName,
                                 Process.SYSTEM_UID), callingUid, userId);
                 if (!blockResolution && !blockNormalResolution) {
