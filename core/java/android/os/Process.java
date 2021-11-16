@@ -18,11 +18,14 @@ package android.os;
 
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UptimeMillisLong;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build.VERSION_CODES;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -553,8 +556,25 @@ public class Process {
     public static final int SIGNAL_KILL = 9;
     public static final int SIGNAL_USR1 = 10;
 
+    /**
+     * When the process started and ActivityThread.handleBindApplication() was executed.
+     */
     private static long sStartElapsedRealtime;
+
+    /**
+     * When the process started and ActivityThread.handleBindApplication() was executed.
+     */
     private static long sStartUptimeMillis;
+
+    /**
+     * When the activity manager was about to ask zygote to fork.
+     */
+    private static long sStartRequestedElapsedRealtime;
+
+    /**
+     * When the activity manager was about to ask zygote to fork.
+     */
+    private static long sStartRequestedUptimeMillis;
 
     private static final int PIDFD_UNKNOWN = 0;
     private static final int PIDFD_SUPPORTED = 1;
@@ -604,6 +624,12 @@ public class Process {
      * @hide
      */
     public static final ZygoteProcess ZYGOTE_PROCESS = new ZygoteProcess();
+
+
+    /**
+     * The process name set via {@link #setArgV0(String)}.
+     */
+    private static String sArgV0;
 
     /**
      * Start a new process.
@@ -718,21 +744,44 @@ public class Process {
     /**
      * Return the {@link SystemClock#elapsedRealtime()} at which this process was started.
      */
-    public static final long getStartElapsedRealtime() {
+    @ElapsedRealtimeLong
+    public static long getStartElapsedRealtime() {
         return sStartElapsedRealtime;
     }
 
     /**
      * Return the {@link SystemClock#uptimeMillis()} at which this process was started.
      */
-    public static final long getStartUptimeMillis() {
+    @UptimeMillisLong
+    public static long getStartUptimeMillis() {
         return sStartUptimeMillis;
     }
 
+    /**
+     * Return the {@link SystemClock#elapsedRealtime()} at which the system decides to start
+     * this process.
+     */
+    @ElapsedRealtimeLong
+    public static long getStartRequestedElapsedRealtime() {
+        return sStartRequestedElapsedRealtime;
+    }
+
+    /**
+     * Return the {@link SystemClock#uptimeMillis()} at which the system decides to start
+     * this process.
+     */
+    @UptimeMillisLong
+    public static long getStartRequestedUptimeMillis() {
+        return sStartRequestedUptimeMillis;
+    }
+
     /** @hide */
-    public static final void setStartTimes(long elapsedRealtime, long uptimeMillis) {
+    public static final void setStartTimes(long elapsedRealtime, long uptimeMillis,
+            long startRequestedElapsedRealtime, long startRequestedUptime) {
         sStartElapsedRealtime = elapsedRealtime;
         sStartUptimeMillis = uptimeMillis;
+        sStartRequestedElapsedRealtime = startRequestedElapsedRealtime;
+        sStartRequestedUptimeMillis = startRequestedUptime;
     }
 
     /**
@@ -1135,8 +1184,26 @@ public class Process {
      * 
      * {@hide}
      */
-    @UnsupportedAppUsage
-    public static final native void setArgV0(String text);
+    @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.S, publicAlternatives = "Do not try to "
+            + "change the process name. (If you must, you could use {@code pthread_setname_np(3)}, "
+            + "but this could confuse the system)")
+    public static void setArgV0(@NonNull String text) {
+        sArgV0 = text;
+        setArgV0Native(text);
+    }
+
+    private static native void setArgV0Native(String text);
+
+    /**
+     * Return the name of this process.
+     */
+    @NonNull
+    public static String myProcessName() {
+        // Note this could be different from the actual process name if someone changes the
+        // process name using native code (using pthread_setname_np()). But sArgV0
+        // is the name that the system thinks this process has.
+        return sArgV0;
+    }
 
     /**
      * Kill the process with the given PID.

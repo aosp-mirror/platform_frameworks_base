@@ -31967,8 +31967,10 @@ package android.os {
     method public static final long getElapsedCpuTime();
     method public static final int[] getExclusiveCores();
     method public static final int getGidForName(String);
-    method public static final long getStartElapsedRealtime();
-    method public static final long getStartUptimeMillis();
+    method public static long getStartElapsedRealtime();
+    method public static long getStartRequestedElapsedRealtime();
+    method public static long getStartRequestedUptimeMillis();
+    method public static long getStartUptimeMillis();
     method public static final int getThreadPriority(int) throws java.lang.IllegalArgumentException;
     method public static final int getUidForName(String);
     method public static final boolean is64Bit();
@@ -31976,6 +31978,7 @@ package android.os {
     method public static final boolean isIsolated();
     method public static final void killProcess(int);
     method public static final int myPid();
+    method @NonNull public static String myProcessName();
     method public static final int myTid();
     method public static final int myUid();
     method public static android.os.UserHandle myUserHandle();
