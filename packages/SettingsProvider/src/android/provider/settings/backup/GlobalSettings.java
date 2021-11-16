@@ -40,9 +40,6 @@ public class GlobalSettings {
     public static final String[] SETTINGS_TO_BACKUP = {
         Settings.Global.APPLY_RAMPING_RINGER,
         Settings.Global.BUGREPORT_IN_POWER_MENU,
-        Settings.Global.CLOCKWORK_SYSUI_PACKAGE_NAME,
-        Settings.Global.CLOCKWORK_SYSUI_MAIN_ACTIVITY_NAME,
-        Settings.Global.CLOCKWORK_HOME_READY,
         Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
         Settings.Global.APP_AUTO_RESTRICTION_ENABLED,
         Settings.Global.AUTO_TIME,
