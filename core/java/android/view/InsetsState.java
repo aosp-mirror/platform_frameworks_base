@@ -168,6 +168,16 @@ public class InsetsState implements Parcelable {
     private final DisplayCutout.ParcelableWrapper mDisplayCutout =
             new DisplayCutout.ParcelableWrapper();
 
+    /**
+     * The frame that rounded corners are relative to.
+     *
+     * There are 2 cases that will draw fake rounded corners:
+     *   1. In split-screen mode
+     *   2. Devices with a task bar
+     * We need to report these fake rounded corners to apps by re-calculating based on this frame.
+     */
+    private final Rect mRoundedCornerFrame = new Rect();
+
     /** The rounded corners on the display */
     private RoundedCorners mRoundedCorners = RoundedCorners.NO_ROUNDED_CORNERS;
 
@@ -274,11 +284,16 @@ public class InsetsState implements Parcelable {
     }
 
     private RoundedCorners calculateRelativeRoundedCorners(Rect frame) {
-        if (mDisplayFrame.equals(frame)) {
-            return mRoundedCorners;
-        }
         if (frame == null) {
             return RoundedCorners.NO_ROUNDED_CORNERS;
+        }
+        // If mRoundedCornerFrame is set, we should calculate the new RoundedCorners based on this
+        // frame. It's used for split-screen mode and devices with a task bar.
+        if (!mRoundedCornerFrame.isEmpty() && !mRoundedCornerFrame.equals(mDisplayFrame)) {
+            return mRoundedCorners.insetWithFrame(frame, mRoundedCornerFrame);
+        }
+        if (mDisplayFrame.equals(frame)) {
+            return mRoundedCorners;
         }
         final int insetLeft = frame.left - mDisplayFrame.left;
         final int insetTop = frame.top - mDisplayFrame.top;
@@ -530,6 +545,15 @@ public class InsetsState implements Parcelable {
         return mRoundedCorners;
     }
 
+    /**
+     * Set the frame that will be used to calculate the rounded corners.
+     *
+     * @see #mRoundedCornerFrame
+     */
+    public void setRoundedCornerFrame(Rect frame) {
+        mRoundedCornerFrame.set(frame);
+    }
+
     public void setPrivacyIndicatorBounds(PrivacyIndicatorBounds bounds) {
         mPrivacyIndicatorBounds = bounds;
     }
@@ -575,6 +599,7 @@ public class InsetsState implements Parcelable {
         mDisplayFrame.scale(scale);
         mDisplayCutout.scale(scale);
         mRoundedCorners = mRoundedCorners.scale(scale);
+        mRoundedCornerFrame.scale(scale);
         mPrivacyIndicatorBounds = mPrivacyIndicatorBounds.scale(scale);
         for (int i = 0; i < SIZE; i++) {
             final InsetsSource source = mSources[i];
@@ -596,6 +621,7 @@ public class InsetsState implements Parcelable {
         mDisplayFrame.set(other.mDisplayFrame);
         mDisplayCutout.set(other.mDisplayCutout);
         mRoundedCorners = other.getRoundedCorners();
+        mRoundedCornerFrame.set(other.mRoundedCornerFrame);
         mPrivacyIndicatorBounds = other.getPrivacyIndicatorBounds();
         if (copySources) {
             for (int i = 0; i < SIZE; i++) {
@@ -620,6 +646,7 @@ public class InsetsState implements Parcelable {
         mDisplayFrame.set(other.mDisplayFrame);
         mDisplayCutout.set(other.mDisplayCutout);
         mRoundedCorners = other.getRoundedCorners();
+        mRoundedCornerFrame.set(other.mRoundedCornerFrame);
         mPrivacyIndicatorBounds = other.getPrivacyIndicatorBounds();
         final ArraySet<Integer> t = toInternalType(types);
         for (int i = t.size() - 1; i >= 0; i--) {
@@ -740,6 +767,7 @@ public class InsetsState implements Parcelable {
         pw.println(newPrefix + "mDisplayFrame=" + mDisplayFrame);
         pw.println(newPrefix + "mDisplayCutout=" + mDisplayCutout.get());
         pw.println(newPrefix + "mRoundedCorners=" + mRoundedCorners);
+        pw.println(newPrefix + "mRoundedCornerFrame=" + mRoundedCornerFrame);
         pw.println(newPrefix + "mPrivacyIndicatorBounds=" + mPrivacyIndicatorBounds);
         for (int i = 0; i < SIZE; i++) {
             InsetsSource source = mSources[i];
@@ -836,6 +864,7 @@ public class InsetsState implements Parcelable {
         if (!mDisplayFrame.equals(state.mDisplayFrame)
                 || !mDisplayCutout.equals(state.mDisplayCutout)
                 || !mRoundedCorners.equals(state.mRoundedCorners)
+                || !mRoundedCornerFrame.equals(state.mRoundedCornerFrame)
                 || !mPrivacyIndicatorBounds.equals(state.mPrivacyIndicatorBounds)) {
             return false;
         }
@@ -861,7 +890,7 @@ public class InsetsState implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mDisplayFrame, mDisplayCutout, Arrays.hashCode(mSources),
-                mRoundedCorners, mPrivacyIndicatorBounds);
+                mRoundedCorners, mPrivacyIndicatorBounds, mRoundedCornerFrame);
     }
 
     public InsetsState(Parcel in) {
@@ -879,6 +908,7 @@ public class InsetsState implements Parcelable {
         mDisplayCutout.writeToParcel(dest, flags);
         dest.writeTypedArray(mSources, 0 /* parcelableFlags */);
         dest.writeTypedObject(mRoundedCorners, flags);
+        mRoundedCornerFrame.writeToParcel(dest, flags);
         dest.writeTypedObject(mPrivacyIndicatorBounds, flags);
     }
 
@@ -898,6 +928,7 @@ public class InsetsState implements Parcelable {
         mDisplayCutout.readFromParcel(in);
         in.readTypedArray(mSources, InsetsSource.CREATOR);
         mRoundedCorners = in.readTypedObject(RoundedCorners.CREATOR);
+        mRoundedCornerFrame.readFromParcel(in);
         mPrivacyIndicatorBounds = in.readTypedObject(PrivacyIndicatorBounds.CREATOR);
     }
 
@@ -914,6 +945,7 @@ public class InsetsState implements Parcelable {
                 + "mDisplayFrame=" + mDisplayFrame
                 + ", mDisplayCutout=" + mDisplayCutout
                 + ", mRoundedCorners=" + mRoundedCorners
+                + "  mRoundedCornerFrame=" + mRoundedCornerFrame
                 + ", mPrivacyIndicatorBounds=" + mPrivacyIndicatorBounds
                 + ", mSources= { " + joiner
                 + " }";
