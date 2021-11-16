@@ -38,10 +38,8 @@ data class KeyguardFingerprintListenModel(
     val shouldListenForFingerprintAssistant: Boolean,
     val switchingUser: Boolean,
     val udfps: Boolean,
-    val userDoesNotHaveTrust: Boolean,
-    val userNeedsStrongAuth: Boolean
+    val userDoesNotHaveTrust: Boolean
 ) : KeyguardListenModel()
-
 /**
  * Verbose debug information associated with [KeyguardUpdateMonitor.shouldListenForFace].
  */
