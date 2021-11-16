@@ -281,6 +281,8 @@ class Task extends TaskFragment {
     // code.
     static final int PERSIST_TASK_VERSION = 1;
 
+    private static final int DEFAULT_MIN_TASK_SIZE_DP = 220;
+
     private float mShadowRadius = 0;
 
     /**
@@ -2052,7 +2054,9 @@ class Task extends TaskFragment {
         // so that the user can not render the task fragment too small to manipulate. We don't need
         // to do this for the root pinned task as the bounds are controlled by the system.
         if (!inPinnedWindowingMode()) {
-            final int defaultMinSizeDp = mRootWindowContainer.mDefaultMinSizeOfResizeableTaskDp;
+            // Use Display specific min sizes when there is one associated with this Task.
+            final int defaultMinSizeDp = mDisplayContent == null
+                    ? DEFAULT_MIN_TASK_SIZE_DP : mDisplayContent.mMinSizeOfResizeableTaskDp;
             final float density = (float) parentConfig.densityDpi / DisplayMetrics.DENSITY_DEFAULT;
             final int defaultMinSize = (int) (defaultMinSizeDp * density);
 
@@ -3413,7 +3417,8 @@ class Task extends TaskFragment {
         info.isResizeable = isResizeable();
         info.minWidth = mMinWidth;
         info.minHeight = mMinHeight;
-        info.defaultMinSize = mRootWindowContainer.mDefaultMinSizeOfResizeableTaskDp;
+        info.defaultMinSize = mDisplayContent == null
+                ? DEFAULT_MIN_TASK_SIZE_DP : mDisplayContent.mMinSizeOfResizeableTaskDp;
 
         info.positionInParent = getRelativePosition();
 

@@ -123,6 +123,7 @@ import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_TARGET;
 import static com.android.server.wm.DisplayContentProto.INSETS_SOURCE_PROVIDERS;
 import static com.android.server.wm.DisplayContentProto.IS_SLEEPING;
 import static com.android.server.wm.DisplayContentProto.KEEP_CLEAR_AREAS;
+import static com.android.server.wm.DisplayContentProto.MIN_SIZE_OF_RESIZEABLE_TASK_DP;
 import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
 import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
@@ -322,6 +323,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * The last bounds of the DisplayArea to mirror.
      */
     private Rect mLastMirroredDisplayAreaBounds = null;
+
+    /**
+     * The default per Display minimal size of tasks. Calculated at construction.
+     */
+    int mMinSizeOfResizeableTaskDp = -1;
 
     // Contains all IME window containers. Note that the z-ordering of the IME windows will depend
     // on the IME target. We mainly have this container grouping so we can keep track of all the IME
@@ -1098,7 +1104,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         mInputMonitor = new InputMonitor(mWmService, this);
         mInsetsPolicy = new InsetsPolicy(mInsetsStateController, this);
-
+        mMinSizeOfResizeableTaskDp = getMinimalTaskSizeDp();
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Creating display=" + display);
 
         mWmService.mDisplayWindowSettings.applySettingsToDisplayLocked(this);
@@ -1552,6 +1558,19 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         return config;
+    }
+
+    private int getMinimalTaskSizeDp() {
+        final Context displayConfigurationContext =
+                mAtmService.mContext.createConfigurationContext(getConfiguration());
+        final float minimalSize =
+                displayConfigurationContext.getResources().getDimension(
+                                com.android.internal.R.dimen.default_minimal_size_resizable_task);
+        if (Double.compare(mDisplayMetrics.density, 0.0) == 0) {
+            throw new IllegalArgumentException("Display with ID=" + getDisplayId() + "has invalid "
+                + "DisplayMetrics.density= 0.0");
+        }
+        return (int) (minimalSize / mDisplayMetrics.density);
     }
 
     private boolean updateOrientation(boolean forceUpdate) {
@@ -2711,6 +2730,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             //                    layout.
             mInsetsStateController.onDisplayInfoUpdated(false /* notifyInsetsChanged */);
         }
+        mMinSizeOfResizeableTaskDp = getMinimalTaskSizeDp();
         mInputMonitor.layoutInputConsumers(info.logicalWidth, info.logicalHeight);
         mDisplayPolicy.onDisplayInfoChanged(info);
     }
@@ -3272,6 +3292,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             screenRotationAnimation.dumpDebug(proto, SCREEN_ROTATION_ANIMATION);
         }
         mDisplayFrames.dumpDebug(proto, DISPLAY_FRAMES);
+        proto.write(MIN_SIZE_OF_RESIZEABLE_TASK_DP, mMinSizeOfResizeableTaskDp);
         if (mTransitionController.isShellTransitionsEnabled()) {
             mTransitionController.dumpDebugLegacy(proto, APP_TRANSITION);
         } else {
@@ -3349,6 +3370,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         pw.print(subPrefix); pw.print("init="); pw.print(mInitialDisplayWidth); pw.print("x");
         pw.print(mInitialDisplayHeight); pw.print(" "); pw.print(mInitialDisplayDensity);
         pw.print("dpi");
+        pw.print(" mMinSizeOfResizeableTaskDp="); pw.print(mMinSizeOfResizeableTaskDp);
         if (mInitialDisplayWidth != mBaseDisplayWidth
                 || mInitialDisplayHeight != mBaseDisplayHeight
                 || mInitialDisplayDensity != mBaseDisplayDensity) {
