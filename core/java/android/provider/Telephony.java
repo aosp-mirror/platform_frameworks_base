@@ -3758,6 +3758,25 @@ public final class Telephony {
         public static final String NETWORK_TYPE_BITMASK = "network_type_bitmask";
 
         /**
+         * Lingering radio technology (network type) bitmask.
+         * To check what values can be contained, refer to the NETWORK_TYPE_ constants in
+         * {@link android.telephony.TelephonyManager}.
+         * Bitmask for a radio tech R is (1 << (R - 1))
+         * <P>Type: INTEGER (long)</P>
+         * @hide
+         */
+        public static final String LINGERING_NETWORK_TYPE_BITMASK =
+                "lingering_network_type_bitmask";
+
+        /**
+         * Sets whether the PDU session brought up by this APN should always be on.
+         * See 3GPP TS 23.501 section 5.6.13
+         * <P>Type: INTEGER</P>
+         * @hide
+         */
+        public static final String ALWAYS_ON = "always_on";
+
+        /**
          * MVNO type:
          * {@code SPN (Service Provider Name), IMSI, GID (Group Identifier Level 1)}.
          * <P>Type: TEXT</P>
@@ -3835,9 +3854,29 @@ public final class Telephony {
          * connected, in bytes.
          * <p>Type: INTEGER </p>
          * @hide
+         * @deprecated use {@link #MTU_V4} or {@link #MTU_V6} instead
          */
         @SystemApi
+        @Deprecated
         public static final String MTU = "mtu";
+
+        /**
+         * The MTU (maximum transmit unit) size of the mobile interface for IPv4 to which the APN is
+         * connected, in bytes.
+         * <p>Type: INTEGER </p>
+         * @hide
+         */
+        @SystemApi
+        public static final String MTU_V4 = "mtu_v4";
+
+        /**
+         * The MTU (maximum transmit unit) size of the mobile interface for IPv6 to which the APN is
+         * connected, in bytes.
+         * <p>Type: INTEGER </p>
+         * @hide
+         */
+        @SystemApi
+        public static final String MTU_V6 = "mtu_v6";
 
         /**
          * APN edit status. APN could be added/edited/deleted by a user or carrier.
