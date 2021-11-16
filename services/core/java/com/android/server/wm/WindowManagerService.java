@@ -7736,19 +7736,32 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean isInputMethodClientFocus(int uid, int pid, int displayId) {
+        public @ImeClientFocusResult int hasInputMethodClientFocus(IBinder windowToken,
+                int uid, int pid, int displayId) {
             if (displayId == Display.INVALID_DISPLAY) {
-                return false;
+                return ImeClientFocusResult.INVALID_DISPLAY_ID;
             }
             synchronized (mGlobalLock) {
                 final DisplayContent displayContent = mRoot.getTopFocusedDisplayContent();
+                final WindowState window = mWindowMap.get(windowToken);
+                if (window == null) {
+                    return ImeClientFocusResult.NOT_IME_TARGET_WINDOW;
+                }
+                final int tokenDisplayId = window.getDisplayContent().getDisplayId();
+                if (tokenDisplayId != displayId) {
+                    Slog.e(TAG, "isInputMethodClientFocus: display ID mismatch."
+                            + " from client: " + displayId
+                            + " from window: " + tokenDisplayId);
+                    return ImeClientFocusResult.DISPLAY_ID_MISMATCH;
+                }
                 if (displayContent == null
                         || displayContent.getDisplayId() != displayId
                         || !displayContent.hasAccess(uid)) {
-                    return false;
+                    return ImeClientFocusResult.INVALID_DISPLAY_ID;
                 }
+
                 if (displayContent.isInputMethodClientFocus(uid, pid)) {
-                    return true;
+                    return ImeClientFocusResult.HAS_IME_FOCUS;
                 }
                 // Okay, how about this...  what is the current focus?
                 // It seems in some cases we may not have moved the IM
@@ -7761,10 +7774,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 final WindowState currentFocus = displayContent.mCurrentFocus;
                 if (currentFocus != null && currentFocus.mSession.mUid == uid
                         && currentFocus.mSession.mPid == pid) {
-                    return currentFocus.canBeImeTarget();
+                    return currentFocus.canBeImeTarget() ? ImeClientFocusResult.HAS_IME_FOCUS
+                            : ImeClientFocusResult.NOT_IME_TARGET_WINDOW;
                 }
             }
-            return false;
+            return ImeClientFocusResult.NOT_IME_TARGET_WINDOW;
         }
 
         @Override
@@ -8760,20 +8774,21 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean shouldRestoreImeVisibility(IBinder imeTargetWindowToken) {
+        final Task imeTargetWindowTask;
         synchronized (mGlobalLock) {
             final WindowState imeTargetWindow = mWindowMap.get(imeTargetWindowToken);
             if (imeTargetWindow == null) {
                 return false;
             }
-            final Task imeTargetWindowTask = imeTargetWindow.getTask();
+            imeTargetWindowTask = imeTargetWindow.getTask();
             if (imeTargetWindowTask == null) {
                 return false;
             }
-            final TaskSnapshot snapshot = getTaskSnapshot(imeTargetWindowTask.mTaskId,
-                    imeTargetWindowTask.mUserId, false /* isLowResolution */,
-                    false /* restoreFromDisk */);
-            return snapshot != null && snapshot.hasImeSurface();
         }
+        final TaskSnapshot snapshot = getTaskSnapshot(imeTargetWindowTask.mTaskId,
+                imeTargetWindowTask.mUserId, false /* isLowResolution */,
+                false /* restoreFromDisk */);
+        return snapshot != null && snapshot.hasImeSurface();
     }
 
     @Override
