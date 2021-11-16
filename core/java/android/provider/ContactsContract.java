@@ -8788,7 +8788,12 @@ public final class ContactsContract {
         public static final String KEY_DEFAULT_ACCOUNT = "key_default_account";
 
         /**
-         * Return the account that was set to default account for new contacts.
+         * Get the account that is set as the default account for new contacts, which should be
+         * initially selected when creating a new contact on contact management apps.
+         *
+         * @param resolver the ContentResolver to query.
+         * @return the default account for new contacts, or null if it's not set or set to NULL
+         * account.
          */
         @Nullable
         public static Account getDefaultAccount(@NonNull ContentResolver resolver) {
@@ -8798,8 +8803,10 @@ public final class ContactsContract {
         }
 
         /**
-         * Set the account to be the default account for new contacts.
+         * Sets the account as the default account that should be initially selected
+         * when creating a new contact on contact management apps.
          *
+         * @param resolver the ContentResolver to query.
          * @param account the account to be set to default.
          * @hide
          */
