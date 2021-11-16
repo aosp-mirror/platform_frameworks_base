@@ -17,6 +17,8 @@
 package com.android.server.communal;
 
 import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
+import static android.app.communal.CommunalManager.ALLOW_COMMUNAL_MODE_BY_DEFAULT;
+import static android.app.communal.CommunalManager.ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 
 import static com.android.server.wm.ActivityInterceptorCallback.COMMUNAL_MODE_ORDERED_ID;
@@ -25,14 +27,10 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.TestApi;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.communal.ICommunalManager;
 import android.app.compat.CompatChanges;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
-import android.compat.annotation.Overridable;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -79,29 +77,6 @@ public final class CommunalManagerService extends SystemService {
     private final PackageReceiver mPackageReceiver;
     private final PackageManager mPackageManager;
     private final DreamManagerInternal mDreamManagerInternal;
-
-    /**
-     * This change id is used to annotate packages which are allowed to run in communal mode.
-     *
-     * @hide
-     */
-    @ChangeId
-    @Overridable
-    @Disabled
-    @TestApi
-    public static final long ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT = 200324021L;
-
-    /**
-     * This change id is used to annotate packages which can run in communal mode by default,
-     * without requiring user opt-in.
-     *
-     * @hide
-     */
-    @ChangeId
-    @Overridable
-    @Disabled
-    @TestApi
-    public static final long ALLOW_COMMUNAL_MODE_BY_DEFAULT = 203673428L;
 
     private final ActivityInterceptorCallback mActivityInterceptorCallback =
             new ActivityInterceptorCallback() {
