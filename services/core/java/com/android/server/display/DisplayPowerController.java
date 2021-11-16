@@ -108,8 +108,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // screen state returns.  Playing the animation can also be somewhat slow.
     private static final boolean USE_COLOR_FADE_ON_ANIMATION = false;
 
-    // The minimum reduction in brightness when dimmed.
-    private static final float SCREEN_DIM_MINIMUM_REDUCTION_FLOAT = 0.04f;
     private static final float SCREEN_ANIMATION_RATE_MINIMUM = 0.0f;
 
     private static final int COLOR_FADE_ON_ANIMATION_DURATION_MILLIS = 250;
@@ -199,6 +197,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     // The dim screen brightness.
     private final float mScreenBrightnessDimConfig;
+
+    // The minimum dim amount to use if the screen brightness is already below
+    // mScreenBrightnessDimConfig.
+    private final float mScreenBrightnessMinimumDimAmount;
 
     private final float mScreenBrightnessDefault;
 
@@ -485,6 +487,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DOZE));
         mScreenBrightnessDimConfig = clampAbsoluteBrightness(
                 pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DIM));
+        mScreenBrightnessMinimumDimAmount = resources.getFloat(
+                com.android.internal.R.dimen.config_screenBrightnessMinimumDimAmountFloat);
+
 
         // NORMAL SCREEN SETTINGS
         mScreenBrightnessDefault = clampAbsoluteBrightness(
@@ -1284,7 +1289,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mPowerRequest.policy == DisplayPowerRequest.POLICY_DIM) {
             if (brightnessState > PowerManager.BRIGHTNESS_MIN) {
                 brightnessState = Math.max(
-                        Math.min(brightnessState - SCREEN_DIM_MINIMUM_REDUCTION_FLOAT,
+                        Math.min(brightnessState - mScreenBrightnessMinimumDimAmount,
                                 mScreenBrightnessDimConfig),
                         PowerManager.BRIGHTNESS_MIN);
                 mBrightnessReasonTemp.addModifier(BrightnessReason.MODIFIER_DIMMED);
