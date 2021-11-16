@@ -223,11 +223,18 @@ final class CompatConfig {
      * Overrides the enabled state for a given change and app.
      *
      *
-     * @param overrides   list of overrides to default changes config.
-     * @param packageName app for which the overrides will be applied.
+     * @param overrides            list of overrides to default changes config.
+     * @param packageName          app for which the overrides will be applied.
+     * @param skipUnknownChangeIds whether to skip unknown change IDs in {@code overrides}.
      */
-    synchronized void addOverrides(CompatibilityOverrideConfig overrides, String packageName) {
+    synchronized void addPackageOverrides(CompatibilityOverrideConfig overrides,
+            String packageName, boolean skipUnknownChangeIds) {
         for (Long changeId : overrides.overrides.keySet()) {
+            if (skipUnknownChangeIds && !isKnownChangeId(changeId)) {
+                Slog.w(TAG, "Trying to add overrides for unknown Change ID " + changeId + ". "
+                        + "Skipping Change ID.");
+                continue;
+            }
             addOverrideUnsafe(changeId, packageName, overrides.overrides.get(changeId));
         }
         saveOverrides();
@@ -338,7 +345,8 @@ final class CompatConfig {
 
     /**
      * Removes all overrides previously added via {@link #addOverride(long, String, boolean)} or
-     * {@link #addOverrides(CompatibilityOverrideConfig, String)} for a certain package.
+     * {@link #addPackageOverrides(CompatibilityOverrideConfig, String, boolean)} for a certain
+     * package.
      *
      * <p>This restores the default behaviour for the given app.
      *
@@ -359,7 +367,8 @@ final class CompatConfig {
     /**
      * Removes overrides whose change ID is specified in {@code overridesToRemove} that were
      * previously added via {@link #addOverride(long, String, boolean)} or
-     * {@link #addOverrides(CompatibilityOverrideConfig, String)} for a certain package.
+     * {@link #addPackageOverrides(CompatibilityOverrideConfig, String, boolean)} for a certain
+     * package.
      *
      * <p>This restores the default behaviour for the given change IDs and app.
      *
@@ -370,6 +379,11 @@ final class CompatConfig {
             String packageName) {
         boolean shouldInvalidateCache = false;
         for (Long changeId : overridesToRemove.changeIds) {
+            if (!isKnownChangeId(changeId)) {
+                Slog.w(TAG, "Trying to remove overrides for unknown Change ID " + changeId + ". "
+                        + "Skipping Change ID.");
+                continue;
+            }
             shouldInvalidateCache |= removeOverrideUnsafe(changeId, packageName);
         }
         if (shouldInvalidateCache) {
