@@ -275,6 +275,7 @@
   <java-symbol type="bool" name="action_bar_expanded_action_views_exclusive" />
   <java-symbol type="bool" name="config_avoidGfxAccel" />
   <java-symbol type="bool" name="config_bluetooth_address_validation" />
+  <java-symbol type="integer" name="config_chooser_max_targets_per_row" />
   <java-symbol type="bool" name="config_flipToScreenOffEnabled" />
   <java-symbol type="integer" name="config_flipToScreenOffMaxLatencyMicros" />
   <java-symbol type="bool" name="config_bluetooth_sco_off_call" />
@@ -2838,6 +2839,7 @@
   <java-symbol type="layout" name="date_picker_month_item_material" />
   <java-symbol type="id" name="month_view" />
   <java-symbol type="integer" name="config_zen_repeat_callers_threshold" />
+  <java-symbol type="dimen" name="chooser_width" />
   <java-symbol type="dimen" name="chooser_corner_radius" />
   <java-symbol type="string" name="chooser_no_direct_share_targets" />
   <java-symbol type="drawable" name="chooser_row_layer_list" />
