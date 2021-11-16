@@ -39,8 +39,6 @@ import static android.net.NetworkStats.STATS_PER_UID;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.TrafficStats.UID_TETHERING;
 
-import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
-
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -72,7 +70,6 @@ import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.os.StrictMode;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.text.TextUtils;
 import android.util.Log;
@@ -445,9 +442,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
         // push any existing quota or UID rules
         synchronized (mQuotaLock) {
-
-            // Netd unconditionally enable bandwidth control
-            SystemProperties.set(PROP_QTAGUID_ENABLED, "1");
 
             mStrictEnabled = true;
 
