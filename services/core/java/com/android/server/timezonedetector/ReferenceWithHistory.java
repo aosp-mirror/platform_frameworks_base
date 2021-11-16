@@ -25,6 +25,7 @@ import android.util.IndentingPrintWriter;
 
 import java.time.Duration;
 import java.util.ArrayDeque;
+import java.util.Iterator;
 
 /**
  * A class that behaves like the following definition, except it stores the history of values set
@@ -112,9 +113,11 @@ public final class ReferenceWithHistory<V> {
         if (mValues == null) {
             ipw.println("{Empty}");
         } else {
-            int i = mSetCount;
-            for (TimestampedValue<V> valueHolder : mValues) {
-                ipw.print(--i);
+            int i = mSetCount - mValues.size();
+            Iterator<TimestampedValue<V>> reverseIterator = mValues.descendingIterator();
+            while (reverseIterator.hasNext()) {
+                TimestampedValue<V> valueHolder = reverseIterator.next();
+                ipw.print(i++);
                 ipw.print("@");
                 ipw.print(Duration.ofMillis(valueHolder.getReferenceTimeMillis()).toString());
                 ipw.print(": ");
