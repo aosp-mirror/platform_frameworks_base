@@ -114,6 +114,7 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -281,6 +282,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
     @Mock private PhoneStatusBarViewController.Factory mPhoneStatusBarViewControllerFactory;
     @Mock private ActivityLaunchAnimator mActivityLaunchAnimator;
+    @Mock private NotifPipelineFlags mNotifPipelineFlags;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
@@ -471,7 +473,8 @@ public class StatusBarTest extends SysuiTestCase {
                 Optional.of(mStartingSurface),
                 mTunerService,
                 mDumpManager,
-                mActivityLaunchAnimator);
+                mActivityLaunchAnimator,
+                mNotifPipelineFlags);
         when(mKeyguardViewMediator.registerStatusBar(
                 any(StatusBar.class),
                 any(NotificationPanelViewController.class),

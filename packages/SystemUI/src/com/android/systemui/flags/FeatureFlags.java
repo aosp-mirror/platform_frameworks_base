@@ -18,8 +18,6 @@ package com.android.systemui.flags;
 
 import android.content.Context;
 import android.util.FeatureFlagUtils;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.android.systemui.dagger.SysUISingleton;
 
@@ -33,12 +31,10 @@ import javax.inject.Inject;
 @SysUISingleton
 public class FeatureFlags {
     private final FlagReader mFlagReader;
-    private final Context mContext;
 
     @Inject
-    public FeatureFlags(FlagReader flagReader, Context context) {
+    public FeatureFlags(FlagReader flagReader) {
         mFlagReader = flagReader;
-        mContext = context;
     }
 
     /**
@@ -47,22 +43,6 @@ public class FeatureFlags {
      */
     public boolean isEnabled(BooleanFlag flag) {
         return mFlagReader.isEnabled(flag);
-    }
-
-    public void assertLegacyPipelineEnabled() {
-        if (isNewNotifPipelineRenderingEnabled()) {
-            throw new IllegalStateException("Old pipeline code running w/ new pipeline enabled");
-        }
-    }
-
-    public boolean checkLegacyPipelineEnabled() {
-        if (!isNewNotifPipelineRenderingEnabled()) {
-            return true;
-        }
-        Log.d("NotifPipeline", "Old pipeline code running w/ new pipeline enabled",
-                new Exception());
-        Toast.makeText(mContext, "Old pipeline code running!", Toast.LENGTH_SHORT).show();
-        return false;
     }
 
     public boolean isNewNotifPipelineRenderingEnabled() {
@@ -129,8 +109,8 @@ public class FeatureFlags {
     }
 
     /** System setting for provider model behavior */
-    public boolean isProviderModelSettingEnabled() {
-        return FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);
+    public boolean isProviderModelSettingEnabled(Context context) {
+        return FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);
     }
 
     /**
@@ -145,10 +125,5 @@ public class FeatureFlags {
      */
     public boolean useCombinedQSHeaders() {
         return isEnabled(Flags.COMBINED_QS_HEADERS);
-    }
-
-    /** static method for the system setting */
-    public static boolean isProviderModelSettingEnabled(Context context) {
-        return FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);
     }
 }

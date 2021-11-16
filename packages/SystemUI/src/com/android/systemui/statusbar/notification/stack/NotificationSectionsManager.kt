@@ -22,10 +22,10 @@ import android.view.LayoutInflater
 import android.view.View
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.R
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.media.KeyguardMediaController
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController
 import com.android.systemui.statusbar.notification.collection.render.ShadeViewManager
@@ -54,12 +54,12 @@ import javax.inject.Inject
  * TODO: Move remaining sections logic from NSSL into this class.
  */
 class NotificationSectionsManager @Inject internal constructor(
-    private val featureFlags: FeatureFlags,
     private val statusBarStateController: StatusBarStateController,
     private val configurationController: ConfigurationController,
     private val keyguardMediaController: KeyguardMediaController,
     private val sectionsFeatureManager: NotificationSectionsFeatureManager,
     private val logger: NotificationSectionsLogger,
+    private val notifPipelineFlags: NotifPipelineFlags,
     @IncomingHeader private val incomingHeaderController: SectionHeaderController,
     @PeopleHeader private val peopleHeaderController: SectionHeaderController,
     @AlertingHeader private val alertingHeaderController: SectionHeaderController,
@@ -201,7 +201,7 @@ class NotificationSectionsManager @Inject internal constructor(
                 override var targetPosition: Int? = null
 
                 override fun adjustViewPosition() {
-                    featureFlags.checkLegacyPipelineEnabled()
+                    notifPipelineFlags.checkLegacyPipelineEnabled()
                     val target = targetPosition
                     val current = currentPosition
                     if (target == null) {
@@ -228,7 +228,7 @@ class NotificationSectionsManager @Inject internal constructor(
     private fun <T : StackScrollerDecorView> decorViewHeaderState(
         header: T
     ): SectionUpdateState<T> {
-        featureFlags.checkLegacyPipelineEnabled()
+        notifPipelineFlags.checkLegacyPipelineEnabled()
         val inner = expandableViewHeaderState(header)
         return object : SectionUpdateState<T> by inner {
             override fun adjustViewPosition() {
@@ -245,7 +245,7 @@ class NotificationSectionsManager @Inject internal constructor(
      * bookkeeping and adds/moves/removes section headers if appropriate.
      */
     fun updateSectionBoundaries(reason: String) {
-        featureFlags.checkLegacyPipelineEnabled()
+        notifPipelineFlags.checkLegacyPipelineEnabled()
         if (!isUsingMultipleSections) {
             return
         }

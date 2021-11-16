@@ -151,7 +151,7 @@ public class QSTileHostTest extends SysuiTestCase {
                 mSecureSettings, mCustomTileStatePersister, mTileServiceRequestControllerBuilder,
                 mFeatureFlags);
         setUpTileFactory();
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(false);
+        when(mFeatureFlags.isProviderModelSettingEnabled(mContext)).thenReturn(false);
     }
 
     private void setUpTileFactory() {
@@ -200,7 +200,7 @@ public class QSTileHostTest extends SysuiTestCase {
 
     @Test
     public void testRemoveWifiAndCellularWithoutInternet() {
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
+        when(mFeatureFlags.isProviderModelSettingEnabled(mContext)).thenReturn(true);
         mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "wifi, spec1, cell, spec2");
 
         assertEquals("internet", mQSTileHost.mTileSpecs.get(0));
@@ -210,7 +210,7 @@ public class QSTileHostTest extends SysuiTestCase {
 
     @Test
     public void testRemoveWifiAndCellularWithInternet() {
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
+        when(mFeatureFlags.isProviderModelSettingEnabled(mContext)).thenReturn(true);
         mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "wifi, spec1, cell, spec2, internet");
 
         assertEquals("spec1", mQSTileHost.mTileSpecs.get(0));
@@ -220,7 +220,7 @@ public class QSTileHostTest extends SysuiTestCase {
 
     @Test
     public void testRemoveWifiWithoutInternet() {
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
+        when(mFeatureFlags.isProviderModelSettingEnabled(mContext)).thenReturn(true);
         mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "spec1, wifi, spec2");
 
         assertEquals("spec1", mQSTileHost.mTileSpecs.get(0));
@@ -230,7 +230,7 @@ public class QSTileHostTest extends SysuiTestCase {
 
     @Test
     public void testRemoveCellWithInternet() {
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
+        when(mFeatureFlags.isProviderModelSettingEnabled(mContext)).thenReturn(true);
         mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "spec1, spec2, cell, internet");
 
         assertEquals("spec1", mQSTileHost.mTileSpecs.get(0));
@@ -240,7 +240,7 @@ public class QSTileHostTest extends SysuiTestCase {
 
     @Test
     public void testNoWifiNoCellularNoInternet() {
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
+        when(mFeatureFlags.isProviderModelSettingEnabled(mContext)).thenReturn(true);
         mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "spec1,spec2");
 
         assertEquals("spec1", mQSTileHost.mTileSpecs.get(0));
