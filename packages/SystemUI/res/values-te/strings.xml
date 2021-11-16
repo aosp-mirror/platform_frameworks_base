@@ -598,9 +598,9 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"ధ్వని సెట్టింగ్‌లు"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"విస్తరింపజేయండి"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"కుదించండి"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"మీడియాకు ఆటోమేటిక్ శీర్షికలు"</string>
-    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"ఉపశీర్షికల చిట్కాను మూసివేయండి"</string>
-    <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"శీర్షికలు అతివ్యాప్తి"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"మీడియాకు ఆటోమేటిక్ క్యాప్షన్‌లు"</string>
+    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"క్యాప్షన్‌ల చిట్కాను మూసివేయండి"</string>
+    <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"క్యాప్షన్‌లు ఓవర్‌లే"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ప్రారంభించు"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"నిలిపివేయండి"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"పరికరం అవుట్‌పుట్‌ని మార్చండి"</string>
