@@ -89,6 +89,8 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     @Mock
     private Handler mHandler;
     @Mock
+    private WindowMagnificationAnimationController mWindowMagnificationAnimationController;
+    @Mock
     private SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
     @Mock
     private MirrorWindowControl mMirrorWindowControl;
@@ -128,7 +130,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
         mResources = getContext().getOrCreateTestableResources().getResources();
         mWindowMagnificationController = new WindowMagnificationController(mContext,
-                mHandler, mSfVsyncFrameProvider,
+                mHandler, mWindowMagnificationAnimationController, mSfVsyncFrameProvider,
                 mMirrorWindowControl, mTransaction, mWindowMagnifierCallback, mSysUiState);
 
         verify(mMirrorWindowControl).setWindowDelegate(
@@ -174,7 +176,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         mWindowManager.setWindowBounds(new Rect(0, 0, screenSize, screenSize));
         //We need to initialize new one because the window size is determined when initialization.
         final WindowMagnificationController controller = new WindowMagnificationController(mContext,
-                mHandler, mSfVsyncFrameProvider,
+                mHandler, mWindowMagnificationAnimationController, mSfVsyncFrameProvider,
                 mMirrorWindowControl, mTransaction, mWindowMagnifierCallback, mSysUiState);
 
         mInstrumentation.runOnMainSync(() -> {

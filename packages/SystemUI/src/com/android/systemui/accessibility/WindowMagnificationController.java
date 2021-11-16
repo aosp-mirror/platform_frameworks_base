@@ -59,6 +59,7 @@ import android.view.WindowManagerGlobal;
 import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
+import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -133,6 +134,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     // The top Y of the system gesture rect at the bottom. Set to -1 if it is invalid.
     private int mSystemGestureTop = -1;
 
+    private final WindowMagnificationAnimationController mAnimationController;
     private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
     private final MagnificationGestureDetector mGestureDetector;
     private final int mBounceEffectDuration;
@@ -148,11 +150,14 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private MirrorWindowControl mMirrorWindowControl;
 
     WindowMagnificationController(@UiContext Context context, @NonNull Handler handler,
+            @NonNull WindowMagnificationAnimationController animationController,
             SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
             MirrorWindowControl mirrorWindowControl, SurfaceControl.Transaction transaction,
             @NonNull WindowMagnifierCallback callback, SysUiState sysUiState) {
         mContext = context;
         mHandler = handler;
+        mAnimationController = animationController;
+        mAnimationController.setWindowMagnificationController(this);
         mSfVsyncFrameProvider = sfVsyncFrameProvider;
         mWindowMagnifierCallback = callback;
         mSysUiState = sysUiState;
@@ -256,6 +261,19 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             return true;
         }
         return false;
+    }
+
+    /**
+     * Wraps {@link WindowMagnificationController#deleteWindowMagnification()}} with transition
+     * animation. If the window magnification is enabling, it runs the animation in reverse.
+     *
+     * @param animationCallback Called when the transition is complete, the given arguments
+     *                          are as same as current values, or the transition is interrupted
+     *                          due to the new transition request.
+     */
+    void deleteWindowMagnification(
+            @Nullable IRemoteMagnificationAnimationCallback animationCallback) {
+        mAnimationController.deleteWindowMagnification(animationCallback);
     }
 
     /**
@@ -693,6 +711,27 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     /**
+     * Wraps {@link WindowMagnificationController#enableWindowMagnification(float, float, float)}
+     * with transition animation. If the window magnification is not enabled, the scale will start
+     * from 1.0 and the center won't be changed during the animation. If animator is
+     * {@code STATE_DISABLING}, the animation runs in reverse.
+     *
+     * @param scale   The target scale, or {@link Float#NaN} to leave unchanged.
+     * @param centerX The screen-relative X coordinate around which to center,
+     *                or {@link Float#NaN} to leave unchanged.
+     * @param centerY The screen-relative Y coordinate around which to center,
+     *                or {@link Float#NaN} to leave unchanged.
+     * @param animationCallback Called when the transition is complete, the given arguments
+     *                          are as same as current values, or the transition is interrupted
+     *                          due to the new transition request.
+     */
+    void enableWindowMagnification(float scale, float centerX, float centerY,
+            @Nullable IRemoteMagnificationAnimationCallback animationCallback) {
+        mAnimationController.enableWindowMagnification(scale, centerX,
+                centerY, animationCallback);
+    }
+
+    /**
      * Enables window magnification with specified parameters. If the given scale is <strong>less
      * than or equal to 1.0f<strong>, then
      * {@link WindowMagnificationController#deleteWindowMagnification()} will be called instead to
@@ -732,7 +771,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      * @param scale the target scale, or {@link Float#NaN} to leave unchanged
      */
     void setScale(float scale) {
-        if (!isWindowVisible() || mScale == scale) {
+        if (mAnimationController.isAnimating() || !isWindowVisible() || mScale == scale) {
             return;
         }
         enableWindowMagnification(scale, Float.NaN, Float.NaN);
@@ -749,7 +788,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      *                current screen pixels.
      */
     void moveWindowMagnifier(float offsetX, float offsetY) {
-        if (mMirrorSurfaceView == null) {
+        if (mAnimationController.isAnimating() || mMirrorSurfaceView == null) {
             return;
         }
         if (updateMagnificationFramePosition((int) offsetX, (int) offsetY)) {
