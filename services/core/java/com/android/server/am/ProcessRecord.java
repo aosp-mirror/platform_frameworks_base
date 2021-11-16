@@ -26,7 +26,6 @@ import android.app.ApplicationExitInfo;
 import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
-import android.app.RemoteServiceException;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ProcessInfo;
 import android.content.pm.VersionedPackage;
@@ -946,11 +945,6 @@ class ProcessRecord implements WindowProcessListener {
         }
 
         return mServices.hasForegroundServices();
-    }
-
-    @GuardedBy("mService")
-    void scheduleCrashLocked(String message) {
-        scheduleCrashLocked(message, RemoteServiceException.TYPE_ID);
     }
 
     /**

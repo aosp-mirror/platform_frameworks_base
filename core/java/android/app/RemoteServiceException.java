@@ -19,20 +19,109 @@ package android.app;
 import android.util.AndroidRuntimeException;
 
 /**
- * Exception used by {@link ActivityThread} to crash an app process.
+ * Exception used by {@link ActivityThread} to crash an app process for an unknown cause.
+ * An exception of this class is no longer supposed to be thrown. Instead, we use fine-grained
+ * sub-exceptions.
+ *
+ * Subclasses must be registered in
+ * {@link android.app.ActivityThread#throwRemoteServiceException(java.lang.String, int)}.
  *
  * @hide
  */
 public class RemoteServiceException extends AndroidRuntimeException {
-    /**
-     * The type ID passed to {@link IApplicationThread#scheduleCrash}.
-     *
-     * Assign a unique ID to each subclass. See the above method for the numbers that are already
-     * taken.
-     */
-    public static final int TYPE_ID = 0;
-
     public RemoteServiceException(String msg) {
         super(msg);
+    }
+
+    /**
+     * Exception used to crash an app process when it didn't call {@link Service#startForeground}
+     * in time after the service was started with
+     * {@link android.content.Context#startForegroundService}.
+     *
+     * @hide
+     */
+    public static class ForegroundServiceDidNotStartInTimeException extends RemoteServiceException {
+        /** The type ID passed to {@link IApplicationThread#scheduleCrash}. */
+        public static final int TYPE_ID = 1;
+
+        public ForegroundServiceDidNotStartInTimeException(String msg) {
+            super(msg);
+        }
+    }
+
+    /**
+     * Exception used to crash an app process when the system received a RemoteException
+     * while delivering a broadcast to an app process.
+     *
+     * @hide
+     */
+    public static class CannotDeliverBroadcastException extends RemoteServiceException {
+        /** The type ID passed to {@link IApplicationThread#scheduleCrash}. */
+        public static final int TYPE_ID = 2;
+
+        public CannotDeliverBroadcastException(String msg) {
+            super(msg);
+        }
+    }
+
+    /**
+     * Exception used to crash an app process when the system received a RemoteException
+     * while posting a notification of a foreground service.
+     *
+     * @hide
+     */
+    public static class CannotPostForegroundServiceNotificationException
+            extends RemoteServiceException {
+        /** The type ID passed to {@link IApplicationThread#scheduleCrash}. */
+        public static final int TYPE_ID = 3;
+
+        public CannotPostForegroundServiceNotificationException(String msg) {
+            super(msg);
+        }
+    }
+
+    /**
+     * Exception used to crash an app process when the system finds an error in a foreground service
+     * notification.
+     *
+     * @hide
+     */
+    public static class BadForegroundServiceNotificationException extends RemoteServiceException {
+        /** The type ID passed to {@link IApplicationThread#scheduleCrash}. */
+        public static final int TYPE_ID = 4;
+
+        public BadForegroundServiceNotificationException(String msg) {
+            super(msg);
+        }
+    }
+
+    /**
+     * Exception used to crash an app process when it calls a setting activity that requires
+     * the {@code REQUEST_PASSWORD_COMPLEXITY} permission.
+     *
+     * @hide
+     */
+    public static class MissingRequestPasswordComplexityPermissionException
+            extends RemoteServiceException {
+        /** The type ID passed to {@link IApplicationThread#scheduleCrash}. */
+        public static final int TYPE_ID = 5;
+
+        public MissingRequestPasswordComplexityPermissionException(String msg) {
+            super(msg);
+        }
+    }
+
+    /**
+     * Exception used to crash an app process by {@code adb shell am crash}.
+     *
+     * @hide
+     */
+    public static class CrashedByAdbException extends RemoteServiceException {
+        /** The type ID passed to {@link IApplicationThread#scheduleCrash}. */
+        public static final int TYPE_ID = 6;
+
+        public CrashedByAdbException(String msg) {
+            super(msg);
+        }
     }
 }
