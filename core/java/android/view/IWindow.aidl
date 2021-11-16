@@ -96,9 +96,9 @@ oneway interface IWindow {
 
     /**
      * Tell the window that it is either gaining or losing focus.  Keep it up
-     * to date on the current state showing navigational focus (touch mode) too.
+     * to date on the current state showing navigational focus too.
      */
-    void windowFocusChanged(boolean hasFocus, boolean inTouchMode);
+    void windowFocusChanged(boolean hasFocus);
 
     void closeSystemDialogs(String reason);
 

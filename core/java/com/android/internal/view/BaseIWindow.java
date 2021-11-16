@@ -90,7 +90,7 @@ public class BaseIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void windowFocusChanged(boolean hasFocus, boolean touchEnabled) {
+    public void windowFocusChanged(boolean hasFocus) {
     }
 
     @Override
