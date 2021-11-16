@@ -3281,6 +3281,10 @@ public class StatusBar extends SystemUI implements
             }
             return true;
         }
+        if (mNotificationPanelViewController.isQsCustomizing()) {
+            mNotificationPanelViewController.closeQsCustomizer();
+            return true;
+        }
         if (mNotificationPanelViewController.isQsExpanded()) {
             if (mNotificationPanelViewController.isQsDetailShowing()) {
                 mNotificationPanelViewController.closeQsDetail();
