@@ -30,6 +30,7 @@ import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.DisplayAddress;
@@ -71,7 +72,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     public static final int DISPLAY_GROUP_EVENT_CHANGED = 2;
     public static final int DISPLAY_GROUP_EVENT_REMOVED = 3;
 
-    private static final int TIMEOUT_STATE_TRANSITION_MILLIS = 300;
+    private static final int TIMEOUT_STATE_TRANSITION_MILLIS = 500;
 
     private static final int MSG_TRANSITION_TO_PENDING_DEVICE_STATE = 1;
 
@@ -100,9 +101,14 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private final boolean mSupportsConcurrentInternalDisplays;
 
     /**
-     * Wake the device when transitioning into this device state.
+     * Wake the device when transitioning into these device state.
      */
-    private final int mDeviceStateOnWhichToWakeUp;
+    private final SparseBooleanArray mDeviceStatesOnWhichToWakeUp;
+
+    /**
+     * Sleep the device when transitioning into these device state.
+     */
+    private final SparseBooleanArray mDeviceStatesOnWhichToSleep;
 
     /**
      * Map of all logical displays indexed by logical display id.
@@ -153,20 +159,25 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private Layout mCurrentLayout = null;
     private int mDeviceState = DeviceStateManager.INVALID_DEVICE_STATE;
     private int mPendingDeviceState = DeviceStateManager.INVALID_DEVICE_STATE;
+    private boolean mBootCompleted = false;
+    private boolean mInteractive;
 
     LogicalDisplayMapper(@NonNull Context context, @NonNull DisplayDeviceRepository repo,
             @NonNull Listener listener, @NonNull DisplayManagerService.SyncRoot syncRoot,
             @NonNull Handler handler) {
         mSyncRoot = syncRoot;
         mPowerManager = context.getSystemService(PowerManager.class);
+        mInteractive = mPowerManager.isInteractive();
         mHandler = new LogicalDisplayMapperHandler(handler.getLooper());
         mDisplayDeviceRepo = repo;
         mListener = listener;
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
         mSupportsConcurrentInternalDisplays = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_supportsConcurrentInternalDisplays);
-        mDeviceStateOnWhichToWakeUp = context.getResources().getInteger(
-                com.android.internal.R.integer.config_deviceStateOnWhichToWakeUp);
+        mDeviceStatesOnWhichToWakeUp = toSparseBooleanArray(context.getResources().getIntArray(
+                com.android.internal.R.array.config_deviceStatesOnWhichToWakeUp));
+        mDeviceStatesOnWhichToSleep = toSparseBooleanArray(context.getResources().getIntArray(
+                com.android.internal.R.array.config_deviceStatesOnWhichToSleep));
         mDisplayDeviceRepo.addListener(this);
         mDeviceStateToLayoutMap = new DeviceStateToLayoutMap();
     }
@@ -329,7 +340,9 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
 
         ipw.println("mSingleDisplayDemoMode=" + mSingleDisplayDemoMode);
         ipw.println("mCurrentLayout=" + mCurrentLayout);
-        ipw.println("mDeviceStateOnWhichToWakeUp=" + mDeviceStateOnWhichToWakeUp);
+        ipw.println("mDeviceStatesOnWhichToWakeUp=" + mDeviceStatesOnWhichToWakeUp);
+        ipw.println("mDeviceStatesOnWhichToSleep=" + mDeviceStatesOnWhichToSleep);
+        ipw.println("mInteractive=" + mInteractive);
 
         final int logicalDisplayCount = mLogicalDisplays.size();
         ipw.println();
@@ -347,9 +360,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     }
 
     void setDeviceStateLocked(int state) {
-        final boolean isInteractive  = mPowerManager.isInteractive();
         Slog.i(TAG, "Requesting Transition to state: " + state + ", from state=" + mDeviceState
-                + ", interactive=" + isInteractive);
+                + ", interactive=" + mInteractive);
         // As part of a state transition, we may need to turn off some displays temporarily so that
         // the transition is smooth. Plus, on some devices, only one internal displays can be
         // on at a time. We use DISPLAY_PHASE_LAYOUT_TRANSITION to mark a display that needs to be
@@ -358,13 +370,17 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             resetLayoutLocked(mDeviceState, state, LogicalDisplay.DISPLAY_PHASE_LAYOUT_TRANSITION);
         }
         mPendingDeviceState = state;
-        final boolean wakeDevice = mPendingDeviceState == mDeviceStateOnWhichToWakeUp
-                && !isInteractive;
+        final boolean wakeDevice = mDeviceStatesOnWhichToWakeUp.get(mPendingDeviceState)
+                && !mDeviceStatesOnWhichToWakeUp.get(mDeviceState)
+                && !mInteractive && mBootCompleted;
+        final boolean sleepDevice = mDeviceStatesOnWhichToSleep.get(mPendingDeviceState)
+                && !mDeviceStatesOnWhichToSleep.get(mDeviceState)
+                && mInteractive && mBootCompleted;
 
-        // If all displays are off already, we can just transition here, unless the device is asleep
-        // and we plan on waking it up. In that case, fall through to the call to wakeUp, and defer
-        // the final transition until later once the device is awake.
-        if (areAllTransitioningDisplaysOffLocked() && !wakeDevice) {
+        // If all displays are off already, we can just transition here, unless we are trying to
+        // wake or sleep the device as part of this transition. In that case defer the final
+        // transition until later once the device is awake/asleep.
+        if (areAllTransitioningDisplaysOffLocked() && !wakeDevice && !sleepDevice) {
             transitionToPendingStateLocked();
             return;
         }
@@ -376,15 +392,37 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         // start turning OFF in preparation for the new layout.
         updateLogicalDisplaysLocked();
 
-        if (wakeDevice) {
-            // We already told the displays to turn off, now we need to wake the device as
-            // we transition to this new state. We do it here so that the waking happens between the
-            // transition from one layout to another.
-            mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_UNFOLD_DEVICE,
-                    "server.display:unfold");
+        if (wakeDevice || sleepDevice) {
+            if (wakeDevice) {
+                // We already told the displays to turn off, now we need to wake the device as
+                // we transition to this new state. We do it here so that the waking happens
+                // between the transition from one layout to another.
+                mPowerManager.wakeUp(SystemClock.uptimeMillis(),
+                        PowerManager.WAKE_REASON_UNFOLD_DEVICE, "server.display:unfold");
+            } else if (sleepDevice) {
+                // Send the device to sleep when required.
+                mPowerManager.goToSleep(SystemClock.uptimeMillis(),
+                        PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD, 0);
+            }
         }
+
         mHandler.sendEmptyMessageDelayed(MSG_TRANSITION_TO_PENDING_DEVICE_STATE,
                 TIMEOUT_STATE_TRANSITION_MILLIS);
+    }
+
+    void onBootCompleted() {
+        synchronized (mSyncRoot) {
+            mBootCompleted = true;
+        }
+    }
+
+    void onEarlyInteractivityChange(boolean interactive) {
+        synchronized (mSyncRoot) {
+            if (mInteractive != interactive) {
+                mInteractive = interactive;
+                finishStateTransitionLocked(false /*force*/);
+            }
+        }
     }
 
     private boolean areAllTransitioningDisplaysOffLocked() {
@@ -419,13 +457,24 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             return;
         }
 
+        final boolean waitingToWakeDevice = mDeviceStatesOnWhichToWakeUp.get(mPendingDeviceState)
+                && !mDeviceStatesOnWhichToWakeUp.get(mDeviceState)
+                && !mInteractive && mBootCompleted;
+        final boolean waitingToSleepDevice = mDeviceStatesOnWhichToSleep.get(mPendingDeviceState)
+                && !mDeviceStatesOnWhichToSleep.get(mDeviceState)
+                && mInteractive && mBootCompleted;
+
         final boolean displaysOff = areAllTransitioningDisplaysOffLocked();
-        if (displaysOff || force) {
+        final boolean isReadyToTransition = displaysOff && !waitingToWakeDevice
+                && !waitingToSleepDevice;
+
+        if (isReadyToTransition || force) {
             transitionToPendingStateLocked();
             mHandler.removeMessages(MSG_TRANSITION_TO_PENDING_DEVICE_STATE);
         } else if (DEBUG) {
             Slog.d(TAG, "Not yet ready to transition to state=" + mPendingDeviceState
-                    + " with displays-off=" + displaysOff + " and force=" + force);
+                    + " with displays-off=" + displaysOff + ", force=" + force
+                    + ", mInteractive=" + mInteractive + ", isReady=" + isReadyToTransition);
         }
     }
 
@@ -821,6 +870,14 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         return displayId;
     }
 
+    private SparseBooleanArray toSparseBooleanArray(int[] input) {
+        final SparseBooleanArray retval = new SparseBooleanArray(2);
+        for (int i = 0; input != null && i < input.length; i++) {
+            retval.put(input[i], true);
+        }
+        return retval;
+    }
+
     private String displayEventToString(int msg) {
         switch(msg) {
             case LOGICAL_DISPLAY_EVENT_ADDED:
@@ -861,5 +918,4 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             }
         }
     }
-
 }

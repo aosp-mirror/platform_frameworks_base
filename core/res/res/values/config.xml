@@ -654,10 +654,23 @@
         -->
     </integer-array>
 
-    <!-- When entering this device state (defined in device_state_configuration.xml),
-         we should wake the device. -1 to disable the feature (do not wake on any device-state
-         transition). -->
-    <integer name="config_deviceStateOnWhichToWakeUp">-1</integer>
+    <!-- When a device enters any of these states, it should be woken up. States are defined in
+         device_state_configuration.xml. -->
+    <integer-array name="config_deviceStatesOnWhichToWakeUp">
+        <!-- Example:
+        <item>0</item>
+        <item>1</item>
+        -->
+    </integer-array>
+
+    <!-- When a device enters any of these states, it should go to sleep. States are defined in
+         device_state_configuration.xml. -->
+    <integer-array name="config_deviceStatesOnWhichToSleep">
+        <!-- Example:
+        <item>0</item>
+        <item>1</item>
+        -->
+    </integer-array>
 
     <!-- Indicate the display area rect for foldable devices in folded state. -->
     <string name="config_foldedArea"></string>
