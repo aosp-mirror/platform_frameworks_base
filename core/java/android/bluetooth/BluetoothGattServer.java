@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
@@ -26,6 +28,8 @@ import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -709,33 +713,85 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * notification
      * @return true, if the notification has been triggered successfully
      * @throws IllegalArgumentException
+     *
+     * @deprecated Use {@link BluetoothGattServer#notifyCharacteristicChanged(BluetoothDevice,
+     * BluetoothGattCharacteristic, boolean, byte[])}  as this is not memory safe.
      */
+    @Deprecated
     @RequiresLegacyBluetoothPermission
     @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean notifyCharacteristicChanged(BluetoothDevice device,
             BluetoothGattCharacteristic characteristic, boolean confirm) {
+        return notifyCharacteristicChanged(device, characteristic, confirm,
+                characteristic.getValue()) == BluetoothStatusCodes.SUCCESS;
+    }
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            BluetoothStatusCodes.SUCCESS,
+            BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION,
+            BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_PRIVILEGED_PERMISSION,
+            BluetoothStatusCodes.ERROR_DEVICE_NOT_CONNECTED,
+            BluetoothStatusCodes.ERROR_PROFILE_SERVICE_NOT_BOUND,
+            BluetoothStatusCodes.ERROR_GATT_WRITE_NOT_ALLOWED,
+            BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY,
+            BluetoothStatusCodes.ERROR_UNKNOWN
+    })
+    public @interface NotifyCharacteristicReturnValues{}
+
+    /**
+     * Send a notification or indication that a local characteristic has been
+     * updated.
+     *
+     * <p>A notification or indication is sent to the remote device to signal
+     * that the characteristic has been updated. This function should be invoked
+     * for every client that requests notifications/indications by writing
+     * to the "Client Configuration" descriptor for the given characteristic.
+     *
+     * @param device the remote device to receive the notification/indication
+     * @param characteristic the local characteristic that has been updated
+     * @param confirm {@code true} to request confirmation from the client (indication) or
+     * {@code false} to send a notification
+     * @param value the characteristic value
+     * @return whether the notification has been triggered successfully
+     * @throws IllegalArgumentException if the characteristic value or service is null
+     */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @NotifyCharacteristicReturnValues
+    public int notifyCharacteristicChanged(@NonNull BluetoothDevice device,
+            @NonNull BluetoothGattCharacteristic characteristic, boolean confirm,
+            @NonNull byte[] value) {
         if (VDBG) Log.d(TAG, "notifyCharacteristicChanged() - device: " + device.getAddress());
-        if (mService == null || mServerIf == 0) return false;
+        if (mService == null || mServerIf == 0) {
+            return BluetoothStatusCodes.ERROR_PROFILE_SERVICE_NOT_BOUND;
+        }
 
+        if (characteristic == null) {
+            throw new IllegalArgumentException("characteristic must not be null");
+        }
+        if (device == null) {
+            throw new IllegalArgumentException("device must not be null");
+        }
         BluetoothGattService service = characteristic.getService();
-        if (service == null) return false;
-
-        if (characteristic.getValue() == null) {
-            throw new IllegalArgumentException("Chracteristic value is empty. Use "
-                    + "BluetoothGattCharacteristic#setvalue to update");
+        if (service == null) {
+            throw new IllegalArgumentException("Characteristic must have a non-null service");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("Characteristic value must not be null");
         }
 
         try {
-            mService.sendNotification(mServerIf, device.getAddress(),
+            return mService.sendNotification(mServerIf, device.getAddress(),
                     characteristic.getInstanceId(), confirm,
-                    characteristic.getValue(), mAttributionSource);
+                    value, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
-
-        return true;
     }
 
     /**
