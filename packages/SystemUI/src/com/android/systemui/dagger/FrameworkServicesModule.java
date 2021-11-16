@@ -442,7 +442,11 @@ public class FrameworkServicesModule {
     @Provides
     @Singleton
     static PermissionManager providePermissionManager(Context context) {
-        return context.getSystemService(PermissionManager.class);
+        PermissionManager pm = context.getSystemService(PermissionManager.class);
+        if (pm != null) {
+            pm.initializeUsageHelper();
+        }
+        return pm;
     }
 
     @Provides
