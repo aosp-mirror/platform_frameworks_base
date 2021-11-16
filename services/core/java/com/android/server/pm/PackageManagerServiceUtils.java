@@ -67,6 +67,7 @@ import android.stats.storage.StorageEnums;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.ArraySet;
+import android.util.AtomicFile;
 import android.util.Base64;
 import android.util.Log;
 import android.util.LogPrinter;
@@ -100,7 +101,6 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.security.SecureRandom;
@@ -679,17 +679,23 @@ public class PackageManagerServiceUtils {
                     + "; src: " + srcFile.getAbsolutePath()
                     + ", dst: " + dstFile.getAbsolutePath());
         }
+        final AtomicFile atomicFile = new AtomicFile(dstFile);
+        FileOutputStream outputStream = null;
         try (
-                InputStream fileIn = new GZIPInputStream(new FileInputStream(srcFile));
-                OutputStream fileOut = new FileOutputStream(dstFile, false /*append*/);
+                InputStream fileIn = new GZIPInputStream(new FileInputStream(srcFile))
         ) {
-            FileUtils.copy(fileIn, fileOut);
-            Os.chmod(dstFile.getAbsolutePath(), 0644);
+            outputStream = atomicFile.startWrite();
+            FileUtils.copy(fileIn, outputStream);
+            // Flush anything in buffer before chmod, because any writes after chmod will fail.
+            outputStream.flush();
+            Os.fchmod(outputStream.getFD(), 0644);
+            atomicFile.finishWrite(outputStream);
             return PackageManager.INSTALL_SUCCEEDED;
         } catch (IOException e) {
             logCriticalInfo(Log.ERROR, "Failed to decompress file"
                     + "; src: " + srcFile.getAbsolutePath()
                     + ", dst: " + dstFile.getAbsolutePath());
+            atomicFile.failWrite(outputStream);
         }
         return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
     }
