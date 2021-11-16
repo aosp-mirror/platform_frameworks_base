@@ -15080,22 +15080,6 @@ public final class Settings {
                 "max_sound_trigger_detection_service_ops_per_day";
 
         /**
-         * Setting indicating the name of the Wear OS app package containing the device's sysui.
-         *
-         * @hide
-         */
-        public static final String CLOCKWORK_SYSUI_PACKAGE_NAME =
-                "clockwork_sysui_package_name";
-
-        /**
-         * Setting indicating the name of the main activity of the Wear OS sysui.
-         *
-         * @hide
-         */
-        public static final String CLOCKWORK_SYSUI_MAIN_ACTIVITY_NAME =
-                "clockwork_sysui_main_activity_name";
-
-        /**
          * Setting to determine if the Clockwork Home application is ready.
          *
          * <p>
