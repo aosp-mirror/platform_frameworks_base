@@ -148,8 +148,9 @@ public final class QuotaController extends StateController {
         public int bgJobCountInMaxPeriod;
 
         /**
-         * The number of {@link TimingSession}s within the bucket window size. This will include
-         * sessions that started before the window as long as they end within the window.
+         * The number of {@link TimingSession TimingSessions} within the bucket window size.
+         * This will include sessions that started before the window as long as they end within
+         * the window.
          */
         public int sessionCountInWindow;
 
@@ -183,7 +184,7 @@ public final class QuotaController extends StateController {
         public long sessionRateLimitExpirationTimeElapsed;
 
         /**
-         * The number of {@link TimingSession}s that ran in at least the last
+         * The number of {@link TimingSession TimingSessions} that ran in at least the last
          * {@link #mRateLimitingWindowMs}. It may contain a few stale entries since cleanup won't
          * happen exactly every {@link #mRateLimitingWindowMs}. This should only be considered
          * valid before elapsed realtime has reached {@link #sessionRateLimitExpirationTimeElapsed}.
@@ -363,8 +364,8 @@ public final class QuotaController extends StateController {
             QcConstants.DEFAULT_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW;
 
     /**
-     * The maximum number of {@link TimingSession}s that can run within the past {@link
-     * #mRateLimitingWindowMs}.
+     * The maximum number of {@link TimingSession TimingSessions} that can run within the past
+     * {@link #mRateLimitingWindowMs}.
      */
     private int mMaxSessionCountPerRateLimitingWindow =
             QcConstants.DEFAULT_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW;
@@ -434,9 +435,10 @@ public final class QuotaController extends StateController {
     };
 
     /**
-     * The maximum number of {@link TimingSession}s based on its standby bucket. For each max value
-     * count in the array, the app will not be allowed to have more than that many number of
-     * {@link TimingSession}s within the latest time interval of its rolling window size.
+     * The maximum number of {@link TimingSession TimingSessions} based on its standby bucket.
+     * For each max value count in the array, the app will not be allowed to have more than that
+     * many number of {@link TimingSession TimingSessions} within the latest time interval of its
+     * rolling window size.
      *
      * @see #mBucketPeriodsMs
      */
@@ -450,8 +452,8 @@ public final class QuotaController extends StateController {
     };
 
     /**
-     * Treat two distinct {@link TimingSession}s as the same if they start and end within this
-     * amount of time of each other.
+     * Treat two distinct {@link TimingSession TimingSessions} as the same if they start and end
+     * within this amount of time of each other.
      */
     private long mTimingSessionCoalescingDurationMs =
             QcConstants.DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS;
@@ -997,8 +999,8 @@ public final class QuotaController extends StateController {
     /**
      * Returns the amount of time, in milliseconds, until the package would have reached its
      * duration quota, assuming it has a job counting towards its quota the entire time. This takes
-     * into account any {@link TimingSession}s that may roll out of the window as the job is
-     * running.
+     * into account any {@link TimingSession TimingSessions} that may roll out of the window as the
+     * job is running.
      */
     @VisibleForTesting
     long getTimeUntilQuotaConsumedLocked(final int userId, @NonNull final String packageName) {
@@ -3073,45 +3075,45 @@ public final class QuotaController extends StateController {
                 DEFAULT_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW;
 
         /**
-         * The maximum number of {@link TimingSession}s an app can run within this particular
-         * standby bucket's window size.
+         * The maximum number of {@link TimingSession TimingSessions} an app can run within this
+         * particular standby bucket's window size.
          */
         public int MAX_SESSION_COUNT_ACTIVE = DEFAULT_MAX_SESSION_COUNT_ACTIVE;
 
         /**
-         * The maximum number of {@link TimingSession}s an app can run within this particular
-         * standby bucket's window size.
+         * The maximum number of {@link TimingSession TimingSessions} an app can run within this
+         * particular standby bucket's window size.
          */
         public int MAX_SESSION_COUNT_WORKING = DEFAULT_MAX_SESSION_COUNT_WORKING;
 
         /**
-         * The maximum number of {@link TimingSession}s an app can run within this particular
-         * standby bucket's window size.
+         * The maximum number of {@link TimingSession TimingSessions} an app can run within this
+         * particular standby bucket's window size.
          */
         public int MAX_SESSION_COUNT_FREQUENT = DEFAULT_MAX_SESSION_COUNT_FREQUENT;
 
         /**
-         * The maximum number of {@link TimingSession}s an app can run within this particular
-         * standby bucket's window size.
+         * The maximum number of {@link TimingSession TimingSessions} an app can run within this
+         * particular standby bucket's window size.
          */
         public int MAX_SESSION_COUNT_RARE = DEFAULT_MAX_SESSION_COUNT_RARE;
 
         /**
-         * The maximum number of {@link TimingSession}s an app can run within this particular
-         * standby bucket's window size.
+         * The maximum number of {@link TimingSession TimingSessions} an app can run within this
+         * particular standby bucket's window size.
          */
         public int MAX_SESSION_COUNT_RESTRICTED = DEFAULT_MAX_SESSION_COUNT_RESTRICTED;
 
         /**
-         * The maximum number of {@link TimingSession}s that can run within the past
+         * The maximum number of {@link TimingSession TimingSessions} that can run within the past
          * {@link #ALLOWED_TIME_PER_PERIOD_MS}.
          */
         public int MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW =
                 DEFAULT_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW;
 
         /**
-         * Treat two distinct {@link TimingSession}s as the same if they start and end within this
-         * amount of time of each other.
+         * Treat two distinct {@link TimingSession TimingSessions} as the same if they start and
+         * end within this amount of time of each other.
          */
         public long TIMING_SESSION_COALESCING_DURATION_MS =
                 DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS;
@@ -3125,8 +3127,8 @@ public final class QuotaController extends StateController {
         private static final int MIN_BUCKET_JOB_COUNT = 10;
 
         /**
-         * The minimum number of {@link TimingSession}s that any bucket will be allowed to run
-         * within its window.
+         * The minimum number of {@link TimingSession TimingSessions} that any bucket will be
+         * allowed to run within its window.
          */
         private static final int MIN_BUCKET_SESSION_COUNT = 1;
 

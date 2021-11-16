@@ -37,7 +37,7 @@ import com.android.server.tare.EconomyManagerInternal.ActionBill;
 import java.util.List;
 
 /**
- * Container to maintain alarm TARE {@link ActionBill}s and their related methods.
+ * Container to maintain alarm TARE {@link ActionBill ActionBills} and their related methods.
  */
 final class TareBill {
     /**

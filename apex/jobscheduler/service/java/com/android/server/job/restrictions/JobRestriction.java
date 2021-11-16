@@ -54,7 +54,8 @@ public abstract class JobRestriction {
 
     /**
      * Called by {@link JobSchedulerService} to check if it may proceed with scheduling the job (in
-     * case all constraints are satisfied and all other {@link JobRestriction}s are fine with it)
+     * case all constraints are satisfied and all other {@link JobRestriction JobRestrictions} are
+     * fine with it).
      *
      * @param job to be checked
      * @return false if the {@link JobSchedulerService} should not schedule this job at the moment,
