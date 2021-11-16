@@ -9014,11 +9014,15 @@ package android.bluetooth {
 
   public final class BluetoothClass implements android.os.Parcelable {
     method public int describeContents();
+    method public boolean doesClassMatch(int);
     method public int getDeviceClass();
     method public int getMajorDeviceClass();
     method public boolean hasService(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothClass> CREATOR;
+    field public static final int PROFILE_A2DP = 1; // 0x1
+    field public static final int PROFILE_HEADSET = 0; // 0x0
+    field public static final int PROFILE_HID = 3; // 0x3
   }
 
   public static class BluetoothClass.Device {

@@ -2016,6 +2016,13 @@ package android.bluetooth {
     method public void onOobData(int, @NonNull android.bluetooth.OobData);
   }
 
+  public final class BluetoothClass implements android.os.Parcelable {
+    field public static final int PROFILE_A2DP_SINK = 6; // 0x6
+    field public static final int PROFILE_NAP = 5; // 0x5
+    field public static final int PROFILE_OPP = 2; // 0x2
+    field public static final int PROFILE_PANU = 4; // 0x4
+  }
+
   public final class BluetoothCsipSetCoordinator implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
     method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.List<java.lang.Integer> getAllGroupIds(@Nullable android.os.ParcelUuid);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
