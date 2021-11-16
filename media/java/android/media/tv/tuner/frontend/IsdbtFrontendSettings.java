@@ -581,7 +581,7 @@ public class IsdbtFrontendSettings extends FrontendSettings {
          * Gets Number of Segment.
          */
         @IntRange(from = 0, to = 0xff)
-        public int getNumOfSegment() {
+        public int getNumberOfSegment() {
             return mNumOfSegment;
         }
 
@@ -639,7 +639,7 @@ public class IsdbtFrontendSettings extends FrontendSettings {
              */
             @NonNull
             @IntRange(from = 0, to = 0xff)
-            public Builder setNumOfSegment(int numOfSegment) {
+            public Builder setNumberOfSegment(int numOfSegment) {
                 mNumOfSegment = numOfSegment;
                 return this;
             }
