@@ -2310,7 +2310,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     /**
-     * Check if a job is restricted by any of the declared {@link JobRestriction}s.
+     * Check if a job is restricted by any of the declared {@link JobRestriction JobRestrictions}.
      * Note, that the jobs with {@link JobInfo#BIAS_FOREGROUND_SERVICE} bias or higher may not
      * be restricted, thus we won't even perform the check, but simply return null early.
      *
