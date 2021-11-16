@@ -10424,7 +10424,7 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public boolean applyTransactionOnDraw(@NonNull SurfaceControl.Transaction t) {
-        if (mRemoved) {
+        if (mRemoved || !isHardwareEnabled()) {
             t.apply();
         } else {
             registerRtFrameCallback(frame -> mergeWithNextTransaction(t, frame));
