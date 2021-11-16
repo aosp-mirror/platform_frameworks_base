@@ -301,6 +301,18 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     }
 
     @Test
+    @LargeTest
+    public void testStagedSessionShouldCleanUpOnOnSuccessMultiPackage() throws Exception {
+        List<String> before = getStagingDirectories();
+        runPhase("testStagedSessionShouldCleanUpOnOnSuccessMultiPackage_Commit");
+        assertThat(getStagingDirectories()).isNotEqualTo(before);
+        getDevice().reboot();
+        runPhase("testStagedSessionShouldCleanUpOnOnSuccess_Verify");
+        List<String> after = getStagingDirectories();
+        assertThat(after).isEqualTo(before);
+    }
+
+    @Test
     public void testStagedInstallationShouldCleanUpOnValidationFailure() throws Exception {
         List<String> before = getStagingDirectories();
         runPhase("testStagedInstallationShouldCleanUpOnValidationFailure");
