@@ -34,6 +34,8 @@ import android.media.PlaybackParams;
 import android.media.tv.TvInputManager.Session;
 import android.media.tv.TvInputManager.Session.FinishedInputEventCallback;
 import android.media.tv.TvInputManager.SessionCallback;
+import android.media.tv.interactive.TvIAppManager;
+import android.media.tv.interactive.TvIAppView;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -195,6 +197,11 @@ public class TvView extends ViewGroup {
      */
     public void setCallback(@Nullable TvInputCallback callback) {
         mCallback = callback;
+    }
+
+    /** @hide */
+    public Session getInputSession() {
+        return mSession;
     }
 
     /**
