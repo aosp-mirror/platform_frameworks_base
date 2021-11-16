@@ -18,31 +18,41 @@ package com.android.server.tv.interactive;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.media.tv.interactive.ITvIAppClient;
 import android.media.tv.interactive.ITvIAppManager;
 import android.media.tv.interactive.ITvIAppService;
 import android.media.tv.interactive.ITvIAppServiceCallback;
 import android.media.tv.interactive.ITvIAppSession;
 import android.media.tv.interactive.ITvIAppSessionCallback;
+import android.media.tv.interactive.TvIAppInfo;
 import android.media.tv.interactive.TvIAppService;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.SparseArray;
 import android.view.Surface;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.content.PackageMonitor;
 import com.android.server.SystemService;
 import com.android.server.utils.Slogf;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -82,12 +92,171 @@ public class TvIAppManagerService extends SystemService {
         mContext = context;
     }
 
+    @GuardedBy("mLock")
+    private void buildTvIAppServiceListLocked(int userId, String[] updatedPackages) {
+        UserState userState = getOrCreateUserStateLocked(userId);
+        userState.mPackageSet.clear();
+
+        if (DEBUG) {
+            Slogf.d(TAG, "buildTvIAppServiceListLocked");
+        }
+        PackageManager pm = mContext.getPackageManager();
+        List<ResolveInfo> services = pm.queryIntentServicesAsUser(
+                new Intent(TvIAppService.SERVICE_INTERFACE),
+                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,
+                userId);
+        List<TvIAppInfo> iAppList = new ArrayList<>();
+
+        for (ResolveInfo ri : services) {
+            ServiceInfo si = ri.serviceInfo;
+            // TODO: add BIND_TV_IAPP permission and check it here
+
+            ComponentName component = new ComponentName(si.packageName, si.name);
+            try {
+                TvIAppInfo info = new TvIAppInfo.Builder(mContext, component).build();
+                iAppList.add(info);
+            } catch (Exception e) {
+                Slogf.e(TAG, "failed to load TV IApp service " + si.name, e);
+                continue;
+            }
+            userState.mPackageSet.add(si.packageName);
+        }
+
+        // sort the iApp list by iApp service id
+        Collections.sort(iAppList, Comparator.comparing(TvIAppInfo::getId));
+        Map<String, TvIAppState> iAppMap = new HashMap<>();
+        ArrayMap<String, Integer> tiasAppCount = new ArrayMap<>(iAppMap.size());
+        for (TvIAppInfo info : iAppList) {
+            String iAppServiceId = info.getId();
+            if (DEBUG) {
+                Slogf.d(TAG, "add " + iAppServiceId);
+            }
+            // Running count of IApp for each IApp service
+            Integer count = tiasAppCount.get(iAppServiceId);
+            count = count == null ? 1 : count + 1;
+            tiasAppCount.put(iAppServiceId, count);
+            TvIAppState iAppState = userState.mIAppMap.get(iAppServiceId);
+            if (iAppState == null) {
+                iAppState = new TvIAppState();
+            }
+            iAppState.mInfo = info;
+            iAppState.mUid = getIAppUid(info);
+            iAppMap.put(iAppServiceId, iAppState);
+            iAppState.mIAppNumber = count;
+        }
+
+        // TODO: notify iApp added / removed
+
+        userState.mIAppMap.clear();
+        userState.mIAppMap = iAppMap;
+    }
+
+    private int getIAppUid(TvIAppInfo info) {
+        try {
+            return getContext().getPackageManager().getApplicationInfo(
+                    info.getServiceInfo().packageName, 0).uid;
+        } catch (PackageManager.NameNotFoundException e) {
+            Slogf.w(TAG, "Unable to get UID for  " + info, e);
+            return Process.INVALID_UID;
+        }
+    }
+
     @Override
     public void onStart() {
         if (DEBUG) {
             Slogf.d(TAG, "onStart");
         }
         publishBinderService(Context.TV_IAPP_SERVICE, new BinderService());
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+            registerBroadcastReceivers();
+        } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
+            synchronized (mLock) {
+                buildTvIAppServiceListLocked(mCurrentUserId, null);
+            }
+        }
+    }
+
+    private void registerBroadcastReceivers() {
+        PackageMonitor monitor = new PackageMonitor() {
+            private void buildTvIAppServiceList(String[] packages) {
+                int userId = getChangingUserId();
+                synchronized (mLock) {
+                    if (mCurrentUserId == userId || mRunningProfiles.contains(userId)) {
+                        buildTvIAppServiceListLocked(userId, packages);
+                    }
+                }
+            }
+
+            @Override
+            public void onPackageUpdateFinished(String packageName, int uid) {
+                if (DEBUG) Slogf.d(TAG, "onPackageUpdateFinished(packageName=" + packageName + ")");
+                // This callback is invoked when the TV iApp service is reinstalled.
+                // In this case, isReplacing() always returns true.
+                buildTvIAppServiceList(new String[] { packageName });
+            }
+
+            @Override
+            public void onPackagesAvailable(String[] packages) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onPackagesAvailable(packages=" + Arrays.toString(packages) + ")");
+                }
+                // This callback is invoked when the media on which some packages exist become
+                // available.
+                if (isReplacing()) {
+                    buildTvIAppServiceList(packages);
+                }
+            }
+
+            @Override
+            public void onPackagesUnavailable(String[] packages) {
+                // This callback is invoked when the media on which some packages exist become
+                // unavailable.
+                if (DEBUG)  {
+                    Slogf.d(TAG, "onPackagesUnavailable(packages=" + Arrays.toString(packages)
+                            + ")");
+                }
+                if (isReplacing()) {
+                    buildTvIAppServiceList(packages);
+                }
+            }
+
+            @Override
+            public void onSomePackagesChanged() {
+                if (DEBUG) Slogf.d(TAG, "onSomePackagesChanged()");
+                if (isReplacing()) {
+                    if (DEBUG) Slogf.d(TAG, "Skipped building TV iApp list due to replacing");
+                    // When the package is updated, buildTvIAppServiceListLocked is called in other
+                    // methods instead.
+                    return;
+                }
+                buildTvIAppServiceList(null);
+            }
+
+            @Override
+            public boolean onPackageChanged(String packageName, int uid, String[] components) {
+                // The iApp list needs to be updated in any cases, regardless of whether
+                // it happened to the whole package or a specific component. Returning true so that
+                // the update can be handled in {@link #onSomePackagesChanged}.
+                return true;
+            }
+        };
+        monitor.register(mContext, null, UserHandle.ALL, true);
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
+        intentFilter.addAction(Intent.ACTION_USER_REMOVED);
+        intentFilter.addAction(Intent.ACTION_USER_STARTED);
+        intentFilter.addAction(Intent.ACTION_USER_STOPPED);
+        mContext.registerReceiverAsUser(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // TODO: handle switch / start / stop user
+            }
+        }, UserHandle.ALL, intentFilter, null, null);
     }
 
     private SessionState getSessionState(IBinder sessionToken) {
@@ -462,19 +631,20 @@ public class TvIAppManagerService extends SystemService {
         // A mapping from the token of a TV IApp session to its state.
         private final Map<IBinder, SessionState> mSessionStateMap = new HashMap<>();
 
+        // A set of all TV IApp service packages.
+        private final Set<String> mPackageSet = new HashSet<>();
+
         private UserState(int userId) {
             mUserId = userId;
         }
     }
 
     private static final class TvIAppState {
-        private final String mIAppServiceId;
-        private final ComponentName mComponentName;
-
-        TvIAppState(String id, ComponentName componentName) {
-            mIAppServiceId = id;
-            mComponentName = componentName;
-        }
+        private String mIAppServiceId;
+        private ComponentName mComponentName;
+        private TvIAppInfo mInfo;
+        private int mUid;
+        private int mIAppNumber;
     }
 
     private final class SessionState implements IBinder.DeathRecipient {

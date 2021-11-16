@@ -3304,6 +3304,7 @@
     <public name="requiredSplitTypes" />
     <public name="splitTypes" />
     <public name="canDisplayOnRemoteDevices" />
+    <public name="supportedTypes" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">
