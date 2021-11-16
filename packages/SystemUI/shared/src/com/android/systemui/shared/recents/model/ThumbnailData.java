@@ -42,6 +42,7 @@ public class ThumbnailData {
     public int orientation;
     public int rotation;
     public Rect insets;
+    public Rect letterboxInsets;
     public boolean reducedResolution;
     public boolean isRealSnapshot;
     public boolean isTranslucent;
@@ -55,6 +56,7 @@ public class ThumbnailData {
         orientation = ORIENTATION_UNDEFINED;
         rotation = ROTATION_UNDEFINED;
         insets = new Rect();
+        letterboxInsets = new Rect();
         reducedResolution = false;
         scale = 1f;
         isRealSnapshot = true;
@@ -97,6 +99,7 @@ public class ThumbnailData {
     public ThumbnailData(TaskSnapshot snapshot) {
         thumbnail = makeThumbnail(snapshot);
         insets = new Rect(snapshot.getContentInsets());
+        letterboxInsets = new Rect(snapshot.getLetterboxInsets());
         orientation = snapshot.getOrientation();
         rotation = snapshot.getRotation();
         reducedResolution = snapshot.isLowResolution();
