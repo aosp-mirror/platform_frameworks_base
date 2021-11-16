@@ -87,8 +87,6 @@
 
     <color name="notification_section_clear_all_btn_color">@color/GM2_grey_700</color>
 
-    <color name="assist_orb_color">#ffffff</color>
-
     <color name="keyguard_user_switcher_background_gradient_color">#77000000</color>
 
     <!-- The color of the navigation bar icons. Need to be in sync with ic_sysbar_* -->
