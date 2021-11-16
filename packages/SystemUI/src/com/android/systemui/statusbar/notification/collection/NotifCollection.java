@@ -245,9 +245,15 @@ public class NotifCollection implements Dumpable {
             DismissedByUserStats stats = entriesToDismiss.get(i).second;
 
             requireNonNull(stats);
-            if (entry != mNotificationSet.get(entry.getKey())) {
+            NotificationEntry storedEntry = mNotificationSet.get(entry.getKey());
+            if (storedEntry == null) {
+                mLogger.logNonExistentNotifDismissed(entry.getKey());
+                continue;
+            }
+            if (entry != storedEntry) {
                 throw mEulogizer.record(
-                        new IllegalStateException("Invalid entry: " + entry.getKey()));
+                        new IllegalStateException("Invalid entry: "
+                                + "different stored and dismissed entries for " + entry.getKey()));
             }
 
             if (entry.getDismissState() == DISMISSED) {
@@ -487,6 +493,37 @@ public class NotifCollection implements Dumpable {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Get the group summary entry
+     * @param group
+     * @return
+     */
+    @Nullable
+    public NotificationEntry getGroupSummary(String group) {
+        return mNotificationSet
+                .values()
+                .stream()
+                .filter(it -> Objects.equals(it.getSbn().getGroup(), group))
+                .filter(it -> it.getSbn().getNotification().isGroupSummary())
+                .findFirst().orElse(null);
+    }
+
+    /**
+     * Checks if the entry is the only child in the logical group
+     * @param entry
+     * @return
+     */
+    public boolean isOnlyChildInGroup(NotificationEntry entry) {
+        String group = entry.getSbn().getGroup();
+        return mNotificationSet.get(entry.getKey()) == entry
+                && mNotificationSet
+                .values()
+                .stream()
+                .filter(it -> Objects.equals(it.getSbn().getGroup(), group))
+                .filter(it -> !it.getSbn().getNotification().isGroupSummary())
+                .count() == 1;
     }
 
     private void applyRanking(@NonNull RankingMap rankingMap) {

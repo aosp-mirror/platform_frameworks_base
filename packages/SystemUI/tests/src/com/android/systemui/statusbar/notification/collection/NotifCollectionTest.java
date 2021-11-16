@@ -174,6 +174,41 @@ public class NotifCollectionTest extends SysuiTestCase {
     }
 
     @Test
+    public void testGetGroupSummary() {
+        assertEquals(null, mCollection.getGroupSummary("group"));
+        NotifEvent summary = mNoMan.postNotif(
+                buildNotif(TEST_PACKAGE, 0)
+                        .setGroup(mContext, "group")
+                        .setGroupSummary(mContext, true));
+
+        final NotificationEntry entry = mCollection.getGroupSummary("group");
+        assertEquals(summary.key, entry.getKey());
+        assertEquals(summary.sbn, entry.getSbn());
+        assertEquals(summary.ranking, entry.getRanking());
+    }
+
+    @Test
+    public void testIsOnlyChildInGroup() {
+        NotifEvent notif1 = mNoMan.postNotif(
+                buildNotif(TEST_PACKAGE, 1)
+                        .setGroup(mContext, "group"));
+        final NotificationEntry entry = mCollection.getEntry(notif1.key);
+        assertTrue(mCollection.isOnlyChildInGroup(entry));
+
+        // summaries are not counted
+        mNoMan.postNotif(
+                buildNotif(TEST_PACKAGE, 0)
+                        .setGroup(mContext, "group")
+                        .setGroupSummary(mContext, true));
+        assertTrue(mCollection.isOnlyChildInGroup(entry));
+
+        mNoMan.postNotif(
+                buildNotif(TEST_PACKAGE, 2)
+                        .setGroup(mContext, "group"));
+        assertFalse(mCollection.isOnlyChildInGroup(entry));
+    }
+
+    @Test
     public void testEventDispatchedWhenNotifPosted() {
         // WHEN a notification is posted
         NotifEvent notif1 = mNoMan.postNotif(
@@ -190,6 +225,15 @@ public class NotifCollectionTest extends SysuiTestCase {
         assertEquals(notif1.key, entry.getKey());
         assertEquals(notif1.sbn, entry.getSbn());
         assertEquals(notif1.ranking, entry.getRanking());
+    }
+
+    @Test
+    public void testCancelNonExistingNotification() {
+        NotifEvent notif = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88, "barTag"));
+        NotificationEntry entry = mCollectionListener.getEntry(notif.key);
+        mCollection.dismissNotification(entry, defaultStats(entry));
+        mCollection.dismissNotification(entry, defaultStats(entry));
+        mCollection.dismissNotification(entry, defaultStats(entry));
     }
 
     @Test
@@ -645,21 +689,6 @@ public class NotifCollectionTest extends SysuiTestCase {
         // WHEN we try to end the dismissal of an interceptor that didn't intercept the notif
         mInterceptor1.onEndInterceptionCallback.onEndDismissInterception(mInterceptor1, entry,
                 defaultStats(entry));
-
-        // THEN an exception is thrown
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void testDismissingNonExistentNotificationThrows() {
-        // GIVEN a collection that originally had three notifs, but where one was dismissed
-        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
-        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
-        NotifEvent notif3 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 99));
-        NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
-        mNoMan.retractNotif(notif2.sbn, REASON_UNKNOWN);
-
-        // WHEN we try to dismiss a notification that isn't present
-        mCollection.dismissNotification(entry2, defaultStats(entry2));
 
         // THEN an exception is thrown
     }
