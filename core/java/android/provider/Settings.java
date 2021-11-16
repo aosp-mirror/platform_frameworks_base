@@ -9604,6 +9604,14 @@ public final class Settings {
         public static final String LOCKSCREEN_SHOW_WALLET = "lockscreen_show_wallet";
 
         /**
+         * Whether to use the lockscreen double-line clock
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_USE_DOUBLE_LINE_CLOCK =
+                "lockscreen_use_double_line_clock";
+
+        /**
          * Specifies whether the web action API is enabled.
          *
          * @hide
