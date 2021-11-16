@@ -1244,7 +1244,8 @@ public class RecentTasksTest extends WindowTestsBase {
         }
         return new TaskSnapshot(1, new ComponentName("", ""), buffer,
                 ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
-                Surface.ROTATION_0, taskSize, new Rect() /* insets */, false /* isLowResolution */,
+                Surface.ROTATION_0, taskSize, new Rect() /* contentInsets */,
+                new Rect() /* letterboxInsets*/, false /* isLowResolution */,
                 true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN, 0 /* mSystemUiVisibility */,
                 false /* isTranslucent */, false /* hasImeSurface */);
     }

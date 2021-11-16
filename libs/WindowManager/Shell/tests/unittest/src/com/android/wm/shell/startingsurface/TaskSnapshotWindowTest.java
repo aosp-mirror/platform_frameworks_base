@@ -94,8 +94,8 @@ public class TaskSnapshotWindowTest {
                 System.currentTimeMillis(),
                 new ComponentName("", ""), buffer,
                 ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
-                Surface.ROTATION_0, taskSize, contentInsets, false,
-                true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN,
+                Surface.ROTATION_0, taskSize, contentInsets, new Rect() /* letterboxInsets */,
+                false, true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN,
                 0 /* systemUiVisibility */, false /* isTranslucent */, false /* hasImeSurface */);
     }
 
