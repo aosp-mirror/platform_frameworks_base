@@ -552,6 +552,11 @@ public class AppWidgetHostView extends FrameLayout {
                 inflateAsync(rvToApply);
                 return;
             }
+
+            // Prepare a local reference to the remote Context so we're ready to
+            // inflate any requested LayoutParams
+            mRemoteContext = getRemoteContext();
+
             int layoutId = rvToApply.getLayoutId();
             if (rvToApply.canRecycleView(mView)) {
                 try {
