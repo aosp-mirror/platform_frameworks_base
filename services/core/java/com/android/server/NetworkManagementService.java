@@ -59,9 +59,6 @@ import android.net.NetworkStats;
 import android.net.RouteInfo;
 import android.net.TetherStatsParcel;
 import android.net.UidRangeParcel;
-import android.net.shared.NetdUtils;
-import android.net.shared.RouteUtils;
-import android.net.shared.RouteUtils.ModifyOperation;
 import android.net.util.NetdService;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -88,6 +85,8 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.Preconditions;
+import com.android.net.module.util.NetdUtils;
+import com.android.net.module.util.NetdUtils.ModifyOperation;
 
 import com.google.android.collect.Maps;
 
@@ -831,13 +830,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public void addRoute(int netId, RouteInfo route) {
         NetworkStack.checkNetworkStackPermission(mContext);
-        RouteUtils.modifyRoute(mNetdService, ModifyOperation.ADD, netId, route);
+        NetdUtils.modifyRoute(mNetdService, ModifyOperation.ADD, netId, route);
     }
 
     @Override
     public void removeRoute(int netId, RouteInfo route) {
         NetworkStack.checkNetworkStackPermission(mContext);
-        RouteUtils.modifyRoute(mNetdService, ModifyOperation.REMOVE, netId, route);
+        NetdUtils.modifyRoute(mNetdService, ModifyOperation.REMOVE, netId, route);
     }
 
     private ArrayList<String> readRouteList(String filename) {
@@ -1785,7 +1784,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     public void addInterfaceToLocalNetwork(String iface, List<RouteInfo> routes) {
         modifyInterfaceInNetwork(MODIFY_OPERATION_ADD, INetd.LOCAL_NET_ID, iface);
         // modifyInterfaceInNetwork already check calling permission.
-        RouteUtils.addRoutesToLocalNetwork(mNetdService, iface, routes);
+        NetdUtils.addRoutesToLocalNetwork(mNetdService, iface, routes);
     }
 
     @Override
@@ -1796,7 +1795,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public int removeRoutesFromLocalNetwork(List<RouteInfo> routes) {
         NetworkStack.checkNetworkStackPermission(mContext);
-        return RouteUtils.removeRoutesFromLocalNetwork(mNetdService, routes);
+        return NetdUtils.removeRoutesFromLocalNetwork(mNetdService, routes);
     }
 
     @Override
