@@ -32,6 +32,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.assist.ui.DefaultUiController;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
@@ -133,12 +134,13 @@ public class AssistManager {
             OverviewProxyService overviewProxyService,
             Lazy<SysUiState> sysUiState,
             DefaultUiController defaultUiController,
-            AssistLogger assistLogger) {
+            AssistLogger assistLogger,
+            @Main Handler uiHandler) {
         mContext = context;
         mDeviceProvisionedController = controller;
         mCommandQueue = commandQueue;
         mAssistUtils = assistUtils;
-        mAssistDisclosure = new AssistDisclosure(context, new Handler());
+        mAssistDisclosure = new AssistDisclosure(context, uiHandler);
         mPhoneStateMonitor = phoneStateMonitor;
         mAssistLogger = assistLogger;
 
