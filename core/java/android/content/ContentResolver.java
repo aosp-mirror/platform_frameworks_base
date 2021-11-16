@@ -2664,6 +2664,38 @@ public abstract class ContentResolver implements ContentInterface {
                 ContentProvider.getUserIdFromUri(uri, mContext.getUserId()));
     }
 
+    /**
+     * Same as {@link #registerContentObserver(Uri, boolean, ContentObserver)}, but the observer
+     * registered will get content change notifications from all users.
+     * {@link ContentObserver#onChange(boolean, Collection, int, UserHandle)} should be
+     * overwritten to get the corresponding {@link UserHandle} for that notification.
+     *
+     * @param uri                  The URI to watch for changes. This can be a specific row URI,
+     *                             or a base URI for a whole class of content.
+     * @param notifyForDescendants When false, the observer will be notified
+     *                             whenever a change occurs to the exact URI specified by
+     *                             <code>uri</code> or to one of the URI's ancestors in the path
+     *                             hierarchy. When true, the observer will also be notified
+     *                             whenever a change occurs to the URI's descendants in the path
+     *                             hierarchy.
+     * @param observer             The object that receives callbacks when changes occur.
+     * @hide
+     * @see #unregisterContentObserver
+     */
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @SystemApi
+    public final void registerContentObserverForAllUsers(@NonNull Uri uri,
+            boolean notifyForDescendants,
+            @NonNull ContentObserver observer) {
+        Objects.requireNonNull(uri, "uri");
+        Objects.requireNonNull(observer, "observer");
+        registerContentObserver(
+                ContentProvider.getUriWithoutUserId(uri),
+                notifyForDescendants,
+                observer,
+                UserHandle.USER_ALL);
+    }
+
     /** @hide - designated user version */
     @UnsupportedAppUsage
     public final void registerContentObserver(Uri uri, boolean notifyForDescendents,
