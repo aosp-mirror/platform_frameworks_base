@@ -732,7 +732,7 @@
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"почетак коришћења дозволе за преглед"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Дозвољава власнику да започне коришћење дозволе за апликацију. Никада не би требало да буде потребна за уобичајене апликације."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"покретање приказа функција апликације"</string>
-    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Дозвољава кориснику да започне прегледање информација о функцијама апликације."</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Дозвољава носиоцу дозволе да започне прегледање информација о функцијама апликације."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"приступ подацима сензора при великој брзини узорковања"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Дозвољава апликацији да узима узорак података сензора при брзини већој од 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Подешавање правила за лозинку"</string>
