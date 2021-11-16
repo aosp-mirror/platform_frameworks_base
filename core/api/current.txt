@@ -19740,6 +19740,7 @@ package android.inputmethodservice {
   @UiContext public class InputMethodService extends android.inputmethodservice.AbstractInputMethodService {
     ctor public InputMethodService();
     method @Deprecated public boolean enableHardwareAcceleration();
+    method public final void finishStylusHandwriting();
     method public int getBackDisposition();
     method public int getCandidatesHiddenVisibility();
     method public android.view.inputmethod.InputBinding getCurrentInputBinding();
@@ -19749,6 +19750,7 @@ package android.inputmethodservice {
     method @Deprecated public int getInputMethodWindowRecommendedHeight();
     method public android.view.LayoutInflater getLayoutInflater();
     method public int getMaxWidth();
+    method @Nullable public final android.view.Window getStylusHandwritingWindow();
     method public CharSequence getTextForImeAction(int);
     method public android.app.Dialog getWindow();
     method public void hideStatusIcon();
@@ -19779,6 +19781,7 @@ package android.inputmethodservice {
     method public void onFinishCandidatesView(boolean);
     method public void onFinishInput();
     method public void onFinishInputView(boolean);
+    method public void onFinishStylusHandwriting();
     method public void onInitializeInterface();
     method public boolean onInlineSuggestionsResponse(@NonNull android.view.inputmethod.InlineSuggestionsResponse);
     method public boolean onKeyDown(int, android.view.KeyEvent);
@@ -19789,6 +19792,7 @@ package android.inputmethodservice {
     method public void onStartCandidatesView(android.view.inputmethod.EditorInfo, boolean);
     method public void onStartInput(android.view.inputmethod.EditorInfo, boolean);
     method public void onStartInputView(android.view.inputmethod.EditorInfo, boolean);
+    method public boolean onStartStylusHandwriting();
     method public void onUnbindInput();
     method @Deprecated public void onUpdateCursor(android.graphics.Rect);
     method public void onUpdateCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfo);
@@ -52885,6 +52889,7 @@ package android.view.inputmethod {
     method public boolean showSoftInput(android.view.View, int, android.os.ResultReceiver);
     method @Deprecated public void showSoftInputFromInputMethod(android.os.IBinder, int);
     method @Deprecated public void showStatusIcon(android.os.IBinder, String, @DrawableRes int);
+    method public void startStylusHandwriting(@NonNull android.view.View);
     method @Deprecated public boolean switchToLastInputMethod(android.os.IBinder);
     method @Deprecated public boolean switchToNextInputMethod(android.os.IBinder, boolean);
     method @Deprecated public void toggleSoftInput(int, int);
