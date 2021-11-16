@@ -18,6 +18,7 @@ package android.inputmethodservice;
 
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -29,6 +30,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.InputChannel;
+import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
@@ -50,6 +52,7 @@ import com.android.internal.view.InlineSuggestionsRequestInfo;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -74,6 +77,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_HIDE_SOFT_INPUT = 70;
     private static final int DO_CHANGE_INPUTMETHOD_SUBTYPE = 80;
     private static final int DO_CREATE_INLINE_SUGGESTIONS_REQUEST = 90;
+    private static final int DO_CAN_START_STYLUS_HANDWRITING = 100;
+    private static final int DO_START_STYLUS_HANDWRITING = 110;
 
     final WeakReference<InputMethodServiceInternal> mTarget;
     final Context mContext;
@@ -169,7 +174,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 SomeArgs args = (SomeArgs) msg.obj;
                 try {
                     inputMethod.initializeInternal((IBinder) args.arg1,
-                            (IInputMethodPrivilegedOperations) args.arg2, msg.arg1);
+                            (IInputMethodPrivilegedOperations) args.arg2, msg.arg1,
+                            (boolean) args.arg3);
                 } finally {
                     args.recycle();
                 }
@@ -229,13 +235,25 @@ class IInputMethodWrapper extends IInputMethod.Stub
             case DO_CHANGE_INPUTMETHOD_SUBTYPE:
                 inputMethod.changeInputMethodSubtype((InputMethodSubtype)msg.obj);
                 return;
-            case DO_CREATE_INLINE_SUGGESTIONS_REQUEST:
+            case DO_CREATE_INLINE_SUGGESTIONS_REQUEST: {
                 final SomeArgs args = (SomeArgs) msg.obj;
                 inputMethod.onCreateInlineSuggestionsRequest(
                         (InlineSuggestionsRequestInfo) args.arg1,
                         (IInlineSuggestionsRequestCallback) args.arg2);
                 args.recycle();
                 return;
+            }
+            case DO_CAN_START_STYLUS_HANDWRITING: {
+                inputMethod.canStartStylusHandwriting(msg.arg1);
+                return;
+            }
+            case DO_START_STYLUS_HANDWRITING: {
+                final SomeArgs args = (SomeArgs) msg.obj;
+                inputMethod.startStylusHandwriting((InputChannel) args.arg1,
+                        (List<MotionEvent>) args.arg2);
+                args.recycle();
+                return;
+            }
 
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
@@ -272,9 +290,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @BinderThread
     @Override
     public void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps,
-            int configChanges) {
+            int configChanges, boolean stylusHwSupported) {
         mCaller.executeOrSendMessage(
-                mCaller.obtainMessageIOO(DO_INITIALIZE_INTERNAL, configChanges, token, privOps));
+                mCaller.obtainMessageIOOO(
+                        DO_INITIALIZE_INTERNAL, configChanges, token, privOps, stylusHwSupported));
     }
 
     @BinderThread
@@ -382,5 +401,22 @@ class IInputMethodWrapper extends IInputMethod.Stub
     public void changeInputMethodSubtype(InputMethodSubtype subtype) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_CHANGE_INPUTMETHOD_SUBTYPE,
                 subtype));
+    }
+
+    @BinderThread
+    @Override
+    public void canStartStylusHandwriting(int requestId)
+            throws RemoteException {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageI(DO_CAN_START_STYLUS_HANDWRITING, requestId));
+    }
+
+    @BinderThread
+    @Override
+    public void startStylusHandwriting(@NonNull InputChannel channel,
+            @Nullable List<MotionEvent> stylusEvents)
+            throws RemoteException {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageOO(DO_START_STYLUS_HANDWRITING, channel, stylusEvents));
     }
 }
