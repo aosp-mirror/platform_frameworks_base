@@ -315,6 +315,12 @@ public class TelephonyManager {
      */
     public static final int UNINITIALIZED_CARD_ID = -2;
 
+    /**
+     * Default port index for the UICC Card
+     * @hide
+     */
+    public static final int DEFAULT_PORT_INDEX = 0;
+
     private final Context mContext;
     private final int mSubId;
     @UnsupportedAppUsage
