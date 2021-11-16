@@ -513,7 +513,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mState = STATE_PLAYING;
         mController.moveToPlaying(this);
 
-        if (mController.mAtm.mTaskSupervisor.getKeyguardController().isKeyguardLocked()) {
+        if (mController.mAtm.mTaskSupervisor.getKeyguardController().isKeyguardLocked(displayId)) {
             mFlags |= TRANSIT_FLAG_KEYGUARD_LOCKED;
         }
 

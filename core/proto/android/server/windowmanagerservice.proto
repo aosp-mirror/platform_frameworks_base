@@ -112,8 +112,9 @@ message KeyguardControllerProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional bool keyguard_showing = 1;
-    repeated KeyguardOccludedProto keyguard_occluded_states = 2;
+    repeated KeyguardOccludedProto keyguard_occluded_states = 2 [deprecated=true];
     optional bool aod_showing = 3;
+    repeated KeyguardPerDisplayProto keyguard_per_display = 4;
 }
 
 message KeyguardOccludedProto {
@@ -121,6 +122,15 @@ message KeyguardOccludedProto {
 
     optional int32 display_id = 1;
     optional bool keyguard_occluded = 2;
+}
+
+message KeyguardPerDisplayProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 display_id = 1;
+    optional bool keyguard_showing = 2;
+    optional bool aod_showing = 3;
+    optional bool keyguard_occluded = 4;
 }
 
 /* represents PhoneWindowManager */

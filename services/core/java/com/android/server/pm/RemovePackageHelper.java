@@ -221,7 +221,7 @@ final class RemovePackageHelper {
 
         // Remove the shared library overlays from its dependent packages.
         for (int currentUserId : UserManagerService.getInstance().getUserIds()) {
-            final List<VersionedPackage> dependents = mPm.getPackagesUsingSharedLibraryLPr(
+            final List<VersionedPackage> dependents = mPm.getPackagesUsingSharedLibrary(
                     libraryInfo, 0, Process.SYSTEM_UID, currentUserId);
             if (dependents == null) {
                 continue;

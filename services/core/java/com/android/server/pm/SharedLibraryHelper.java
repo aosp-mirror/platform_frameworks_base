@@ -34,6 +34,7 @@ import android.util.Slog;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.utils.WatchedLongSparseArray;
 
 import libcore.util.HexEncoding;
@@ -326,11 +327,11 @@ final class SharedLibraryHelper {
         return versionedLib.get(version);
     }
 
-    public static List<SharedLibraryInfo> findSharedLibraries(PackageSetting pkgSetting) {
-        if (!pkgSetting.getPkgState().getUsesLibraryInfos().isEmpty()) {
+    public static List<SharedLibraryInfo> findSharedLibraries(PackageStateInternal pkgSetting) {
+        if (!pkgSetting.getTransientState().getUsesLibraryInfos().isEmpty()) {
             ArrayList<SharedLibraryInfo> retValue = new ArrayList<>();
             Set<String> collectedNames = new HashSet<>();
-            for (SharedLibraryInfo info : pkgSetting.getPkgState().getUsesLibraryInfos()) {
+            for (SharedLibraryInfo info : pkgSetting.getTransientState().getUsesLibraryInfos()) {
                 findSharedLibrariesRecursive(info, retValue, collectedNames);
             }
             return retValue;

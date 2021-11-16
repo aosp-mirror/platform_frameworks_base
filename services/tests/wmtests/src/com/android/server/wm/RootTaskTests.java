@@ -29,6 +29,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -1505,7 +1506,7 @@ public class RootTaskTests extends WindowTestsBase {
         final UnknownAppVisibilityController unknownAppVisibilityController =
                 mDefaultTaskDisplayArea.mDisplayContent.mUnknownAppVisibilityController;
         final KeyguardController keyguardController = mSupervisor.getKeyguardController();
-        doReturn(true).when(keyguardController).isKeyguardLocked();
+        doReturn(true).when(keyguardController).isKeyguardLocked(eq(DEFAULT_DISPLAY));
 
         // Start 2 activities that their processes have not yet started.
         final ActivityRecord[] activities = new ActivityRecord[2];
@@ -1571,7 +1572,7 @@ public class RootTaskTests extends WindowTestsBase {
         display.isDefaultDisplay = isDefaultDisplay;
 
         task.mDisplayContent = display;
-        doReturn(keyguardGoingAway).when(keyguardController).isKeyguardGoingAway();
+        doReturn(keyguardGoingAway).when(display).isKeyguardGoingAway();
         doReturn(displaySleeping).when(display).isSleeping();
         doReturn(focusedRootTask).when(task).isFocusedRootTaskOnDisplay();
 

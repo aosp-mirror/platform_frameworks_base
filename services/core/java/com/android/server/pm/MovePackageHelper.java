@@ -96,7 +96,7 @@ public final class MovePackageHelper {
             final PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
             if (pkg == null
                     || ps == null
-                    || mPm.shouldFilterApplicationLocked(ps, callingUid, user.getIdentifier())) {
+                    || mPm.shouldFilterApplication(ps, callingUid, user.getIdentifier())) {
                 throw new PackageManagerException(MOVE_FAILED_DOESNT_EXIST, "Missing package");
             }
             if (pkg.isSystem()) {

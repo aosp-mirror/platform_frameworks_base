@@ -107,6 +107,7 @@ import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
 import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -337,6 +338,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock
     private QuickAccessWalletController mQuickAccessWalletController;
     @Mock
+    private QRCodeScannerController mQrCodeScannerController;
+    @Mock
     private NotificationRemoteInputManager mNotificationRemoteInputManager;
     @Mock
     private RecordingController mRecordingController;
@@ -506,6 +509,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mFragmentService,
                 mContentResolver,
                 mQuickAccessWalletController,
+                mQrCodeScannerController,
                 mRecordingController,
                 new FakeExecutor(new FakeSystemClock()),
                 mSecureSettings,

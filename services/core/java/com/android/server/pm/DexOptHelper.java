@@ -53,11 +53,13 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -259,10 +261,8 @@ final class DexOptHelper {
             return;
         }
 
-        List<PackageSetting> pkgSettings;
-        synchronized (mPm.mLock) {
-            pkgSettings = getPackagesForDexopt(mPm.mSettings.getPackagesLocked().values(), mPm);
-        }
+        List<PackageStateInternal> pkgSettings =
+                getPackagesForDexopt(mPm.getPackageStates().values(), mPm);
 
         List<AndroidPackage> pkgs = new ArrayList<>(pkgSettings.size());
         for (int index = 0; index < pkgSettings.size(); index++) {
@@ -359,7 +359,7 @@ final class DexOptHelper {
     }
 
     private int performDexOptInternalWithDependenciesLI(AndroidPackage p,
-            @NonNull PackageSetting pkgSetting, DexoptOptions options) {
+            @NonNull PackageStateInternal pkgSetting, DexoptOptions options) {
         // System server gets a special path.
         if (PLATFORM_PACKAGE_NAME.equals(p.getPackageName())) {
             return mPm.getDexManager().dexoptSystemServer(options);
@@ -465,23 +465,23 @@ final class DexOptHelper {
 
     // Sort apps by importance for dexopt ordering. Important apps are given
     // more priority in case the device runs out of space.
-    public static List<PackageSetting> getPackagesForDexopt(
-            Collection<PackageSetting> packages,
+    public static List<PackageStateInternal> getPackagesForDexopt(
+            Collection<? extends PackageStateInternal> packages,
             PackageManagerService packageManagerService) {
         return getPackagesForDexopt(packages, packageManagerService, DEBUG_DEXOPT);
     }
 
-    public static List<PackageSetting> getPackagesForDexopt(
-            Collection<PackageSetting> pkgSettings,
+    public static List<PackageStateInternal> getPackagesForDexopt(
+            Collection<? extends PackageStateInternal> pkgSettings,
             PackageManagerService packageManagerService,
             boolean debug) {
-        List<PackageSetting> result = new LinkedList<>();
-        ArrayList<PackageSetting> remainingPkgSettings = new ArrayList<>(pkgSettings);
+        List<PackageStateInternal> result = new LinkedList<>();
+        ArrayList<PackageStateInternal> remainingPkgSettings = new ArrayList<>(pkgSettings);
 
         // First, remove all settings without available packages
         remainingPkgSettings.removeIf(REMOVE_IF_NULL_PKG);
 
-        ArrayList<PackageSetting> sortTemp = new ArrayList<>(remainingPkgSettings.size());
+        ArrayList<PackageStateInternal> sortTemp = new ArrayList<>(remainingPkgSettings.size());
 
         // Give priority to core apps.
         applyPackageFilter(pkgSetting -> pkgSetting.getPkg().isCoreApp(), result,
@@ -502,27 +502,27 @@ final class DexOptHelper {
 
         // Filter out packages that aren't recently used, add all remaining apps.
         // TODO: add a property to control this?
-        Predicate<PackageSetting> remainingPredicate;
+        Predicate<PackageStateInternal> remainingPredicate;
         if (!remainingPkgSettings.isEmpty()
                 && packageManagerService.isHistoricalPackageUsageAvailable()) {
             if (debug) {
                 Log.i(TAG, "Looking at historical package use");
             }
             // Get the package that was used last.
-            PackageSetting lastUsed = Collections.max(remainingPkgSettings,
-                    (pkgSetting1, pkgSetting2) -> Long.compare(
-                            pkgSetting1.getPkgState().getLatestForegroundPackageUseTimeInMills(),
-                            pkgSetting2.getPkgState().getLatestForegroundPackageUseTimeInMills()));
+            PackageStateInternal lastUsed = Collections.max(remainingPkgSettings,
+                    Comparator.comparingLong(
+                            pkgSetting -> pkgSetting.getTransientState()
+                                    .getLatestForegroundPackageUseTimeInMills()));
             if (debug) {
                 Log.i(TAG, "Taking package " + lastUsed.getPackageName()
                         + " as reference in time use");
             }
-            long estimatedPreviousSystemUseTime = lastUsed.getPkgState()
+            long estimatedPreviousSystemUseTime = lastUsed.getTransientState()
                     .getLatestForegroundPackageUseTimeInMills();
             // Be defensive if for some reason package usage has bogus data.
             if (estimatedPreviousSystemUseTime != 0) {
                 final long cutoffTime = estimatedPreviousSystemUseTime - SEVEN_DAYS_IN_MILLISECONDS;
-                remainingPredicate = pkgSetting -> pkgSetting.getPkgState()
+                remainingPredicate = pkgSetting -> pkgSetting.getTransientState()
                         .getLatestForegroundPackageUseTimeInMills() >= cutoffTime;
             } else {
                 // No meaningful historical info. Take all.
@@ -549,12 +549,12 @@ final class DexOptHelper {
     // dependencies. If usage data is available, the positive packages will be sorted by usage
     // data (with {@code sortTemp} as temporary storage).
     private static void applyPackageFilter(
-            Predicate<PackageSetting> filter,
-            Collection<PackageSetting> result,
-            Collection<PackageSetting> packages,
-            @NonNull List<PackageSetting> sortTemp,
+            Predicate<PackageStateInternal> filter,
+            Collection<PackageStateInternal> result,
+            Collection<PackageStateInternal> packages,
+            @NonNull List<PackageStateInternal> sortTemp,
             PackageManagerService packageManagerService) {
-        for (PackageSetting pkgSetting : packages) {
+        for (PackageStateInternal pkgSetting : packages) {
             if (filter.test(pkgSetting)) {
                 sortTemp.add(pkgSetting);
             }
@@ -563,10 +563,10 @@ final class DexOptHelper {
         sortPackagesByUsageDate(sortTemp, packageManagerService);
         packages.removeAll(sortTemp);
 
-        for (PackageSetting pkgSetting : sortTemp) {
+        for (PackageStateInternal pkgSetting : sortTemp) {
             result.add(pkgSetting);
 
-            List<PackageSetting> deps =
+            List<PackageStateInternal> deps =
                     packageManagerService.findSharedNonSystemLibraries(pkgSetting);
             if (!deps.isEmpty()) {
                 deps.removeAll(result);
@@ -581,7 +581,7 @@ final class DexOptHelper {
     // Sort a list of apps by their last usage, most recently used apps first. The order of
     // packages without usage data is undefined (but they will be sorted after the packages
     // that do have usage data).
-    private static void sortPackagesByUsageDate(List<PackageSetting> pkgSettings,
+    private static void sortPackagesByUsageDate(List<PackageStateInternal> pkgSettings,
             PackageManagerService packageManagerService) {
         if (!packageManagerService.isHistoricalPackageUsageAvailable()) {
             return;
@@ -589,8 +589,8 @@ final class DexOptHelper {
 
         Collections.sort(pkgSettings, (pkgSetting1, pkgSetting2) ->
                 Long.compare(
-                        pkgSetting2.getPkgState().getLatestForegroundPackageUseTimeInMills(),
-                        pkgSetting1.getPkgState().getLatestForegroundPackageUseTimeInMills())
+                        pkgSetting2.getTransientState().getLatestForegroundPackageUseTimeInMills(),
+                        pkgSetting1.getTransientState().getLatestForegroundPackageUseTimeInMills())
         );
     }
 
@@ -610,7 +610,7 @@ final class DexOptHelper {
         return pkgNames;
     }
 
-    public static String packagesToString(List<PackageSetting> pkgSettings) {
+    public static String packagesToString(List<PackageStateInternal> pkgSettings) {
         StringBuilder sb = new StringBuilder();
         for (int index = 0; index < pkgSettings.size(); index++) {
             if (sb.length() > 0) {

@@ -159,5 +159,24 @@
           }
         ]
       }
+  ],
+  "hubui-postsubmit": [
+      {
+        "name": "PlatformScenarioTests",
+        "options": [
+          {
+              "include-filter": "android.platform.test.scenario.hubui"
+          },
+          {
+              "include-annotation": "android.platform.test.scenario.annotation.HubUi"
+          },
+          {
+              "exclude-annotation": "org.junit.Ignore"
+          },
+          {
+              "exclude-annotation": "androidx.test.filters.FlakyTest"
+          }
+      ]
+    }
   ]
 }

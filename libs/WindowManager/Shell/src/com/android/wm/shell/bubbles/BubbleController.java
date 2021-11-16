@@ -111,8 +111,7 @@ public class BubbleController {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleController" : TAG_BUBBLES;
 
-    // TODO(b/173386799) keep in sync with Launcher3 and also don't do a broadcast
-    public static final String TASKBAR_CHANGED_BROADCAST = "taskbarChanged";
+    // TODO(b/173386799) keep in sync with Launcher3, not hooked up to anything
     public static final String EXTRA_TASKBAR_CREATED = "taskbarCreated";
     public static final String EXTRA_BUBBLE_OVERFLOW_OPENED = "bubbleOverflowOpened";
     public static final String EXTRA_TASKBAR_VISIBLE = "taskbarVisible";

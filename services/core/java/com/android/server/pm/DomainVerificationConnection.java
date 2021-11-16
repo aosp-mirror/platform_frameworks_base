@@ -52,9 +52,7 @@ public final class DomainVerificationConnection implements DomainVerificationSer
 
     @Override
     public void scheduleWriteSettings() {
-        synchronized (mPm.mLock) {
-            mPm.scheduleWriteSettingsLocked();
-        }
+        mPm.scheduleWriteSettings();
     }
 
     @Override

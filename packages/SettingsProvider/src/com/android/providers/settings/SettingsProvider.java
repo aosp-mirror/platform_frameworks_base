@@ -43,7 +43,6 @@ import android.app.backup.BackupManager;
 import android.app.compat.CompatChanges;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
-import android.bluetooth.BluetoothProfile;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.BroadcastReceiver;
@@ -3595,7 +3594,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 205;
+            private static final int SETTINGS_VERSION = 206;
 
             private final int mUserId;
 
@@ -5422,6 +5421,23 @@ public class SettingsProvider extends ContentProvider {
                     }
                     currentVersion = 205;
                 }
+
+                if (currentVersion == 205) {
+                    // Version 205: Set the default value for QR Code Scanner Setting:
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting showQRCodeScannerOnLockScreen = secureSettings.getSettingLocked(
+                            Secure.LOCK_SCREEN_SHOW_QR_CODE_SCANNER);
+                    if (showQRCodeScannerOnLockScreen.isNull()) {
+                        final boolean defLockScreenShowQrCodeScanner = getContext().getResources()
+                                .getBoolean(R.bool.def_lock_screen_show_qr_code_scanner);
+                        secureSettings.insertSettingOverrideableByRestoreLocked(
+                                Secure.LOCK_SCREEN_SHOW_QR_CODE_SCANNER,
+                                defLockScreenShowQrCodeScanner ? "1" : "0", null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 206;
+                }
+
 
                 // vXXX: Add new settings above this point.
 

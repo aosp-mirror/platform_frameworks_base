@@ -48,6 +48,7 @@ import android.util.Xml;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -186,7 +187,7 @@ final class PreferredActivityHelper {
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
             synchronized (mPm.mLock) {
-                if (mPm.getUidTargetSdkVersionLockedLPr(callingUid)
+                if (mPm.getUidTargetSdkVersion(callingUid)
                         < Build.VERSION_CODES.FROYO) {
                     Slog.w(TAG, "Ignoring addPreferredActivity() from uid "
                             + callingUid);
@@ -244,7 +245,7 @@ final class PreferredActivityHelper {
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
             synchronized (mPm.mLock) {
-                if (mPm.getUidTargetSdkVersionLockedLPr(callingUid)
+                if (mPm.getUidTargetSdkVersion(callingUid)
                         < Build.VERSION_CODES.FROYO) {
                     Slog.w(TAG, "Ignoring replacePreferredActivity() from uid "
                             + Binder.getCallingUid());
@@ -305,29 +306,24 @@ final class PreferredActivityHelper {
         if (mPm.getInstantAppPackageName(callingUid) != null) {
             return;
         }
-        // writer
-        synchronized (mPm.mLock) {
-            AndroidPackage pkg = mPm.mPackages.get(packageName);
-            if (pkg == null || !mPm.isCallerSameApp(packageName, callingUid)) {
-                if (mPm.mContext.checkCallingOrSelfPermission(
-                        android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    if (mPm.getUidTargetSdkVersionLockedLPr(callingUid)
-                            < Build.VERSION_CODES.FROYO) {
-                        Slog.w(TAG, "Ignoring clearPackagePreferredActivities() from uid "
-                                + callingUid);
-                        return;
-                    }
-                    mPm.mContext.enforceCallingOrSelfPermission(
-                            android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
+        final PackageStateInternal packageState = mPm.getPackageStateInternal(packageName);
+        if (packageState == null || !mPm.isCallerSameApp(packageName, callingUid)) {
+            if (mPm.mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                if (mPm.getUidTargetSdkVersion(callingUid)
+                        < Build.VERSION_CODES.FROYO) {
+                    Slog.w(TAG, "Ignoring clearPackagePreferredActivities() from uid "
+                            + callingUid);
+                    return;
                 }
+                mPm.mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
             }
-            final PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
-            if (ps != null
-                    && mPm.shouldFilterApplicationLocked(
-                    ps, callingUid, UserHandle.getUserId(callingUid))) {
-                return;
-            }
+        }
+        if (packageState != null && mPm.shouldFilterApplication(packageState, callingUid,
+                UserHandle.getUserId(callingUid))) {
+            return;
         }
         int callingUserId = UserHandle.getCallingUserId();
         clearPackagePreferredActivities(packageName, callingUserId);
@@ -618,12 +614,12 @@ final class PreferredActivityHelper {
         mPm.mInjector.getLocalService(NetworkPolicyManagerInternal.class).resetUserState(userId);
     }
 
+    // TODO: This method should not touch the Computer directly
     public int getPreferredActivities(List<IntentFilter> outFilters,
-            List<ComponentName> outActivities, String packageName) {
+            List<ComponentName> outActivities, String packageName, Computer computer) {
         List<WatchedIntentFilter> temp =
                 WatchedIntentFilter.toWatchedIntentFilterList(outFilters);
-        final int result = getPreferredActivitiesInternal(
-                temp, outActivities, packageName);
+        int result = getPreferredActivitiesInternal(temp, outActivities, packageName, computer);
         outFilters.clear();
         for (int i = 0; i < temp.size(); i++) {
             outFilters.add(temp.get(i).getIntentFilter());
@@ -635,33 +631,31 @@ final class PreferredActivityHelper {
      * Variant that takes a {@link WatchedIntentFilter}
      */
     private int getPreferredActivitiesInternal(List<WatchedIntentFilter> outFilters,
-            List<ComponentName> outActivities, String packageName) {
+            List<ComponentName> outActivities, String packageName, Computer computer) {
         final int callingUid = Binder.getCallingUid();
         if (mPm.getInstantAppPackageName(callingUid) != null) {
             return 0;
         }
         int num = 0;
         final int userId = UserHandle.getCallingUserId();
-        // reader
-        synchronized (mPm.mLock) {
-            PreferredIntentResolver pir = mPm.mSettings.getPreferredActivities(userId);
-            if (pir != null) {
-                final Iterator<PreferredActivity> it = pir.filterIterator();
-                while (it.hasNext()) {
-                    final PreferredActivity pa = it.next();
-                    final String prefPackageName = pa.mPref.mComponent.getPackageName();
-                    if (packageName == null
-                            || (prefPackageName.equals(packageName) && pa.mPref.mAlways)) {
-                        if (mPm.shouldFilterApplicationLocked(
-                                mPm.mSettings.getPackageLPr(prefPackageName), callingUid, userId)) {
-                            continue;
-                        }
-                        if (outFilters != null) {
-                            outFilters.add(new WatchedIntentFilter(pa.getIntentFilter()));
-                        }
-                        if (outActivities != null) {
-                            outActivities.add(pa.mPref.mComponent);
-                        }
+
+        PreferredIntentResolver pir = computer.getPreferredActivities(userId);
+        if (pir != null) {
+            final Iterator<PreferredActivity> it = pir.filterIterator();
+            while (it.hasNext()) {
+                final PreferredActivity pa = it.next();
+                final String prefPackageName = pa.mPref.mComponent.getPackageName();
+                if (packageName == null
+                        || (prefPackageName.equals(packageName) && pa.mPref.mAlways)) {
+                    if (mPm.shouldFilterApplication(
+                            mPm.getPackageStateInternal(prefPackageName), callingUid, userId)) {
+                        continue;
+                    }
+                    if (outFilters != null) {
+                        outFilters.add(new WatchedIntentFilter(pa.getIntentFilter()));
+                    }
+                    if (outActivities != null) {
+                        outActivities.add(pa.mPref.mComponent);
                     }
                 }
             }

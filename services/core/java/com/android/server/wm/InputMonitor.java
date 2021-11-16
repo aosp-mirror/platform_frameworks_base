@@ -497,12 +497,16 @@ final class InputMonitor {
 
             resetInputConsumers(mInputTransaction);
             // Update recents input consumer layer if active
-            if (mAddRecentsAnimationInputConsumerHandle
-                    && getWeak(mActiveRecentsActivity) != null) {
-                final WindowContainer layer = getWeak(mActiveRecentsLayerRef);
-                mRecentsAnimationInputConsumer.show(mInputTransaction,
-                        layer != null ? layer : getWeak(mActiveRecentsActivity));
-                mAddRecentsAnimationInputConsumerHandle = false;
+            final ActivityRecord activeRecents = getWeak(mActiveRecentsActivity);
+            if (mAddRecentsAnimationInputConsumerHandle && activeRecents != null
+                    && activeRecents.getSurfaceControl() != null) {
+                WindowContainer layer = getWeak(mActiveRecentsLayerRef);
+                layer = layer != null ? layer : activeRecents;
+                // Handle edge-case for SUW where windows don't exist yet
+                if (layer.getSurfaceControl() != null) {
+                    mRecentsAnimationInputConsumer.show(mInputTransaction, layer);
+                    mAddRecentsAnimationInputConsumerHandle = false;
+                }
             }
             mDisplayContent.forAllWindows(this, true /* traverseTopToBottom */);
             updateInputFocusRequest(mRecentsAnimationInputConsumer);

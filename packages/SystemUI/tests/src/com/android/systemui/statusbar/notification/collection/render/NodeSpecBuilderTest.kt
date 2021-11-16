@@ -58,6 +58,7 @@ class NodeSpecBuilderTest : SysuiTestCase() {
     private val section1 = buildSection(1, section1Bucket, headerController1)
     private val section1NoHeader = buildSection(1, section1Bucket, null)
     private val section2 = buildSection(2, section2Bucket, headerController2)
+    private val section3 = buildSection(3, section2Bucket, headerController2)
 
     private val fakeViewBarn = FakeViewBarn()
 
@@ -72,6 +73,37 @@ class NodeSpecBuilderTest : SysuiTestCase() {
         }
 
         specBuilder = NodeSpecBuilder(viewBarn)
+    }
+
+    @Test
+    fun testMultipleSectionsWithSameController() {
+        checkOutput(
+                listOf(
+                        notif(0, section0),
+                        notif(1, section2),
+                        notif(2, section3)
+                ),
+                tree(
+                        node(headerController0),
+                        notifNode(0),
+                        node(headerController2),
+                        notifNode(1),
+                        notifNode(2)
+                )
+        )
+    }
+
+    @Test(expected = RuntimeException::class)
+    fun testMultipleSectionsWithSameControllerNonConsecutive() {
+        checkOutput(
+                listOf(
+                        notif(0, section0),
+                        notif(1, section1),
+                        notif(2, section3),
+                        notif(3, section1)
+                ),
+                tree()
+        )
     }
 
     @Test

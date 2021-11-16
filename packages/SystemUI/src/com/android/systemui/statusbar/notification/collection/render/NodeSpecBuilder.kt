@@ -51,8 +51,10 @@ class NodeSpecBuilder(
 
             // If this notif begins a new section, first add the section's header view
             if (section != currentSection) {
-                section.headerController?.let { headerController ->
-                    root.children.add(NodeSpecImpl(root, headerController))
+                if (section.headerController != currentSection?.headerController) {
+                    section.headerController?.let { headerController ->
+                        root.children.add(NodeSpecImpl(root, headerController))
+                    }
                 }
                 prevSections.add(currentSection)
                 currentSection = section

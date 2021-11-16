@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.util.Slog;
 import android.view.InputApplicationHandle;
 import android.view.KeyEvent;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 
@@ -232,6 +233,19 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     public void notifyDropWindow(IBinder token, float x, float y) {
         mService.mH.sendMessage(PooledLambda.obtainMessage(
                 mService.mDragDropController::reportDropWindow, token, x, y));
+    }
+
+    @Override
+    public SurfaceControl getParentSurfaceForPointers(int displayId) {
+        synchronized (mService.mGlobalLock) {
+            final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
+            if (dc == null) {
+                Slog.e(TAG, "Failed to get parent surface for pointers on display " + displayId
+                        + " - DisplayContent not found.");
+                return null;
+            }
+            return dc.getOverlayLayer();
+        }
     }
 
     /** Waits until the built-in input devices have been configured. */

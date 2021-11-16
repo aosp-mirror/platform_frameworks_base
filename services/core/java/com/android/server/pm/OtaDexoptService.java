@@ -44,7 +44,9 @@ import com.android.server.pm.pkg.PackageStateInternal;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -123,32 +125,31 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         if (mDexoptCommands != null) {
             throw new IllegalStateException("already called prepare()");
         }
-        final List<PackageSetting> important;
-        final List<PackageSetting> others;
-        Predicate<PackageSetting> isPlatformPackage = pkgSetting ->
+        final List<PackageStateInternal> important;
+        final List<PackageStateInternal> others;
+        Predicate<PackageStateInternal> isPlatformPackage = pkgSetting ->
                 PLATFORM_PACKAGE_NAME.equals(pkgSetting.getPkg().getPackageName());
-        synchronized (mPackageManagerService.mLock) {
-            // Important: the packages we need to run with ab-ota compiler-reason.
-            important = DexOptHelper.getPackagesForDexopt(
-                    mPackageManagerService.mSettings.getPackagesLocked().values(),
-                    mPackageManagerService, DEBUG_DEXOPT);
-            // Remove Platform Package from A/B OTA b/160735835.
-            important.removeIf(isPlatformPackage);
-            // Others: we should optimize this with the (first-)boot compiler-reason.
-            others = new ArrayList<>(mPackageManagerService.mSettings.getPackagesLocked().values());
-            others.removeAll(important);
-            others.removeIf(PackageManagerServiceUtils.REMOVE_IF_NULL_PKG);
-            others.removeIf(isPlatformPackage);
+        // Important: the packages we need to run with ab-ota compiler-reason.
+        final Collection<? extends PackageStateInternal> allPackageStates =
+                mPackageManagerService.getPackageStates().values();
+        important = DexOptHelper.getPackagesForDexopt(allPackageStates,mPackageManagerService,
+                DEBUG_DEXOPT);
+        // Remove Platform Package from A/B OTA b/160735835.
+        important.removeIf(isPlatformPackage);
+        // Others: we should optimize this with the (first-)boot compiler-reason.
+        others = new ArrayList<>(allPackageStates);
+        others.removeAll(important);
+        others.removeIf(PackageManagerServiceUtils.REMOVE_IF_NULL_PKG);
+        others.removeIf(isPlatformPackage);
 
-            // Pre-size the array list by over-allocating by a factor of 1.5.
-            mDexoptCommands = new ArrayList<>(3 * mPackageManagerService.mPackages.size() / 2);
-        }
+        // Pre-size the array list by over-allocating by a factor of 1.5.
+        mDexoptCommands = new ArrayList<>(3 * allPackageStates.size() / 2);
 
-        for (PackageSetting pkgSetting : important) {
+        for (PackageStateInternal pkgSetting : important) {
             mDexoptCommands.addAll(generatePackageDexopts(pkgSetting.getPkg(), pkgSetting,
                     PackageManagerService.REASON_AB_OTA));
         }
-        for (PackageSetting pkgSetting : others) {
+        for (PackageStateInternal pkgSetting : others) {
             // We assume here that there are no core apps left.
             if (pkgSetting.getPkg().isCoreApp()) {
                 throw new IllegalStateException("Found a core app that's not important");
@@ -162,7 +163,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         if (spaceAvailable < BULK_DELETE_THRESHOLD) {
             Log.i(TAG, "Low on space, deleting oat files in an attempt to free up space: "
                     + DexOptHelper.packagesToString(others));
-            for (PackageSetting pkg : others) {
+            for (PackageStateInternal pkg : others) {
                 mPackageManagerService.deleteOatArtifactsOfPackage(pkg.getPackageName());
             }
         }
@@ -173,18 +174,16 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         if (DEBUG_DEXOPT) {
             try {
                 // Output some data about the packages.
-                PackageSetting lastUsed = Collections.max(important,
-                        (pkgSetting1, pkgSetting2) -> Long.compare(
-                                pkgSetting1.getPkgState()
-                                        .getLatestForegroundPackageUseTimeInMills(),
-                                pkgSetting2.getPkgState()
-                                        .getLatestForegroundPackageUseTimeInMills()));
+                PackageStateInternal lastUsed = Collections.max(important,
+                        Comparator.comparingLong(pkgSetting -> pkgSetting.getTransientState()
+                                .getLatestForegroundPackageUseTimeInMills()));
                 Log.d(TAG, "A/B OTA: lastUsed time = "
-                        + lastUsed.getPkgState().getLatestForegroundPackageUseTimeInMills());
+                        + lastUsed.getTransientState().getLatestForegroundPackageUseTimeInMills());
                 Log.d(TAG, "A/B OTA: deprioritized packages:");
-                for (PackageSetting pkgSetting : others) {
+                for (PackageStateInternal pkgSetting : others) {
                     Log.d(TAG, "  " + pkgSetting.getPackageName() + " - "
-                            + pkgSetting.getPkgState().getLatestForegroundPackageUseTimeInMills());
+                            + pkgSetting.getTransientState()
+                            .getLatestForegroundPackageUseTimeInMills());
                 }
             } catch (Exception ignored) {
             }
@@ -277,7 +276,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
      * Generate all dexopt commands for the given package.
      */
     private synchronized List<String> generatePackageDexopts(AndroidPackage pkg,
-            PackageSetting pkgSetting, int compilationReason) {
+            PackageStateInternal pkgSetting, int compilationReason) {
         // Intercept and collect dexopt requests
         final List<String> commands = new ArrayList<String>();
         final Installer collectingInstaller = new Installer(mContext, true) {
