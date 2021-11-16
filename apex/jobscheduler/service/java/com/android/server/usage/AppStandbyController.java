@@ -183,7 +183,7 @@ public class AppStandbyController
             COMPRESS_TIME ? 1 * ONE_MINUTE : 12 * ONE_HOUR,
             COMPRESS_TIME ? 4 * ONE_MINUTE : 24 * ONE_HOUR,
             COMPRESS_TIME ? 16 * ONE_MINUTE : 48 * ONE_HOUR,
-            COMPRESS_TIME ? 32 * ONE_MINUTE : 45 * ONE_DAY
+            COMPRESS_TIME ? 32 * ONE_MINUTE : 3 * ONE_DAY
     };
 
     /** The minimum allowed values for each index in {@link #DEFAULT_ELAPSED_TIME_THRESHOLDS}. */
@@ -2540,7 +2540,7 @@ public class AppStandbyController
                     switch (name) {
                         case KEY_AUTO_RESTRICTED_BUCKET_DELAY_MS:
                             mInjector.mAutoRestrictedBucketDelayMs = Math.max(
-                                    COMPRESS_TIME ? ONE_MINUTE : 2 * ONE_HOUR,
+                                    COMPRESS_TIME ? ONE_MINUTE : 4 * ONE_HOUR,
                                     properties.getLong(KEY_AUTO_RESTRICTED_BUCKET_DELAY_MS,
                                             DEFAULT_AUTO_RESTRICTED_BUCKET_DELAY_MS));
                             break;
