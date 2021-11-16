@@ -571,6 +571,9 @@
     <!-- Permission required for GTS test - PendingSystemUpdateTest -->
     <uses-permission android:name="android.permission.NOTIFY_PENDING_SYSTEM_UPDATE" />
 
+    <!-- Permission required for CTS test - SettingsMultiPaneDeepLinkTest -->
+    <uses-permission android:name="android.permission.LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
