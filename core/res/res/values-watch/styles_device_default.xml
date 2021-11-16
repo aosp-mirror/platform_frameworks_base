@@ -15,8 +15,23 @@
 -->
 
 <resources>
+    <style name="DialogWindowTitle.DeviceDefault" parent="DialogWindowTitle.Material">
+      <item name="singleLine">true</item>
+      <item name="shadowRadius">0</item>
+      <item name="ellipsize">end</item>
+      <item name="textAppearance">@style/TextAppearance.DeviceDefault.Title</item>
+    </style>
     <style name="TextAppearance.DeviceDefault.Body1" parent="TextAppearance.Material.Body1">
         <item name="android:textSize">15sp</item>
         <item name="android:fontFamily">sans-serif</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Title" parent="TextAppearance.Material.Title">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Subhead" parent="TextAppearance.Material.Subhead">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">google-sans-medium</item>
     </style>
 </resources>
