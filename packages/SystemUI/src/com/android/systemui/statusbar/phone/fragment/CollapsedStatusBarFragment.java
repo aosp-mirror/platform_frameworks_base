@@ -12,7 +12,7 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.statusbar.phone.fragment;
 
 import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
 import static android.app.StatusBarManager.DISABLE_CLOCK;
@@ -52,7 +52,14 @@ import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
+import com.android.systemui.statusbar.phone.NotificationIconAreaController;
+import com.android.systemui.statusbar.phone.PhoneStatusBarView;
+import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
+import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
+import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
@@ -83,6 +90,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public static final String STATUS_BAR_ICON_MANAGER_TAG = "status_bar_icon_manager";
     public static final int FADE_IN_DURATION = 320;
     public static final int FADE_IN_DELAY = 50;
+    private StatusBarFragmentComponent mStatusBarFragmentComponent;
     private PhoneStatusBarView mStatusBar;
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardStateController mKeyguardStateController;
@@ -96,6 +104,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private int mDisabled2;
     private Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     private DarkIconManager mDarkIconManager;
+    private final StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
     private final CommandQueue mCommandQueue;
     private final CollapsedStatusBarFragmentLogger mCollapsedStatusBarFragmentLogger;
     private final OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
@@ -127,6 +136,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     @Inject
     public CollapsedStatusBarFragment(
+            StatusBarFragmentComponent.Factory statusBarFragmentComponentFactory,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
@@ -143,6 +153,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             OperatorNameViewController.Factory operatorNameViewControllerFactory
     ) {
+        mStatusBarFragmentComponentFactory = statusBarFragmentComponentFactory;
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
         mLocationPublisher = locationPublisher;
@@ -169,6 +180,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mStatusBarFragmentComponent = mStatusBarFragmentComponentFactory.create(this);
+        mStatusBarFragmentComponent.init();
+
         mStatusBar = (PhoneStatusBarView) view;
         View contents = mStatusBar.findViewById(R.id.status_bar_contents);
         contents.addOnLayoutChangeListener(mStatusBarLayoutListener);
@@ -250,6 +264,17 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
         // #disable should have already been called, so use the disable values to set visibility.
         updateNotificationIconAreaAndCallChip(mDisabled1, false);
+    }
+
+    /**
+     * Returns the dagger component for this fragment.
+     *
+     * TODO(b/205609837): Eventually, the dagger component should encapsulate all status bar
+     *   fragment functionality and we won't need to expose it here anymore.
+     */
+    @Nullable
+    public StatusBarFragmentComponent getStatusBarFragmentComponent() {
+        return mStatusBarFragmentComponent;
     }
 
     @Override
