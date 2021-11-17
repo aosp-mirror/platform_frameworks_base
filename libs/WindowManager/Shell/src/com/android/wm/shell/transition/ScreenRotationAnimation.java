@@ -292,14 +292,16 @@ class ScreenRotationAnimation {
             @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor,
             @NonNull ShellExecutor animExecutor) {
         startSurfaceAnimation(animations, mRotateEnterAnimation, mSurfaceControl, finishCallback,
-                mTransactionPool, mainExecutor, animExecutor, null /* position */);
+                mTransactionPool, mainExecutor, animExecutor, null /* position */,
+                0 /* cornerRadius */, null /* clipRect */);
     }
 
     private void startScreenshotRotationAnimation(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor,
             @NonNull ShellExecutor animExecutor) {
         startSurfaceAnimation(animations, mRotateExitAnimation, mAnimLeash, finishCallback,
-                mTransactionPool, mainExecutor, animExecutor, null /* position */);
+                mTransactionPool, mainExecutor, animExecutor, null /* position */,
+                0 /* cornerRadius */, null /* clipRect */);
     }
 
     private void startColorAnimation(float animationScale, @NonNull ShellExecutor animExecutor) {
