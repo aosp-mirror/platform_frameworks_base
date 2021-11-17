@@ -35,7 +35,7 @@ private typealias Callback = (Int, Boolean) -> Unit
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
-class SecureSettingTest : SysuiTestCase() {
+class SettingObserverTest : SysuiTestCase() {
 
     companion object {
         private const val TEST_SETTING = "setting"
@@ -46,7 +46,7 @@ class SecureSettingTest : SysuiTestCase() {
     }
 
     private lateinit var testableLooper: TestableLooper
-    private lateinit var setting: SecureSetting
+    private lateinit var setting: SettingObserver
     private lateinit var secureSettings: SecureSettings
 
     private lateinit var callback: Callback
@@ -56,7 +56,7 @@ class SecureSettingTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
         secureSettings = FakeSettings()
 
-        setting = object : SecureSetting(
+        setting = object : SettingObserver(
                 secureSettings,
                 Handler(testableLooper.looper),
                 TEST_SETTING,

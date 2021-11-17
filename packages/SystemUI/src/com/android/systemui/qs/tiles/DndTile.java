@@ -61,7 +61,7 @@ import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -83,7 +83,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
     private final ZenModeController mController;
     private final DndDetailAdapter mDetailAdapter;
     private final SharedPreferences mSharedPreferences;
-    private final SecureSetting mSettingZenDuration;
+    private final SettingObserver mSettingZenDuration;
 
     private boolean mListening;
     private boolean mShowingDetail;
@@ -108,7 +108,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
         mSharedPreferences = sharedPreferences;
         mDetailAdapter = new DndDetailAdapter();
         mController.observe(getLifecycle(), mZenCallback);
-        mSettingZenDuration = new SecureSetting(secureSettings, mUiHandler,
+        mSettingZenDuration = new SettingObserver(secureSettings, mUiHandler,
                 Settings.Secure.ZEN_DURATION, getHost().getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {

@@ -24,7 +24,7 @@ import com.android.systemui.statusbar.policy.Listenable;
 import com.android.systemui.util.settings.SecureSettings;
 
 /** Helper for managing a secure setting. **/
-public abstract class SecureSetting extends ContentObserver implements Listenable {
+public abstract class SettingObserver extends ContentObserver implements Listenable {
     private final SecureSettings mSecureSettings;
     private final String mSettingName;
     private final int mDefaultValue;
@@ -35,16 +35,16 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
 
     protected abstract void handleValueChanged(int value, boolean observedChange);
 
-    public SecureSetting(SecureSettings secureSettings, Handler handler, String settingName,
+    public SettingObserver(SecureSettings secureSettings, Handler handler, String settingName,
             int userId) {
         this(secureSettings, handler, settingName, userId, 0);
     }
 
-    public SecureSetting(SecureSettings secureSetting, Handler handler, String settingName) {
+    public SettingObserver(SecureSettings secureSetting, Handler handler, String settingName) {
         this(secureSetting, handler, settingName, ActivityManager.getCurrentUser());
     }
 
-    public SecureSetting(SecureSettings secureSettings, Handler handler, String settingName,
+    public SettingObserver(SecureSettings secureSettings, Handler handler, String settingName,
             int userId, int defaultValue) {
         super(handler);
         mSecureSettings = secureSettings;
@@ -57,6 +57,11 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
         return mListening ? mObservedValue : getValueFromProvider();
     }
 
+    /**
+     * Set the value of the observed setting.
+     *
+     * @param value The new value for the setting.
+     */
     public void setValue(int value) {
         mSecureSettings.putIntForUser(mSettingName, value, mUserId);
     }
@@ -87,6 +92,9 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
         handleValueChanged(value, changed);
     }
 
+    /**
+     * Set user handle for which to observe the setting.
+     */
     public void setUserId(int userId) {
         mUserId = userId;
         if (mListening) {
