@@ -3560,24 +3560,24 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         @Override
-        public ParcelFileDescriptor open() throws NativeDaemonConnectorException {
+        public ParcelFileDescriptor open() throws AppFuseMountException {
             try {
                 final FileDescriptor fd = mVold.mountAppFuse(uid, mountId);
                 mMounted = true;
                 return new ParcelFileDescriptor(fd);
             } catch (Exception e) {
-                throw new NativeDaemonConnectorException("Failed to mount", e);
+                throw new AppFuseMountException("Failed to mount", e);
             }
         }
 
         @Override
         public ParcelFileDescriptor openFile(int mountId, int fileId, int flags)
-                throws NativeDaemonConnectorException {
+                throws AppFuseMountException {
             try {
                 return new ParcelFileDescriptor(
                         mVold.openAppFuseFile(uid, mountId, fileId, flags));
             } catch (Exception e) {
-                throw new NativeDaemonConnectorException("Failed to open", e);
+                throw new AppFuseMountException("Failed to open", e);
             }
         }
 
@@ -3617,7 +3617,7 @@ class StorageManagerService extends IStorageManager.Stub
                         // It seems the thread of mAppFuseBridge has already been terminated.
                         mAppFuseBridge = null;
                     }
-                } catch (NativeDaemonConnectorException e) {
+                } catch (AppFuseMountException e) {
                     throw e.rethrowAsParcelableException();
                 }
             }
