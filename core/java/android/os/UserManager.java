@@ -3149,6 +3149,39 @@ public class UserManager {
     }
 
     /**
+     * Creates a user with the specified {@link NewUserRequest}.
+     *
+     * @param newUserRequest specify the user information
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS})
+    public @NonNull NewUserResponse createUser(@NonNull NewUserRequest newUserRequest) {
+        UserInfo user = null;
+        int operationResult = USER_OPERATION_ERROR_UNKNOWN;
+        try {
+            user = createUser(newUserRequest.getName(), newUserRequest.getUserType(),
+                    determineFlagsForUserCreation(newUserRequest));
+        } catch (UserOperationException e) {
+            Log.w(TAG, "Exception while creating user " + newUserRequest, e);
+            operationResult = e.getUserOperationResult();
+        }
+        if (user == null) {
+            return new NewUserResponse(null, operationResult);
+        }
+        return new NewUserResponse(user.getUserHandle(), USER_OPERATION_SUCCESS);
+    }
+
+    private int determineFlagsForUserCreation(NewUserRequest newUserRequest) {
+        int flags = 0;
+        if (newUserRequest.isAdmin()) flags |= UserInfo.FLAG_ADMIN;
+        if (newUserRequest.isEphemeral()) flags |= UserInfo.FLAG_EPHEMERAL;
+        return flags;
+    }
+
+    /**
      * Pre-creates a user of the specified type. Default user restrictions will be applied.
      *
      * <p>This method can be used by OEMs to "warm" up the user creation by pre-creating some users

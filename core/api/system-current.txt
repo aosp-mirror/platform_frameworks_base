@@ -8677,6 +8677,28 @@ package android.os {
     method public boolean hasSingleFileDescriptor();
   }
 
+  public final class NewUserRequest {
+    method @Nullable public String getName();
+    method @NonNull public String getUserType();
+    method public boolean isAdmin();
+    method public boolean isEphemeral();
+  }
+
+  public static final class NewUserRequest.Builder {
+    ctor public NewUserRequest.Builder();
+    method @NonNull public android.os.NewUserRequest build();
+    method @NonNull public android.os.NewUserRequest.Builder setAdmin();
+    method @NonNull public android.os.NewUserRequest.Builder setEphemeral();
+    method @NonNull public android.os.NewUserRequest.Builder setName(@Nullable String);
+    method @NonNull public android.os.NewUserRequest.Builder setUserType(@NonNull String);
+  }
+
+  public final class NewUserResponse {
+    method public int getOperationResult();
+    method @Nullable public android.os.UserHandle getUser();
+    method public boolean isSuccessful();
+  }
+
   public interface Parcelable {
     field public static final int PARCELABLE_STABILITY_LOCAL = 0; // 0x0
     field public static final int PARCELABLE_STABILITY_VINTF = 1; // 0x1
@@ -8913,6 +8935,7 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean canHaveRestrictedProfile();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void clearSeedAccountData();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.os.UserHandle createProfile(@NonNull String, @NonNull String, @NonNull java.util.Set<java.lang.String>) throws android.os.UserManager.UserOperationException;
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.os.NewUserResponse createUser(@NonNull android.os.NewUserRequest);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional=true) public java.util.List<android.os.UserHandle> getAllProfiles();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional=true) public java.util.List<android.os.UserHandle> getEnabledProfiles();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public android.os.UserHandle getProfileParent(@NonNull android.os.UserHandle);
