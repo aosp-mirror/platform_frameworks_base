@@ -152,7 +152,7 @@ public class ResolverActivity extends Activity implements
     /** See {@link #setRetainInOnStop}. */
     private boolean mRetainInOnStop;
 
-    private static final int REQUEST_CODE_RETURN_FROM_DELEGATE_CHOOSER = 20;
+    protected static final int REQUEST_CODE_RETURN_FROM_DELEGATE_CHOOSER = 20;
 
     private static final String EXTRA_SHOW_FRAGMENT_ARGS = ":settings:show_fragment_args";
     private static final String EXTRA_FRAGMENT_ARG_KEY = ":settings:fragment_args_key";
@@ -321,6 +321,86 @@ public class ResolverActivity extends Activity implements
      */
     protected void super_onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    /**
+     * Pass-through API to support {@link ChooserActivity} running in "headless springboard" mode
+     * where we hand over to the unbundled chooser (while violating many of the invariants of a
+     * typical ResolverActivity implementation). Subclasses running in this mode need to be able
+     * to opt-out of the normal ResolverActivity behavior.
+     *
+     * TODO: this should be removed later on in the unbundling migration, when the springboard
+     * activity no longer needs to derive from ResolverActivity. The hold-over design here is
+     * <em>not</em> good practice (e.g. there could be other events that weren't anticipated as
+     * requiring this kind of "pass-through" override, and so might fall back on ResolverActivity
+     * implementations that depend on the invariants that are violated in the headless mode). If
+     * necessary, we could instead consider using a springboard-only activity on the system side
+     * immediately, which would delegate either to the unbundled chooser, or to a
+     * (properly-inheriting) system ChooserActivity. This would have performance implications even
+     * when the unbundling experiment is disabled.
+     */
+    protected void super_onRestart() {
+        super.onRestart();
+    }
+
+    /**
+     * Pass-through API to support {@link ChooserActivity} running in "headless springboard" mode
+     * where we hand over to the unbundled chooser (while violating many of the invariants of a
+     * typical ResolverActivity implementation). Subclasses running in this mode need to be able
+     * to opt-out of the normal ResolverActivity behavior.
+     *
+     * TODO: this should be removed later on in the unbundling migration, when the springboard
+     * activity no longer needs to derive from ResolverActivity. The hold-over design here is
+     * <em>not</em> good practice (e.g. there could be other events that weren't anticipated as
+     * requiring this kind of "pass-through" override, and so might fall back on ResolverActivity
+     * implementations that depend on the invariants that are violated in the headless mode). If
+     * necessary, we could instead consider using a springboard-only activity on the system side
+     * immediately, which would delegate either to the unbundled chooser, or to a
+     * (properly-inheriting) system ChooserActivity. This would have performance implications even
+     * when the unbundling experiment is disabled.
+     */
+    protected void super_onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    /**
+     * Pass-through API to support {@link ChooserActivity} running in "headless springboard" mode
+     * where we hand over to the unbundled chooser (while violating many of the invariants of a
+     * typical ResolverActivity implementation). Subclasses running in this mode need to be able
+     * to opt-out of the normal ResolverActivity behavior.
+     *
+     * TODO: this should be removed later on in the unbundling migration, when the springboard
+     * activity no longer needs to derive from ResolverActivity. The hold-over design here is
+     * <em>not</em> good practice (e.g. there could be other events that weren't anticipated as
+     * requiring this kind of "pass-through" override, and so might fall back on ResolverActivity
+     * implementations that depend on the invariants that are violated in the headless mode). If
+     * necessary, we could instead consider using a springboard-only activity on the system side
+     * immediately, which would delegate either to the unbundled chooser, or to a
+     * (properly-inheriting) system ChooserActivity. This would have performance implications even
+     * when the unbundling experiment is disabled.
+     */
+    protected void super_onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    /**
+     * Pass-through API to support {@link ChooserActivity} running in "headless springboard" mode
+     * where we hand over to the unbundled chooser (while violating many of the invariants of a
+     * typical ResolverActivity implementation). Subclasses running in this mode need to be able
+     * to opt-out of the normal ResolverActivity behavior.
+     *
+     * TODO: this should be removed later on in the unbundling migration, when the springboard
+     * activity no longer needs to derive from ResolverActivity. The hold-over design here is
+     * <em>not</em> good practice (e.g. there could be other events that weren't anticipated as
+     * requiring this kind of "pass-through" override, and so might fall back on ResolverActivity
+     * implementations that depend on the invariants that are violated in the headless mode). If
+     * necessary, we could instead consider using a springboard-only activity on the system side
+     * immediately, which would delegate either to the unbundled chooser, or to a
+     * (properly-inheriting) system ChooserActivity. This would have performance implications even
+     * when the unbundling experiment is disabled.
+     */
+    public void super_onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -877,7 +957,7 @@ public class ResolverActivity extends Activity implements
         }
         final Intent intent = getIntent();
         if ((intent.getFlags() & FLAG_ACTIVITY_NEW_TASK) != 0 && !isVoiceInteraction()
-                && !mResolvingHome && !mRetainInOnStop) {
+                && !mResolvingHome && !mRetainInOnStop && !mAwaitingDelegateResponse) {
             // This resolver is in the unusual situation where it has been
             // launched at the top of a new task.  We don't let it be added
             // to the recent tasks shown to the user, and we need to make sure
