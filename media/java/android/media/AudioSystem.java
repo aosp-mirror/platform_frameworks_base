@@ -199,7 +199,11 @@ public class AudioSystem
     /** @hide */
     public static final int MODE_CALL_SCREENING     = 4;
     /** @hide */
-    public static final int NUM_MODES               = 5;
+    public static final int MODE_CALL_REDIRECT     = 5;
+    /** @hide */
+    public static final int MODE_COMMUNICATION_REDIRECT  = 6;
+    /** @hide */
+    public static final int NUM_MODES               = 7;
 
     /** @hide */
     public static String modeToString(int mode) {
@@ -211,6 +215,8 @@ public class AudioSystem
             case MODE_NORMAL: return "MODE_NORMAL";
             case MODE_RINGTONE: return "MODE_RINGTONE";
             case MODE_CALL_SCREENING: return "MODE_CALL_SCREENING";
+            case MODE_CALL_REDIRECT: return "MODE_CALL_REDIRECT";
+            case MODE_COMMUNICATION_REDIRECT: return "MODE_COMMUNICATION_REDIRECT";
             default: return "unknown mode (" + mode + ")";
         }
     }

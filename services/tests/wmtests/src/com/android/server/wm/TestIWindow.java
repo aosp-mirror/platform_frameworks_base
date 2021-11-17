@@ -69,7 +69,7 @@ public class TestIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) throws RemoteException {
+    public void windowFocusChanged(boolean hasFocus) throws RemoteException {
     }
 
     @Override

@@ -61,10 +61,12 @@ import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.SecureSetting;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.volume.ZenModePanel;
 
 import javax.inject.Inject;
@@ -81,6 +83,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
     private final ZenModeController mController;
     private final DndDetailAdapter mDetailAdapter;
     private final SharedPreferences mSharedPreferences;
+    private final SecureSetting mSettingZenDuration;
 
     private boolean mListening;
     private boolean mShowingDetail;
@@ -96,7 +99,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             ZenModeController zenModeController,
-            @Main SharedPreferences sharedPreferences
+            @Main SharedPreferences sharedPreferences,
+            SecureSettings secureSettings
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
@@ -104,7 +108,16 @@ public class DndTile extends QSTileImpl<BooleanState> {
         mSharedPreferences = sharedPreferences;
         mDetailAdapter = new DndDetailAdapter();
         mController.observe(getLifecycle(), mZenCallback);
+        mSettingZenDuration = new SecureSetting(secureSettings, mUiHandler,
+                Settings.Secure.ZEN_DURATION, getHost().getUserId()) {
+            @Override
+            protected void handleValueChanged(int value, boolean observedChange) {
+                refreshState();
+            }
+        };
     }
+
+
 
     public static void setVisible(Context context, boolean visible) {
         Prefs.putBoolean(context, Prefs.Key.DND_TILE_VISIBLE, visible);
@@ -144,14 +157,18 @@ public class DndTile extends QSTileImpl<BooleanState> {
         if (mState.value) {
             mController.setZen(ZEN_MODE_OFF, null, TAG);
         } else {
-            showDetail(true);
+            enableZenMode(view);
         }
     }
 
     @Override
-    public void showDetail(boolean show) {
-        int zenDuration = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ZEN_DURATION, 0);
+    protected void handleUserSwitch(int newUserId) {
+        super.handleUserSwitch(newUserId);
+        mSettingZenDuration.setUserId(newUserId);
+    }
+
+    private void enableZenMode(@Nullable View view) {
+        int zenDuration = mSettingZenDuration.getValue();
         boolean showOnboarding = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0
                 && Settings.Secure.getInt(mContext.getContentResolver(),
@@ -270,6 +287,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
         state.dualLabelContentDescription = mContext.getResources().getString(
                 R.string.accessibility_quick_settings_open_settings, getTileLabel());
         state.expandedAccessibilityClassName = Switch.class.getName();
+        state.forceExpandIcon =
+                mSettingZenDuration.getValue() == Settings.Secure.ZEN_DURATION_PROMPT;
     }
 
     @Override
@@ -296,6 +315,13 @@ public class DndTile extends QSTileImpl<BooleanState> {
         } else {
             Prefs.unregisterListener(mContext, mPrefListener);
         }
+        mSettingZenDuration.setListening(listening);
+    }
+
+    @Override
+    protected void handleDestroy() {
+        super.handleDestroy();
+        mSettingZenDuration.setListening(false);
     }
 
     @Override

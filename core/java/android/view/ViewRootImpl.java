@@ -8705,8 +8705,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void onFocusEvent(boolean hasFocus, boolean inTouchMode) {
-            windowFocusChanged(hasFocus, inTouchMode);
+        public void onFocusEvent(boolean hasFocus) {
+            windowFocusChanged(hasFocus);
         }
 
         @Override
@@ -8975,9 +8975,7 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * Notifies this {@link ViewRootImpl} object that window focus has changed.
      */
-    public void windowFocusChanged(boolean hasFocus, boolean unusedInTouchMode) {
-        // TODO(b/193718270): Remove inTouchMode parameter from this method and update related code
-        //     accordingly.
+    public void windowFocusChanged(boolean hasFocus) {
         synchronized (this) {
             mWindowFocusChanged = true;
             mUpcomingWindowFocus = hasFocus;
@@ -9732,10 +9730,10 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) {
+        public void windowFocusChanged(boolean hasFocus) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.windowFocusChanged(hasFocus, inTouchMode);
+                viewAncestor.windowFocusChanged(hasFocus);
             }
         }
 
@@ -10426,7 +10424,7 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public boolean applyTransactionOnDraw(@NonNull SurfaceControl.Transaction t) {
-        if (mRemoved) {
+        if (mRemoved || !isHardwareEnabled()) {
             t.apply();
         } else {
             registerRtFrameCallback(frame -> mergeWithNextTransaction(t, frame));

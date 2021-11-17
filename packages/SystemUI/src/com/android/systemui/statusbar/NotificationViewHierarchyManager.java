@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.DynamicChildBindController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.LowPriorityInflationHelper;
@@ -91,6 +92,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final KeyguardBypassController mBypassController;
     private final ForegroundServiceSectionController mFgsSectionController;
+    private final NotifPipelineFlags mNotifPipelineFlags;
     private AssistantFeedbackController mAssistantFeedbackController;
     private final Context mContext;
 
@@ -121,7 +123,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             ForegroundServiceSectionController fgsSectionController,
             DynamicChildBindController dynamicChildBindController,
             LowPriorityInflationHelper lowPriorityInflationHelper,
-            AssistantFeedbackController assistantFeedbackController) {
+            AssistantFeedbackController assistantFeedbackController,
+            NotifPipelineFlags notifPipelineFlags) {
         mContext = context;
         mHandler = mainHandler;
         mFeatureFlags = featureFlags;
@@ -132,6 +135,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         mStatusBarStateController = (SysuiStatusBarStateController) statusBarStateController;
         mEntryManager = notificationEntryManager;
         mFgsSectionController = fgsSectionController;
+        mNotifPipelineFlags = notifPipelineFlags;
         Resources res = context.getResources();
         mAlwaysExpandNonGroupedNotification =
                 res.getBoolean(R.bool.config_alwaysExpandNonGroupedNotifications);
@@ -157,7 +161,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     //TODO: Rewrite this to focus on Entries, or some other data object instead of views
     public void updateNotificationViews() {
         Assert.isMainThread();
-        if (!mFeatureFlags.checkLegacyPipelineEnabled()) {
+        if (!mNotifPipelineFlags.checkLegacyPipelineEnabled()) {
             return;
         }
 
@@ -435,7 +439,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
      */
     public void updateRowStates() {
         Assert.isMainThread();
-        if (!mFeatureFlags.checkLegacyPipelineEnabled()) {
+        if (!mNotifPipelineFlags.checkLegacyPipelineEnabled()) {
             return;
         }
 
@@ -524,7 +528,9 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
     @Override
     public void onDynamicPrivacyChanged() {
-        mFeatureFlags.assertLegacyPipelineEnabled();
+        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            throw new IllegalStateException("Old pipeline code running w/ new pipeline enabled");
+        }
         if (mPerformingUpdate) {
             Log.w(TAG, "onDynamicPrivacyChanged made a re-entrant call");
         }

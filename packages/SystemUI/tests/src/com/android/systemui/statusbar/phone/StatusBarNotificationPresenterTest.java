@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -128,7 +129,8 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mInitController,
                 mNotificationInterruptStateProvider,
                 mock(NotificationRemoteInputManager.class),
-                mock(ConfigurationController.class));
+                mock(ConfigurationController.class),
+                mock(NotifPipelineFlags.class));
         mInitController.executePostInitTasks();
         ArgumentCaptor<NotificationInterruptSuppressor> suppressorCaptor =
                 ArgumentCaptor.forClass(NotificationInterruptSuppressor.class);

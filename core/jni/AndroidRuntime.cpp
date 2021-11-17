@@ -750,8 +750,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     }
 
     const bool checkJni = GetBoolProperty("dalvik.vm.checkjni", false);
-    ALOGV("CheckJNI is %s\n", checkJni ? "ON" : "OFF");
     if (checkJni) {
+        ALOGD("CheckJNI is ON");
+
         /* extended JNI checking */
         addOption("-Xcheck:jni");
 

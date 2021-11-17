@@ -52,6 +52,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
@@ -80,11 +81,8 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     @Rule public final MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Mock private NotificationStackScrollLayout mNssl;
-    @Mock private FeatureFlags mFeatureFlags;
-    @Mock private ActivityStarterDelegate mActivityStarterDelegate;
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
-    @Mock private PeopleHubViewAdapter mPeopleHubAdapter;
     @Mock private KeyguardMediaController mKeyguardMediaController;
     @Mock private NotificationSectionsFeatureManager mSectionsFeatureManager;
     @Mock private NotificationRowComponent mNotificationRowComponent;
@@ -94,6 +92,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     @Mock private SectionHeaderController mPeopleHeaderController;
     @Mock private SectionHeaderController mAlertingHeaderController;
     @Mock private SectionHeaderController mSilentHeaderController;
+    @Mock private NotifPipelineFlags mNotifPipelineFlags;
 
     private NotificationSectionsManager mSectionsManager;
 
@@ -122,12 +121,12 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         when(mSilentHeaderController.getHeaderView()).thenReturn(mock(SectionHeaderView.class));
         mSectionsManager =
                 new NotificationSectionsManager(
-                        mFeatureFlags,
                         mStatusBarStateController,
                         mConfigurationController,
                         mKeyguardMediaController,
                         mSectionsFeatureManager,
                         mLogger,
+                        mNotifPipelineFlags,
                         mIncomingHeaderController,
                         mPeopleHeaderController,
                         mAlertingHeaderController,

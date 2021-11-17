@@ -121,7 +121,7 @@ public class TileQueryHelper {
         }
 
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
-        if (mFeatureFlags.isProviderModelSettingEnabled()) {
+        if (mFeatureFlags.isProviderModelSettingEnabled(mContext)) {
             possibleTiles.remove("cell");
             possibleTiles.remove("wifi");
         }

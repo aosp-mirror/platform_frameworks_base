@@ -158,11 +158,9 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     public void setUp() throws Exception {
         mMockingSession = ExtendedMockito.mockitoSession().strictness(Strictness.LENIENT)
                 .mockStatic(FeatureFlags.class).startMocking();
-        ExtendedMockito.doReturn(true).when(() ->
-                FeatureFlags.isProviderModelSettingEnabled(mContext));
         mFeatureFlags = mock(FeatureFlags.class);
         when(mFeatureFlags.isCombinedStatusBarSignalIconsEnabled()).thenReturn(false);
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
+        when(mFeatureFlags.isProviderModelSettingEnabled(mContext)).thenReturn(true);
 
 
         mInstrumentation = InstrumentationRegistry.getInstrumentation();

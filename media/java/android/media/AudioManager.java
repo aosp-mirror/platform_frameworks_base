@@ -30,8 +30,11 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.compat.CompatChanges;
 import android.bluetooth.BluetoothCodecConfig;
 import android.bluetooth.BluetoothDevice;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -2840,6 +2843,14 @@ public class AudioManager {
     }
 
     /**
+     * This change id controls use of audio modes for call audio redirection.
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long CALL_REDIRECTION_AUDIO_MODES = 189472651L; // buganizer id
+
+    /**
      * Returns the current audio mode.
      *
      * @return      the current audio mode.
@@ -2858,6 +2869,12 @@ public class AudioManager {
             }
             if (mode == MODE_CALL_SCREENING && sdk <= Build.VERSION_CODES.Q) {
                 mode = MODE_IN_CALL;
+            } else if (mode == MODE_CALL_REDIRECT
+                    && !CompatChanges.isChangeEnabled(CALL_REDIRECTION_AUDIO_MODES)) {
+                mode = MODE_IN_CALL;
+            } else if (mode == MODE_COMMUNICATION_REDIRECT
+                    && !CompatChanges.isChangeEnabled(CALL_REDIRECTION_AUDIO_MODES)) {
+                mode = MODE_IN_COMMUNICATION;
             }
             return mode;
         } catch (RemoteException e) {
@@ -3075,13 +3092,26 @@ public class AudioManager {
      */
     public static final int MODE_CALL_SCREENING     = AudioSystem.MODE_CALL_SCREENING;
 
+    /**
+     * A telephony call is established and its audio is being redirected to another device.
+     */
+    public static final int MODE_CALL_REDIRECT   = AudioSystem.MODE_CALL_REDIRECT;
+
+    /**
+     * n audio/video chat or VoIP call is established and its audio is being redirected to another
+     * device.
+     */
+    public static final int MODE_COMMUNICATION_REDIRECT = AudioSystem.MODE_COMMUNICATION_REDIRECT;
+
     /** @hide */
     @IntDef(flag = false, prefix = "MODE_", value = {
             MODE_NORMAL,
             MODE_RINGTONE,
             MODE_IN_CALL,
             MODE_IN_COMMUNICATION,
-            MODE_CALL_SCREENING }
+            MODE_CALL_SCREENING,
+            MODE_CALL_REDIRECT,
+            MODE_COMMUNICATION_REDIRECT}
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioMode {}

@@ -227,7 +227,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         mMobileStatusTracker = new MobileStatusTracker(mPhone, receiverLooper,
                 info, mDefaults, mMobileCallback);
         mProviderModelBehavior = featureFlags.isCombinedStatusBarSignalIconsEnabled();
-        mProviderModelSetting = featureFlags.isProviderModelSettingEnabled();
+        mProviderModelSetting = featureFlags.isProviderModelSettingEnabled(mContext);
     }
 
     void setConfiguration(Config config) {

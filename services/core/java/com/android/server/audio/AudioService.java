@@ -4638,12 +4638,13 @@ public class AudioService extends IAudioService.Stub
          * or recording for VOICE_COMMUNICATION.
          *   or
          * - It requests a mode different from MODE_IN_COMMUNICATION or MODE_NORMAL
+         * Note: only privileged apps can request MODE_IN_CALL, MODE_CALL_REDIRECT
+         * or MODE_COMMUNICATION_REDIRECT.
          */
         public boolean isActive() {
             return mIsPrivileged
                     || ((mMode == AudioSystem.MODE_IN_COMMUNICATION)
                         && (mRecordingActive || mPlaybackActive))
-                    || mMode == AudioSystem.MODE_IN_CALL
                     || mMode == AudioSystem.MODE_RINGTONE
                     || mMode == AudioSystem.MODE_CALL_SCREENING;
         }
@@ -4752,9 +4753,13 @@ public class AudioService extends IAudioService.Stub
         final boolean hasModifyPhoneStatePermission = mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.MODIFY_PHONE_STATE)
                 == PackageManager.PERMISSION_GRANTED;
-        if ((mode == AudioSystem.MODE_IN_CALL) && !hasModifyPhoneStatePermission) {
-            Log.w(TAG, "MODIFY_PHONE_STATE Permission Denial: setMode(MODE_IN_CALL) from pid="
-                    + pid + ", uid=" + Binder.getCallingUid());
+        if ((mode == AudioSystem.MODE_IN_CALL
+                || mode == AudioSystem.MODE_CALL_REDIRECT
+                || mode == AudioSystem.MODE_COMMUNICATION_REDIRECT)
+                && !hasModifyPhoneStatePermission) {
+            Log.w(TAG, "MODIFY_PHONE_STATE Permission Denial: setMode("
+                    + AudioSystem.modeToString(mode) + ") from pid=" + pid
+                    + ", uid=" + Binder.getCallingUid());
             return;
         }
 

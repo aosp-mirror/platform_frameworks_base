@@ -12,7 +12,7 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.statusbar.phone.fragment;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -48,6 +48,13 @@ import com.android.systemui.statusbar.DisableFlagsLogger;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
+import com.android.systemui.statusbar.phone.NotificationIconAreaController;
+import com.android.systemui.statusbar.phone.NotificationPanelViewController;
+import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
+import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -72,7 +79,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private OngoingCallController mOngoingCallController;
     private SystemStatusAnimationScheduler mAnimationScheduler;
     private StatusBarLocationPublisher mLocationPublisher;
-
     // Set in instantiate()
     private StatusBarIconController mStatusBarIconController;
     private NetworkController mNetworkController;
@@ -84,6 +90,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
     private OperatorNameViewController mOperatorNameViewController;
 
+    private StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
+    private StatusBarFragmentComponent mStatusBarFragmentComponent;
 
     public CollapsedStatusBarFragmentTest() {
         super(CollapsedStatusBarFragment.class);
@@ -245,8 +253,22 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
     }
 
+    @Test
+    public void setUp_fragmentCreatesDaggerComponent() {
+        mFragments.dispatchResume();
+        processAllMessages();
+        CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
+
+        assertEquals(mStatusBarFragmentComponent, fragment.getStatusBarFragmentComponent());
+    }
+
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
+        mStatusBarFragmentComponentFactory =
+                mock(StatusBarFragmentComponent.Factory.class);
+        mStatusBarFragmentComponent = mock(StatusBarFragmentComponent.class);
+        when(mStatusBarFragmentComponentFactory.create(any()))
+                .thenReturn(mStatusBarFragmentComponent);
         mOngoingCallController = mock(OngoingCallController.class);
         mAnimationScheduler = mock(SystemStatusAnimationScheduler.class);
         mLocationPublisher = mock(StatusBarLocationPublisher.class);
@@ -261,6 +283,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         setUpNotificationIconAreaController();
         return new CollapsedStatusBarFragment(
+                mStatusBarFragmentComponentFactory,
                 mOngoingCallController,
                 mAnimationScheduler,
                 mLocationPublisher,
@@ -281,7 +304,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                         ),
                 mOperatorNameViewControllerFactory);
     }
-
 
     private void setUpNotificationIconAreaController() {
         mMockNotificationAreaController = mock(NotificationIconAreaController.class);

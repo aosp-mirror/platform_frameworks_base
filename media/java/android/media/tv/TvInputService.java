@@ -53,6 +53,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
@@ -1581,7 +1582,8 @@ public abstract class TvInputService extends Service {
                 return TvInputManager.Session.DISPATCH_NOT_HANDLED;
             }
             if (!mOverlayViewContainer.hasWindowFocus()) {
-                mOverlayViewContainer.getViewRootImpl().windowFocusChanged(true, true);
+                ViewRootImpl viewRoot = mOverlayViewContainer.getViewRootImpl();
+                viewRoot.windowFocusChanged(true);
             }
             if (isNavigationKey && mOverlayViewContainer.hasFocusable()) {
                 // If mOverlayView has focusable views, navigation key events should be always

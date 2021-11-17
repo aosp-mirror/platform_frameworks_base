@@ -16,7 +16,7 @@
 
 package com.android.server.devicepolicy;
 
-import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_DISABLED;
+import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
@@ -161,10 +161,10 @@ class ActiveAdmin {
     int mPasswordComplexity = PASSWORD_COMPLEXITY_NONE;
 
     @DevicePolicyManager.NearbyStreamingPolicy
-    int mNearbyNotificationStreamingPolicy = NEARBY_STREAMING_DISABLED;
+    int mNearbyNotificationStreamingPolicy = NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY;
 
     @DevicePolicyManager.NearbyStreamingPolicy
-    int mNearbyAppStreamingPolicy = NEARBY_STREAMING_DISABLED;
+    int mNearbyAppStreamingPolicy = NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY;
 
     @Nullable
     FactoryResetProtectionPolicy mFactoryResetProtectionPolicy = null;
@@ -553,11 +553,11 @@ class ActiveAdmin {
         if (mPasswordComplexity != PASSWORD_COMPLEXITY_NONE) {
             writeAttributeValueToXml(out, TAG_PASSWORD_COMPLEXITY, mPasswordComplexity);
         }
-        if (mNearbyNotificationStreamingPolicy != NEARBY_STREAMING_DISABLED) {
+        if (mNearbyNotificationStreamingPolicy != NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY) {
             writeAttributeValueToXml(out, TAG_NEARBY_NOTIFICATION_STREAMING_POLICY,
                     mNearbyNotificationStreamingPolicy);
         }
-        if (mNearbyAppStreamingPolicy != NEARBY_STREAMING_DISABLED) {
+        if (mNearbyAppStreamingPolicy != NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY) {
             writeAttributeValueToXml(out, TAG_NEARBY_APP_STREAMING_POLICY,
                     mNearbyAppStreamingPolicy);
         }

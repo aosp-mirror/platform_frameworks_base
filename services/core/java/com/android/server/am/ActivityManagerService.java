@@ -4666,7 +4666,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.getCompat(), getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
                         buildSerial, autofillOptions, contentCaptureOptions,
-                        app.getDisabledCompatChanges(), serializedSystemFontMap);
+                        app.getDisabledCompatChanges(), serializedSystemFontMap,
+                        app.getStartElapsedTime(), app.getStartUptime());
             } else {
                 thread.bindApplication(processName, appInfo, providerList, null, profilerInfo,
                         null, null, null, testMode,
@@ -4676,7 +4677,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.getCompat(), getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
                         buildSerial, autofillOptions, contentCaptureOptions,
-                        app.getDisabledCompatChanges(), serializedSystemFontMap);
+                        app.getDisabledCompatChanges(), serializedSystemFontMap,
+                        app.getStartElapsedTime(), app.getStartUptime());
             }
             if (profilerInfo != null) {
                 profilerInfo.closeFd();
@@ -11950,6 +11952,15 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // If this is a preceding instance of another process instance
         allowRestart = mProcessList.handlePrecedingAppDiedLocked(app);
+
+        // If somehow this process was still waiting for the death of its predecessor,
+        // (probably it's "killed" before starting for real), reset the bookkeeping.
+        final ProcessRecord predecessor = app.mPredecessor;
+        if (predecessor != null) {
+            predecessor.mSuccessor = null;
+            predecessor.mSuccessorStartRunnable = null;
+            app.mPredecessor = null;
+        }
 
         // If the caller is restarting this app, then leave it in its
         // current lists and let the caller take care of it.

@@ -68,7 +68,7 @@ public class WifiSignalController extends SignalController<WifiState, IconGroup>
                     new WifiTrafficStateCallback());
         }
         mCurrentState.iconGroup = mLastState.iconGroup = mUnmergedWifiIconGroup;
-        mProviderModelSetting = featureFlags.isProviderModelSettingEnabled();
+        mProviderModelSetting = featureFlags.isProviderModelSettingEnabled(mContext);
     }
 
     @Override

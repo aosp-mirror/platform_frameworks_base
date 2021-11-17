@@ -178,9 +178,14 @@ class ProcessRecord implements WindowProcessListener {
     private volatile String mSeInfo;
 
     /**
-     * When the process is started.
+     * When the process is started. (before zygote fork)
      */
-    private volatile long mStartTime;
+    private volatile long mStartUptime;
+
+    /**
+     * When the process is started. (before zygote fork)
+     */
+    private volatile long mStartElapsedTime;
 
     /**
      * This will be same as {@link #uid} usually except for some apps used during factory testing.
@@ -372,16 +377,18 @@ class ProcessRecord implements WindowProcessListener {
     Runnable mSuccessorStartRunnable;
 
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
-            long startTime) {
+            long startUptime, long startElapsedTime) {
         this.mStartUid = startUid;
         this.mHostingRecord = hostingRecord;
         this.mSeInfo = seInfo;
-        this.mStartTime = startTime;
+        this.mStartUptime = startUptime;
+        this.mStartElapsedTime = startElapsedTime;
     }
 
     @GuardedBy({"mService", "mProcLock"})
     void dump(PrintWriter pw, String prefix) {
         final long nowUptime = SystemClock.uptimeMillis();
+        final long nowElapsedTime = SystemClock.elapsedRealtime();
 
         pw.print(prefix); pw.print("user #"); pw.print(userId);
                 pw.print(" uid="); pw.print(info.uid);
@@ -442,6 +449,10 @@ class ProcessRecord implements WindowProcessListener {
         pw.print(prefix); pw.print("pid="); pw.println(mPid);
         pw.print(prefix); pw.print("lastActivityTime=");
         TimeUtils.formatDuration(mLastActivityTime, nowUptime, pw);
+        pw.print(prefix); pw.print("startUptimeTime=");
+        TimeUtils.formatDuration(mStartElapsedTime, nowUptime, pw);
+        pw.print(prefix); pw.print("startElapsedTime=");
+        TimeUtils.formatDuration(mStartElapsedTime, nowElapsedTime, pw);
         pw.println();
         if (mPersistent || mRemoved) {
             pw.print(prefix); pw.print("persistent="); pw.print(mPersistent);
@@ -671,12 +682,21 @@ class ProcessRecord implements WindowProcessListener {
         mSeInfo = seInfo;
     }
 
-    long getStartTime() {
-        return mStartTime;
+    long getStartUptime() {
+        return mStartUptime;
     }
 
-    void setStartTime(long startTime) {
-        mStartTime = startTime;
+    /**
+     * Same as {@link #getStartUptime()}.
+     * @deprecated use {@link #getStartUptime()} instead for clarity.
+     */
+    @Deprecated
+    long getStartTime() {
+        return mStartUptime;
+    }
+
+    long getStartElapsedTime() {
+        return mStartElapsedTime;
     }
 
     int getStartUid() {

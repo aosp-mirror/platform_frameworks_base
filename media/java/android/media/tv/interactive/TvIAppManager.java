@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.media.tv.TvInputManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -150,6 +151,8 @@ public final class TvIAppManager {
 
         private IBinder mToken;
 
+        private TvInputManager.Session mInputSession;
+
         private Session(IBinder token, ITvIAppManager service, int userId, int seq,
                 SparseArray<SessionCallbackRecord> sessionCallbackRecordMap) {
             mToken = token;
@@ -157,6 +160,14 @@ public final class TvIAppManager {
             mUserId = userId;
             mSeq = seq;
             mSessionCallbackRecordMap = sessionCallbackRecordMap;
+        }
+
+        public TvInputManager.Session getInputSession() {
+            return mInputSession;
+        }
+
+        public void setInputSession(TvInputManager.Session inputSession) {
+            mInputSession = inputSession;
         }
 
         void startIApp() {

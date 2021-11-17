@@ -33,11 +33,9 @@ import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
-import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.AsyncTask;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
@@ -83,7 +81,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -133,7 +130,6 @@ public class NotificationMediaManager implements Dumpable {
     private final DelayableExecutor mMainExecutor;
 
     private final Context mContext;
-    private final MediaSessionManager mMediaSessionManager;
     private final ArrayList<MediaListener> mMediaListeners;
     private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     private final MediaArtworkProcessor mMediaArtworkProcessor;
@@ -196,10 +192,6 @@ public class NotificationMediaManager implements Dumpable {
         mMediaArtworkProcessor = mediaArtworkProcessor;
         mKeyguardBypassController = keyguardBypassController;
         mMediaListeners = new ArrayList<>();
-        // TODO: use MediaSessionManager.SessionListener to hook us up to future updates
-        // in session state
-        mMediaSessionManager = (MediaSessionManager) mContext.getSystemService(
-                Context.MEDIA_SESSION_SERVICE);
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mNotificationShadeWindowController = notificationShadeWindowController;
@@ -476,35 +468,6 @@ public class NotificationMediaManager implements Dumpable {
                 }
             }
         }
-        if (mediaNotification == null) {
-            // Still nothing? OK, let's just look for live media sessions and see if they match
-            // one of our notifications. This will catch apps that aren't (yet!) using media
-            // notifications.
-
-            if (mMediaSessionManager != null) {
-                // TODO: Should this really be for all users? It appears that inactive users
-                //  can't have active sessions, which would mean it is fine.
-                final List<MediaController> sessions =
-                        mMediaSessionManager.getActiveSessionsForUser(null, UserHandle.ALL);
-
-                for (MediaController aController : sessions) {
-                    // now to see if we have one like this
-                    final String pkg = aController.getPackageName();
-
-                    for (NotificationEntry entry : allNotifications) {
-                        if (entry.getSbn().getPackageName().equals(pkg)) {
-                            if (DEBUG_MEDIA) {
-                                Log.v(TAG, "DEBUG_MEDIA: found controller matching "
-                                        + entry.getSbn().getKey());
-                            }
-                            controller = aController;
-                            mediaNotification = entry;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
 
         if (controller != null && !sameSessions(mMediaController, controller)) {
             // We have a new media session
@@ -550,8 +513,6 @@ public class NotificationMediaManager implements Dumpable {
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
-        pw.print("    mMediaSessionManager=");
-        pw.println(mMediaSessionManager);
         pw.print("    mMediaNotificationKey=");
         pw.println(mMediaNotificationKey);
         pw.print("    mMediaController=");

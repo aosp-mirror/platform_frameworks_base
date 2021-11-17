@@ -114,6 +114,7 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -133,6 +134,8 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
+import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -243,6 +246,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private CollapsedStatusBarFragmentLogger mCollapsedStatusBarFragmentLogger;
     @Mock private StatusBarComponent.Factory mStatusBarComponentFactory;
     @Mock private StatusBarComponent mStatusBarComponent;
+    @Mock private StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
+    @Mock private StatusBarFragmentComponent mStatusBarFragmentComponent;
     @Mock private PluginManager mPluginManager;
     @Mock private LegacySplitScreen mLegacySplitScreen;
     @Mock private LightsOutNotifController mLightsOutNotifController;
@@ -277,6 +282,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
     @Mock private PhoneStatusBarViewController.Factory mPhoneStatusBarViewControllerFactory;
     @Mock private ActivityLaunchAnimator mActivityLaunchAnimator;
+    @Mock private NotifPipelineFlags mNotifPipelineFlags;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
@@ -356,6 +362,8 @@ public class StatusBarTest extends SysuiTestCase {
         when(mBiometricUnlockControllerLazy.get()).thenReturn(mBiometricUnlockController);
 
         when(mStatusBarComponentFactory.create()).thenReturn(mStatusBarComponent);
+        when(mStatusBarFragmentComponentFactory.create(any()))
+                .thenReturn(mStatusBarFragmentComponent);
         when(mStatusBarComponent.getNotificationShadeWindowViewController()).thenReturn(
                 mNotificationShadeWindowViewController);
 
@@ -425,6 +433,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mCommandQueue,
                 mCollapsedStatusBarFragmentLogger,
                 mStatusBarComponentFactory,
+                mStatusBarFragmentComponentFactory,
                 mPluginManager,
                 Optional.of(mLegacySplitScreen),
                 mLightsOutNotifController,
@@ -464,7 +473,8 @@ public class StatusBarTest extends SysuiTestCase {
                 Optional.of(mStartingSurface),
                 mTunerService,
                 mDumpManager,
-                mActivityLaunchAnimator);
+                mActivityLaunchAnimator,
+                mNotifPipelineFlags);
         when(mKeyguardViewMediator.registerStatusBar(
                 any(StatusBar.class),
                 any(NotificationPanelViewController.class),

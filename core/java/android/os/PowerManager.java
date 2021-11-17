@@ -440,9 +440,15 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_REASON_DISPLAY_GROUPS_TURNED_OFF = 12;
 
     /**
+     * Go to sleep reason code: A foldable device has been folded.
      * @hide
      */
-    public static final int GO_TO_SLEEP_REASON_MAX = GO_TO_SLEEP_REASON_DISPLAY_GROUPS_TURNED_OFF;
+    public static final int GO_TO_SLEEP_REASON_DEVICE_FOLD = 13;
+
+    /**
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_MAX =  GO_TO_SLEEP_REASON_DEVICE_FOLD;
 
     /**
      * @hide
@@ -461,6 +467,7 @@ public final class PowerManager {
             case GO_TO_SLEEP_REASON_INATTENTIVE: return "inattentive";
             case GO_TO_SLEEP_REASON_DISPLAY_GROUP_REMOVED: return "display_group_removed";
             case GO_TO_SLEEP_REASON_DISPLAY_GROUPS_TURNED_OFF: return "display_groups_turned_off";
+            case GO_TO_SLEEP_REASON_DEVICE_FOLD: return "device_folded";
             default: return Integer.toString(sleepReason);
         }
     }
@@ -568,7 +575,8 @@ public final class PowerManager {
             GO_TO_SLEEP_REASON_ACCESSIBILITY,
             GO_TO_SLEEP_REASON_FORCE_SUSPEND,
             GO_TO_SLEEP_REASON_INATTENTIVE,
-            GO_TO_SLEEP_REASON_QUIESCENT
+            GO_TO_SLEEP_REASON_QUIESCENT,
+            GO_TO_SLEEP_REASON_DEVICE_FOLD
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface GoToSleepReason{}

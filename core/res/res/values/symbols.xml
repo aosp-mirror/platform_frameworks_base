@@ -2049,6 +2049,7 @@
   <java-symbol type="dimen" name="config_screenBrightnessSettingDefaultFloat" />
   <java-symbol type="dimen" name="config_screenBrightnessDozeFloat" />
   <java-symbol type="dimen" name="config_screenBrightnessDimFloat" />
+  <java-symbol type="dimen" name="config_screenBrightnessMinimumDimAmountFloat" />
   <java-symbol type="integer" name="config_screenBrightnessDark" />
   <java-symbol type="integer" name="config_screenBrightnessDim" />
   <java-symbol type="integer" name="config_screenBrightnessDoze" />
@@ -3856,7 +3857,8 @@
 
   <!-- For Foldables -->
   <java-symbol type="array" name="config_foldedDeviceStates" />
-  <java-symbol type="integer" name="config_deviceStateOnWhichToWakeUp" />
+  <java-symbol type="array" name="config_deviceStatesOnWhichToWakeUp" />
+  <java-symbol type="array" name="config_deviceStatesOnWhichToSleep" />
   <java-symbol type="string" name="config_foldedArea" />
   <java-symbol type="bool" name="config_supportsConcurrentInternalDisplays" />
   <java-symbol type="bool" name="config_unfoldTransitionEnabled" />

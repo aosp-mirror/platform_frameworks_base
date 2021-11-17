@@ -26,8 +26,8 @@ import java.lang.annotation.Retention;
 import javax.inject.Qualifier;
 
 /**
- * A {@link LogBuffer} for
- * {@link com.android.systemui.statusbar.phone.CollapsedStatusBarFragment}-related messages.
+ * A {@link LogBuffer} for {@link
+ * com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment}-related messages.
  */
 @Qualifier
 @Documented

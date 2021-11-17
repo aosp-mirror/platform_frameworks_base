@@ -38,7 +38,10 @@ import android.app.PropertyInvalidatedCache;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
+import android.os.IPowerManager;
+import android.os.IThermalService;
 import android.os.Parcel;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -72,10 +75,13 @@ public class LogicalDisplayMapperTest {
     private LogicalDisplayMapper mLogicalDisplayMapper;
     private TestLooper mLooper;
     private Handler mHandler;
+    private PowerManager mPowerManager;
 
     @Mock LogicalDisplayMapper.Listener mListenerMock;
     @Mock Context mContextMock;
     @Mock Resources mResourcesMock;
+    @Mock IPowerManager mIPowerManagerMock;
+    @Mock IThermalService mIThermalServiceMock;
 
     @Captor ArgumentCaptor<LogicalDisplay> mDisplayCaptor;
 
@@ -105,6 +111,11 @@ public class LogicalDisplayMapperTest {
         // Disable binder caches in this process.
         PropertyInvalidatedCache.disableForTestMode();
 
+        mPowerManager = new PowerManager(mContextMock, mIPowerManagerMock, mIThermalServiceMock,
+                null);
+        when(mContextMock.getSystemServiceName(PowerManager.class))
+                .thenReturn(Context.POWER_SERVICE);
+        when(mContextMock.getSystemService(PowerManager.class)).thenReturn(mPowerManager);
         when(mContextMock.getResources()).thenReturn(mResourcesMock);
         when(mResourcesMock.getBoolean(
                 com.android.internal.R.bool.config_supportsConcurrentInternalDisplays))
@@ -300,7 +311,6 @@ public class LogicalDisplayMapperTest {
         assertEquals(DEFAULT_DISPLAY_GROUP,
                 mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(id(display3)));
     }
-
 
     /////////////////
     // Helper Methods

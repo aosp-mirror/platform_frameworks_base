@@ -31,13 +31,11 @@ import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN;
 
-import static com.android.wm.shell.startingsurface.StartingWindowController.DEBUG_SPLASH_SCREEN;
-import static com.android.wm.shell.startingsurface.StartingWindowController.DEBUG_TASK_SNAPSHOT;
-
-import android.util.Slog;
 import android.window.StartingWindowInfo;
 import android.window.TaskSnapshot;
 
+import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.startingsurface.StartingWindowTypeAlgorithm;
 
 /**
@@ -45,8 +43,6 @@ import com.android.wm.shell.startingsurface.StartingWindowTypeAlgorithm;
  * At the moment also used on Android Auto and Wear OS.
  */
 public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgorithm {
-    private static final String TAG = PhoneStartingWindowTypeAlgorithm.class.getSimpleName();
-
     @Override
     public int getSuggestedWindowType(StartingWindowInfo windowInfo) {
         final int parameter = windowInfo.startingWindowTypeParameter;
@@ -62,17 +58,19 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
         final boolean activityDrawn = (parameter & TYPE_PARAMETER_ACTIVITY_DRAWN) != 0;
         final boolean topIsHome = windowInfo.taskInfo.topActivityType == ACTIVITY_TYPE_HOME;
 
-        if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
-            Slog.d(TAG, "preferredStartingWindowType newTask:" + newTask
-                    + " taskSwitch:" + taskSwitch
-                    + " processRunning:" + processRunning
-                    + " allowTaskSnapshot:" + allowTaskSnapshot
-                    + " activityCreated:" + activityCreated
-                    + " useEmptySplashScreen:" + useEmptySplashScreen
-                    + " legacySplashScreen:" + legacySplashScreen
-                    + " activityDrawn:" + activityDrawn
-                    + " topIsHome:" + topIsHome);
-        }
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                "preferredStartingWindowType "
+                        + "newTask=%b, "
+                        + "taskSwitch=%b, "
+                        + "processRunning=%b, "
+                        + "allowTaskSnapshot=%b, "
+                        + "activityCreated=%b, "
+                        + "useEmptySplashScreen=%b, "
+                        + "legacySplashScreen=%b, "
+                        + "activityDrawn=%b, "
+                        + "topIsHome=%b",
+                newTask, taskSwitch, processRunning, allowTaskSnapshot, activityCreated,
+                useEmptySplashScreen, legacySplashScreen, activityDrawn, topIsHome);
 
         if (!topIsHome) {
             if (!processRunning || newTask || (taskSwitch && !activityCreated)) {
@@ -111,26 +109,24 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
     private boolean isSnapshotCompatible(StartingWindowInfo windowInfo) {
         final TaskSnapshot snapshot = windowInfo.taskSnapshot;
         if (snapshot == null) {
-            if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
-                Slog.d(TAG, "isSnapshotCompatible no snapshot " + windowInfo.taskInfo.taskId);
-            }
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                    "isSnapshotCompatible no snapshot, taskId=%d",
+                    windowInfo.taskInfo.taskId);
             return false;
         }
         if (!snapshot.getTopActivityComponent().equals(windowInfo.taskInfo.topActivity)) {
-            if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
-                Slog.d(TAG, "isSnapshotCompatible obsoleted snapshot "
-                        + windowInfo.taskInfo.topActivity);
-            }
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                    "isSnapshotCompatible obsoleted snapshot for %s",
+                    windowInfo.taskInfo.topActivity);
             return false;
         }
 
         final int taskRotation = windowInfo.taskInfo.configuration
                 .windowConfiguration.getRotation();
         final int snapshotRotation = snapshot.getRotation();
-        if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
-            Slog.d(TAG, "isSnapshotCompatible rotation " + taskRotation
-                    + " snapshot " + snapshotRotation);
-        }
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                "isSnapshotCompatible taskRotation=%d, snapshotRotation=%d",
+                taskRotation, snapshotRotation);
         return taskRotation == snapshotRotation;
     }
 }

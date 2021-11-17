@@ -85,7 +85,7 @@ class Agent {
             mCurrentOngoingEvents = new SparseArrayMap<>();
 
     /**
-     * Set of {@link ActionAffordabilityNote}s keyed by userId-pkgName.
+     * Set of {@link ActionAffordabilityNote ActionAffordabilityNotes} keyed by userId-pkgName.
      *
      * Note: it would be nice/better to sort by base price since that doesn't change and simply
      * look at the change in the "insertion" of what would be affordable, but since CTP

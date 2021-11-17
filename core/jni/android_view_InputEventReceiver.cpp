@@ -390,13 +390,11 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
             case AINPUT_EVENT_TYPE_FOCUS: {
                 FocusEvent* focusEvent = static_cast<FocusEvent*>(inputEvent);
                 if (kDebugDispatchCycle) {
-                    ALOGD("channel '%s' ~ Received focus event: hasFocus=%s, inTouchMode=%s.",
-                          getInputChannelName().c_str(), toString(focusEvent->getHasFocus()),
-                          toString(focusEvent->getInTouchMode()));
+                    ALOGD("channel '%s' ~ Received focus event: hasFocus=%s.",
+                          getInputChannelName().c_str(), toString(focusEvent->getHasFocus()));
                 }
                 env->CallVoidMethod(receiverObj.get(), gInputEventReceiverClassInfo.onFocusEvent,
-                                    jboolean(focusEvent->getHasFocus()),
-                                    jboolean(focusEvent->getInTouchMode()));
+                                    jboolean(focusEvent->getHasFocus()));
                 finishInputEvent(seq, true /* handled */);
                 continue;
             }
@@ -615,7 +613,7 @@ int register_android_view_InputEventReceiver(JNIEnv* env) {
             gInputEventReceiverClassInfo.clazz,
             "dispatchInputEvent", "(ILandroid/view/InputEvent;)V");
     gInputEventReceiverClassInfo.onFocusEvent =
-            GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onFocusEvent", "(ZZ)V");
+            GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onFocusEvent", "(Z)V");
     gInputEventReceiverClassInfo.onPointerCaptureEvent =
             GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onPointerCaptureEvent",
                              "(Z)V");
