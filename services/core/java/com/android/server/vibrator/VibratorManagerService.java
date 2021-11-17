@@ -229,7 +229,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        context.registerReceiver(mIntentReceiver, filter);
+        context.registerReceiver(mIntentReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
 
         injector.addService(EXTERNAL_VIBRATOR_SERVICE, new ExternalVibratorService());
     }
