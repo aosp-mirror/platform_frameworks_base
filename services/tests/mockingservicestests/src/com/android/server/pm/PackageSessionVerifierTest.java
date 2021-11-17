@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -77,18 +78,26 @@ public class PackageSessionVerifierTest {
     public void checkRollbacks() throws Exception {
         StagingManager.StagedSession session1 = createStagedSession(111, "com.foo", 1);
         StagingManager.StagedSession session2 = createStagedSession(222, "com.bar", 2);
+        StagingManager.StagedSession session3 = createStagedSession(333, "com.baz", 3);
         session2.sessionParams().setInstallReason(PackageManager.INSTALL_REASON_ROLLBACK);
+        session3.sessionParams().setInstallReason(PackageManager.INSTALL_REASON_ROLLBACK);
+        when(session2.isDestroyed()).thenReturn(true);
         mSessionVerifier.storeSession(session1);
         mSessionVerifier.storeSession(session2);
+        mSessionVerifier.storeSession(session3);
+
+        // Non-rollback session shouldn't be failed by a destroyed session
+        mSessionVerifier.checkRollbacks(session2);
+        verify(session1, never()).setSessionFailed(anyInt(), anyString());
 
         // Non-rollback session should fail
-        mSessionVerifier.checkRollbacks(session2);
+        mSessionVerifier.checkRollbacks(session3);
         verify(session1, times(1)).setSessionFailed(anyInt(), anyString());
 
         // Yet another non-rollback session should fail
-        StagingManager.StagedSession session3 = createStagedSession(333, "com.baz", 3);
+        StagingManager.StagedSession session4 = createStagedSession(444, "com.fur", 4);
         assertThrows(PackageManagerException.class,
-                () -> mSessionVerifier.checkRollbacks(session3));
+                () -> mSessionVerifier.checkRollbacks(session4));
     }
 
     @Test
@@ -105,6 +114,11 @@ public class PackageSessionVerifierTest {
         StagingManager.StagedSession session3 = createStagedSession(333, "com.foo", 3);
         assertThrows(PackageManagerException.class,
                 () -> mSessionVerifier.checkOverlaps(session3, session3));
+        // session4 is earlier than session1, but it shouldn't fail session1
+        StagingManager.StagedSession session4 = createStagedSession(444, "com.foo", 0);
+        when(session4.isDestroyed()).thenReturn(true);
+        mSessionVerifier.checkOverlaps(session4, session4);
+        verify(session1, never()).setSessionFailed(anyInt(), anyString());
     }
 
     private PackageInstallerSession createSession(boolean isStaged, boolean isApex,
