@@ -17,6 +17,8 @@
 package android.media.tv.interactive;
 
 import android.media.tv.interactive.ITvIAppClient;
+import android.media.tv.interactive.ITvIAppManagerCallback;
+import android.media.tv.interactive.TvIAppInfo;
 import android.view.Surface;
 
 /**
@@ -24,6 +26,7 @@ import android.view.Surface;
  * @hide
  */
 interface ITvIAppManager {
+    List<TvIAppInfo> getTvIAppServiceList(int userId);
     void startIApp(in IBinder sessionToken, int userId);
     void createSession(
             in ITvIAppClient client, in String iAppServiceId, int type, int seq, int userId);
@@ -31,4 +34,7 @@ interface ITvIAppManager {
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);
     void dispatchSurfaceChanged(in IBinder sessionToken, int format, int width, int height,
             int userId);
+
+    void registerCallback(in ITvIAppManagerCallback callback, int userId);
+    void unregisterCallback(in ITvIAppManagerCallback callback, int userId);
 }
