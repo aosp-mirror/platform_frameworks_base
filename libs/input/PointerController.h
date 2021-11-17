@@ -72,8 +72,6 @@ public:
     void reloadPointerResources();
     void onDisplayViewportsUpdated(std::vector<DisplayViewport>& viewports);
 
-    void onDisplayInfosChanged(const std::vector<gui::DisplayInfo>& displayInfos);
-
 private:
     friend PointerControllerContext::LooperCallback;
     friend PointerControllerContext::MessageHandler;
@@ -87,22 +85,8 @@ private:
     struct Locked {
         Presentation presentation;
 
-        std::vector<gui::DisplayInfo> mDisplayInfos;
         std::unordered_map<int32_t /* displayId */, TouchSpotController> spotControllers;
     } mLocked GUARDED_BY(mLock);
-
-    class DisplayInfoListener : public gui::WindowInfosListener {
-    public:
-        explicit DisplayInfoListener(PointerController& pc) : mPointerController(pc){};
-        void onWindowInfosChanged(const std::vector<android::gui::WindowInfo>&,
-                                  const std::vector<android::gui::DisplayInfo>&) override;
-
-    private:
-        PointerController& mPointerController;
-    };
-    sp<DisplayInfoListener> mDisplayInfoListener;
-
-    const ui::Transform& getTransformForDisplayLocked(int displayId) const REQUIRES(mLock);
 
     PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
                       const sp<SpriteController>& spriteController);
