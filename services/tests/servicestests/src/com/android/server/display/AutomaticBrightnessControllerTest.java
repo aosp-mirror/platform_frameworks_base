@@ -56,12 +56,9 @@ public class AutomaticBrightnessControllerTest {
     private static final int DARKENING_LIGHT_DEBOUNCE_CONFIG = 0;
     private static final float DOZE_SCALE_FACTOR = 0.0f;
     private static final boolean RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG = false;
-    private static final int DISPLAY_ID = 0;
-    private static final int LAYER_STACK = 0;
     private static final int LIGHT_SENSOR_WARMUP_TIME = 0;
 
     private Context mContext;
-    private LogicalDisplay mLogicalDisplay;
     private AutomaticBrightnessController mController;
 
     @Mock SensorManager mSensorManager;
@@ -69,7 +66,6 @@ public class AutomaticBrightnessControllerTest {
     @Mock HysteresisLevels mAmbientBrightnessThresholds;
     @Mock HysteresisLevels mScreenBrightnessThresholds;
     @Mock Handler mNoOpHandler;
-    @Mock DisplayDevice mDisplayDevice;
     @Mock HighBrightnessModeController mHbmController;
 
     @Before
@@ -79,7 +75,6 @@ public class AutomaticBrightnessControllerTest {
         MockitoAnnotations.initMocks(this);
 
         mContext = InstrumentationRegistry.getContext();
-        mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice);
     }
 
     @After
@@ -104,7 +99,7 @@ public class AutomaticBrightnessControllerTest {
                 BRIGHTNESS_MAX_FLOAT, DOZE_SCALE_FACTOR, LIGHT_SENSOR_RATE,
                 INITIAL_LIGHT_SENSOR_RATE, BRIGHTENING_LIGHT_DEBOUNCE_CONFIG,
                 DARKENING_LIGHT_DEBOUNCE_CONFIG, RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG,
-                mAmbientBrightnessThresholds, mScreenBrightnessThresholds, mLogicalDisplay,
+                mAmbientBrightnessThresholds, mScreenBrightnessThresholds,
                 mContext, mHbmController
         );
 
