@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 // Sysconfig files
 
 package {
@@ -115,6 +114,13 @@ prebuilt_etc {
     product_specific: true,
     sub_dir: "permissions",
     src: "com.android.imsserviceentitlement.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "privapp_whitelist_com.android.intentresolver",
+    sub_dir: "permissions",
+    src: "com.android.intentresolver.xml",
     filename_from_src: true,
 }
 
