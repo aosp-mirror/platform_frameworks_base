@@ -3538,9 +3538,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     list.addAll(mApexManager.getFactoryPackages());
                 } else {
                     list.addAll(mApexManager.getActivePackages());
-                }
-                if (listUninstalled) {
-                    list.addAll(mApexManager.getInactivePackages());
+                    if (listUninstalled) {
+                        list.addAll(mApexManager.getInactivePackages());
+                    }
                 }
             }
             return new ParceledListSlice<>(list);
