@@ -151,6 +151,9 @@
     <item msgid="7571394439974244289">"બંધ છે"</item>
     <item msgid="6866424167599381915">"ચાલુ છે"</item>
   </string-array>
+    <!-- no translation found for tile_states_qr_code_scanner:0 (7435143266149257618) -->
+    <!-- no translation found for tile_states_qr_code_scanner:1 (3301403109049256043) -->
+    <!-- no translation found for tile_states_qr_code_scanner:2 (8878684975184010135) -->
   <string-array name="tile_states_alarm">
     <item msgid="4936533380177298776">"ઉપલબ્ધ નથી"</item>
     <item msgid="2710157085538036590">"બંધ છે"</item>
