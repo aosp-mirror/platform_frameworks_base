@@ -1438,6 +1438,7 @@
   <java-symbol type="drawable" name="ic_qs_flashlight" />
   <java-symbol type="drawable" name="ic_qs_auto_rotate" />
   <java-symbol type="drawable" name="ic_qs_dnd" />
+  <java-symbol type="drawable" name="ic_qs_one_handed_mode" />
 
   <java-symbol type="drawable" name="sim_light_blue" />
   <java-symbol type="drawable" name="sim_light_green" />
