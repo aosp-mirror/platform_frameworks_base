@@ -218,6 +218,19 @@ public class SystemUIDialog extends AlertDialog implements ListenableDialog,
         }
     }
 
+    /**
+     * Dismiss this dialog. If it was launched from another dialog using
+     * {@link com.android.systemui.animation.DialogLaunchAnimator#showFromView} with a
+     * non-{@code null} {@code parentHostDialog} parameter, also dismisses the stack of dialogs,
+     * animating back to the original touchSurface.
+     */
+    public void dismissStack() {
+        for (DialogListener listener : new LinkedHashSet<>(mDialogListeners)) {
+            listener.prepareForStackDismiss();
+        }
+        dismiss();
+    }
+
     @Override
     public void hide() {
         super.hide();

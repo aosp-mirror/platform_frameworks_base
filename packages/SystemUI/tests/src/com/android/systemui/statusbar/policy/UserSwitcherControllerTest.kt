@@ -44,13 +44,16 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.QSUserSwitcherEvent
+import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.statusbar.phone.NotificationShadeWindowView
 import com.android.systemui.telephony.TelephonyListenerManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -85,6 +88,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var interactionJankMonitor: InteractionJankMonitor
     @Mock private lateinit var latencyTracker: LatencyTracker
+    @Mock private lateinit var dialogShower: UserSwitchDialogController.DialogShower
+    @Mock private lateinit var notificationShadeWindowView: NotificationShadeWindowView
     private lateinit var testableLooper: TestableLooper
     private lateinit var uiBgExecutor: FakeExecutor
     private lateinit var uiEventLogger: UiEventLoggerFake
@@ -98,6 +103,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     private val guestId = 1234
     private val guestInfo = UserInfo(guestId, "Guest", null,
             UserInfo.FLAG_FULL or UserInfo.FLAG_GUEST, UserManager.USER_TYPE_FULL_GUEST)
+    private val secondaryUser =
+            UserInfo(10, "Secondary", null, 0, UserManager.USER_TYPE_FULL_SECONDARY)
 
     @Before
     fun setUp() {
@@ -114,6 +121,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 mock(FingerprintManager::class.java))
 
         `when`(userManager.canAddMoreUsers()).thenReturn(true)
+        `when`(notificationShadeWindowView.context).thenReturn(context)
 
         userSwitcherController = UserSwitcherController(
                 context,
@@ -139,6 +147,26 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         userSwitcherController.mPauseRefreshUsers = true
 
         picture = UserIcons.convertToBitmap(context.getDrawable(R.drawable.ic_avatar_user))
+        userSwitcherController.init(notificationShadeWindowView)
+    }
+
+    @Test
+    fun testSwitchUser_parentDialogDismissed() {
+        val otherUserRecord = UserSwitcherController.UserRecord(
+                secondaryUser,
+                picture,
+                false /* guest */,
+                false /* current */,
+                false /* isAddUser */,
+                false /* isRestricted */,
+                true /* isSwitchToEnabled */)
+        `when`(userTracker.userId).thenReturn(ownerId)
+        `when`(userTracker.userInfo).thenReturn(ownerInfo)
+
+        userSwitcherController.onUserListItemClicked(otherUserRecord, dialogShower)
+        testableLooper.processAllMessages()
+
+        verify(dialogShower).dismiss()
     }
 
     @Test
@@ -156,13 +184,33 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
         `when`(userManager.createGuest(any(), anyString())).thenReturn(guestInfo)
 
-        userSwitcherController.onUserListItemClicked(emptyGuestUserRecord)
+        userSwitcherController.onUserListItemClicked(emptyGuestUserRecord, null)
         testableLooper.processAllMessages()
         verify(interactionJankMonitor).begin(any())
         verify(latencyTracker).onActionStart(LatencyTracker.ACTION_USER_SWITCH)
         verify(activityManager).switchUser(guestInfo.id)
         assertEquals(1, uiEventLogger.numLogs())
         assertEquals(QSUserSwitcherEvent.QS_USER_GUEST_ADD.id, uiEventLogger.eventId(0))
+    }
+
+    @Test
+    fun testAddGuest_parentDialogDismissed() {
+        val emptyGuestUserRecord = UserSwitcherController.UserRecord(
+                null,
+                null,
+                true /* guest */,
+                false /* current */,
+                false /* isAddUser */,
+                false /* isRestricted */,
+                true /* isSwitchToEnabled */)
+        `when`(userTracker.userId).thenReturn(ownerId)
+        `when`(userTracker.userInfo).thenReturn(ownerInfo)
+
+        `when`(userManager.createGuest(any(), anyString())).thenReturn(guestInfo)
+
+        userSwitcherController.onUserListItemClicked(emptyGuestUserRecord, dialogShower)
+        testableLooper.processAllMessages()
+        verify(dialogShower).dismiss()
     }
 
     @Test
@@ -178,13 +226,53 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         `when`(userTracker.userId).thenReturn(guestInfo.id)
         `when`(userTracker.userInfo).thenReturn(guestInfo)
 
-        userSwitcherController.onUserListItemClicked(currentGuestUserRecord)
+        userSwitcherController.onUserListItemClicked(currentGuestUserRecord, null)
         assertNotNull(userSwitcherController.mExitGuestDialog)
         userSwitcherController.mExitGuestDialog
                 .getButton(DialogInterface.BUTTON_POSITIVE).performClick()
         testableLooper.processAllMessages()
         assertEquals(1, uiEventLogger.numLogs())
         assertEquals(QSUserSwitcherEvent.QS_USER_GUEST_REMOVE.id, uiEventLogger.eventId(0))
+    }
+
+    @Test
+    fun testRemoveGuest_removeButtonPressed_dialogDismissed() {
+        val currentGuestUserRecord = UserSwitcherController.UserRecord(
+                guestInfo,
+                picture,
+                true /* guest */,
+                true /* current */,
+                false /* isAddUser */,
+                false /* isRestricted */,
+                true /* isSwitchToEnabled */)
+        `when`(userTracker.userId).thenReturn(guestInfo.id)
+        `when`(userTracker.userInfo).thenReturn(guestInfo)
+
+        userSwitcherController.onUserListItemClicked(currentGuestUserRecord, null)
+        assertNotNull(userSwitcherController.mExitGuestDialog)
+        userSwitcherController.mExitGuestDialog
+                .getButton(DialogInterface.BUTTON_POSITIVE).performClick()
+        testableLooper.processAllMessages()
+        assertFalse(userSwitcherController.mExitGuestDialog.isShowing)
+    }
+
+    @Test
+    fun testRemoveGuest_dialogShowerUsed() {
+        val currentGuestUserRecord = UserSwitcherController.UserRecord(
+                guestInfo,
+                picture,
+                true /* guest */,
+                true /* current */,
+                false /* isAddUser */,
+                false /* isRestricted */,
+                true /* isSwitchToEnabled */)
+        `when`(userTracker.userId).thenReturn(guestInfo.id)
+        `when`(userTracker.userInfo).thenReturn(guestInfo)
+
+        userSwitcherController.onUserListItemClicked(currentGuestUserRecord, dialogShower)
+        assertNotNull(userSwitcherController.mExitGuestDialog)
+        testableLooper.processAllMessages()
+        verify(dialogShower).showDialog(userSwitcherController.mExitGuestDialog)
     }
 
     @Test
@@ -200,7 +288,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         `when`(userTracker.userId).thenReturn(guestId)
         `when`(userTracker.userInfo).thenReturn(guestInfo)
 
-        userSwitcherController.onUserListItemClicked(currentGuestUserRecord)
+        userSwitcherController.onUserListItemClicked(currentGuestUserRecord, null)
         assertNotNull(userSwitcherController.mExitGuestDialog)
         userSwitcherController.mExitGuestDialog
                 .getButton(DialogInterface.BUTTON_NEGATIVE).performClick()
@@ -226,7 +314,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 eq(GuestResumeSessionReceiver.SETTING_GUEST_HAS_LOGGED_IN), anyInt(), anyInt()))
                 .thenReturn(1)
 
-        userSwitcherController.onUserListItemClicked(currentGuestUserRecord)
+        userSwitcherController.onUserListItemClicked(currentGuestUserRecord, null)
 
         // Simulate a user switch event
         val intent = Intent(Intent.ACTION_USER_SWITCHED).putExtra(Intent.EXTRA_USER_HANDLE, guestId)
@@ -260,7 +348,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 eq(GuestResumeSessionReceiver.SETTING_GUEST_HAS_LOGGED_IN), anyInt(), anyInt()))
                 .thenReturn(1)
 
-        userSwitcherController.onUserListItemClicked(currentGuestUserRecord)
+        userSwitcherController.onUserListItemClicked(currentGuestUserRecord, null)
 
         // Simulate a user switch event
         val intent = Intent(Intent.ACTION_USER_SWITCHED).putExtra(Intent.EXTRA_USER_HANDLE, guestId)
