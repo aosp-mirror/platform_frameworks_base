@@ -100,11 +100,11 @@ class UnfoldTransitionModule {
     fun provideShellProgressProvider(
         config: UnfoldTransitionConfig,
         provider: Optional<UnfoldTransitionProgressProvider>
-    ): Optional<ShellUnfoldProgressProvider> =
+    ): ShellUnfoldProgressProvider =
         if (config.isEnabled && provider.isPresent()) {
-            Optional.of(UnfoldProgressProvider(provider.get()))
+            UnfoldProgressProvider(provider.get())
         } else {
-            Optional.empty()
+            ShellUnfoldProgressProvider.NO_PROVIDER
         }
 }
 

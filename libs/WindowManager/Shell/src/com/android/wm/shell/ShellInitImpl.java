@@ -74,7 +74,7 @@ public class ShellInitImpl {
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Optional<FullscreenUnfoldController> fullscreenUnfoldTransitionController,
-            Optional<Optional<FreeformTaskListener>> freeformTaskListenerOptional,
+            Optional<FreeformTaskListener> freeformTaskListenerOptional,
             Optional<RecentTasksController> recentTasks,
             Transitions transitions,
             StartingWindowController startingWindow,
@@ -90,7 +90,7 @@ public class ShellInitImpl {
         mFullscreenTaskListener = fullscreenTaskListener;
         mPipTouchHandlerOptional = pipTouchHandlerOptional;
         mFullscreenUnfoldController = fullscreenUnfoldTransitionController;
-        mFreeformTaskListenerOptional = freeformTaskListenerOptional.flatMap(f -> f);
+        mFreeformTaskListenerOptional = freeformTaskListenerOptional;
         mRecentTasks = recentTasks;
         mTransitions = transitions;
         mMainExecutor = mainExecutor;
