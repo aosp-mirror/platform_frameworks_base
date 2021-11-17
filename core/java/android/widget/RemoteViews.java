@@ -338,7 +338,10 @@ public class RemoteViews implements Parcelable, Filter {
      * Maps bitmaps to unique indicies to avoid Bitmap duplication.
      */
     @UnsupportedAppUsage
-    private BitmapCache mBitmapCache;
+    private BitmapCache mBitmapCache = new BitmapCache();
+
+    /** Cache of ApplicationInfos used by collection items. */
+    private ApplicationInfoCache mApplicationInfoCache = new ApplicationInfoCache();
 
     /**
      * Indicates whether or not this RemoteViews object is contained as a child of any other
@@ -576,7 +579,7 @@ public class RemoteViews implements Parcelable, Filter {
             return 0;
         }
 
-        public void setBitmapCache(BitmapCache bitmapCache) {
+        public void setHierarchyRootData(HierarchyRootData root) {
             // Do nothing
         }
 
@@ -603,14 +606,6 @@ public class RemoteViews implements Parcelable, Filter {
 
         public boolean prefersAsyncApply() {
             return false;
-        }
-
-        /**
-         * Overridden by subclasses which have (or inherit) an ApplicationInfo instance
-         * as member variable
-         */
-        public boolean hasSameAppInfo(ApplicationInfo parentInfo) {
-            return true;
         }
 
         public void visitUris(@NonNull Consumer<Uri> visitor) {
@@ -690,9 +685,8 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        // Because pruning can remove the need for bitmaps, we reconstruct the bitmap cache
-        mBitmapCache = new BitmapCache();
-        setBitmapCache(mBitmapCache);
+        // Because pruning can remove the need for bitmaps, we reconstruct the caches.
+        reconstructCaches();
     }
 
     /**
@@ -938,23 +932,70 @@ public class RemoteViews implements Parcelable, Filter {
         ArrayList<RemoteViews> list;
     }
 
-    private static class SetRemoteCollectionItemListAdapterAction extends Action {
+    /**
+     * Cache of {@link ApplicationInfo}s that can be used to ensure that the same
+     * {@link ApplicationInfo} instance is used throughout the RemoteViews.
+     */
+    private static class ApplicationInfoCache {
+        private final Map<Pair<String, Integer>, ApplicationInfo> mPackageUserToApplicationInfo;
+
+        ApplicationInfoCache() {
+            mPackageUserToApplicationInfo = new ArrayMap<>();
+        }
+
+        /**
+         * Adds the {@link ApplicationInfo} to the cache if it's not present. Returns either the
+         * provided {@code applicationInfo} or a previously added value with the same package name
+         * and uid.
+         */
+        @Nullable
+        ApplicationInfo getOrPut(@Nullable ApplicationInfo applicationInfo) {
+            Pair<String, Integer> key = getPackageUserKey(applicationInfo);
+            if (key == null) return null;
+            return mPackageUserToApplicationInfo.computeIfAbsent(key, ignored -> applicationInfo);
+        }
+
+        /** Puts the {@link ApplicationInfo} in the cache, replacing any previously stored value. */
+        void put(@Nullable ApplicationInfo applicationInfo) {
+            Pair<String, Integer> key = getPackageUserKey(applicationInfo);
+            if (key == null) return;
+            mPackageUserToApplicationInfo.put(key, applicationInfo);
+        }
+
+        /**
+         * Returns the currently stored {@link ApplicationInfo} from the cache matching
+         * {@code  applicationInfo}, or null if there wasn't any.
+         */
+        @Nullable ApplicationInfo get(@Nullable ApplicationInfo applicationInfo) {
+            Pair<String, Integer> key = getPackageUserKey(applicationInfo);
+            if (key == null) return null;
+            return mPackageUserToApplicationInfo.get(key);
+        }
+    }
+
+    private class SetRemoteCollectionItemListAdapterAction extends Action {
         private final RemoteCollectionItems mItems;
 
         SetRemoteCollectionItemListAdapterAction(@IdRes int id, RemoteCollectionItems items) {
             viewId = id;
             mItems = items;
+            mItems.setHierarchyRootData(getHierarchyRootData());
         }
 
         SetRemoteCollectionItemListAdapterAction(Parcel parcel) {
             viewId = parcel.readInt();
-            mItems = parcel.readTypedObject(RemoteCollectionItems.CREATOR);
+            mItems = new RemoteCollectionItems(parcel, getHierarchyRootData());
+        }
+
+        @Override
+        public void setHierarchyRootData(HierarchyRootData rootData) {
+            mItems.setHierarchyRootData(rootData);
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(viewId);
-            dest.writeTypedObject(mItems, flags);
+            mItems.writeToParcel(dest, flags, /* attached= */ true);
         }
 
         @Override
@@ -1602,8 +1643,8 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void setBitmapCache(BitmapCache bitmapCache) {
-            bitmapId = bitmapCache.getBitmapId(bitmap);
+        public void setHierarchyRootData(HierarchyRootData rootData) {
+            bitmapId = rootData.mBitmapCache.getBitmapId(bitmap);
         }
 
         @Override
@@ -2220,15 +2261,6 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private void configureRemoteViewsAsChild(RemoteViews rv) {
-        rv.setBitmapCache(mBitmapCache);
-        rv.setNotRoot();
-    }
-
-    void setNotRoot() {
-        mIsRoot = false;
-    }
-
     private static boolean hasStableId(View view) {
         Object tag = view.getTag(com.android.internal.R.id.remote_views_stable_id);
         return tag != null;
@@ -2302,17 +2334,14 @@ public class RemoteViews implements Parcelable, Filter {
             mNestedViews = nestedViews;
             mIndex = index;
             mStableId = stableId;
-            if (nestedViews != null) {
-                configureRemoteViewsAsChild(nestedViews);
-            }
+            nestedViews.configureAsChild(getHierarchyRootData());
         }
 
-        ViewGroupActionAdd(Parcel parcel, BitmapCache bitmapCache, ApplicationInfo info,
-                int depth, Map<Class, Object> classCookies) {
+        ViewGroupActionAdd(Parcel parcel, ApplicationInfo info, int depth) {
             viewId = parcel.readInt();
             mIndex = parcel.readInt();
             mStableId = parcel.readInt();
-            mNestedViews = new RemoteViews(parcel, bitmapCache, info, depth, classCookies);
+            mNestedViews = new RemoteViews(parcel, getHierarchyRootData(), info, depth);
             mNestedViews.addFlags(mApplyFlags);
         }
 
@@ -2324,8 +2353,8 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public boolean hasSameAppInfo(ApplicationInfo parentInfo) {
-            return mNestedViews.hasSameAppInfo(parentInfo);
+        public void setHierarchyRootData(HierarchyRootData root) {
+            mNestedViews.configureAsChild(root);
         }
 
         private int findViewIndexToRecycle(ViewGroup target, RemoteViews newContent) {
@@ -2491,11 +2520,6 @@ public class RemoteViews implements Parcelable, Filter {
                     targetVg.addView(task.mResult, insertIndex);
                 }
             };
-        }
-
-        @Override
-        public void setBitmapCache(BitmapCache bitmapCache) {
-            mNestedViews.setBitmapCache(bitmapCache);
         }
 
         @Override
@@ -3505,8 +3529,7 @@ public class RemoteViews implements Parcelable, Filter {
     protected RemoteViews(ApplicationInfo application, @LayoutRes int layoutId) {
         mApplication = application;
         mLayoutId = layoutId;
-        mBitmapCache = new BitmapCache();
-        mClassCookies = null;
+        mApplicationInfoCache.put(application);
     }
 
     private boolean hasMultipleLayouts() {
@@ -3562,12 +3585,10 @@ public class RemoteViews implements Parcelable, Filter {
         mLandscape = landscape;
         mPortrait = portrait;
 
-        mBitmapCache = new BitmapCache();
-        configureRemoteViewsAsChild(landscape);
-        configureRemoteViewsAsChild(portrait);
-
         mClassCookies = (portrait.mClassCookies != null)
                 ? portrait.mClassCookies : landscape.mClassCookies;
+
+        configureDescendantsAsChildren();
     }
 
     /**
@@ -3593,10 +3614,12 @@ public class RemoteViews implements Parcelable, Filter {
             throw new IllegalArgumentException("Too many RemoteViews in constructor");
         }
         if (remoteViews.size() == 1) {
-            initializeFrom(remoteViews.values().iterator().next());
+            // If the map only contains a single mapping, treat this as if that RemoteViews was
+            // passed as the top-level RemoteViews.
+            RemoteViews single = remoteViews.values().iterator().next();
+            initializeFrom(single, /* hierarchyRoot= */ single);
             return;
         }
-        mBitmapCache = new BitmapCache();
         mClassCookies = initializeSizedRemoteViews(
                 remoteViews.entrySet().stream().map(
                         entry -> {
@@ -3611,6 +3634,8 @@ public class RemoteViews implements Parcelable, Filter {
         mLayoutId = smallestView.mLayoutId;
         mViewId = smallestView.mViewId;
         mLightBackgroundLayoutId = smallestView.mLightBackgroundLayoutId;
+
+        configureDescendantsAsChildren();
     }
 
     // Initialize mSizedRemoteViews and return the class cookies.
@@ -3639,7 +3664,6 @@ public class RemoteViews implements Parcelable, Filter {
             } else {
                 sizedRemoteViews.add(view);
             }
-            configureRemoteViewsAsChild(view);
             view.setIdealSize(size);
             if (classCookies == null) {
                 classCookies = view.mClassCookies;
@@ -3654,13 +3678,38 @@ public class RemoteViews implements Parcelable, Filter {
      * Creates a copy of another RemoteViews.
      */
     public RemoteViews(RemoteViews src) {
-        initializeFrom(src);
+        initializeFrom(src, /* hierarchyRoot= */ null);
     }
 
-    private void initializeFrom(RemoteViews src) {
-        mBitmapCache = src.mBitmapCache;
+    /**
+     * No-arg constructor for use with {@link #initializeFrom(RemoteViews, RemoteViews)}. A
+     * constructor taking two RemoteViews parameters would clash with the landscape/portrait
+     * constructor.
+     */
+    private RemoteViews() {}
+
+    private static RemoteViews createInitializedFrom(@NonNull RemoteViews src,
+            @Nullable RemoteViews hierarchyRoot) {
+        RemoteViews child = new RemoteViews();
+        child.initializeFrom(src, hierarchyRoot);
+        return child;
+    }
+
+    private void initializeFrom(@NonNull RemoteViews src, @Nullable RemoteViews hierarchyRoot) {
+        if (hierarchyRoot == null || src.mIsRoot) {
+            // If there's no provided root, or if src was itself a root, then this RemoteViews is
+            // the root of the new hierarchy.
+            mIsRoot = true;
+            mBitmapCache = new BitmapCache();
+            mApplicationInfoCache = new ApplicationInfoCache();
+            hierarchyRoot = this;
+        } else {
+            // Otherwise, we're a descendant in the hierarchy.
+            mIsRoot = false;
+            mBitmapCache = hierarchyRoot.mBitmapCache;
+            mApplicationInfoCache = hierarchyRoot.mApplicationInfoCache;
+        }
         mApplication = src.mApplication;
-        mIsRoot = src.mIsRoot;
         mLayoutId = src.mLayoutId;
         mLightBackgroundLayoutId = src.mLightBackgroundLayoutId;
         mApplyFlags = src.mApplyFlags;
@@ -3669,21 +3718,21 @@ public class RemoteViews implements Parcelable, Filter {
         mProviderInstanceId = src.mProviderInstanceId;
 
         if (src.hasLandscapeAndPortraitLayouts()) {
-            mLandscape = new RemoteViews(src.mLandscape);
-            mPortrait = new RemoteViews(src.mPortrait);
+            mLandscape = createInitializedFrom(src.mLandscape, hierarchyRoot);
+            mPortrait = createInitializedFrom(src.mPortrait, hierarchyRoot);
         }
 
         if (src.hasSizedRemoteViews()) {
             mSizedRemoteViews = new ArrayList<>(src.mSizedRemoteViews.size());
             for (RemoteViews srcView : src.mSizedRemoteViews) {
-                mSizedRemoteViews.add(new RemoteViews(srcView));
+                mSizedRemoteViews.add(createInitializedFrom(srcView, hierarchyRoot));
             }
         }
 
         if (src.mActions != null) {
             Parcel p = Parcel.obtain();
             p.putClassCookies(mClassCookies);
-            src.writeActionsToParcel(p);
+            src.writeActionsToParcel(p, /* flags= */ 0);
             p.setDataPosition(0);
             // Since src is already in memory, we do not care about stack overflow as it has
             // already been read once.
@@ -3691,9 +3740,11 @@ public class RemoteViews implements Parcelable, Filter {
             p.recycle();
         }
 
-        // Now that everything is initialized and duplicated, setting a new BitmapCache will
-        // re-initialize the cache.
-        setBitmapCache(new BitmapCache());
+        // Now that everything is initialized and duplicated, create new caches for this
+        // RemoteViews and recursively set up all descendants.
+        if (mIsRoot) {
+            reconstructCaches();
+        }
     }
 
     /**
@@ -3702,11 +3753,11 @@ public class RemoteViews implements Parcelable, Filter {
      * @param parcel
      */
     public RemoteViews(Parcel parcel) {
-        this(parcel, null, null, 0, null);
+        this(parcel, /* rootParent= */ null, /* info= */ null, /* depth= */ 0);
     }
 
-    private RemoteViews(Parcel parcel, BitmapCache bitmapCache, ApplicationInfo info, int depth,
-            Map<Class, Object> classCookies) {
+    private RemoteViews(@NonNull Parcel parcel, @Nullable HierarchyRootData rootData,
+            @Nullable ApplicationInfo info, int depth) {
         if (depth > MAX_NESTED_VIEWS
                 && (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID)) {
             throw new IllegalArgumentException("Too many nested views.");
@@ -3715,20 +3766,17 @@ public class RemoteViews implements Parcelable, Filter {
 
         int mode = parcel.readInt();
 
-        // We only store a bitmap cache in the root of the RemoteViews.
-        if (bitmapCache == null) {
+        if (rootData == null) {
+            // We only store a bitmap cache in the root of the RemoteViews.
             mBitmapCache = new BitmapCache(parcel);
             // Store the class cookies such that they are available when we clone this RemoteView.
             mClassCookies = parcel.copyClassCookies();
         } else {
-            setBitmapCache(bitmapCache);
-            mClassCookies = classCookies;
-            setNotRoot();
+            configureAsChild(rootData);
         }
 
         if (mode == MODE_NORMAL) {
-            mApplication = parcel.readInt() == 0 ? info :
-                    ApplicationInfo.CREATOR.createFromParcel(parcel);
+            mApplication = ApplicationInfo.CREATOR.createFromParcel(parcel);
             mIdealSize = parcel.readInt() == 0 ? null : SizeF.CREATOR.createFromParcel(parcel);
             mLayoutId = parcel.readInt();
             mViewId = parcel.readInt();
@@ -3743,8 +3791,7 @@ public class RemoteViews implements Parcelable, Filter {
             }
             List<RemoteViews> remoteViews = new ArrayList<>(numViews);
             for (int i = 0; i < numViews; i++) {
-                RemoteViews view = new RemoteViews(parcel, mBitmapCache, info, depth,
-                        mClassCookies);
+                RemoteViews view = new RemoteViews(parcel, getHierarchyRootData(), info, depth);
                 info = view.mApplication;
                 remoteViews.add(view);
             }
@@ -3756,9 +3803,9 @@ public class RemoteViews implements Parcelable, Filter {
             mLightBackgroundLayoutId = smallestView.mLightBackgroundLayoutId;
         } else {
             // MODE_HAS_LANDSCAPE_AND_PORTRAIT
-            mLandscape = new RemoteViews(parcel, mBitmapCache, info, depth, mClassCookies);
-            mPortrait = new RemoteViews(parcel, mBitmapCache, mLandscape.mApplication, depth,
-                    mClassCookies);
+            mLandscape = new RemoteViews(parcel, getHierarchyRootData(), info, depth);
+            mPortrait =
+                    new RemoteViews(parcel, getHierarchyRootData(), mLandscape.mApplication, depth);
             mApplication = mPortrait.mApplication;
             mLayoutId = mPortrait.mLayoutId;
             mViewId = mPortrait.mViewId;
@@ -3766,6 +3813,11 @@ public class RemoteViews implements Parcelable, Filter {
         }
         mApplyFlags = parcel.readInt();
         mProviderInstanceId = parcel.readLong();
+
+        // Ensure that all descendants have their caches set up recursively.
+        if (mIsRoot) {
+            configureDescendantsAsChildren();
+        }
     }
 
     private void readActionsFromParcel(Parcel parcel, int depth) {
@@ -3788,8 +3840,7 @@ public class RemoteViews implements Parcelable, Filter {
             case REFLECTION_ACTION_TAG:
                 return new ReflectionAction(parcel);
             case VIEW_GROUP_ACTION_ADD_TAG:
-                return new ViewGroupActionAdd(parcel, mBitmapCache, mApplication, depth,
-                        mClassCookies);
+                return new ViewGroupActionAdd(parcel, mApplication, depth);
             case VIEW_GROUP_ACTION_REMOVE_TAG:
                 return new ViewGroupActionRemove(parcel);
             case VIEW_CONTENT_NAVIGATION_TAG:
@@ -3879,25 +3930,53 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Recursively sets BitmapCache in the hierarchy and update the bitmap ids.
+     * Sets the root of the hierarchy and then recursively traverses the tree to update the root
+     * and populate caches for all descendants.
      */
-    private void setBitmapCache(BitmapCache bitmapCache) {
-        mBitmapCache = bitmapCache;
+    private void configureAsChild(@NonNull HierarchyRootData rootData) {
+        mIsRoot = false;
+        mBitmapCache = rootData.mBitmapCache;
+        mApplicationInfoCache = rootData.mApplicationInfoCache;
+        mClassCookies = rootData.mClassCookies;
+        configureDescendantsAsChildren();
+    }
+
+    /**
+     * Recursively traverses the tree to update the root and populate caches for all descendants.
+     */
+    private void configureDescendantsAsChildren() {
+        // Before propagating down the tree, replace our application from the root application info
+        // cache, to ensure the same instance is present throughout the hierarchy to allow for
+        // squashing.
+        mApplication = mApplicationInfoCache.getOrPut(mApplication);
+
+        HierarchyRootData rootData = getHierarchyRootData();
         if (hasSizedRemoteViews()) {
             for (RemoteViews remoteView : mSizedRemoteViews) {
-                remoteView.setBitmapCache(bitmapCache);
+                remoteView.configureAsChild(rootData);
             }
         } else if (hasLandscapeAndPortraitLayouts()) {
-            mLandscape.setBitmapCache(bitmapCache);
-            mPortrait.setBitmapCache(bitmapCache);
+            mLandscape.configureAsChild(rootData);
+            mPortrait.configureAsChild(rootData);
         } else {
             if (mActions != null) {
-                final int count = mActions.size();
-                for (int i = 0; i < count; ++i) {
-                    mActions.get(i).setBitmapCache(bitmapCache);
+                for (Action action : mActions) {
+                    action.setHierarchyRootData(rootData);
                 }
             }
         }
+    }
+
+    /**
+     * Recreates caches at the root level of the hierarchy, then recursively populates the caches
+     * down the hierarchy.
+     */
+    private void reconstructCaches() {
+        if (!mIsRoot) return;
+        mBitmapCache = new BitmapCache();
+        mApplicationInfoCache = new ApplicationInfoCache();
+        mApplication = mApplicationInfoCache.getOrPut(mApplication);
+        configureDescendantsAsChildren();
     }
 
     /**
@@ -5848,21 +5927,18 @@ public class RemoteViews implements Parcelable, Filter {
 
     /** @hide */
     public void updateAppInfo(@NonNull ApplicationInfo info) {
-        if (mApplication != null && mApplication.sourceDir.equals(info.sourceDir)) {
+        ApplicationInfo existing = mApplicationInfoCache.get(info);
+        if (existing != null && !existing.sourceDir.equals(info.sourceDir)) {
             // Overlay paths are generated against a particular version of an application.
             // The overlays paths of a newly upgraded application are incompatible with the
             // old version of the application.
-            mApplication = info;
+            return;
         }
-        if (hasSizedRemoteViews()) {
-            for (RemoteViews layout : mSizedRemoteViews) {
-                layout.updateAppInfo(info);
-            }
-        }
-        if (hasLandscapeAndPortraitLayouts()) {
-            mLandscape.updateAppInfo(info);
-            mPortrait.updateAppInfo(info);
-        }
+
+        // If we can update to the new AppInfo, put it in the cache and propagate the change
+        // throughout the hierarchy.
+        mApplicationInfoCache.put(info);
+        configureDescendantsAsChildren();
     }
 
     private Context getContextForResourcesEnsuringCorrectCachedApkPaths(Context context) {
@@ -6028,6 +6104,8 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        boolean prevSquashingAllowed = dest.allowSquashing();
+
         if (!hasMultipleLayouts()) {
             dest.writeInt(MODE_NORMAL);
             // We only write the bitmap cache if we are the root RemoteViews, as this cache
@@ -6035,12 +6113,7 @@ public class RemoteViews implements Parcelable, Filter {
             if (mIsRoot) {
                 mBitmapCache.writeBitmapsToParcel(dest, flags);
             }
-            if (!mIsRoot && (flags & PARCELABLE_ELIDE_DUPLICATES) != 0) {
-                dest.writeInt(0);
-            } else {
-                dest.writeInt(1);
-                mApplication.writeToParcel(dest, flags);
-            }
+            mApplication.writeToParcel(dest, flags);
             if (mIsRoot || mIdealSize == null) {
                 dest.writeInt(0);
             } else {
@@ -6050,17 +6123,15 @@ public class RemoteViews implements Parcelable, Filter {
             dest.writeInt(mLayoutId);
             dest.writeInt(mViewId);
             dest.writeInt(mLightBackgroundLayoutId);
-            writeActionsToParcel(dest);
+            writeActionsToParcel(dest, flags);
         } else if (hasSizedRemoteViews()) {
             dest.writeInt(MODE_HAS_SIZED_REMOTEVIEWS);
             if (mIsRoot) {
                 mBitmapCache.writeBitmapsToParcel(dest, flags);
             }
-            int childFlags = flags;
             dest.writeInt(mSizedRemoteViews.size());
             for (RemoteViews view : mSizedRemoteViews) {
-                view.writeToParcel(dest, childFlags);
-                childFlags |= PARCELABLE_ELIDE_DUPLICATES;
+                view.writeToParcel(dest, flags);
             }
         } else {
             dest.writeInt(MODE_HAS_LANDSCAPE_AND_PORTRAIT);
@@ -6071,13 +6142,15 @@ public class RemoteViews implements Parcelable, Filter {
             }
             mLandscape.writeToParcel(dest, flags);
             // Both RemoteViews already share the same package and user
-            mPortrait.writeToParcel(dest, flags | PARCELABLE_ELIDE_DUPLICATES);
+            mPortrait.writeToParcel(dest, flags);
         }
         dest.writeInt(mApplyFlags);
         dest.writeLong(mProviderInstanceId);
+
+        dest.restoreAllowSquashing(prevSquashingAllowed);
     }
 
-    private void writeActionsToParcel(Parcel parcel) {
+    private void writeActionsToParcel(Parcel parcel, int flags) {
         int count;
         if (mActions != null) {
             count = mActions.size();
@@ -6088,8 +6161,7 @@ public class RemoteViews implements Parcelable, Filter {
         for (int i = 0; i < count; i++) {
             Action a = mActions.get(i);
             parcel.writeInt(a.getActionTag());
-            a.writeToParcel(parcel, a.hasSameAppInfo(mApplication)
-                    ? PARCELABLE_ELIDE_DUPLICATES : 0);
+            a.writeToParcel(parcel, flags);
         }
     }
 
@@ -6568,6 +6640,8 @@ public class RemoteViews implements Parcelable, Filter {
         private final boolean mHasStableIds;
         private final int mViewTypeCount;
 
+        private HierarchyRootData mHierarchyRootData;
+
         RemoteCollectionItems(
                 long[] ids, RemoteViews[] views, boolean hasStableIds, int viewTypeCount) {
             mIds = ids;
@@ -6590,16 +6664,53 @@ public class RemoteViews implements Parcelable, Filter {
                         "View type count is set to " + viewTypeCount + ", but the collection "
                                 + "contains " + layoutIdCount + " different layout ids");
             }
+
+            // Until the collection items are attached to a parent, we configure the first item
+            // to be the root of the others to share caches and save space during serialization.
+            if (views.length > 0) {
+                setHierarchyRootData(views[0].getHierarchyRootData());
+                views[0].mIsRoot = true;
+            }
         }
 
-        RemoteCollectionItems(Parcel in) {
+        RemoteCollectionItems(@NonNull Parcel in, @Nullable HierarchyRootData hierarchyRootData) {
+            mHasStableIds = in.readBoolean();
+            mViewTypeCount = in.readInt();
             int length = in.readInt();
             mIds = new long[length];
             in.readLongArray(mIds);
+
+            boolean attached = in.readBoolean();
             mViews = new RemoteViews[length];
-            in.readTypedArray(mViews, RemoteViews.CREATOR);
-            mHasStableIds = in.readBoolean();
-            mViewTypeCount = in.readInt();
+            int firstChildIndex;
+            if (attached) {
+                if (hierarchyRootData == null) {
+                    throw new IllegalStateException("Cannot unparcel a RemoteCollectionItems that "
+                            + "was parceled as attached without providing data for a root "
+                            + "RemoteViews");
+                }
+                mHierarchyRootData = hierarchyRootData;
+                firstChildIndex = 0;
+            } else {
+                mViews[0] = new RemoteViews(in);
+                mHierarchyRootData = mViews[0].getHierarchyRootData();
+                firstChildIndex = 1;
+            }
+
+            for (int i = firstChildIndex; i < length; i++) {
+                mViews[i] = new RemoteViews(
+                        in,
+                        mHierarchyRootData,
+                        /* info= */ null,
+                        /* depth= */ 0);
+            }
+        }
+
+        void setHierarchyRootData(@NonNull HierarchyRootData rootData) {
+            mHierarchyRootData = rootData;
+            for (RemoteViews view : mViews) {
+                view.configureAsChild(rootData);
+            }
         }
 
         @Override
@@ -6609,11 +6720,39 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
-            dest.writeInt(mIds.length);
-            dest.writeLongArray(mIds);
-            dest.writeTypedArray(mViews, flags);
+            writeToParcel(dest, flags, /* attached= */ false);
+        }
+
+        private void writeToParcel(@NonNull Parcel dest, int flags, boolean attached) {
+            boolean prevAllowSquashing = dest.allowSquashing();
+
             dest.writeBoolean(mHasStableIds);
             dest.writeInt(mViewTypeCount);
+            dest.writeInt(mIds.length);
+            dest.writeLongArray(mIds);
+
+            if (attached && mHierarchyRootData == null) {
+                throw new IllegalStateException("Cannot call writeToParcelAttached for a "
+                        + "RemoteCollectionItems without first calling setHierarchyRootData()");
+            }
+
+            // Write whether we parceled as attached or not. This allows cleaner validation and
+            // proper error messaging when unparceling later.
+            dest.writeBoolean(attached);
+            boolean restoreRoot = false;
+            if (!attached && mViews.length > 0 && !mViews[0].mIsRoot) {
+                // If we're writing unattached, temporarily set the first item as the root so that
+                // the bitmap cache is written to the parcel.
+                restoreRoot = true;
+                mViews[0].mIsRoot = true;
+            }
+
+            for (RemoteViews view : mViews) {
+                view.writeToParcel(dest, flags);
+            }
+
+            if (restoreRoot) mViews[0].mIsRoot = false;
+            dest.restoreAllowSquashing(prevAllowSquashing);
         }
 
         /**
@@ -6671,7 +6810,7 @@ public class RemoteViews implements Parcelable, Filter {
             @NonNull
             @Override
             public RemoteCollectionItems createFromParcel(@NonNull Parcel source) {
-                return new RemoteCollectionItems(source);
+                return new RemoteCollectionItems(source, /* hierarchyRoot= */ null);
             }
 
             @NonNull
@@ -6845,5 +6984,30 @@ public class RemoteViews implements Parcelable, Filter {
         viewId <<= 8;
         viewId |= childId;
         return viewId;
+    }
+
+    @Nullable
+    private static Pair<String, Integer> getPackageUserKey(@Nullable ApplicationInfo info) {
+        if (info == null || info.packageName ==  null) return null;
+        return Pair.create(info.packageName, info.uid);
+    }
+
+    private HierarchyRootData getHierarchyRootData() {
+        return new HierarchyRootData(mBitmapCache, mApplicationInfoCache, mClassCookies);
+    }
+
+    private static final class HierarchyRootData {
+        final BitmapCache mBitmapCache;
+        final ApplicationInfoCache mApplicationInfoCache;
+        final Map<Class, Object> mClassCookies;
+
+        HierarchyRootData(
+                BitmapCache bitmapCache,
+                ApplicationInfoCache applicationInfoCache,
+                Map<Class, Object> classCookies) {
+            mBitmapCache = bitmapCache;
+            mApplicationInfoCache = applicationInfoCache;
+            mClassCookies = classCookies;
+        }
     }
 }
