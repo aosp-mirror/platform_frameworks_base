@@ -37,6 +37,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.R;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SurfaceUtils;
@@ -102,7 +103,12 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         mSurfaceSession = surfaceSession;
         mIconProvider = iconProvider;
         mStageTaskUnfoldController = stageTaskUnfoldController;
-        taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
+
+        // No need to create root task if the device is using legacy split screen.
+        // TODO(b/199236198): Remove this check after totally deprecated legacy split.
+        if (!context.getResources().getBoolean(R.bool.config_useLegacySplit)) {
+            taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
+        }
     }
 
     int getChildCount() {
