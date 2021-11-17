@@ -248,8 +248,9 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 Color.valueOf(Color.BLUE), null);
 
         String jsonString =
-                "{\"android.theme.customization.system_palette\":\"override.package.name\","
-                        + "\"android.theme.customization.color_source\":\"home_wallpaper\","
+                "{\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
                         + "\"android.theme.customization.color_index\":\"2\"}";
 
         when(mSecureSettings.getStringForUser(
@@ -274,14 +275,15 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onWallpaperColorsChanged_ResetThemeWithDifferentWallpapers() {
+    public void onWallpaperColorsChanged_ResetThemeWithNewHomeWallpapers() {
         // Should ask for a new theme when wallpaper colors change
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
 
         String jsonString =
-                "{\"android.theme.customization.system_palette\":\"override.package.name\","
-                        + "\"android.theme.customization.color_source\":\"home_wallpaper\","
+                "{\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
                         + "\"android.theme.customization.color_index\":\"2\"}";
 
         when(mSecureSettings.getStringForUser(
@@ -304,14 +306,15 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onWallpaperColorsChanged_ResetThemeWithSameWallpaper() {
+    public void onWallpaperColorsChanged_ResetThemeWithNewHomeAndLockWallpaper() {
         // Should ask for a new theme when wallpaper colors change
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
 
         String jsonString =
-                "{\"android.theme.customization.system_palette\":\"override.package.name\","
-                        + "\"android.theme.customization.color_source\":\"home_wallpaper\","
+                "{\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
                         + "\"android.theme.customization.color_index\":\"2\"}";
 
         when(mSecureSettings.getStringForUser(
@@ -339,8 +342,9 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
         String jsonString =
-                "{\"android.theme.customization.system_palette\":\"override.package.name\","
-                        + "\"android.theme.customization.color_source\":\"home_wallpaper\","
+                "{\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
                         + "\"android.theme.customization.color_index\":\"2\"}";
         when(mSecureSettings.getStringForUser(
                 eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
@@ -366,8 +370,9 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
         String jsonString =
-                "{\"android.theme.customization.system_palette\":\"override.package.name\","
-                        + "\"android.theme.customization.color_source\":\"lock_wallpaper\","
+                "{\"android.theme.customization.color_source\":\"lock_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
                         + "\"android.theme.customization.color_index\":\"2\"}";
         when(mSecureSettings.getStringForUser(
                 eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
@@ -394,8 +399,9 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 Color.valueOf(Color.BLUE), null);
 
         String jsonString =
-                "{\"android.theme.customization.system_palette\":\"override.package.name\","
-                        + "\"android.theme.customization.color_source\":\"home_wallpaper\","
+                "{\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
                         + "\"android.theme.customization.color_index\":\"2\"}";
 
         when(mSecureSettings.getStringForUser(
@@ -416,6 +422,36 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onWallpaperColorsChanged_keepThemeWhenFromLatestWallpaperAndSpecifiedColor() {
+        // Shouldn't ask for a new theme when the colors of the last applied wallpaper change
+        // with the same specified system palette one.
+        WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
+                Color.valueOf(0xffa16b00), null);
+
+        String jsonString =
+                "{\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
+                        + "\"android.theme.customization.color_index\":\"2\"}";
+
+        when(mSecureSettings.getStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
+                .thenReturn(jsonString);
+        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_LOCK)).thenReturn(1);
+        // SYSTEM wallpaper is the last applied one
+        when(mWallpaperManager.getWallpaperId(WallpaperManager.FLAG_SYSTEM)).thenReturn(2);
+
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+
+        ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
+        verify(mSecureSettings, never()).putString(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture());
+
+        // Apply overlay by existing theme from secure setting
+        verify(mThemeOverlayApplier).applyCurrentUserOverlays(any(), any(), anyInt(), any());
+    }
+
+    @Test
     public void onWallpaperColorsChanged_keepThemeIfNotLatestWallpaper() {
         // Shouldn't ask for a new theme when the colors of the wallpaper that is not the last
         // applied one change
@@ -423,8 +459,9 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 Color.valueOf(Color.BLUE), null);
 
         String jsonString =
-                "{\"android.theme.customization.system_palette\":\"override.package.name\","
-                        + "\"android.theme.customization.color_source\":\"home_wallpaper\","
+                "{\"android.theme.customization.color_source\":\"home_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
                         + "\"android.theme.customization.color_index\":\"2\"}";
 
         when(mSecureSettings.getStringForUser(
