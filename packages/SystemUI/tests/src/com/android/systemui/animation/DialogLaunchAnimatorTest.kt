@@ -16,6 +16,7 @@ import com.android.systemui.animation.DialogListener.DismissReason
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
+import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -28,24 +29,22 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
     private val dialogLaunchAnimator =
         DialogLaunchAnimator(context, launchAnimator, hostDialogprovider)
 
+    private val attachedViews = mutableSetOf<View>()
+
+    @After
+    fun tearDown() {
+        runOnMainThreadAndWaitForIdleSync {
+            attachedViews.forEach {
+                ViewUtils.detachView(it)
+            }
+        }
+    }
+
     @Test
     fun testShowDialogFromView() {
         // Show the dialog. showFromView() must be called on the main thread with a dialog created
         // on the main thread too.
-        val (dialog, hostDialog) = runOnMainThreadAndWaitForIdleSync {
-            val touchSurfaceRoot = LinearLayout(context)
-            val touchSurface = View(context)
-            touchSurfaceRoot.addView(touchSurface)
-
-            // We need to attach the root to the window manager otherwise the exit animation will
-            // be skipped
-            ViewUtils.attachView(touchSurfaceRoot)
-
-            val dialog = TestDialog(context)
-            val hostDialog =
-                dialogLaunchAnimator.showFromView(dialog, touchSurface) as TestHostDialog
-            dialog to hostDialog
-        }
+        val (dialog, hostDialog) = createDialogAndHostDialog()
 
         // Only the host dialog is actually showing.
         assertTrue(hostDialog.isShowing)
@@ -98,6 +97,51 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         assertFalse(dialog.isShowing)
         assertTrue(hostDialog.wasDismissed)
         assertTrue(dialog.onStopCalled)
+    }
+
+    @Test
+    fun testStackedDialogsDismissesAll() {
+        val (_, hostDialogFirst) = createDialogAndHostDialog()
+        val (dialogSecond, hostDialogSecond) = createDialogAndHostDialogFromDialog(hostDialogFirst)
+
+        runOnMainThreadAndWaitForIdleSync {
+            dialogLaunchAnimator.disableAllCurrentDialogsExitAnimations()
+            dialogSecond.dismissStack()
+        }
+
+        assertTrue(hostDialogSecond.wasDismissed)
+        assertTrue(hostDialogFirst.wasDismissed)
+    }
+
+    private fun createDialogAndHostDialog(): Pair<TestDialog, TestHostDialog> {
+        return runOnMainThreadAndWaitForIdleSync {
+            val touchSurfaceRoot = LinearLayout(context)
+            val touchSurface = View(context)
+            touchSurfaceRoot.addView(touchSurface)
+
+            // We need to attach the root to the window manager otherwise the exit animation will
+            // be skipped
+            ViewUtils.attachView(touchSurfaceRoot)
+            attachedViews.add(touchSurfaceRoot)
+
+            val dialog = TestDialog(context)
+            val hostDialog =
+                    dialogLaunchAnimator.showFromView(dialog, touchSurface) as TestHostDialog
+            dialog to hostDialog
+        }
+    }
+
+    private fun createDialogAndHostDialogFromDialog(
+        hostParent: Dialog
+    ): Pair<TestDialog, TestHostDialog> {
+        return runOnMainThreadAndWaitForIdleSync {
+            val dialog = TestDialog(context)
+            val hostDialog = dialogLaunchAnimator.showFromDialog(
+                    dialog,
+                    hostParent
+            ) as TestHostDialog
+            dialog to hostDialog
+        }
     }
 
     private fun <T : Any> runOnMainThreadAndWaitForIdleSync(f: () -> T): T {
@@ -196,6 +240,11 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         override fun show() {
             super.show()
             notifyListeners { onShow() }
+        }
+
+        fun dismissStack() {
+            notifyListeners { prepareForStackDismiss() }
+            dismiss()
         }
 
         private fun notifyListeners(notify: DialogListener.() -> Unit) {
