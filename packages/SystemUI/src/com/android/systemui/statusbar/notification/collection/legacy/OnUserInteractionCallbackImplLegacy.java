@@ -111,7 +111,7 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
     public NotificationEntry getGroupSummaryToDismiss(NotificationEntry entry) {
         if (mGroupMembershipManager.isOnlyChildInGroup(entry)) {
             NotificationEntry groupSummary = mGroupMembershipManager.getLogicalGroupSummary(entry);
-            return groupSummary.isClearable() ? groupSummary : null;
+            return groupSummary.isDismissable() ? groupSummary : null;
         }
         return null;
     }

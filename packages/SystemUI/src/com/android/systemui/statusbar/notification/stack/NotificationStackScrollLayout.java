@@ -255,8 +255,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private boolean mIsCurrentUserSetup;
     protected FooterView mFooterView;
     protected EmptyShadeView mEmptyShadeView;
-    private boolean mDismissAllInProgress;
-    private FooterDismissListener mFooterDismissListener;
+    private boolean mClearAllInProgress;
+    private FooterClearAllListener mFooterClearAllListener;
     private boolean mFlingAfterUpEvent;
 
     /**
@@ -439,8 +439,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private int mQsScrollBoundaryPosition;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private final Rect mTmpRect = new Rect();
-    private DismissListener mDismissListener;
-    private DismissAllAnimationListener mDismissAllAnimationListener;
+    private ClearAllListener mClearAllListener;
+    private ClearAllAnimationListener mClearAllAnimationListener;
     private ShadeController mShadeController;
     private Consumer<Boolean> mOnStackYChanged;
 
@@ -1207,7 +1207,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void clampScrollPosition() {
         int scrollRange = getScrollRange();
-        if (scrollRange < mOwnScrollY && !mAmbientState.isDismissAllInProgress()) {
+        if (scrollRange < mOwnScrollY && !mAmbientState.isClearAllInProgress()) {
             boolean animateStackY = false;
             if (scrollRange < getScrollAmountToScrollBoundary()
                     && mAnimateStackYForContentHeightChange) {
@@ -1729,7 +1729,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
              return;
         }
         mSwipeHelper.dismissChild(child, 0, endRunnable, delay, true, duration,
-                true /* isDismissAll */);
+                true /* isClearAll */);
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -4070,8 +4070,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         clearTransient();
         clearHeadsUpDisappearRunning();
 
-        if (mAmbientState.isDismissAllInProgress()) {
-            setDismissAllInProgress(false);
+        if (mAmbientState.isClearAllInProgress()) {
+            setClearAllInProgress(false);
             if (mShadeNeedsToClose) {
                 mShadeNeedsToClose = false;
                 postDelayed(
@@ -4445,19 +4445,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setDismissAllInProgress(boolean dismissAllInProgress) {
-        mDismissAllInProgress = dismissAllInProgress;
-        mAmbientState.setDismissAllInProgress(dismissAllInProgress);
-        mController.getNoticationRoundessManager().setDismissAllInProgress(dismissAllInProgress);
-        handleDismissAllClipping();
+    public void setClearAllInProgress(boolean clearAllInProgress) {
+        mClearAllInProgress = clearAllInProgress;
+        mAmbientState.setClearAllInProgress(clearAllInProgress);
+        mController.getNoticationRoundessManager().setClearAllInProgress(clearAllInProgress);
+        handleClearAllClipping();
     }
 
-    boolean getDismissAllInProgress() {
-        return mDismissAllInProgress;
+    boolean getClearAllInProgress() {
+        return mClearAllInProgress;
     }
 
     @ShadeViewRefactor(RefactorComponent.ADAPTER)
-    private void handleDismissAllClipping() {
+    private void handleClearAllClipping() {
         final int count = getChildCount();
         boolean previousChildWillBeDismissed = false;
         for (int i = 0; i < count; i++) {
@@ -4465,12 +4465,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             if (child.getVisibility() == GONE) {
                 continue;
             }
-            if (mDismissAllInProgress && previousChildWillBeDismissed) {
+            if (mClearAllInProgress && previousChildWillBeDismissed) {
                 child.setMinClipTopAmount(child.getClipTopAmount());
             } else {
                 child.setMinClipTopAmount(0);
             }
-            previousChildWillBeDismissed = canChildBeDismissed(child);
+            previousChildWillBeDismissed = canChildBeCleared(child);
         }
     }
 
@@ -5021,7 +5021,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         if (view instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-            if (isVisible(row) && includeChildInDismissAll(row, selection)) {
+            if (isVisible(row) && includeChildInClearAll(row, selection)) {
                 return true;
             }
         }
@@ -5051,7 +5051,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
                 if (isChildrenVisible(parent)) {
                     for (ExpandableNotificationRow child : parent.getAttachedChildren()) {
-                        if (isVisible(child) && includeChildInDismissAll(child, selection)) {
+                        if (isVisible(child) && includeChildInClearAll(child, selection)) {
                             viewsToHide.add(child);
                         }
                     }
@@ -5072,13 +5072,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 continue;
             }
             ExpandableNotificationRow parent = (ExpandableNotificationRow) view;
-            if (includeChildInDismissAll(parent, selection)) {
+            if (includeChildInClearAll(parent, selection)) {
                 viewsToRemove.add(parent);
             }
             List<ExpandableNotificationRow> children = parent.getAttachedChildren();
             if (isVisible(parent) && children != null) {
                 for (ExpandableNotificationRow child : children) {
-                    if (includeChildInDismissAll(parent, selection)) {
+                    if (includeChildInClearAll(parent, selection)) {
                         viewsToRemove.add(child);
                     }
                 }
@@ -5089,7 +5089,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     /**
      * Collects a list of visible rows, and animates them away in a staggered fashion as if they
-     * were dismissed. Notifications are dismissed in the backend via onDismissAllAnimationsEnd.
+     * were dismissed. Notifications are dismissed in the backend via onClearAllAnimationsEnd.
      */
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     @VisibleForTesting
@@ -5098,18 +5098,18 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         final ArrayList<View> viewsToAnimateAway = getVisibleViewsToAnimateAway(selection);
         final ArrayList<ExpandableNotificationRow> rowsToDismissInBackend =
                 getRowsToDismissInBackend(selection);
-        if (mDismissListener != null) {
-            mDismissListener.onDismiss(selection);
+        if (mClearAllListener != null) {
+            mClearAllListener.onClearAll(selection);
         }
         final Runnable dismissInBackend = () -> {
-            onDismissAllAnimationsEnd(rowsToDismissInBackend, selection);
+            onClearAllAnimationsEnd(rowsToDismissInBackend, selection);
         };
         if (viewsToAnimateAway.isEmpty()) {
             dismissInBackend.run();
             return;
         }
         // Disable normal animations
-        setDismissAllInProgress(true);
+        setClearAllInProgress(true);
         mShadeNeedsToClose = closeShade;
 
         // Decrease the delay for every row we animate to give the sense of
@@ -5130,10 +5130,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    private boolean includeChildInDismissAll(
+    private boolean includeChildInClearAll(
             ExpandableNotificationRow row,
             @SelectedRows int selection) {
-        return canChildBeDismissed(row) && matchesSelection(row, selection);
+        return canChildBeCleared(row) && matchesSelection(row, selection);
     }
 
     /** Register a {@link View.OnClickListener} to be invoked when the Manage button is clicked. */
@@ -5149,9 +5149,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     protected void inflateFooterView() {
         FooterView footerView = (FooterView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_notification_footer, this, false);
-        footerView.setDismissButtonClickListener(v -> {
-            if (mFooterDismissListener != null) {
-                mFooterDismissListener.onDismiss();
+        footerView.setClearAllButtonClickListener(v -> {
+            if (mFooterClearAllListener != null) {
+                mFooterClearAllListener.onClearAll();
             }
             clearNotifications(ROWS_ALL, true /* closeShade */);
             footerView.setSecondaryVisible(false /* visible */, true /* animate */);
@@ -5388,20 +5388,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mCheckForLeavebehind;
     }
 
-    void setDismissListener (DismissListener listener) {
-        mDismissListener = listener;
+    void setClearAllListener(ClearAllListener listener) {
+        mClearAllListener = listener;
     }
 
-    void setDismissAllAnimationListener(DismissAllAnimationListener dismissAllAnimationListener) {
-        mDismissAllAnimationListener = dismissAllAnimationListener;
+    void setClearAllAnimationListener(ClearAllAnimationListener clearAllAnimationListener) {
+        mClearAllAnimationListener = clearAllAnimationListener;
     }
 
     public void setHighPriorityBeforeSpeedBump(boolean highPriorityBeforeSpeedBump) {
         mHighPriorityBeforeSpeedBump = highPriorityBeforeSpeedBump;
     }
 
-    void setFooterDismissListener(FooterDismissListener listener) {
-        mFooterDismissListener = listener;
+    void setFooterClearAllListener(FooterClearAllListener listener) {
+        mFooterClearAllListener = listener;
     }
 
     void setShadeController(ShadeController shadeController) {
@@ -5975,13 +5975,24 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     static boolean canChildBeDismissed(View v) {
         if (v instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-            if (row.isBlockingHelperShowingAndTranslationFinished()) {
-                return true;
-            }
             if (row.areGutsExposed() || !row.getEntry().hasFinishedInitialization()) {
                 return false;
             }
             return row.canViewBeDismissed();
+        }
+        if (v instanceof PeopleHubView) {
+            return ((PeopleHubView) v).getCanSwipe();
+        }
+        return false;
+    }
+
+    static boolean canChildBeCleared(View v) {
+        if (v instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+            if (row.areGutsExposed() || !row.getEntry().hasFinishedInitialization()) {
+                return false;
+            }
+            return row.canViewBeCleared();
         }
         if (v instanceof PeopleHubView) {
             return ((PeopleHubView) v).getCanSwipe();
@@ -6002,11 +6013,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * Called after the animations for a "clear all notifications" action has ended.
      */
-    private void onDismissAllAnimationsEnd(
+    private void onClearAllAnimationsEnd(
             List<ExpandableNotificationRow> viewsToRemove,
             @SelectedRows int selectedRows) {
-        if (mDismissAllAnimationListener != null) {
-            mDismissAllAnimationListener.onAnimationEnd(viewsToRemove, selectedRows);
+        if (mClearAllAnimationListener != null) {
+            mClearAllAnimationListener.onAnimationEnd(viewsToRemove, selectedRows);
         }
     }
 
@@ -6148,15 +6159,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /** Only rows where entry.isHighPriority() is false. */
     public static final int ROWS_GENTLE = 2;
 
-    interface DismissListener {
-        void onDismiss(@SelectedRows int selectedRows);
+    interface ClearAllListener {
+        void onClearAll(@SelectedRows int selectedRows);
     }
 
-    interface FooterDismissListener {
-        void onDismiss();
+    interface FooterClearAllListener {
+        void onClearAll();
     }
 
-    interface DismissAllAnimationListener {
+    interface ClearAllAnimationListener {
         void onAnimationEnd(
                 List<ExpandableNotificationRow> viewsToRemove, @SelectedRows int selectedRows);
     }

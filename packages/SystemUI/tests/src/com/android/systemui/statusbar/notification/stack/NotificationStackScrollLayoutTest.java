@@ -447,7 +447,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void testClearNotifications_All() {
         final int[] numCalls = {0};
         final int[] selected = {-1};
-        mStackScroller.setDismissListener(selectedRows -> {
+        mStackScroller.setClearAllListener(selectedRows -> {
             numCalls[0]++;
             selected[0] = selectedRows;
         });
@@ -461,7 +461,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void testClearNotifications_Gentle() {
         final int[] numCalls = {0};
         final int[] selected = {-1};
-        mStackScroller.setDismissListener(selectedRows -> {
+        mStackScroller.setClearAllListener(selectedRows -> {
             numCalls[0]++;
             selected[0] = selectedRows;
         });
