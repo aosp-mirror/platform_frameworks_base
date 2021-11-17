@@ -39,12 +39,11 @@ import java.util.StringTokenizer;
  * <ul>
  *     <li>{@code effectiveFromElapsedMillis}: The time according to the elapsed realtime clock
  *     after which the suggestion should be considered in effect. For example, when a location fix
- *     used to establish the time zone is old, then the suggestion
- *     {@code effectiveFromElapsedMillis} should reflect this and indicates the time zone that was
- *     detected / correct at that time. The time_zone_detector is only expected to use the latest
- *     suggestion it has received, and so later suggestions always counteract previous suggestions.
- *     The inclusion of this information means that the time_zone_detector can take into account
- *     ordering when comparing suggestions from different sources.
+ *     used to establish the time zone is old, then the suggestion's {@code
+ *     effectiveFromElapsedMillis} should reflect this and indicates the time zone that was
+ *     detected / correct at that time. The inclusion of this information means that the
+ *     time_zone_detector <em>may</em> take this into account if comparing suggestions or signals
+ *     from different sources.
  *     <br />Note: Because the times can be back-dated, time_zone_detector can be sent a sequence of
  *     suggestions where the {@code effectiveFromElapsedMillis} of later suggestions is before
  *     the {@code effectiveFromElapsedMillis} of an earlier one.</li>

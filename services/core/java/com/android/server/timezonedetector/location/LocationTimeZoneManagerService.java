@@ -168,7 +168,8 @@ public class LocationTimeZoneManagerService extends Binder {
     // According to the SystemService docs: All lifecycle methods are called from the system
     // server's main looper thread.
     void onSystemReady() {
-        mServiceConfigAccessor.addListener(this::handleServiceConfigurationChangedOnMainThread);
+        mServiceConfigAccessor.addLocationTimeZoneManagerConfigListener(
+                this::handleServiceConfigurationChangedOnMainThread);
     }
 
     private void handleServiceConfigurationChangedOnMainThread() {

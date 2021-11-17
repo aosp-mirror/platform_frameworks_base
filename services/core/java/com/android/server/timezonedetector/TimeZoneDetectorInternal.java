@@ -25,7 +25,7 @@ import android.annotation.NonNull;
  * <p>The methods on this class can be called from any thread.
  * @hide
  */
-public interface TimeZoneDetectorInternal extends Dumpable.Container {
+public interface TimeZoneDetectorInternal {
 
     /** Adds a listener that will be invoked when {@link ConfigurationInternal} may have changed. */
     void addConfigurationListener(@NonNull ConfigurationChangeListener listener);

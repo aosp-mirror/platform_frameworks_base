@@ -60,12 +60,12 @@ public class TimeZoneDetectorServiceTest {
     private static final long ARBITRARY_ELAPSED_REALTIME_MILLIS = 1234L;
 
     private Context mMockContext;
-    private FakeTimeZoneDetectorStrategy mFakeTimeZoneDetectorStrategy;
 
     private TimeZoneDetectorService mTimeZoneDetectorService;
     private HandlerThread mHandlerThread;
     private TestHandler mTestHandler;
     private TestCallerIdentityInjector mTestCallerIdentityInjector;
+    private FakeTimeZoneDetectorStrategy mFakeTimeZoneDetectorStrategy;
 
 
     @Before
@@ -349,11 +349,15 @@ public class TimeZoneDetectorServiceTest {
         when(mMockContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
 
+        Dumpable dumpable = mock(Dumpable.class);
+        mTimeZoneDetectorService.addDumpable(dumpable);
+
         PrintWriter pw = new PrintWriter(new StringWriter());
         mTimeZoneDetectorService.dump(null, pw, null);
 
         verify(mMockContext).checkCallingOrSelfPermission(eq(android.Manifest.permission.DUMP));
         mFakeTimeZoneDetectorStrategy.verifyDumpCalled();
+        verify(dumpable).dump(any(), any());
     }
 
     private static TimeZoneConfiguration createTimeZoneConfiguration(boolean autoDetectionEnabled) {

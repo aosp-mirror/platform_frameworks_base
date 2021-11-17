@@ -98,7 +98,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     }
 
     private static final String LOG_TAG = TimeZoneDetectorService.TAG;
-    private static final boolean DBG = false;
+    private static final boolean DBG = TimeZoneDetectorService.DBG;
 
     /**
      * The abstract score for an empty or invalid telephony suggestion.
@@ -168,7 +168,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
 
     @GuardedBy("this")
     @NonNull
-    private List<ConfigurationChangeListener> mConfigChangeListeners = new ArrayList<>();
+    private final List<ConfigurationChangeListener> mConfigChangeListeners = new ArrayList<>();
 
     /**
      * A log that records the decisions / decision metadata that affected the device's time zone.
@@ -183,7 +183,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
      * to be stable.
      */
     @GuardedBy("this")
-    private ArrayMapWithHistory<Integer, QualifiedTelephonyTimeZoneSuggestion>
+    private final ArrayMapWithHistory<Integer, QualifiedTelephonyTimeZoneSuggestion>
             mTelephonySuggestionsBySlotIndex =
             new ArrayMapWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
 
@@ -192,18 +192,16 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
      * detection then the latest suggestion is cleared.
      */
     @GuardedBy("this")
-    private ReferenceWithHistory<GeolocationTimeZoneSuggestion> mLatestGeoLocationSuggestion =
+    private final ReferenceWithHistory<GeolocationTimeZoneSuggestion> mLatestGeoLocationSuggestion =
             new ReferenceWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
 
     /**
      * The latest manual suggestion received.
      */
     @GuardedBy("this")
-    private ReferenceWithHistory<ManualTimeZoneSuggestion> mLatestManualSuggestion =
+    private final ReferenceWithHistory<ManualTimeZoneSuggestion> mLatestManualSuggestion =
             new ReferenceWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
 
-    @GuardedBy("this")
-    private final List<Dumpable> mDumpables = new ArrayList<>();
 
     /**
      * Creates a new instance of {@link TimeZoneDetectorStrategyImpl}.
@@ -293,7 +291,9 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
 
         if (currentUserConfig.getGeoDetectionEnabledBehavior()) {
             // Only store a geolocation suggestion if geolocation detection is currently enabled.
-            // See also clearGeolocationSuggestionIfNeeded().
+            // See also handleConfigChanged(), which can clear mLatestGeoLocationSuggestion.
+            // The suggestion's "effective from" time is ignored: we currently assume suggestions
+            // are made in a sensible order and the most recent is always the best one to use.
             mLatestGeoLocationSuggestion.set(suggestion);
 
             // Now perform auto time zone detection. The new suggestion may be used to modify the
@@ -427,7 +427,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
             return;
         }
 
-        // Use the right suggestions based on the current configuration.
+        // Use the correct algorithm based on the user's current configuration.
         if (currentUserConfig.getGeoDetectionEnabledBehavior()) {
             doGeolocationTimeZoneDetection(detectionReason);
         } else  {
@@ -598,15 +598,6 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
             Slog.d(LOG_TAG, "handleConfigChanged()");
         }
 
-        clearGeolocationSuggestionIfNeeded();
-
-        for (ConfigurationChangeListener listener : mConfigChangeListeners) {
-            listener.onChange();
-        }
-    }
-
-    @GuardedBy("this")
-    private void clearGeolocationSuggestionIfNeeded() {
         // This method is called whenever the user changes or the config for any user changes. We
         // don't know what happened, so we capture the current user's config, check to see if we
         // need to clear state associated with a previous user, and rerun detection.
@@ -623,15 +614,17 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
             // said it is ok to do so.
             mLatestGeoLocationSuggestion.set(null);
             mTimeZoneChangesLog.log(
-                    "clearGeolocationSuggestionIfNeeded: Cleared latest Geolocation suggestion.");
+                    "handleConfigChanged: Cleared latest Geolocation suggestion.");
         }
 
-        doAutoTimeZoneDetection(currentUserConfig, "clearGeolocationSuggestionIfNeeded()");
-    }
+        // The configuration change may have changed available suggestions or the way suggestions
+        // are used, so re-run detection.
+        doAutoTimeZoneDetection(currentUserConfig, "handleConfigChanged()");
 
-    @Override
-    public synchronized void addDumpable(@NonNull Dumpable dumpable) {
-        mDumpables.add(dumpable);
+        // Pass on the signal to sub-components.
+        for (ConfigurationChangeListener listener : mConfigChangeListeners) {
+            listener.onChange();
+        }
     }
 
     /**
@@ -671,10 +664,6 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         mTelephonySuggestionsBySlotIndex.dump(ipw);
         ipw.decreaseIndent(); // level 2
         ipw.decreaseIndent(); // level 1
-
-        for (Dumpable dumpable : mDumpables) {
-            dumpable.dump(ipw, args);
-        }
     }
 
     /**

@@ -47,18 +47,15 @@ import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion.MatchType;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion.Quality;
-import android.util.IndentingPrintWriter;
 
 import com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.QualifiedTelephonyTimeZoneSuggestion;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 /**
@@ -66,8 +63,8 @@ import java.util.function.Function;
  */
 public class TimeZoneDetectorStrategyImplTest {
 
-    /** A time zone used for initialization that does not occur elsewhere in tests. */
     private static final @UserIdInt int USER_ID = 9876;
+    /** A time zone used for initialization that does not occur elsewhere in tests. */
     private static final String ARBITRARY_TIME_ZONE_ID = "Etc/UTC";
     private static final int SLOT_INDEX1 = 10000;
     private static final int SLOT_INDEX2 = 20000;
@@ -790,7 +787,7 @@ public class TimeZoneDetectorStrategyImplTest {
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
         script.simulateGeolocationTimeZoneSuggestion(suggestion)
-                .verifyTimeZoneChangedAndReset("Europe/London");
+                .verifyTimeZoneChangedAndReset(suggestion);
 
         // Assert internal service state.
         assertEquals(suggestion, mTimeZoneDetectorStrategy.getLatestGeolocationSuggestion());
@@ -815,7 +812,7 @@ public class TimeZoneDetectorStrategyImplTest {
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
         script.simulateGeolocationTimeZoneSuggestion(londonOnlySuggestion)
-                .verifyTimeZoneChangedAndReset("Europe/London");
+                .verifyTimeZoneChangedAndReset(londonOnlySuggestion);
         assertEquals(londonOnlySuggestion,
                 mTimeZoneDetectorStrategy.getLatestGeolocationSuggestion());
 
@@ -826,7 +823,7 @@ public class TimeZoneDetectorStrategyImplTest {
                 mTimeZoneDetectorStrategy.getLatestGeolocationSuggestion());
 
         script.simulateGeolocationTimeZoneSuggestion(parisOnlySuggestion)
-                .verifyTimeZoneChangedAndReset("Europe/Paris");
+                .verifyTimeZoneChangedAndReset(parisOnlySuggestion);
         assertEquals(parisOnlySuggestion,
                 mTimeZoneDetectorStrategy.getLatestGeolocationSuggestion());
 
@@ -848,7 +845,7 @@ public class TimeZoneDetectorStrategyImplTest {
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
         script.simulateGeolocationTimeZoneSuggestion(suggestion)
-                .verifyTimeZoneChangedAndReset("Europe/London");
+                .verifyTimeZoneChangedAndReset(suggestion);
 
         // Assert internal service state.
         assertEquals(suggestion, mTimeZoneDetectorStrategy.getLatestGeolocationSuggestion());
@@ -903,7 +900,7 @@ public class TimeZoneDetectorStrategyImplTest {
                 USER_ID, CONFIG_GEO_DETECTION_ENABLED, true /* expectedResult */)
                 .verifyTimeZoneNotChanged()
                 .simulateGeolocationTimeZoneSuggestion(geolocationSuggestion)
-                .verifyTimeZoneChangedAndReset(geolocationSuggestion.getZoneIds().get(0));
+                .verifyTimeZoneChangedAndReset(geolocationSuggestion);
 
         // Changing the detection to disable geo detection should cause the device tz setting to
         // change to the telephony suggestion.
@@ -912,28 +909,6 @@ public class TimeZoneDetectorStrategyImplTest {
                 .verifyTimeZoneChangedAndReset(telephonySuggestion);
 
         assertNull(mTimeZoneDetectorStrategy.getLatestGeolocationSuggestion());
-    }
-
-    @Test
-    public void testAddDumpable() {
-        new Script()
-                .initializeConfig(CONFIG_INT_AUTO_DISABLED_GEO_DISABLED)
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
-
-        AtomicBoolean dumpCalled = new AtomicBoolean(false);
-        class FakeDumpable implements Dumpable {
-            @Override
-            public void dump(IndentingPrintWriter pw, String[] args) {
-                dumpCalled.set(true);
-            }
-        }
-
-        mTimeZoneDetectorStrategy.addDumpable(new FakeDumpable());
-        IndentingPrintWriter ipw = new IndentingPrintWriter(new StringWriter());
-        String[] args = {"ArgOne", "ArgTwo"};
-        mTimeZoneDetectorStrategy.dump(ipw, args);
-
-        assertTrue(dumpCalled.get());
     }
 
     @Test
@@ -1250,6 +1225,14 @@ public class TimeZoneDetectorStrategyImplTest {
 
         Script verifyTimeZoneChangedAndReset(TelephonyTimeZoneSuggestion suggestion) {
             mFakeEnvironment.assertTimeZoneChangedTo(suggestion.getZoneId());
+            mFakeEnvironment.commitAllChanges();
+            return this;
+        }
+
+        Script verifyTimeZoneChangedAndReset(GeolocationTimeZoneSuggestion suggestion) {
+            assertEquals("Only use this method with unambiguous geo suggestions",
+                    1, suggestion.getZoneIds().size());
+            mFakeEnvironment.assertTimeZoneChangedTo(suggestion.getZoneIds().get(0));
             mFakeEnvironment.commitAllChanges();
             return this;
         }
