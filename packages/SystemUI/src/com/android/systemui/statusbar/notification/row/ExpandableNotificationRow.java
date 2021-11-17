@@ -23,7 +23,6 @@ import static android.service.notification.NotificationListenerService.REASON_CA
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
 
-import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -50,7 +49,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
@@ -3368,6 +3366,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 }
                 ipw.decreaseIndent();
                 ipw.println("}");
+            } else if (mPrivateLayout != null) {
+                mPrivateLayout.dumpSmartReplies(ipw);
             }
         });
     }
