@@ -1848,7 +1848,7 @@ public class Editor {
         if (mHasPendingRestartInputForSetText) {
             final InputMethodManager imm = getInputMethodManager();
             if (imm != null) {
-                imm.restartInput(mTextView);
+                imm.invalidateInput(mTextView);
             }
             mHasPendingRestartInputForSetText = false;
         }
