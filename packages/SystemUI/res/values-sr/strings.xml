@@ -92,10 +92,10 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Снимите још"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Одбаците снимак екрана"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Преглед снимка екрана"</string>
-    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Горња ивица <xliff:g id="PERCENT">%1$d</xliff:g> одсто"</string>
-    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Доња ивица <xliff:g id="PERCENT">%1$d</xliff:g> одсто"</string>
-    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Лева ивица <xliff:g id="PERCENT">%1$d</xliff:g> одсто"</string>
-    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Десна ивица <xliff:g id="PERCENT">%1$d</xliff:g> одсто"</string>
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Горња ивица <xliff:g id="PERCENT">%1$d</xliff:g> посто"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Доња ивица <xliff:g id="PERCENT">%1$d</xliff:g> посто"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Лева ивица <xliff:g id="PERCENT">%1$d</xliff:g> посто"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Десна ивица <xliff:g id="PERCENT">%1$d</xliff:g> посто"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Снимач екрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Обрађујемо видео снимка екрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Обавештење о сесији снимања екрана је активно"</string>
