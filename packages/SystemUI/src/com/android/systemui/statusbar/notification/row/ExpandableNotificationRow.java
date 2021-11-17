@@ -3345,6 +3345,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 }
                 ipw.decreaseIndent();
                 ipw.println("}");
+            } else if (mPrivateLayout != null) {
+                mPrivateLayout.dumpSmartReplies(ipw);
             }
         });
     }
