@@ -10,6 +10,9 @@
     },
     {
       "name": "CtsLocaleManagerTestCases"
+    },
+    {
+      "name": "CtsLocaleManagerHostTestCases"
     }
   ]
 }
