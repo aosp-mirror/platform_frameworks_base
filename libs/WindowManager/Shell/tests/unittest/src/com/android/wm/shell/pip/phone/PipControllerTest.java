@@ -191,7 +191,7 @@ public class PipControllerTest extends ShellTestCase {
         mPipController.mDisplaysChangedListener.onDisplayConfigurationChanged(
                 displayId, new Configuration());
 
-        verify(mMockPipMotionHelper).animateResizedBounds(any(Rect.class));
+        verify(mMockPipMotionHelper).movePip(any(Rect.class));
     }
 
     @Test
