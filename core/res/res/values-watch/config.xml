@@ -27,10 +27,6 @@
         <item>restart</item>
     </string-array>
 
-    <!-- Base "touch slop" value used by ViewConfiguration as a
-         movement threshold where scrolling should begin. -->
-    <dimen name="config_viewConfigurationTouchSlop">4dp</dimen>
-
     <!-- Minimum velocity to initiate a fling, as measured in dips per second. -->
     <dimen name="config_viewMinFlingVelocity">500dp</dimen>
 
