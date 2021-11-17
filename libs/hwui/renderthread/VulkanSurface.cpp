@@ -426,7 +426,7 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
     if (bufferInfo->skSurface.get() == nullptr) {
         bufferInfo->skSurface = SkSurface::MakeFromAHardwareBuffer(
                 mGrContext, ANativeWindowBuffer_getHardwareBuffer(bufferInfo->buffer.get()),
-                kTopLeft_GrSurfaceOrigin, mWindowInfo.colorspace, nullptr);
+                kTopLeft_GrSurfaceOrigin, mWindowInfo.colorspace, nullptr, /*from_window=*/true);
         if (bufferInfo->skSurface.get() == nullptr) {
             ALOGE("SkSurface::MakeFromAHardwareBuffer failed");
             mNativeWindow->cancelBuffer(mNativeWindow.get(), buffer,
