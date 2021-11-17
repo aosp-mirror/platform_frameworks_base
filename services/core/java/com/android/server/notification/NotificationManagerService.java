@@ -4456,13 +4456,14 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void requestBindListener(ComponentName component) {
             checkCallerIsSystemOrSameApp(component.getPackageName());
+            int uid = Binder.getCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
                 ManagedServices manager =
                         mAssistants.isComponentEnabledForCurrentProfiles(component)
                         ? mAssistants
                         : mListeners;
-                manager.setComponentState(component, true);
+                manager.setComponentState(component, UserHandle.getUserId(uid), true);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -4470,12 +4471,14 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void requestUnbindListener(INotificationListener token) {
+            int uid = Binder.getCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
                 // allow bound services to disable themselves
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                    info.getOwner().setComponentState(info.component, false);
+                    info.getOwner().setComponentState(
+                            info.component, UserHandle.getUserId(uid), false);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -4967,11 +4970,12 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void requestUnbindProvider(IConditionProvider provider) {
+            int uid = Binder.getCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
                 // allow bound services to disable themselves
                 final ManagedServiceInfo info = mConditionProviders.checkServiceToken(provider);
-                info.getOwner().setComponentState(info.component, false);
+                info.getOwner().setComponentState(info.component, UserHandle.getUserId(uid), false);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -4980,9 +4984,10 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void requestBindProvider(ComponentName component) {
             checkCallerIsSystemOrSameApp(component.getPackageName());
+            int uid = Binder.getCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
-                mConditionProviders.setComponentState(component, true);
+                mConditionProviders.setComponentState(component, UserHandle.getUserId(uid), true);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
