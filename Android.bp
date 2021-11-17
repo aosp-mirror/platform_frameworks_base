@@ -329,6 +329,7 @@ java_defaults {
         "TeleService-platform-compat-config",
         "documents-ui-compat-config",
         "calendar-provider-compat-config",
+        "contacts-provider-platform-compat-config",
     ],
     libs: [
         "app-compat-annotations",
