@@ -112,6 +112,8 @@
     <!--  [CHAR LIMIT=none] -->
     <string name="uninstall_application_text_user">Do you want to uninstall this app for the user <xliff:g id="username">%1$s</xliff:g>?</string>
     <!--  [CHAR LIMIT=none] -->
+    <string name="uninstall_application_text_current_user_work_profile">Do you want to uninstall this app from your work profile?</string>
+    <!--  [CHAR LIMIT=none] -->
     <string name="uninstall_update_text">Replace this app with the factory version? All data will be removed.</string>
     <!--  [CHAR LIMIT=none] -->
     <string name="uninstall_update_text_multiuser">Replace this app with the factory version? All data will be removed. This affects all users of this device, including those with work profiles.</string>
