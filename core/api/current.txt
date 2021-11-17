@@ -52442,6 +52442,7 @@ package android.view.inputmethod {
     method public boolean hideSoftInputFromWindow(android.os.IBinder, int);
     method public boolean hideSoftInputFromWindow(android.os.IBinder, int, android.os.ResultReceiver);
     method @Deprecated public void hideStatusIcon(android.os.IBinder);
+    method public void invalidateInput(@NonNull android.view.View);
     method public boolean isAcceptingText();
     method public boolean isActive(android.view.View);
     method public boolean isActive();

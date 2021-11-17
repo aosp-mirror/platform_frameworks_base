@@ -103,6 +103,17 @@ final class RemoteInputConnection implements InputConnection {
         mCancellationGroup = cancellationGroup;
     }
 
+    @AnyThread
+    public boolean isSameConnection(@NonNull IInputContext inputContext) {
+        return mInvoker.isSameConnection(inputContext);
+    }
+
+    RemoteInputConnection(@NonNull RemoteInputConnection original, int sessionId) {
+        mImsInternal = original.mImsInternal;
+        mInvoker = original.mInvoker.cloneWithSessionId(sessionId);
+        mCancellationGroup = original.mCancellationGroup;
+    }
+
     /**
      * See {@link InputConnection#getTextAfterCursor(int, int)}.
      */

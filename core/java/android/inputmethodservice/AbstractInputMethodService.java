@@ -68,6 +68,16 @@ public abstract class AbstractInputMethodService extends WindowProviderService
     private InputMethod mInputMethod;
 
     /**
+     * @return {@link InputMethod} instance returned from {@link #onCreateInputMethodInterface()}.
+     *         {@code null} if {@link #onCreateInputMethodInterface()} is not yet called.
+     * @hide
+     */
+    @Nullable
+    protected final InputMethod getInputMethodInternal() {
+        return mInputMethod;
+    }
+
+    /**
      * Keep the strong reference to {@link InputMethodServiceInternal} to ensure that it will not be
      * garbage-collected until {@link AbstractInputMethodService} gets garbage-collected.
      *
