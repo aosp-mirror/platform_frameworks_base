@@ -40,7 +40,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
-import static com.android.wm.shell.bubbles.BubbleController.TASKBAR_CHANGED_BROADCAST;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -137,7 +136,6 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.camera.CameraIntents;
@@ -217,6 +215,9 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
+import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
+import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
+import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -488,6 +489,7 @@ public class StatusBar extends SystemUI implements
     private final DozeParameters mDozeParameters;
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final StatusBarComponent.Factory mStatusBarComponentFactory;
+    private final StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
     private final PluginManager mPluginManager;
     private final Optional<LegacySplitScreen> mSplitScreenOptional;
     private final StatusBarNotificationActivityStarter.Builder
@@ -672,7 +674,6 @@ public class StatusBar extends SystemUI implements
 
     private final ActivityIntentHelper mActivityIntentHelper;
     private NotificationStackScrollLayoutController mStackScrollerController;
-    private BatteryMeterViewController mBatteryMeterViewController;
 
     private final ColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
             (extractor, which) -> updateTheme();
@@ -744,6 +745,7 @@ public class StatusBar extends SystemUI implements
             CommandQueue commandQueue,
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             StatusBarComponent.Factory statusBarComponentFactory,
+            StatusBarFragmentComponent.Factory statusBarFragmentComponentFactory,
             PluginManager pluginManager,
             Optional<LegacySplitScreen> splitScreenOptional,
             LightsOutNotifController lightsOutNotifController,
@@ -848,6 +850,7 @@ public class StatusBar extends SystemUI implements
         mCommandQueue = commandQueue;
         mCollapsedStatusBarFragmentLogger = collapsedStatusBarFragmentLogger;
         mStatusBarComponentFactory = statusBarComponentFactory;
+        mStatusBarFragmentComponentFactory = statusBarFragmentComponentFactory;
         mPluginManager = pluginManager;
         mSplitScreenOptional = splitScreenOptional;
         mStatusBarNotificationActivityStarterBuilder = statusBarNotificationActivityStarterBuilder;
@@ -918,8 +921,6 @@ public class StatusBar extends SystemUI implements
         mBypassHeadsUpNotifier.setUp();
         if (mBubblesOptional.isPresent()) {
             mBubblesOptional.get().setExpandListener(mBubbleExpandListener);
-            IntentFilter filter = new IntentFilter(TASKBAR_CHANGED_BROADCAST);
-            mBroadcastDispatcher.registerReceiver(mTaskbarChangeReceiver, filter);
         }
 
         mKeyguardIndicationController.init();
@@ -1134,27 +1135,20 @@ public class StatusBar extends SystemUI implements
         mPluginDependencyProvider.allowPluginDependency(StatusBarStateController.class);
         mStatusBarWindowController.getFragmentHostManager()
                 .addTagListener(CollapsedStatusBarFragment.TAG, (tag, fragment) -> {
-                    CollapsedStatusBarFragment statusBarFragment =
-                            (CollapsedStatusBarFragment) fragment;
+                    StatusBarFragmentComponent statusBarFragmentComponent =
+                            ((CollapsedStatusBarFragment) fragment).getStatusBarFragmentComponent();
+                    if (statusBarFragmentComponent == null) {
+                        throw new IllegalStateException(
+                                "CollapsedStatusBarFragment should have a valid component");
+                    }
 
-                    PhoneStatusBarView oldStatusBarView = mStatusBarView;
-                    mStatusBarView = (PhoneStatusBarView) statusBarFragment.getView();
+                    mStatusBarView = statusBarFragmentComponent.getPhoneStatusBarView();
 
+                    // TODO(b/205609837): Migrate this to StatusBarFragmentComponent.
                     mPhoneStatusBarViewController = mPhoneStatusBarViewControllerFactory
                             .create(mStatusBarView, mNotificationPanelViewController
                                     .getStatusBarTouchEventHandler());
                     mPhoneStatusBarViewController.init();
-
-                    mBatteryMeterViewController = new BatteryMeterViewController(
-                            mStatusBarView.findViewById(R.id.battery),
-                            mConfigurationController,
-                            mTunerService,
-                            mBroadcastDispatcher,
-                            mMainHandler,
-                            mContext.getContentResolver(),
-                            mBatteryController
-                    );
-                    mBatteryMeterViewController.init();
 
                     // Ensure we re-propagate panel expansion values to the panel controller and
                     // any listeners it may have, such as PanelBar. This will also ensure we
@@ -1169,8 +1163,8 @@ public class StatusBar extends SystemUI implements
                         // This view is being recreated, let's destroy the old one
                         mHeadsUpAppearanceController.destroy();
                     }
-                    // TODO: this should probably be scoped to the StatusBarComponent
                     // TODO (b/136993073) Separate notification shade and status bar
+                    // TODO(b/205609837): Migrate this to StatusBarFragmentComponent.
                     mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                             mNotificationIconAreaController, mHeadsUpManager,
                             mStackScrollerController,
@@ -1187,6 +1181,7 @@ public class StatusBar extends SystemUI implements
                 .beginTransaction()
                 .replace(R.id.status_bar_container,
                         new CollapsedStatusBarFragment(
+                                mStatusBarFragmentComponentFactory,
                                 mOngoingCallController,
                                 mAnimationScheduler,
                                 mStatusBarLocationPublisher,
@@ -3283,6 +3278,10 @@ public class StatusBar extends SystemUI implements
             }
             return true;
         }
+        if (mNotificationPanelViewController.isQsCustomizing()) {
+            mNotificationPanelViewController.closeQsCustomizer();
+            return true;
+        }
         if (mNotificationPanelViewController.isQsExpanded()) {
             if (mNotificationPanelViewController.isQsDetailShowing()) {
                 mNotificationPanelViewController.closeQsDetail();
@@ -4267,13 +4266,6 @@ public class StatusBar extends SystemUI implements
             mNotificationShadeWindowController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
             mScrimController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
             mKeyguardViewMediator.setWallpaperSupportsAmbientMode(supportsAmbientMode);
-        }
-    };
-
-    BroadcastReceiver mTaskbarChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mBubblesOptional.ifPresent(bubbles -> bubbles.onTaskbarChanged(intent.getExtras()));
         }
     };
 

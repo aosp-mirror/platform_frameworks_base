@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.statusbar.phone.fragment
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase

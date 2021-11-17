@@ -90,6 +90,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ऐप्लिकेशन या आपका संगठन स्क्रीनशॉट लेने की अनुमति नहीं देता"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"बदलाव करें"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"स्क्रीनशॉट में बदलाव करें"</string>
+    <string name="screenshot_share_description" msgid="2861628935812656612">"स्क्रीनशॉट शेयर करें"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ज़्यादा कॉन्टेंट कैप्चर करें"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"स्क्रीनशॉट को खारिज करें"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रीनशॉट की झलक"</string>

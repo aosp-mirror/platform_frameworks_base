@@ -90,6 +90,8 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"這個應用程式或貴機構不允許擷取螢幕畫面"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"編輯"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"編輯螢幕截圖"</string>
+    <!-- no translation found for screenshot_share_description (2861628935812656612) -->
+    <skip />
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"擴大螢幕截圖範圍"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"關閉螢幕截圖"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"螢幕截圖預覽"</string>

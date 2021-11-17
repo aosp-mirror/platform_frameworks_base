@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"Interfejs"</string>
+    <string name="app_label" msgid="4811759950673118541">"UI systemu"</string>
     <string name="status_bar_clear_all_button" msgid="2491321682873657397">"Wyczyść"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"Brak powiadomień"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"Bieżące"</string>
@@ -90,6 +90,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Nie możesz wykonać zrzutu ekranu, bo nie zezwala na to aplikacja lub Twoja organizacja."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Edytuj"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Edytuj zrzut ekranu"</string>
+    <string name="screenshot_share_description" msgid="2861628935812656612">"Udostępnij zrzut ekranu"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Zarejestruj więcej danych"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Zamknij zrzut ekranu"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Podgląd zrzutu ekranu"</string>

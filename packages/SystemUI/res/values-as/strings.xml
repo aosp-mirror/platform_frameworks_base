@@ -90,6 +90,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"এপটোৱে বা আপোনাৰ প্ৰতিষ্ঠানে স্ক্ৰীণশ্বট ল\'বলৈ অনুমতি নিদিয়ে"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"সম্পাদনা কৰক"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"স্ক্ৰীনশ্বট সম্পাদনা কৰক"</string>
+    <string name="screenshot_share_description" msgid="2861628935812656612">"স্ক্ৰীনশ্বট শ্বেয়াৰ কৰক"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"অধিক কেপচাৰ কৰক"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"স্ক্ৰীনশ্বট অগ্ৰাহ্য কৰক"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"স্ক্ৰীনশ্বটৰ পূৰ্বদৰ্শন"</string>
