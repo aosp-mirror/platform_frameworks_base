@@ -69,8 +69,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Таны апп, байгууллагад дэлгэцийн зураг авахыг зөвшөөрдөггүй"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Засах"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Дэлгэцийн агшныг засах"</string>
-    <!-- no translation found for screenshot_share_description (2861628935812656612) -->
-    <skip />
+    <string name="screenshot_share_description" msgid="2861628935812656612">"Дэлгэцийн агшныг хуваалцах"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Ихийг багтаасан зураг авах"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Дэлгэцийн агшныг хаах"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Дэлгэцийн агшныг урьдчилан үзэх"</string>
@@ -108,6 +107,8 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Утас"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Дуут туслах"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Түрийвч"</string>
+    <!-- no translation found for accessibility_qr_code_scanner_button (7521277927692910795) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Тайлах"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Төхөөрөмжийг түгжсэн"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Скан хийх нүүр царай"</string>
@@ -465,6 +466,10 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Ашиглахын тулд түгжээг тайлах"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Таны картыг авахад асуудал гарлаа. Дараа дахин оролдоно уу"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Түгжигдсэн дэлгэцийн тохиргоо"</string>
+    <!-- no translation found for qr_code_scanner_title (1598912458255252498) -->
+    <skip />
+    <!-- no translation found for qr_code_scanner_description (7452098243938659945) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Ажлын профайл"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Нислэгийн горим"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g>-т та дараагийн сэрүүлгээ сонсохгүй"</string>

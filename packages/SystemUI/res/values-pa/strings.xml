@@ -107,6 +107,8 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ਫ਼ੋਨ ਕਰੋ"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ਅਵਾਜ਼ੀ ਸਹਾਇਕ"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"ਵਾਲੇਟ"</string>
+    <!-- no translation found for accessibility_qr_code_scanner_button (7521277927692910795) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="122785427241471085">"ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"ਡੀਵਾਈਸ ਲਾਕ ਹੈ"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"ਚਿਹਰਾ ਸਕੈਨ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
@@ -464,6 +466,10 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ਵਰਤਣ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ਤੁਹਾਡੇ ਕਾਰਡ ਪ੍ਰਾਪਤ ਕਰਨ ਵਿੱਚ ਕੋਈ ਸਮੱਸਿਆ ਆਈ, ਕਿਰਪਾ ਕਰਕੇ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ਲਾਕ ਸਕ੍ਰੀਨ ਸੈਟਿੰਗਾਂ"</string>
+    <!-- no translation found for qr_code_scanner_title (1598912458255252498) -->
+    <skip />
+    <!-- no translation found for qr_code_scanner_description (7452098243938659945) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ਹਵਾਈ-ਜਹਾਜ਼ ਮੋਡ"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"ਤੁਸੀਂ <xliff:g id="WHEN">%1$s</xliff:g> ਵਜੇ ਆਪਣਾ ਅਗਲਾ ਅਲਾਰਮ ਨਹੀਂ ਸੁਣੋਗੇ"</string>

@@ -69,8 +69,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Lietotne vai jūsu organizācija neatļauj veikt ekrānuzņēmumus."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Rediģēt"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Rediģēt ekrānuzņēmumu"</string>
-    <!-- no translation found for screenshot_share_description (2861628935812656612) -->
-    <skip />
+    <string name="screenshot_share_description" msgid="2861628935812656612">"Kopīgot ekrānuzņēmumu"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Tvert vairāk"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Nerādīt ekrānuzņēmumu"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekrānuzņēmuma priekšskatījums"</string>
@@ -108,6 +107,8 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Tālruņa numurs"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Balss palīgs"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Maks"</string>
+    <!-- no translation found for accessibility_qr_code_scanner_button (7521277927692910795) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Atbloķēt"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Ierīce ir bloķēta"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Sejas skenēšana"</string>
@@ -468,6 +469,10 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lai izmantotu, atbloķējiet ekrānu"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ienesot jūsu kartes, radās problēma. Lūdzu, vēlāk mēģiniet vēlreiz."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Bloķēšanas ekrāna iestatījumi"</string>
+    <!-- no translation found for qr_code_scanner_title (1598912458255252498) -->
+    <skip />
+    <!-- no translation found for qr_code_scanner_description (7452098243938659945) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Darba profils"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Lidojuma režīms"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Nākamais signāls (<xliff:g id="WHEN">%1$s</xliff:g>) netiks atskaņots."</string>
