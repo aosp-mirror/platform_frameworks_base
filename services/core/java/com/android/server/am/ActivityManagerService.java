@@ -183,7 +183,6 @@ import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.PropertyInvalidatedCache;
-import android.app.RemoteServiceException;
 import android.app.SyncNotedAppOp;
 import android.app.WaitResult;
 import android.app.backup.BackupManager.OperationType;
@@ -2997,13 +2996,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new SecurityException(msg);
         }
         mAtmInternal.finishHeavyWeightApp();
-    }
-
-    @Override
-    public void crashApplication(int uid, int initialPid, String packageName, int userId,
-            String message, boolean force) {
-        crashApplicationWithType(uid, initialPid, packageName, userId, message, force,
-                RemoteServiceException.TYPE_ID);
     }
 
     @Override
