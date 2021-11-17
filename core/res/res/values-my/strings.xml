@@ -48,7 +48,7 @@
     <string name="invalidPin" msgid="7542498253319440408">"နံပါတ်(၄)ခုမှ(၈)ခုအထိပါရှိသော ပင်နံပါတ်အားထည့်ပါ"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"နံပါတ်(၈)ခုသို့မဟုတ် ထိုထက်ရှည်သောသော PUKအားထည့်သွင်းပါ"</string>
     <string name="needPuk" msgid="7321876090152422918">"ဆင်းမ်ကတ် ရဲ့ ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ် သော့ကျနေပါသည်။ ဖွင့်ရန် ကုဒ်အားထည့်သွင်းပါ။"</string>
-    <string name="needPuk2" msgid="7032612093451537186">"ဆင်းမ်ကဒ်အားမပိတ်ရန် PUK2အားထည့်သွင်းပါ"</string>
+    <string name="needPuk2" msgid="7032612093451537186">"ဆင်းမ်ကတ်အားမပိတ်ရန် PUK2 အားထည့်သွင်းပါ"</string>
     <string name="enablePin" msgid="2543771964137091212">"မအောင်မြင်ပါ, SIM/RUIM သော့ကို အရင် သုံးခွင့်ပြုရန်"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">ဆင်းမ်ကတ် သော့မချခင် သင့်တွင် <xliff:g id="NUMBER_1">%d</xliff:g> ခါ ကြိုးစားခွင့်များကျန်ပါသေးသည်။</item>
@@ -331,7 +331,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"တို့ထိခြင်းဖြင့် ရှာဖွေမှုကို ဖွင့်ရန်"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"တို့လိုက်သည့်အရာများကို အသံထွက်ဖတ်ပေးပါလိမ့်မည်။ လက်ဟန်အမူအရာများကို အသုံးပြု၍ မျက်နှာပြင်ကို လေ့လာနိုင်ပါသည်။"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"ရိုက်သောစာများကို စောင့်ကြည့်ရန်"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"ကိုယ်ရေးအချက်အလက်များဖြစ်သော ခရက်ဒစ်ကဒ်နံပါတ်နှင့် စကားဝှက်များ ပါဝင်သည်။"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"ကိုယ်ရေးအချက်အလက်များဖြစ်သော ခရက်ဒစ်ကတ်နံပါတ်နှင့် စကားဝှက်များ ပါဝင်သည်။"</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"မျက်နှာပြင် ချဲ့ခြင်းကို ထိန်းချုပ်ရန်"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"မျက်နှာပြင် ဇူးမ်အရွယ်နှင့် နေရာချထားခြင်းကို ထိန်းချုပ်ပါသည်။"</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"လက်ဟန်များ အသုံးပြုပါ"</string>
@@ -889,13 +889,13 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"ထပ် စမ်းပါ"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ဝန်ဆောင်မှုနှင့် ဒေတာအားလုံးအတွက် လော့ခ်ဖွင့်ပါ"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"မျက်မှာပြ လော့ခ်ဖွင့်ခြင်း ခွင့်ပြုသော အကြိမ်ရေထက် ကျော်လွန်သွားပါပြီ"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"ဆင်းကဒ် မရှိပါ"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"တက်ပလက်ထဲတွင်း ဆင်းကဒ် မရှိပါ"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"ဆင်းမ်ကတ် မရှိပါ"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"တက်ဘလက်ထဲတွင်း ဆင်းမ်ကတ်မရှိပါ"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"သင့် Android TV စက်ပစ္စည်းပေါ်တွင် ဆင်းမ်ကတ်မရှိပါ။"</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"ဖုန်းထဲတွင် ဆင်းကဒ် မရှိပါ"</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"ဖုန်းထဲတွင် ဆင်းကတ်မရှိပါ"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"ဆင်းမ်ကတ် ထည့်ပါ"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"ဆင်းမ်ကတ် မရှိဘူး သို့မဟုတ် ဖတ်မရပါ။ ဆင်းမ်ကတ် တစ်ခုကို ထည့်ပါ။"</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"သုံးစွဲ မရတော့သော ဆင်းကဒ်"</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"သုံး၍ မရတော့သော ဆင်းမ်ကတ်"</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"သင့် ဆင်းမ်ကတ်ကို ထာဝရ ပိတ်လိုက်ပါပြီ။\n နောက် ဆင်းမ်ကတ် တစ်ခု အတွက် သင်၏ ကြိုးမဲ့ ဝန်ဆောင်မှု စီမံပေးသူကို ဆက်သွယ်ပါ"</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"ယခင် တစ်ပုဒ်"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"နောက် တစ်ပုဒ်"</string>
@@ -1338,8 +1338,8 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"နောင်တွင် ဆက်တင် &gt; အပလီကေးရှင်းများ မှပြောင်းနိုင်သည်"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"အမြဲခွင့်ပြုရန်"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"ဘယ်တော့မှခွင့်မပြုပါ"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"SIMကဒ်ဖယ်ရှားခြင်း"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"သတ်မှတ်ထားသောဆင်းမ်ကဒ်ဖြင့် ပြန်လည်ဖွင့်သည့်အထိ မိုဘိုင်းကွန်ယက်ရရှိမည်မဟုတ်ပါ"</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM ကတ်ဖယ်ရှားခြင်း"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"သတ်မှတ်ထားသောဆင်းမ်ကတ်ဖြင့် ပြန်လည်ဖွင့်သည့်အထိ မိုဘိုင်းကွန်ရက်ရရှိမည်မဟုတ်ပါ"</string>
     <string name="sim_done_button" msgid="6464250841528410598">"ပြီးပါပြီ"</string>
     <string name="sim_added_title" msgid="7930779986759414595">"ဆင်းမ်ကတ် ထည့်ပါသည်"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"မိုးဘိုင်းကွန်ရက်ကို ဆက်သွယ်ရန် စက်ကို ပြန် စ ပါ"</string>
@@ -2044,7 +2044,7 @@
     <string name="autofill_continue_yes" msgid="7914985605534510385">"ရှေ့ဆက်ရန်"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"စကားဝှက်"</string>
     <string name="autofill_save_type_address" msgid="3111006395818252885">"လိပ်စာ"</string>
-    <string name="autofill_save_type_credit_card" msgid="3583795235862046693">"ခရက်တစ်ကတ်"</string>
+    <string name="autofill_save_type_credit_card" msgid="3583795235862046693">"ခရက်ဒစ်ကတ်"</string>
     <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"ဒက်ဘစ် ကတ်"</string>
     <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"ငွေပေးချေမှုကတ်"</string>
     <string name="autofill_save_type_generic_card" msgid="1019367283921448608">"ကတ်"</string>

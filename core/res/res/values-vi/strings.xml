@@ -1016,7 +1016,7 @@
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"sửa đổi các quyền về vị trí địa lý của Trình duyệt"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"Cho phép ứng dụng sửa đổi cấp phép vị trí địa lý của Trình duyệt. Ứng dụng độc hại có thể lợi dụng quyền này để cho phép gửi thông tin vị trí tới các trang web tùy ý."</string>
     <string name="save_password_message" msgid="2146409467245462965">"Bạn có muốn trình duyệt nhớ mật khẩu này không?"</string>
-    <string name="save_password_notnow" msgid="2878327088951240061">"Không phải bây giờ"</string>
+    <string name="save_password_notnow" msgid="2878327088951240061">"Để sau"</string>
     <string name="save_password_remember" msgid="6490888932657708341">"Nhớ"</string>
     <string name="save_password_never" msgid="6776808375903410659">"Chưa bao giờ"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Bạn không được phép mở trang này."</string>
