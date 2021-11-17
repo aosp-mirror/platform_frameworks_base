@@ -7067,7 +7067,9 @@ public class NotificationManagerService extends SystemService {
                     if (index < 0) {
                         mNotificationList.add(r);
                         mUsageStats.registerPostedByApp(r);
-                        r.setInterruptive(isVisuallyInterruptive(null, r));
+                        final boolean isInterruptive = isVisuallyInterruptive(null, r);
+                        r.setInterruptive(isInterruptive);
+                        r.setTextChanged(isInterruptive);
                     } else {
                         old = mNotificationList.get(index);  // Potentially *changes* old
                         mNotificationList.set(index, r);
