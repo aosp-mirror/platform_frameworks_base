@@ -27,6 +27,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -2003,6 +2004,22 @@ public class NotificationContentView extends FrameLayout {
             pw.print("null");
         }
         pw.println();
+    }
+
+    /** Add any existing SmartReplyView to the dump */
+    public void dumpSmartReplies(IndentingPrintWriter pw) {
+        if (mHeadsUpSmartReplyView != null) {
+            pw.println("HeadsUp SmartReplyView:");
+            pw.increaseIndent();
+            mHeadsUpSmartReplyView.dump(pw);
+            pw.decreaseIndent();
+        }
+        if (mExpandedSmartReplyView != null) {
+            pw.println("Expanded SmartReplyView:");
+            pw.increaseIndent();
+            mExpandedSmartReplyView.dump(pw);
+            pw.decreaseIndent();
+        }
     }
 
     public RemoteInputView getExpandedRemoteInput() {
