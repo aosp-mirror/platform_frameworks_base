@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -75,7 +76,6 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
-import com.android.systemui.statusbar.phone.CollapsedStatusBarFragmentLogger;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.DozeScrimController;
 import com.android.systemui.statusbar.phone.DozeServiceHost;
@@ -99,6 +99,8 @@ import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
+import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -197,6 +199,7 @@ public interface StatusBarPhoneModule {
             CommandQueue commandQueue,
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             StatusBarComponent.Factory statusBarComponentFactory,
+            StatusBarFragmentComponent.Factory statusBarFragmentComponentFactory,
             PluginManager pluginManager,
             Optional<LegacySplitScreen> splitScreenOptional,
             LightsOutNotifController lightsOutNotifController,
@@ -237,7 +240,8 @@ public interface StatusBarPhoneModule {
             Optional<StartingSurface> startingSurfaceOptional,
             TunerService tunerService,
             DumpManager dumpManager,
-            ActivityLaunchAnimator activityLaunchAnimator) {
+            ActivityLaunchAnimator activityLaunchAnimator,
+            NotifPipelineFlags notifPipelineFlags) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -297,6 +301,7 @@ public interface StatusBarPhoneModule {
                 commandQueue,
                 collapsedStatusBarFragmentLogger,
                 statusBarComponentFactory,
+                statusBarFragmentComponentFactory,
                 pluginManager,
                 splitScreenOptional,
                 lightsOutNotifController,
@@ -336,7 +341,8 @@ public interface StatusBarPhoneModule {
                 startingSurfaceOptional,
                 tunerService,
                 dumpManager,
-                activityLaunchAnimator
+                activityLaunchAnimator,
+                notifPipelineFlags
         );
     }
 }

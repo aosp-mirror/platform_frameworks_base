@@ -25,6 +25,7 @@ import static com.android.server.job.controllers.Package.packageToString;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
+import android.app.job.JobInfo;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.EstimatedLaunchTimeChangedListener;
 import android.content.Context;
@@ -38,6 +39,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArrayMap;
+import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
@@ -71,6 +73,9 @@ public class PrefetchController extends StateController {
      */
     @GuardedBy("mLock")
     private final SparseArrayMap<String, Long> mEstimatedLaunchTimes = new SparseArrayMap<>();
+    /** Cached list of UIDs in the TOP state. */
+    @GuardedBy("mLock")
+    private final SparseBooleanArray mTopUids = new SparseBooleanArray();
     private final ThresholdAlarmListener mThresholdAlarmListener;
 
     /**
@@ -98,6 +103,7 @@ public class PrefetchController extends StateController {
 
     private static final int MSG_RETRIEVE_ESTIMATED_LAUNCH_TIME = 0;
     private static final int MSG_PROCESS_UPDATED_ESTIMATED_LAUNCH_TIME = 1;
+    private static final int MSG_PROCESS_TOP_STATE_CHANGE = 2;
 
     public PrefetchController(JobSchedulerService service) {
         super(service);
@@ -165,6 +171,22 @@ public class PrefetchController extends StateController {
         mThresholdAlarmListener.removeAlarmsForUserId(userId);
     }
 
+    @GuardedBy("mLock")
+    @Override
+    public void onUidBiasChangedLocked(int uid, int newBias) {
+        final boolean isNowTop = newBias == JobInfo.BIAS_TOP_APP;
+        final boolean wasTop = mTopUids.get(uid);
+        if (isNowTop) {
+            mTopUids.put(uid, true);
+        } else {
+            // Delete entries of non-top apps so the set doesn't get too large.
+            mTopUids.delete(uid);
+        }
+        if (isNowTop != wasTop) {
+            mHandler.obtainMessage(MSG_PROCESS_TOP_STATE_CHANGE, uid, 0).sendToTarget();
+        }
+    }
+
     /** Return the app's next estimated launch time. */
     @GuardedBy("mLock")
     @CurrentTimeMillisLong
@@ -203,6 +225,35 @@ public class PrefetchController extends StateController {
             changed |= updateConstraintLocked(js, now, nowElapsed);
         }
         return changed;
+    }
+
+    private void maybeUpdateConstraintForUid(int uid) {
+        synchronized (mLock) {
+            final ArraySet<String> pkgs = mService.getPackagesForUidLocked(uid);
+            if (pkgs == null) {
+                return;
+            }
+            final int userId = UserHandle.getUserId(uid);
+            final ArraySet<JobStatus> changedJobs = new ArraySet<>();
+            final long now = sSystemClock.millis();
+            final long nowElapsed = sElapsedRealtimeClock.millis();
+            for (int p = pkgs.size() - 1; p >= 0; --p) {
+                final String pkgName = pkgs.valueAt(p);
+                final ArraySet<JobStatus> jobs = mTrackedJobs.get(userId, pkgName);
+                if (jobs == null) {
+                    continue;
+                }
+                for (int i = 0; i < jobs.size(); i++) {
+                    final JobStatus js = jobs.valueAt(i);
+                    if (updateConstraintLocked(js, now, nowElapsed)) {
+                        changedJobs.add(js);
+                    }
+                }
+            }
+            if (changedJobs.size() > 0) {
+                mStateChangedListener.onControllerStateChanged(changedJobs);
+            }
+        }
     }
 
     private void processUpdatedEstimatedLaunchTime(int userId, @NonNull String pkgName,
@@ -244,9 +295,18 @@ public class PrefetchController extends StateController {
     @GuardedBy("mLock")
     private boolean updateConstraintLocked(@NonNull JobStatus jobStatus,
             @CurrentTimeMillisLong long now, @ElapsedRealtimeLong long nowElapsed) {
-        return jobStatus.setPrefetchConstraintSatisfied(nowElapsed,
-                willBeLaunchedSoonLocked(
-                        jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(), now));
+        // Mark a prefetch constraint as satisfied in the following scenarios:
+        //   1. The app is not open but it will be launched soon
+        //   2. The app is open and the job is already running (so we let it finish)
+        final boolean appIsOpen = mTopUids.get(jobStatus.getSourceUid());
+        final boolean satisfied;
+        if (!appIsOpen) {
+            satisfied = willBeLaunchedSoonLocked(
+                    jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(), now);
+        } else {
+            satisfied = mService.isCurrentlyRunningLocked(jobStatus);
+        }
+        return jobStatus.setPrefetchConstraintSatisfied(nowElapsed, satisfied);
     }
 
     @GuardedBy("mLock")
@@ -398,6 +458,11 @@ public class PrefetchController extends StateController {
                     final SomeArgs args = (SomeArgs) msg.obj;
                     processUpdatedEstimatedLaunchTime(args.argi1, (String) args.arg1, args.argl1);
                     args.recycle();
+                    break;
+
+                case MSG_PROCESS_TOP_STATE_CHANGE:
+                    final int uid = msg.arg1;
+                    maybeUpdateConstraintForUid(uid);
                     break;
             }
         }

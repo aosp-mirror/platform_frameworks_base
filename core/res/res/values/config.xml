@@ -654,10 +654,23 @@
         -->
     </integer-array>
 
-    <!-- When entering this device state (defined in device_state_configuration.xml),
-         we should wake the device. -1 to disable the feature (do not wake on any device-state
-         transition). -->
-    <integer name="config_deviceStateOnWhichToWakeUp">-1</integer>
+    <!-- When a device enters any of these states, it should be woken up. States are defined in
+         device_state_configuration.xml. -->
+    <integer-array name="config_deviceStatesOnWhichToWakeUp">
+        <!-- Example:
+        <item>0</item>
+        <item>1</item>
+        -->
+    </integer-array>
+
+    <!-- When a device enters any of these states, it should go to sleep. States are defined in
+         device_state_configuration.xml. -->
+    <integer-array name="config_deviceStatesOnWhichToSleep">
+        <!-- Example:
+        <item>0</item>
+        <item>1</item>
+        -->
+    </integer-array>
 
     <!-- Indicate the display area rect for foldable devices in folded state. -->
     <string name="config_foldedArea"></string>
@@ -1405,6 +1418,12 @@
          that can be set by the user. -->
     <integer name="config_screenBrightnessDim">10</integer>
     <item name="config_screenBrightnessDimFloat" format="float" type="dimen">0.05</item>
+
+    <!-- If the screen brightness is already set at or below config_screenBrightnessDim, and the
+         user activity timeout expires, we still want to dim the screen slightly to indicate that
+         the device is about to go to sleep. The screen will dim by this amount in that case.
+         -->
+    <item name="config_screenBrightnessMinimumDimAmountFloat" format="float" type="dimen">0.04</item>
 
     <!-- Minimum allowable screen brightness to use in a very dark room.
          This value sets the floor for the darkest possible auto-brightness

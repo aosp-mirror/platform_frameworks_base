@@ -1418,4 +1418,22 @@ public class EuiccManager {
                         .getEuiccControllerService()
                         .get());
     }
+
+    /**
+     * Returns whether the passing portIndex is available.
+     * A port is available if it has no profiles enabled on it or calling app has carrier privilege
+     * over the profile installed on the selected port.
+     * Always returns false if the cardId is a physical card.
+     *
+     * @param portIndex is an enumeration of the ports available on the UICC.
+     * @return {@code true} if port is available
+     */
+    public boolean isSimPortAvailable(int portIndex) {
+        try {
+            return getIEuiccController().isSimPortAvailable(mCardId, portIndex,
+                    mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

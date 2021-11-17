@@ -56,6 +56,7 @@ public class CpuPowerCalculator extends PowerCalculator {
         public long durationFgMs;
         public String packageWithHighestDrain;
         public double[] perProcStatePowerMah;
+        public long[] cpuFreqTimes;
     }
 
     public CpuPowerCalculator(PowerProfile profile) {
@@ -98,6 +99,9 @@ public class CpuPowerCalculator extends PowerCalculator {
 
         BatteryConsumer.Key[] keys = UNINITIALIZED_KEYS;
         Result result = new Result();
+        if (query.isProcessStateDataNeeded()) {
+            result.cpuFreqTimes = new long[batteryStats.getCpuFreqCount()];
+        }
         final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
                 builder.getUidBatteryConsumerBuilders();
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
@@ -187,11 +191,10 @@ public class CpuPowerCalculator extends PowerCalculator {
             // TODO(b/191921016): use per-state CPU cluster times
             final long[] cpuClusterTimes = null;
 
-            final long[] cpuFreqTimes = u.getCpuFreqTimes(BatteryStats.STATS_SINCE_CHARGED,
-                    uidProcState);
-            if (cpuClusterTimes != null || cpuFreqTimes != null) {
+            boolean hasCpuFreqTimes = u.getCpuFreqTimes(result.cpuFreqTimes, uidProcState);
+            if (cpuClusterTimes != null || hasCpuFreqTimes) {
                 result.perProcStatePowerMah[procState] += calculateUidModeledPowerMah(u,
-                        0, cpuClusterTimes, cpuFreqTimes);
+                        0, cpuClusterTimes, result.cpuFreqTimes);
             }
         }
 

@@ -41,6 +41,7 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.DynamicChildBindController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -77,6 +78,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
 
     // Dependency mocks:
     @Mock private FeatureFlags mFeatureFlags;
+    @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotificationGroupManagerLegacy mGroupManager;
@@ -103,7 +105,8 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         when(mVisualStabilityManager.areGroupChangesAllowed()).thenReturn(true);
         when(mVisualStabilityManager.isReorderingAllowed()).thenReturn(true);
 
-        when(mFeatureFlags.checkLegacyPipelineEnabled()).thenReturn(true);
+        when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
+        when(mNotifPipelineFlags.checkLegacyPipelineEnabled()).thenReturn(true);
 
         mHelper = new NotificationTestHelper(mContext, mDependency, TestableLooper.get(this));
 
@@ -117,7 +120,8 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 mock(ForegroundServiceSectionController.class),
                 mock(DynamicChildBindController.class),
                 mock(LowPriorityInflationHelper.class),
-                mock(AssistantFeedbackController.class));
+                mock(AssistantFeedbackController.class),
+                mNotifPipelineFlags);
         mViewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
     }
 

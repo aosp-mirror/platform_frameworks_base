@@ -136,7 +136,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
                     }
                 }
         ).when(mQSTileHost).createTile(anyString());
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(false);
+        when(mFeatureFlags.isProviderModelSettingEnabled(mContext)).thenReturn(false);
         FakeSystemClock clock = new FakeSystemClock();
         mMainExecutor = new FakeExecutor(clock);
         mBgExecutor = new FakeExecutor(clock);

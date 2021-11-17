@@ -38,22 +38,32 @@ import java.util.List;
 
 /**
  * The TvIAppService class represents a TV interactive applications RTE.
- * @hide
  */
 public abstract class TvIAppService extends Service {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvIAppService";
 
-    private final Handler mServiceHandler = new ServiceHandler();
+    // TODO: cleanup and unhide APIs.
 
     /**
-     * This is the interface name that a service implementing an environment to run Tv IApp should
-     * say that it support -- that is, this is the action it uses for its intent filter. To be
-     * supported, the service must also require the BIND_TV_IAPP permission so that other
-     * applications cannot abuse it.
+     * This is the interface name that a service implementing a TV IApp service should say that it
+     * supports -- that is, this is the action it uses for its intent filter. To be supported, the
+     * service must also require the android.Manifest.permission#BIND_TV_IAPP permission so
+     * that other applications cannot abuse it.
      */
-    public static final String SERVICE_INTERFACE = "android.media.tv.TvIAppService";
+    public static final String SERVICE_INTERFACE = "android.media.tv.interactive.TvIAppService";
 
+    /**
+     * Name under which a TvIAppService component publishes information about itself. This meta-data
+     * must reference an XML resource containing an
+     * <code>&lt;{@link android.R.styleable#TvIAppService tv-iapp}&gt;</code>
+     * tag.
+     */
+    public static final String SERVICE_META_DATA = "android.media.tv.interactive.app";
+
+    private final Handler mServiceHandler = new ServiceHandler();
+
+    /** @hide */
     @Override
     public final IBinder onBind(Intent intent) {
         ITvIAppService.Stub tvIAppServiceBinder = new ITvIAppService.Stub() {
@@ -83,12 +93,17 @@ public abstract class TvIAppService extends Service {
      *
      * @param iAppServiceId The ID of the TV IApp associated with the session.
      * @param type The type of the TV IApp associated with the session.
+     * @hide
      */
     @Nullable
-    public abstract Session onCreateSession(@NonNull String iAppServiceId, int type);
+    public Session onCreateSession(@NonNull String iAppServiceId, int type) {
+        // TODO: make it abstract when unhide
+        return null;
+    }
 
     /**
      * Base class for derived classes to implement to provide a TV interactive app session.
+     * @hide
      */
     public abstract static class Session implements KeyEvent.Callback {
         private final Object mLock = new Object();
@@ -113,6 +128,7 @@ public abstract class TvIAppService extends Service {
 
         /**
          * Starts TvIAppService session.
+         * @hide
          */
         public void onStartIApp() {
         }
@@ -144,6 +160,7 @@ public abstract class TvIAppService extends Service {
 
         /**
          * Releases TvIAppService session.
+         * @hide
          */
         public void onRelease() {
         }
@@ -245,6 +262,7 @@ public abstract class TvIAppService extends Service {
 
     /**
      * Implements the internal ITvIAppSession interface.
+     * @hide
      */
     public static class ITvIAppSessionWrapper extends ITvIAppSession.Stub {
         private final Session mSessionImpl;

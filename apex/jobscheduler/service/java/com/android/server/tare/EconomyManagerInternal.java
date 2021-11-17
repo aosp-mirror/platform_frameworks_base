@@ -74,7 +74,7 @@ public interface EconomyManagerInternal {
     }
 
     /**
-     * A collection of {@link AnticipatedAction}s that will be performed together.
+     * A collection of {@link AnticipatedAction AnticipatedActions} that will be performed together.
      */
     final class ActionBill {
         private static final Comparator<AnticipatedAction>

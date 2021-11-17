@@ -631,7 +631,8 @@ public final class SystemServer implements Dumpable {
         mStartCount = SystemProperties.getInt(SYSPROP_START_COUNT, 0) + 1;
         mRuntimeStartElapsedTime = SystemClock.elapsedRealtime();
         mRuntimeStartUptime = SystemClock.uptimeMillis();
-        Process.setStartTimes(mRuntimeStartElapsedTime, mRuntimeStartUptime);
+        Process.setStartTimes(mRuntimeStartElapsedTime, mRuntimeStartUptime,
+                mRuntimeStartElapsedTime, mRuntimeStartUptime);
 
         // Remember if it's runtime restart(when sys.boot_completed is already set) or reboot
         // We don't use "mStartCount > 1" here because it'll be wrong on a FDE device.

@@ -51,4 +51,5 @@ interface IEuiccController {
     void setSupportedCountries(boolean isSupported, in List<String> countriesList);
     List<String> getSupportedCountries(boolean isSupported);
     boolean isSupportedCountry(String countryIso);
+    boolean isSimPortAvailable(int cardId, int portIndex, String callingPackage);
 }

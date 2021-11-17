@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.media.PlaybackParams;
+import android.media.tv.interactive.TvIAppManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -2073,6 +2074,8 @@ public final class TvInputManager {
         // @GuardedBy("mMetadataLock")
         private int mVideoHeight;
 
+        private TvIAppManager.Session mIAppSession;
+
         private Session(IBinder token, InputChannel channel, ITvInputManager service, int userId,
                 int seq, SparseArray<SessionCallbackRecord> sessionCallbackRecordMap) {
             mToken = token;
@@ -2081,6 +2084,14 @@ public final class TvInputManager {
             mUserId = userId;
             mSeq = seq;
             mSessionCallbackRecordMap = sessionCallbackRecordMap;
+        }
+
+        public TvIAppManager.Session getIAppSession() {
+            return mIAppSession;
+        }
+
+        public void setIAppSession(TvIAppManager.Session IAppSession) {
+            this.mIAppSession = IAppSession;
         }
 
         /**

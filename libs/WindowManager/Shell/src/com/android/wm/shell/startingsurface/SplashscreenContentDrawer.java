@@ -61,9 +61,11 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.palette.Palette;
 import com.android.internal.graphics.palette.Quantizer;
 import com.android.internal.graphics.palette.VariationalKMeansQuantizer;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.BaseIconFactory;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -78,8 +80,7 @@ import java.util.function.UnaryOperator;
  * @hide
  */
 public class SplashscreenContentDrawer {
-    private static final String TAG = StartingSurfaceDrawer.TAG;
-    private static final boolean DEBUG = StartingSurfaceDrawer.DEBUG_SPLASH_SCREEN;
+    private static final String TAG = StartingWindowController.TAG;
 
     // The acceptable area ratio of foreground_icon_area/background_icon_area, if there is an
     // icon which it's non-transparent foreground area is similar to it's background area, then
@@ -295,12 +296,10 @@ public class SplashscreenContentDrawer {
                 R.styleable.Window_windowSplashScreenIconBackgroundColor, def),
                 Color.TRANSPARENT);
         typedArray.recycle();
-        if (DEBUG) {
-            Slog.d(TAG, "window attributes color: "
-                    + Integer.toHexString(attrs.mWindowBgColor)
-                    + " icon " + attrs.mSplashScreenIcon + " duration " + attrs.mAnimationDuration
-                    + " brandImage " + attrs.mBrandingImage);
-        }
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                "getWindowAttrs: window attributes color: %s, replace icon: %b, avd duration: %d",
+                Integer.toHexString(attrs.mWindowBgColor), attrs.mSplashScreenIcon != null,
+                attrs.mAnimationDuration);
     }
 
     /** Creates the wrapper with system theme to avoid unexpected styles from app. */
@@ -385,9 +384,8 @@ public class SplashscreenContentDrawer {
                     iconDrawable = mContext.getPackageManager().getDefaultActivityIcon();
                 }
                 if (!processAdaptiveIcon(iconDrawable)) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "The icon is not an AdaptiveIconDrawable");
-                    }
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                            "The icon is not an AdaptiveIconDrawable");
                     Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "legacy_icon_factory");
                     final ShapeIconFactory factory = new ShapeIconFactory(
                             SplashscreenContentDrawer.this.mContext,
@@ -435,14 +433,14 @@ public class SplashscreenContentDrawer {
                     () -> new DrawableColorTester(iconForeground,
                             DrawableColorTester.TRANSLUCENT_FILTER /* filterType */),
                     () -> new DrawableColorTester(adaptiveIconDrawable.getBackground()));
-
-            if (DEBUG) {
-                Slog.d(TAG, "FgMainColor=" + Integer.toHexString(iconColor.mFgColor)
-                        + " BgMainColor=" + Integer.toHexString(iconColor.mBgColor)
-                        + " IsBgComplex=" + iconColor.mIsBgComplex
-                        + " FromCache=" + (iconColor.mReuseCount > 0)
-                        + " ThemeColor=" + Integer.toHexString(mThemeColor));
-            }
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                    "processAdaptiveIcon: FgMainColor=%s, BgMainColor=%s, "
+                            + "IsBgComplex=%b, FromCache=%b, ThemeColor=%s",
+                    Integer.toHexString(iconColor.mFgColor),
+                    Integer.toHexString(iconColor.mBgColor),
+                    iconColor.mIsBgComplex,
+                    iconColor.mReuseCount > 0,
+                    Integer.toHexString(mThemeColor));
 
             // Only draw the foreground of AdaptiveIcon to the splash screen if below condition
             // meet:
@@ -456,9 +454,8 @@ public class SplashscreenContentDrawer {
                     && (isRgbSimilarInHsv(mThemeColor, iconColor.mBgColor)
                             || (iconColor.mIsBgGrayscale
                                     && !isRgbSimilarInHsv(mThemeColor, iconColor.mFgColor)))) {
-                if (DEBUG) {
-                    Slog.d(TAG, "makeSplashScreenContentView: choose fg icon");
-                }
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                        "processAdaptiveIcon: choose fg icon");
                 // Reference AdaptiveIcon description, outer is 108 and inner is 72, so we
                 // scale by 192/160 if we only draw adaptiveIcon's foreground.
                 final float noBgScale =
@@ -469,9 +466,8 @@ public class SplashscreenContentDrawer {
                 mFinalIconSize = (int) (0.5f + mIconSize * noBgScale);
                 createIconDrawable(iconForeground, false);
             } else {
-                if (DEBUG) {
-                    Slog.d(TAG, "makeSplashScreenContentView: draw whole icon");
-                }
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                        "processAdaptiveIcon: draw whole icon");
                 createIconDrawable(iconDrawable, false);
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -504,9 +500,6 @@ public class SplashscreenContentDrawer {
                         mBrandingImageHeight);
             }
             final SplashScreenView splashScreenView = builder.build();
-            if (DEBUG) {
-                Slog.d(TAG, "fillViewWithIcon surfaceWindowView " + splashScreenView);
-            }
             if (mSuggestType != STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
                 splashScreenView.addOnAttachStateChangeListener(
                         new View.OnAttachStateChangeListener() {
@@ -536,10 +529,9 @@ public class SplashscreenContentDrawer {
         final float lumB = Color.luminance(b);
         final float contrastRatio = lumA > lumB
                 ? (lumA + 0.05f) / (lumB + 0.05f) : (lumB + 0.05f) / (lumA + 0.05f);
-        if (DEBUG) {
-            Slog.d(TAG, "isRgbSimilarInHsv a: " + Integer.toHexString(a)
-                    + " b " + Integer.toHexString(b) + " contrast ratio: " + contrastRatio);
-        }
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                "isRgbSimilarInHsv a:%s, b:%s, contrast ratio:%f",
+                Integer.toHexString(a), Integer.toHexString(b), contrastRatio);
         if (contrastRatio < 2) {
             return true;
         }
@@ -560,14 +552,11 @@ public class SplashscreenContentDrawer {
         final double square = squareH + squareS + squareV;
         final double mean = square / 3;
         final double root = Math.sqrt(mean);
-        if (DEBUG) {
-            Slog.d(TAG, "hsvDiff " + minAngle
-                    + " ah " + aHsv[0] + " bh " + bHsv[0]
-                    + " as " + aHsv[1] + " bs " + bHsv[1]
-                    + " av " + aHsv[2] + " bv " + bHsv[2]
-                    + " sqH " + squareH + " sqS " + squareS + " sqV " + squareV
-                    + " root " + root);
-        }
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                "isRgbSimilarInHsv hsvDiff: %d, ah: %f, bh: %f, as: %f, bs: %f, av: %f, bv: %f, "
+                        + "sqH: %f, sqS: %f, sqV: %f, rsm: %f",
+                minAngle, aHsv[0], bHsv[0], aHsv[1], bHsv[1], aHsv[2], bHsv[2],
+                squareH, squareS, squareV, root);
         return root < 0.1;
     }
 
@@ -598,9 +587,8 @@ public class SplashscreenContentDrawer {
             if (drawable instanceof LayerDrawable) {
                 LayerDrawable layerDrawable = (LayerDrawable) drawable;
                 if (layerDrawable.getNumberOfLayers() > 0) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "replace drawable with bottom layer drawable");
-                    }
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                            "DrawableColorTester: replace drawable with bottom layer drawable");
                     drawable = layerDrawable.getDrawable(0);
                 }
             }
@@ -805,9 +793,8 @@ public class SplashscreenContentDrawer {
                         }
                     }
                     if (realSize == 0) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "quantize: this is pure transparent image");
-                        }
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                                "DrawableTester quantize: pure transparent image");
                         mInnerQuantizer.quantize(pixels, maxColors);
                         return;
                     }

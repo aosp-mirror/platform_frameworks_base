@@ -222,6 +222,11 @@ public class SubscriptionInfo implements Parcelable {
     private boolean mAreUiccApplicationsEnabled = true;
 
     /**
+     * The port index of the Uicc card.
+     */
+    private final int mPortIndex;
+
+    /**
      * Public copy constructor.
      * @hide
      */
@@ -274,6 +279,22 @@ public class SubscriptionInfo implements Parcelable {
             int carrierId, int profileClass, int subType, @Nullable String groupOwner,
             @Nullable UiccAccessRule[] carrierConfigAccessRules,
             boolean areUiccApplicationsEnabled) {
+        this(id, iccId, simSlotIndex, displayName, carrierName, nameSource, iconTint, number,
+                roaming, icon, mcc, mnc, countryIso, isEmbedded, nativeAccessRules, cardString,
+                cardId, isOpportunistic, groupUUID, isGroupDisabled, carrierId, profileClass,
+                subType, groupOwner, carrierConfigAccessRules, areUiccApplicationsEnabled, 0);
+    }
+    /**
+     * @hide
+     */
+    public SubscriptionInfo(int id, String iccId, int simSlotIndex, CharSequence displayName,
+            CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
+            Bitmap icon, String mcc, String mnc, String countryIso, boolean isEmbedded,
+            @Nullable UiccAccessRule[] nativeAccessRules, String cardString, int cardId,
+            boolean isOpportunistic, @Nullable String groupUUID, boolean isGroupDisabled,
+            int carrierId, int profileClass, int subType, @Nullable String groupOwner,
+            @Nullable UiccAccessRule[] carrierConfigAccessRules,
+            boolean areUiccApplicationsEnabled, int portIndex) {
         this.mId = id;
         this.mIccId = iccId;
         this.mSimSlotIndex = simSlotIndex;
@@ -300,8 +321,8 @@ public class SubscriptionInfo implements Parcelable {
         this.mGroupOwner = groupOwner;
         this.mCarrierConfigAccessRules = carrierConfigAccessRules;
         this.mAreUiccApplicationsEnabled = areUiccApplicationsEnabled;
+        this.mPortIndex = portIndex;
     }
-
     /**
      * @return the subscription ID.
      */
@@ -737,6 +758,14 @@ public class SubscriptionInfo implements Parcelable {
     public int getCardId() {
         return this.mCardId;
     }
+    /**
+     * Returns the port index of the SIM card which contains the subscription.
+     *
+     * @return the portIndex
+     */
+    public int getPortIndex() {
+        return this.mPortIndex;
+    }
 
     /**
      * Set whether the subscription's group is disabled.
@@ -783,6 +812,7 @@ public class SubscriptionInfo implements Parcelable {
             UiccAccessRule[] nativeAccessRules = source.createTypedArray(UiccAccessRule.CREATOR);
             String cardString = source.readString();
             int cardId = source.readInt();
+            int portId = source.readInt();
             boolean isOpportunistic = source.readBoolean();
             String groupUUID = source.readString();
             boolean isGroupDisabled = source.readBoolean();
@@ -800,7 +830,7 @@ public class SubscriptionInfo implements Parcelable {
                     carrierName, nameSource, iconTint, number, dataRoaming, /* icon= */ null,
                     mcc, mnc, countryIso, isEmbedded, nativeAccessRules, cardString, cardId,
                     isOpportunistic, groupUUID, isGroupDisabled, carrierid, profileClass, subType,
-                    groupOwner, carrierConfigAccessRules, areUiccApplicationsEnabled);
+                    groupOwner, carrierConfigAccessRules, areUiccApplicationsEnabled, portId);
             info.setAssociatedPlmns(ehplmns, hplmns);
             return info;
         }
@@ -830,6 +860,7 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeTypedArray(mNativeAccessRules, flags);
         dest.writeString(mCardString);
         dest.writeInt(mCardId);
+        dest.writeInt(mPortIndex);
         dest.writeBoolean(mIsOpportunistic);
         dest.writeString(mGroupUUID == null ? null : mGroupUUID.toString());
         dest.writeBoolean(mIsGroupDisabled);
@@ -876,6 +907,7 @@ public class SubscriptionInfo implements Parcelable {
                 + " mnc=" + mMnc + " countryIso=" + mCountryIso + " isEmbedded=" + mIsEmbedded
                 + " nativeAccessRules=" + Arrays.toString(mNativeAccessRules)
                 + " cardString=" + cardStringToPrint + " cardId=" + mCardId
+                + " portIndex=" + mPortIndex
                 + " isOpportunistic=" + mIsOpportunistic + " groupUUID=" + mGroupUUID
                 + " isGroupDisabled=" + mIsGroupDisabled
                 + " profileClass=" + mProfileClass
@@ -892,7 +924,7 @@ public class SubscriptionInfo implements Parcelable {
         return Objects.hash(mId, mSimSlotIndex, mNameSource, mIconTint, mDataRoaming, mIsEmbedded,
                 mIsOpportunistic, mGroupUUID, mIccId, mNumber, mMcc, mMnc, mCountryIso, mCardString,
                 mCardId, mDisplayName, mCarrierName, mNativeAccessRules, mIsGroupDisabled,
-                mCarrierId, mProfileClass, mGroupOwner, mAreUiccApplicationsEnabled);
+                mCarrierId, mProfileClass, mGroupOwner, mAreUiccApplicationsEnabled, mPortIndex);
     }
 
     @Override
@@ -925,6 +957,7 @@ public class SubscriptionInfo implements Parcelable {
                 && Objects.equals(mCountryIso, toCompare.mCountryIso)
                 && Objects.equals(mCardString, toCompare.mCardString)
                 && Objects.equals(mCardId, toCompare.mCardId)
+                && mPortIndex == toCompare.mPortIndex
                 && Objects.equals(mGroupOwner, toCompare.mGroupOwner)
                 && TextUtils.equals(mDisplayName, toCompare.mDisplayName)
                 && TextUtils.equals(mCarrierName, toCompare.mCarrierName)

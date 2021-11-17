@@ -24,6 +24,8 @@ cc_library_shared {
 
     srcs: [
         "GnssAntennaInfoCallback.cpp",
+        "GnssBatching.cpp",
+        "GnssBatchingCallback.cpp",
         "GnssConfiguration.cpp",
         "GnssMeasurement.cpp",
         "GnssMeasurementCallback.cpp",

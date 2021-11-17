@@ -62,6 +62,7 @@ import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -143,6 +144,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
     @Mock private NotificationGroupManagerLegacy mGroupMembershipManager;
     @Mock private NotificationGroupManagerLegacy mGroupExpansionManager;
     @Mock private FeatureFlags mFeatureFlags;
+    @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private LeakDetector mLeakDetector;
 
     @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
@@ -179,6 +181,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 .setNotification(notification)
                 .build();
 
+        when(mNotifPipelineFlags.checkLegacyPipelineEnabled()).thenReturn(true);
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
 
         mEntryManager = new NotificationEntryManager(
@@ -282,7 +285,6 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
 
         mRowBinder = new NotificationRowBinderImpl(
                 mContext,
-                mFeatureFlags,
                 new NotificationMessagingUtil(mContext),
                 mRemoteInputManager,
                 mLockscreenUserManager,
@@ -294,7 +296,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                         mEntryManager,
                         mock(LauncherApps.class),
                         new IconBuilder(mContext)),
-                mock(LowPriorityInflationHelper.class));
+                mock(LowPriorityInflationHelper.class),
+                mNotifPipelineFlags);
 
         mEntryManager.setUpWithPresenter(mPresenter);
         mEntryManager.addNotificationEntryListener(mEntryListener);

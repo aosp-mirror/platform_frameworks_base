@@ -52,7 +52,7 @@ import com.android.internal.R;
  */
 public class SplashscreenIconDrawableFactory {
 
-    private static final String TAG = "SplashscreenIconDrawableFactory";
+    private static final String TAG = StartingWindowController.TAG;
 
     /**
      * @return An array containing the foreground drawable at index 0 and if needed a background

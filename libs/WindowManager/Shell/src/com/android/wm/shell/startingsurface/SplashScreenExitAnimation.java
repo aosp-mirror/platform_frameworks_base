@@ -56,7 +56,7 @@ import com.android.wm.shell.common.TransactionPool;
 public class SplashScreenExitAnimation implements Animator.AnimatorListener {
     private static final boolean DEBUG_EXIT_ANIMATION = false;
     private static final boolean DEBUG_EXIT_ANIMATION_BLEND = false;
-    private static final String TAG = StartingSurfaceDrawer.TAG;
+    private static final String TAG = StartingWindowController.TAG;
 
     private static final Interpolator ICON_INTERPOLATOR = new PathInterpolator(0.15f, 0f, 1f, 1f);
     private static final Interpolator MASK_RADIUS_INTERPOLATOR =

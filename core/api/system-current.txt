@@ -2405,6 +2405,7 @@ package android.content {
     method @NonNull public static java.io.File encodeToFile(@NonNull android.net.Uri);
     method @Nullable @RequiresPermission("android.permission.CACHE_CONTENT") public android.os.Bundle getCache(@NonNull android.net.Uri);
     method @RequiresPermission("android.permission.CACHE_CONTENT") public void putCache(@NonNull android.net.Uri, @Nullable android.os.Bundle);
+    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public final void registerContentObserverForAllUsers(@NonNull android.net.Uri, boolean, @NonNull android.database.ContentObserver);
   }
 
   public abstract class Context {
@@ -3143,6 +3144,14 @@ package android.content.rollback {
     field public static final int STATUS_FAILURE_INSTALL = 3; // 0x3
     field public static final int STATUS_FAILURE_ROLLBACK_UNAVAILABLE = 2; // 0x2
     field public static final int STATUS_SUCCESS = 0; // 0x0
+  }
+
+}
+
+package android.database {
+
+  public abstract class ContentObserver {
+    method public void onChange(boolean, @NonNull java.util.Collection<android.net.Uri>, int, @NonNull android.os.UserHandle);
   }
 
 }
@@ -7521,7 +7530,7 @@ package android.media.tv.tuner.frontend {
     method @NonNull public static android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder builder();
     method public int getCodeRate();
     method public int getModulation();
-    method @IntRange(from=0, to=255) public int getNumOfSegment();
+    method @IntRange(from=0, to=255) public int getNumberOfSegment();
     method public int getTimeInterleaveMode();
   }
 
@@ -7529,7 +7538,7 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings build();
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder setCodeRate(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder setModulation(int);
-    method @IntRange(from=0, to=255) @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder setNumOfSegment(int);
+    method @IntRange(from=0, to=255) @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder setNumberOfSegment(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder setTimeInterleaveMode(int);
   }
 
@@ -8946,6 +8955,7 @@ package android.os {
     field public static final int SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED = 4; // 0x4
     field public static final int SWITCHABILITY_STATUS_USER_IN_CALL = 1; // 0x1
     field public static final int SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED = 2; // 0x2
+    field public static final String USER_TYPE_FULL_GUEST = "android.os.usertype.full.GUEST";
     field public static final String USER_TYPE_FULL_SECONDARY = "android.os.usertype.full.SECONDARY";
     field public static final String USER_TYPE_FULL_SYSTEM = "android.os.usertype.full.SYSTEM";
     field public static final String USER_TYPE_PROFILE_CLONE = "android.os.usertype.profile.CLONE";
@@ -12349,6 +12359,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSimPowerState(int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSimPowerStateForSlot(int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSimPowerStateForSlot(int, int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSimSlotMapping(@NonNull java.util.Collection<android.telephony.UiccSlotMapping>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSystemSelectionChannels(@NonNull java.util.List<android.telephony.RadioAccessSpecifier>, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSystemSelectionChannels(@NonNull java.util.List<android.telephony.RadioAccessSpecifier>);
     method @Deprecated public void setVisualVoicemailEnabled(android.telecom.PhoneAccountHandle, boolean);
@@ -12360,7 +12371,7 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPinReportResult(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean supplyPuk(String, String);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPukReportResult(String, String);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean switchSlots(int[]);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean switchSlots(int[]);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void toggleRadioOnOff();
     method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void updateOtaEmergencyNumberDbFilePath(@NonNull android.os.ParcelFileDescriptor);
     method public void updateServiceLocation();
@@ -12530,10 +12541,11 @@ package android.telephony {
     method public int describeContents();
     method public String getCardId();
     method public int getCardStateInfo();
-    method public boolean getIsActive();
+    method @Deprecated public boolean getIsActive();
     method public boolean getIsEuicc();
     method public boolean getIsExtendedApduSupported();
-    method public int getLogicalSlotIdx();
+    method @Deprecated public int getLogicalSlotIdx();
+    method @NonNull public java.util.Collection<android.telephony.UiccPortInfo> getPorts();
     method public boolean isRemovable();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CARD_STATE_INFO_ABSENT = 1; // 0x1
@@ -12541,6 +12553,15 @@ package android.telephony {
     field public static final int CARD_STATE_INFO_PRESENT = 2; // 0x2
     field public static final int CARD_STATE_INFO_RESTRICTED = 4; // 0x4
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.UiccSlotInfo> CREATOR;
+  }
+
+  public final class UiccSlotMapping implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0) public int getLogicalSlotIndex();
+    method @IntRange(from=0) public int getPhysicalSlotIndex();
+    method @IntRange(from=0) public int getPortIndex();
+    method public void writeToParcel(@Nullable android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.UiccSlotMapping> CREATOR;
   }
 
   public abstract class VisualVoicemailService extends android.app.Service {
@@ -12834,7 +12855,8 @@ package android.telephony.euicc {
     method public void authenticateServer(String, String, byte[], byte[], byte[], byte[], java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<byte[]>);
     method public void cancelSession(String, byte[], @android.telephony.euicc.EuiccCardManager.CancelReason int, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<byte[]>);
     method public void deleteProfile(String, String, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<java.lang.Void>);
-    method public void disableProfile(String, String, boolean, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<java.lang.Void>);
+    method @Deprecated public void disableProfile(String, String, boolean, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<java.lang.Void>);
+    method public void disableProfile(@Nullable String, @Nullable String, int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.euicc.EuiccCardManager.ResultCallback<java.lang.Void>);
     method public void listNotifications(String, @android.telephony.euicc.EuiccNotification.Event int, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<android.telephony.euicc.EuiccNotification[]>);
     method public void loadBoundProfilePackage(String, byte[], java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<byte[]>);
     method public void prepareDownload(String, @Nullable byte[], byte[], byte[], byte[], java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<byte[]>);
@@ -12852,7 +12874,8 @@ package android.telephony.euicc {
     method public void retrieveNotificationList(String, @android.telephony.euicc.EuiccNotification.Event int, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<android.telephony.euicc.EuiccNotification[]>);
     method public void setDefaultSmdpAddress(String, String, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<java.lang.Void>);
     method public void setNickname(String, String, String, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<java.lang.Void>);
-    method public void switchToProfile(String, String, boolean, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<android.service.euicc.EuiccProfileInfo>);
+    method @Deprecated public void switchToProfile(String, String, boolean, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<android.service.euicc.EuiccProfileInfo>);
+    method public void switchToProfile(@Nullable String, @Nullable String, int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.euicc.EuiccCardManager.ResultCallback<android.service.euicc.EuiccProfileInfo>);
     field public static final int CANCEL_REASON_END_USER_REJECTED = 0; // 0x0
     field public static final int CANCEL_REASON_POSTPONED = 1; // 0x1
     field public static final int CANCEL_REASON_PPR_NOT_ALLOWED = 3; // 0x3

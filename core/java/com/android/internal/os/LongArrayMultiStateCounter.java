@@ -27,6 +27,7 @@ import dalvik.annotation.optimization.FastNative;
 import libcore.util.NativeAllocationRegistry;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Performs per-state counting of multi-element values over time. The class' behavior is illustrated
@@ -120,6 +121,8 @@ public final class LongArrayMultiStateCounter implements Parcelable {
     private static final NativeAllocationRegistry sRegistry =
             NativeAllocationRegistry.createMalloced(
                     LongArrayMultiStateCounter.class.getClassLoader(), native_getReleaseFunc());
+    private static final AtomicReference<LongArrayContainer> sTmpArrayContainer =
+            new AtomicReference<>();
 
     private final int mStateCount;
     private final int mLength;
@@ -201,6 +204,19 @@ public final class LongArrayMultiStateCounter implements Parcelable {
      */
     public void reset() {
         native_reset(mNativeObject);
+    }
+
+    /**
+     * Populates the array with the accumulated counts for the specified state.
+     */
+    public void getCounts(long[] counts, int state) {
+        LongArrayContainer container = sTmpArrayContainer.getAndSet(null);
+        if (container == null || container.mLength != counts.length) {
+            container = new LongArrayContainer(counts.length);
+        }
+        getCounts(container, state);
+        container.getValues(counts);
+        sTmpArrayContainer.set(container);
     }
 
     /**

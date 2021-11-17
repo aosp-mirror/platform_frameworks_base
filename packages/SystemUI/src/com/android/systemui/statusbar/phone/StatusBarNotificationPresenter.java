@@ -57,6 +57,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
@@ -108,6 +109,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private final AccessibilityManager mAccessibilityManager;
     private final KeyguardManager mKeyguardManager;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
+    private final NotifPipelineFlags mNotifPipelineFlags;
     private final IStatusBarService mBarService;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private boolean mReinflateNotificationsOnUserSwitched;
@@ -144,7 +146,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             InitController initController,
             NotificationInterruptStateProvider notificationInterruptStateProvider,
             NotificationRemoteInputManager remoteInputManager,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            NotifPipelineFlags notifPipelineFlags) {
         mKeyguardStateController = keyguardStateController;
         mNotificationPanel = panel;
         mHeadsUpManager = headsUp;
@@ -167,6 +170,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mLockscreenGestureLogger = lockscreenGestureLogger;
         mAboveShelfObserver = new AboveShelfObserver(stackScrollerController.getView());
         mNotificationShadeWindowController = notificationShadeWindowController;
+        mNotifPipelineFlags = notifPipelineFlags;
         mAboveShelfObserver.setListener(statusBarWindow.findViewById(
                 R.id.notification_container_parent));
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
@@ -305,7 +309,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
     @Override
     public void updateNotificationViews(final String reason) {
-        if (!mFeatureFlags.checkLegacyPipelineEnabled()) {
+        if (!mNotifPipelineFlags.checkLegacyPipelineEnabled()) {
             return;
         }
         // The function updateRowStates depends on both of these being non-null, so check them here.

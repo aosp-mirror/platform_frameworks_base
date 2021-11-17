@@ -33,6 +33,8 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.StatusBarManager;
+import android.graphics.Insets;
+import android.graphics.Rect;
 import android.util.IntArray;
 import android.util.SparseArray;
 import android.view.InsetsAnimationControlCallbacks;
@@ -50,7 +52,6 @@ import android.view.WindowInsets.Type;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowInsetsAnimationControlListener;
-import android.view.WindowInsetsAnimationController;
 import android.view.WindowManager;
 
 import com.android.internal.R;
@@ -220,8 +221,9 @@ class InsetsPolicy {
      */
     InsetsState getInsetsForWindow(WindowState target) {
         final InsetsState originalState = mStateController.getInsetsForWindow(target);
-        final InsetsState state = adjustVisibilityForTransientTypes(originalState);
-        return adjustVisibilityForIme(target, state, state == originalState);
+        InsetsState state = adjustVisibilityForTransientTypes(originalState);
+        state = adjustVisibilityForIme(target, state, state == originalState);
+        return adjustInsetsForRoundedCorners(target, state, state == originalState);
     }
 
     /**
@@ -282,6 +284,34 @@ class InsetsPolicy {
                 state.addSource(imeSource);
                 return state;
             }
+        }
+        return originalState;
+    }
+
+    private InsetsState adjustInsetsForRoundedCorners(WindowState w, InsetsState originalState,
+            boolean copyState) {
+        final WindowState roundedCornerWindow = mPolicy.getRoundedCornerWindow();
+        final Task task = w.getTask();
+        final boolean isInSplitScreenMode = task != null && task.inMultiWindowMode()
+                && task.getRootTask() != null
+                && task.getRootTask().getAdjacentTaskFragment() != null;
+        if (task != null && !task.getWindowConfiguration().tasksAreFloating()
+                && (roundedCornerWindow != null || isInSplitScreenMode)) {
+            // Instead of using display frame to calculating rounded corner, for the fake rounded
+            // corners drawn by divider bar or task bar, we need to re-calculate rounded corners
+            // based on task bounds and if the task bounds is intersected with task bar, we should
+            // exclude the intersected part.
+            final Rect roundedCornerFrame = new Rect(task.getBounds());
+            if (roundedCornerWindow != null
+                    && roundedCornerWindow.getControllableInsetProvider() != null) {
+                final InsetsSource source =
+                        roundedCornerWindow.getControllableInsetProvider().getSource();
+                final Insets insets = source.calculateInsets(roundedCornerFrame, false);
+                roundedCornerFrame.inset(insets);
+            }
+            final InsetsState state = copyState ? new InsetsState(originalState) : originalState;
+            state.setRoundedCornerFrame(roundedCornerFrame);
+            return state;
         }
         return originalState;
     }

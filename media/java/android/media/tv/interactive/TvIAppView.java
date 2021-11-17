@@ -16,9 +16,12 @@
 
 package android.media.tv.interactive;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.media.tv.TvInputManager;
+import android.media.tv.TvView;
 import android.media.tv.interactive.TvIAppManager.Session;
 import android.media.tv.interactive.TvIAppManager.SessionCallback;
 import android.os.Handler;
@@ -38,6 +41,11 @@ import android.view.ViewGroup;
 public class TvIAppView extends ViewGroup {
     private static final String TAG = "TvIAppView";
     private static final boolean DEBUG = false;
+
+    private static final int SET_TVVIEW_SUCCESS = 1;
+    private static final int SET_TVVIEW_FAIL = 2;
+    private static final int UNSET_TVVIEW_SUCCESS = 3;
+    private static final int UNSET_TVVIEW_FAIL = 4;
 
     private final TvIAppManager mTvIAppManager;
     private final Handler mHandler = new Handler();
@@ -211,6 +219,39 @@ public class TvIAppView extends ViewGroup {
             mSession = null;
             resetSurfaceView();
         }
+    }
+
+    public Session getIAppSession() {
+        return mSession;
+    }
+
+    /**
+     * Sets the TvIAppView to receive events from TIS. This method links the session of
+     * TvIAppManager to TvInputManager session, so the TIAS can get the TIS events.
+     *
+     * @param tvView the TvView to be linked to this TvIAppView via linking of Sessions.
+     * @return to be added
+     */
+    public int setTvView(@Nullable TvView tvView) {
+        if (tvView == null) {
+            return unsetTvView();
+        }
+        TvInputManager.Session inputSession = tvView.getInputSession();
+        if (inputSession == null || mSession == null) {
+            return SET_TVVIEW_FAIL;
+        }
+        mSession.setInputSession(inputSession);
+        inputSession.setIAppSession(mSession);
+        return SET_TVVIEW_SUCCESS;
+    }
+
+    private int unsetTvView() {
+        if (mSession == null || mSession.getInputSession() == null) {
+            return UNSET_TVVIEW_FAIL;
+        }
+        mSession.getInputSession().setIAppSession(null);
+        mSession.setInputSession(null);
+        return UNSET_TVVIEW_SUCCESS;
     }
 
     private class MySessionCallback extends SessionCallback {
