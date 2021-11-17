@@ -87,13 +87,13 @@ import android.app.ActivityManagerInternal.ServiceNotificationPolicy;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
-import android.app.ForegroundServiceDidNotStartInTimeException;
 import android.app.ForegroundServiceStartNotAllowedException;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.RemoteServiceException.ForegroundServiceDidNotStartInTimeException;
 import android.app.Service;
 import android.app.ServiceStartArgs;
 import android.app.admin.DevicePolicyEventLogger;
@@ -1243,7 +1243,7 @@ public final class ActiveServices {
     }
 
     void killMisbehavingService(ServiceRecord r,
-            int appUid, int appPid, String localPackageName) {
+            int appUid, int appPid, String localPackageName, int exceptionTypeId) {
         synchronized (mAm) {
             if (!r.destroying) {
                 // This service is still alive, stop it.
@@ -1257,8 +1257,8 @@ public final class ActiveServices {
                     stopServiceLocked(found, false);
                 }
             }
-            mAm.crashApplication(appUid, appPid, localPackageName, -1,
-                    "Bad notification for startForeground", true /*force*/);
+            mAm.crashApplicationWithType(appUid, appPid, localPackageName, -1,
+                    "Bad notification for startForeground", true /*force*/, exceptionTypeId);
         }
     }
 
