@@ -16,6 +16,7 @@
 
 package android.media.tv.interactive;
 
+import android.graphics.Rect;
 import android.media.tv.interactive.ITvIAppClient;
 import android.media.tv.interactive.ITvIAppManagerCallback;
 import android.media.tv.interactive.TvIAppInfo;
@@ -37,6 +38,11 @@ interface ITvIAppManager {
             int userId);
     void notifyBroadcastInfoResponse(in IBinder sessionToken, in BroadcastInfoResponse response,
             int UserId);
+
+    void createMediaView(in IBinder sessionToken, in IBinder windowToken, in Rect frame,
+            int userId);
+    void relayoutMediaView(in IBinder sessionToken, in Rect frame, int userId);
+    void removeMediaView(in IBinder sessionToken, int userId);
 
     void registerCallback(in ITvIAppManagerCallback callback, int userId);
     void unregisterCallback(in ITvIAppManagerCallback callback, int userId);
