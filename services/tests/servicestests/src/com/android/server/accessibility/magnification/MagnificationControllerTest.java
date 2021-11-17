@@ -470,6 +470,16 @@ public class MagnificationControllerTest {
     }
 
     @Test
+    public void onFullScreenMagnificationActivationState_windowActivated_disableMagnification()
+            throws RemoteException {
+        setMagnificationEnabled(MODE_WINDOW);
+
+        mMagnificationController.onFullScreenMagnificationActivationState(TEST_DISPLAY, true);
+
+        verify(mWindowMagnificationManager).disableWindowMagnification(eq(TEST_DISPLAY), eq(false));
+    }
+
+    @Test
     public void onTouchInteractionStart_fullScreenAndCapabilitiesAll_showMagnificationButton()
             throws RemoteException {
         setMagnificationEnabled(MODE_FULLSCREEN);

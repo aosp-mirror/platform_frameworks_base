@@ -357,6 +357,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                 mLastActivatedMode = mActivatedMode;
             }
             logMagnificationModeWithImeOnIfNeeded();
+            disableWindowMagnificationIfNeeded(displayId);
         } else {
             logMagnificationUsageState(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
                     SystemClock.uptimeMillis() - mFullScreenModeEnabledTime);
@@ -366,6 +367,14 @@ public class MagnificationController implements WindowMagnificationManager.Callb
             }
         }
         updateMagnificationButton(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+    }
+
+    private void disableWindowMagnificationIfNeeded(int displayId) {
+        final WindowMagnificationManager windowMagnificationManager =
+                getWindowMagnificationMgr();
+        if (isActivated(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW)) {
+            windowMagnificationManager.disableWindowMagnification(displayId, false);
+        }
     }
 
     @Override
