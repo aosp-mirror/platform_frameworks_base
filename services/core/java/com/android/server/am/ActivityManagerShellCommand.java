@@ -46,6 +46,7 @@ import android.app.IStopUserCallback;
 import android.app.IUidObserver;
 import android.app.KeyguardManager;
 import android.app.ProfilerInfo;
+import android.app.RemoteServiceException.CrashedByAdbException;
 import android.app.UserSwitchObserver;
 import android.app.WaitResult;
 import android.app.usage.AppStandbyInfo;
@@ -1173,7 +1174,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
         } catch (NumberFormatException e) {
             packageName = arg;
         }
-        mInterface.crashApplication(-1, pid, packageName, userId, "shell-induced crash", false);
+        mInterface.crashApplicationWithType(-1, pid, packageName, userId, "shell-induced crash",
+                false, CrashedByAdbException.TYPE_ID);
         return 0;
     }
 
