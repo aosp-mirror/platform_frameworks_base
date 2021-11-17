@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"बंद करा"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"विस्तृत करा"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"सेटिंग्ज"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"स्प्लिट स्क्रीन एंटर करा"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"मेनू"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> चित्रामध्ये चित्र मध्ये आहे"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g>ने हे वैशिष्ट्य वापरू नये असे तुम्हाला वाटत असल्यास, सेटिंग्ज उघडण्यासाठी टॅप करा आणि ते बंद करा."</string>
