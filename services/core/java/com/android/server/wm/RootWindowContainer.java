@@ -2587,9 +2587,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (mService.isBooted() || mService.isBooting()) {
                 startSystemDecorations(display);
             }
-            // Drop any cached DisplayInfos associated with this display id - the values are now
-            // out of date given this display added event.
-            mWmService.mPossibleDisplayInfoMapper.removePossibleDisplayInfos(displayId);
         }
     }
 
@@ -2610,8 +2607,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (displayContent == null) {
                 return;
             }
+
             displayContent.remove();
-            mWmService.mPossibleDisplayInfoMapper.removePossibleDisplayInfos(displayId);
         }
     }
 
@@ -2623,9 +2620,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (displayContent != null) {
                 displayContent.onDisplayChanged();
             }
-            // Drop any cached DisplayInfos associated with this display id - the values are now
-            // out of date given this display changed event.
-            mWmService.mPossibleDisplayInfoMapper.removePossibleDisplayInfos(displayId);
         }
     }
 
