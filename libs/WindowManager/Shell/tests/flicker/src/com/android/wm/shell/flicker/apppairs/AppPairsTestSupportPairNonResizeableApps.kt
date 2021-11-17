@@ -24,11 +24,13 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.wm.shell.flicker.appPairsDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.resetMultiWindowConfig
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.setSupportsNonResizableMultiWindow
 import org.junit.After
+import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -86,7 +88,11 @@ class AppPairsTestSupportPairNonResizeableApps(
 
     @FlakyTest
     @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+    override fun statusBarLayerRotatesScales() {
+        // This test doesn't work in shell transitions because of b/206753786
+        assumeFalse(isShellTransitionsEnabled)
+        super.statusBarLayerRotatesScales()
+    }
 
     @Presubmit
     @Test

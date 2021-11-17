@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -23,7 +24,11 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import org.junit.Assume.assumeFalse
+import org.junit.Before
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -59,6 +64,21 @@ class ExitPipWithDismissButtonTest(testSpec: FlickerTestParameter) : ExitPipTran
                 pipApp.closePipWindow(wmHelper)
             }
         }
+
+    @Before
+    fun onBefore() {
+        // This CUJ don't work in shell transitions because of b/204570898 b/204562589
+        assumeFalse(isShellTransitionsEnabled)
+    }
+
+    /** {@inheritDoc}  */
+    @Presubmit
+    @Test
+    override fun statusBarLayerRotatesScales() {
+        // This test doesn't work in shell transitions because of b/206753786
+        assumeFalse(isShellTransitionsEnabled)
+        super.statusBarLayerRotatesScales()
+    }
 
     companion object {
         /**
