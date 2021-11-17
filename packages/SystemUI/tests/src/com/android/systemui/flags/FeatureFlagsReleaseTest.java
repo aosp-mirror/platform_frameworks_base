@@ -18,15 +18,14 @@ package com.android.systemui.flags;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
-import android.content.Context;
+import android.content.res.Resources;
 
 import androidx.test.filters.SmallTest;
 
@@ -51,13 +50,14 @@ import java.io.StringWriter;
 public class FeatureFlagsReleaseTest extends SysuiTestCase {
     FeatureFlagsRelease mFeatureFlagsRelease;
 
+    @Mock private Resources mResources;
     @Mock private DumpManager mDumpManager;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mFeatureFlagsRelease = new FeatureFlagsRelease(mDumpManager);
+        mFeatureFlagsRelease = new FeatureFlagsRelease(mResources, mDumpManager);
     }
 
     @After
@@ -68,15 +68,34 @@ public class FeatureFlagsReleaseTest extends SysuiTestCase {
     }
 
     @Test
+    public void testBooleanResourceFlag() {
+        int flagId = 213;
+        int flagResourceId = 3;
+        ResourceBooleanFlag flag = new ResourceBooleanFlag(flagId, flagResourceId);
+        when(mResources.getBoolean(flagResourceId)).thenReturn(true);
+
+        assertThat(mFeatureFlagsRelease.isEnabled(flag)).isTrue();
+    }
+
+    @Test
     public void testDump() {
+        int flagIdA = 213;
+        int flagIdB = 18;
+        int flagResourceId = 3;
+        BooleanFlag flagA = new BooleanFlag(flagIdA, true);
+        ResourceBooleanFlag flagB = new ResourceBooleanFlag(flagIdB, flagResourceId);
+        when(mResources.getBoolean(flagResourceId)).thenReturn(true);
+
         // WHEN the flags have been accessed
-        assertFalse(mFeatureFlagsRelease.isEnabled(1, false));
-        assertTrue(mFeatureFlagsRelease.isEnabled(2, true));
+        assertThat(mFeatureFlagsRelease.isEnabled(1, false)).isFalse();
+        assertThat(mFeatureFlagsRelease.isEnabled(flagA)).isTrue();
+        assertThat(mFeatureFlagsRelease.isEnabled(flagB)).isTrue();
 
         // THEN the dump contains the flags and the default values
         String dump = dumpToString();
         assertThat(dump).contains(" sysui_flag_1: false\n");
-        assertThat(dump).contains(" sysui_flag_2: true\n");
+        assertThat(dump).contains(" sysui_flag_" + flagIdA + ": true\n");
+        assertThat(dump).contains(" sysui_flag_" + flagIdB + ": true\n");
     }
 
     private String dumpToString() {

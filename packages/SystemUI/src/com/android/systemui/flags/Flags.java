@@ -61,8 +61,8 @@ public class Flags {
     public static final BooleanFlag NEW_UNLOCK_SWIPE_ANIMATION =
             new BooleanFlag(202, true);
 
-    public static final BooleanFlag CHARGING_RIPPLE =
-            new BooleanFlag(203, false, R.bool.flag_charging_ripple);
+    public static final ResourceBooleanFlag CHARGING_RIPPLE =
+            new ResourceBooleanFlag(203, R.bool.flag_charging_ripple);
 
     /***************************************/
     // 300 - power menu
@@ -77,8 +77,8 @@ public class Flags {
     public static final BooleanFlag SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
             new BooleanFlag(401, false);
 
-    public static final BooleanFlag SMARTSPACE =
-            new BooleanFlag(402, false, R.bool.flag_smartspace);
+    public static final ResourceBooleanFlag SMARTSPACE =
+            new ResourceBooleanFlag(402, R.bool.flag_smartspace);
 
     /***************************************/
     // 500 - quick settings
@@ -88,11 +88,11 @@ public class Flags {
     public static final BooleanFlag COMBINED_QS_HEADERS =
             new BooleanFlag(501, false);
 
-    public static final BooleanFlag PEOPLE_TILE =
-            new BooleanFlag(502, false, R.bool.flag_conversations);
+    public static final ResourceBooleanFlag PEOPLE_TILE =
+            new ResourceBooleanFlag(502, R.bool.flag_conversations);
 
-    public static final BooleanFlag QS_USER_DETAIL_SHORTCUT =
-            new BooleanFlag(503, false, R.bool.flag_lockscreen_qs_user_detail_shortcut);
+    public static final ResourceBooleanFlag QS_USER_DETAIL_SHORTCUT =
+            new ResourceBooleanFlag(503, R.bool.flag_lockscreen_qs_user_detail_shortcut);
 
     /***************************************/
     // 600- status bar
@@ -115,8 +115,8 @@ public class Flags {
 
     /***************************************/
     // 800 - general visual/theme
-    public static final BooleanFlag MONET =
-            new BooleanFlag(800, true, R.bool.flag_monet);
+    public static final ResourceBooleanFlag MONET =
+            new ResourceBooleanFlag(800, R.bool.flag_monet);
 
     /***************************************/
     // 900 - media

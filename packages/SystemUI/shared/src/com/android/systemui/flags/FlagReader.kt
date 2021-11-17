@@ -24,6 +24,8 @@ interface FlagReader {
         return flag.default
     }
 
+    fun isEnabled(flag: ResourceBooleanFlag): Boolean
+
     /** Returns a boolean value for the given flag.  */
     fun isEnabled(id: Int, def: Boolean): Boolean {
         return def
