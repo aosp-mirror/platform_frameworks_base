@@ -70,6 +70,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -1661,6 +1662,14 @@ public class UserManager {
     public static final int USER_OPERATION_ERROR_MAX_USERS = 6;
 
     /**
+     * Indicates user operation failed because a user with that account already exists.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int USER_OPERATION_ERROR_USER_ACCOUNT_ALREADY_EXISTS = 7;
+
+    /**
      * Result returned from various user operations.
      *
      * @hide
@@ -1673,7 +1682,8 @@ public class UserManager {
             USER_OPERATION_ERROR_MAX_RUNNING_USERS,
             USER_OPERATION_ERROR_CURRENT_USER,
             USER_OPERATION_ERROR_LOW_STORAGE,
-            USER_OPERATION_ERROR_MAX_USERS
+            USER_OPERATION_ERROR_MAX_USERS,
+            USER_OPERATION_ERROR_USER_ACCOUNT_ALREADY_EXISTS
     })
     public @interface UserOperationResult {}
 
@@ -3159,26 +3169,24 @@ public class UserManager {
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
     public @NonNull NewUserResponse createUser(@NonNull NewUserRequest newUserRequest) {
-        UserInfo user = null;
-        int operationResult = USER_OPERATION_ERROR_UNKNOWN;
         try {
-            user = createUser(newUserRequest.getName(), newUserRequest.getUserType(),
-                    determineFlagsForUserCreation(newUserRequest));
-        } catch (UserOperationException e) {
-            Log.w(TAG, "Exception while creating user " + newUserRequest, e);
-            operationResult = e.getUserOperationResult();
-        }
-        if (user == null) {
-            return new NewUserResponse(null, operationResult);
-        }
-        return new NewUserResponse(user.getUserHandle(), USER_OPERATION_SUCCESS);
-    }
+            final UserHandle userHandle = mService.createUserWithAttributes(
+                    newUserRequest.getName(),
+                    newUserRequest.getUserType(),
+                    newUserRequest.getFlags(),
+                    newUserRequest.getUserIcon(),
+                    newUserRequest.getAccountName(),
+                    newUserRequest.getAccountType(),
+                    newUserRequest.getAccountOptions());
 
-    private int determineFlagsForUserCreation(NewUserRequest newUserRequest) {
-        int flags = 0;
-        if (newUserRequest.isAdmin()) flags |= UserInfo.FLAG_ADMIN;
-        if (newUserRequest.isEphemeral()) flags |= UserInfo.FLAG_EPHEMERAL;
-        return flags;
+            return new NewUserResponse(userHandle, USER_OPERATION_SUCCESS);
+
+        } catch (ServiceSpecificException e) {
+            Log.w(TAG, "Exception while creating user " + newUserRequest, e);
+            return new NewUserResponse(null, e.errorCode);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -4913,17 +4921,40 @@ public class UserManager {
     }
 
     /**
-     * @hide
      * Checks if any uninitialized user has the specific seed account name and type.
      *
      * @param accountName The account name to check for
      * @param accountType The account type of the account to check for
      * @return whether the seed account was found
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public boolean someUserHasSeedAccount(String accountName, String accountType) {
         try {
             return mService.someUserHasSeedAccount(accountName, accountType);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks if any initialized or uninitialized user has the specific account name and type.
+     *
+     * @param accountName The account name to check for
+     * @param accountType The account type of the account to check for
+     * @return whether the account was found
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS})
+    public boolean someUserHasAccount(
+            @NonNull String accountName, @NonNull String accountType) {
+        Objects.requireNonNull(accountName, "accountName must not be null");
+        Objects.requireNonNull(accountType, "accountType must not be null");
+
+        try {
+            return mService.someUserHasAccount(accountName, accountType);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

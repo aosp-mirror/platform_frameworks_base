@@ -17,7 +17,11 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.content.pm.UserInfo;
+import android.graphics.Bitmap;
+import android.text.TextUtils;
 
 /**
  * Contains necessary information to create user using
@@ -26,6 +30,7 @@ import android.annotation.SystemApi;
  * @hide
  */
 @SystemApi
+@SuppressLint("PackageLayering")
 public final class NewUserRequest {
     @Nullable
     private final String mName;
@@ -33,16 +38,24 @@ public final class NewUserRequest {
     private final boolean mEphemeral;
     @NonNull
     private final String mUserType;
+    private final Bitmap mUserIcon;
+    private final String mAccountName;
+    private final String mAccountType;
+    private final PersistableBundle mAccountOptions;
 
     private NewUserRequest(Builder builder) {
         mName = builder.mName;
         mAdmin = builder.mAdmin;
         mEphemeral = builder.mEphemeral;
         mUserType = builder.mUserType;
+        mUserIcon = builder.mUserIcon;
+        mAccountName = builder.mAccountName;
+        mAccountType = builder.mAccountType;
+        mAccountOptions = builder.mAccountOptions;
     }
 
     /**
-     * Gets the user name.
+     * Returns the name of the user.
      */
     @Nullable
     public String getName() {
@@ -50,7 +63,7 @@ public final class NewUserRequest {
     }
 
     /**
-     * Is user Ephemenral?
+     * Returns whether the user is ephemeral.
      *
      * <p> Ephemeral user will be removed after leaving the foreground.
      */
@@ -59,7 +72,7 @@ public final class NewUserRequest {
     }
 
     /**
-     * Is user Admin?
+     * Returns whether the user is an admin.
      *
      * <p> Admin user is with administrative privileges and such user can create and
      * delete users.
@@ -69,7 +82,17 @@ public final class NewUserRequest {
     }
 
     /**
-     * Gets user type.
+     * Returns the calculated flags for user creation.
+     */
+    int getFlags() {
+        int flags = 0;
+        if (isAdmin()) flags |= UserInfo.FLAG_ADMIN;
+        if (isEphemeral()) flags |= UserInfo.FLAG_EPHEMERAL;
+        return flags;
+    }
+
+    /**
+     * Returns the user type.
      *
      * <p> Supported types are {@link UserManager.USER_TYPE_FULL_SECONDARY} and
      * {@link USER_TYPE_FULL_GUEST}
@@ -79,25 +102,71 @@ public final class NewUserRequest {
         return mUserType;
     }
 
+    /**
+     * Returns the user icon.
+     */
+    @Nullable
+    public Bitmap getUserIcon() {
+        return mUserIcon;
+    }
+
+    /**
+     * Returns the account name.
+     */
+    @Nullable
+    public String getAccountName() {
+        return mAccountName;
+    }
+
+    /**
+     * Returns the account type.
+     */
+    @Nullable
+    public String getAccountType() {
+        return mAccountType;
+    }
+
+    /**
+     * Returns the account options.
+     */
+    @SuppressLint("NullableCollection")
+    @Nullable
+    public PersistableBundle getAccountOptions() {
+        return mAccountOptions;
+    }
+
     @Override
     public String toString() {
-        return String.format(
-                "NewUserRequest- UserName:%s, userType:%s, IsAdmin:%s, IsEphemeral:%s.", mName,
-                mUserType, mAdmin, mEphemeral);
+        return "NewUserRequest{"
+                + "mName='" + mName + '\''
+                + ", mAdmin=" + mAdmin
+                + ", mEphemeral=" + mEphemeral
+                + ", mUserType='" + mUserType + '\''
+                + ", mAccountName='" + mAccountName + '\''
+                + ", mAccountType='" + mAccountType + '\''
+                + ", mAccountOptions=" + mAccountOptions
+                + '}';
     }
 
     /**
      * Builder for building {@link NewUserRequest}
      */
+    @SuppressLint("PackageLayering")
     public static final class Builder {
 
         private String mName;
         private boolean mAdmin;
         private boolean mEphemeral;
         private String mUserType = UserManager.USER_TYPE_FULL_SECONDARY;
+        private Bitmap mUserIcon;
+        private String mAccountName;
+        private String mAccountType;
+        private PersistableBundle mAccountOptions;
 
         /**
          * Sets user name.
+         *
+         * @return This object for method chaining.
          */
         @NonNull
         public Builder setName(@Nullable String name) {
@@ -110,6 +179,8 @@ public final class NewUserRequest {
          *
          * <p> Admin user is with administrative privileges and such user can create
          * and delete users.
+         *
+         * @return This object for method chaining.
          */
         @NonNull
         public Builder setAdmin() {
@@ -121,6 +192,8 @@ public final class NewUserRequest {
          * Sets user as ephemeral.
          *
          * <p> Ephemeral user will be removed after leaving the foreground.
+         *
+         * @return This object for method chaining.
          */
         @NonNull
         public Builder setEphemeral() {
@@ -134,10 +207,60 @@ public final class NewUserRequest {
          * Supported types are {@link UserManager.USER_TYPE_FULL_SECONDARY} and
          * {@link UserManager.USER_TYPE_FULL_GUEST}. Default value is
          * {@link UserManager.USER_TYPE_FULL_SECONDARY}.
+         *
+         * @return This object for method chaining.
          */
         @NonNull
         public Builder setUserType(@NonNull String type) {
             mUserType = type;
+            return this;
+        }
+
+        /**
+         * Sets user icon.
+         *
+         * @return This object for method chaining.
+         */
+        @NonNull
+        public Builder setUserIcon(@Nullable Bitmap userIcon) {
+            mUserIcon = userIcon;
+            return this;
+        }
+
+        /**
+         * Sets account name that will be used by the setup wizard to initialize the user.
+         *
+         * @see android.accounts.Account
+         * @return This object for method chaining.
+         */
+        @NonNull
+        public Builder setAccountName(@Nullable String accountName) {
+            mAccountName = accountName;
+            return this;
+        }
+
+        /**
+         * Sets account type for the account to be created. This is required if the account name
+         * is not null. This will be used by the setup wizard to initialize the user.
+         *
+         * @see android.accounts.Account
+         * @return This object for method chaining.
+         */
+        @NonNull
+        public Builder setAccountType(@Nullable String accountType) {
+            mAccountType = accountType;
+            return this;
+        }
+
+        /**
+         * Sets account options that can contain account-specific extra information
+         * to be used by setup wizard to initialize the account for the user.
+         *
+         * @return This object for method chaining.
+         */
+        @NonNull
+        public Builder setAccountOptions(@Nullable PersistableBundle accountOptions) {
+            mAccountOptions = accountOptions;
             return this;
         }
 
@@ -164,6 +287,11 @@ public final class NewUserRequest {
             if (mUserType != UserManager.USER_TYPE_FULL_SECONDARY
                     && mUserType != UserManager.USER_TYPE_FULL_GUEST) {
                 throw new IllegalStateException("Unsupported user type: " + mUserType);
+            }
+
+            if (TextUtils.isEmpty(mAccountName) != TextUtils.isEmpty(mAccountType)) {
+                throw new IllegalStateException(
+                        "Account name and account type should be provided together.");
             }
         }
     }
