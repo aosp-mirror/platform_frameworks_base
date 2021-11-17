@@ -95,6 +95,7 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.INetworkStatsSession;
@@ -743,6 +744,8 @@ public class StatsPullAtomService extends SystemService {
                         return pullAccessibilityShortcutStatsLocked(atomTag, data);
                     case FrameworkStatsLog.ACCESSIBILITY_FLOATING_MENU_STATS:
                         return pullAccessibilityFloatingMenuStatsLocked(atomTag, data);
+                    case FrameworkStatsLog.MEDIA_CAPABILITIES:
+                        return pullMediaCapabilitiesStats(atomTag, data);
                     default:
                         throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
                 }
@@ -940,6 +943,7 @@ public class StatsPullAtomService extends SystemService {
         registerKeystoreCrashStats();
         registerAccessibilityShortcutStats();
         registerAccessibilityFloatingMenuStats();
+        registerMediaCapabilitiesStats();
     }
 
     private void initAndRegisterNetworkStatsPullers() {
@@ -4188,6 +4192,16 @@ public class StatsPullAtomService extends SystemService {
         );
     }
 
+    private void registerMediaCapabilitiesStats() {
+        int tagId = FrameworkStatsLog.MEDIA_CAPABILITIES;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
     int parseKeystoreStorageStats(KeystoreAtom[] atoms, List<StatsEvent> pulledData) {
         for (KeystoreAtom atomWrapper : atoms) {
             if (atomWrapper.payload.getTag() != KeystoreAtomPayload.storageStats) {
@@ -4468,6 +4482,54 @@ public class StatsPullAtomService extends SystemService {
             Binder.restoreCallingIdentity(token);
         }
         return StatsManager.PULL_SUCCESS;
+    }
+
+    int pullMediaCapabilitiesStats(int atomTag, List<StatsEvent> pulledData) {
+        AudioManager audioManager = mContext.getSystemService(AudioManager.class);
+        if (audioManager == null) {
+            return StatsManager.PULL_SKIP;
+        }
+
+        // get the surround sound metrics information
+        Map<Integer, Boolean> surroundEncodingsMap = audioManager.getSurroundFormats();
+        byte[] surroundEncodings =
+                getAudioEncodingsAsProto(new ArrayList(surroundEncodingsMap.keySet()));
+        byte[] sinkSurroundEncodings =
+                getAudioEncodingsAsProto(audioManager.getReportedSurroundFormats());
+        List<Integer> disabledSurroundEncodingsList = new ArrayList<>();
+        List<Integer> enabledSurroundEncodingsList = new ArrayList<>();
+        for (int surroundEncoding:  surroundEncodingsMap.keySet()) {
+            if (!surroundEncodingsMap.get(surroundEncoding)) {
+                disabledSurroundEncodingsList.add(surroundEncoding);
+            } else {
+                enabledSurroundEncodingsList.add(surroundEncoding);
+            }
+        }
+        byte[] disabledSurroundEncodings = getAudioEncodingsAsProto(disabledSurroundEncodingsList);
+        byte[] enabledSurroundEncodings = getAudioEncodingsAsProto(enabledSurroundEncodingsList);
+        int surroundOutputMode = audioManager.getEncodedSurroundMode();
+
+        // TODO(b/203185126) : Remove the display capabilities metrics mock and retrieve actual
+        //  metrics
+        byte[] mockByteArray = new byte[0];
+        pulledData.add(
+                FrameworkStatsLog.buildStatsEvent(
+                        atomTag, surroundEncodings, sinkSurroundEncodings,
+                        disabledSurroundEncodings, enabledSurroundEncodings, surroundOutputMode,
+                        mockByteArray, mockByteArray, -1, -1, mockByteArray,
+                        -1, -1, 0.0f, false));
+
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private byte[] getAudioEncodingsAsProto(List<Integer> audioEncodings) {
+        ProtoOutputStream protoOutputStream = new ProtoOutputStream();
+        for (int audioEncoding : audioEncodings) {
+            protoOutputStream.write(
+                    ProtoOutputStream.FIELD_COUNT_REPEATED | ProtoOutputStream.FIELD_TYPE_ENUM | 1,
+                    audioEncoding);
+        }
+        return protoOutputStream.getBytes();
     }
 
     /**
