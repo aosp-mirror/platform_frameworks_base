@@ -52,9 +52,12 @@ import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITI
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -66,6 +69,7 @@ import android.view.Choreographer;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
+import android.view.WindowManager.TransitionType;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
@@ -292,6 +296,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
         };
 
+        boolean requireBackgroundForTransition = false;
+
         final int wallpaperTransit = getWallpaperTransitType(info);
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
@@ -354,6 +360,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
             Animation a = loadAnimation(info, change, wallpaperTransit);
             if (a != null) {
+                if (changeRequiresBackground(info, change)) {
+                    requireBackgroundForTransition = true;
+                }
+
                 startSurfaceAnimation(animations, a, change.getLeash(), onAnimFinish,
                         mTransactionPool, mMainExecutor, mAnimExecutor, null /* position */);
 
@@ -362,11 +372,50 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 }
             }
         }
+
+        if (requireBackgroundForTransition) {
+            addBackgroundToTransition(info.getRootLeash(), startTransaction, finishTransaction);
+        }
+
         startTransaction.apply();
         TransitionMetrics.getInstance().reportAnimationStart(transition);
         // run finish now in-case there are no animations
         onAnimFinish.run();
         return true;
+    }
+
+    private boolean changeRequiresBackground(TransitionInfo info,
+            TransitionInfo.Change change) {
+        final boolean isTask = change.getTaskInfo() != null;
+        final @TransitionType int type = info.getType();
+        final boolean isOpenOrCloseTransition = type == TRANSIT_OPEN || type == TRANSIT_CLOSE
+                || type == TRANSIT_TO_FRONT || type == TRANSIT_TO_BACK;
+        return isTask && isOpenOrCloseTransition;
+    }
+
+    private void addBackgroundToTransition(
+            @NonNull SurfaceControl rootLeash,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction
+    ) {
+        final Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
+        final @ColorInt int overviewBackgroundColor =
+                uiContext.getColor(R.color.overview_background);
+        final Color bgColor = Color.valueOf(overviewBackgroundColor);
+        final float[] colorArray = new float[] { bgColor.red(), bgColor.green(), bgColor.blue() };
+
+        final SurfaceControl animationBackgroundSurface = new SurfaceControl.Builder()
+                .setName("Animation Background")
+                .setParent(rootLeash)
+                .setColorLayer()
+                .setOpaque(true)
+                .build();
+
+        startTransaction
+                .setLayer(animationBackgroundSurface, Integer.MIN_VALUE)
+                .setColor(animationBackgroundSurface, colorArray)
+                .show(animationBackgroundSurface);
+        finishTransaction.remove(animationBackgroundSurface);
     }
 
     @Nullable
