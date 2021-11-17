@@ -102,7 +102,7 @@ public class LogModule {
 
     /**
      * Provides a logging buffer for
-     * {@link com.android.systemui.statusbar.phone.CollapsedStatusBarFragment}.
+     * {@link com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment}.
      */
     @Provides
     @SysUISingleton

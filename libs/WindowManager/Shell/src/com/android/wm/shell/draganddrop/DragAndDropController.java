@@ -19,6 +19,7 @@ package com.android.wm.shell.draganddrop;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DragEvent.ACTION_DRAG_ENDED;
 import static android.view.DragEvent.ACTION_DRAG_ENTERED;
 import static android.view.DragEvent.ACTION_DRAG_EXITED;
@@ -34,13 +35,13 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMA
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
-import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
@@ -55,7 +56,6 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.util.Optional;
@@ -91,6 +91,11 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
     @Override
     public void onDisplayAdded(int displayId) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Display added: %d", displayId);
+        if (displayId != DEFAULT_DISPLAY) {
+            // Ignore non-default displays for now
+            return;
+        }
+
         final Context context = mDisplayController.getDisplayContext(displayId)
                 .createWindowContext(TYPE_APPLICATION_OVERLAY, null);
         final WindowManager wm = context.getSystemService(WindowManager.class);

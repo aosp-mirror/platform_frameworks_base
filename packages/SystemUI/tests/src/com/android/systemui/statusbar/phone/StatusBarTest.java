@@ -131,6 +131,8 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
+import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -241,6 +243,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private CollapsedStatusBarFragmentLogger mCollapsedStatusBarFragmentLogger;
     @Mock private StatusBarComponent.Factory mStatusBarComponentFactory;
     @Mock private StatusBarComponent mStatusBarComponent;
+    @Mock private StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
+    @Mock private StatusBarFragmentComponent mStatusBarFragmentComponent;
     @Mock private PluginManager mPluginManager;
     @Mock private LegacySplitScreen mLegacySplitScreen;
     @Mock private LightsOutNotifController mLightsOutNotifController;
@@ -345,6 +349,8 @@ public class StatusBarTest extends SysuiTestCase {
         when(mBiometricUnlockControllerLazy.get()).thenReturn(mBiometricUnlockController);
 
         when(mStatusBarComponentFactory.create()).thenReturn(mStatusBarComponent);
+        when(mStatusBarFragmentComponentFactory.create(any()))
+                .thenReturn(mStatusBarFragmentComponent);
         when(mStatusBarComponent.getNotificationShadeWindowViewController()).thenReturn(
                 mNotificationShadeWindowViewController);
 
@@ -414,6 +420,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mCommandQueue,
                 mCollapsedStatusBarFragmentLogger,
                 mStatusBarComponentFactory,
+                mStatusBarFragmentComponentFactory,
                 mPluginManager,
                 Optional.of(mLegacySplitScreen),
                 mLightsOutNotifController,

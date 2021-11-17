@@ -59,7 +59,8 @@ import java.util.function.Predicate;
  */
 class TaskSnapshotPersisterTestBase extends WindowTestsBase {
 
-    private static final Rect TEST_INSETS = new Rect(10, 20, 30, 40);
+    private static final Rect TEST_CONTENT_INSETS = new Rect(10, 20, 30, 40);
+    private static final Rect TEST_LETTERBOX_INSETS = new Rect();
     static final File FILES_DIR = getInstrumentation().getTargetContext().getFilesDir();
     static final long MOCK_SNAPSHOT_ID = 12345678;
 
@@ -208,7 +209,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
             return new TaskSnapshot(MOCK_SNAPSHOT_ID, mTopActivityComponent,
                     HardwareBuffer.createFromGraphicBuffer(buffer),
                     ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
-                    mRotation, taskSize, TEST_INSETS,
+                    mRotation, taskSize, TEST_CONTENT_INSETS, TEST_LETTERBOX_INSETS,
                     // When building a TaskSnapshot with the Builder class, isLowResolution
                     // is always false. Low-res snapshots are only created when loading from
                     // disk.

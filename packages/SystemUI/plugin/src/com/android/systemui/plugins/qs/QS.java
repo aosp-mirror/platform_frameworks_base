@@ -34,7 +34,7 @@ public interface QS extends FragmentBase {
 
     String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
-    int VERSION = 11;
+    int VERSION = 12;
 
     String TAG = "QS";
 
@@ -46,6 +46,8 @@ public interface QS extends FragmentBase {
     void setHeightOverride(int desiredHeight);
     void setHeaderClickable(boolean qsExpansionEnabled);
     boolean isCustomizing();
+    /** Close the QS customizer, if it is open. */
+    void closeCustomizer();
     void setOverscrolling(boolean overscrolling);
     void setExpanded(boolean qsExpanded);
     void setListening(boolean listening);

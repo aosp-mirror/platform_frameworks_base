@@ -172,6 +172,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.phone.panelstate.PanelState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -2869,6 +2870,10 @@ public class NotificationPanelViewController extends PanelViewController {
             mStatusBarTouchableRegionManager.setPanelExpanded(isExpanded);
             mStatusBar.setPanelExpanded(isExpanded);
             mPanelExpanded = isExpanded;
+
+            if (!isExpanded && mQs != null && mQs.isCustomizing()) {
+                mQs.closeCustomizer();
+            }
         }
     }
 
@@ -3167,8 +3172,18 @@ public class NotificationPanelViewController extends PanelViewController {
         return mQs.isShowingDetail();
     }
 
+    /** Returns whether the QS customizer is currently active. */
+    public boolean isQsCustomizing() {
+        return mQs.isCustomizing();
+    }
+
     public void closeQsDetail() {
         mQs.closeDetail();
+    }
+
+    /** Close the QS customizer if it is open. */
+    public void closeQsCustomizer() {
+        mQs.closeCustomizer();
     }
 
     public boolean isLaunchTransitionFinished() {

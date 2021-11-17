@@ -90,6 +90,8 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Ukuthatha izithombe-skrini akuvunyelwe uhlelo lokusebenza noma inhlangano yakho"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Hlela"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Hlela isithombe-skrini"</string>
+    <!-- no translation found for screenshot_share_description (2861628935812656612) -->
+    <skip />
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Thwebula okuningi"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Cashisa isithombe-skrini"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ukubuka kuqala isithombe-skrini"</string>

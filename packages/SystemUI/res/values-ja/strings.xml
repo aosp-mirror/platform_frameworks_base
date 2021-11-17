@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"システムUI"</string>
+    <string name="app_label" msgid="4811759950673118541">"システム UI"</string>
     <string name="status_bar_clear_all_button" msgid="2491321682873657397">"通知を消去"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"通知なし"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"実行中"</string>
@@ -90,6 +90,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"スクリーンショットの作成はアプリまたは組織で許可されていません"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"編集"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"スクリーンショットを編集します"</string>
+    <string name="screenshot_share_description" msgid="2861628935812656612">"スクリーンショットを共有"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"キャプチャ範囲を拡大"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"スクリーンショットを閉じます"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"スクリーンショットのプレビュー"</string>

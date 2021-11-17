@@ -90,6 +90,8 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"এই অ্যাপ বা আপনার প্রতিষ্ঠান স্ক্রিনশট নেওয়ার অনুমতি দেয়নি"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"এডিট করুন"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"স্ক্রিনশট এডিট করুন"</string>
+    <!-- no translation found for screenshot_share_description (2861628935812656612) -->
+    <skip />
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"আরও বেশি ক্যাপচার করুন"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"স্ক্রিনশট বাতিল করুন"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"স্ক্রিনশটের প্রিভিউ"</string>

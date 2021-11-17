@@ -90,6 +90,8 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ઍપ્લિકેશન કે તમારી સંસ્થા દ્વારા સ્ક્રીનશૉટ લેવાની મંજૂરી નથી"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ફેરફાર કરો"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"સ્ક્રીનશૉટમાં ફેરફાર કરો"</string>
+    <!-- no translation found for screenshot_share_description (2861628935812656612) -->
+    <skip />
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"વધુ કૅપ્ચર કરો"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"સ્ક્રીનશૉટ છોડી દો"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"સ્ક્રીનશૉટનો પ્રીવ્યૂ"</string>

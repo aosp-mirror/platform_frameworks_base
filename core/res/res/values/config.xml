@@ -1388,6 +1388,12 @@
     <integer name="config_screenBrightnessDim">10</integer>
     <item name="config_screenBrightnessDimFloat" format="float" type="dimen">0.05</item>
 
+    <!-- If the screen brightness is already set at or below config_screenBrightnessDim, and the
+         user activity timeout expires, we still want to dim the screen slightly to indicate that
+         the device is about to go to sleep. The screen will dim by this amount in that case.
+         -->
+    <item name="config_screenBrightnessMinimumDimAmountFloat" format="float" type="dimen">0.04</item>
+
     <!-- Minimum allowable screen brightness to use in a very dark room.
          This value sets the floor for the darkest possible auto-brightness
          adjustment.  It is expected to be somewhat less than the first entry in
@@ -4910,7 +4916,7 @@
             but isn't supported on the device or both dark scrim alpha and blur radius aren't
             provided.
      -->
-    <color name="config_letterboxBackgroundColor">@android:color/system_neutral2_500</color>
+    <color name="config_letterboxBackgroundColor">@android:color/system_neutral2_900</color>
 
     <!-- Horizonal position of a center of the letterboxed app window.
         0 corresponds to the left side of the screen and 1 to the right side. If given value < 0

@@ -90,6 +90,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"앱이나 조직에서 스크린샷 촬영을 허용하지 않습니다."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"수정"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"스크린샷 수정"</string>
+    <string name="screenshot_share_description" msgid="2861628935812656612">"스크린샷 공유"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"더 캡처하기"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"스크린샷 닫기"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"스크린샷 미리보기"</string>
