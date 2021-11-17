@@ -16,7 +16,7 @@
 
 <resources>
     <style name="DialogWindowTitle.DeviceDefault" parent="DialogWindowTitle.Material">
-      <item name="singleLine">true</item>
+      <item name="maxLines">2</item>
       <item name="shadowRadius">0</item>
       <item name="ellipsize">end</item>
       <item name="textAppearance">@style/TextAppearance.DeviceDefault.Title</item>
