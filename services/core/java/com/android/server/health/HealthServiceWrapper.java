@@ -81,6 +81,8 @@ public abstract class HealthServiceWrapper {
     public static HealthServiceWrapper create(@Nullable HealthInfoCallback healthInfoCallback)
             throws RemoteException, NoSuchElementException {
         return create(
+                healthInfoCallback == null ? null : new HealthRegCallbackAidl(healthInfoCallback),
+                new HealthServiceWrapperAidl.ServiceManagerStub() {},
                 healthInfoCallback == null ? null : new HealthHalCallbackHidl(healthInfoCallback),
                 new HealthServiceWrapperHidl.IServiceManagerSupplier() {},
                 new HealthServiceWrapperHidl.IHealthSupplier() {});
@@ -89,6 +91,9 @@ public abstract class HealthServiceWrapper {
     /**
      * Create a new HealthServiceWrapper instance for testing.
      *
+     * @param aidlRegCallback callback for AIDL service registration, or {@code null} if the client
+     *     does not care about AIDL service registration notifications
+     * @param aidlServiceManager Stub for AIDL ServiceManager
      * @param hidlRegCallback callback for HIDL service registration, or {@code null} if the client
      *     does not care about HIDL service registration notifications
      * @param hidlServiceManagerSupplier supplier of HIDL service manager
@@ -97,10 +102,17 @@ public abstract class HealthServiceWrapper {
      */
     @VisibleForTesting
     static @NonNull HealthServiceWrapper create(
+            @Nullable HealthRegCallbackAidl aidlRegCallback,
+            @NonNull HealthServiceWrapperAidl.ServiceManagerStub aidlServiceManager,
             @Nullable HealthServiceWrapperHidl.Callback hidlRegCallback,
             @NonNull HealthServiceWrapperHidl.IServiceManagerSupplier hidlServiceManagerSupplier,
             @NonNull HealthServiceWrapperHidl.IHealthSupplier hidlHealthSupplier)
             throws RemoteException, NoSuchElementException {
+        try {
+            return new HealthServiceWrapperAidl(aidlRegCallback, aidlServiceManager);
+        } catch (NoSuchElementException e) {
+            // Ignore, try HIDL
+        }
         return new HealthServiceWrapperHidl(
                 hidlRegCallback, hidlServiceManagerSupplier, hidlHealthSupplier);
     }
