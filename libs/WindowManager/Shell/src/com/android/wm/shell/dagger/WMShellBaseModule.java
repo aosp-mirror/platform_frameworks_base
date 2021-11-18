@@ -74,6 +74,7 @@ import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.sizecompatui.SizeCompatUI;
 import com.android.wm.shell.sizecompatui.SizeCompatUIController;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -171,11 +172,18 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
+    static SizeCompatUI provideSizeCompatUI(SizeCompatUIController sizeCompatUIController) {
+        return sizeCompatUIController.asSizeCompatUI();
+    }
+
+    @WMSingleton
+    @Provides
     static SizeCompatUIController provideSizeCompatUIController(Context context,
             DisplayController displayController, DisplayInsetsController displayInsetsController,
-            DisplayImeController imeController, SyncTransactionQueue syncQueue) {
+            DisplayImeController imeController, SyncTransactionQueue syncQueue,
+            @ShellMainThread ShellExecutor mainExecutor) {
         return new SizeCompatUIController(context, displayController, displayInsetsController,
-                imeController, syncQueue);
+                imeController, syncQueue, mainExecutor);
     }
 
     @WMSingleton
