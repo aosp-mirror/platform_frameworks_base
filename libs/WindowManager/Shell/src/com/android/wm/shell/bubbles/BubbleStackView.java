@@ -529,9 +529,10 @@ public class BubbleStackView extends FrameLayout
                 // Otherwise, we either tapped the stack (which means we're collapsed
                 // and should expand) or the currently selected bubble (we're expanded
                 // and should collapse).
-                if (!maybeShowStackEdu()) {
+                if (!maybeShowStackEdu() && !mShowedUserEducationInTouchListenerActive) {
                     mBubbleData.setExpanded(!mBubbleData.isExpanded());
                 }
+                mShowedUserEducationInTouchListenerActive = false;
             }
         }
     };
@@ -547,6 +548,14 @@ public class BubbleStackView extends FrameLayout
             // If we're expanding or collapsing, consume but ignore all touch events.
             if (mIsExpansionAnimating) {
                 return true;
+            }
+
+            mShowedUserEducationInTouchListenerActive = false;
+            if (maybeShowStackEdu()) {
+                mShowedUserEducationInTouchListenerActive = true;
+                return true;
+            } else if (isStackEduShowing()) {
+                mStackEduView.hide(false /* fromExpansion */);
             }
 
             // If the manage menu is visible, just hide it.
@@ -607,7 +616,8 @@ public class BubbleStackView extends FrameLayout
             // If we're expanding or collapsing, ignore all touch events.
             if (mIsExpansionAnimating
                     // Also ignore events if we shouldn't be draggable.
-                    || (mPositioner.showingInTaskbar() && !mIsExpanded)) {
+                    || (mPositioner.showingInTaskbar() && !mIsExpanded)
+                    || mShowedUserEducationInTouchListenerActive) {
                 return;
             }
 
@@ -628,7 +638,7 @@ public class BubbleStackView extends FrameLayout
                     mExpandedAnimationController.dragBubbleOut(
                             v, viewInitialX + dx, viewInitialY + dy);
                 } else {
-                    if (mStackEduView != null) {
+                    if (isStackEduShowing()) {
                         mStackEduView.hide(false /* fromExpansion */);
                     }
                     mStackAnimationController.moveStackFromTouch(
@@ -644,6 +654,10 @@ public class BubbleStackView extends FrameLayout
             if (mIsExpansionAnimating
                     // Also ignore events if we shouldn't be draggable.
                     || (mPositioner.showingInTaskbar() && !mIsExpanded)) {
+                return;
+            }
+            if (mShowedUserEducationInTouchListenerActive) {
+                mShowedUserEducationInTouchListenerActive = false;
                 return;
             }
 
@@ -738,6 +752,7 @@ public class BubbleStackView extends FrameLayout
     private ImageView mManageSettingsIcon;
     private TextView mManageSettingsText;
     private boolean mShowingManage = false;
+    private boolean mShowedUserEducationInTouchListenerActive = false;
     private PhysicsAnimator.SpringConfig mManageSpringConfig = new PhysicsAnimator.SpringConfig(
             SpringForce.STIFFNESS_MEDIUM, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
     private BubblePositioner mPositioner;
@@ -929,10 +944,12 @@ public class BubbleStackView extends FrameLayout
                 showManageMenu(false /* show */);
             } else if (mManageEduView != null && mManageEduView.getVisibility() == VISIBLE) {
                 mManageEduView.hide();
-            } else if (mStackEduView != null && mStackEduView.getVisibility() == VISIBLE) {
+            } else if (isStackEduShowing()) {
                 mStackEduView.hide(false /* isExpanding */);
             } else if (mBubbleData.isExpanded()) {
                 mBubbleData.setExpanded(false);
+            } else {
+                maybeShowStackEdu();
             }
         });
 
@@ -1157,7 +1174,7 @@ public class BubbleStackView extends FrameLayout
      * @return true if education view for collapsed stack should show and was not showing before.
      */
     private boolean maybeShowStackEdu() {
-        if (!shouldShowStackEdu()) {
+        if (!shouldShowStackEdu() || isExpanded()) {
             return false;
         }
         if (mStackEduView == null) {
@@ -1168,9 +1185,13 @@ public class BubbleStackView extends FrameLayout
         return mStackEduView.show(mPositioner.getDefaultStartPosition());
     }
 
+    private boolean isStackEduShowing() {
+        return mStackEduView != null && mStackEduView.getVisibility() == VISIBLE;
+    }
+
     // Recreates & shows the education views. Call when a theme/config change happens.
     private void updateUserEdu() {
-        if (mStackEduView != null && mStackEduView.getVisibility() == VISIBLE) {
+        if (isStackEduShowing()) {
             removeView(mStackEduView);
             mStackEduView = new StackEducationView(mContext, mPositioner, mBubbleController);
             addView(mStackEduView);
@@ -1852,7 +1873,7 @@ public class BubbleStackView extends FrameLayout
         cancelDelayedExpandCollapseSwitchAnimations();
         final boolean showVertically = mPositioner.showBubblesVertically();
         mIsExpanded = true;
-        if (mStackEduView != null) {
+        if (isStackEduShowing()) {
             mStackEduView.hide(true /* fromExpansion */);
         }
         beforeExpandedViewAnimation();
@@ -2390,7 +2411,7 @@ public class BubbleStackView extends FrameLayout
         if (flyoutMessage == null
                 || flyoutMessage.message == null
                 || !bubble.showFlyout()
-                || (mStackEduView != null && mStackEduView.getVisibility() == VISIBLE)
+                || isStackEduShowing()
                 || isExpanded()
                 || mIsExpansionAnimating
                 || mIsGestureInProgress
@@ -2512,7 +2533,7 @@ public class BubbleStackView extends FrameLayout
      * them.
      */
     public void getTouchableRegion(Rect outRect) {
-        if (mStackEduView != null && mStackEduView.getVisibility() == VISIBLE) {
+        if (isStackEduShowing()) {
             // When user education shows then capture all touches
             outRect.set(0, 0, getWidth(), getHeight());
             return;
