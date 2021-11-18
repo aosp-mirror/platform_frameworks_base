@@ -29,6 +29,8 @@ per-file Service* = file:/services/core/java/com/android/server/am/OWNERS
 per-file SystemServiceRegistry.java = file:/services/core/java/com/android/server/am/OWNERS
 per-file *UserSwitchObserver* = file:/services/core/java/com/android/server/am/OWNERS
 per-file UiAutomation.java = file:/services/accessibility/OWNERS
+per-file GameManager* = file:/GAME_MANAGER_OWNERS
+per-file IGameManager* = file:/GAME_MANAGER_OWNERS
 
 # ActivityThread
 per-file ActivityThread.java = file:/services/core/java/com/android/server/am/OWNERS
