@@ -498,7 +498,10 @@ public class SubscriptionInfo implements Parcelable {
      *
      * @return the number of this subscription, or an empty string if one of these requirements is
      * not met
+     * @deprecated use {@link SubscriptionManager#getPhoneNumber(int)} instead, which takes a
+     *             {@link #getSubscriptionId() subscription ID}.
      */
+    @Deprecated
     public String getNumber() {
         return mNumber;
     }
