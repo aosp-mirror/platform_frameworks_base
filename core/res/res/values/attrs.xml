@@ -1984,6 +1984,22 @@
         <enum name="KEYCODE_THUMBS_UP" value="286" />
         <enum name="KEYCODE_THUMBS_DOWN" value="287" />
         <enum name="KEYCODE_PROFILE_SWITCH" value="288" />
+        <enum name="KEYCODE_VIDEO_APP_1" value="289" />
+        <enum name="KEYCODE_VIDEO_APP_2" value="290" />
+        <enum name="KEYCODE_VIDEO_APP_3" value="291" />
+        <enum name="KEYCODE_VIDEO_APP_4" value="292" />
+        <enum name="KEYCODE_VIDEO_APP_5" value="293" />
+        <enum name="KEYCODE_VIDEO_APP_6" value="294" />
+        <enum name="KEYCODE_VIDEO_APP_7" value="295" />
+        <enum name="KEYCODE_VIDEO_APP_8" value="296" />
+        <enum name="KEYCODE_FEATURED_APP_1" value="297" />
+        <enum name="KEYCODE_FEATURED_APP_2" value="298" />
+        <enum name="KEYCODE_FEATURED_APP_3" value="299" />
+        <enum name="KEYCODE_FEATURED_APP_4" value="300" />
+        <enum name="KEYCODE_DEMO_APP_1" value="301" />
+        <enum name="KEYCODE_DEMO_APP_2" value="302" />
+        <enum name="KEYCODE_DEMO_APP_3" value="303" />
+        <enum name="KEYCODE_DEMO_APP_4" value="304" />
     </attr>
 
     <!-- ***************************************************************** -->
