@@ -75,8 +75,8 @@ final class PreferredActivityHelper {
     }
 
     private ResolveInfo findPreferredActivityNotLocked(Intent intent, String resolvedType,
-            @PackageManager.ResolveInfoFlags long flags, List<ResolveInfo> query, boolean always,
-            boolean removeMatches, boolean debug, int userId) {
+            @PackageManager.ResolveInfoFlagsBits long flags, List<ResolveInfo> query,
+            boolean always, boolean removeMatches, boolean debug, int userId) {
         return findPreferredActivityNotLocked(
                 intent, resolvedType, flags, query, always, removeMatches, debug, userId,
                 UserHandle.getAppId(Binder.getCallingUid()) >= Process.FIRST_APPLICATION_UID);
@@ -85,7 +85,7 @@ final class PreferredActivityHelper {
     // TODO: handle preferred activities missing while user has amnesia
     /** <b>must not hold {@link PackageManagerService.mLock}</b> */
     public ResolveInfo findPreferredActivityNotLocked(
-            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlags long flags,
+            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
             List<ResolveInfo> query, boolean always, boolean removeMatches, boolean debug,
             int userId, boolean queryMayBeFiltered) {
         if (Thread.holdsLock(mPm.mLock)) {

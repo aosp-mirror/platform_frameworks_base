@@ -28,10 +28,6 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.pm.PackageManager.ApplicationInfoFlags;
-import android.content.pm.PackageManager.ComponentInfoFlags;
-import android.content.pm.PackageManager.PackageInfoFlags;
-import android.content.pm.PackageManager.ResolveInfoFlags;
 import android.content.pm.SigningDetails.CertCapabilities;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.component.ParsedMainComponent;
@@ -198,7 +194,7 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      * @see PackageManager#getPackageInfo(String, int)
      */
     public abstract PackageInfo getPackageInfo(String packageName,
-            @PackageInfoFlags long flags, int filterCallingUid, int userId);
+            @PackageManager.PackageInfoFlagsBits long flags, int filterCallingUid, int userId);
 
     /**
      * Retrieve CE data directory inode number of an application.
@@ -227,7 +223,8 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
      */
     public abstract List<ApplicationInfo> getInstalledApplications(
-            @ApplicationInfoFlags long flags, @UserIdInt int userId, int callingUid);
+            @PackageManager.ApplicationInfoFlagsBits long flags, @UserIdInt int userId,
+            int callingUid);
 
     /**
      * Retrieve launcher extras for a suspended package provided to the system in
@@ -324,7 +321,8 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      * @see PackageManager#getPackageUidAsUser(String, int, int)
      * @return The app's uid, or < 0 if the package was not found in that user
      */
-    public abstract int getPackageUid(String packageName, @PackageInfoFlags long flags, int userId);
+    public abstract int getPackageUid(String packageName,
+            @PackageManager.PackageInfoFlagsBits long flags, int userId);
 
     /**
      * Retrieve all of the information we know about a particular package/application.
@@ -333,7 +331,7 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      * @see PackageManager#getApplicationInfo(String, int)
      */
     public abstract ApplicationInfo getApplicationInfo(String packageName,
-            @ApplicationInfoFlags long flags, int filterCallingUid, int userId);
+            @PackageManager.ApplicationInfoFlagsBits long flags, int filterCallingUid, int userId);
 
     /**
      * Retrieve all of the information we know about a particular activity class.
@@ -342,7 +340,7 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      * @see PackageManager#getActivityInfo(ComponentName, int)
      */
     public abstract ActivityInfo getActivityInfo(ComponentName component,
-            @ComponentInfoFlags long flags, int filterCallingUid, int userId);
+            @PackageManager.ComponentInfoFlagsBits long flags, int filterCallingUid, int userId);
 
     /**
      * Retrieve all activities that can be performed for the given intent.
@@ -353,22 +351,24 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      * @see PackageManager#queryIntentActivities(Intent, int)
      */
     public abstract List<ResolveInfo> queryIntentActivities(
-            Intent intent, @Nullable String resolvedType, @ResolveInfoFlags long flags,
-            int filterCallingUid, int userId);
+            Intent intent, @Nullable String resolvedType,
+            @PackageManager.ResolveInfoFlagsBits long flags, int filterCallingUid, int userId);
 
 
     /**
      * Retrieve all receivers that can handle a broadcast of the given intent.
      */
     public abstract List<ResolveInfo> queryIntentReceivers(Intent intent,
-            String resolvedType, @ResolveInfoFlags long flags, int filterCallingUid, int userId);
+            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
+            int filterCallingUid, int userId);
 
     /**
      * Retrieve all services that can be performed for the given intent.
      * @see PackageManager#queryIntentServices(Intent, int)
      */
     public abstract List<ResolveInfo> queryIntentServices(
-            Intent intent, @ResolveInfoFlags long flags, int callingUid, int userId);
+            Intent intent, @PackageManager.ResolveInfoFlagsBits long flags, int callingUid,
+            int userId);
 
     /**
      * Interface to {@link com.android.server.pm.PackageManagerService#getHomeActivitiesAsUser}.
@@ -592,20 +592,21 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      * Resolves an activity intent, allowing instant apps to be resolved.
      */
     public abstract ResolveInfo resolveIntent(Intent intent, String resolvedType,
-            @ResolveInfoFlags long flags, @PrivateResolveFlags long privateResolveFlags, int userId,
-            boolean resolveForStart, int filterCallingUid);
+            @PackageManager.ResolveInfoFlagsBits long flags,
+            @PrivateResolveFlags long privateResolveFlags, int userId, boolean resolveForStart,
+            int filterCallingUid);
 
     /**
     * Resolves a service intent, allowing instant apps to be resolved.
     */
     public abstract ResolveInfo resolveService(Intent intent, String resolvedType,
-            @ResolveInfoFlags long flags, int userId, int callingUid);
+            @PackageManager.ResolveInfoFlagsBits long flags, int userId, int callingUid);
 
     /**
     * Resolves a content provider intent.
     */
-    public abstract ProviderInfo resolveContentProvider(String name, @ComponentInfoFlags long flags,
-            int userId, int callingUid);
+    public abstract ProviderInfo resolveContentProvider(String name,
+            @PackageManager.ComponentInfoFlagsBits long flags, int userId, int callingUid);
 
     /**
      * Track the creator of a new isolated uid.
@@ -877,7 +878,7 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
 
     /** Returns {@code true} if the specified component is enabled and matches the given flags. */
     public abstract boolean isEnabledAndMatches(@NonNull ParsedMainComponent component,
-            @ComponentInfoFlags long flags, int userId);
+            @PackageManager.ComponentInfoFlagsBits long flags, int userId);
 
     /** Returns {@code true} if the given user requires extra badging for icons. */
     public abstract boolean userNeedsBadging(int userId);

@@ -22,6 +22,7 @@ import android.annotation.CheckResult;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -655,7 +656,7 @@ public abstract class PackageManager {
      */
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "GET_", "MATCH_" }, value = {
+    @LongDef(flag = true, prefix = { "GET_", "MATCH_" }, value = {
             GET_ACTIVITIES,
             GET_CONFIGURATIONS,
             GET_GIDS,
@@ -685,10 +686,10 @@ public abstract class PackageManager {
             GET_ATTRIBUTIONS,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface PackageInfoFlags {}
+    public @interface PackageInfoFlagsBits {}
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "GET_", "MATCH_" }, value = {
+    @LongDef(flag = true, prefix = { "GET_", "MATCH_" }, value = {
             GET_META_DATA,
             GET_SHARED_LIBRARY_FILES,
             MATCH_UNINSTALLED_PACKAGES,
@@ -704,10 +705,10 @@ public abstract class PackageManager {
             MATCH_APEX,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ApplicationInfoFlags {}
+    public @interface ApplicationInfoFlagsBits {}
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "GET_", "MATCH_" }, value = {
+    @LongDef(flag = true, prefix = { "GET_", "MATCH_" }, value = {
             GET_META_DATA,
             GET_SHARED_LIBRARY_FILES,
             MATCH_ALL,
@@ -727,10 +728,10 @@ public abstract class PackageManager {
             GET_UNINSTALLED_PACKAGES,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ComponentInfoFlags {}
+    public @interface ComponentInfoFlagsBits {}
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "GET_", "MATCH_" }, value = {
+    @LongDef(flag = true, prefix = { "GET_", "MATCH_" }, value = {
             GET_META_DATA,
             GET_RESOLVED_FILTER,
             GET_SHARED_LIBRARY_FILES,
@@ -750,7 +751,7 @@ public abstract class PackageManager {
             GET_UNINSTALLED_PACKAGES,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ResolveInfoFlags {}
+    public @interface ResolveInfoFlagsBits {}
 
     /** @hide */
     @IntDef(flag = true, prefix = { "GET_", "MATCH_" }, value = {
@@ -4630,6 +4631,74 @@ public abstract class PackageManager {
      */
     public static final String PROPERTY_ALLOW_ADB_BACKUP = "android.backup.ALLOW_ADB_BACKUP";
 
+    /**
+     * Flags class that wraps around the bitmask flags used in methods that retrieve package or
+     * application info.
+     * @hide
+     */
+    public static class Flags {
+        final long mValue;
+        protected Flags(long value) {
+            mValue = value;
+        }
+        public long getValue() {
+            return mValue;
+        }
+    }
+
+    /**
+     * Specific flags used for retrieving package info. Example:
+     * {@code PackageManager.getPackageInfo(packageName, PackageInfoFlags.of(0)}
+     */
+    public final static class PackageInfoFlags extends Flags {
+        private PackageInfoFlags(@PackageInfoFlagsBits long value) {
+            super(value);
+        }
+        @NonNull
+        public static PackageInfoFlags of(@PackageInfoFlagsBits long value) {
+            return new PackageInfoFlags(value);
+        }
+    }
+
+    /**
+     * Specific flags used for retrieving application info.
+     */
+    public final static class ApplicationInfoFlags extends Flags {
+        private ApplicationInfoFlags(@ApplicationInfoFlagsBits long value) {
+            super(value);
+        }
+        @NonNull
+        public static ApplicationInfoFlags of(@ApplicationInfoFlagsBits long value) {
+            return new ApplicationInfoFlags(value);
+        }
+    }
+
+    /**
+     * Specific flags used for retrieving component info.
+     */
+    public final static class ComponentInfoFlags extends Flags {
+        private ComponentInfoFlags(@ComponentInfoFlagsBits long value) {
+            super(value);
+        }
+        @NonNull
+        public static ComponentInfoFlags of(@ComponentInfoFlagsBits long value) {
+            return new ComponentInfoFlags(value);
+        }
+    }
+
+    /**
+     * Specific flags used for retrieving resolve info.
+     */
+    public final static class ResolveInfoFlags extends Flags {
+        private ResolveInfoFlags(@ResolveInfoFlagsBits long value) {
+            super(value);
+        }
+        @NonNull
+        public static ResolveInfoFlags of(@ResolveInfoFlagsBits long value) {
+            return new ResolveInfoFlags(value);
+        }
+    }
+
     /** {@hide} */
     public int getUserId() {
         return UserHandle.myUserId();
@@ -4658,10 +4727,21 @@ public abstract class PackageManager {
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
+     * @deprecated Use {@link #getPackageInfo(String, PackageInfoFlags)} instead.
      */
-    public abstract PackageInfo getPackageInfo(@NonNull String packageName,
-            @PackageInfoFlags int flags)
+    @Deprecated
+    public abstract PackageInfo getPackageInfo(@NonNull String packageName, int flags)
             throws NameNotFoundException;
+
+    /**
+     * See {@link #getPackageInfo(String, int)}
+     */
+    @NonNull
+    public PackageInfo getPackageInfo(@NonNull String packageName, @NonNull PackageInfoFlags flags)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getPackageInfo not implemented in subclass");
+    }
 
     /**
      * Retrieve overall information about an application package that is
@@ -4684,9 +4764,21 @@ public abstract class PackageManager {
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
+     * @deprecated Use {@link #getPackageInfo(VersionedPackage, PackageInfoFlags)} instead.
      */
+    @Deprecated
     public abstract PackageInfo getPackageInfo(@NonNull VersionedPackage versionedPackage,
-            @PackageInfoFlags int flags) throws NameNotFoundException;
+            int flags) throws NameNotFoundException;
+
+    /**
+     * See {@link #getPackageInfo(VersionedPackage, int)}
+     */
+    @NonNull
+    public PackageInfo getPackageInfo(@NonNull VersionedPackage versionedPackage,
+            @NonNull PackageInfoFlags flags) throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getPackageInfo not implemented in subclass");
+    }
 
     /**
      * Retrieve overall information about an application package that is
@@ -4705,13 +4797,27 @@ public abstract class PackageManager {
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
+     * @deprecated Use {@link #getPackageInfoAsUser(String, PackageInfoFlags, int)} instead.
      * @hide
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     @UnsupportedAppUsage
     public abstract PackageInfo getPackageInfoAsUser(@NonNull String packageName,
-            @PackageInfoFlags int flags, @UserIdInt int userId) throws NameNotFoundException;
+            int flags, @UserIdInt int userId) throws NameNotFoundException;
+
+    /**
+     * See {@link #getPackageInfoAsUser(String, int, int)}
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    @NonNull
+    public PackageInfo getPackageInfoAsUser(@NonNull String packageName,
+            @NonNull PackageInfoFlags flags, @UserIdInt int userId) throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getPackageInfoAsUser not implemented in subclass");
+    }
 
     /**
      * Map from the current package names in use on the device to whatever
@@ -4834,9 +4940,21 @@ public abstract class PackageManager {
      *         none.
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
+     * @deprecated Use {@link #getPackageGids(String, PackageInfoFlags)} instead.
      */
-    public abstract int[] getPackageGids(@NonNull String packageName, @PackageInfoFlags int flags)
+    @Deprecated
+    public abstract int[] getPackageGids(@NonNull String packageName, int flags)
             throws NameNotFoundException;
+
+    /**
+     * See {@link #getPackageGids(String, int)}.
+     */
+    @Nullable
+    public int[] getPackageGids(@NonNull String packageName, @NonNull PackageInfoFlags flags)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getPackageGids not implemented in subclass");
+    }
 
     /**
      * Return the UID associated with the given package name.
@@ -4849,9 +4967,20 @@ public abstract class PackageManager {
      * @return Returns an integer UID who owns the given package name.
      * @throws NameNotFoundException if a package with the given name can not be
      *             found on the system.
+     * @deprecated Use {@link #getPackageUid(String, PackageInfoFlags)} instead.
      */
-    public abstract int getPackageUid(@NonNull String packageName, @PackageInfoFlags int flags)
+    @Deprecated
+    public abstract int getPackageUid(@NonNull String packageName, int flags)
             throws NameNotFoundException;
+
+    /**
+     * See {@link #getPackageUid(String, int)}.
+     */
+    public int getPackageUid(@NonNull String packageName, @NonNull PackageInfoFlags flags)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getPackageUid not implemented in subclass");
+    }
 
     /**
      * Return the UID associated with the given package name.
@@ -4884,12 +5013,24 @@ public abstract class PackageManager {
      * @return Returns an integer UID who owns the given package name.
      * @throws NameNotFoundException if a package with the given name can not be
      *             found on the system.
+     * @deprecated Use {@link #getPackageUidAsUser(String, PackageInfoFlags, int)} instead.
      * @hide
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     public abstract int getPackageUidAsUser(@NonNull String packageName,
-            @PackageInfoFlags int flags, @UserIdInt int userId) throws NameNotFoundException;
+            int flags, @UserIdInt int userId) throws NameNotFoundException;
+
+    /**
+     * See {@link #getPackageUidAsUser(String, int, int)}.
+     * @hide
+     */
+    public int getPackageUidAsUser(@NonNull String packageName, @NonNull PackageInfoFlags flags,
+            @UserIdInt int userId) throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getPackageUidAsUser not implemented in subclass");
+    }
 
     /**
      * Retrieve all of the information we know about a particular permission.
@@ -5015,17 +5156,42 @@ public abstract class PackageManager {
      *         which had been deleted with {@code DELETE_KEEP_DATA} flag set).
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
+     * @deprecated Use {@link #getApplicationInfo(String, ApplicationInfoFlags)} instead.
      */
     @NonNull
+    @Deprecated
     public abstract ApplicationInfo getApplicationInfo(@NonNull String packageName,
-            @ApplicationInfoFlags int flags) throws NameNotFoundException;
+            int flags) throws NameNotFoundException;
 
-    /** {@hide} */
+    /**
+     * See {@link #getApplicationInfo(String, int)}.
+     */
+    @NonNull
+    public ApplicationInfo getApplicationInfo(@NonNull String packageName,
+            @NonNull ApplicationInfoFlags flags) throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getApplicationInfo not implemented in subclass");
+    }
+
+    /**
+     * @deprecated Use {@link #getApplicationInfoAsUser(String, ApplicationInfoFlags, int)} instead.
+     * {@hide}
+     */
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @UnsupportedAppUsage
+    @Deprecated
     public abstract ApplicationInfo getApplicationInfoAsUser(@NonNull String packageName,
-            @ApplicationInfoFlags int flags, @UserIdInt int userId) throws NameNotFoundException;
+            int flags, @UserIdInt int userId) throws NameNotFoundException;
+
+    /** {@hide} */
+    @NonNull
+    public ApplicationInfo getApplicationInfoAsUser(@NonNull String packageName,
+            @NonNull ApplicationInfoFlags flags, @UserIdInt int userId)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getApplicationInfoAsUser not implemented in subclass");
+    }
 
     /**
      * Retrieve all of the information we know about a particular
@@ -5043,13 +5209,29 @@ public abstract class PackageManager {
      *         which had been deleted with {@code DELETE_KEEP_DATA} flag set).
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
+     * @deprecated Use {@link #getApplicationInfoAsUser(String, ApplicationInfoFlags, UserHandle)}
+     * instead.
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    @SystemApi
+    @Deprecated
+    public ApplicationInfo getApplicationInfoAsUser(@NonNull String packageName,
+            int flags, @NonNull UserHandle user)
+            throws NameNotFoundException {
+        return getApplicationInfoAsUser(packageName, flags, user.getIdentifier());
+    }
+
+    /**
+     * See {@link #getApplicationInfoAsUser(String, int, UserHandle)}.
      * @hide
      */
     @NonNull
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     @SystemApi
     public ApplicationInfo getApplicationInfoAsUser(@NonNull String packageName,
-            @ApplicationInfoFlags int flags, @NonNull UserHandle user)
+            @NonNull ApplicationInfoFlags flags, @NonNull UserHandle user)
             throws NameNotFoundException {
         return getApplicationInfoAsUser(packageName, flags, user.getIdentifier());
     }
@@ -5075,10 +5257,22 @@ public abstract class PackageManager {
      *         activity.
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
+     * @deprecated Use {@link #getActivityInfo(ComponentName, ComponentInfoFlags)} instead.
      */
+    @Deprecated
     @NonNull
     public abstract ActivityInfo getActivityInfo(@NonNull ComponentName component,
-            @ComponentInfoFlags int flags) throws NameNotFoundException;
+            int flags) throws NameNotFoundException;
+
+    /**
+     * See {@link #getActivityInfo(ComponentName, int)}.
+     */
+    @NonNull
+    public ActivityInfo getActivityInfo(@NonNull ComponentName component,
+            @NonNull ComponentInfoFlags flags) throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getActivityInfo not implemented in subclass");
+    }
 
     /**
      * Retrieve all of the information we know about a particular receiver
@@ -5092,10 +5286,22 @@ public abstract class PackageManager {
      *         receiver.
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
+     * @deprecated Use {@link #getReceiverInfo(ComponentName, ComponentInfoFlags)} instead.
      */
+    @Deprecated
     @NonNull
     public abstract ActivityInfo getReceiverInfo(@NonNull ComponentName component,
-            @ComponentInfoFlags int flags) throws NameNotFoundException;
+            int flags) throws NameNotFoundException;
+
+    /**
+     * See {@link #getReceiverInfo(ComponentName, int)}.
+     */
+    @NonNull
+    public ActivityInfo getReceiverInfo(@NonNull ComponentName component,
+            @NonNull ComponentInfoFlags flags) throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getReceiverInfo not implemented in subclass");
+    }
 
     /**
      * Retrieve all of the information we know about a particular service class.
@@ -5107,10 +5313,22 @@ public abstract class PackageManager {
      * @return A {@link ServiceInfo} object containing information about the
      *         service.
      * @throws NameNotFoundException if the component cannot be found on the system.
+     * @deprecated Use {@link #getServiceInfo(ComponentName, ComponentInfoFlags)} instead.
      */
+    @Deprecated
     @NonNull
     public abstract ServiceInfo getServiceInfo(@NonNull ComponentName component,
-            @ComponentInfoFlags int flags) throws NameNotFoundException;
+            int flags) throws NameNotFoundException;
+
+    /**
+     * See {@link #getServiceInfo(ComponentName, int)}.
+     */
+    @NonNull
+    public ServiceInfo getServiceInfo(@NonNull ComponentName component,
+            @NonNull ComponentInfoFlags flags) throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getServiceInfo not implemented in subclass");
+    }
 
     /**
      * Retrieve all of the information we know about a particular content
@@ -5124,10 +5342,22 @@ public abstract class PackageManager {
      *         provider.
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
+     * @deprecated Use {@link #getProviderInfo(ComponentName, ComponentInfoFlags)} instead.
      */
+    @Deprecated
     @NonNull
     public abstract ProviderInfo getProviderInfo(@NonNull ComponentName component,
-            @ComponentInfoFlags int flags) throws NameNotFoundException;
+            int flags) throws NameNotFoundException;
+
+    /**
+     * See {@link #getProviderInfo(ComponentName, int)}.
+     */
+    @NonNull
+    public ProviderInfo getProviderInfo(@NonNull ComponentName component,
+            @NonNull ComponentInfoFlags flags) throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getProviderInfo not implemented in subclass");
+    }
 
     /**
      * Retrieve information for a particular module.
@@ -5172,9 +5402,21 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
+     * @deprecated Use {@link #getInstalledPackages(PackageInfoFlags)} instead.
+     */
+    @Deprecated
+    @NonNull
+    public abstract List<PackageInfo> getInstalledPackages(int flags);
+
+    /**
+     * See {@link #getInstalledPackages(int)}.
+     * @param flags
      */
     @NonNull
-    public abstract List<PackageInfo> getInstalledPackages(@PackageInfoFlags int flags);
+    public List<PackageInfo> getInstalledPackages(@NonNull PackageInfoFlags flags) {
+        throw new UnsupportedOperationException(
+                "getInstalledPackages not implemented in subclass");
+    }
 
     /**
      * Return a List of all installed packages that are currently holding any of
@@ -5190,10 +5432,22 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
+     * @deprecated Use {@link #getPackagesHoldingPermissions(String[], PackageInfoFlags)} instead.
      */
+    @Deprecated
     @NonNull
     public abstract List<PackageInfo> getPackagesHoldingPermissions(
-            @NonNull String[] permissions, @PackageInfoFlags int flags);
+            @NonNull String[] permissions, int flags);
+
+    /**
+     * See {@link #getPackagesHoldingPermissions(String[], int)}.
+     */
+    @NonNull
+    public List<PackageInfo> getPackagesHoldingPermissions(
+            @NonNull String[] permissions, @NonNull PackageInfoFlags flags) {
+        throw new UnsupportedOperationException(
+                "getPackagesHoldingPermissions not implemented in subclass");
+    }
 
     /**
      * Return a List of all packages that are installed on the device, for a
@@ -5209,14 +5463,29 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
+     * @deprecated Use {@link #getInstalledPackagesAsUser(PackageInfoFlags, int)} instead.
      * @hide
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @SystemApi
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-    public abstract List<PackageInfo> getInstalledPackagesAsUser(@PackageInfoFlags int flags,
+    public abstract List<PackageInfo> getInstalledPackagesAsUser(int flags,
             @UserIdInt int userId);
+
+    /**
+     * See {@link #getInstalledPackagesAsUser(int, int)}.
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    public List<PackageInfo> getInstalledPackagesAsUser(@NonNull PackageInfoFlags flags,
+            @UserIdInt int userId) {
+        throw new UnsupportedOperationException(
+                "getApplicationInfoAsUser not implemented in subclass");
+    }
 
     /**
      * Check whether a particular package has been granted a particular
@@ -5904,10 +6173,21 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
+     * @deprecated  Use {@link #getInstalledApplications(ApplicationInfoFlags)} instead.
      */
     @NonNull
-    public abstract List<ApplicationInfo> getInstalledApplications(@ApplicationInfoFlags int flags);
+    @Deprecated
+    public abstract List<ApplicationInfo> getInstalledApplications(int flags);
 
+    /**
+     * See {@link #getInstalledApplications(int)}
+     * @param flags
+     */
+    @NonNull
+    public List<ApplicationInfo> getInstalledApplications(@NonNull ApplicationInfoFlags flags) {
+        throw new UnsupportedOperationException(
+                "getInstalledApplications not implemented in subclass");
+    }
     /**
      * Return a List of all application packages that are installed on the
      * device, for a specific user. If flag GET_UNINSTALLED_PACKAGES has been
@@ -5926,13 +6206,27 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
+     * @deprecated  Use {@link #getInstalledApplicationsAsUser(ApplicationInfoFlags, int)} instead.
      * @hide
      */
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @TestApi
+    @Deprecated
     public abstract List<ApplicationInfo> getInstalledApplicationsAsUser(
-            @ApplicationInfoFlags int flags, @UserIdInt int userId);
+            int flags, @UserIdInt int userId);
+
+    /**
+     * See {@link #getInstalledApplicationsAsUser(int, int}.
+     * @hide
+     */
+    @NonNull
+    @TestApi
+    public List<ApplicationInfo> getInstalledApplicationsAsUser(
+            @NonNull ApplicationInfoFlags flags, @UserIdInt int userId) {
+        throw new UnsupportedOperationException(
+                "getInstalledApplicationsAsUser not implemented in subclass");
+    }
 
     /**
      * Gets the instant applications the user recently used.
@@ -6081,9 +6375,19 @@ public abstract class PackageManager {
      * @return The shared library list.
      *
      * @see #MATCH_UNINSTALLED_PACKAGES
+     * @deprecated Use {@link #getSharedLibraries(PackageInfoFlags)} instead.
      */
-    public abstract @NonNull List<SharedLibraryInfo> getSharedLibraries(
-            @InstallFlags int flags);
+    @Deprecated
+    public abstract @NonNull List<SharedLibraryInfo> getSharedLibraries(int flags);
+
+    /**
+     * See {@link #getSharedLibraries(int)}.
+     * @param flags
+     */
+    public @NonNull List<SharedLibraryInfo> getSharedLibraries(@NonNull PackageInfoFlags flags) {
+        throw new UnsupportedOperationException(
+                "getSharedLibraries() not implemented in subclass");
+    }
 
     /**
      * Get a list of shared libraries on the device.
@@ -6098,10 +6402,22 @@ public abstract class PackageManager {
      * @see #MATCH_UNINSTALLED_PACKAGES
      *
      * @hide
+     * @deprecated Use {@link #getSharedLibrariesAsUser(PackageInfoFlags, int)} instead.
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
-    public abstract @NonNull List<SharedLibraryInfo> getSharedLibrariesAsUser(
-            @InstallFlags int flags, @UserIdInt int userId);
+    public abstract @NonNull List<SharedLibraryInfo> getSharedLibrariesAsUser(int flags,
+            @UserIdInt int userId);
+
+    /**
+     * See {@link #getSharedLibrariesAsUser(int, int)}.
+     * @hide
+     */
+    public @NonNull List<SharedLibraryInfo> getSharedLibrariesAsUser(
+            @NonNull PackageInfoFlags flags, @UserIdInt int userId) {
+        throw new UnsupportedOperationException(
+                "getSharedLibrariesAsUser() not implemented in subclass");
+    }
 
     /**
      * Get the list of shared libraries declared by a package.
@@ -6111,13 +6427,28 @@ public abstract class PackageManager {
      * @return the shared library list
      *
      * @hide
+     * @deprecated Use {@link #getDeclaredSharedLibraries(String, PackageInfoFlags)} instead.
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @RequiresPermission(Manifest.permission.ACCESS_SHARED_LIBRARIES)
     @SystemApi
     public List<SharedLibraryInfo> getDeclaredSharedLibraries(@NonNull String packageName,
-            @InstallFlags int flags) {
+            int flags) {
+        throw new UnsupportedOperationException(
+                "getDeclaredSharedLibraries() not implemented in subclass");
+    }
+
+    /**
+     * See {@link #getDeclaredSharedLibraries(String, int)}.
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(Manifest.permission.ACCESS_SHARED_LIBRARIES)
+    @SystemApi
+    public List<SharedLibraryInfo> getDeclaredSharedLibraries(@NonNull String packageName,
+            @NonNull PackageInfoFlags flags) {
         throw new UnsupportedOperationException(
                 "getDeclaredSharedLibraries() not implemented in subclass");
     }
@@ -6218,10 +6549,20 @@ public abstract class PackageManager {
      *         matching activity was found. If multiple matching activities are
      *         found and there is no default set, returns a ResolveInfo object
      *         containing something else, such as the activity resolver.
+     * @deprecated Use {@link #resolveActivity(Intent, ResolveInfoFlags)} instead.
+     */
+    @Deprecated
+    @Nullable
+    public abstract ResolveInfo resolveActivity(@NonNull Intent intent, int flags);
+
+    /**
+     * See {@link #resolveActivity(Intent, int)}.
      */
     @Nullable
-    public abstract ResolveInfo resolveActivity(@NonNull Intent intent,
-            @ResolveInfoFlags int flags);
+    public ResolveInfo resolveActivity(@NonNull Intent intent, @NonNull ResolveInfoFlags flags) {
+        throw new UnsupportedOperationException(
+                "resolveActivity not implemented in subclass");
+    }
 
     /**
      * Determine the best action to perform for a given Intent for a given user.
@@ -6250,12 +6591,25 @@ public abstract class PackageManager {
      *         found and there is no default set, returns a ResolveInfo object
      *         containing something else, such as the activity resolver.
      * @hide
+     * @deprecated Use {@link #resolveActivityAsUser(Intent, ResolveInfoFlags, int)} instead.
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @Nullable
     @UnsupportedAppUsage
     public abstract ResolveInfo resolveActivityAsUser(@NonNull Intent intent,
-            @ResolveInfoFlags int flags, @UserIdInt int userId);
+            int flags, @UserIdInt int userId);
+
+    /**
+     * See {@link #resolveActivityAsUser(Intent, int, int)}.
+     * @hide
+     */
+    @Nullable
+    public ResolveInfo resolveActivityAsUser(@NonNull Intent intent,
+            @NonNull ResolveInfoFlags flags, @UserIdInt int userId) {
+        throw new UnsupportedOperationException(
+                "resolveActivityAsUser not implemented in subclass");
+    }
 
     /**
      * Retrieve all activities that can be performed for the given intent.
@@ -6271,10 +6625,21 @@ public abstract class PackageManager {
      *         words, the first item is what would be returned by
      *         {@link #resolveActivity}. If there are no matching activities, an
      *         empty list is returned.
+     * @deprecated Use {@link #queryIntentActivities(Intent, ResolveInfoFlags)} instead.
+     */
+    @Deprecated
+    @NonNull
+    public abstract List<ResolveInfo> queryIntentActivities(@NonNull Intent intent, int flags);
+
+    /**
+     * See {@link #queryIntentActivities(Intent, int)}.
      */
     @NonNull
-    public abstract List<ResolveInfo> queryIntentActivities(@NonNull Intent intent,
-            @ResolveInfoFlags int flags);
+    public List<ResolveInfo> queryIntentActivities(@NonNull Intent intent,
+            @NonNull ResolveInfoFlags flags) {
+        throw new UnsupportedOperationException(
+                "queryIntentActivities not implemented in subclass");
+    }
 
     /**
      * Retrieve all activities that can be performed for the given intent, for a
@@ -6292,12 +6657,25 @@ public abstract class PackageManager {
      *         {@link #resolveActivity}. If there are no matching activities, an
      *         empty list is returned.
      * @hide
+     * @deprecated Use {@link #queryIntentActivitiesAsUser(Intent, ResolveInfoFlags, int)} instead.
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @UnsupportedAppUsage
     public abstract List<ResolveInfo> queryIntentActivitiesAsUser(@NonNull Intent intent,
-            @ResolveInfoFlags int flags, @UserIdInt int userId);
+            int flags, @UserIdInt int userId);
+
+    /**
+     * See {@link #queryIntentActivitiesAsUser(Intent, int, int)}.
+     * @hide
+     */
+    @NonNull
+    public List<ResolveInfo> queryIntentActivitiesAsUser(@NonNull Intent intent,
+            @NonNull ResolveInfoFlags flags, @UserIdInt int userId) {
+        throw new UnsupportedOperationException(
+                "queryIntentActivitiesAsUser not implemented in subclass");
+    }
 
     /**
      * Retrieve all activities that can be performed for the given intent, for a
@@ -6316,13 +6694,28 @@ public abstract class PackageManager {
      *         {@link #resolveActivity}. If there are no matching activities, an
      *         empty list is returned.
      * @hide
+     * @deprecated Use {@link #queryIntentActivitiesAsUser(Intent, ResolveInfoFlags, UserHandle)}
+     * instead.
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     @SystemApi
     public List<ResolveInfo> queryIntentActivitiesAsUser(@NonNull Intent intent,
-            @ResolveInfoFlags int flags, @NonNull UserHandle user) {
+            int flags, @NonNull UserHandle user) {
+        return queryIntentActivitiesAsUser(intent, flags, user.getIdentifier());
+    }
+
+    /**
+     * See {@link #queryIntentActivitiesAsUser(Intent, int, UserHandle)}.
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    @SystemApi
+    public List<ResolveInfo> queryIntentActivitiesAsUser(@NonNull Intent intent,
+            @NonNull ResolveInfoFlags flags, @NonNull UserHandle user) {
         return queryIntentActivitiesAsUser(intent, flags, user.getIdentifier());
     }
 
@@ -6350,10 +6743,24 @@ public abstract class PackageManager {
      *         activities that can handle <var>intent</var> but did not get
      *         included by one of the <var>specifics</var> intents. If there are
      *         no matching activities, an empty list is returned.
+     * @deprecated Use {@link #queryIntentActivityOptions(ComponentName, List, Intent,
+     * ResolveInfoFlags)} instead.
      */
+    @Deprecated
     @NonNull
     public abstract List<ResolveInfo> queryIntentActivityOptions(@Nullable ComponentName caller,
-            @Nullable Intent[] specifics, @NonNull Intent intent, @ResolveInfoFlags int flags);
+            @Nullable Intent[] specifics, @NonNull Intent intent, int flags);
+
+    /**
+     * See {@link #queryIntentActivityOptions(ComponentName, Intent[], Intent, int)}.
+     */
+    @NonNull
+    public List<ResolveInfo> queryIntentActivityOptions(@Nullable ComponentName caller,
+            @Nullable List<Intent> specifics, @NonNull Intent intent,
+            @NonNull ResolveInfoFlags flags) {
+        throw new UnsupportedOperationException(
+                "queryIntentActivityOptions not implemented in subclass");
+    }
 
     /**
      * Retrieve all receivers that can handle a broadcast of the given intent.
@@ -6363,10 +6770,21 @@ public abstract class PackageManager {
      * @return Returns a List of ResolveInfo objects containing one entry for
      *         each matching receiver, ordered from best to worst. If there are
      *         no matching receivers, an empty list or null is returned.
+     * @deprecated Use {@link #queryBroadcastReceivers(Intent, ResolveInfoFlags)} instead.
+     */
+    @Deprecated
+    @NonNull
+    public abstract List<ResolveInfo> queryBroadcastReceivers(@NonNull Intent intent, int flags);
+
+    /**
+     * See {@link #queryBroadcastReceivers(Intent, int)}.
      */
     @NonNull
-    public abstract List<ResolveInfo> queryBroadcastReceivers(@NonNull Intent intent,
-            @ResolveInfoFlags int flags);
+    public List<ResolveInfo> queryBroadcastReceivers(@NonNull Intent intent,
+            @NonNull ResolveInfoFlags flags) {
+        throw new UnsupportedOperationException(
+                "queryBroadcastReceivers not implemented in subclass");
+    }
 
     /**
      * Retrieve all receivers that can handle a broadcast of the given intent,
@@ -6379,24 +6797,53 @@ public abstract class PackageManager {
      *         each matching receiver, ordered from best to worst. If there are
      *         no matching receivers, an empty list or null is returned.
      * @hide
+     * @deprecated Use {@link #queryBroadcastReceiversAsUser(Intent, ResolveInfoFlags, UserHandle)}
+     * instead.
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @SystemApi
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     public List<ResolveInfo> queryBroadcastReceiversAsUser(@NonNull Intent intent,
-            @ResolveInfoFlags int flags, UserHandle userHandle) {
+            int flags, UserHandle userHandle) {
+        return queryBroadcastReceiversAsUser(intent, flags, userHandle.getIdentifier());
+    }
+
+    /**
+     * See {@link #queryBroadcastReceiversAsUser(Intent, int, UserHandle)}.
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    public List<ResolveInfo> queryBroadcastReceiversAsUser(@NonNull Intent intent,
+            @NonNull ResolveInfoFlags flags, @NonNull UserHandle userHandle) {
         return queryBroadcastReceiversAsUser(intent, flags, userHandle.getIdentifier());
     }
 
     /**
      * @hide
+     * @deprecated Use {@link #queryBroadcastReceiversAsUser(Intent, ResolveInfoFlags, int)}
+     * instead.
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @UnsupportedAppUsage
     public abstract List<ResolveInfo> queryBroadcastReceiversAsUser(@NonNull Intent intent,
-            @ResolveInfoFlags int flags, @UserIdInt int userId);
+            int flags, @UserIdInt int userId);
+
+    /**
+     * See {@link #queryBroadcastReceiversAsUser(Intent, int, int)}.
+     * @hide
+     */
+    @NonNull
+    public List<ResolveInfo> queryBroadcastReceiversAsUser(@NonNull Intent intent,
+            @NonNull ResolveInfoFlags flags, @UserIdInt int userId) {
+        throw new UnsupportedOperationException(
+                "queryBroadcastReceiversAsUser not implemented in subclass");
+    }
 
 
     /** @deprecated @hide */
@@ -6404,7 +6851,7 @@ public abstract class PackageManager {
     @Deprecated
     @UnsupportedAppUsage
     public List<ResolveInfo> queryBroadcastReceivers(@NonNull Intent intent,
-            @ResolveInfoFlags int flags, @UserIdInt int userId) {
+            int flags, @UserIdInt int userId) {
         final String msg = "Shame on you for calling the hidden API "
                 + "queryBroadcastReceivers(). Shame!";
         if (VMRuntime.getRuntime().getTargetSdkVersion() >= Build.VERSION_CODES.O) {
@@ -6424,17 +6871,41 @@ public abstract class PackageManager {
      * @return Returns a ResolveInfo object containing the final service intent
      *         that was determined to be the best action. Returns null if no
      *         matching service was found.
+     * @deprecated Use {@link #resolveService(Intent, ResolveInfoFlags)} instead.
+     */
+    @Deprecated
+    @Nullable
+    public abstract ResolveInfo resolveService(@NonNull Intent intent, int flags);
+
+    /**
+     * See {@link #resolveService(Intent, int)}.
      */
     @Nullable
-    public abstract ResolveInfo resolveService(@NonNull Intent intent, @ResolveInfoFlags int flags);
+    public ResolveInfo resolveService(@NonNull Intent intent, @NonNull ResolveInfoFlags flags) {
+        throw new UnsupportedOperationException(
+                "resolveService not implemented in subclass");
+    }
 
     /**
      * @hide
+     * @deprecated Use {@link #resolveServiceAsUser(Intent, ResolveInfoFlags, int)} instead.
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @Nullable
     public abstract ResolveInfo resolveServiceAsUser(@NonNull Intent intent,
-            @ResolveInfoFlags int flags, @UserIdInt int userId);
+            int flags, @UserIdInt int userId);
+
+    /**
+     * See {@link #resolveServiceAsUser(Intent, int, int)}.
+     * @hide
+     */
+    @Nullable
+    public ResolveInfo resolveServiceAsUser(@NonNull Intent intent,
+            @NonNull ResolveInfoFlags flags, @UserIdInt int userId) {
+        throw new UnsupportedOperationException(
+                "resolveServiceAsUser not implemented in subclass");
+    }
 
     /**
      * Retrieve all services that can match the given intent.
@@ -6446,10 +6917,22 @@ public abstract class PackageManager {
      *         words, the first item is what would be returned by
      *         {@link #resolveService}. If there are no matching services, an
      *         empty list or null is returned.
+     * @deprecated Use {@link #queryIntentServices(Intent, ResolveInfoFlags)} instead.
      */
+    @Deprecated
     @NonNull
     public abstract List<ResolveInfo> queryIntentServices(@NonNull Intent intent,
-            @ResolveInfoFlags int flags);
+            int flags);
+
+    /**
+     * See {@link #queryIntentServices(Intent, int)}.
+     */
+    @NonNull
+    public List<ResolveInfo> queryIntentServices(@NonNull Intent intent,
+            @NonNull ResolveInfoFlags flags) {
+        throw new UnsupportedOperationException(
+                "queryIntentServices not implemented in subclass");
+    }
 
     /**
      * Retrieve all services that can match the given intent for a given user.
@@ -6463,12 +6946,25 @@ public abstract class PackageManager {
      *         {@link #resolveService}. If there are no matching services, an
      *         empty list or null is returned.
      * @hide
+     * @deprecated Use {@link #queryIntentServicesAsUser(Intent, ResolveInfoFlags, int)} instead.
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @UnsupportedAppUsage
     public abstract List<ResolveInfo> queryIntentServicesAsUser(@NonNull Intent intent,
-            @ResolveInfoFlags int flags, @UserIdInt int userId);
+            int flags, @UserIdInt int userId);
+
+    /**
+     * See {@link #queryIntentServicesAsUser(Intent, int, int)}.
+     * @hide
+     */
+    @NonNull
+    public List<ResolveInfo> queryIntentServicesAsUser(@NonNull Intent intent,
+            @NonNull ResolveInfoFlags flags, @UserIdInt int userId) {
+        throw new UnsupportedOperationException(
+                "queryIntentServicesAsUser not implemented in subclass");
+    }
 
     /**
      * Retrieve all services that can match the given intent for a given user.
@@ -6482,13 +6978,59 @@ public abstract class PackageManager {
      *         {@link #resolveService}. If there are no matching services, an
      *         empty list or null is returned.
      * @hide
+     * @deprecated Use {@link #queryIntentServicesAsUser(Intent, ResolveInfoFlags, UserHandle)}
+     * instead.
+     */
+    @Deprecated
+    @NonNull
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    @SystemApi
+    public List<ResolveInfo> queryIntentServicesAsUser(@NonNull Intent intent,
+            int flags, @NonNull UserHandle user) {
+        return queryIntentServicesAsUser(intent, flags, user.getIdentifier());
+    }
+
+    /**
+     * See {@link #queryIntentServicesAsUser(Intent, int, UserHandle)}.
+     * @hide
      */
     @NonNull
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     @SystemApi
     public List<ResolveInfo> queryIntentServicesAsUser(@NonNull Intent intent,
-            @ResolveInfoFlags int flags, @NonNull UserHandle user) {
+            @NonNull ResolveInfoFlags flags, @NonNull UserHandle user) {
         return queryIntentServicesAsUser(intent, flags, user.getIdentifier());
+    }
+    /**
+     * Retrieve all providers that can match the given intent.
+     *
+     * @param intent An intent containing all of the desired specification
+     *            (action, data, type, category, and/or component).
+     * @param flags Additional option flags to modify the data returned.
+     * @param userId The user id.
+     * @return Returns a List of ResolveInfo objects containing one entry for
+     *         each matching provider, ordered from best to worst. If there are
+     *         no matching services, an empty list or null is returned.
+     * @hide
+     * @deprecated Use {@link #queryIntentContentProvidersAsUser(Intent, ResolveInfoFlags, int)}
+     * instead.
+     */
+    @Deprecated
+    @SuppressWarnings("HiddenAbstractMethod")
+    @NonNull
+    @UnsupportedAppUsage
+    public abstract List<ResolveInfo> queryIntentContentProvidersAsUser(
+            @NonNull Intent intent, int flags, @UserIdInt int userId);
+
+    /**
+     * See {@link #queryIntentContentProvidersAsUser(Intent, int, int)}.
+     * @hide
+     */
+    @NonNull
+    protected List<ResolveInfo> queryIntentContentProvidersAsUser(
+            @NonNull Intent intent, @NonNull ResolveInfoFlags flags, @UserIdInt int userId) {
+        throw new UnsupportedOperationException(
+                "queryIntentContentProvidersAsUser not implemented in subclass");
     }
 
     /**
@@ -6497,35 +7039,32 @@ public abstract class PackageManager {
      * @param intent An intent containing all of the desired specification
      *            (action, data, type, category, and/or component).
      * @param flags Additional option flags to modify the data returned.
-     * @param userId The user id.
-     * @return Returns a List of ResolveInfo objects containing one entry for
-     *         each matching provider, ordered from best to worst. If there are
-     *         no matching services, an empty list or null is returned.
-     * @hide
-     */
-    @SuppressWarnings("HiddenAbstractMethod")
-    @NonNull
-    @UnsupportedAppUsage
-    public abstract List<ResolveInfo> queryIntentContentProvidersAsUser(
-            @NonNull Intent intent, @ResolveInfoFlags int flags, @UserIdInt int userId);
-
-    /**
-     * Retrieve all providers that can match the given intent.
-     *
-     * @param intent An intent containing all of the desired specification
-     *            (action, data, type, category, and/or component).
-     * @param flags Additional option flags to modify the data returned.
      * @param user The user being queried.
      * @return Returns a List of ResolveInfo objects containing one entry for
      *         each matching provider, ordered from best to worst. If there are
      *         no matching services, an empty list or null is returned.
+     * @hide
+     * @deprecated Use {@link #queryIntentContentProvidersAsUser(Intent, ResolveInfoFlags,
+     * UserHandle)} instead.
+     */
+    @Deprecated
+    @NonNull
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    @SystemApi
+    public List<ResolveInfo> queryIntentContentProvidersAsUser(@NonNull Intent intent,
+            int flags, @NonNull UserHandle user) {
+        return queryIntentContentProvidersAsUser(intent, flags, user.getIdentifier());
+    }
+
+    /**
+     * See {@link #queryIntentContentProvidersAsUser(Intent, int, UserHandle)}.
      * @hide
      */
     @NonNull
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     @SystemApi
     public List<ResolveInfo> queryIntentContentProvidersAsUser(@NonNull Intent intent,
-            @ResolveInfoFlags int flags, @NonNull UserHandle user) {
+            @NonNull ResolveInfoFlags flags, @NonNull UserHandle user) {
         return queryIntentContentProvidersAsUser(intent, flags, user.getIdentifier());
     }
 
@@ -6538,10 +7077,22 @@ public abstract class PackageManager {
      * @return Returns a List of ResolveInfo objects containing one entry for
      *         each matching provider, ordered from best to worst. If there are
      *         no matching services, an empty list or null is returned.
+     * @deprecated Use {@link #queryIntentContentProviders(Intent, ResolveInfoFlags)} instead.
      */
+    @Deprecated
     @NonNull
     public abstract List<ResolveInfo> queryIntentContentProviders(@NonNull Intent intent,
-            @ResolveInfoFlags int flags);
+            int flags);
+
+    /**
+     * See {@link #queryIntentContentProviders(Intent, int)}.
+     */
+    @NonNull
+    public List<ResolveInfo> queryIntentContentProviders(@NonNull Intent intent,
+            @NonNull ResolveInfoFlags flags) {
+        throw new UnsupportedOperationException(
+                "queryIntentContentProviders not implemented in subclass");
+    }
 
     /**
      * Find a single content provider by its authority.
@@ -6556,10 +7107,22 @@ public abstract class PackageManager {
      * @param flags Additional option flags to modify the data returned.
      * @return A {@link ProviderInfo} object containing information about the
      *         provider. If a provider was not found, returns null.
+     * @deprecated Use {@link #resolveContentProvider(String, ComponentInfoFlags)} instead.
      */
+    @Deprecated
     @Nullable
     public abstract ProviderInfo resolveContentProvider(@NonNull String authority,
-            @ComponentInfoFlags int flags);
+            int flags);
+
+    /**
+     * See {@link #resolveContentProvider(String, int)}.
+     */
+    @Nullable
+    public ProviderInfo resolveContentProvider(@NonNull String authority,
+            @NonNull ComponentInfoFlags flags) {
+        throw new UnsupportedOperationException(
+                "resolveContentProvider not implemented in subclass");
+    }
 
     /**
      * Find a single content provider by its base path name.
@@ -6570,12 +7133,25 @@ public abstract class PackageManager {
      * @return A {@link ProviderInfo} object containing information about the
      *         provider. If a provider was not found, returns null.
      * @hide
+     * @deprecated Use {@link #resolveContentProviderAsUser(String, ComponentInfoFlags, int)}
+     * instead.
      */
     @SuppressWarnings("HiddenAbstractMethod")
     @Nullable
     @UnsupportedAppUsage
     public abstract ProviderInfo resolveContentProviderAsUser(@NonNull String providerName,
-            @ComponentInfoFlags int flags, @UserIdInt int userId);
+            int flags, @UserIdInt int userId);
+
+    /**
+     * See {@link #resolveContentProviderAsUser(String, int, int)}.
+     * @hide
+     */
+    @Nullable
+    public ProviderInfo resolveContentProviderAsUser(@NonNull String providerName,
+            @NonNull ComponentInfoFlags flags, @UserIdInt int userId) {
+        throw new UnsupportedOperationException(
+                "resolveContentProviderAsUser not implemented in subclass");
+    }
 
     /**
      * Retrieve content provider information.
@@ -6593,10 +7169,22 @@ public abstract class PackageManager {
      *         each provider either matching <var>processName</var> or, if
      *         <var>processName</var> is null, all known content providers.
      *         <em>If there are no matching providers, null is returned.</em>
+     * @deprecated Use {@link #queryContentProviders(String, int, ComponentInfoFlags)} instead.
      */
+    @Deprecated
     @NonNull
     public abstract List<ProviderInfo> queryContentProviders(
-            @Nullable String processName, int uid, @ComponentInfoFlags int flags);
+            @Nullable String processName, int uid, int flags);
+
+    /**
+     * See {@link #queryContentProviders(String, int, int)}.
+     */
+    @NonNull
+    public List<ProviderInfo> queryContentProviders(
+            @Nullable String processName, int uid, @NonNull ComponentInfoFlags flags) {
+        throw new UnsupportedOperationException(
+                "queryContentProviders not implemented in subclass");
+    }
 
     /**
      * Same as {@link #queryContentProviders}, except when {@code metaDataKey} is not null,
@@ -6612,10 +7200,24 @@ public abstract class PackageManager {
      * {@link #queryIntentContentProviders} for that.
      *
      * @hide
+     * @deprecated Use {@link #queryContentProviders(String, int, ComponentInfoFlags, String)}
+     * instead.
+     */
+    @Deprecated
+    @NonNull
+    public List<ProviderInfo> queryContentProviders(@Nullable String processName,
+            int uid, int flags, String metaDataKey) {
+        // Provide the default implementation for mocks.
+        return queryContentProviders(processName, uid, flags);
+    }
+
+    /**
+     * See {@link #queryContentProviders(String, int, int, String)}.
+     * @hide
      */
     @NonNull
     public List<ProviderInfo> queryContentProviders(@Nullable String processName,
-            int uid, @ComponentInfoFlags int flags, String metaDataKey) {
+            int uid, @NonNull ComponentInfoFlags flags, @Nullable String metaDataKey) {
         // Provide the default implementation for mocks.
         return queryContentProviders(processName, uid, flags);
     }
@@ -7151,10 +7753,21 @@ public abstract class PackageManager {
      * @param flags Additional option flags to modify the data returned.
      * @return A PackageInfo object containing information about the package
      *         archive. If the package could not be parsed, returns null.
+     * @deprecated Use {@link #getPackageArchiveInfo(String, PackageInfoFlags)} instead.
+     */
+    @Deprecated
+    @Nullable
+    public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath, int flags) {
+        throw new UnsupportedOperationException(
+                "getPackageArchiveInfo() not implemented in subclass");
+    }
+
+    /**
+     * See {@link #getPackageArchiveInfo(String, int)}.
      */
     @Nullable
     public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath,
-            @PackageInfoFlags int flags) {
+            @NonNull PackageInfoFlags flags) {
         throw new UnsupportedOperationException(
                 "getPackageArchiveInfo() not implemented in subclass");
     }
@@ -7730,7 +8343,7 @@ public abstract class PackageManager {
      */
     @NonNull
     @Deprecated
-    public abstract List<PackageInfo> getPreferredPackages(@PackageInfoFlags int flags);
+    public abstract List<PackageInfo> getPreferredPackages(int flags);
 
     /**
      * Add a new preferred activity mapping to the system.  This will be used
@@ -9406,10 +10019,11 @@ public abstract class PackageManager {
 
     private static final class ApplicationInfoQuery {
         final String packageName;
-        final int flags;
+        final long flags;
         final int userId;
 
-        ApplicationInfoQuery(@Nullable String packageName, int flags, int userId) {
+        ApplicationInfoQuery(@Nullable String packageName, @ApplicationInfoFlagsBits long flags,
+                int userId) {
             this.packageName = packageName;
             this.flags = flags;
             this.userId = userId;
@@ -9448,7 +10062,7 @@ public abstract class PackageManager {
     }
 
     private static ApplicationInfo getApplicationInfoAsUserUncached(
-            String packageName, int flags, int userId) {
+            String packageName, @ApplicationInfoFlagsBits long flags, int userId) {
         try {
             return ActivityThread.getPackageManager()
                     .getApplicationInfo(packageName, flags, userId);
@@ -9478,7 +10092,7 @@ public abstract class PackageManager {
 
     /** @hide */
     public static ApplicationInfo getApplicationInfoAsUserCached(
-            String packageName, int flags, int userId) {
+            String packageName, @ApplicationInfoFlagsBits long flags, int userId) {
         return sApplicationInfoCache.query(
                 new ApplicationInfoQuery(packageName, flags, userId));
     }
@@ -9509,10 +10123,10 @@ public abstract class PackageManager {
 
     private static final class PackageInfoQuery {
         final String packageName;
-        final int flags;
+        final long flags;
         final int userId;
 
-        PackageInfoQuery(@Nullable String packageName, int flags, int userId) {
+        PackageInfoQuery(@Nullable String packageName, @PackageInfoFlagsBits long flags, int userId) {
             this.packageName = packageName;
             this.flags = flags;
             this.userId = userId;
@@ -9551,7 +10165,7 @@ public abstract class PackageManager {
     }
 
     private static PackageInfo getPackageInfoAsUserUncached(
-            String packageName, int flags, int userId) {
+            String packageName, @PackageInfoFlagsBits long flags, int userId) {
         try {
             return ActivityThread.getPackageManager().getPackageInfo(packageName, flags, userId);
         } catch (RemoteException e) {
@@ -9580,7 +10194,7 @@ public abstract class PackageManager {
 
     /** @hide */
     public static PackageInfo getPackageInfoAsUserCached(
-            String packageName, int flags, int userId) {
+            String packageName, @PackageInfoFlagsBits long flags, int userId) {
         return sPackageInfoCache.query(new PackageInfoQuery(packageName, flags, userId));
     }
 

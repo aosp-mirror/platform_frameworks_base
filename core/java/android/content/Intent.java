@@ -9220,7 +9220,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #resolveActivity
      */
     public ActivityInfo resolveActivityInfo(@NonNull PackageManager pm,
-            @PackageManager.ComponentInfoFlags int flags) {
+            @PackageManager.ComponentInfoFlagsBits int flags) {
         ActivityInfo ai = null;
         if (mComponent != null) {
             try {
@@ -9248,7 +9248,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     @UnsupportedAppUsage
     public @Nullable ComponentName resolveSystemService(@NonNull PackageManager pm,
-            @PackageManager.ComponentInfoFlags int flags) {
+            @PackageManager.ComponentInfoFlagsBits int flags) {
         if (mComponent != null) {
             return mComponent;
         }

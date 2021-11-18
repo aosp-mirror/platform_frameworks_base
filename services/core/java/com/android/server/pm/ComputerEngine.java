@@ -429,7 +429,7 @@ public class ComputerEngine implements Computer {
     }
 
     public final @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
-            String resolvedType, @PackageManager.ResolveInfoFlags long flags,
+            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
             @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags,
             int filterCallingUid, int userId, boolean resolveForStart,
             boolean allowDynamicSplits) {
@@ -541,14 +541,14 @@ public class ComputerEngine implements Computer {
     }
 
     public final @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
-            String resolvedType, @PackageManager.ResolveInfoFlags long flags, int userId) {
+            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         return queryIntentActivitiesInternal(
                 intent, resolvedType, flags, 0 /*privateResolveFlags*/, Binder.getCallingUid(),
                 userId, false /*resolveForStart*/, true /*allowDynamicSplits*/);
     }
 
     public final @NonNull List<ResolveInfo> queryIntentServicesInternal(Intent intent,
-            String resolvedType, @PackageManager.ResolveInfoFlags long flags, int userId,
+            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId,
             int callingUid, boolean includeInstantApps) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         enforceCrossUserOrProfilePermission(callingUid,
@@ -625,7 +625,7 @@ public class ComputerEngine implements Computer {
     }
 
     protected @NonNull List<ResolveInfo> queryIntentServicesInternalBody(Intent intent,
-            String resolvedType, @PackageManager.ResolveInfoFlags long flags, int userId,
+            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId,
             int callingUid, String instantAppPkgName) {
         // reader
         String pkgName = intent.getPackage();
@@ -653,7 +653,7 @@ public class ComputerEngine implements Computer {
     }
 
     public @NonNull QueryIntentActivitiesResult queryIntentActivitiesInternalBody(
-            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlags long flags,
+            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
             int filterCallingUid, int userId, boolean resolveForStart, boolean allowDynamicSplits,
             String pkgName, String instantAppPkgName) {
         // reader
@@ -786,7 +786,7 @@ public class ComputerEngine implements Computer {
     }
 
     public final ActivityInfo getActivityInfo(ComponentName component,
-            @PackageManager.ResolveInfoFlags long flags, int userId) {
+            @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         return getActivityInfoInternal(component, flags, Binder.getCallingUid(), userId);
     }
 
@@ -797,7 +797,7 @@ public class ComputerEngine implements Computer {
      * trusted and will be used as-is; unlike userId which will be validated by this method.
      */
     public final ActivityInfo getActivityInfoInternal(ComponentName component,
-            @PackageManager.ResolveInfoFlags long flags, int filterCallingUid, int userId) {
+            @PackageManager.ResolveInfoFlagsBits long flags, int filterCallingUid, int userId) {
         if (!mUserManager.exists(userId)) return null;
         flags = updateFlagsForComponent(flags, userId);
 
@@ -811,7 +811,7 @@ public class ComputerEngine implements Computer {
     }
 
     protected ActivityInfo getActivityInfoInternalBody(ComponentName component,
-            @PackageManager.ResolveInfoFlags long flags, int filterCallingUid, int userId) {
+            @PackageManager.ResolveInfoFlagsBits long flags, int filterCallingUid, int userId) {
         ParsedActivity a = mComponentResolver.getActivity(component);
 
         if (DEBUG_PACKAGE_INFO) Log.v(TAG, "getActivityInfo " + component + ": " + a);
@@ -879,7 +879,7 @@ public class ComputerEngine implements Computer {
     }
 
     public final ApplicationInfo getApplicationInfo(String packageName,
-            @PackageManager.ApplicationInfoFlags long flags, int userId) {
+            @PackageManager.ApplicationInfoFlagsBits long flags, int userId) {
         return getApplicationInfoInternal(packageName, flags, Binder.getCallingUid(), userId);
     }
 
@@ -890,7 +890,7 @@ public class ComputerEngine implements Computer {
      * trusted and will be used as-is; unlike userId which will be validated by this method.
      */
     public final ApplicationInfo getApplicationInfoInternal(String packageName,
-            @PackageManager.ApplicationInfoFlags long flags,
+            @PackageManager.ApplicationInfoFlagsBits long flags,
             int filterCallingUid, int userId) {
         if (!mUserManager.exists(userId)) return null;
         flags = updateFlagsForApplication(flags, userId);
@@ -905,7 +905,7 @@ public class ComputerEngine implements Computer {
     }
 
     protected ApplicationInfo getApplicationInfoInternalBody(String packageName,
-            @PackageManager.ApplicationInfoFlags long flags,
+            @PackageManager.ApplicationInfoFlagsBits long flags,
             int filterCallingUid, int userId) {
         // writer
         // Normalize package name to handle renamed packages and static libs
@@ -1161,7 +1161,7 @@ public class ComputerEngine implements Computer {
     }
 
     public final CrossProfileDomainInfo getCrossProfileDomainPreferredLpr(Intent intent,
-            String resolvedType, @PackageManager.ResolveInfoFlags long flags, int sourceUserId,
+            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int sourceUserId,
             int parentUserId) {
         if (!mUserManager.hasUserRestriction(UserManager.ALLOW_PARENT_PROFILE_APP_LINKING,
                 sourceUserId)) {
@@ -1426,7 +1426,7 @@ public class ComputerEngine implements Computer {
     }
 
     private List<ResolveInfo> maybeAddInstantAppInstaller(List<ResolveInfo> result,
-            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlags long flags,
+            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
             int userId, boolean resolveForStart, boolean isRequesterInstantApp) {
         // first, check to see if we've got an instant app already installed
         final boolean alreadyResolvedLocally = (flags & PackageManager.MATCH_INSTANT) != 0;
@@ -1532,7 +1532,7 @@ public class ComputerEngine implements Computer {
     }
 
     public final PackageInfo generatePackageInfo(PackageStateInternal ps,
-            @PackageManager.PackageInfoFlags long flags, int userId) {
+            @PackageManager.PackageInfoFlagsBits long flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
         if (ps == null) {
             return null;
@@ -1607,7 +1607,7 @@ public class ComputerEngine implements Computer {
     }
 
     public final PackageInfo getPackageInfo(String packageName,
-            @PackageManager.PackageInfoFlags long flags, int userId) {
+            @PackageManager.PackageInfoFlagsBits long flags, int userId) {
         return getPackageInfoInternal(packageName, PackageManager.VERSION_CODE_HIGHEST,
                 flags, Binder.getCallingUid(), userId);
     }
@@ -1808,7 +1808,7 @@ public class ComputerEngine implements Computer {
     @Nullable
     private CrossProfileDomainInfo createForwardingResolveInfo(
             @NonNull CrossProfileIntentFilter filter, @NonNull Intent intent,
-            @Nullable String resolvedType, @PackageManager.ResolveInfoFlags long flags,
+            @Nullable String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
             int sourceUserId) {
         int targetUserId = filter.getTargetUserId();
         if (!isUserEnabled(targetUserId)) {
@@ -1970,7 +1970,7 @@ public class ComputerEngine implements Computer {
     }
 
     public final ServiceInfo getServiceInfo(ComponentName component,
-            @PackageManager.ResolveInfoFlags long flags, int userId) {
+            @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
         flags = updateFlagsForComponent(flags, userId);
@@ -1981,7 +1981,7 @@ public class ComputerEngine implements Computer {
     }
 
     protected ServiceInfo getServiceInfoBody(ComponentName component,
-            @PackageManager.ResolveInfoFlags long flags, int userId, int callingUid) {
+            @PackageManager.ResolveInfoFlagsBits long flags, int userId, int callingUid) {
         ParsedService s = mComponentResolver.getService(component);
         if (DEBUG_PACKAGE_INFO) {
             Log.v(
@@ -2233,7 +2233,7 @@ public class ComputerEngine implements Computer {
     }
 
     private boolean filterStaticSharedLibPackage(@Nullable PackageStateInternal ps, int uid,
-            int userId, @PackageManager.ComponentInfoFlags long flags) {
+            int userId, @PackageManager.ComponentInfoFlagsBits long flags) {
         // Callers can access only the static shared libs they depend on, otherwise they need to
         // explicitly ask for the static shared libraries given the caller is allowed to access
         // all static libs.
@@ -2289,7 +2289,7 @@ public class ComputerEngine implements Computer {
     }
 
     private boolean filterSdkLibPackage(@Nullable PackageStateInternal ps, int uid,
-            int userId, @PackageManager.ComponentInfoFlags long flags) {
+            int userId, @PackageManager.ComponentInfoFlagsBits long flags) {
         // Callers can access only the SDK libs they depend on, otherwise they need to
         // explicitly ask for the SDKs given the caller is allowed to access
         // all shared libs.
@@ -2346,7 +2346,7 @@ public class ComputerEngine implements Computer {
 
     @Override
     public final boolean filterSharedLibPackage(@Nullable PackageStateInternal ps, int uid,
-            int userId, @PackageManager.ComponentInfoFlags long flags) {
+            int userId, @PackageManager.ComponentInfoFlagsBits long flags) {
         return filterStaticSharedLibPackage(ps, uid, userId, flags) || filterSdkLibPackage(ps, uid,
                 userId, flags);
     }
@@ -2445,7 +2445,7 @@ public class ComputerEngine implements Computer {
      * activity was not set by the DPC.
      */
     public final boolean isImplicitImageCaptureIntentAndNotSetByDpcLocked(Intent intent,
-            int userId, String resolvedType, @PackageManager.ResolveInfoFlags long flags) {
+            int userId, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags) {
         return intent.isImplicitImageCaptureIntent() && !isPersistentPreferredActivitySetByDpm(
                 intent, userId, resolvedType, flags);
     }
@@ -2486,7 +2486,7 @@ public class ComputerEngine implements Computer {
 
     private boolean isInstantAppResolutionAllowed(
             Intent intent, List<ResolveInfo> resolvedActivities, int userId,
-            boolean skipPackageCheck, @PackageManager.ResolveInfoFlags long flags) {
+            boolean skipPackageCheck, @PackageManager.ResolveInfoFlagsBits long flags) {
         if (mInstantAppResolverConnection == null) {
             return false;
         }
@@ -2526,7 +2526,7 @@ public class ComputerEngine implements Computer {
     // Or if there's already an ephemeral app installed that handles the action
     protected boolean isInstantAppResolutionAllowedBody(
             Intent intent, List<ResolveInfo> resolvedActivities, int userId,
-            boolean skipPackageCheck, @PackageManager.ResolveInfoFlags long flags) {
+            boolean skipPackageCheck, @PackageManager.ResolveInfoFlagsBits long flags) {
         final int count = (resolvedActivities == null ? 0 : resolvedActivities.size());
         for (int n = 0; n < count; n++) {
             final ResolveInfo info = resolvedActivities.get(n);
@@ -2558,7 +2558,7 @@ public class ComputerEngine implements Computer {
     }
 
     private boolean isPersistentPreferredActivitySetByDpm(Intent intent, int userId,
-            String resolvedType, @PackageManager.ResolveInfoFlags long flags) {
+            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags) {
         PersistentPreferredIntentResolver ppir =
                 mSettings.getPersistentPreferredActivities(userId);
         //TODO(b/158003772): Remove double query
@@ -2716,7 +2716,7 @@ public class ComputerEngine implements Computer {
     }
 
     public int getPackageUidInternal(String packageName,
-            @PackageManager.PackageInfoFlags long flags, int userId, int callingUid) {
+            @PackageManager.PackageInfoFlagsBits long flags, int userId, int callingUid) {
         // reader
         final AndroidPackage p = mPackages.get(packageName);
         if (p != null && AndroidPackageUtils.isMatchForSystemOnly(p, flags)) {
@@ -3239,7 +3239,7 @@ public class ComputerEngine implements Computer {
 
     // The body of findPreferredActivity.
     protected PackageManagerService.FindPreferredActivityBodyResult findPreferredActivityBody(
-            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlags long flags,
+            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
             List<ResolveInfo> query, boolean always,
             boolean removeMatches, boolean debug, int userId, boolean queryMayBeFiltered,
             int callingUid, boolean isDeviceProvisioned) {
@@ -3448,7 +3448,7 @@ public class ComputerEngine implements Computer {
     }
 
     public final PackageManagerService.FindPreferredActivityBodyResult findPreferredActivityInternal(
-            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlags long flags,
+            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
             List<ResolveInfo> query, boolean always,
             boolean removeMatches, boolean debug, int userId, boolean queryMayBeFiltered) {
 
@@ -3465,7 +3465,7 @@ public class ComputerEngine implements Computer {
     }
 
     public final ResolveInfo findPersistentPreferredActivityLP(Intent intent,
-            String resolvedType, @PackageManager.ResolveInfoFlags long flags,
+            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
             List<ResolveInfo> query, boolean debug, int userId) {
         final int n = query.size();
         PersistentPreferredIntentResolver ppir =
@@ -3663,7 +3663,7 @@ public class ComputerEngine implements Computer {
 
     @Override
     public int[] getPackageGids(@NonNull String packageName,
-            @PackageManager.PackageInfoFlags long flags, @UserIdInt int userId) {
+            @PackageManager.PackageInfoFlagsBits long flags, @UserIdInt int userId) {
         if (!mUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
         flags = updateFlagsForPackage(flags, userId);
@@ -3740,7 +3740,7 @@ public class ComputerEngine implements Computer {
     @Nullable
     @Override
     public ActivityInfo getReceiverInfo(@NonNull ComponentName component,
-            @PackageManager.ComponentInfoFlags long flags, @UserIdInt int userId) {
+            @PackageManager.ComponentInfoFlagsBits long flags, @UserIdInt int userId) {
         if (!mUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
         flags = updateFlagsForComponent(flags, userId);
@@ -3773,7 +3773,7 @@ public class ComputerEngine implements Computer {
     @Nullable
     @Override
     public ParceledListSlice<SharedLibraryInfo> getSharedLibraries(@NonNull String packageName,
-            @PackageManager.PackageInfoFlags long flags, @UserIdInt int userId) {
+            @PackageManager.PackageInfoFlagsBits long flags, @UserIdInt int userId) {
         if (!mUserManager.exists(userId)) return null;
         Preconditions.checkArgumentNonnegative(userId, "userId must be >= 0");
         final int callingUid = Binder.getCallingUid();
@@ -3902,7 +3902,8 @@ public class ComputerEngine implements Computer {
 
     @Override
     public List<VersionedPackage> getPackagesUsingSharedLibrary(@NonNull SharedLibraryInfo libInfo,
-            @PackageManager.PackageInfoFlags long flags, int callingUid, @UserIdInt int userId) {
+            @PackageManager.PackageInfoFlagsBits long flags, int callingUid,
+            @UserIdInt int userId) {
         List<VersionedPackage> versionedPackages = null;
         final ArrayMap<String, ? extends PackageStateInternal> packageStates = getPackageStates();
         final int packageCount = packageStates.size();
@@ -3964,7 +3965,7 @@ public class ComputerEngine implements Computer {
     @Nullable
     @Override
     public ParceledListSlice<SharedLibraryInfo> getDeclaredSharedLibraries(
-            @NonNull String packageName, @PackageManager.PackageInfoFlags long flags,
+            @NonNull String packageName, @PackageManager.PackageInfoFlagsBits long flags,
             @UserIdInt int userId) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_SHARED_LIBRARIES,
                 "getDeclaredSharedLibraries");
@@ -4041,7 +4042,7 @@ public class ComputerEngine implements Computer {
     @Nullable
     @Override
     public ProviderInfo getProviderInfo(@NonNull ComponentName component,
-            @PackageManager.ComponentInfoFlags long flags, @UserIdInt int userId) {
+            @PackageManager.ComponentInfoFlagsBits long flags, @UserIdInt int userId) {
         if (!mUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
         flags = updateFlagsForComponent(flags, userId);
@@ -4515,7 +4516,7 @@ public class ComputerEngine implements Computer {
     @NonNull
     @Override
     public ParceledListSlice<PackageInfo> getPackagesHoldingPermissions(
-            @NonNull String[] permissions, @PackageManager.PackageInfoFlags long flags,
+            @NonNull String[] permissions, @PackageManager.PackageInfoFlagsBits long flags,
             @UserIdInt int userId) {
         if (!mUserManager.exists(userId)) return ParceledListSlice.emptyList();
         flags = updateFlagsForPackage(flags, userId);
@@ -4536,7 +4537,7 @@ public class ComputerEngine implements Computer {
     }
 
     private void addPackageHoldingPermissions(ArrayList<PackageInfo> list, PackageStateInternal ps,
-            String[] permissions, boolean[] tmp, @PackageManager.PackageInfoFlags long flags,
+            String[] permissions, boolean[] tmp, @PackageManager.PackageInfoFlagsBits long flags,
             int userId) {
         int numMatch = 0;
         for (int i=0; i<permissions.length; i++) {
@@ -4578,7 +4579,7 @@ public class ComputerEngine implements Computer {
     @NonNull
     @Override
     public List<ApplicationInfo> getInstalledApplications(
-            @PackageManager.ApplicationInfoFlags long flags, @UserIdInt int userId,
+            @PackageManager.ApplicationInfoFlagsBits long flags, @UserIdInt int userId,
             int callingUid) {
         if (getInstantAppPackageName(callingUid) != null) {
             return Collections.emptyList();
@@ -4655,7 +4656,8 @@ public class ComputerEngine implements Computer {
     @Nullable
     @Override
     public ProviderInfo resolveContentProvider(@NonNull String name,
-            @PackageManager.ResolveInfoFlags long flags, @UserIdInt int userId, int callingUid) {
+            @PackageManager.ResolveInfoFlagsBits long flags, @UserIdInt int userId,
+            int callingUid) {
         if (!mUserManager.exists(userId)) return null;
         flags = updateFlagsForComponent(flags, userId);
         final ProviderInfo providerInfo = mComponentResolver.queryProvider(name, flags, userId);
@@ -4744,7 +4746,8 @@ public class ComputerEngine implements Computer {
     @NonNull
     @Override
     public ParceledListSlice<ProviderInfo> queryContentProviders(@Nullable String processName,
-            int uid, @PackageManager.ComponentInfoFlags long flags, @Nullable String metaDataKey) {
+            int uid, @PackageManager.ComponentInfoFlagsBits long flags,
+            @Nullable String metaDataKey) {
         final int callingUid = Binder.getCallingUid();
         final int userId = processName != null ? UserHandle.getUserId(uid)
                 : UserHandle.getCallingUserId();
@@ -5290,7 +5293,7 @@ public class ComputerEngine implements Computer {
 
     @Override
     public int getPackageUid(@NonNull String packageName,
-            @PackageManager.PackageInfoFlags long flags, @UserIdInt int userId) {
+            @PackageManager.PackageInfoFlagsBits long flags, @UserIdInt int userId) {
         if (!mUserManager.exists(userId)) return -1;
         final int callingUid = Binder.getCallingUid();
         flags = updateFlagsForPackage(flags, userId);

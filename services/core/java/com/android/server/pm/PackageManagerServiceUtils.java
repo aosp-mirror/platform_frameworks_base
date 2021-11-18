@@ -1079,7 +1079,7 @@ public class PackageManagerServiceUtils {
     public static boolean hasAnyDomainApproval(
             @NonNull DomainVerificationManagerInternal manager,
             @NonNull PackageStateInternal pkgSetting, @NonNull Intent intent,
-            @PackageManager.ResolveInfoFlags long resolveInfoFlags, @UserIdInt int userId) {
+            @PackageManager.ResolveInfoFlagsBits long resolveInfoFlags, @UserIdInt int userId) {
         return manager.approvalLevelForDomain(pkgSetting, intent, resolveInfoFlags, userId)
                 > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE;
     }
