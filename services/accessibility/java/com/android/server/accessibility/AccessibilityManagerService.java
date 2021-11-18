@@ -3709,6 +3709,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
                 updateMagnificationLocked(userState);
                 updateWindowsForAccessibilityCallbackLocked(userState);
+                notifyClearAccessibilityCacheLocked();
             }
         }
 
