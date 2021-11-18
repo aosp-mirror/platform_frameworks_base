@@ -133,35 +133,36 @@ public interface Computer {
     }
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent, String resolvedType,
-            int flags, @PackageManagerInternal.PrivateResolveFlags int privateResolveFlags,
+            @PackageManager.ResolveInfoFlags long flags,
+            @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags,
             int filterCallingUid, int userId, boolean resolveForStart, boolean allowDynamicSplits);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent, String resolvedType,
-            int flags, int userId);
+            long flags, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     @NonNull List<ResolveInfo> queryIntentServicesInternal(Intent intent, String resolvedType,
-            int flags, int userId, int callingUid, boolean includeInstantApps);
+            long flags, int userId, int callingUid, boolean includeInstantApps);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     @NonNull QueryIntentActivitiesResult queryIntentActivitiesInternalBody(Intent intent,
-            String resolvedType, int flags, int filterCallingUid, int userId,
+            String resolvedType, long flags, int filterCallingUid, int userId,
             boolean resolveForStart, boolean allowDynamicSplits, String pkgName,
             String instantAppPkgName);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    ActivityInfo getActivityInfo(ComponentName component, int flags, int userId);
+    ActivityInfo getActivityInfo(ComponentName component, long flags, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    ActivityInfo getActivityInfoInternal(ComponentName component, int flags,
+    ActivityInfo getActivityInfoInternal(ComponentName component, long flags,
             int filterCallingUid, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     AndroidPackage getPackage(String packageName);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     AndroidPackage getPackage(int uid);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    ApplicationInfo generateApplicationInfoFromSettings(String packageName, int flags,
+    ApplicationInfo generateApplicationInfoFromSettings(String packageName, long flags,
             int filterCallingUid, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    ApplicationInfo getApplicationInfo(String packageName, int flags, int userId);
+    ApplicationInfo getApplicationInfo(String packageName, long flags, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    ApplicationInfo getApplicationInfoInternal(String packageName, int flags,
+    ApplicationInfo getApplicationInfoInternal(String packageName, long flags,
             int filterCallingUid, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     ComponentName getDefaultHomeActivity(int userId);
@@ -169,7 +170,7 @@ public interface Computer {
     ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     CrossProfileDomainInfo getCrossProfileDomainPreferredLpr(Intent intent, String resolvedType,
-            int flags, int sourceUserId, int parentUserId);
+            long flags, int sourceUserId, int parentUserId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     Intent getHomeIntent();
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
@@ -180,11 +181,11 @@ public interface Computer {
             String ephemeralPkgName, boolean allowDynamicSplits, int filterCallingUid,
             boolean resolveForStart, int userId, Intent intent);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    PackageInfo generatePackageInfo(PackageStateInternal ps, int flags, int userId);
+    PackageInfo generatePackageInfo(PackageStateInternal ps, long flags, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    PackageInfo getPackageInfo(String packageName, int flags, int userId);
+    PackageInfo getPackageInfo(String packageName, long flags, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    PackageInfo getPackageInfoInternal(String packageName, long versionCode, int flags,
+    PackageInfo getPackageInfoInternal(String packageName, long versionCode, long flags,
             int filterCallingUid, int userId);
 
     /**
@@ -202,12 +203,12 @@ public interface Computer {
     @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     @Nullable PackageState getPackageStateCopied(@NonNull String packageName);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    ParceledListSlice<PackageInfo> getInstalledPackages(int flags, int userId);
+    ParceledListSlice<PackageInfo> getInstalledPackages(long flags, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     ResolveInfo createForwardingResolveInfoUnchecked(WatchedIntentFilter filter,
             int sourceUserId, int targetUserId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    ServiceInfo getServiceInfo(ComponentName component, int flags, int userId);
+    ServiceInfo getServiceInfo(ComponentName component, long flags, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     SharedLibraryInfo getSharedLibraryInfo(String name, long version);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
@@ -224,7 +225,7 @@ public interface Computer {
     boolean canViewInstantApps(int callingUid, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean filterSharedLibPackage(@Nullable PackageStateInternal ps, int uid, int userId,
-            int flags);
+            long flags);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean isCallerSameApp(String packageName, int uid);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
@@ -234,7 +235,7 @@ public interface Computer {
             @PackageManager.ComponentType int type);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean isImplicitImageCaptureIntentAndNotSetByDpcLocked(Intent intent, int userId,
-            String resolvedType, int flags);
+            String resolvedType, long flags);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean isInstantApp(String packageName, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
@@ -254,18 +255,18 @@ public interface Computer {
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     int checkUidPermission(String permName, int uid);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
-    int getPackageUidInternal(String packageName, int flags, int userId, int callingUid);
+    int getPackageUidInternal(String packageName, long flags, int userId, int callingUid);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    int updateFlagsForApplication(int flags, int userId);
+    long updateFlagsForApplication(long flags, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    int updateFlagsForComponent(int flags, int userId);
+    long updateFlagsForComponent(long flags, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    int updateFlagsForPackage(int flags, int userId);
+    long updateFlagsForPackage(long flags, int userId);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    int updateFlagsForResolve(int flags, int userId, int callingUid, boolean wantInstantApps,
+    long updateFlagsForResolve(long flags, int userId, int callingUid, boolean wantInstantApps,
             boolean isImplicitImageCaptureIntentAndNotSetByDpc);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    int updateFlagsForResolve(int flags, int userId, int callingUid, boolean wantInstantApps,
+    long updateFlagsForResolve(long flags, int userId, int callingUid, boolean wantInstantApps,
             boolean onlyExposedExplicitly, boolean isImplicitImageCaptureIntentAndNotSetByDpc);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     void enforceCrossUserOrProfilePermission(int callingUid, @UserIdInt int userId,
@@ -291,10 +292,10 @@ public interface Computer {
     void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     PackageManagerService.FindPreferredActivityBodyResult findPreferredActivityInternal(
-            Intent intent, String resolvedType, int flags, List<ResolveInfo> query, boolean always,
+            Intent intent, String resolvedType, long flags, List<ResolveInfo> query, boolean always,
             boolean removeMatches, boolean debug, int userId, boolean queryMayBeFiltered);
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    ResolveInfo findPersistentPreferredActivityLP(Intent intent, String resolvedType, int flags,
+    ResolveInfo findPersistentPreferredActivityLP(Intent intent, String resolvedType, long flags,
             List<ResolveInfo> query, boolean debug, int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
@@ -337,7 +338,8 @@ public interface Computer {
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
-    int[] getPackageGids(@NonNull String packageName, int flags, @UserIdInt int userId);
+    int[] getPackageGids(@NonNull String packageName, @PackageManager.PackageInfoFlags long flags,
+            @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     int getTargetSdkVersion(@NonNull String packageName);
@@ -348,13 +350,13 @@ public interface Computer {
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
-    ActivityInfo getReceiverInfo(@NonNull ComponentName component, int flags,
-            @UserIdInt int userId);
+    ActivityInfo getReceiverInfo(@NonNull ComponentName component,
+            @PackageManager.ComponentInfoFlags long flags, @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ParceledListSlice<SharedLibraryInfo> getSharedLibraries(@NonNull String packageName,
-            int flags, @UserIdInt int userId);
+            @PackageManager.PackageInfoFlags long flags, @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean canRequestPackageInstalls(@NonNull String packageName, int callingUid,
@@ -367,17 +369,18 @@ public interface Computer {
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     List<VersionedPackage> getPackagesUsingSharedLibrary(@NonNull SharedLibraryInfo libInfo,
-            int flags, int callingUid, @UserIdInt int userId);
+            @PackageManager.PackageInfoFlags long flags, int callingUid, @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ParceledListSlice<SharedLibraryInfo> getDeclaredSharedLibraries(
-            @NonNull String packageName, int flags, @UserIdInt int userId);
+            @NonNull String packageName, @PackageManager.PackageInfoFlags long flags,
+            @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
-    ProviderInfo getProviderInfo(@NonNull ComponentName component, int flags,
-            @UserIdInt int userId);
+    ProviderInfo getProviderInfo(@NonNull ComponentName component,
+            @PackageManager.ComponentInfoFlags long flags, @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
@@ -436,17 +439,17 @@ public interface Computer {
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     ParceledListSlice<PackageInfo> getPackagesHoldingPermissions(@NonNull String[] permissions,
-            int flags, @UserIdInt int userId);
+            @PackageManager.PackageInfoFlags long flags, @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
-    List<ApplicationInfo> getInstalledApplications(int flags, @UserIdInt int userId,
-            int callingUid);
+    List<ApplicationInfo> getInstalledApplications(@PackageManager.ApplicationInfoFlags long flags,
+            @UserIdInt int userId, int callingUid);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
-    ProviderInfo resolveContentProvider(@NonNull String name, int flags,
-            @UserIdInt int userId, int callingUid);
+    ProviderInfo resolveContentProvider(@NonNull String name,
+            @PackageManager.ResolveInfoFlags long flags, @UserIdInt int userId, int callingUid);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
@@ -460,7 +463,7 @@ public interface Computer {
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     ParceledListSlice<ProviderInfo> queryContentProviders(@Nullable String processName, int uid,
-            int flags, @Nullable String metaDataKey);
+            @PackageManager.ComponentInfoFlags long flags, @Nullable String metaDataKey);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
@@ -552,7 +555,8 @@ public interface Computer {
     boolean canQueryPackage(int callingUid, @Nullable String targetPackageName);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
-    int getPackageUid(@NonNull String packageName, int flags, @UserIdInt int userId);
+    int getPackageUid(@NonNull String packageName, @PackageManager.PackageInfoFlags long flags,
+            @UserIdInt int userId);
 
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean canAccessComponent(int callingUid, @NonNull ComponentName component,

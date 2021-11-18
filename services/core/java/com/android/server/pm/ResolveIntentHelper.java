@@ -74,8 +74,9 @@ final class ResolveIntentHelper {
      * However, if {@code resolveForStart} is {@code true}, all instant apps are visible
      * since we need to allow the system to start any installed application.
      */
-    public ResolveInfo resolveIntentInternal(Intent intent, String resolvedType, int flags,
-            @PackageManagerInternal.PrivateResolveFlags int privateResolveFlags, int userId,
+    public ResolveInfo resolveIntentInternal(Intent intent, String resolvedType,
+            @PackageManager.ResolveInfoFlags long flags,
+            @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags, int userId,
             boolean resolveForStart, int filterCallingUid) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveIntent");
@@ -114,8 +115,9 @@ final class ResolveIntentHelper {
     }
 
     private ResolveInfo chooseBestActivity(Intent intent, String resolvedType,
-            int flags, int privateResolveFlags, List<ResolveInfo> query, int userId,
-            boolean queryMayBeFiltered) {
+            @PackageManager.ResolveInfoFlags long flags,
+            @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags,
+            List<ResolveInfo> query, int userId, boolean queryMayBeFiltered) {
         if (query != null) {
             final int n = query.size();
             if (n == 1) {
@@ -276,7 +278,8 @@ final class ResolveIntentHelper {
     // In this method, we have to know the actual calling UID, but in some cases Binder's
     // call identity is removed, so the UID has to be passed in explicitly.
     public @NonNull List<ResolveInfo> queryIntentReceiversInternal(Intent intent,
-            String resolvedType, int flags, int userId, int filterCallingUid) {
+            String resolvedType, @PackageManager.ResolveInfoFlags long flags, int userId,
+            int filterCallingUid) {
         if (!mPm.mUserManager.exists(userId)) return Collections.emptyList();
         mPm.enforceCrossUserPermission(filterCallingUid, userId, false /*requireFullPermission*/,
                 false /*checkShell*/, "query intent receivers");
@@ -370,8 +373,8 @@ final class ResolveIntentHelper {
     }
 
 
-    public ResolveInfo resolveServiceInternal(Intent intent, String resolvedType, int flags,
-            int userId, int callingUid) {
+    public ResolveInfo resolveServiceInternal(Intent intent, String resolvedType,
+            @PackageManager.ResolveInfoFlags long flags, int userId, int callingUid) {
         if (!mPm.mUserManager.exists(userId)) return null;
         flags = mPm.updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
                 false /* isImplicitImageCaptureIntentAndNotSetByDpc */);
@@ -388,7 +391,8 @@ final class ResolveIntentHelper {
     }
 
     public @NonNull List<ResolveInfo> queryIntentContentProvidersInternal(
-            Intent intent, String resolvedType, int flags, int userId) {
+            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlags long flags,
+            int userId) {
         if (!mPm.mUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
         final String instantAppPkgName = mPm.getInstantAppPackageName(callingUid);
@@ -529,7 +533,7 @@ final class ResolveIntentHelper {
 
     public @NonNull List<ResolveInfo> queryIntentActivityOptionsInternal(ComponentName caller,
             Intent[] specifics, String[] specificTypes, Intent intent,
-            String resolvedType, int flags, int userId) {
+            String resolvedType, @PackageManager.ResolveInfoFlags long flags, int userId) {
         if (!mPm.mUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
         flags = mPm.updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,

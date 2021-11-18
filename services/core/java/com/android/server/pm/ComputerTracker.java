@@ -97,8 +97,8 @@ public final class ComputerTracker implements Computer {
     }
 
     public @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
-            String resolvedType, int flags,
-            @PackageManagerInternal.PrivateResolveFlags int privateResolveFlags,
+            String resolvedType, @PackageManager.ResolveInfoFlags long flags,
+            @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags,
             int filterCallingUid, int userId, boolean resolveForStart,
             boolean allowDynamicSplits) {
         ThreadComputer current = snapshot();
@@ -111,7 +111,7 @@ public final class ComputerTracker implements Computer {
         }
     }
     public @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
-            String resolvedType, int flags, int userId) {
+            String resolvedType, @PackageManager.ResolveInfoFlags long flags, int userId) {
         ThreadComputer current = snapshot();
         try {
             return current.mComputer.queryIntentActivitiesInternal(intent, resolvedType, flags,
@@ -121,8 +121,8 @@ public final class ComputerTracker implements Computer {
         }
     }
     public @NonNull List<ResolveInfo> queryIntentServicesInternal(Intent intent,
-            String resolvedType, int flags, int userId, int callingUid,
-            boolean includeInstantApps) {
+            String resolvedType, @PackageManager.ResolveInfoFlags long flags, int userId,
+            int callingUid, boolean includeInstantApps) {
         ThreadComputer current = snapshot();
         try {
             return current.mComputer.queryIntentServicesInternal(intent, resolvedType, flags,
@@ -132,10 +132,9 @@ public final class ComputerTracker implements Computer {
         }
     }
     public @NonNull QueryIntentActivitiesResult queryIntentActivitiesInternalBody(
-            Intent intent,
-            String resolvedType, int flags, int filterCallingUid, int userId,
-            boolean resolveForStart, boolean allowDynamicSplits, String pkgName,
-            String instantAppPkgName) {
+            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlags long flags,
+            int filterCallingUid, int userId, boolean resolveForStart, boolean allowDynamicSplits,
+            String pkgName, String instantAppPkgName) {
         ThreadComputer current = live();
         try {
             return current.mComputer.queryIntentActivitiesInternalBody(intent, resolvedType,
@@ -145,7 +144,8 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public ActivityInfo getActivityInfo(ComponentName component, int flags, int userId) {
+    public ActivityInfo getActivityInfo(ComponentName component,
+            @PackageManager.ComponentInfoFlags long flags, int userId) {
         ThreadComputer current = snapshot();
         try {
             return current.mComputer.getActivityInfo(component, flags, userId);
@@ -153,7 +153,8 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public ActivityInfo getActivityInfoInternal(ComponentName component, int flags,
+    public ActivityInfo getActivityInfoInternal(ComponentName component,
+            @PackageManager.ComponentInfoFlags long flags,
             int filterCallingUid, int userId) {
         ThreadComputer current = live();
         try {
@@ -180,7 +181,7 @@ public final class ComputerTracker implements Computer {
         }
     }
     public ApplicationInfo generateApplicationInfoFromSettings(String packageName,
-            int flags, int filterCallingUid, int userId) {
+            long flags, int filterCallingUid, int userId) {
         ThreadComputer current = live();
         try {
             return current.mComputer.generateApplicationInfoFromSettings(packageName, flags,
@@ -189,7 +190,8 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public ApplicationInfo getApplicationInfo(String packageName, int flags, int userId) {
+    public ApplicationInfo getApplicationInfo(String packageName,
+            @PackageManager.ApplicationInfoFlags long flags, int userId) {
         ThreadComputer current = snapshot();
         try {
             return current.mComputer.getApplicationInfo(packageName, flags, userId);
@@ -197,8 +199,8 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public ApplicationInfo getApplicationInfoInternal(String packageName, int flags,
-            int filterCallingUid, int userId) {
+    public ApplicationInfo getApplicationInfoInternal(String packageName,
+            @PackageManager.ApplicationInfoFlags long flags, int filterCallingUid, int userId) {
         ThreadComputer current = live();
         try {
             return current.mComputer.getApplicationInfoInternal(packageName, flags,
@@ -225,7 +227,8 @@ public final class ComputerTracker implements Computer {
         }
     }
     public CrossProfileDomainInfo getCrossProfileDomainPreferredLpr(Intent intent,
-            String resolvedType, int flags, int sourceUserId, int parentUserId) {
+            String resolvedType, @PackageManager.ResolveInfoFlags long flags, int sourceUserId,
+            int parentUserId) {
         ThreadComputer current = live();
         try {
             return current.mComputer.getCrossProfileDomainPreferredLpr(intent, resolvedType,
@@ -264,7 +267,8 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public PackageInfo generatePackageInfo(PackageStateInternal ps, int flags, int userId) {
+    public PackageInfo generatePackageInfo(PackageStateInternal ps,
+            @PackageManager.PackageInfoFlags long flags, int userId) {
         ThreadComputer current = live();
         try {
             return current.mComputer.generatePackageInfo(ps, flags, userId);
@@ -272,7 +276,8 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public PackageInfo getPackageInfo(String packageName, int flags, int userId) {
+    public PackageInfo getPackageInfo(String packageName,
+            @PackageManager.PackageInfoFlags long flags, int userId) {
         ThreadComputer current = snapshot();
         try {
             return current.mComputer.getPackageInfo(packageName, flags, userId);
@@ -281,7 +286,7 @@ public final class ComputerTracker implements Computer {
         }
     }
     public PackageInfo getPackageInfoInternal(String packageName, long versionCode,
-            int flags, int filterCallingUid, int userId) {
+            long flags, int filterCallingUid, int userId) {
         ThreadComputer current = live();
         try {
             return current.mComputer.getPackageInfoInternal(packageName, versionCode, flags,
@@ -317,7 +322,7 @@ public final class ComputerTracker implements Computer {
         }
     }
 
-    public ParceledListSlice<PackageInfo> getInstalledPackages(int flags, int userId) {
+    public ParceledListSlice<PackageInfo> getInstalledPackages(long flags, int userId) {
         ThreadComputer current = snapshot();
         try {
             return current.mComputer.getInstalledPackages(flags, userId);
@@ -335,7 +340,8 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public ServiceInfo getServiceInfo(ComponentName component, int flags, int userId) {
+    public ServiceInfo getServiceInfo(ComponentName component,
+            @PackageManager.ComponentInfoFlags long flags, int userId) {
         ThreadComputer current = live();
         try {
             return current.mComputer.getServiceInfo(component, flags, userId);
@@ -440,7 +446,7 @@ public final class ComputerTracker implements Computer {
         }
     }
     public boolean filterSharedLibPackage(@Nullable PackageStateInternal ps, int uid,
-            int userId, int flags) {
+            int userId, @PackageManager.ComponentInfoFlags long flags) {
         ThreadComputer current = live();
         try {
             return current.mComputer.filterSharedLibPackage(ps, uid, userId, flags);
@@ -474,7 +480,7 @@ public final class ComputerTracker implements Computer {
         }
     }
     public boolean isImplicitImageCaptureIntentAndNotSetByDpcLocked(Intent intent,
-            int userId, String resolvedType, int flags) {
+            int userId, String resolvedType, @PackageManager.ResolveInfoFlags long flags) {
         ThreadComputer current = live();
         try {
             return current.mComputer.isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent,
@@ -546,8 +552,8 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public int getPackageUidInternal(String packageName, int flags, int userId,
-            int callingUid) {
+    public int getPackageUidInternal(String packageName,
+            @PackageManager.PackageInfoFlags long flags, int userId, int callingUid) {
         ThreadComputer current = live();
         try {
             return current.mComputer.getPackageUidInternal(packageName, flags, userId,
@@ -556,7 +562,7 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public int updateFlagsForApplication(int flags, int userId) {
+    public long updateFlagsForApplication(long flags, int userId) {
         ThreadComputer current = live();
         try {
             return current.mComputer.updateFlagsForApplication(flags, userId);
@@ -564,7 +570,7 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public int updateFlagsForComponent(int flags, int userId) {
+    public long updateFlagsForComponent(long flags, int userId) {
         ThreadComputer current = live();
         try {
             return current.mComputer.updateFlagsForComponent(flags, userId);
@@ -572,7 +578,7 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public int updateFlagsForPackage(int flags, int userId) {
+    public long updateFlagsForPackage(long flags, int userId) {
         ThreadComputer current = live();
         try {
             return current.mComputer.updateFlagsForPackage(flags, userId);
@@ -580,7 +586,7 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public int updateFlagsForResolve(int flags, int userId, int callingUid,
+    public long updateFlagsForResolve(long flags, int userId, int callingUid,
             boolean wantInstantApps, boolean isImplicitImageCaptureIntentAndNotSetByDpc) {
         ThreadComputer current = snapshot();
         try {
@@ -590,7 +596,7 @@ public final class ComputerTracker implements Computer {
             current.release();
         }
     }
-    public int updateFlagsForResolve(int flags, int userId, int callingUid,
+    public long updateFlagsForResolve(long flags, int userId, int callingUid,
             boolean wantInstantApps, boolean onlyExposedExplicitly,
             boolean isImplicitImageCaptureIntentAndNotSetByDpc) {
         ThreadComputer current = live();
@@ -642,8 +648,9 @@ public final class ComputerTracker implements Computer {
         }
     }
     public PackageManagerService.FindPreferredActivityBodyResult findPreferredActivityInternal(
-            Intent intent, String resolvedType, int flags, List<ResolveInfo> query, boolean always,
-            boolean removeMatches, boolean debug, int userId, boolean queryMayBeFiltered) {
+            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlags long flags,
+            List<ResolveInfo> query, boolean always, boolean removeMatches, boolean debug,
+            int userId, boolean queryMayBeFiltered) {
         ThreadComputer current = live();
         try {
             return current.mComputer.findPreferredActivityInternal(intent, resolvedType, flags,
@@ -653,8 +660,8 @@ public final class ComputerTracker implements Computer {
         }
     }
     public ResolveInfo findPersistentPreferredActivityLP(Intent intent,
-            String resolvedType, int flags, List<ResolveInfo> query, boolean debug,
-            int userId) {
+            String resolvedType, @PackageManager.ResolveInfoFlags long flags,
+            List<ResolveInfo> query, boolean debug, int userId) {
         ThreadComputer current = live();
         try {
             return current.mComputer.findPersistentPreferredActivityLP(intent, resolvedType,
@@ -741,7 +748,8 @@ public final class ComputerTracker implements Computer {
     }
 
     @Override
-    public int[] getPackageGids(@NonNull String packageName, int flags, @UserIdInt int userId) {
+    public int[] getPackageGids(@NonNull String packageName,
+            @PackageManager.PackageInfoFlags long flags, @UserIdInt int userId) {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.getPackageGids(packageName, flags, userId);
         }
@@ -765,8 +773,8 @@ public final class ComputerTracker implements Computer {
 
     @Nullable
     @Override
-    public ActivityInfo getReceiverInfo(@NonNull ComponentName component, int flags,
-            @UserIdInt int userId) {
+    public ActivityInfo getReceiverInfo(@NonNull ComponentName component,
+            @PackageManager.ComponentInfoFlags long flags, @UserIdInt int userId) {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.getReceiverInfo(component, flags, userId);
         }
@@ -775,7 +783,7 @@ public final class ComputerTracker implements Computer {
     @Nullable
     @Override
     public ParceledListSlice<SharedLibraryInfo> getSharedLibraries(@NonNull String packageName,
-            int flags, @UserIdInt int userId) {
+            @PackageManager.PackageInfoFlags long flags, @UserIdInt int userId) {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.getSharedLibraries(packageName, flags, userId);
         }
@@ -800,7 +808,7 @@ public final class ComputerTracker implements Computer {
 
     @Override
     public List<VersionedPackage> getPackagesUsingSharedLibrary(@NonNull SharedLibraryInfo libInfo,
-            int flags, int callingUid, @UserIdInt int userId) {
+            @PackageManager.PackageInfoFlags long flags, int callingUid, @UserIdInt int userId) {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.getPackagesUsingSharedLibrary(libInfo, flags, callingUid,
                     userId);
@@ -810,7 +818,8 @@ public final class ComputerTracker implements Computer {
     @Nullable
     @Override
     public ParceledListSlice<SharedLibraryInfo> getDeclaredSharedLibraries(
-            @NonNull String packageName, int flags, @UserIdInt int userId) {
+            @NonNull String packageName, @PackageManager.PackageInfoFlags long flags,
+            @UserIdInt int userId) {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.getDeclaredSharedLibraries(packageName, flags, userId);
         }
@@ -818,8 +827,8 @@ public final class ComputerTracker implements Computer {
 
     @Nullable
     @Override
-    public ProviderInfo getProviderInfo(@NonNull ComponentName component, int flags,
-            @UserIdInt int userId) {
+    public ProviderInfo getProviderInfo(@NonNull ComponentName component,
+            @PackageManager.ComponentInfoFlags long flags, @UserIdInt int userId) {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.getProviderInfo(component, flags, userId);
         }
@@ -934,7 +943,8 @@ public final class ComputerTracker implements Computer {
     @NonNull
     @Override
     public ParceledListSlice<PackageInfo> getPackagesHoldingPermissions(
-            @NonNull String[] permissions, int flags, @UserIdInt int userId) {
+            @NonNull String[] permissions, @PackageManager.PackageInfoFlags long flags,
+            @UserIdInt int userId) {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.getPackagesHoldingPermissions(permissions, flags, userId);
         }
@@ -942,7 +952,8 @@ public final class ComputerTracker implements Computer {
 
     @NonNull
     @Override
-    public List<ApplicationInfo> getInstalledApplications(int flags, @UserIdInt int userId,
+    public List<ApplicationInfo> getInstalledApplications(
+            @PackageManager.ApplicationInfoFlags long flags, @UserIdInt int userId,
             int callingUid) {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.getInstalledApplications(flags, userId, callingUid);
@@ -951,8 +962,8 @@ public final class ComputerTracker implements Computer {
 
     @Nullable
     @Override
-    public ProviderInfo resolveContentProvider(@NonNull String name, int flags,
-            @UserIdInt int userId, int callingUid) {
+    public ProviderInfo resolveContentProvider(@NonNull String name,
+            @PackageManager.ResolveInfoFlags long flags, @UserIdInt int userId, int callingUid) {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.resolveContentProvider(name, flags, userId, callingUid);
         }
@@ -979,7 +990,7 @@ public final class ComputerTracker implements Computer {
     @NonNull
     @Override
     public ParceledListSlice<ProviderInfo> queryContentProviders(@Nullable String processName,
-            int uid, int flags, @Nullable String metaDataKey) {
+            int uid, @PackageManager.ComponentInfoFlags long flags, @Nullable String metaDataKey) {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.queryContentProviders(processName, uid, flags, metaDataKey);
         }
@@ -1143,7 +1154,8 @@ public final class ComputerTracker implements Computer {
     }
 
     @Override
-    public int getPackageUid(@NonNull String packageName, int flags, @UserIdInt int userId) {
+    public int getPackageUid(@NonNull String packageName,
+            @PackageManager.PackageInfoFlags long flags, @UserIdInt int userId) {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.getPackageUid(packageName, flags, userId);
         }

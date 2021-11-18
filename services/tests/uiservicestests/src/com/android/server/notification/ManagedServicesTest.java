@@ -26,6 +26,7 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -809,7 +810,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
                     service.isComponentEnabledForCurrentProfiles(
                             unapprovedAdditionalComponent));
             verify(mIpm, never()).getServiceInfo(
-                    eq(unapprovedAdditionalComponent), anyInt(), anyInt());
+                    eq(unapprovedAdditionalComponent), anyLong(), anyInt());
         }
     }
 
@@ -953,7 +954,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
                     service.isComponentEnabledForCurrentProfiles(
                             unapprovedAdditionalComponent));
             verify(mIpm, never()).getServiceInfo(
-                    eq(unapprovedAdditionalComponent), anyInt(), anyInt());
+                    eq(unapprovedAdditionalComponent), anyLong(), anyInt());
         }
     }
 
@@ -1642,14 +1643,14 @@ public class ManagedServicesTest extends UiServiceTestCase {
                             assertTrue(service.isComponentEnabledForCurrentProfiles(
                                     componentName));
                             verify(mIpm, times(1)).getServiceInfo(
-                                    eq(componentName), anyInt(), anyInt());
+                                    eq(componentName), anyLong(), anyInt());
                         }
                     } else {
                         ComponentName componentName =
                                 ComponentName.unflattenFromString(packageOrComponent);
                         assertTrue(service.isComponentEnabledForCurrentProfiles(componentName));
                         verify(mIpm, times(1)).getServiceInfo(
-                                eq(componentName), anyInt(), anyInt());
+                                eq(componentName), anyLong(), anyInt());
                     }
                 }
             }

@@ -318,7 +318,7 @@ public class ComponentResolver
     }
 
     @Nullable
-    List<ResolveInfo> queryActivities(Intent intent, String resolvedType, int flags,
+    List<ResolveInfo> queryActivities(Intent intent, String resolvedType, long flags,
             int userId) {
         synchronized (mLock) {
             return mActivities.queryIntent(intent, resolvedType, flags, userId);
@@ -326,7 +326,7 @@ public class ComponentResolver
     }
 
     @Nullable
-    List<ResolveInfo> queryActivities(Intent intent, String resolvedType, int flags,
+    List<ResolveInfo> queryActivities(Intent intent, String resolvedType, long flags,
             List<ParsedActivity> activities, int userId) {
         synchronized (mLock) {
             return mActivities.queryIntentForPackage(
@@ -335,14 +335,14 @@ public class ComponentResolver
     }
 
     @Nullable
-    List<ResolveInfo> queryProviders(Intent intent, String resolvedType, int flags, int userId) {
+    List<ResolveInfo> queryProviders(Intent intent, String resolvedType, long flags, int userId) {
         synchronized (mLock) {
             return mProviders.queryIntent(intent, resolvedType, flags, userId);
         }
     }
 
     @Nullable
-    List<ResolveInfo> queryProviders(Intent intent, String resolvedType, int flags,
+    List<ResolveInfo> queryProviders(Intent intent, String resolvedType, long flags,
             List<ParsedProvider> providers, int userId) {
         synchronized (mLock) {
             return mProviders.queryIntentForPackage(intent, resolvedType, flags, providers, userId);
@@ -350,7 +350,7 @@ public class ComponentResolver
     }
 
     @Nullable
-    List<ProviderInfo> queryProviders(String processName, String metaDataKey, int uid, int flags,
+    List<ProviderInfo> queryProviders(String processName, String metaDataKey, int uid, long flags,
             int userId) {
         if (!sUserManager.exists(userId)) {
             return null;
@@ -409,7 +409,7 @@ public class ComponentResolver
     }
 
     @Nullable
-    ProviderInfo queryProvider(String authority, int flags, int userId) {
+    ProviderInfo queryProvider(String authority, long flags, int userId) {
         synchronized (mLock) {
             final ParsedProvider p = mProvidersByAuthority.get(authority);
             if (p == null) {
@@ -480,14 +480,14 @@ public class ComponentResolver
     }
 
     @Nullable
-    List<ResolveInfo> queryReceivers(Intent intent, String resolvedType, int flags, int userId) {
+    List<ResolveInfo> queryReceivers(Intent intent, String resolvedType, long flags, int userId) {
         synchronized (mLock) {
             return mReceivers.queryIntent(intent, resolvedType, flags, userId);
         }
     }
 
     @Nullable
-    List<ResolveInfo> queryReceivers(Intent intent, String resolvedType, int flags,
+    List<ResolveInfo> queryReceivers(Intent intent, String resolvedType, long flags,
             List<ParsedActivity> receivers, int userId) {
         synchronized (mLock) {
             return mReceivers.queryIntentForPackage(intent, resolvedType, flags, receivers, userId);
@@ -495,14 +495,14 @@ public class ComponentResolver
     }
 
     @Nullable
-    List<ResolveInfo> queryServices(Intent intent, String resolvedType, int flags, int userId) {
+    List<ResolveInfo> queryServices(Intent intent, String resolvedType, long flags, int userId) {
         synchronized (mLock) {
             return mServices.queryIntent(intent, resolvedType, flags, userId);
         }
     }
 
     @Nullable
-    List<ResolveInfo> queryServices(Intent intent, String resolvedType, int flags,
+    List<ResolveInfo> queryServices(Intent intent, String resolvedType, long flags,
             List<ParsedService> services, int userId) {
         synchronized (mLock) {
             return mServices.queryIntentForPackage(intent, resolvedType, flags, services, userId);
@@ -1380,7 +1380,7 @@ public class ComponentResolver
             return super.queryIntent(intent, resolvedType, defaultOnly, userId);
         }
 
-        List<ResolveInfo> queryIntent(Intent intent, String resolvedType, int flags,
+        List<ResolveInfo> queryIntent(Intent intent, String resolvedType, long flags,
                 int userId) {
             if (!sUserManager.exists(userId)) {
                 return null;
@@ -1392,7 +1392,7 @@ public class ComponentResolver
         }
 
         List<ResolveInfo> queryIntentForPackage(Intent intent, String resolvedType,
-                int flags, List<ParsedActivity> packageActivities, int userId) {
+                long flags, List<ParsedActivity> packageActivities, int userId) {
             if (!sUserManager.exists(userId)) {
                 return null;
             }
@@ -1669,7 +1669,7 @@ public class ComponentResolver
         // ActivityIntentResolver.
         protected final ArrayMap<ComponentName, ParsedActivity> mActivities =
                 new ArrayMap<>();
-        private int mFlags;
+        private long mFlags;
     }
 
     // Both receivers and activities share a class, but point to different get methods
@@ -1711,7 +1711,7 @@ public class ComponentResolver
         }
 
         @Nullable
-        List<ResolveInfo> queryIntent(Intent intent, String resolvedType, int flags,
+        List<ResolveInfo> queryIntent(Intent intent, String resolvedType, long flags,
                 int userId) {
             if (!sUserManager.exists(userId)) {
                 return null;
@@ -1724,7 +1724,7 @@ public class ComponentResolver
 
         @Nullable
         List<ResolveInfo> queryIntentForPackage(Intent intent, String resolvedType,
-                int flags, List<ParsedProvider> packageProviders, int userId) {
+                long flags, List<ParsedProvider> packageProviders, int userId) {
             if (!sUserManager.exists(userId)) {
                 return null;
             }
@@ -1946,7 +1946,7 @@ public class ComponentResolver
         }
 
         private final ArrayMap<ComponentName, ParsedProvider> mProviders = new ArrayMap<>();
-        private int mFlags;
+        private long mFlags;
     }
 
     private static final class ServiceIntentResolver
@@ -1969,7 +1969,7 @@ public class ComponentResolver
             return super.queryIntent(intent, resolvedType, defaultOnly, userId);
         }
 
-        List<ResolveInfo> queryIntent(Intent intent, String resolvedType, int flags,
+        List<ResolveInfo> queryIntent(Intent intent, String resolvedType, long flags,
                 int userId) {
             if (!sUserManager.exists(userId)) return null;
             mFlags = flags;
@@ -1979,7 +1979,7 @@ public class ComponentResolver
         }
 
         List<ResolveInfo> queryIntentForPackage(Intent intent, String resolvedType,
-                int flags, List<ParsedService> packageServices, int userId) {
+                long flags, List<ParsedService> packageServices, int userId) {
             if (!sUserManager.exists(userId)) return null;
             if (packageServices == null) {
                 return Collections.emptyList();
@@ -2190,7 +2190,7 @@ public class ComponentResolver
 
         // Keys are String (activity class name), values are Activity.
         private final ArrayMap<ComponentName, ParsedService> mServices = new ArrayMap<>();
-        private int mFlags;
+        private long mFlags;
     }
 
     static final class InstantAppIntentResolver

@@ -44,6 +44,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
@@ -306,7 +307,7 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         // MockPackageManager - default returns ApplicationInfo with matching calling UID
         mContext.setMockPackageManager(mPackageManagerClient);
 
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), anyInt()))
+        when(mPackageManager.getApplicationInfo(anyString(), anyLong(), anyInt()))
                 .thenAnswer((Answer<ApplicationInfo>) invocation -> {
                     Object[] args = invocation.getArguments();
                     return getApplicationInfo((String) args[0], mUid);

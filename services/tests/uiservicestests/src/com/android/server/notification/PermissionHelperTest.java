@@ -28,6 +28,7 @@ import static junit.framework.Assert.fail;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -42,7 +43,6 @@ import android.content.pm.ParceledListSlice;
 import android.permission.IPermissionManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Pair;
-import android.util.Slog;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -169,7 +169,8 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
         ParceledListSlice<PackageInfo> infos = new ParceledListSlice<>(
                 ImmutableList.of(notThis, none, first, second));
-        when(mPackageManager.getInstalledPackages(eq(GET_PERMISSIONS), anyInt())).thenReturn(infos);
+        when(mPackageManager.getInstalledPackages(eq((long) GET_PERMISSIONS), anyInt()))
+                .thenReturn(infos);
 
         Set<Pair<Integer, String>> actual = mPermissionHelper.getAppsRequestingPermission(0);
 
@@ -181,7 +182,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
         int userId = 1;
         ParceledListSlice<PackageInfo> infos = ParceledListSlice.emptyList();
         when(mPackageManager.getPackagesHoldingPermissions(
-                eq(new String[] {Manifest.permission.POST_NOTIFICATIONS}), anyInt(), eq(userId)))
+                eq(new String[] {Manifest.permission.POST_NOTIFICATIONS}), anyLong(), eq(userId)))
                 .thenReturn(infos);
         assertThat(mPermissionHelper.getAppsGrantedPermission(userId)).isNotNull();
     }
@@ -206,7 +207,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
         ParceledListSlice<PackageInfo> infos = new ParceledListSlice<>(
                 ImmutableList.of(first, second));
         when(mPackageManager.getPackagesHoldingPermissions(
-                eq(new String[] {Manifest.permission.POST_NOTIFICATIONS}), anyInt(), eq(userId)))
+                eq(new String[] {Manifest.permission.POST_NOTIFICATIONS}), anyLong(), eq(userId)))
                 .thenReturn(infos);
 
         Set<Pair<Integer, String>> expected =
@@ -305,11 +306,11 @@ public class PermissionHelperTest extends UiServiceTestCase {
         ParceledListSlice<PackageInfo> infos = new ParceledListSlice<>(
                 ImmutableList.of(first, second));
         when(mPackageManager.getPackagesHoldingPermissions(
-                eq(new String[] {Manifest.permission.POST_NOTIFICATIONS}), anyInt(), eq(userId)))
+                eq(new String[] {Manifest.permission.POST_NOTIFICATIONS}), anyLong(), eq(userId)))
                 .thenReturn(infos);
         ParceledListSlice<PackageInfo> requesting = new ParceledListSlice<>(
                 ImmutableList.of(first, second, third));
-        when(mPackageManager.getInstalledPackages(eq(GET_PERMISSIONS), anyInt()))
+        when(mPackageManager.getInstalledPackages(eq((long) GET_PERMISSIONS), anyInt()))
                 .thenReturn(requesting);
 
         Map<Pair<Integer, String>, Boolean> expected = ImmutableMap.of(new Pair(1, "first"), true,

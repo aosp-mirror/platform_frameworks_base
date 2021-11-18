@@ -41,6 +41,7 @@ import static org.junit.Assume.assumeThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -316,14 +317,14 @@ public class WallpaperManagerServiceTests {
         final int lastUserId = 5;
         final ServiceInfo pi = mIpm.getServiceInfo(sDefaultWallpaperComponent,
                 PackageManager.GET_META_DATA | PackageManager.GET_PERMISSIONS, 0);
-        doReturn(pi).when(mIpm).getServiceInfo(any(), anyInt(), anyInt());
+        doReturn(pi).when(mIpm).getServiceInfo(any(), anyLong(), anyInt());
 
         final Intent intent = new Intent(WallpaperService.SERVICE_INTERFACE);
         final ParceledListSlice ris =
                 mIpm.queryIntentServices(intent,
                         intent.resolveTypeIfNeeded(sContext.getContentResolver()),
                         PackageManager.GET_META_DATA, 0);
-        doReturn(ris).when(mIpm).queryIntentServices(any(), any(), anyInt(), anyInt());
+        doReturn(ris).when(mIpm).queryIntentServices(any(), any(), anyLong(), anyInt());
         doReturn(PackageManager.PERMISSION_GRANTED).when(mIpm).checkPermission(
                 eq(android.Manifest.permission.AMBIENT_WALLPAPER), any(), anyInt());
 
@@ -348,7 +349,7 @@ public class WallpaperManagerServiceTests {
         final int lastUserId = 5;
         final ServiceInfo pi = mIpm.getServiceInfo(sDefaultWallpaperComponent,
                 PackageManager.GET_META_DATA | PackageManager.GET_PERMISSIONS, 0);
-        doReturn(pi).when(mIpm).getServiceInfo(any(), anyInt(), anyInt());
+        doReturn(pi).when(mIpm).getServiceInfo(any(), anyLong(), anyInt());
 
         final Intent intent = new Intent(WallpaperService.SERVICE_INTERFACE);
         final ParceledListSlice ris =
@@ -362,7 +363,7 @@ public class WallpaperManagerServiceTests {
             mService.switchUser(userId, null);
             verifyLastWallpaperData(userId, sImageWallpaperComponentName);
             // Simulate user unlocked
-            doReturn(ris).when(mIpm).queryIntentServices(any(), any(), anyInt(), eq(userId));
+            doReturn(ris).when(mIpm).queryIntentServices(any(), any(), anyLong(), eq(userId));
             mService.onUnlockUser(userId);
             verifyLastWallpaperData(userId, sDefaultWallpaperComponent);
             verifyCurrentSystemData(userId);

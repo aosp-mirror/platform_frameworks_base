@@ -145,8 +145,8 @@ open class AndroidPackageParsingTestBase {
             flags: Int = 0,
             userId: Int = 0
         ): ApplicationInfo? {
-            return PackageInfoUtils.generateApplicationInfo(pkg, flags, dummyUserState, userId,
-                    mockPkgSetting(pkg))
+            return PackageInfoUtils.generateApplicationInfo(pkg, flags.toLong(), dummyUserState,
+                userId, mockPkgSetting(pkg))
         }
 
         fun newAppInfoWithoutState(
@@ -154,8 +154,8 @@ open class AndroidPackageParsingTestBase {
             flags: Int = 0,
             userId: Int = 0
         ): ApplicationInfo? {
-            return PackageInfoUtils.generateApplicationInfo(pkg, flags, dummyUserState, userId,
-                    mockPkgSetting(pkg))
+            return PackageInfoUtils.generateApplicationInfo(pkg, flags.toLong(), dummyUserState,
+                userId, mockPkgSetting(pkg))
         }
 
         fun oldPackageInfo(pkg: PackageParser.Package, flags: Int = 0): PackageInfo? {
@@ -164,7 +164,7 @@ open class AndroidPackageParsingTestBase {
         }
 
         fun newPackageInfo(pkg: AndroidPackage, flags: Int = 0): PackageInfo? {
-            return PackageInfoUtils.generate(pkg, intArrayOf(), flags, 5, 6, emptySet(),
+            return PackageInfoUtils.generate(pkg, intArrayOf(), flags.toLong(), 5, 6, emptySet(),
                     dummyUserState, 0, mockPkgSetting(pkg))
         }
 
