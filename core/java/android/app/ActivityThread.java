@@ -1293,8 +1293,11 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         @Override
-        public void scheduleCrash(String msg, int typeId) {
-            sendMessage(H.SCHEDULE_CRASH, msg, typeId);
+        public void scheduleCrash(String msg, int typeId, @Nullable Bundle extras) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = msg;
+            args.arg2 = extras;
+            sendMessage(H.SCHEDULE_CRASH, args, typeId);
         }
 
         public void dumpActivity(ParcelFileDescriptor pfd, IBinder activitytoken,
@@ -1924,11 +1927,11 @@ public final class ActivityThread extends ClientTransactionHandler
         }
     }
 
-    private void throwRemoteServiceException(String message, int typeId) {
+    private void throwRemoteServiceException(String message, int typeId, @Nullable Bundle extras) {
         // Use a switch to ensure all the type IDs are unique.
         switch (typeId) {
             case ForegroundServiceDidNotStartInTimeException.TYPE_ID:
-                throw new ForegroundServiceDidNotStartInTimeException(message);
+                throw generateForegroundServiceDidNotStartInTimeException(message, extras);
 
             case CannotDeliverBroadcastException.TYPE_ID:
                 throw new CannotDeliverBroadcastException(message);
@@ -1949,6 +1952,15 @@ public final class ActivityThread extends ClientTransactionHandler
                 throw new RemoteServiceException(message
                         + " (with unwknown typeId:" + typeId + ")");
         }
+    }
+
+    private ForegroundServiceDidNotStartInTimeException
+            generateForegroundServiceDidNotStartInTimeException(String message, Bundle extras) {
+        final String serviceClassName =
+                ForegroundServiceDidNotStartInTimeException.getServiceClassNameFromExtras(extras);
+        final Exception inner = (serviceClassName == null) ? null
+                : Service.getStartForegroundServiceStackTrace(serviceClassName);
+        throw new ForegroundServiceDidNotStartInTimeException(message, inner);
     }
 
     class H extends Handler {
@@ -2168,9 +2180,14 @@ public final class ActivityThread extends ClientTransactionHandler
                     handleDispatchPackageBroadcast(msg.arg1, (String[])msg.obj);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
-                case SCHEDULE_CRASH:
-                    throwRemoteServiceException((String) msg.obj, msg.arg1);
+                case SCHEDULE_CRASH: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String message = (String) args.arg1;
+                    Bundle extras = (Bundle) args.arg2;
+                    args.recycle();
+                    throwRemoteServiceException(message, msg.arg1, extras);
                     break;
+                }
                 case DUMP_HEAP:
                     handleDumpHeap((DumpHeapData) msg.obj);
                     break;

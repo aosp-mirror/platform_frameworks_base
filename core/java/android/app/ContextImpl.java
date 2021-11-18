@@ -1862,6 +1862,14 @@ class ContextImpl extends Context {
                             "Not allowed to start service " + service + ": " + cn.getClassName());
                 }
             }
+            // If we started a foreground service in the same package, remember the stack trace.
+            if (cn != null && requireForeground) {
+                if (cn.getPackageName().equals(getOpPackageName())) {
+                    Service.setStartForegroundServiceStackTrace(cn.getClassName(),
+                            new StackTrace("Last startServiceCommon() call for this service was "
+                                    + "made here"));
+                }
+            }
             return cn;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

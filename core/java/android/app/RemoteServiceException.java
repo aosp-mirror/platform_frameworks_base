@@ -16,6 +16,10 @@
 
 package android.app;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.ComponentName;
+import android.os.Bundle;
 import android.util.AndroidRuntimeException;
 
 /**
@@ -33,6 +37,10 @@ public class RemoteServiceException extends AndroidRuntimeException {
         super(msg);
     }
 
+    public RemoteServiceException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
+
     /**
      * Exception used to crash an app process when it didn't call {@link Service#startForeground}
      * in time after the service was started with
@@ -44,8 +52,21 @@ public class RemoteServiceException extends AndroidRuntimeException {
         /** The type ID passed to {@link IApplicationThread#scheduleCrash}. */
         public static final int TYPE_ID = 1;
 
-        public ForegroundServiceDidNotStartInTimeException(String msg) {
-            super(msg);
+        private static final String KEY_SERVICE_CLASS_NAME = "serviceclassname";
+
+        public ForegroundServiceDidNotStartInTimeException(String msg, Throwable cause) {
+            super(msg, cause);
+        }
+
+        public static Bundle createExtrasForService(@NonNull ComponentName service) {
+            Bundle b = new Bundle();
+            b.putString(KEY_SERVICE_CLASS_NAME, service.getClassName());
+            return b;
+        }
+
+        @Nullable
+        public static String getServiceClassNameFromExtras(@Nullable Bundle extras) {
+            return (extras == null) ? null : extras.getString(KEY_SERVICE_CLASS_NAME);
         }
     }
 

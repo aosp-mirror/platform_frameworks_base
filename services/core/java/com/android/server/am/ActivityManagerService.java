@@ -338,6 +338,7 @@ import com.android.internal.os.BinderTransactionNameResolver;
 import com.android.internal.os.ByteTransferPipe;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.ProcessCpuTracker;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.os.Zygote;
 import com.android.internal.policy.AttributeCache;
@@ -1472,8 +1473,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
-    static final String SERVICE_RECORD_KEY = "servicerecord";
-
     /**
      * Flag whether the current user is a "monkey", i.e. whether
      * the UI is driven by a UI automation tool.
@@ -1652,8 +1651,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mServices.serviceForegroundTimeout((ServiceRecord) msg.obj);
             } break;
             case SERVICE_FOREGROUND_CRASH_MSG: {
-                mServices.serviceForegroundCrash((ProcessRecord) msg.obj,
-                        msg.getData().getCharSequence(SERVICE_RECORD_KEY));
+                SomeArgs args = (SomeArgs) msg.obj;
+                mServices.serviceForegroundCrash(
+                        (ProcessRecord) args.arg1,
+                        (String) args.arg2,
+                        (ComponentName) args.arg3);
+                args.recycle();
             } break;
             case UPDATE_TIME_ZONE: {
                 synchronized (mProcLock) {
@@ -3001,6 +3004,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void crashApplicationWithType(int uid, int initialPid, String packageName, int userId,
             String message, boolean force, int exceptionTypeId) {
+        crashApplicationWithTypeWithExtras(uid, initialPid, packageName, userId, message,
+                force, exceptionTypeId, null);
+    }
+
+    @Override
+    public void crashApplicationWithTypeWithExtras(int uid, int initialPid, String packageName,
+            int userId, String message, boolean force, int exceptionTypeId,
+            @Nullable Bundle extras) {
         if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: crashApplication() from pid="
@@ -3013,7 +3024,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized(this) {
             mAppErrors.scheduleAppCrashLocked(uid, initialPid, packageName, userId,
-                    message, force, exceptionTypeId);
+                    message, force, exceptionTypeId, extras);
         }
     }
 

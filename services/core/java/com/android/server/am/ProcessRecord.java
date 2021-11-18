@@ -31,6 +31,7 @@ import android.content.pm.ProcessInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.CompatibilityInfo;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -958,7 +959,7 @@ class ProcessRecord implements WindowProcessListener {
      *                        of its subclasses.
      */
     @GuardedBy("mService")
-    void scheduleCrashLocked(String message, int exceptionTypeId) {
+    void scheduleCrashLocked(String message, int exceptionTypeId, @Nullable Bundle extras) {
         // Checking killedbyAm should keep it from showing the crash dialog if the process
         // was already dead for a good / normal reason.
         if (!mKilledByAm) {
@@ -969,7 +970,7 @@ class ProcessRecord implements WindowProcessListener {
                 }
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    mThread.scheduleCrash(message, exceptionTypeId);
+                    mThread.scheduleCrash(message, exceptionTypeId, extras);
                 } catch (RemoteException e) {
                     // If it's already dead our work is done. If it's wedged just kill it.
                     // We won't get the crash dialog or the error reporting.
