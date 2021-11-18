@@ -96,8 +96,8 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
 
     @Test
     public void testCreateSizeCompatButton() {
-        // Not create button if IME is showing.
-        mLayout.createSizeCompatButton(true /* isImeShowing */);
+        // Not create button if show is false.
+        mLayout.createSizeCompatButton(false /* show */);
 
         verify(mLayout.mButtonWindowManager, never()).createSizeCompatButton();
         assertNull(mLayout.mButton);
@@ -106,7 +106,7 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
 
         // Not create hint popup.
         mLayout.mShouldShowHint = false;
-        mLayout.createSizeCompatButton(false /* isImeShowing */);
+        mLayout.createSizeCompatButton(true /* show */);
 
         verify(mLayout.mButtonWindowManager).createSizeCompatButton();
         assertNotNull(mLayout.mButton);
@@ -116,7 +116,7 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
         // Create hint popup.
         mLayout.release();
         mLayout.mShouldShowHint = true;
-        mLayout.createSizeCompatButton(false /* isImeShowing */);
+        mLayout.createSizeCompatButton(true /* show */);
 
         verify(mLayout.mButtonWindowManager, times(2)).createSizeCompatButton();
         assertNotNull(mLayout.mButton);
@@ -128,7 +128,7 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
 
     @Test
     public void testRelease() {
-        mLayout.createSizeCompatButton(false /* isImeShowing */);
+        mLayout.createSizeCompatButton(true /* show */);
         final SizeCompatUIWindowManager hintWindowManager = mLayout.mHintWindowManager;
 
         mLayout.release();
@@ -142,12 +142,11 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
 
     @Test
     public void testUpdateSizeCompatInfo() {
-        mLayout.createSizeCompatButton(false /* isImeShowing */);
+        mLayout.createSizeCompatButton(true /* show */);
 
         // No diff
         clearInvocations(mLayout);
-        mLayout.updateSizeCompatInfo(mTaskConfig, mTaskListener,
-                false /* isImeShowing */);
+        mLayout.updateSizeCompatInfo(mTaskConfig, mTaskListener, true /* show */);
 
         verify(mLayout, never()).updateButtonSurfacePosition();
         verify(mLayout, never()).release();
@@ -158,7 +157,7 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
         final ShellTaskOrganizer.TaskListener newTaskListener = mock(
                 ShellTaskOrganizer.TaskListener.class);
         mLayout.updateSizeCompatInfo(mTaskConfig, newTaskListener,
-                false /* isImeShowing */);
+                true /* show */);
 
         verify(mLayout).release();
         verify(mLayout).createSizeCompatButton(anyBoolean());
@@ -168,7 +167,7 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
         final Configuration newTaskConfiguration = new Configuration();
         newTaskConfiguration.windowConfiguration.setBounds(new Rect(0, 1000, 0, 2000));
         mLayout.updateSizeCompatInfo(newTaskConfiguration, newTaskListener,
-                false /* isImeShowing */);
+                true /* show */);
 
         verify(mLayout).updateButtonSurfacePosition();
         verify(mLayout).updateHintSurfacePosition();
@@ -220,24 +219,24 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
     }
 
     @Test
-    public void testUpdateImeVisibility() {
+    public void testUpdateVisibility() {
         // Create button if it is not created.
         mLayout.mButton = null;
-        mLayout.updateImeVisibility(false /* isImeShowing */);
+        mLayout.updateVisibility(true /* show */);
 
-        verify(mLayout).createSizeCompatButton(false /* isImeShowing */);
+        verify(mLayout).createSizeCompatButton(true /* show */);
 
-        // Hide button if ime is shown.
+        // Hide button.
         clearInvocations(mLayout);
         doReturn(View.VISIBLE).when(mButton).getVisibility();
-        mLayout.updateImeVisibility(true /* isImeShowing */);
+        mLayout.updateVisibility(false /* show */);
 
         verify(mLayout, never()).createSizeCompatButton(anyBoolean());
         verify(mButton).setVisibility(View.GONE);
 
-        // Show button if ime is not shown.
+        // Show button.
         doReturn(View.GONE).when(mButton).getVisibility();
-        mLayout.updateImeVisibility(false /* isImeShowing */);
+        mLayout.updateVisibility(true /* show */);
 
         verify(mLayout, never()).createSizeCompatButton(anyBoolean());
         verify(mButton).setVisibility(View.VISIBLE);
