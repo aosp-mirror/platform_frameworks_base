@@ -420,6 +420,18 @@ public class DozeSensorsTest extends SysuiTestCase {
         assertTrue(triggerSensor.mRegistered);
     }
 
+    @Test
+    public void testGesturesAllInitiallyRespectSettings() {
+        DozeSensors dozeSensors = new DozeSensors(getContext(), mSensorManager, mDozeParameters,
+                mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
+                mProximitySensor, mFakeSettings, mAuthController,
+                mDevicePostureController);
+
+        for (TriggerSensor sensor : dozeSensors.mTriggerSensors) {
+            assertFalse(sensor.mIgnoresSetting);
+        }
+    }
+
     private class TestableDozeSensors extends DozeSensors {
         TestableDozeSensors() {
             super(getContext(), mSensorManager, mDozeParameters,
