@@ -820,6 +820,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
     private final KeyguardStateController mKeyguardStateController;
     private final Lazy<KeyguardUnlockAnimationController> mKeyguardUnlockAnimationControllerLazy;
+    private final InteractionJankMonitor mInteractionJankMonitor;
     private boolean mWallpaperSupportsAmbientMode;
 
     /**
@@ -845,7 +846,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             KeyguardStateController keyguardStateController,
             Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationControllerLazy,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
-            Lazy<NotificationShadeDepthController> notificationShadeDepthController) {
+            Lazy<NotificationShadeDepthController> notificationShadeDepthController,
+            InteractionJankMonitor interactionJankMonitor) {
         super(context);
         mFalsingCollector = falsingCollector;
         mLockPatternUtils = lockPatternUtils;
@@ -882,6 +884,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         mKeyguardStateController = keyguardStateController;
         mKeyguardUnlockAnimationControllerLazy = keyguardUnlockAnimationControllerLazy;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mInteractionJankMonitor = interactionJankMonitor;
     }
 
     public void userActivity() {
@@ -2245,8 +2248,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                                 onKeyguardExitFinished();
                                 mKeyguardViewControllerLazy.get().hide(0 /* startTime */,
                                         0 /* fadeoutDuration */);
-                                InteractionJankMonitor.getInstance()
-                                        .end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
+                                mInteractionJankMonitor.end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
                             }
 
                             @Override
@@ -2255,7 +2257,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                             }
                         };
                 try {
-                    InteractionJankMonitor.getInstance().begin(
+                    mInteractionJankMonitor.begin(
                             createInteractionJankMonitorConf("RunRemoteAnimation"));
                     runner.onAnimationStart(WindowManager.TRANSIT_KEYGUARD_GOING_AWAY, apps,
                             wallpapers, nonApps, callback);
@@ -2271,14 +2273,14 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 mSurfaceBehindRemoteAnimationFinishedCallback = finishedCallback;
                 mSurfaceBehindRemoteAnimationRunning = true;
 
-                InteractionJankMonitor.getInstance().begin(
+                mInteractionJankMonitor.begin(
                         createInteractionJankMonitorConf("DismissPanel"));
 
                 // Pass the surface and metadata to the unlock animation controller.
                 mKeyguardUnlockAnimationControllerLazy.get().notifyStartKeyguardExitAnimation(
                         apps[0], startTime, mSurfaceBehindRemoteAnimationRequested);
             } else {
-                InteractionJankMonitor.getInstance().begin(
+                mInteractionJankMonitor.begin(
                         createInteractionJankMonitorConf("RemoteAnimationDisabled"));
 
                 mKeyguardViewControllerLazy.get().hide(startTime, fadeoutDuration);
@@ -2288,7 +2290,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 // supported, so it's always null.
                 mContext.getMainExecutor().execute(() -> {
                     if (finishedCallback == null) {
-                        InteractionJankMonitor.getInstance().end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
+                        mInteractionJankMonitor.end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
                         return;
                     }
 
@@ -2316,8 +2318,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                             } catch (RemoteException e) {
                                 Slog.e(TAG, "RemoteException");
                             } finally {
-                                InteractionJankMonitor.getInstance()
-                                        .end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
+                                mInteractionJankMonitor.end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
                             }
                         }
 
@@ -2328,8 +2329,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                             } catch (RemoteException e) {
                                 Slog.e(TAG, "RemoteException");
                             } finally {
-                                InteractionJankMonitor.getInstance()
-                                        .cancel(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
+                                mInteractionJankMonitor.cancel(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
                             }
                         }
                     });

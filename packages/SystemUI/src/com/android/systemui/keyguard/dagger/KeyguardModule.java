@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.PowerManager;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -97,7 +98,8 @@ public class KeyguardModule {
             KeyguardStateController keyguardStateController,
             Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationController,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
-            Lazy<NotificationShadeDepthController> notificationShadeDepthController) {
+            Lazy<NotificationShadeDepthController> notificationShadeDepthController,
+            InteractionJankMonitor interactionJankMonitor) {
         return new KeyguardViewMediator(
                 context,
                 falsingCollector,
@@ -120,7 +122,8 @@ public class KeyguardModule {
                 keyguardStateController,
                 keyguardUnlockAnimationController,
                 unlockedScreenOffAnimationController,
-                notificationShadeDepthController
+                notificationShadeDepthController,
+                interactionJankMonitor
         );
     }
 
