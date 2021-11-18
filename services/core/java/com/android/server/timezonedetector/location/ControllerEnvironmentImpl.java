@@ -20,11 +20,9 @@ import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.os.SystemClock;
 
-import com.android.server.LocalServices;
 import com.android.server.timezonedetector.ConfigurationChangeListener;
 import com.android.server.timezonedetector.ConfigurationInternal;
 import com.android.server.timezonedetector.ServiceConfigAccessor;
-import com.android.server.timezonedetector.TimeZoneDetectorInternal;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -35,32 +33,32 @@ import java.util.Objects;
  */
 class ControllerEnvironmentImpl extends LocationTimeZoneProviderController.Environment {
 
-    @NonNull private final TimeZoneDetectorInternal mTimeZoneDetectorInternal;
     @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
-    @NonNull private final ConfigurationChangeListener mConfigurationChangeListener;
+    @NonNull private final ConfigurationChangeListener mConfigurationInternalChangeListener;
 
     ControllerEnvironmentImpl(@NonNull ThreadingDomain threadingDomain,
             @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull LocationTimeZoneProviderController controller) {
         super(threadingDomain);
         mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
-        mTimeZoneDetectorInternal = LocalServices.getService(TimeZoneDetectorInternal.class);
 
-        // Listen for configuration changes.
-        mConfigurationChangeListener = () -> mThreadingDomain.post(controller::onConfigChanged);
-        mTimeZoneDetectorInternal.addConfigurationListener(mConfigurationChangeListener);
+        // Listen for configuration internal changes.
+        mConfigurationInternalChangeListener =
+                () -> mThreadingDomain.post(controller::onConfigurationInternalChanged);
+        mServiceConfigAccessor.addConfigurationInternalChangeListener(
+                mConfigurationInternalChangeListener);
     }
-
 
     @Override
     void destroy() {
-        mTimeZoneDetectorInternal.removeConfigurationListener(mConfigurationChangeListener);
+        mServiceConfigAccessor.removeConfigurationInternalChangeListener(
+                mConfigurationInternalChangeListener);
     }
 
     @Override
     @NonNull
     ConfigurationInternal getCurrentUserConfigurationInternal() {
-        return mTimeZoneDetectorInternal.getCurrentUserConfigurationInternal();
+        return mServiceConfigAccessor.getCurrentUserConfigurationInternal();
     }
 
     @Override

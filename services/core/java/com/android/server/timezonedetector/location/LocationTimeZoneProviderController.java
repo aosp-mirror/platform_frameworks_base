@@ -39,7 +39,7 @@ import java.util.Objects;
  * <p>The controller interacts with the following components:
  * <ul>
  *     <li>The surrounding service, which calls {@link #initialize(Environment, Callback)} and
- *     {@link #onConfigChanged()}.</li>
+ *     {@link #onConfigurationInternalChanged()}.</li>
  *     <li>The {@link Environment} through which obtains information it needs.</li>
  *     <li>The {@link Callback} through which it makes time zone suggestions.</li>
  *     <li>Any {@link LocationTimeZoneProvider} instances it owns, which communicate via the
@@ -81,12 +81,11 @@ abstract class LocationTimeZoneProviderController implements Dumpable {
     abstract void initialize(@NonNull Environment environment, @NonNull Callback callback);
 
     /**
-     * Called when any settings or other device state that affect location-based time zone detection
-     * have changed. The receiver should call {@link
-     * Environment#getCurrentUserConfigurationInternal()} to get the current user's config. This
-     * call must be made on the {@link ThreadingDomain} handler thread.
+     * Called when the content of the {@link ConfigurationInternal} may have changed. The receiver
+     * should call {@link Environment#getCurrentUserConfigurationInternal()} to get the current
+     * user's config. This call must be made on the {@link ThreadingDomain} handler thread.
      */
-    abstract void onConfigChanged();
+    abstract void onConfigurationInternalChanged();
 
     @VisibleForTesting
     abstract boolean isUncertaintyTimeoutSet();

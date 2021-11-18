@@ -122,7 +122,7 @@ class ControllerImpl extends LocationTimeZoneProviderController {
     }
 
     @Override
-    void onConfigChanged() {
+    void onConfigurationInternalChanged() {
         mThreadingDomain.assertCurrentThread();
 
         synchronized (mSharedLock) {

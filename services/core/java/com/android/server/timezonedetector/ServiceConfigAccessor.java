@@ -18,165 +18,96 @@ package com.android.server.timezonedetector;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.util.ArraySet;
-
-import com.android.internal.R;
-import com.android.internal.annotations.GuardedBy;
-import com.android.server.timedetector.ServerFlags;
+import android.annotation.UserIdInt;
+import android.app.time.TimeZoneConfiguration;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.time.Duration;
-import java.util.Collections;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 /**
- * A singleton that provides access to service configuration for time zone detection. This hides how
- * configuration is split between static, compile-time config and dynamic, server-pushed flags. It
- * provides a rudimentary mechanism to signal when values have changed.
+ * An interface that provides access to service configuration for time zone detection. This hides
+ * how configuration is split between static, compile-time config, dynamic server-pushed flags and
+ * user settings. It provides listeners to signal when values that affect different components have
+ * changed.
  */
-public final class ServiceConfigAccessor {
+public interface ServiceConfigAccessor {
 
     @StringDef(prefix = "PROVIDER_MODE_",
-            value = { PROVIDER_MODE_DISABLED, PROVIDER_MODE_ENABLED})
+            value = { PROVIDER_MODE_DISABLED, PROVIDER_MODE_ENABLED })
     @Retention(RetentionPolicy.SOURCE)
     @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
-    @interface ProviderMode {}
+    @interface ProviderMode {
+    }
 
     /**
      * The "disabled" provider mode. For use with {@link #getPrimaryLocationTimeZoneProviderMode()}
      * and {@link #getSecondaryLocationTimeZoneProviderMode()}.
      */
-    public static final @ProviderMode String PROVIDER_MODE_DISABLED = "disabled";
+    @ProviderMode String PROVIDER_MODE_DISABLED = "disabled";
 
     /**
      * The "enabled" provider mode. For use with {@link #getPrimaryLocationTimeZoneProviderMode()}
      * and {@link #getSecondaryLocationTimeZoneProviderMode()}.
      */
-    public static final @ProviderMode String PROVIDER_MODE_ENABLED = "enabled";
+    @ProviderMode String PROVIDER_MODE_ENABLED = "enabled";
 
     /**
-     * Device config keys that can affect {@link
-     * com.android.server.timezonedetector.location.LocationTimeZoneManagerService} behavior.
+     * Adds a listener that will be invoked when {@link ConfigurationInternal} may have changed.
+     * The listener is invoked on the main thread.
      */
-    private static final Set<String> LOCATION_TIME_ZONE_MANAGER_SERVER_FLAGS_KEYS_TO_WATCH =
-            Collections.unmodifiableSet(new ArraySet<>(new String[] {
-                    ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
-                    ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
-                    ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
-                    ServerFlags.KEY_PRIMARY_LTZP_MODE_OVERRIDE,
-                    ServerFlags.KEY_SECONDARY_LTZP_MODE_OVERRIDE,
-                    ServerFlags.KEY_LTZP_INITIALIZATION_TIMEOUT_MILLIS,
-                    ServerFlags.KEY_LTZP_INITIALIZATION_TIMEOUT_FUZZ_MILLIS,
-                    ServerFlags.KEY_LTZP_EVENT_FILTERING_AGE_THRESHOLD_MILLIS,
-                    ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS
-            }));
-
-    private static final Duration DEFAULT_LTZP_INITIALIZATION_TIMEOUT = Duration.ofMinutes(5);
-    private static final Duration DEFAULT_LTZP_INITIALIZATION_TIMEOUT_FUZZ = Duration.ofMinutes(1);
-    private static final Duration DEFAULT_LTZP_UNCERTAINTY_DELAY = Duration.ofMinutes(5);
-    private static final Duration DEFAULT_LTZP_EVENT_FILTER_AGE_THRESHOLD = Duration.ofMinutes(1);
-
-    private static final Object SLOCK = new Object();
-
-    /** The singleton instance. Initialized once in {@link #getInstance(Context)}. */
-    @GuardedBy("SLOCK")
-    @Nullable
-    private static ServiceConfigAccessor sInstance;
-
-    @NonNull private final Context mContext;
-
-    @NonNull private final ServerFlags mServerFlags;
+    void addConfigurationInternalChangeListener(
+            @NonNull ConfigurationChangeListener listener);
 
     /**
-     * The mode to use for the primary location time zone provider in a test. Setting this
-     * disables some permission checks.
-     * This state is volatile: it is never written to storage / never survives a reboot. This is to
-     * avoid a test provider accidentally being left configured on a device.
-     * See also {@link #resetVolatileTestConfig()}.
+     * Removes a listener previously added via {@link
+     * #addConfigurationInternalChangeListener(ConfigurationChangeListener)}.
      */
-    @Nullable
-    private String mTestPrimaryLocationTimeZoneProviderMode;
+    void removeConfigurationInternalChangeListener(
+            @NonNull ConfigurationChangeListener listener);
 
     /**
-     * The package name to use for the primary location time zone provider in a test.
-     * This state is volatile: it is never written to storage / never survives a reboot. This is to
-     * avoid a test provider accidentally being left configured on a device.
-     * See also {@link #resetVolatileTestConfig()}.
+     * Returns a snapshot of the {@link ConfigurationInternal} for the current user. This is only a
+     * snapshot so callers must use {@link
+     * #addConfigurationInternalChangeListener(ConfigurationChangeListener)} to be notified when it
+     * changes.
      */
-    @Nullable
-    private String mTestPrimaryLocationTimeZoneProviderPackageName;
+    @NonNull
+    ConfigurationInternal getCurrentUserConfigurationInternal();
 
     /**
-     * See {@link #mTestPrimaryLocationTimeZoneProviderMode}; this is the equivalent for the
-     * secondary provider.
+     * Updates the configuration properties that control a device's time zone behavior.
+     *
+     * <p>This method returns {@code true} if the configuration was changed,
+     * {@code false} otherwise.
      */
-    @Nullable
-    private String mTestSecondaryLocationTimeZoneProviderMode;
+    boolean updateConfiguration(@UserIdInt int userId,
+            @NonNull TimeZoneConfiguration requestedConfiguration);
 
     /**
-     * See {@link #mTestPrimaryLocationTimeZoneProviderPackageName}; this is the equivalent for the
-     * secondary provider.
+     * Returns a snapshot of the configuration that controls time zone detector behavior for the
+     * specified user.
      */
-    @Nullable
-    private String mTestSecondaryLocationTimeZoneProviderPackageName;
-
-    /**
-     * Whether to record state changes for tests.
-     * This state is volatile: it is never written to storage / never survives a reboot. This is to
-     * avoid a test state accidentally being left configured on a device.
-     * See also {@link #resetVolatileTestConfig()}.
-     */
-    private boolean mRecordProviderStateChanges;
-
-    private ServiceConfigAccessor(@NonNull Context context) {
-        mContext = Objects.requireNonNull(context);
-
-        mServerFlags = ServerFlags.getInstance(mContext);
-    }
-
-    /** Returns the singleton instance. */
-    public static ServiceConfigAccessor getInstance(Context context) {
-        synchronized (SLOCK) {
-            if (sInstance == null) {
-                sInstance = new ServiceConfigAccessor(context);
-            }
-            return sInstance;
-        }
-    }
+    @NonNull
+    ConfigurationInternal getConfigurationInternal(@UserIdInt int userId);
 
     /**
      * Adds a listener that will be called when server flags related to location_time_zone_manager
      * change. The callbacks are delivered on the main looper thread.
      *
-     * <p>Note: Only for use by long-lived objects. There is deliberately no associated remove
-     * method.
+     * <p>Note: Currently only for use by long-lived objects; there is no associated remove method.
      */
-    public void addLocationTimeZoneManagerConfigListener(
-            @NonNull ConfigurationChangeListener listener) {
-        mServerFlags.addListener(listener, LOCATION_TIME_ZONE_MANAGER_SERVER_FLAGS_KEYS_TO_WATCH);
-    }
-
-    /** Returns {@code true} if any form of automatic time zone detection is supported. */
-    public boolean isAutoDetectionFeatureSupported() {
-        return isTelephonyTimeZoneDetectionFeatureSupported()
-                || isGeoTimeZoneDetectionFeatureSupported();
-    }
+    void addLocationTimeZoneManagerConfigListener(
+            @NonNull ConfigurationChangeListener listener);
 
     /**
      * Returns {@code true} if the telephony-based time zone detection feature is supported on the
      * device.
      */
-    public boolean isTelephonyTimeZoneDetectionFeatureSupported() {
-        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
-    }
+    boolean isTelephonyTimeZoneDetectionFeatureSupported();
 
     /**
      * Returns {@code true} if the location-based time zone detection feature can be supported on
@@ -191,239 +122,116 @@ public final class ServiceConfigAccessor {
      * Typically {@link #isGeoTimeZoneDetectionFeatureSupported()} should be used except during
      * boot.
      */
-    public boolean isGeoTimeZoneDetectionFeatureSupportedInConfig() {
-        return mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_enableGeolocationTimeZoneDetection);
-    }
+    boolean isGeoTimeZoneDetectionFeatureSupportedInConfig();
 
     /**
      * Returns {@code true} if the location-based time zone detection feature is supported on the
      * device.
      */
-    public boolean isGeoTimeZoneDetectionFeatureSupported() {
-        // For the feature to be enabled it must:
-        // 1) Be turned on in config.
-        // 2) Not be turned off via a server flag.
-        // 3) There must be at least one location time zone provider enabled / configured.
-        return isGeoTimeZoneDetectionFeatureSupportedInConfig()
-                && isGeoTimeZoneDetectionFeatureSupportedInternal()
-                && atLeastOneProviderIsEnabled();
-    }
-
-    private boolean atLeastOneProviderIsEnabled() {
-        return !(Objects.equals(getPrimaryLocationTimeZoneProviderMode(), PROVIDER_MODE_DISABLED)
-                && Objects.equals(getSecondaryLocationTimeZoneProviderMode(),
-                PROVIDER_MODE_DISABLED));
-    }
-
-    /**
-     * Returns {@code true} if the location-based time zone detection feature is not explicitly
-     * disabled by a server flag.
-     */
-    private boolean isGeoTimeZoneDetectionFeatureSupportedInternal() {
-        final boolean defaultEnabled = true;
-        return mServerFlags.getBoolean(
-                ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
-                defaultEnabled);
-    }
+    boolean isGeoTimeZoneDetectionFeatureSupported();
 
     /** Returns the package name of the app hosting the primary location time zone provider. */
     @NonNull
-    public String getPrimaryLocationTimeZoneProviderPackageName() {
-        if (mTestPrimaryLocationTimeZoneProviderMode != null) {
-            // In test mode: use the test setting value.
-            return mTestPrimaryLocationTimeZoneProviderPackageName;
-        }
-        return mContext.getResources().getString(
-                R.string.config_primaryLocationTimeZoneProviderPackageName);
-    }
+    String getPrimaryLocationTimeZoneProviderPackageName();
 
     /**
      * Sets the package name of the app hosting the primary location time zone provider for tests.
      * Setting a {@code null} value means the provider is to be disabled.
      * The values are reset with {@link #resetVolatileTestConfig()}.
      */
-    public void setTestPrimaryLocationTimeZoneProviderPackageName(
-            @Nullable String testPrimaryLocationTimeZoneProviderPackageName) {
-        mTestPrimaryLocationTimeZoneProviderPackageName =
-                testPrimaryLocationTimeZoneProviderPackageName;
-        mTestPrimaryLocationTimeZoneProviderMode =
-                mTestPrimaryLocationTimeZoneProviderPackageName == null
-                        ? PROVIDER_MODE_DISABLED : PROVIDER_MODE_ENABLED;
-    }
+    void setTestPrimaryLocationTimeZoneProviderPackageName(
+            @Nullable String testPrimaryLocationTimeZoneProviderPackageName);
 
     /**
      * Returns {@code true} if the usual permission checks are to be bypassed for the primary
      * provider. Returns {@code true} only if {@link
      * #setTestPrimaryLocationTimeZoneProviderPackageName} has been called.
      */
-    public boolean isTestPrimaryLocationTimeZoneProvider() {
-        return mTestPrimaryLocationTimeZoneProviderMode != null;
-    }
+    boolean isTestPrimaryLocationTimeZoneProvider();
 
     /** Returns the package name of the app hosting the secondary location time zone provider. */
     @NonNull
-    public String getSecondaryLocationTimeZoneProviderPackageName() {
-        if (mTestSecondaryLocationTimeZoneProviderMode != null) {
-            // In test mode: use the test setting value.
-            return mTestSecondaryLocationTimeZoneProviderPackageName;
-        }
-        return mContext.getResources().getString(
-                R.string.config_secondaryLocationTimeZoneProviderPackageName);
-    }
+    String getSecondaryLocationTimeZoneProviderPackageName();
 
     /**
      * Sets the package name of the app hosting the secondary location time zone provider for tests.
      * Setting a {@code null} value means the provider is to be disabled.
      * The values are reset with {@link #resetVolatileTestConfig()}.
      */
-    public void setTestSecondaryLocationTimeZoneProviderPackageName(
-            @Nullable String testSecondaryLocationTimeZoneProviderPackageName) {
-        mTestSecondaryLocationTimeZoneProviderPackageName =
-                testSecondaryLocationTimeZoneProviderPackageName;
-        mTestSecondaryLocationTimeZoneProviderMode =
-                mTestSecondaryLocationTimeZoneProviderPackageName == null
-                        ? PROVIDER_MODE_DISABLED : PROVIDER_MODE_ENABLED;
-    }
+    void setTestSecondaryLocationTimeZoneProviderPackageName(
+            @Nullable String testSecondaryLocationTimeZoneProviderPackageName);
 
     /**
      * Returns {@code true} if the usual permission checks are to be bypassed for the secondary
      * provider. Returns {@code true} only if {@link
      * #setTestSecondaryLocationTimeZoneProviderPackageName} has been called.
      */
-    public boolean isTestSecondaryLocationTimeZoneProvider() {
-        return mTestSecondaryLocationTimeZoneProviderMode != null;
-    }
+    boolean isTestSecondaryLocationTimeZoneProvider();
 
     /**
      * Enables/disables the state recording mode for tests. The value is reset with {@link
      * #resetVolatileTestConfig()}.
      */
-    public void setRecordProviderStateChanges(boolean enabled) {
-        mRecordProviderStateChanges = enabled;
-    }
+    void setRecordProviderStateChanges(boolean enabled);
 
     /**
      * Returns {@code true} if providers are expected to record their state changes for tests.
      */
-    public boolean getRecordProviderStateChanges() {
-        return mRecordProviderStateChanges;
-    }
+    boolean getRecordProviderStateChanges();
 
     /**
      * Returns the mode for the primary location time zone provider.
      */
     @NonNull
-    public @ProviderMode String getPrimaryLocationTimeZoneProviderMode() {
-        if (mTestPrimaryLocationTimeZoneProviderMode != null) {
-            // In test mode: use the test setting value.
-            return mTestPrimaryLocationTimeZoneProviderMode;
-        }
-        return mServerFlags.getOptionalString(ServerFlags.KEY_PRIMARY_LTZP_MODE_OVERRIDE)
-                .orElse(getPrimaryLocationTimeZoneProviderModeFromConfig());
-    }
-
-    @NonNull
-    private @ProviderMode String getPrimaryLocationTimeZoneProviderModeFromConfig() {
-        int providerEnabledConfigId = R.bool.config_enablePrimaryLocationTimeZoneProvider;
-        return getConfigBoolean(providerEnabledConfigId)
-                ? PROVIDER_MODE_ENABLED : PROVIDER_MODE_DISABLED;
-    }
+    @ProviderMode String getPrimaryLocationTimeZoneProviderMode();
 
     /**
      * Returns the mode for the secondary location time zone provider.
      */
-    public @ProviderMode String getSecondaryLocationTimeZoneProviderMode() {
-        if (mTestSecondaryLocationTimeZoneProviderMode != null) {
-            // In test mode: use the test setting value.
-            return mTestSecondaryLocationTimeZoneProviderMode;
-        }
-        return mServerFlags.getOptionalString(ServerFlags.KEY_SECONDARY_LTZP_MODE_OVERRIDE)
-                .orElse(getSecondaryLocationTimeZoneProviderModeFromConfig());
-    }
-
-    @NonNull
-    private @ProviderMode String getSecondaryLocationTimeZoneProviderModeFromConfig() {
-        int providerEnabledConfigId = R.bool.config_enableSecondaryLocationTimeZoneProvider;
-        return getConfigBoolean(providerEnabledConfigId)
-                ? PROVIDER_MODE_ENABLED : PROVIDER_MODE_DISABLED;
-    }
+    @ProviderMode String getSecondaryLocationTimeZoneProviderMode();
 
     /**
      * Returns whether location time zone detection is enabled for users when there's no setting
      * value. Intended for use during feature release testing to "opt-in" users that haven't shown
      * an explicit preference.
      */
-    public boolean isGeoDetectionEnabledForUsersByDefault() {
-        return mServerFlags.getBoolean(
-                ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT, false);
-    }
+    boolean isGeoDetectionEnabledForUsersByDefault();
 
     /**
      * Returns whether location time zone detection is force enabled/disabled for users. Intended
      * for use during feature release testing to force a given state.
      */
     @NonNull
-    public Optional<Boolean> getGeoDetectionSettingEnabledOverride() {
-        return mServerFlags.getOptionalBoolean(
-                ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE);
-    }
+    Optional<Boolean> getGeoDetectionSettingEnabledOverride();
 
     /**
      * Returns the time to send to a location time zone provider that informs it how long it has
      * to return its first time zone suggestion.
      */
     @NonNull
-    public Duration getLocationTimeZoneProviderInitializationTimeout() {
-        return mServerFlags.getDurationFromMillis(
-                ServerFlags.KEY_LTZP_INITIALIZATION_TIMEOUT_MILLIS,
-                DEFAULT_LTZP_INITIALIZATION_TIMEOUT);
-    }
+    Duration getLocationTimeZoneProviderInitializationTimeout();
 
     /**
      * Returns the time added to {@link #getLocationTimeZoneProviderInitializationTimeout()} by the
      * server before unilaterally declaring the provider is uncertain.
      */
     @NonNull
-    public Duration getLocationTimeZoneProviderInitializationTimeoutFuzz() {
-        return mServerFlags.getDurationFromMillis(
-                ServerFlags.KEY_LTZP_INITIALIZATION_TIMEOUT_FUZZ_MILLIS,
-                DEFAULT_LTZP_INITIALIZATION_TIMEOUT_FUZZ);
-    }
+    Duration getLocationTimeZoneProviderInitializationTimeoutFuzz();
 
     /**
      * Returns the time after uncertainty is detected by providers before the location time zone
      * manager makes a suggestion to the time zone detector.
      */
     @NonNull
-    public Duration getLocationTimeZoneUncertaintyDelay() {
-        return mServerFlags.getDurationFromMillis(
-                ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS,
-                DEFAULT_LTZP_UNCERTAINTY_DELAY);
-    }
+    Duration getLocationTimeZoneUncertaintyDelay();
 
     /**
      * Returns the time between equivalent events before the provider process will send the event
      * to the system server.
      */
     @NonNull
-    public Duration getLocationTimeZoneProviderEventFilteringAgeThreshold() {
-        return mServerFlags.getDurationFromMillis(
-                ServerFlags.KEY_LTZP_EVENT_FILTERING_AGE_THRESHOLD_MILLIS,
-                DEFAULT_LTZP_EVENT_FILTER_AGE_THRESHOLD);
-    }
+    Duration getLocationTimeZoneProviderEventFilteringAgeThreshold();
 
     /** Clears all in-memory test config. */
-    public void resetVolatileTestConfig() {
-        mTestPrimaryLocationTimeZoneProviderPackageName = null;
-        mTestPrimaryLocationTimeZoneProviderMode = null;
-        mTestSecondaryLocationTimeZoneProviderPackageName = null;
-        mTestSecondaryLocationTimeZoneProviderMode = null;
-        mRecordProviderStateChanges = false;
-    }
-
-    private boolean getConfigBoolean(int providerEnabledConfigId) {
-        Resources resources = mContext.getResources();
-        return resources.getBoolean(providerEnabledConfigId);
-    }
+    void resetVolatileTestConfig();
 }
