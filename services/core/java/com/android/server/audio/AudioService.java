@@ -133,6 +133,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
@@ -550,10 +551,8 @@ public class AudioService extends IAudioService.Stub
     private final boolean mHasVibrator;
     // Used to play vibrations
     private Vibrator mVibrator;
-    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-            .build();
+    private static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH);
 
     // Broadcast receiver for device connections intent broadcasts
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
@@ -4343,7 +4342,7 @@ public class AudioService extends IAudioService.Stub
             return false;
         }
         mVibrator.vibrate(Binder.getCallingUid(), mContext.getOpPackageName(), effect,
-                reason, VIBRATION_ATTRIBUTES);
+                reason, TOUCH_VIBRATION_ATTRIBUTES);
         return true;
     }
 

@@ -32342,6 +32342,7 @@ package android.os {
   }
 
   public final class VibrationAttributes implements android.os.Parcelable {
+    method @NonNull public static android.os.VibrationAttributes createForUsage(int);
     method public int describeContents();
     method public int getFlags();
     method public int getUsage();
@@ -32367,6 +32368,7 @@ package android.os {
   public static final class VibrationAttributes.Builder {
     ctor public VibrationAttributes.Builder();
     ctor public VibrationAttributes.Builder(@Nullable android.os.VibrationAttributes);
+    ctor public VibrationAttributes.Builder(@NonNull android.media.AudioAttributes);
     method @NonNull public android.os.VibrationAttributes build();
     method @NonNull public android.os.VibrationAttributes.Builder setFlags(int, int);
     method @NonNull public android.os.VibrationAttributes.Builder setUsage(int);
@@ -32417,7 +32419,8 @@ package android.os {
     method @Deprecated @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(long[], int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(long[], int, android.media.AudioAttributes);
     method @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(android.os.VibrationEffect);
-    method @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(android.os.VibrationEffect, android.media.AudioAttributes);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(android.os.VibrationEffect, android.media.AudioAttributes);
+    method @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(@NonNull android.os.VibrationEffect, @NonNull android.os.VibrationAttributes);
     field public static final int VIBRATION_EFFECT_SUPPORT_NO = 2; // 0x2
     field public static final int VIBRATION_EFFECT_SUPPORT_UNKNOWN = 0; // 0x0
     field public static final int VIBRATION_EFFECT_SUPPORT_YES = 1; // 0x1
