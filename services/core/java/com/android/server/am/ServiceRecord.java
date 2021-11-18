@@ -28,6 +28,7 @@ import android.annotation.Nullable;
 import android.app.IApplicationThread;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.RemoteServiceException.CannotPostForegroundServiceNotificationException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -1059,7 +1060,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                         // If it gave us a garbage notification, it doesn't
                         // get to be foreground.
                         ams.mServices.killMisbehavingService(record,
-                                appUid, appPid, localPackageName);
+                                appUid, appPid, localPackageName,
+                                CannotPostForegroundServiceNotificationException.TYPE_ID);
                     }
                 }
             });

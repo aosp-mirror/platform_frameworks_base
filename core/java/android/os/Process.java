@@ -742,7 +742,8 @@ public class Process {
     public static final native long getElapsedCpuTime();
 
     /**
-     * Return the {@link SystemClock#elapsedRealtime()} at which this process was started.
+     * Return the {@link SystemClock#elapsedRealtime()} at which this process was started,
+     * but before any of the application code was executed.
      */
     @ElapsedRealtimeLong
     public static long getStartElapsedRealtime() {
@@ -750,7 +751,8 @@ public class Process {
     }
 
     /**
-     * Return the {@link SystemClock#uptimeMillis()} at which this process was started.
+     * Return the {@link SystemClock#uptimeMillis()} at which this process was started,
+     * but before any of the application code was executed.
      */
     @UptimeMillisLong
     public static long getStartUptimeMillis() {
@@ -758,8 +760,12 @@ public class Process {
     }
 
     /**
-     * Return the {@link SystemClock#elapsedRealtime()} at which the system decides to start
-     * this process.
+     * Return the {@link SystemClock#elapsedRealtime()} at which the system was about to
+     * start this process. i.e. before a zygote fork.
+     *
+     * <p>More precisely, the system may start app processes before there's a start request,
+     * in order to reduce the process start up latency, in which case this is set when the system
+     * decides to "specialize" the process into a requested app.
      */
     @ElapsedRealtimeLong
     public static long getStartRequestedElapsedRealtime() {
@@ -767,8 +773,12 @@ public class Process {
     }
 
     /**
-     * Return the {@link SystemClock#uptimeMillis()} at which the system decides to start
-     * this process.
+     * Return the {@link SystemClock#uptimeMillis()} at which the system was about to
+     * start this process. i.e. before a zygote fork.
+     *
+     * <p>More precisely, the system may start app processes before there's a start request,
+     * in order to reduce the process start up latency, in which case this is set when the system
+     * decides to "specialize" the process into a requested app.
      */
     @UptimeMillisLong
     public static long getStartRequestedUptimeMillis() {
@@ -1195,7 +1205,8 @@ public class Process {
     private static native void setArgV0Native(String text);
 
     /**
-     * Return the name of this process.
+     * Return the name of this process. By default, the process name is the same as the app's
+     * package name, but this can be changed using {@code android:process}.
      */
     @NonNull
     public static String myProcessName() {

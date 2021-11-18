@@ -435,8 +435,10 @@ public final class AccessibilityInteractionClient
                     }
                 }
 
+                long populationTimeStamp;
                 final long identityToken = Binder.clearCallingIdentity();
                 try {
+                    populationTimeStamp = SystemClock.uptimeMillis();
                     windows = connection.getWindows();
                 } finally {
                     Binder.restoreCallingIdentity(identityToken);
@@ -446,7 +448,7 @@ public final class AccessibilityInteractionClient
                 }
                 if (windows != null) {
                     if (sAccessibilityCache != null) {
-                        sAccessibilityCache.setWindowsOnAllDisplays(windows);
+                        sAccessibilityCache.setWindowsOnAllDisplays(windows, populationTimeStamp);
                     }
                     return windows;
                 }

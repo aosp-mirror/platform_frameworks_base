@@ -219,61 +219,89 @@ public class InternetDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void updateDialog_wifiOnAndNoWifiList_hideWifiListAndSeeAll() {
+    public void updateDialog_wifiOnAndNoWifiEntry_hideWifiEntryAndSeeAll() {
         // The precondition WiFi ON is already in setUp()
+        mInternetDialog.mConnectedWifiEntry = null;
         mInternetDialog.mWifiEntriesCount = 0;
 
         mInternetDialog.updateDialog(false);
 
+        assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.GONE);
         assertThat(mWifiList.getVisibility()).isEqualTo(View.GONE);
         assertThat(mSeeAll.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
-    public void updateDialog_wifiOnAndHasWifiList_showWifiListAndSeeAll() {
+    public void updateDialog_wifiOnAndHasConnectedWifi_showConnectedWifiAndSeeAll() {
         // The preconditions WiFi ON and WiFi entries are already in setUp()
+        mInternetDialog.mWifiEntriesCount = 0;
 
         mInternetDialog.updateDialog(false);
 
+        assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mWifiList.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mSeeAll.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void updateDialog_wifiOnAndHasWifiList_showWifiListAndSeeAll() {
+        // The preconditions WiFi ON and WiFi entries are already in setUp()
+        mInternetDialog.mConnectedWifiEntry = null;
+
+        mInternetDialog.updateDialog(false);
+
+        assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.GONE);
         assertThat(mWifiList.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mSeeAll.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
-    public void updateDialog_deviceLockedAndHasInternetWifi_showHighlightWifiToggle() {
-        // The preconditions WiFi ON and Internet WiFi are already in setUp()
-        when(mInternetDialogController.isDeviceLocked()).thenReturn(true);
+    public void updateDialog_wifiOnAndHasBothWifiEntry_showBothWifiEntryAndSeeAll() {
+        // The preconditions WiFi ON and WiFi entries are already in setUp()
 
         mInternetDialog.updateDialog(false);
 
-        assertThat(mWifiToggle.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mWifiToggle.getBackground()).isNotNull();
+        assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mWifiList.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mSeeAll.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
-    public void updateDialog_deviceLockedAndHasInternetWifi_hideConnectedWifi() {
-        // The preconditions WiFi ON and Internet WiFi are already in setUp()
-        when(mInternetDialogController.isDeviceLocked()).thenReturn(true);
-
-        mInternetDialog.updateDialog(false);
-
-        assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.GONE);
-    }
-
-    @Test
-    public void updateDialog_deviceLockedAndHasWifiList_hideWifiListAndSeeAll() {
+    public void updateDialog_deviceLockedAndNoConnectedWifi_showWifiToggle() {
         // The preconditions WiFi entries are already in setUp()
         when(mInternetDialogController.isDeviceLocked()).thenReturn(true);
+        mInternetDialog.mConnectedWifiEntry = null;
 
         mInternetDialog.updateDialog(false);
 
+        // Show WiFi Toggle without background
+        assertThat(mWifiToggle.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mWifiToggle.getBackground()).isNull();
+        // Hide Wi-Fi networks and See all
+        assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mWifiList.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mSeeAll.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void updateDialog_deviceLockedAndHasConnectedWifi_showWifiToggleWithBackground() {
+        // The preconditions WiFi ON and WiFi entries are already in setUp()
+        when(mInternetDialogController.isDeviceLocked()).thenReturn(true);
+
+        mInternetDialog.updateDialog(false);
+
+        // Show WiFi Toggle with highlight background
+        assertThat(mWifiToggle.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mWifiToggle.getBackground()).isNotNull();
+        // Hide Wi-Fi networks and See all
+        assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.GONE);
         assertThat(mWifiList.getVisibility()).isEqualTo(View.GONE);
         assertThat(mSeeAll.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
     public void updateDialog_wifiOn_hideWifiScanNotify() {
-        // The preconditions WiFi ON and Internet WiFi are already in setUp()
+        // The preconditions WiFi ON and WiFi entries are already in setUp()
 
         mInternetDialog.updateDialog(false);
 

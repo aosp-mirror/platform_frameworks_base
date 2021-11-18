@@ -4205,7 +4205,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         // Make sure all dynamic permissions have been assigned to a package,
         // and make sure there are no dangling permissions.
         boolean permissionSourcePackageChanged = updatePermissionSourcePackage(changingPkgName,
-                changingPkg, callback);
+                callback);
 
         if (permissionTreesSourcePackageChanged | permissionSourcePackageChanged) {
             // Permission ownership has changed. This e.g. changes which packages can get signature
@@ -4244,22 +4244,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     /**
      * Update which app declares a permission.
      *
-     * <p>Possible parameter combinations
-     * <table>
-     *     <tr><th></th><th>packageName != null</th><th>packageName == null</th></tr>
-     *     <tr><th>pkg != null</th><td>package is updated</td><td>invalid</td></tr>
-     *     <tr><th>pkg == null</th><td>package is deleted</td><td>all packages are updated</td></tr>
-     * </table>
-     *
      * @param packageName The package that is updated, or {@code null} if all packages should be
      *                    updated
-     * @param pkg The package that is updated, or {@code null} if all packages should be updated or
-     *            package is deleted
      *
      * @return {@code true} if a permission source package might have changed
      */
     private boolean updatePermissionSourcePackage(@Nullable String packageName,
-            @Nullable AndroidPackage pkg,
             final @Nullable PermissionCallback callback) {
         // Always need update if packageName is null
         if (packageName == null) {
@@ -4289,6 +4279,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         }
         if (needsUpdate != null) {
+            final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
             for (final Permission bp : needsUpdate) {
                 // If the target package is being uninstalled, we need to revoke this permission
                 // From all other packages

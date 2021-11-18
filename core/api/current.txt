@@ -3255,18 +3255,18 @@ package android.accessibilityservice {
   }
 
   public final class TouchInteractionController {
-    method public void addListener(@Nullable java.util.concurrent.Executor, @NonNull android.accessibilityservice.TouchInteractionController.Listener);
     method public int getDisplayId();
     method public int getMaxPointerCount();
     method public int getState();
     method public void performClick();
     method public void performLongClickAndStartDrag();
-    method public void removeAllListeners();
-    method public boolean removeListener(@NonNull android.accessibilityservice.TouchInteractionController.Listener);
+    method public void registerCallback(@Nullable java.util.concurrent.Executor, @NonNull android.accessibilityservice.TouchInteractionController.Callback);
     method public void requestDelegating();
     method public void requestDragging(int);
     method public void requestTouchExploration();
     method @NonNull public static String stateToString(int);
+    method public void unregisterAllCallbacks();
+    method public boolean unregisterCallback(@NonNull android.accessibilityservice.TouchInteractionController.Callback);
     field public static final int STATE_CLEAR = 0; // 0x0
     field public static final int STATE_DELEGATING = 4; // 0x4
     field public static final int STATE_DRAGGING = 3; // 0x3
@@ -3274,7 +3274,7 @@ package android.accessibilityservice {
     field public static final int STATE_TOUCH_INTERACTING = 1; // 0x1
   }
 
-  public static interface TouchInteractionController.Listener {
+  public static interface TouchInteractionController.Callback {
     method public void onMotionEvent(@NonNull android.view.MotionEvent);
     method public void onStateChanged(int);
   }
@@ -31666,9 +31666,9 @@ package android.os {
     method public byte[] marshall();
     method @NonNull public static android.os.Parcel obtain();
     method @NonNull public static android.os.Parcel obtain(@NonNull android.os.IBinder);
-    method @Nullable public Object[] readArray(@Nullable ClassLoader);
+    method @Deprecated @Nullable public Object[] readArray(@Nullable ClassLoader);
     method @Nullable public <T> T[] readArray(@Nullable ClassLoader, @NonNull Class<T>);
-    method @Nullable public java.util.ArrayList readArrayList(@Nullable ClassLoader);
+    method @Deprecated @Nullable public java.util.ArrayList readArrayList(@Nullable ClassLoader);
     method @Nullable public <T> java.util.ArrayList<T> readArrayList(@Nullable ClassLoader, @NonNull Class<? extends T>);
     method public void readBinderArray(@NonNull android.os.IBinder[]);
     method public void readBinderList(@NonNull java.util.List<android.os.IBinder>);
@@ -31686,32 +31686,32 @@ package android.os {
     method public android.os.ParcelFileDescriptor readFileDescriptor();
     method public float readFloat();
     method public void readFloatArray(@NonNull float[]);
-    method @Nullable public java.util.HashMap readHashMap(@Nullable ClassLoader);
+    method @Deprecated @Nullable public java.util.HashMap readHashMap(@Nullable ClassLoader);
     method @Nullable public <K, V> java.util.HashMap<K,V> readHashMap(@Nullable ClassLoader, @NonNull Class<? extends K>, @NonNull Class<? extends V>);
     method public int readInt();
     method public void readIntArray(@NonNull int[]);
     method public <T extends android.os.IInterface> void readInterfaceArray(@NonNull T[], @NonNull java.util.function.Function<android.os.IBinder,T>);
     method public <T extends android.os.IInterface> void readInterfaceList(@NonNull java.util.List<T>, @NonNull java.util.function.Function<android.os.IBinder,T>);
-    method public void readList(@NonNull java.util.List, @Nullable ClassLoader);
+    method @Deprecated public void readList(@NonNull java.util.List, @Nullable ClassLoader);
     method public <T> void readList(@NonNull java.util.List<? super T>, @Nullable ClassLoader, @NonNull Class<T>);
     method public long readLong();
     method public void readLongArray(@NonNull long[]);
-    method public void readMap(@NonNull java.util.Map, @Nullable ClassLoader);
+    method @Deprecated public void readMap(@NonNull java.util.Map, @Nullable ClassLoader);
     method public <K, V> void readMap(@NonNull java.util.Map<? super K,? super V>, @Nullable ClassLoader, @NonNull Class<K>, @NonNull Class<V>);
-    method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader);
+    method @Deprecated @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader);
     method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader, @NonNull Class<T>);
     method @Nullable public android.os.Parcelable[] readParcelableArray(@Nullable ClassLoader);
     method @Nullable public <T> T[] readParcelableArray(@Nullable ClassLoader, @NonNull Class<T>);
-    method @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
+    method @Deprecated @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
     method @Nullable public <T> android.os.Parcelable.Creator<T> readParcelableCreator(@Nullable ClassLoader, @NonNull Class<T>);
     method @NonNull public <T extends android.os.Parcelable> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader);
     method @Nullable public android.os.PersistableBundle readPersistableBundle();
     method @Nullable public android.os.PersistableBundle readPersistableBundle(@Nullable ClassLoader);
-    method @Nullable public java.io.Serializable readSerializable();
+    method @Deprecated @Nullable public java.io.Serializable readSerializable();
     method @Nullable public <T extends java.io.Serializable> T readSerializable(@Nullable ClassLoader, @NonNull Class<T>);
     method @NonNull public android.util.Size readSize();
     method @NonNull public android.util.SizeF readSizeF();
-    method @Nullable public <T> android.util.SparseArray<T> readSparseArray(@Nullable ClassLoader);
+    method @Deprecated @Nullable public <T> android.util.SparseArray<T> readSparseArray(@Nullable ClassLoader);
     method @Nullable public <T> android.util.SparseArray<T> readSparseArray(@Nullable ClassLoader, @NonNull Class<? extends T>);
     method @Nullable public android.util.SparseBooleanArray readSparseBooleanArray();
     method @Nullable public String readString();
@@ -42743,6 +42743,8 @@ package android.telephony {
     method @NonNull public java.util.List<android.net.Uri> getDeviceToDeviceStatusSharingContacts(int);
     method public int getDeviceToDeviceStatusSharingPreference(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telephony.SubscriptionInfo> getOpportunisticSubscriptions();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public String getPhoneNumber(int, int);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public String getPhoneNumber(int);
     method public static int getSlotIndex(int);
     method @Nullable public int[] getSubscriptionIds(int);
     method @NonNull public java.util.List<android.telephony.SubscriptionPlan> getSubscriptionPlans(int);
@@ -42754,6 +42756,7 @@ package android.telephony {
     method public void removeOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener);
     method public void removeOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void removeSubscriptionsFromGroup(@NonNull java.util.List<java.lang.Integer>, @NonNull android.os.ParcelUuid);
+    method public void setCarrierPhoneNumber(int, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDeviceToDeviceStatusSharingContacts(int, @NonNull java.util.List<android.net.Uri>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDeviceToDeviceStatusSharingPreference(int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunistic(boolean, int);
@@ -42780,6 +42783,9 @@ package android.telephony {
     field public static final String EXTRA_SUBSCRIPTION_INDEX = "android.telephony.extra.SUBSCRIPTION_INDEX";
     field public static final int INVALID_SIM_SLOT_INDEX = -1; // 0xffffffff
     field public static final int INVALID_SUBSCRIPTION_ID = -1; // 0xffffffff
+    field public static final int PHONE_NUMBER_SOURCE_CARRIER = 2; // 0x2
+    field public static final int PHONE_NUMBER_SOURCE_IMS = 3; // 0x3
+    field public static final int PHONE_NUMBER_SOURCE_UICC = 1; // 0x1
     field public static final int SUBSCRIPTION_TYPE_LOCAL_SIM = 0; // 0x0
     field public static final int SUBSCRIPTION_TYPE_REMOTE_SIM = 1; // 0x1
   }
@@ -43578,7 +43584,8 @@ package android.telephony.euicc {
     method public boolean isEnabled();
     method public boolean isSimPortAvailable(int);
     method public void startResolutionActivity(android.app.Activity, int, android.content.Intent, android.app.PendingIntent) throws android.content.IntentSender.SendIntentException;
-    method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, android.app.PendingIntent);
+    method @Deprecated @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, android.app.PendingIntent);
+    method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.euicc.EuiccManager.ResultListener);
     method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void updateSubscriptionNickname(int, @Nullable String, @NonNull android.app.PendingIntent);
     field public static final String ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS = "android.telephony.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS";
     field public static final String ACTION_NOTIFY_CARRIER_SETUP_INCOMPLETE = "android.telephony.euicc.action.NOTIFY_CARRIER_SETUP_INCOMPLETE";
@@ -43622,6 +43629,10 @@ package android.telephony.euicc {
     field public static final int OPERATION_SMDX_SUBJECT_REASON_CODE = 10; // 0xa
     field public static final int OPERATION_SWITCH = 4; // 0x4
     field public static final int OPERATION_SYSTEM = 1; // 0x1
+  }
+
+  public static interface EuiccManager.ResultListener {
+    method public void onComplete(int, @Nullable android.content.Intent);
   }
 
 }

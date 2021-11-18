@@ -130,19 +130,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     private StageCoordinator mStageCoordinator;
 
-    // TODO(b/205019015): Remove after we clean up downstream modules
-    public SplitScreenController(ShellTaskOrganizer shellTaskOrganizer,
-            SyncTransactionQueue syncQueue, Context context,
-            RootTaskDisplayAreaOrganizer rootTDAOrganizer,
-            ShellExecutor mainExecutor, DisplayImeController displayImeController,
-            DisplayInsetsController displayInsetsController,
-            Transitions transitions, TransactionPool transactionPool, IconProvider iconProvider,
-            Provider<Optional<StageTaskUnfoldController>> unfoldControllerProvider) {
-        this(shellTaskOrganizer, syncQueue, context, rootTDAOrganizer, mainExecutor,
-                displayImeController, displayInsetsController, transitions, transactionPool,
-                iconProvider, Optional.empty(), unfoldControllerProvider);
-    }
-
     public SplitScreenController(ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, Context context,
             RootTaskDisplayAreaOrganizer rootTDAOrganizer,

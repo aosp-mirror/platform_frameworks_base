@@ -26,6 +26,8 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import org.junit.Assume.assumeFalse
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,6 +66,15 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
                 pipApp.clickEnterPipButton(wmHelper)
             }
         }
+
+    /** {@inheritDoc}  */
+    @Presubmit
+    @Test
+    override fun statusBarLayerRotatesScales() {
+        // This test doesn't work in shell transitions because of b/206753786
+        assumeFalse(isShellTransitionsEnabled)
+        super.statusBarLayerRotatesScales()
+    }
 
     /**
      * Checks [pipApp] window remains visible throughout the animation

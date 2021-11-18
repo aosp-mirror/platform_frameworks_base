@@ -41,6 +41,12 @@ import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
+import android.app.RemoteServiceException.BadForegroundServiceNotificationException;
+import android.app.RemoteServiceException.CannotDeliverBroadcastException;
+import android.app.RemoteServiceException.CannotPostForegroundServiceNotificationException;
+import android.app.RemoteServiceException.CrashedByAdbException;
+import android.app.RemoteServiceException.ForegroundServiceDidNotStartInTimeException;
+import android.app.RemoteServiceException.MissingRequestPasswordComplexityPermissionException;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
@@ -1929,11 +1935,27 @@ public final class ActivityThread extends ClientTransactionHandler
     private void throwRemoteServiceException(String message, int typeId) {
         // Use a switch to ensure all the type IDs are unique.
         switch (typeId) {
-            case ForegroundServiceDidNotStartInTimeException.TYPE_ID: // 1
+            case ForegroundServiceDidNotStartInTimeException.TYPE_ID:
                 throw new ForegroundServiceDidNotStartInTimeException(message);
-            case RemoteServiceException.TYPE_ID: // 0
+
+            case CannotDeliverBroadcastException.TYPE_ID:
+                throw new CannotDeliverBroadcastException(message);
+
+            case CannotPostForegroundServiceNotificationException.TYPE_ID:
+                throw new CannotPostForegroundServiceNotificationException(message);
+
+            case BadForegroundServiceNotificationException.TYPE_ID:
+                throw new BadForegroundServiceNotificationException(message);
+
+            case MissingRequestPasswordComplexityPermissionException.TYPE_ID:
+                throw new MissingRequestPasswordComplexityPermissionException(message);
+
+            case CrashedByAdbException.TYPE_ID:
+                throw new CrashedByAdbException(message);
+
             default:
-                throw new RemoteServiceException(message);
+                throw new RemoteServiceException(message
+                        + " (with unwknown typeId:" + typeId + ")");
         }
     }
 

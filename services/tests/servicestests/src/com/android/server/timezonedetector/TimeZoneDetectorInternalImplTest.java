@@ -78,16 +78,6 @@ public class TimeZoneDetectorInternalImplTest {
     }
 
     @Test
-    public void testAddDumpable() throws Exception {
-        Dumpable stubbedDumpable = mock(Dumpable.class);
-
-        mTimeZoneDetectorInternal.addDumpable(stubbedDumpable);
-        mTestHandler.assertTotalMessagesEnqueued(0);
-
-        mFakeTimeZoneDetectorStrategy.verifyHasDumpable(stubbedDumpable);
-    }
-
-    @Test
     public void testAddConfigurationListener() throws Exception {
         boolean[] changeCalled = new boolean[2];
         mTimeZoneDetectorInternal.addConfigurationListener(() -> changeCalled[0] = true);

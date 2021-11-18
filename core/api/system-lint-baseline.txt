@@ -31,6 +31,10 @@ KotlinKeyword: android.app.Notification#when:
 
 
 
+MissingGetterMatchingBuilder: android.os.NewUserRequest.Builder#setAdmin():
+    android.os.NewUserRequest does not declare a `getAdmin()` method matching method android.os.NewUserRequest.Builder.setAdmin()
+MissingGetterMatchingBuilder: android.os.NewUserRequest.Builder#setEphemeral():
+    android.os.NewUserRequest does not declare a `getEphemeral()` method matching method android.os.NewUserRequest.Builder.setEphemeral()
 MissingGetterMatchingBuilder: android.security.keystore.KeyGenParameterSpec.Builder#setUid(int):
     android.security.keystore.KeyGenParameterSpec does not declare a `getUid()` method matching method android.security.keystore.KeyGenParameterSpec.Builder.setUid(int)
 MissingGetterMatchingBuilder: android.service.autofill.Dataset.Builder#setFieldInlinePresentation(android.view.autofill.AutofillId, android.view.autofill.AutofillValue, java.util.regex.Pattern, android.service.autofill.InlinePresentation):

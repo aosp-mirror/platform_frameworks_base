@@ -133,7 +133,7 @@ public class LocaleManagerShellCommand extends ShellCommand {
             try {
                 LocaleList locales = mBinderService.getApplicationLocales(packageName, userId);
                 getOutPrintWriter().println("Locales for " + packageName
-                        + " for user " + userId + " are " + locales);
+                        + " for user " + userId + " are [" + locales.toLanguageTags() + "]");
             } catch (RemoteException e) {
                 getOutPrintWriter().println("Remote Exception: " + e);
             } catch (IllegalArgumentException e) {

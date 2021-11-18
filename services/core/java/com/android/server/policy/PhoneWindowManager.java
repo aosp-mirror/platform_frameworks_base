@@ -951,7 +951,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             powerMultiPressAction(eventTime, interactive, mDoublePressOnPowerBehavior);
         } else if (count == 3) {
             powerMultiPressAction(eventTime, interactive, mTriplePressOnPowerBehavior);
-        } else if (interactive && !beganFromNonInteractive) {
+        } else if (count == 1 && interactive && !beganFromNonInteractive) {
             if (mSideFpsEventHandler.onSinglePressDetected(eventTime)) {
                 Slog.i(TAG, "Suppressing power key because the user is interacting with the "
                         + "fingerprint sensor");
@@ -3479,13 +3479,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (!mSystemBooted) {
             // If we have not yet booted, don't let key events do anything.
             // Exception: Wake and power key events are forwarded to PowerManager to allow it to
-            // wake from quiescent mode during boot.
+            // wake from quiescent mode during boot. On these key events we also explicitly turn on
+            // the connected TV and switch HDMI input if we're a HDMI playback device.
+            boolean shouldTurnOnTv = false;
             if (down && (keyCode == KeyEvent.KEYCODE_POWER
                     || keyCode == KeyEvent.KEYCODE_TV_POWER)) {
                 wakeUpFromPowerKey(event.getDownTime());
+                shouldTurnOnTv = true;
             } else if (down && (isWakeKey || keyCode == KeyEvent.KEYCODE_WAKEUP)
                     && isWakeKeyWhenScreenOff(keyCode)) {
                 wakeUpFromWakeKey(event);
+                shouldTurnOnTv = true;
+            }
+            if (shouldTurnOnTv) {
+                final HdmiControl hdmiControl = getHdmiControl();
+                if (hdmiControl != null) {
+                    hdmiControl.turnOnTv();
+                }
             }
             return 0;
         }

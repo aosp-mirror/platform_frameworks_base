@@ -176,6 +176,34 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
                 ? WallpaperManager.FLAG_LOCK : WallpaperManager.FLAG_SYSTEM;
     }
 
+    private boolean isSeedColorSet(JSONObject jsonObject, WallpaperColors newWallpaperColors) {
+        if (newWallpaperColors == null) {
+            return false;
+        }
+        // Gets the color that was overridden in the theme setting if any.
+        String sysPaletteColor = (String) jsonObject.opt(OVERLAY_CATEGORY_SYSTEM_PALETTE);
+        if (sysPaletteColor == null) {
+            return false;
+        }
+        if (!sysPaletteColor.startsWith("#")) {
+            sysPaletteColor = "#" + sysPaletteColor;
+        }
+        final int systemPaletteColorArgb = Color.parseColor(sysPaletteColor);
+        // Gets seed colors from incoming {@link WallpaperColors} instance.
+        List<Integer> seedColors = ColorScheme.getSeedColors(newWallpaperColors);
+        for (int seedColor : seedColors) {
+            // The seed color from incoming {@link WallpaperColors} instance
+            // was set as color override.
+            if (seedColor == systemPaletteColorArgb) {
+                if (DEBUG) {
+                    Log.d(TAG, "Same as previous set system palette: " + sysPaletteColor);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void handleWallpaperColors(WallpaperColors wallpaperColors, int flags) {
         final boolean hadWallpaperColors = mCurrentColors != null;
         int latestWallpaperType = getLatestWallpaperType();
@@ -213,8 +241,11 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
         try {
             JSONObject jsonObject = (overlayPackageJson == null) ? new JSONObject()
                     : new JSONObject(overlayPackageJson);
+            // The latest applied wallpaper should be the source of system colors when:
+            // There is not preset color applied and the incoming wallpaper color is not applied
             if (!COLOR_SOURCE_PRESET.equals(jsonObject.optString(OVERLAY_COLOR_SOURCE))
-                    && ((flags & latestWallpaperType) != 0)) {
+                    && ((flags & latestWallpaperType) != 0 && !isSeedColorSet(jsonObject,
+                    wallpaperColors))) {
                 mSkipSettingChange = true;
                 if (jsonObject.has(OVERLAY_CATEGORY_ACCENT_COLOR) || jsonObject.has(
                         OVERLAY_CATEGORY_SYSTEM_PALETTE)) {

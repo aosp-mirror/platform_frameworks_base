@@ -16,25 +16,16 @@
 
 package com.android.wm.shell.dagger;
 
-import android.animation.AnimationHandler;
-import android.content.Context;
 import android.view.IWindowManager;
 
-import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.SystemWindows;
-import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ShellMainThread;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.startingsurface.StartingWindowTypeAlgorithm;
 import com.android.wm.shell.startingsurface.tv.TvStartingWindowTypeAlgorithm;
-import com.android.wm.shell.transition.Transitions;
 
 import dagger.Module;
 import dagger.Provides;
@@ -51,42 +42,12 @@ import dagger.Provides;
 public class TvWMShellModule {
 
     //
-    // Internal common - Components used internally by multiple shell features
-    //
-
-    @WMSingleton
-    @Provides
-    static DisplayImeController provideDisplayImeController(IWindowManager wmService,
-            DisplayController displayController, DisplayInsetsController displayInsetsController,
-            @ShellMainThread ShellExecutor mainExecutor, TransactionPool transactionPool) {
-        return new DisplayImeController(wmService, displayController, displayInsetsController,
-                mainExecutor, transactionPool);
-    }
-
-    //
-    // Split/multiwindow
-    //
-
-    @WMSingleton
-    @Provides
-    static LegacySplitScreenController provideSplitScreen(Context context,
-            DisplayController displayController, SystemWindows systemWindows,
-            DisplayImeController displayImeController, TransactionPool transactionPool,
-            ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
-            TaskStackListenerImpl taskStackListener, Transitions transitions,
-            @ShellMainThread ShellExecutor mainExecutor,
-            @ChoreographerSfVsync AnimationHandler sfVsyncAnimationHandler) {
-        return new LegacySplitScreenController(context, displayController, systemWindows,
-                displayImeController, transactionPool, shellTaskOrganizer, syncQueue,
-                taskStackListener, transitions, mainExecutor, sfVsyncAnimationHandler);
-    }
-
-    //
     // Starting Windows (Splash Screen)
     //
 
     @WMSingleton
     @Provides
+    @DynamicOverride
     static StartingWindowTypeAlgorithm provideStartingWindowTypeAlgorithm() {
         return new TvStartingWindowTypeAlgorithm();
     };

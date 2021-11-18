@@ -2124,15 +2124,17 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             }
 
-            t.traceBegin("StartWiredAccessoryManager");
-            try {
-                // Listen for wired headset changes
-                inputManager.setWiredAccessoryCallbacks(
-                        new WiredAccessoryManager(context, inputManager));
-            } catch (Throwable e) {
-                reportWtf("starting WiredAccessoryManager", e);
+            if (!isWatch) {
+                t.traceBegin("StartWiredAccessoryManager");
+                try {
+                    // Listen for wired headset changes
+                    inputManager.setWiredAccessoryCallbacks(
+                            new WiredAccessoryManager(context, inputManager));
+                } catch (Throwable e) {
+                    reportWtf("starting WiredAccessoryManager", e);
+                }
+                t.traceEnd();
             }
-            t.traceEnd();
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_MIDI)) {
                 // Start MIDI Manager service
@@ -2181,10 +2183,12 @@ public final class SystemServer implements Dumpable {
                 Slog.e(TAG, "Failure starting HardwarePropertiesManagerService", e);
             }
             t.traceEnd();
-
-            t.traceBegin("StartTwilightService");
-            mSystemServiceManager.startService(TwilightService.class);
-            t.traceEnd();
+          
+            if (!isWatch) {
+                t.traceBegin("StartTwilightService");
+                mSystemServiceManager.startService(TwilightService.class);
+                t.traceEnd();
+            }
 
             t.traceBegin("StartColorDisplay");
             mSystemServiceManager.startService(ColorDisplayService.class);
@@ -2470,11 +2474,9 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
         }
 
-        if (!isWatch) {
-            t.traceBegin("StartMediaProjectionManager");
-            mSystemServiceManager.startService(MediaProjectionManagerService.class);
-            t.traceEnd();
-        }
+        t.traceBegin("StartMediaProjectionManager");
+        mSystemServiceManager.startService(MediaProjectionManagerService.class);
+        t.traceEnd();
 
        if (isWatch) {
             // Must be started before services that depend it, e.g. WearConnectivityService
