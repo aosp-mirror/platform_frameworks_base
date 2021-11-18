@@ -8195,8 +8195,8 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public @PackageManager.EnabledState int getComponentEnabledSetting(
                 @NonNull ComponentName componentName, int callingUid, int userId) {
-            return PackageManagerService.this.mComputer.getComponentEnabledSetting(componentName,
-                    callingUid, userId);
+            return PackageManagerService.this.mComputer.getComponentEnabledSettingInternal(
+                    componentName, callingUid, userId);
         }
 
         @Override
