@@ -2012,9 +2012,8 @@ public final class QuotaController extends StateController {
             if (DEBUG) {
                 Slog.v(TAG, "Starting to track " + jobStatus.toShortString());
             }
-            // Always track jobs, even when charging.
-            mRunningBgJobs.add(jobStatus);
-            if (shouldTrackLocked()) {
+            // Always maintain list of running jobs, even when quota is free.
+            if (mRunningBgJobs.add(jobStatus) && shouldTrackLocked()) {
                 mBgJobCount++;
                 if (mRegularJobTimer) {
                     incrementJobCountLocked(mPkg.userId, mPkg.packageName, 1);
