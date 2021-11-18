@@ -733,6 +733,17 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         mPendingTaskEvents.clear();
     }
 
+    void reportImeDrawnOnTask(Task task) {
+        final TaskOrganizerState state = mTaskOrganizerStates.get(task.mTaskOrganizer.asBinder());
+        if (state != null) {
+            try {
+                state.mOrganizer.mTaskOrganizer.onImeDrawnOnTask(task.mTaskId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Exception sending onImeDrawnOnTask callback", e);
+            }
+        }
+    }
+
     void onTaskInfoChanged(Task task, boolean force) {
         if (!task.mTaskAppearedSent) {
             // Skip if task still not appeared.

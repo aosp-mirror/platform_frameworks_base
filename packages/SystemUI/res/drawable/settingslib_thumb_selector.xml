@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (C) 2021 The Android Open Source Project
+  Copyright (C) 2020 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -13,12 +13,10 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
--->
-<resources>
-    <style name="Theme.CollapsingToolbar.Settings" parent="@style/Theme.MaterialComponents.DayNight">
-        <item name="elevationOverlayEnabled">true</item>
-        <item name="elevationOverlayColor">?attr/colorPrimary</item>
-        <item name="colorPrimary">@*android:color/primary_device_default_settings_light</item>
-        <item name="colorAccent">@*android:color/accent_device_default_light</item>
-    </style>
-</resources>
+  -->
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/settingslib_thumb_on" android:state_checked="true"/>
+    <item android:drawable="@drawable/settingslib_thumb_off" android:state_checked="false"/>
+    <item android:drawable="@drawable/settingslib_thumb_disabled" android:state_enabled="false"/>
+</selector>

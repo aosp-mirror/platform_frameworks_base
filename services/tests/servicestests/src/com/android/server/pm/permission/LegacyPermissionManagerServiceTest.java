@@ -125,7 +125,7 @@ public class LegacyPermissionManagerServiceTest {
     public void checkDeviceIdentifierAccess_hasPrivilegedPermission_returnsGranted() {
         // Apps with the READ_PRIVILEGED_PHONE_STATE permission should have access to device
         // identifiers.
-        setupCheckDeviceIdentifierAccessTest(SYSTEM_PID, SYSTEM_UID);
+        setupCheckDeviceIdentifierAccessTest(SYSTEM_PID, SYSTEM_UID, APP_UID);
         when(mInjector.checkPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
                 APP_PID, APP_UID)).thenReturn(PackageManager.PERMISSION_GRANTED);
 
@@ -140,7 +140,7 @@ public class LegacyPermissionManagerServiceTest {
     public void checkDeviceIdentifierAccess_hasAppOp_returnsGranted() {
         // Apps that have been granted the READ_DEVICE_IDENTIFIERS appop should have access to
         // device identifiers.
-        setupCheckDeviceIdentifierAccessTest(SYSTEM_PID, SYSTEM_UID);
+        setupCheckDeviceIdentifierAccessTest(SYSTEM_PID, SYSTEM_UID, APP_UID);
         when(mAppOpsManager.noteOpNoThrow(eq(AppOpsManager.OPSTR_READ_DEVICE_IDENTIFIERS),
                 eq(APP_UID), eq(mPackageName), any(), any())).thenReturn(
                 AppOpsManager.MODE_ALLOWED);
@@ -156,7 +156,7 @@ public class LegacyPermissionManagerServiceTest {
     public void checkDeviceIdentifierAccess_hasDpmAccess_returnsGranted() {
         // Apps that pass a DevicePolicyManager device / profile owner check should have access to
         // device identifiers.
-        setupCheckDeviceIdentifierAccessTest(SYSTEM_PID, SYSTEM_UID);
+        setupCheckDeviceIdentifierAccessTest(SYSTEM_PID, SYSTEM_UID, APP_UID);
         when(mDevicePolicyManager.hasDeviceIdentifierAccess(mPackageName, APP_PID,
                 APP_UID)).thenReturn(true);
 
@@ -236,7 +236,7 @@ public class LegacyPermissionManagerServiceTest {
         // both the permission and the appop must be granted. If the permission is granted but the
         // appop is not then AppOpsManager#MODE_IGNORED should be returned to indicate that this
         // should be a silent failure.
-        setupCheckPhoneNumberAccessTest(SYSTEM_PID, SYSTEM_UID);
+        setupCheckPhoneNumberAccessTest(SYSTEM_PID, SYSTEM_UID, APP_UID);
         setPackageTargetSdk(Build.VERSION_CODES.Q);
 
         grantPermissionAndAppop(android.Manifest.permission.READ_PHONE_STATE, null);
@@ -256,7 +256,7 @@ public class LegacyPermissionManagerServiceTest {
         // Apps targeting R+ with just the READ_PHONE_STATE permission granted should not have
         // access to the phone number; PERMISSION_DENIED should be returned both with and without
         // the appop granted since this check should be skipped for target SDK R+.
-        setupCheckPhoneNumberAccessTest(SYSTEM_PID, SYSTEM_UID);
+        setupCheckPhoneNumberAccessTest(SYSTEM_PID, SYSTEM_UID, APP_UID);
 
         grantPermissionAndAppop(android.Manifest.permission.READ_PHONE_STATE, null);
         int resultWithoutAppop = mLegacyPermissionManagerService.checkPhoneNumberAccess(
@@ -319,12 +319,79 @@ public class LegacyPermissionManagerServiceTest {
         assertEquals(PackageManager.PERMISSION_GRANTED, resultWithAppop);
     }
 
+    @Test
+    public void checkPhoneNumberAccess_providedUidDoesNotMatchPackageUid_throwsException()
+            throws Exception {
+        // An app can directly interact with one of the services that accepts a package name and
+        // returns a protected resource via a direct binder transact. This app could then provide
+        // the name of another app that targets pre-R, then determine if the app is installed based
+        // on whether the service throws an exception or not. While the app can provide the package
+        // name of another app, it cannot specify the package uid which is passed to the
+        // LegacyPermissionManager using Binder#getCallingUid. Ultimately this uid should then be
+        // compared against the actual uid of the package to ensure information about packages
+        // installed on the device is not leaked.
+        setupCheckPhoneNumberAccessTest(SYSTEM_PID, SYSTEM_UID, APP_UID + 1);
+
+        assertThrows(SecurityException.class,
+                () -> mLegacyPermissionManagerService.checkPhoneNumberAccess(mPackageName,
+                        CHECK_PHONE_NUMBER_MESSAGE, null, APP_PID, APP_UID));
+    }
+
+    @Test
+    public void checkPhoneNumberAccess_nullPackageNameSystemUid_returnsGranted() throws Exception {
+        // The platform can pass a null package name when checking if the platform itself has
+        // access to the device phone number(s) / identifier(s). This test ensures if a null package
+        // is provided, then the package uid check is skipped and the test is based on whether the
+        // the provided uid / pid has been granted the privileged permission.
+        setupCheckPhoneNumberAccessTest(SYSTEM_PID, SYSTEM_UID, -1);
+        when(mInjector.checkPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+                SYSTEM_PID, SYSTEM_UID)).thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        int result = mLegacyPermissionManagerService.checkPhoneNumberAccess(null,
+                CHECK_PHONE_NUMBER_MESSAGE, null, SYSTEM_PID, SYSTEM_UID);
+
+        assertEquals(PackageManager.PERMISSION_GRANTED, result);
+    }
+
+    @Test
+    public void checkPhoneNumberAccess_systemUidMismatchPackageUid_returnsGranted()
+            throws Exception {
+        // When the platform is checking device phone number / identifier access checks for other
+        // components on the platform, a uid less than the first application UID is provided; this
+        // test verifies the package uid check is skipped and access is still granted with the
+        // privileged permission.
+        int telephonyUid = SYSTEM_UID + 1;
+        int telephonyPid = SYSTEM_PID + 1;
+        setupCheckPhoneNumberAccessTest(SYSTEM_PID, SYSTEM_UID, -1);
+        when(mInjector.checkPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+                telephonyPid, telephonyUid)).thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        int result = mLegacyPermissionManagerService.checkPhoneNumberAccess(mPackageName,
+                CHECK_PHONE_NUMBER_MESSAGE, null, telephonyPid, telephonyUid);
+
+        assertEquals(PackageManager.PERMISSION_GRANTED, result);
+    }
+
     /**
      * Configures device identifier access tests to fail; tests verifying access should individually
      * set an access check to succeed to verify access when that condition is met.
      */
     private void setupCheckDeviceIdentifierAccessTest(int callingPid, int callingUid) {
-        setupAccessTest(callingPid, callingUid);
+        setupCheckDeviceIdentifierAccessTest(callingPid, callingUid, callingUid);
+    }
+
+    /**
+     * Configures device identifier access tests to fail; tests verifying access should individually
+     * set an access check to succeed to verify access when that condition is met.
+     *
+     * <p>To prevent leaking package information, access checks for package UIDs >= {@link
+     * android.os.Process#FIRST_APPLICATION_UID} must ensure the provided uid matches the uid of
+     * the package being checked; to ensure this check is successful, this method accepts the
+     * {@code packageUid} to be used for the package being checked.
+     */
+    public void setupCheckDeviceIdentifierAccessTest(int callingPid, int callingUid,
+            int packageUid) {
+        setupAccessTest(callingPid, callingUid, packageUid);
 
         when(mDevicePolicyManager.hasDeviceIdentifierAccess(anyString(), anyInt(),
                 anyInt())).thenReturn(false);
@@ -333,11 +400,26 @@ public class LegacyPermissionManagerServiceTest {
     }
 
     /**
-     * Configures phone number access tests to fail; tests verifying access should individually set
-     * an access check to succeed to verify access when that condition is met.
+     * Configures phone number access tests to fail; tests verifying access should individually
+     * set an access check to succeed to verify access when that condition is set.
+     *
      */
     private void setupCheckPhoneNumberAccessTest(int callingPid, int callingUid) throws Exception {
-        setupAccessTest(callingPid, callingUid);
+        setupCheckPhoneNumberAccessTest(callingPid, callingUid, callingUid);
+    }
+
+    /**
+     * Configures phone number access tests to fail; tests verifying access should individually set
+     * an access check to succeed to verify access when that condition is met.
+     *
+     * <p>To prevent leaking package information, access checks for package UIDs >= {@link
+     * android.os.Process#FIRST_APPLICATION_UID} must ensure the provided uid matches the uid of
+     * the package being checked; to ensure this check is successful, this method accepts the
+     * {@code packageUid} to be used for the package being checked.
+     */
+    private void setupCheckPhoneNumberAccessTest(int callingPid, int callingUid, int packageUid)
+            throws Exception {
+        setupAccessTest(callingPid, callingUid, packageUid);
         setPackageTargetSdk(Build.VERSION_CODES.R);
     }
 
@@ -345,9 +427,10 @@ public class LegacyPermissionManagerServiceTest {
      * Configures the common mocks for any access tests using the provided {@code callingPid}
      * and {@code callingUid}.
      */
-    private void setupAccessTest(int callingPid, int callingUid) {
+    private void setupAccessTest(int callingPid, int callingUid, int packageUid) {
         when(mInjector.getCallingPid()).thenReturn(callingPid);
         when(mInjector.getCallingUid()).thenReturn(callingUid);
+        when(mInjector.getPackageUidForUser(anyString(), anyInt())).thenReturn(packageUid);
 
         when(mInjector.checkPermission(anyString(), anyInt(), anyInt())).thenReturn(
                 PackageManager.PERMISSION_DENIED);

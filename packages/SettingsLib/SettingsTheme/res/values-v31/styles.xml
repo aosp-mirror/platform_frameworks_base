@@ -16,12 +16,16 @@
   -->
 <resources>
     <style name="TextAppearance.PreferenceTitle.SettingsLib"
-           parent="@*android:style/TextAppearance.DeviceDefault.ListItem">
+           parent="@android:style/TextAppearance.Material.Subhead">
+        <item name="android:fontFamily">@string/settingslib_config_headlineFontFamily</item>
         <item name="android:textSize">20sp</item>
     </style>
 
     <style name="TextAppearance.CategoryTitle.SettingsLib"
-           parent="@*android:style/TextAppearance.DeviceDefault.Body2" />
+           parent="@android:style/TextAppearance.DeviceDefault.Medium">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">14sp</item>
+    </style>
 
     <style name="Switch.SettingsLib" parent="@android:style/Widget.Material.CompoundButton.Switch">
         <item name="android:switchMinWidth">52dp</item>

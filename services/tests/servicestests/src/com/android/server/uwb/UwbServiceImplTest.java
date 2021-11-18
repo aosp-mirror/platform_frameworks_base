@@ -82,6 +82,8 @@ public class UwbServiceImplTest {
         MockitoAnnotations.initMocks(this);
         when(mUwbInjector.getVendorService()).thenReturn(mVendorService);
         when(mUwbInjector.checkUwbRangingPermissionForDataDelivery(any(), any())).thenReturn(true);
+        when(mUwbInjector.isPersistedUwbStateEnabled()).thenReturn(true);
+        when(mUwbInjector.isAirplaneModeOn()).thenReturn(false);
         when(mVendorService.asBinder()).thenReturn(mVendorServiceBinder);
         mUwbServiceImpl = new UwbServiceImpl(mContext, mUwbInjector);
     }

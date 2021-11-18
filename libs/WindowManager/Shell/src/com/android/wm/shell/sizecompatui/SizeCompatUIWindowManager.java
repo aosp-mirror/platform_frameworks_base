@@ -110,7 +110,8 @@ class SizeCompatUIWindowManager extends WindowlessWindowManager {
         }
 
         if (mLeash != null) {
-            new SurfaceControl.Transaction().remove(mLeash).apply();
+            final SurfaceControl leash = mLeash;
+            mLayout.mSyncQueue.runInSync(t -> t.remove(leash));
             mLeash = null;
         }
     }

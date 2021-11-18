@@ -59,6 +59,9 @@ class HighBrightnessModeController {
 
     private static final float HDR_PERCENT_OF_SCREEN_REQUIRED = 0.50f;
 
+    @VisibleForTesting
+    static final float HBM_TRANSITION_POINT_INVALID = Float.POSITIVE_INFINITY;
+
     private final float mBrightnessMin;
     private final float mBrightnessMax;
     private final Handler mHandler;
@@ -212,6 +215,14 @@ class HighBrightnessModeController {
 
     int getHighBrightnessMode() {
         return mHbmMode;
+    }
+
+    float getTransitionPoint() {
+        if (deviceSupportsHbm()) {
+            return mHbmData.transitionPoint;
+        } else {
+            return HBM_TRANSITION_POINT_INVALID;
+        }
     }
 
     void stop() {

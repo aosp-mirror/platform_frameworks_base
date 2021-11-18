@@ -3494,7 +3494,8 @@ public class TelephonyManager {
      */
     private int getLogicalSlotIndex(int physicalSlotIndex) {
         UiccSlotInfo[] slotInfos = getUiccSlotsInfo();
-        if (slotInfos != null && physicalSlotIndex >= 0 && physicalSlotIndex < slotInfos.length) {
+        if (slotInfos != null && physicalSlotIndex >= 0 && physicalSlotIndex < slotInfos.length
+                && slotInfos[physicalSlotIndex] != null) {
             return slotInfos[physicalSlotIndex].getLogicalSlotIdx();
         }
 
@@ -8864,7 +8865,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Set the preferred network type to global mode which includes LTE, CDMA, EvDo and GSM/WCDMA.
+     * Set the preferred network type to global mode which includes NR, LTE, CDMA, EvDo
+     * and GSM/WCDMA.
      *
      * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
@@ -8875,7 +8877,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Set the preferred network type to global mode which includes LTE, CDMA, EvDo and GSM/WCDMA.
+     * Set the preferred network type to global mode which includes NR, LTE, CDMA, EvDo
+     * and GSM/WCDMA.
      *
      * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
@@ -8883,7 +8886,7 @@ public class TelephonyManager {
      * @hide
      */
     public boolean setPreferredNetworkTypeToGlobal(int subId) {
-        return setPreferredNetworkType(subId, RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA);
+        return setPreferredNetworkType(subId, RILConstants.NETWORK_MODE_NR_LTE_CDMA_EVDO_GSM_WCDMA);
     }
 
     /**
@@ -14295,7 +14298,8 @@ public class TelephonyManager {
             if (callForwardingInfo.getNumber() == null) {
                 throw new IllegalArgumentException("callForwarding number is null");
             }
-            if (callForwardingInfo.getTimeoutSeconds() <= 0) {
+            if (callForwardingReason == CallForwardingInfo.REASON_NO_REPLY
+                        && callForwardingInfo.getTimeoutSeconds() <= 0) {
                 throw new IllegalArgumentException("callForwarding timeout isn't positive");
             }
         }

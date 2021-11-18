@@ -361,6 +361,11 @@ public final class DisplayManagerGlobal {
         for (int i = 0; i < numListeners; i++) {
             mask |= mDisplayListeners.get(i).mEventsMask;
         }
+        if (mDispatchNativeCallbacks) {
+            mask |= DisplayManager.EVENT_FLAG_DISPLAY_ADDED
+                    | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                    | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED;
+        }
         return mask;
     }
 
@@ -1047,12 +1052,17 @@ public final class DisplayManagerGlobal {
 
     private static native void nSignalNativeCallbacks(float refreshRate);
 
-    // Called from AChoreographer via JNI.
-    // Registers AChoreographer so that refresh rate callbacks can be dispatched from DMS.
-    private void registerNativeChoreographerForRefreshRateCallbacks() {
+    /**
+     * Called from AChoreographer via JNI.
+     * Registers AChoreographer so that refresh rate callbacks can be dispatched from DMS.
+     * Public for unit testing to be able to call this method.
+     */
+    @VisibleForTesting
+    public void registerNativeChoreographerForRefreshRateCallbacks() {
         synchronized (mLock) {
-            registerCallbackIfNeededLocked();
             mDispatchNativeCallbacks = true;
+            registerCallbackIfNeededLocked();
+            updateCallbackIfNeededLocked();
             DisplayInfo display = getDisplayInfoLocked(Display.DEFAULT_DISPLAY);
             if (display != null) {
                 // We need to tell AChoreographer instances the current refresh rate so that apps
@@ -1063,11 +1073,16 @@ public final class DisplayManagerGlobal {
         }
     }
 
-    // Called from AChoreographer via JNI.
-    // Unregisters AChoreographer from receiving refresh rate callbacks.
-    private void unregisterNativeChoreographerForRefreshRateCallbacks() {
+    /**
+     * Called from AChoreographer via JNI.
+     * Unregisters AChoreographer from receiving refresh rate callbacks.
+     * Public for unit testing to be able to call this method.
+     */
+    @VisibleForTesting
+    public void unregisterNativeChoreographerForRefreshRateCallbacks() {
         synchronized (mLock) {
             mDispatchNativeCallbacks = false;
+            updateCallbackIfNeededLocked();
         }
     }
 }

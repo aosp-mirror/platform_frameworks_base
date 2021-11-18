@@ -36,7 +36,16 @@ public final class FadeOutManager {
 
     public static final String TAG = "AudioService.FadeOutManager";
 
+    /** duration of the fade out curve */
     /*package*/ static final long FADE_OUT_DURATION_MS = 2000;
+    /**
+     * delay after which a faded out player will be faded back in. This will be heard by the user
+     * only in the case of unmuting players that didn't respect audio focus and didn't stop/pause
+     * when their app lost focus.
+     * This is the amount of time between the app being notified of
+     * the focus loss (when its muted by the fade out), and the time fade in (to unmute) starts
+     */
+    /*package*/ static final long DELAY_FADE_IN_OFFENDERS_MS = 2000;
 
     private static final boolean DEBUG = PlaybackActivityMonitor.DEBUG;
 
@@ -148,6 +157,11 @@ public final class FadeOutManager {
         }
     }
 
+    /**
+     * Remove the app for the given UID from the list of faded out apps, unfade out its players
+     * @param uid the uid for the app to unfade out
+     * @param players map of current available players (so we can get an APC from piid)
+     */
     synchronized void unfadeOutUid(int uid, HashMap<Integer, AudioPlaybackConfiguration> players) {
         Log.i(TAG, "unfadeOutUid() uid:" + uid);
         final FadedOutApp fa = mFadedApps.remove(uid);
@@ -155,12 +169,6 @@ public final class FadeOutManager {
             return;
         }
         fa.removeUnfadeAll(players);
-    }
-
-    synchronized void forgetUid(int uid) {
-        //Log.v(TAG, "forget() uid:" + uid);
-        //mFadedApps.remove(uid);
-        // TODO unfade all players later in case they are reused or the app continued to play
     }
 
     // pre-condition: apc.getPlayerState() == AudioPlaybackConfiguration.PLAYER_STATE_STARTED

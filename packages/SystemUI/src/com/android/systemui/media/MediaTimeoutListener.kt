@@ -20,6 +20,7 @@ import android.media.session.MediaController
 import android.media.session.PlaybackState
 import android.os.SystemProperties
 import android.util.Log
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
@@ -29,8 +30,14 @@ import javax.inject.Inject
 
 private const val DEBUG = true
 private const val TAG = "MediaTimeout"
-private val PAUSED_MEDIA_TIMEOUT = SystemProperties
+
+@VisibleForTesting
+val PAUSED_MEDIA_TIMEOUT = SystemProperties
         .getLong("debug.sysui.media_timeout", TimeUnit.MINUTES.toMillis(10))
+
+@VisibleForTesting
+val RESUME_MEDIA_TIMEOUT = SystemProperties
+        .getLong("debug.sysui.media_timeout_resume", TimeUnit.DAYS.toMillis(3))
 
 /**
  * Controller responsible for keeping track of playback states and expiring inactive streams.
@@ -45,8 +52,9 @@ class MediaTimeoutListener @Inject constructor(
 
     /**
      * Callback representing that a media object is now expired:
-     * @param token Media session unique identifier
-     * @param pauseTimeout True when expired for {@code PAUSED_MEDIA_TIMEOUT}
+     * @param key Media control unique identifier
+     * @param timedOut True when expired for {@code PAUSED_MEDIA_TIMEOUT} for active media,
+     *                 or {@code RESUME_MEDIA_TIMEOUT} for resume media
      */
     lateinit var timeoutCallback: (String, Boolean) -> Unit
 
@@ -122,6 +130,7 @@ class MediaTimeoutListener @Inject constructor(
 
         var timedOut = false
         var playing: Boolean? = null
+        var resumption: Boolean? = null
         var destroyed = false
 
         var mediaData: MediaData = data
@@ -159,12 +168,19 @@ class MediaTimeoutListener @Inject constructor(
         }
 
         override fun onSessionDestroyed() {
-            // If the session is destroyed, the controller is no longer valid, and we will need to
-            // recreate it if this key is updated later
             if (DEBUG) {
                 Log.d(TAG, "Session destroyed for $key")
             }
-            destroy()
+
+            if (resumption == true) {
+                // Some apps create a session when MBS is queried. We should unregister the
+                // controller since it will no longer be valid, but don't cancel the timeout
+                mediaController?.unregisterCallback(this)
+            } else {
+                // For active controls, if the session is destroyed, clean up everything since we
+                // will need to recreate it if this key is updated later
+                destroy()
+            }
         }
 
         private fun processState(state: PlaybackState?, dispatchEvents: Boolean) {
@@ -173,20 +189,28 @@ class MediaTimeoutListener @Inject constructor(
             }
 
             val isPlaying = state != null && isPlayingState(state.state)
-            if (playing == isPlaying && playing != null) {
+            val resumptionChanged = resumption != mediaData.resumption
+            if (playing == isPlaying && playing != null && !resumptionChanged) {
                 return
             }
             playing = isPlaying
+            resumption = mediaData.resumption
 
             if (!isPlaying) {
                 if (DEBUG) {
-                    Log.v(TAG, "schedule timeout for $key")
+                    Log.v(TAG, "schedule timeout for $key playing $isPlaying, $resumption")
                 }
-                if (cancellation != null) {
+                if (cancellation != null && !resumptionChanged) {
+                    // if the media changed resume state, we'll need to adjust the timeout length
                     if (DEBUG) Log.d(TAG, "cancellation already exists, continuing.")
                     return
                 }
-                expireMediaTimeout(key, "PLAYBACK STATE CHANGED - $state")
+                expireMediaTimeout(key, "PLAYBACK STATE CHANGED - $state, $resumption")
+                val timeout = if (mediaData.resumption) {
+                    RESUME_MEDIA_TIMEOUT
+                } else {
+                    PAUSED_MEDIA_TIMEOUT
+                }
                 cancellation = mainExecutor.executeDelayed({
                     cancellation = null
                     if (DEBUG) {
@@ -195,7 +219,7 @@ class MediaTimeoutListener @Inject constructor(
                     timedOut = true
                     // this event is async, so it's safe even when `dispatchEvents` is false
                     timeoutCallback(key, timedOut)
-                }, PAUSED_MEDIA_TIMEOUT)
+                }, timeout)
             } else {
                 expireMediaTimeout(key, "playback started - $state, $key")
                 timedOut = false

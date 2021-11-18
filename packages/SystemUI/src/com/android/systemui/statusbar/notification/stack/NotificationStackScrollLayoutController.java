@@ -117,6 +117,8 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
@@ -144,6 +146,7 @@ public class NotificationStackScrollLayoutController {
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
     private final TunerService mTunerService;
+    private final DeviceProvisionedController mDeviceProvisionedController;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final ConfigurationController mConfigurationController;
     private final ZenModeController mZenModeController;
@@ -171,6 +174,7 @@ public class NotificationStackScrollLayoutController {
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     // TODO: StatusBar should be encapsulated behind a Controller
     private final StatusBar mStatusBar;
+    private final NotificationGroupManagerLegacy mLegacyGroupManager;
     private final SectionHeaderController mSilentHeaderController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
 
@@ -215,6 +219,28 @@ public class NotificationStackScrollLayoutController {
                     mConfigurationController.removeCallback(mConfigurationListener);
                     mZenModeController.removeCallback(mZenModeControllerCallback);
                     mStatusBarStateController.removeCallback(mStateListener);
+                }
+            };
+
+    private final DeviceProvisionedListener mDeviceProvisionedListener =
+            new DeviceProvisionedListener() {
+                @Override
+                public void onDeviceProvisionedChanged() {
+                    updateCurrentUserIsSetup();
+                }
+
+                @Override
+                public void onUserSwitched() {
+                    updateCurrentUserIsSetup();
+                }
+
+                @Override
+                public void onUserSetupChanged() {
+                    updateCurrentUserIsSetup();
+                }
+
+                private void updateCurrentUserIsSetup() {
+                    mView.setCurrentUserSetup(mDeviceProvisionedController.isCurrentUserSetup());
                 }
             };
 
@@ -587,6 +613,7 @@ public class NotificationStackScrollLayoutController {
             HeadsUpManagerPhone headsUpManager,
             NotificationRoundnessManager notificationRoundnessManager,
             TunerService tunerService,
+            DeviceProvisionedController deviceProvisionedController,
             DynamicPrivacyController dynamicPrivacyController,
             ConfigurationController configurationController,
             SysuiStatusBarStateController statusBarStateController,
@@ -623,6 +650,7 @@ public class NotificationStackScrollLayoutController {
         mHeadsUpManager = headsUpManager;
         mNotificationRoundnessManager = notificationRoundnessManager;
         mTunerService = tunerService;
+        mDeviceProvisionedController = deviceProvisionedController;
         mDynamicPrivacyController = dynamicPrivacyController;
         mConfigurationController = configurationController;
         mStatusBarStateController = statusBarStateController;
@@ -651,6 +679,8 @@ public class NotificationStackScrollLayoutController {
                 mStatusBar.requestNotificationUpdate("onGroupsChanged");
             }
         });
+        mLegacyGroupManager = featureFlags.isNewNotifPipelineRenderingEnabled()
+                ? null : legacyGroupManager;
         mSilentHeaderController = silentHeaderController;
         mFeatureFlags = featureFlags;
         mNotifPipeline = notifPipeline;
@@ -758,6 +788,9 @@ public class NotificationStackScrollLayoutController {
             mView.requestChildrenUpdate();
             return Unit.INSTANCE;
         });
+
+        // callback is invoked synchronously, updating mView immediately
+        mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
 
         if (mView.isAttachedToWindow()) {
             mOnAttachStateChangeListener.onViewAttachedToWindow(mView);
@@ -1122,6 +1155,10 @@ public class NotificationStackScrollLayoutController {
                 mZenModeController.areNotificationsHiddenInShade());
     }
 
+    public boolean areNotificationsHiddenInShade() {
+        return mZenModeController.areNotificationsHiddenInShade();
+    }
+
     public boolean isShowingEmptyShadeView() {
         return mShowEmptyShadeView;
     }
@@ -1170,6 +1207,10 @@ public class NotificationStackScrollLayoutController {
      * Return whether there are any clearable notifications
      */
     public boolean hasActiveClearableNotifications(@SelectedRows int selection) {
+        return hasNotifications(selection, true /* clearable */);
+    }
+
+    public boolean hasNotifications(@SelectedRows int selection, boolean isClearable) {
         if (mDynamicPrivacyController.isInLockedDownShade()) {
             return false;
         }
@@ -1180,9 +1221,16 @@ public class NotificationStackScrollLayoutController {
                 continue;
             }
             final ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            if (row.canViewBeDismissed() &&
-                    NotificationStackScrollLayout.matchesSelection(row, selection)) {
-                return true;
+            final boolean matchClearable =
+                    isClearable ? row.canViewBeDismissed() : !row.canViewBeDismissed();
+            final boolean inSection =
+                    NotificationStackScrollLayout.matchesSelection(row, selection);
+            if (matchClearable && inSection) {
+                if (mLegacyGroupManager == null
+                        || !mLegacyGroupManager.isSummaryOfSuppressedGroup(
+                        row.getEntry().getSbn())) {
+                    return true;
+                }
             }
         }
         return false;

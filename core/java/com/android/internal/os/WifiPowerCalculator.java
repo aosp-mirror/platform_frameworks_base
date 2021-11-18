@@ -215,6 +215,9 @@ public class WifiPowerCalculator extends PowerCalculator {
                             + "ms tx=" + txTime + "ms power=" + formatCharge(
                             powerDurationAndTraffic.powerMah));
                 }
+            } else {
+                powerDurationAndTraffic.durationMs = 0;
+                powerDurationAndTraffic.powerMah = 0;
             }
         } else {
             final long wifiRunningTime = u.getWifiRunningTime(rawRealtimeUs, statsType) / 1000;
