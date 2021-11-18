@@ -15091,6 +15091,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public String getSwitchingFromUserMessage() {
+        return mUserController.getSwitchingFromSystemUserMessage();
+    }
+
+    @Override
+    public String getSwitchingToUserMessage() {
+        return mUserController.getSwitchingToSystemUserMessage();
+    }
+
+    @Override
     public void setStopUserOnSwitch(@StopUserOnSwitch int value) {
         mUserController.setStopUserOnSwitch(value);
     }
