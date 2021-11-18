@@ -25,8 +25,12 @@ import javax.inject.Inject
  * Proxy to make {@link SystemProperties} easily testable.
  */
 @SysUISingleton
-class SystemPropertiesHelper @Inject constructor() {
+open class SystemPropertiesHelper @Inject constructor() {
     fun getBoolean(name: String, default: Boolean): Boolean {
         return SystemProperties.getBoolean(name, default)
+    }
+
+    fun set(name: String, value: Int) {
+        SystemProperties.set(name, value.toString())
     }
 }

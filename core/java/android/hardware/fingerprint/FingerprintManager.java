@@ -146,6 +146,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     private CryptoObject mCryptoObject;
     @Nullable private RemoveTracker mRemoveTracker;
     private Handler mHandler;
+    @Nullable private float[] mEnrollStageThresholds;
 
     /**
      * Retrieves a list of properties for all fingerprint sensors on the device.
@@ -189,22 +190,30 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     private class OnAuthenticationCancelListener implements OnCancelListener {
-        private android.hardware.biometrics.CryptoObject mCrypto;
+        private final long mAuthRequestId;
 
-        public OnAuthenticationCancelListener(android.hardware.biometrics.CryptoObject crypto) {
-            mCrypto = crypto;
+        OnAuthenticationCancelListener(long id) {
+            mAuthRequestId = id;
         }
 
         @Override
         public void onCancel() {
-            cancelAuthentication(mCrypto);
+            Slog.d(TAG, "Cancel fingerprint authentication requested for: " + mAuthRequestId);
+            cancelAuthentication(mAuthRequestId);
         }
     }
 
     private class OnFingerprintDetectionCancelListener implements OnCancelListener {
+        private final long mAuthRequestId;
+
+        OnFingerprintDetectionCancelListener(long id) {
+            mAuthRequestId = id;
+        }
+
         @Override
         public void onCancel() {
-            cancelFingerprintDetect();
+            Slog.d(TAG, "Cancel fingerprint detect requested for: " + mAuthRequestId);
+            cancelFingerprintDetect(mAuthRequestId);
         }
     }
 
@@ -552,13 +561,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             throw new IllegalArgumentException("Must supply an authentication callback");
         }
 
-        if (cancel != null) {
-            if (cancel.isCanceled()) {
-                Slog.w(TAG, "authentication already canceled");
-                return;
-            } else {
-                cancel.setOnCancelListener(new OnAuthenticationCancelListener(crypto));
-            }
+        if (cancel != null && cancel.isCanceled()) {
+            Slog.w(TAG, "authentication already canceled");
+            return;
         }
 
         if (mService != null) {
@@ -567,8 +572,11 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 mAuthenticationCallback = callback;
                 mCryptoObject = crypto;
                 final long operationId = crypto != null ? crypto.getOpId() : 0;
-                mService.authenticate(mToken, operationId, sensorId, userId, mServiceReceiver,
-                        mContext.getOpPackageName());
+                final long authId = mService.authenticate(mToken, operationId, sensorId, userId,
+                        mServiceReceiver, mContext.getOpPackageName());
+                if (cancel != null) {
+                    cancel.setOnCancelListener(new OnAuthenticationCancelListener(authId));
+                }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception while authenticating: ", e);
                 // Though this may not be a hardware issue, it will cause apps to give up or try
@@ -595,15 +603,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         if (cancel.isCanceled()) {
             Slog.w(TAG, "Detection already cancelled");
             return;
-        } else {
-            cancel.setOnCancelListener(new OnFingerprintDetectionCancelListener());
         }
 
         mFingerprintDetectionCallback = callback;
 
         try {
-            mService.detectFingerprint(mToken, userId, mServiceReceiver,
+            final long authId = mService.detectFingerprint(mToken, userId, mServiceReceiver,
                     mContext.getOpPackageName());
+            cancel.setOnCancelListener(new OnFingerprintDetectionCancelListener(authId));
         } catch (RemoteException e) {
             Slog.w(TAG, "Remote exception when requesting finger detect", e);
         }
@@ -841,26 +848,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      */
     public boolean hasEnrolledTemplates(int userId) {
         return hasEnrolledFingerprints(userId);
-    }
-
-    /**
-     * Checks if the specified user has enrollments in any of the specified sensors.
-     * @hide
-     */
-    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public boolean hasEnrolledTemplatesForAnySensor(int userId,
-            @NonNull List<FingerprintSensorPropertiesInternal> sensors) {
-        if (mService == null) {
-            Slog.w(TAG, "hasEnrolledTemplatesForAnySensor: no fingerprint service");
-            return false;
-        }
-
-        try {
-            return mService.hasEnrolledTemplatesForAnySensor(userId, sensors,
-                    mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
     }
 
     /**
@@ -1320,24 +1307,64 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
     }
 
-    private void cancelAuthentication(android.hardware.biometrics.CryptoObject cryptoObject) {
+    private void cancelAuthentication(long requestId) {
         if (mService != null) try {
-            mService.cancelAuthentication(mToken, mContext.getOpPackageName());
+            mService.cancelAuthentication(mToken, mContext.getOpPackageName(), requestId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
-    private void cancelFingerprintDetect() {
+    private void cancelFingerprintDetect(long requestId) {
         if (mService == null) {
             return;
         }
 
         try {
-            mService.cancelFingerprintDetect(mToken, mContext.getOpPackageName());
+            mService.cancelFingerprintDetect(mToken, mContext.getOpPackageName(), requestId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @hide
+     */
+    public int getEnrollStageCount() {
+        if (mEnrollStageThresholds == null) {
+            mEnrollStageThresholds = createEnrollStageThresholds(mContext);
+        }
+        return mEnrollStageThresholds.length + 1;
+    }
+
+    /**
+     * @hide
+     */
+    public float getEnrollStageThreshold(int index) {
+        if (mEnrollStageThresholds == null) {
+            mEnrollStageThresholds = createEnrollStageThresholds(mContext);
+        }
+
+        if (index < 0 || index > mEnrollStageThresholds.length) {
+            Slog.w(TAG, "Unsupported enroll stage index: " + index);
+            return index < 0 ? 0f : 1f;
+        }
+
+        // The implicit threshold for the final stage is always 1.
+        return index == mEnrollStageThresholds.length ? 1f : mEnrollStageThresholds[index];
+    }
+
+    @NonNull
+    private static float[] createEnrollStageThresholds(@NonNull Context context) {
+        // TODO(b/200604947): Fetch this value from FingerprintService, rather than internal config
+        final String[] enrollStageThresholdStrings = context.getResources().getStringArray(
+                com.android.internal.R.array.config_udfps_enroll_stage_thresholds);
+
+        final float[] enrollStageThresholds = new float[enrollStageThresholdStrings.length];
+        for (int i = 0; i < enrollStageThresholds.length; i++) {
+            enrollStageThresholds[i] = Float.parseFloat(enrollStageThresholdStrings[i]);
+        }
+        return enrollStageThresholds;
     }
 
     /**
@@ -1390,9 +1417,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         // This is used as a last resort in case a vendor string is missing
         // It should not happen for anything other than FINGERPRINT_ERROR_VENDOR, but
         // warn and use the default if all else fails.
-        // TODO(b/196639965): update string
         Slog.w(TAG, "Invalid error message: " + errMsg + ", " + vendorCode);
-        return "";
+        return context.getString(
+                com.android.internal.R.string.fingerprint_error_vendor_unknown);
     }
 
     /**

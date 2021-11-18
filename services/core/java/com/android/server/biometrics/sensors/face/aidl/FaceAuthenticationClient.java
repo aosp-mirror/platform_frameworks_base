@@ -65,7 +65,8 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
     @FaceManager.FaceAcquired private int mLastAcquire = FaceManager.FACE_ACQUIRED_UNKNOWN;
 
     FaceAuthenticationClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
+            @NonNull LazyDaemon<ISession> lazyDaemon,
+            @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
             boolean isStrongBiometric, int statsClient, @NonNull UsageStats usageStats,
@@ -76,6 +77,7 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
                 BiometricsProtoEnums.MODALITY_FACE, statsClient, null /* taskStackListener */,
                 lockoutCache, allowBackgroundAuthentication, true /* shouldVibrate */,
                 isKeyguardBypassEnabled);
+        setRequestId(requestId);
         mUsageStats = usageStats;
         mLockoutCache = lockoutCache;
         mNotificationManager = context.getSystemService(NotificationManager.class);

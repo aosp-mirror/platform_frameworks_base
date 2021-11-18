@@ -488,7 +488,7 @@ public class BootReceiver extends BroadcastReceiver {
             } else {
                 final String headers = getBootHeadersToLogAndUpdate();
                 addFileToDropBox(db, timestamps, headers, tombstone.getPath(), LOG_SIZE,
-                        TAG_TOMBSTONE);
+                                 TAG_TOMBSTONE);
             }
         } catch (IOException e) {
             Slog.e(TAG, "Can't log tombstone", e);

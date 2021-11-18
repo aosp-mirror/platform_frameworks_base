@@ -108,11 +108,11 @@ public abstract class BiometricSensor {
 
     void goToStateWaitingForCookie(boolean requireConfirmation, IBinder token, long sessionId,
             int userId, IBiometricSensorReceiver sensorReceiver, String opPackageName,
-            int cookie, boolean allowBackgroundAuthentication)
+            long requestId, int cookie, boolean allowBackgroundAuthentication)
             throws RemoteException {
         mCookie = cookie;
         impl.prepareForAuthentication(requireConfirmation, token,
-                sessionId, userId, sensorReceiver, opPackageName, mCookie,
+                sessionId, userId, sensorReceiver, opPackageName, requestId, mCookie,
                 allowBackgroundAuthentication);
         mSensorState = STATE_WAITING_FOR_COOKIE;
     }
@@ -129,8 +129,9 @@ public abstract class BiometricSensor {
         mSensorState = STATE_AUTHENTICATING;
     }
 
-    void goToStateCancelling(IBinder token, String opPackageName) throws RemoteException {
-        impl.cancelAuthenticationFromService(token, opPackageName);
+    void goToStateCancelling(IBinder token, String opPackageName, long requestId)
+            throws RemoteException {
+        impl.cancelAuthenticationFromService(token, opPackageName, requestId);
         mSensorState = STATE_CANCELING;
     }
 

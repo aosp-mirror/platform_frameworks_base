@@ -72,6 +72,7 @@ import static com.android.server.am.AppProfiler.TAG_PSS;
 import static com.android.server.am.ProcessList.TAG_PROCESS_OBSERVERS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -114,6 +115,8 @@ import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowProcessController;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -170,6 +173,27 @@ public class OomAdjuster {
     @ChangeId
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.S)
     static final long USE_SHORT_FGS_USAGE_INTERACTION_TIME = 183972877L;
+
+    static final int CACHED_COMPAT_CHANGE_PROCESS_CAPABILITY = 0;
+    static final int CACHED_COMPAT_CHANGE_CAMERA_MICROPHONE_CAPABILITY = 1;
+    static final int CACHED_COMPAT_CHANGE_USE_SHORT_FGS_USAGE_INTERACTION_TIME = 2;
+
+    @IntDef(prefix = { "CACHED_COMPAT_CHANGE_" }, value = {
+        CACHED_COMPAT_CHANGE_PROCESS_CAPABILITY,
+        CACHED_COMPAT_CHANGE_CAMERA_MICROPHONE_CAPABILITY,
+        CACHED_COMPAT_CHANGE_USE_SHORT_FGS_USAGE_INTERACTION_TIME,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    static @interface CachedCompatChangeId{}
+
+    /**
+     * Mapping from CACHED_COMPAT_CHANGE_* to the actual compat change id.
+     */
+    static final long[] CACHED_COMPAT_CHANGE_IDS_MAPPING = new long[] {
+        PROCESS_CAPABILITY_CHANGE_ID,
+        CAMERA_MICROPHONE_CAPABILITY_CHANGE_ID,
+        USE_SHORT_FGS_USAGE_INTERACTION_TIME,
+    };
 
     /**
      * For some direct access we need to power manager.
@@ -366,6 +390,12 @@ public class OomAdjuster {
     @VisibleForTesting
     protected PlatformCompatCache getPlatformCompatCache() {
         return mPlatformCompatCache;
+    }
+
+    boolean isChangeEnabled(@CachedCompatChangeId int cachedCompatChangeId, ApplicationInfo app,
+            boolean defaultValue) {
+        return getPlatformCompatCache().isChangeEnabled(
+                CACHED_COMPAT_CHANGE_IDS_MAPPING[cachedCompatChangeId], app, defaultValue);
     }
 
     OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids) {
@@ -1929,12 +1959,8 @@ public class OomAdjuster {
                             (fgsType & FOREGROUND_SERVICE_TYPE_LOCATION)
                                     != 0 ? PROCESS_CAPABILITY_FOREGROUND_LOCATION : 0;
 
-                    boolean enabled = false;
-                    try {
-                        enabled = getPlatformCompatCache().isChangeEnabled(
-                                CAMERA_MICROPHONE_CAPABILITY_CHANGE_ID, s.appInfo);
-                    } catch (RemoteException e) {
-                    }
+                    final boolean enabled = state.getCachedCompatChange(
+                            CACHED_COMPAT_CHANGE_CAMERA_MICROPHONE_CAPABILITY);
                     if (enabled) {
                         capabilityFromFGS |=
                                 (fgsType & FOREGROUND_SERVICE_TYPE_CAMERA)
@@ -2151,12 +2177,8 @@ public class OomAdjuster {
                                 // to client's state.
                                 clientProcState = PROCESS_STATE_BOUND_TOP;
                                 state.bumpAllowStartFgsState(PROCESS_STATE_BOUND_TOP);
-                                boolean enabled = false;
-                                try {
-                                    enabled = getPlatformCompatCache().isChangeEnabled(
-                                            PROCESS_CAPABILITY_CHANGE_ID, client.info);
-                                } catch (RemoteException e) {
-                                }
+                                final boolean enabled = cstate.getCachedCompatChange(
+                                        CACHED_COMPAT_CHANGE_PROCESS_CAPABILITY);
                                 if (enabled) {
                                     if (cr.hasFlag(Context.BIND_INCLUDE_CAPABILITIES)) {
                                         // TOP process passes all capabilities to the service.
@@ -2800,8 +2822,8 @@ public class OomAdjuster {
                 state.setProcStateChanged(true);
             }
         } else if (state.hasReportedInteraction()) {
-            final boolean fgsInteractionChangeEnabled = getPlatformCompatCache().isChangeEnabled(
-                    USE_SHORT_FGS_USAGE_INTERACTION_TIME, app.info, false);
+            final boolean fgsInteractionChangeEnabled = state.getCachedCompatChange(
+                    CACHED_COMPAT_CHANGE_USE_SHORT_FGS_USAGE_INTERACTION_TIME);
             final long interactionThreshold = fgsInteractionChangeEnabled
                     ? mConstants.USAGE_STATS_INTERACTION_INTERVAL_POST_S
                     : mConstants.USAGE_STATS_INTERACTION_INTERVAL_PRE_S;
@@ -2811,8 +2833,8 @@ public class OomAdjuster {
                 maybeUpdateUsageStatsLSP(app, nowElapsed);
             }
         } else {
-            final boolean fgsInteractionChangeEnabled = getPlatformCompatCache().isChangeEnabled(
-                    USE_SHORT_FGS_USAGE_INTERACTION_TIME, app.info, false);
+            final boolean fgsInteractionChangeEnabled = state.getCachedCompatChange(
+                    CACHED_COMPAT_CHANGE_USE_SHORT_FGS_USAGE_INTERACTION_TIME);
             final long interactionThreshold = fgsInteractionChangeEnabled
                     ? mConstants.SERVICE_USAGE_INTERACTION_TIME_POST_S
                     : mConstants.SERVICE_USAGE_INTERACTION_TIME_PRE_S;
@@ -2901,8 +2923,8 @@ public class OomAdjuster {
         if (mService.mUsageStatsService == null) {
             return;
         }
-        final boolean fgsInteractionChangeEnabled = getPlatformCompatCache().isChangeEnabled(
-                USE_SHORT_FGS_USAGE_INTERACTION_TIME, app.info, false);
+        final boolean fgsInteractionChangeEnabled = state.getCachedCompatChange(
+                CACHED_COMPAT_CHANGE_USE_SHORT_FGS_USAGE_INTERACTION_TIME);
         boolean isInteraction;
         // To avoid some abuse patterns, we are going to be careful about what we consider
         // to be an app interaction.  Being the top activity doesn't count while the display

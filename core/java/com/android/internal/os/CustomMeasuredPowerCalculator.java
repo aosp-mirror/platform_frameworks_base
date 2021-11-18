@@ -21,13 +21,18 @@ import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.UidBatteryConsumer;
+import android.util.Slog;
 import android.util.SparseArray;
+
+import java.util.Arrays;
 
 /**
  * Calculates the amount of power consumed by custom energy consumers (i.e. consumers of type
  * {@link android.hardware.power.stats.EnergyConsumerType#OTHER}).
  */
 public class CustomMeasuredPowerCalculator extends PowerCalculator {
+    private static final String TAG = "CustomMeasuredPowerCalc";
+
     public CustomMeasuredPowerCalculator(PowerProfile powerProfile) {
     }
 
@@ -76,9 +81,9 @@ public class CustomMeasuredPowerCalculator extends PowerCalculator {
             if (totalPowerMah == null) {
                 newTotalPowerMah = new double[customMeasuredPowerMah.length];
             } else if (totalPowerMah.length != customMeasuredPowerMah.length) {
-                newTotalPowerMah = new double[customMeasuredPowerMah.length];
-                System.arraycopy(totalPowerMah, 0, newTotalPowerMah, 0,
-                        customMeasuredPowerMah.length);
+                Slog.wtf(TAG, "Number of custom energy components is not the same for all apps: "
+                        + totalPowerMah.length + ", " + customMeasuredPowerMah.length);
+                newTotalPowerMah = Arrays.copyOf(totalPowerMah, customMeasuredPowerMah.length);
             } else {
                 newTotalPowerMah = totalPowerMah;
             }

@@ -19,10 +19,13 @@ package com.android.server.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IDeviceIdentifiersPolicyService;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 
 import com.android.internal.telephony.TelephonyPermissions;
 import com.android.server.SystemService;
@@ -65,11 +68,31 @@ public final class DeviceIdentifiersPolicyService extends SystemService {
         @Override
         public @Nullable String getSerialForPackage(String callingPackage,
                 String callingFeatureId) throws RemoteException {
+            if (!checkPackageBelongsToCaller(callingPackage)) {
+                throw new IllegalArgumentException(
+                        "Invalid callingPackage or callingPackage does not belong to caller's uid:"
+                                + Binder.getCallingUid());
+            }
+
             if (!TelephonyPermissions.checkCallingOrSelfReadDeviceIdentifiers(mContext,
                     callingPackage, callingFeatureId, "getSerial")) {
                 return Build.UNKNOWN;
             }
             return SystemProperties.get("ro.serialno", Build.UNKNOWN);
+        }
+
+        private boolean checkPackageBelongsToCaller(String callingPackage) {
+            int callingUid = Binder.getCallingUid();
+            int callingUserId = UserHandle.getUserId(callingUid);
+            int callingPackageUid;
+            try {
+                callingPackageUid = mContext.getPackageManager().getPackageUidAsUser(
+                        callingPackage, callingUserId);
+            } catch (PackageManager.NameNotFoundException e) {
+                return false;
+            }
+
+            return callingPackageUid == callingUid;
         }
     }
 }

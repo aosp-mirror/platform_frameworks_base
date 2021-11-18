@@ -52,13 +52,15 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
     private boolean mIsPointerDown;
 
     public FingerprintDetectClient(@NonNull Context context,
-            @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
+            @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon,
+            @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
             int sensorId, @Nullable IUdfpsOverlayController udfpsOverlayController,
             boolean isStrongBiometric, int statsClient) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 true /* shouldVibrate */, BiometricsProtoEnums.MODALITY_FINGERPRINT,
                 BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
+        setRequestId(requestId);
         mUdfpsOverlayController = udfpsOverlayController;
         mIsStrongBiometric = isStrongBiometric;
     }

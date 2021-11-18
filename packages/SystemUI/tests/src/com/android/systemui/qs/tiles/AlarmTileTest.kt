@@ -3,6 +3,7 @@ package com.android.systemui.qs.tiles
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.os.Handler
+import android.provider.AlarmClock
 import android.service.quicksettings.Tile
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -95,6 +96,11 @@ class AlarmTileTest : SysuiTestCase() {
     @Test
     fun testDoesntHandleLongClick() {
         assertThat(tile.state.handlesLongClick).isFalse()
+    }
+
+    @Test
+    fun testDefaultIntentShowAlarms() {
+        assertThat(tile.defaultIntent.action).isEqualTo(AlarmClock.ACTION_SHOW_ALARMS)
     }
 
     @Test

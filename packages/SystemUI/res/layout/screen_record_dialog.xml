@@ -113,6 +113,8 @@
                         android:layout_height="wrap_content"
                         android:minHeight="48dp"
                         android:layout_weight="1"
+                        android:layout_gravity="fill_vertical"
+                        android:gravity="center_vertical"
                         android:text="@string/screenrecord_taps_label"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:fontFamily="@*android:string/config_headlineFontFamily"

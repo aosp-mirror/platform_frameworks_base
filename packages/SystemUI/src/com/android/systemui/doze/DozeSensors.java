@@ -456,13 +456,24 @@ public class DozeSensors {
 
         public void updateListening() {
             if (!mConfigured || mSensor == null) return;
-            if (mRequested && !mDisabled && (enabledBySetting() || mIgnoresSetting)
-                    && !mRegistered) {
-                mRegistered = mSensorManager.requestTriggerSensor(this, mSensor);
-                if (DEBUG) Log.d(TAG, "requestTriggerSensor " + mRegistered);
+            if (mRequested && !mDisabled && (enabledBySetting() || mIgnoresSetting)) {
+                if (!mRegistered) {
+                    mRegistered = mSensorManager.requestTriggerSensor(this, mSensor);
+                    if (DEBUG) {
+                        Log.d(TAG, "requestTriggerSensor[" + mSensor
+                                + "] " + mRegistered);
+                    }
+                } else {
+                    if (DEBUG) {
+                        Log.d(TAG, "requestTriggerSensor[" + mSensor
+                                + "] already registered");
+                    }
+                }
             } else if (mRegistered) {
                 final boolean rt = mSensorManager.cancelTriggerSensor(this, mSensor);
-                if (DEBUG) Log.d(TAG, "cancelTriggerSensor " + rt);
+                if (DEBUG) {
+                    Log.d(TAG, "cancelTriggerSensor[" + mSensor + "] " + rt);
+                }
                 mRegistered = false;
             }
         }

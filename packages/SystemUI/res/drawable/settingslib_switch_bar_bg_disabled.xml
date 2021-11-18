@@ -13,14 +13,14 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
--->
-<resources>
-    <style name="CollapsingToolbarTitle.Collapsed" parent="@android:style/TextAppearance.DeviceDefault.Widget.ActionBar.Title">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textSize">20dp</item>
-    </style>
+  -->
 
-    <style name="CollapsingToolbarTitle.Expanded" parent="CollapsingToolbarTitle.Collapsed">
-        <item name="android:textSize">36dp</item>
-    </style>
-</resources>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?android:attr/colorControlHighlight">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/settingslib_state_off_color"/>
+            <corners android:radius="@dimen/settingslib_switch_bar_radius"/>
+        </shape>
+    </item>
+</ripple>

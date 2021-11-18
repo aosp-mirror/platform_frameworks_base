@@ -35,6 +35,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Utils
+import com.android.systemui.util.time.SystemClock
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -53,11 +54,13 @@ class MediaResumeListener @Inject constructor(
     @Background private val backgroundExecutor: Executor,
     private val tunerService: TunerService,
     private val mediaBrowserFactory: ResumeMediaBrowserFactory,
-    dumpManager: DumpManager
+    dumpManager: DumpManager,
+    private val systemClock: SystemClock
 ) : MediaDataManager.Listener, Dumpable {
 
     private var useMediaResumption: Boolean = Utils.useMediaResumption(context)
-    private val resumeComponents: ConcurrentLinkedQueue<ComponentName> = ConcurrentLinkedQueue()
+    private val resumeComponents: ConcurrentLinkedQueue<Pair<ComponentName, Long>> =
+            ConcurrentLinkedQueue()
 
     private lateinit var mediaDataManager: MediaDataManager
 
@@ -131,14 +134,32 @@ class MediaResumeListener @Inject constructor(
         val listString = prefs.getString(MEDIA_PREFERENCE_KEY + currentUserId, null)
         val components = listString?.split(ResumeMediaBrowser.DELIMITER.toRegex())
             ?.dropLastWhile { it.isEmpty() }
+        var needsUpdate = false
         components?.forEach {
             val info = it.split("/")
             val packageName = info[0]
             val className = info[1]
             val component = ComponentName(packageName, className)
-            resumeComponents.add(component)
+
+            val lastPlayed = if (info.size == 3) {
+                try {
+                    info[2].toLong()
+                } catch (e: NumberFormatException) {
+                    needsUpdate = true
+                    systemClock.currentTimeMillis()
+                }
+            } else {
+                needsUpdate = true
+                systemClock.currentTimeMillis()
+            }
+            resumeComponents.add(component to lastPlayed)
         }
         Log.d(TAG, "loaded resume components ${resumeComponents.toArray().contentToString()}")
+
+        if (needsUpdate) {
+            // Save any missing times that we had to fill in
+            writeSharedPrefs()
+        }
     }
 
     /**
@@ -149,9 +170,12 @@ class MediaResumeListener @Inject constructor(
             return
         }
 
+        val now = systemClock.currentTimeMillis()
         resumeComponents.forEach {
-            val browser = mediaBrowserFactory.create(mediaBrowserCallback, it)
-            browser.findRecentMedia()
+            if (now.minus(it.second) <= RESUME_MEDIA_TIMEOUT) {
+                val browser = mediaBrowserFactory.create(mediaBrowserCallback, it.first)
+                browser.findRecentMedia()
+            }
         }
     }
 
@@ -234,18 +258,24 @@ class MediaResumeListener @Inject constructor(
      */
     private fun updateResumptionList(componentName: ComponentName) {
         // Remove if exists
-        resumeComponents.remove(componentName)
+        resumeComponents.remove(resumeComponents.find { it.first.equals(componentName) })
         // Insert at front of queue
-        resumeComponents.add(componentName)
+        val currentTime = systemClock.currentTimeMillis()
+        resumeComponents.add(componentName to currentTime)
         // Remove old components if over the limit
         if (resumeComponents.size > ResumeMediaBrowser.MAX_RESUMPTION_CONTROLS) {
             resumeComponents.remove()
         }
 
-        // Save changes
+        writeSharedPrefs()
+    }
+
+    private fun writeSharedPrefs() {
         val sb = StringBuilder()
         resumeComponents.forEach {
-            sb.append(it.flattenToString())
+            sb.append(it.first.flattenToString())
+            sb.append("/")
+            sb.append(it.second)
             sb.append(ResumeMediaBrowser.DELIMITER)
         }
         val prefs = context.getSharedPreferences(MEDIA_PREFERENCES, Context.MODE_PRIVATE)

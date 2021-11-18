@@ -43,11 +43,13 @@ public class FaceDetectClient extends AcquisitionClient<ISession> implements Det
     @Nullable private ICancellationSignal mCancellationSignal;
 
     public FaceDetectClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
-            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
+            @NonNull IBinder token, long requestId,
+            @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId, boolean isStrongBiometric, int statsClient) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 true /* shouldVibrate */, BiometricsProtoEnums.MODALITY_FACE,
                 BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
+        setRequestId(requestId);
         mIsStrongBiometric = isStrongBiometric;
     }
 
