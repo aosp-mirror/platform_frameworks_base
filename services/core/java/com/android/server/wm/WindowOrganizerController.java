@@ -220,31 +220,47 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         try {
             synchronized (mGlobalLock) {
                 Transition transition = Transition.fromBinder(transitionToken);
+                if (mTransitionController.getTransitionPlayer() == null && transition == null) {
+                    Slog.w(TAG, "Using shell transitions API for legacy transitions.");
+                    if (t == null) {
+                        throw new IllegalArgumentException("Can't use legacy transitions in"
+                                + " compatibility mode with no WCT.");
+                    }
+                    applyTransaction(t, -1 /* syncId */, null, caller);
+                    return null;
+                }
                 // In cases where transition is already provided, the "readiness lifecycle" of the
                 // transition is determined outside of this transaction. However, if this is a
                 // direct call from shell, the entire transition lifecycle is contained in the
                 // provided transaction and thus we can setReady immediately after apply.
-                boolean needsSetReady = transition == null && t != null;
+                final boolean needsSetReady = transition == null && t != null;
+                final WindowContainerTransaction wct =
+                        t != null ? t : new WindowContainerTransaction();
                 if (transition == null) {
                     if (type < 0) {
                         throw new IllegalArgumentException("Can't create transition with no type");
                     }
-                    if (mTransitionController.getTransitionPlayer() == null) {
-                        Slog.w(TAG, "Using shell transitions API for legacy transitions.");
-                        if (t == null) {
-                            throw new IllegalArgumentException("Can't use legacy transitions in"
-                                    + " compatibility mode with no WCT.");
-                        }
-                        applyTransaction(t, -1 /* syncId */, null, caller);
-                        return null;
+                    // If there is already a collecting transition, queue up a new transition and
+                    // return that. The actual start and apply will then be deferred until that
+                    // transition starts collecting. This should almost never happen except during
+                    // tests.
+                    if (mTransitionController.isCollecting()) {
+                        Slog.e(TAG, "startTransition() while one is already collecting.");
+                        final TransitionController.PendingStartTransition pt =
+                                mTransitionController.createPendingTransition(type);
+                        pt.setOnStartCollecting(mService.mH, () -> {
+                            pt.mTransition.start();
+                            applyTransaction(wct, -1 /*syncId*/, pt.mTransition, caller);
+                            if (needsSetReady) {
+                                pt.mTransition.setAllReady();
+                            }
+                        });
+                        return pt.mTransition;
                     }
                     transition = mTransitionController.createTransition(type);
                 }
                 transition.start();
-                if (t == null) {
-                    t = new WindowContainerTransaction();
-                }
-                applyTransaction(t, -1 /*syncId*/, transition, caller);
+                applyTransaction(wct, -1 /*syncId*/, transition, caller);
                 if (needsSetReady) {
                     transition.setAllReady();
                 }
