@@ -51,7 +51,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Attributable;
 import android.content.AttributionSource;
 import android.content.Context;
-import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -59,7 +58,6 @@ import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
-import android.os.SynchronousResultReceiver;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Pair;
@@ -82,7 +80,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -2421,38 +2418,6 @@ public final class BluetoothAdapter {
             Log.e(TAG, "", e);
         }
         return false;
-    }
-
-    /**
-     * Return the record of {@link BluetoothActivityEnergyInfo} object that
-     * has the activity and energy info. This can be used to ascertain what
-     * the controller has been up to, since the last sample.
-     *
-     * @param updateType Type of info, cached vs refreshed.
-     * @return a record with {@link BluetoothActivityEnergyInfo} or null if report is unavailable or
-     * unsupported
-     * @hide
-     * @deprecated use the asynchronous {@link #requestControllerActivityEnergyInfo(ResultReceiver)}
-     * instead.
-     */
-    @Deprecated
-    @RequiresBluetoothConnectPermission
-    @RequiresPermission(allOf = {
-            android.Manifest.permission.BLUETOOTH_CONNECT,
-            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
-    })
-    public BluetoothActivityEnergyInfo getControllerActivityEnergyInfo(int updateType) {
-        SynchronousResultReceiver receiver = new SynchronousResultReceiver();
-        requestControllerActivityEnergyInfo(receiver);
-        try {
-            SynchronousResultReceiver.Result result = receiver.awaitResult(1000);
-            if (result.bundle != null) {
-                return result.bundle.getParcelable(BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY);
-            }
-        } catch (TimeoutException e) {
-            Log.e(TAG, "getControllerActivityEnergyInfo timed out");
-        }
-        return null;
     }
 
     /**
