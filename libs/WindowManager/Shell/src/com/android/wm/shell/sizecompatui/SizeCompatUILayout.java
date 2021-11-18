@@ -103,9 +103,9 @@ class SizeCompatUILayout {
     }
 
     /** Creates the activity restart button window. */
-    void createSizeCompatButton(boolean isImeShowing) {
-        if (isImeShowing || mButton != null) {
-            // When ime is showing, wait until ime is dismiss to create UI.
+    void createSizeCompatButton(boolean show) {
+        if (!show || mButton != null) {
+            // Wait until button should be visible.
             return;
         }
         mButton = mButtonWindowManager.createSizeCompatButton();
@@ -154,7 +154,7 @@ class SizeCompatUILayout {
 
     /** Called when size compat info changed. */
     void updateSizeCompatInfo(Configuration taskConfig,
-            ShellTaskOrganizer.TaskListener taskListener, boolean isImeShowing) {
+            ShellTaskOrganizer.TaskListener taskListener, boolean show) {
         final Configuration prevTaskConfig = mTaskConfig;
         final ShellTaskOrganizer.TaskListener prevTaskListener = mTaskListener;
         mTaskConfig = taskConfig;
@@ -170,7 +170,7 @@ class SizeCompatUILayout {
         if (mButton == null || prevTaskListener != taskListener) {
             // TaskListener changed, recreate the button for new surface parent.
             release();
-            createSizeCompatButton(isImeShowing);
+            createSizeCompatButton(show);
             return;
         }
 
@@ -204,16 +204,16 @@ class SizeCompatUILayout {
         }
     }
 
-    /** Called when IME visibility changed. */
-    void updateImeVisibility(boolean isImeShowing) {
+    /** Called when the visibility of the UI should change. */
+    void updateVisibility(boolean show) {
         if (mButton == null) {
-            // Button may not be created because ime is previous showing.
-            createSizeCompatButton(isImeShowing);
+            // Button may not have been created because it was hidden previously.
+            createSizeCompatButton(show);
             return;
         }
 
         // Hide size compat UIs when IME is showing.
-        final int newVisibility = isImeShowing ? View.GONE : View.VISIBLE;
+        final int newVisibility = show ? View.VISIBLE : View.GONE;
         if (mButton.getVisibility() != newVisibility) {
             mButton.setVisibility(newVisibility);
         }
