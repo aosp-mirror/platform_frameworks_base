@@ -23,6 +23,7 @@ import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent.StatusBarScope
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.SPLIT_SHADE_HEADER
@@ -43,7 +44,7 @@ class SplitShadeHeaderController @Inject constructor(
         private val SPLIT_HEADER_TRANSITION_ID = R.id.split_header_transition
     }
 
-    private val combinedHeaders = featureFlags.useCombinedQSHeaders()
+    private val combinedHeaders = featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)
     // TODO(b/194178072) Handle RSSI hiding when multi carrier
     private val iconManager: StatusBarIconController.IconManager
     private val qsCarrierGroupController: QSCarrierGroupController

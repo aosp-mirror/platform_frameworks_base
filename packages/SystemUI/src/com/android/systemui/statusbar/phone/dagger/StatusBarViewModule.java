@@ -26,6 +26,7 @@ import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.biometrics.AuthRippleView;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
@@ -132,7 +133,7 @@ public abstract class StatusBarViewModule {
             NotificationShadeWindowView notificationShadeWindowView,
             FeatureFlags featureFlags) {
         ViewStub stub = notificationShadeWindowView.findViewById(R.id.qs_header_stub);
-        int layoutId = featureFlags.useCombinedQSHeaders()
+        int layoutId = featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)
                 ? R.layout.combined_qs_header
                 : R.layout.split_shade_header;
         stub.setLayoutResource(layoutId);

@@ -148,6 +148,7 @@ import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.emergency.EmergencyGesture;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.KeyguardService;
@@ -1460,7 +1461,6 @@ public class StatusBar extends CoreStartable implements
                 mDynamicPrivacyController,
                 mKeyguardStateController,
                 mKeyguardIndicationController,
-                mFeatureFlags,
                 this /* statusBar */,
                 mShadeController,
                 mLockscreenShadeTransitionController,
@@ -4284,7 +4284,7 @@ public class StatusBar extends CoreStartable implements
                 Log.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
             }
 
-            if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
                 mViewHierarchyManager.updateRowStates();
             }
             mScreenPinningRequest.onConfigurationChanged();
@@ -4368,7 +4368,7 @@ public class StatusBar extends CoreStartable implements
 
                 @Override
                 public void onDozeAmountChanged(float linear, float eased) {
-                    if (mFeatureFlags.useNewLockscreenAnimations()
+                    if (mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)
                             && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)
                             && !mBiometricUnlockController.isWakeAndUnlock()) {
                         mLightRevealScrim.setRevealAmount(1f - linear);

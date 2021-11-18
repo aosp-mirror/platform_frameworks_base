@@ -71,6 +71,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.phone.SystemUIHostDialogProvider;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallFlags;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLogger;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
@@ -99,7 +100,7 @@ public interface StatusBarDependenciesModule {
     @Provides
     static NotificationRemoteInputManager provideNotificationRemoteInputManager(
             Context context,
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationVisibilityProvider visibilityProvider,
@@ -114,7 +115,7 @@ public interface StatusBarDependenciesModule {
             DumpManager dumpManager) {
         return new NotificationRemoteInputManager(
                 context,
-                featureFlags,
+                notifPipelineFlags,
                 lockscreenUserManager,
                 smartReplyController,
                 visibilityProvider,
@@ -142,7 +143,7 @@ public interface StatusBarDependenciesModule {
             KeyguardBypassController keyguardBypassController,
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             @Main DelayableExecutor mainExecutor,
             MediaDataManager mediaDataManager,
             DumpManager dumpManager) {
@@ -156,7 +157,7 @@ public interface StatusBarDependenciesModule {
                 keyguardBypassController,
                 notifPipeline,
                 notifCollection,
-                featureFlags,
+                notifPipelineFlags,
                 mainExecutor,
                 mediaDataManager,
                 dumpManager);
@@ -269,7 +270,6 @@ public interface StatusBarDependenciesModule {
     @SysUISingleton
     static OngoingCallController provideOngoingCallController(
             CommonNotifCollection notifCollection,
-            FeatureFlags featureFlags,
             SystemClock systemClock,
             ActivityStarter activityStarter,
             @Main Executor mainExecutor,
@@ -278,19 +278,22 @@ public interface StatusBarDependenciesModule {
             DumpManager dumpManager,
             StatusBarWindowController statusBarWindowController,
             SwipeStatusBarAwayGestureHandler swipeStatusBarAwayGestureHandler,
-            StatusBarStateController statusBarStateController) {
+            StatusBarStateController statusBarStateController,
+            OngoingCallFlags ongoingCallFlags) {
+
+        boolean ongoingCallInImmersiveEnabled = ongoingCallFlags.isInImmersiveEnabled();
         Optional<StatusBarWindowController> windowController =
-                featureFlags.isOngoingCallInImmersiveEnabled()
+                ongoingCallInImmersiveEnabled
                         ? Optional.of(statusBarWindowController)
                         : Optional.empty();
         Optional<SwipeStatusBarAwayGestureHandler> gestureHandler =
-                featureFlags.isOngoingCallInImmersiveEnabled()
+                ongoingCallInImmersiveEnabled
                         ? Optional.of(swipeStatusBarAwayGestureHandler)
                         : Optional.empty();
         OngoingCallController ongoingCallController =
                 new OngoingCallController(
                         notifCollection,
-                        featureFlags,
+                        ongoingCallFlags,
                         systemClock,
                         activityStarter,
                         mainExecutor,

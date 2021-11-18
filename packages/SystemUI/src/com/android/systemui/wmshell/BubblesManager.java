@@ -60,12 +60,12 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -141,7 +141,7 @@ public class BubblesManager implements Dumpable {
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             DumpManager dumpManager,
             Executor sysuiMainExecutor) {
         if (bubblesOptional.isPresent()) {
@@ -150,7 +150,7 @@ public class BubblesManager implements Dumpable {
                     configurationController, statusBarService, notificationManager,
                     visibilityProvider,
                     interruptionStateProvider, zenModeController, notifUserManager,
-                    groupManager, entryManager, notifPipeline, sysUiState, featureFlags,
+                    groupManager, entryManager, notifPipeline, sysUiState, notifPipelineFlags,
                     dumpManager, sysuiMainExecutor);
         } else {
             return null;
@@ -174,7 +174,7 @@ public class BubblesManager implements Dumpable {
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             DumpManager dumpManager,
             Executor sysuiMainExecutor) {
         mContext = context;
@@ -194,7 +194,7 @@ public class BubblesManager implements Dumpable {
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE))
                 : statusBarService;
 
-        if (featureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (notifPipelineFlags.isNewPipelineEnabled()) {
             setupNotifPipeline();
         } else {
             setupNEM();

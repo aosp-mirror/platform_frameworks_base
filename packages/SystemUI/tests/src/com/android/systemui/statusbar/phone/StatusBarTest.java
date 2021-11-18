@@ -314,7 +314,7 @@ public class StatusBarTest extends SysuiTestCase {
         NotificationLogger notificationLogger = new NotificationLogger(
                 mNotificationListener,
                 mUiBgExecutor,
-                mFeatureFlags,
+                mNotifPipelineFlags,
                 mVisibilityProvider,
                 mock(NotificationEntryManager.class),
                 mock(NotifPipeline.class),

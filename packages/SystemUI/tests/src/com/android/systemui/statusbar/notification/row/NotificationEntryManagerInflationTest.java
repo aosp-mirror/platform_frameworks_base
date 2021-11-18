@@ -48,7 +48,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -143,7 +142,6 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
 
     @Mock private NotificationGroupManagerLegacy mGroupMembershipManager;
     @Mock private NotificationGroupManagerLegacy mGroupExpansionManager;
-    @Mock private FeatureFlags mFeatureFlags;
     @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private LeakDetector mLeakDetector;
 
@@ -182,12 +180,12 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 .build();
 
         when(mNotifPipelineFlags.checkLegacyPipelineEnabled()).thenReturn(true);
-        when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
+        when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(false);
 
         mEntryManager = new NotificationEntryManager(
                 mock(NotificationEntryManagerLogger.class),
                 mGroupMembershipManager,
-                mFeatureFlags,
+                mNotifPipelineFlags,
                 () -> mRowBinder,
                 () -> mRemoteInputManager,
                 mLeakDetector,

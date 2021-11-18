@@ -27,6 +27,7 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.colorextraction.SysuiColorExtractor
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyDialogController
@@ -248,7 +249,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
     @Test
     fun testRSSISlot_notCombined() {
-        `when`(featureFlags.isCombinedStatusBarSignalIconsEnabled).thenReturn(false)
+        `when`(featureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)).thenReturn(false)
         controller.init()
 
         val captor = argumentCaptor<List<String>>()
@@ -261,7 +262,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
     @Test
     fun testRSSISlot_combined() {
-        `when`(featureFlags.isCombinedStatusBarSignalIconsEnabled).thenReturn(true)
+        `when`(featureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)).thenReturn(true)
         controller.init()
 
         val captor = argumentCaptor<List<String>>()

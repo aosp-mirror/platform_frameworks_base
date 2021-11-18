@@ -37,7 +37,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.ForegroundServiceNotificationListener;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -113,7 +112,6 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotificationShadeWindowController.class), mock(DynamicPrivacyController.class),
                 mock(KeyguardStateController.class),
                 mock(KeyguardIndicationController.class),
-                mock(FeatureFlags.class),
                 mStatusBar,
                 mock(ShadeControllerImpl.class), mock(LockscreenShadeTransitionController.class),
                 mCommandQueue,

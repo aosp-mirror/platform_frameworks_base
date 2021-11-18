@@ -38,7 +38,6 @@ import com.android.systemui.demomode.dagger.DemoModeModule;
 import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.log.dagger.LogModule;
@@ -52,6 +51,7 @@ import com.android.systemui.shared.system.smartspace.SmartspaceTransitionControl
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
@@ -206,14 +206,15 @@ public abstract class SystemUIModule {
             NotificationInterruptStateProvider interruptionStateProvider,
             ZenModeController zenModeController, NotificationLockscreenUserManager notifUserManager,
             NotificationGroupManagerLegacy groupManager, NotificationEntryManager entryManager,
-            NotifPipeline notifPipeline, SysUiState sysUiState, FeatureFlags featureFlags,
-            DumpManager dumpManager, @Main Executor sysuiMainExecutor) {
+            NotifPipeline notifPipeline, SysUiState sysUiState,
+            NotifPipelineFlags notifPipelineFlags, DumpManager dumpManager,
+            @Main Executor sysuiMainExecutor) {
         return Optional.ofNullable(BubblesManager.create(context, bubblesOptional,
                 notificationShadeWindowController, statusBarStateController, shadeController,
                 configurationController, statusBarService, notificationManager,
                 visibilityProvider,
                 interruptionStateProvider, zenModeController, notifUserManager,
-                groupManager, entryManager, notifPipeline, sysUiState, featureFlags, dumpManager,
-                sysuiMainExecutor));
+                groupManager, entryManager, notifPipeline, sysUiState, notifPipelineFlags,
+                dumpManager, sysuiMainExecutor));
     }
 }

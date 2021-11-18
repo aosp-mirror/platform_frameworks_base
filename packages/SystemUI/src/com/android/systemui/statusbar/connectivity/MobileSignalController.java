@@ -55,6 +55,7 @@ import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.SignalStrengthUtil;
 import com.android.systemui.R;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.util.CarrierConfigTracker;
 
 import java.io.PrintWriter;
@@ -227,7 +228,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         mImsMmTelManager = ImsMmTelManager.createForSubscriptionId(info.getSubscriptionId());
         mMobileStatusTracker = new MobileStatusTracker(mPhone, receiverLooper,
                 info, mDefaults, mMobileCallback);
-        mProviderModelBehavior = featureFlags.isCombinedStatusBarSignalIconsEnabled();
+        mProviderModelBehavior = featureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS);
         mProviderModelSetting = statusBarFlags.isProviderModelSettingEnabled();
     }
 

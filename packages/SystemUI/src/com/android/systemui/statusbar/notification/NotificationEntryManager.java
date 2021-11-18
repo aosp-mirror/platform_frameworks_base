@@ -38,7 +38,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
@@ -102,7 +101,7 @@ public class NotificationEntryManager implements
 
     private final NotificationEntryManagerLogger mLogger;
     private final NotificationGroupManagerLegacy mGroupManager;
-    private final FeatureFlags mFeatureFlags;
+    private final NotifPipelineFlags mNotifPipelineFlags;
     private final Lazy<NotificationRowBinder> mNotificationRowBinderLazy;
     private final Lazy<NotificationRemoteInputManager> mRemoteInputManagerLazy;
     private final LeakDetector mLeakDetector;
@@ -149,7 +148,7 @@ public class NotificationEntryManager implements
     public NotificationEntryManager(
             NotificationEntryManagerLogger logger,
             NotificationGroupManagerLegacy groupManager,
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
@@ -159,7 +158,7 @@ public class NotificationEntryManager implements
     ) {
         mLogger = logger;
         mGroupManager = groupManager;
-        mFeatureFlags = featureFlags;
+        mNotifPipelineFlags = notifPipelineFlags;
         mNotificationRowBinderLazy = notificationRowBinderLazy;
         mRemoteInputManagerLazy = notificationRemoteInputManagerLazy;
         mLeakDetector = leakDetector;
@@ -637,7 +636,7 @@ public class NotificationEntryManager implements
         }
 
         // Construct the expanded view.
-        if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
             mNotificationRowBinderLazy.get().inflateViews(entry, null, mInflationCallback);
         }
 
@@ -694,7 +693,7 @@ public class NotificationEntryManager implements
             listener.onEntryUpdated(entry, fromSystem);
         }
 
-        if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
             mNotificationRowBinderLazy.get().inflateViews(entry, null, mInflationCallback);
         }
 
@@ -721,12 +720,12 @@ public class NotificationEntryManager implements
      * @param reason why the notifications are updating
      */
     public void updateNotifications(String reason) {
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
             mLogger.logUseWhileNewPipelineActive("updateNotifications", reason);
             return;
         }
         reapplyFilterAndSort(reason);
-        if (mPresenter != null) {
+        if (mPresenter != null && !mNotifPipelineFlags.isNewPipelineEnabled()) {
             mPresenter.updateNotificationViews(reason);
         }
     }
@@ -884,7 +883,7 @@ public class NotificationEntryManager implements
 
     /** Resorts / filters the current notification set with the current RankingMap */
     public void reapplyFilterAndSort(String reason) {
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
             mLogger.logUseWhileNewPipelineActive("reapplyFilterAndSort", reason);
             return;
         }
@@ -893,7 +892,7 @@ public class NotificationEntryManager implements
 
     /** Calls to NotificationRankingManager and updates mSortedAndFiltered */
     private void updateRankingAndSort(@NonNull RankingMap rankingMap, String reason) {
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
             mLogger.logUseWhileNewPipelineActive("updateRankingAndSort", reason);
             return;
         }
