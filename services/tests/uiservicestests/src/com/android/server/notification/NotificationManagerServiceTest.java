@@ -3872,6 +3872,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testTextChangedSet_forNewNotifs() throws Exception {
+        NotificationRecord original = generateNotificationRecord(mTestNotificationChannel);
+        mService.addEnqueuedNotification(original);
+
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mService.new PostNotificationRunnable(original.getKey());
+        runnable.run();
+        waitForIdle();
+
+        assertTrue(original.isTextChanged());
+    }
+
+    @Test
     public void testVisuallyInterruptive_notSeen() throws Exception {
         NotificationRecord original = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(original);

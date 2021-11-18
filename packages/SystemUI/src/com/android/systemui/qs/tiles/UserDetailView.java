@@ -28,6 +28,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -37,9 +39,9 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.PseudoGridView;
 import com.android.systemui.qs.QSUserSwitcherEvent;
+import com.android.systemui.qs.user.UserSwitchDialogController;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-
-import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -77,7 +79,7 @@ public class UserDetailView extends PseudoGridView {
         private View mCurrentUserView;
         private final UiEventLogger mUiEventLogger;
         private final FalsingManager mFalsingManager;
-        private Consumer<UserSwitcherController.UserRecord> mClickCallback;
+        private @Nullable UserSwitchDialogController.DialogShower mDialogShower;
 
         @Inject
         public Adapter(Context context, UserSwitcherController controller,
@@ -95,8 +97,17 @@ public class UserDetailView extends PseudoGridView {
             return createUserDetailItemView(convertView, parent, item);
         }
 
-        public void injectCallback(Consumer<UserSwitcherController.UserRecord> clickCallback) {
-            mClickCallback = clickCallback;
+        /**
+         * If this adapter is inside a dialog, passing a
+         * {@link UserSwitchDialogController.DialogShower} will help animate to and from the parent
+         * dialog. This will also allow for dismissing the whole stack of dialogs in a single
+         * animation.
+         *
+         * @param shower
+         * @see SystemUIDialog#dismissStack()
+         */
+        public void injectDialogShower(UserSwitchDialogController.DialogShower shower) {
+            mDialogShower = shower;
         }
 
         public UserDetailItemView createUserDetailItemView(View convertView, ViewGroup parent,
@@ -172,10 +183,7 @@ public class UserDetailView extends PseudoGridView {
                     }
                     view.setActivated(true);
                 }
-                onUserListItemClicked(tag);
-            }
-            if (mClickCallback != null) {
-                mClickCallback.accept(tag);
+                onUserListItemClicked(tag, mDialogShower);
             }
         }
 

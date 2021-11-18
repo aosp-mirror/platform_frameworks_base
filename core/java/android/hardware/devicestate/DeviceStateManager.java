@@ -96,7 +96,7 @@ public final class DeviceStateManager {
     public void requestState(@NonNull DeviceStateRequest request,
             @Nullable @CallbackExecutor Executor executor,
             @Nullable DeviceStateRequest.Callback callback) {
-        mGlobal.requestState(request, callback, executor);
+        mGlobal.requestState(request, executor, callback);
     }
 
     /**
