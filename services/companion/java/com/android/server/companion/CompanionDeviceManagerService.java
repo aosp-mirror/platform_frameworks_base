@@ -17,15 +17,12 @@
 
 package com.android.server.companion;
 
-import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
-import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.FEATURE_COMPANION_DEVICE_SETUP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.os.Binder.getCallingUid;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.UserHandle.getCallingUserId;
 
@@ -38,6 +35,13 @@ import static com.android.internal.util.CollectionUtils.map;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
+import static com.android.server.companion.PermissionsUtils.checkCallerCanManageAssociationsForPackage;
+import static com.android.server.companion.PermissionsUtils.checkCallerCanManagerCompanionDevice;
+import static com.android.server.companion.PermissionsUtils.enforceCallerCanInteractWithUserId;
+import static com.android.server.companion.PermissionsUtils.enforceCallerCanManagerCompanionDevice;
+import static com.android.server.companion.PermissionsUtils.enforceCallerIsSystemOr;
+import static com.android.server.companion.RolesUtils.addRoleHolderForAssociation;
+import static com.android.server.companion.RolesUtils.removeRoleHolderForAssociation;
 
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableSet;
@@ -52,7 +56,6 @@ import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.role.RoleManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -162,7 +165,6 @@ public class CompanionDeviceManagerService extends SystemService {
     private final AssociationRequestsProcessor mAssociationRequestsProcessor;
     private PowerWhitelistManager mPowerWhitelistManager;
     private IAppOpsService mAppOpsManager;
-    private RoleManager mRoleManager;
     private BluetoothAdapter mBluetoothAdapter;
     private UserManager mUserManager;
 
@@ -205,7 +207,6 @@ public class CompanionDeviceManagerService extends SystemService {
         mPersistentDataStore = new PersistentDataStore();
 
         mPowerWhitelistManager = context.getSystemService(PowerWhitelistManager.class);
-        mRoleManager = context.getSystemService(RoleManager.class);
         mAppOpsManager = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
@@ -215,7 +216,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 context.getSystemService(PermissionControllerManager.class));
         mUserManager = context.getSystemService(UserManager.class);
         mCompanionDevicePresenceController = new CompanionDevicePresenceController();
-        mAssociationRequestsProcessor = new AssociationRequestsProcessor(this, mRoleManager);
+        mAssociationRequestsProcessor = new AssociationRequestsProcessor(this);
 
         registerPackageMonitor();
     }
@@ -328,8 +329,9 @@ public class CompanionDeviceManagerService extends SystemService {
 
         final int userId = association.getUserId();
         final String packageName = association.getPackageName();
-
-        if (!checkCallerCanManageAssociationsForPackage(userId, packageName)) return null;
+        if (!checkCallerCanManageAssociationsForPackage(getContext(), userId, packageName)) {
+            return null;
+        }
 
         return association;
     }
@@ -397,18 +399,17 @@ public class CompanionDeviceManagerService extends SystemService {
                     + "request=" + request + ", "
                     + "package=u" + userId + "/" + packageName);
             mAssociationRequestsProcessor.process(request, packageName, userId, callback);
-
         }
 
         @Override
         public List<AssociationInfo> getAssociations(String packageName, int userId) {
             final int callingUid = getCallingUserId();
-            if (!checkCallerCanManageAssociationsForPackage(userId, packageName)) {
+            if (!checkCallerCanManageAssociationsForPackage(getContext(), userId, packageName)) {
                 throw new SecurityException("Caller (uid=" + callingUid + ") does not have "
                         + "permissions to get associations for u" + userId + "/" + packageName);
             }
 
-            if (!checkCallerCanManagerCompanionDevice()) {
+            if (!checkCallerCanManagerCompanionDevice(getContext())) {
                 // If the caller neither is system nor holds MANAGE_COMPANION_DEVICES: it needs to
                 // request the feature (also: the caller is the app itself).
                 checkUsesFeature(packageName, getCallingUserId());
@@ -420,8 +421,8 @@ public class CompanionDeviceManagerService extends SystemService {
 
         @Override
         public List<AssociationInfo> getAllAssociationsForUser(int userId) throws RemoteException {
-            enforceCallerCanInteractWithUserId(userId);
-            enforceCallerCanManagerCompanionDevice();
+            enforceCallerCanInteractWithUserId(getContext(), userId);
+            enforceCallerCanManagerCompanionDevice(getContext(), "getAllAssociationsForUser");
 
             return new ArrayList<>(
                     CompanionDeviceManagerService.this.getAllAssociationsForUser(userId));
@@ -430,8 +431,9 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public void addOnAssociationsChangedListener(IOnAssociationsChangedListener listener,
                 int userId) {
-            enforceCallerCanInteractWithUserId(userId);
-            enforceCallerCanManagerCompanionDevice();
+            enforceCallerCanInteractWithUserId(getContext(), userId);
+            enforceCallerCanManagerCompanionDevice(getContext(),
+                    "addOnAssociationsChangedListener");
 
             //TODO: Implement.
         }
@@ -617,7 +619,7 @@ public class CompanionDeviceManagerService extends SystemService {
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
-            enforceCallerCanManagerCompanionDevice();
+            enforceCallerCanManagerCompanionDevice(getContext(), "onShellCommand");
             new CompanionDeviceShellCommand(CompanionDeviceManagerService.this)
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
@@ -767,25 +769,8 @@ public class CompanionDeviceManagerService extends SystemService {
                         + " for " + association
                         + " - profile still present in " + otherAssociationWithDeviceProfile);
             } else {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    mRoleManager.removeRoleHolderAsUser(
-                            association.getDeviceProfile(),
-                            association.getPackageName(),
-                            RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP,
-                            UserHandle.of(association.getUserId()),
-                            getContext().getMainExecutor(),
-                            success -> {
-                                if (!success) {
-                                    Slog.e(LOG_TAG, "Failed to revoke device profile role "
-                                            + association.getDeviceProfile()
-                                            + " to " + association.getPackageName()
-                                            + " for user " + association.getUserId());
-                                }
-                            });
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
+                Binder.withCleanCallingIdentity(
+                        () -> removeRoleHolderForAssociation(getContext(), association));
             }
         }
     }
@@ -835,7 +820,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
         if (!association.isSelfManaged()) {
             if (mCurrentlyConnectedDevices.contains(association.getDeviceMacAddressAsString())) {
-                grantDeviceProfile(association);
+                addRoleHolderForAssociation(getContext(), association);
             }
 
             if (association.isNotifyOnDeviceNearby()) {
@@ -957,34 +942,14 @@ public class CompanionDeviceManagerService extends SystemService {
                         Slog.i(LOG_TAG, "Granting role " + association.getDeviceProfile()
                                 + " to " + association.getPackageName()
                                 + " due to device connected: " + association.getDeviceMacAddress());
-                        grantDeviceProfile(association);
+
+                        addRoleHolderForAssociation(getContext(), association);
                     }
                 }
             }
         }
 
         onDeviceNearby(address);
-    }
-
-    private void grantDeviceProfile(AssociationInfo association) {
-        Slog.i(LOG_TAG, "grantDeviceProfile(association = " + association + ")");
-
-        if (association.getDeviceProfile() != null) {
-            mRoleManager.addRoleHolderAsUser(
-                    association.getDeviceProfile(),
-                    association.getPackageName(),
-                    RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP,
-                    UserHandle.of(association.getUserId()),
-                    getContext().getMainExecutor(),
-                    success -> {
-                        if (!success) {
-                            Slog.e(LOG_TAG, "Failed to grant device profile role "
-                                    + association.getDeviceProfile()
-                                    + " to " + association.getPackageName()
-                                    + " for user " + association.getUserId());
-                        }
-                    });
-        }
     }
 
     void onDeviceDisconnected(String address) {
@@ -1279,74 +1244,6 @@ public class CompanionDeviceManagerService extends SystemService {
         final Map<String, Set<Integer>> copy = new HashMap<>(orig.size(), 1f);
         forEach(orig, (key, value) -> copy.put(key, new ArraySet<>(value)));
         return copy;
-    }
-
-    boolean checkCallerCanInteractWithUserId(int userId) {
-        if (getCallingUserId() == userId) return true;
-
-        return getContext().checkCallingPermission(INTERACT_ACROSS_USERS) == PERMISSION_GRANTED;
-    }
-
-    void enforceCallerCanInteractWithUserId(int userId) {
-        if (getCallingUserId() == userId) return;
-
-        getContext().enforceCallingPermission(INTERACT_ACROSS_USERS, null);
-    }
-
-    private boolean checkCallerIsSystemOr(@UserIdInt int userId, @NonNull String pkg) {
-        final int callingUid = getCallingUid();
-        if (callingUid == SYSTEM_UID) return true;
-
-        if (getCallingUserId() != userId) return false;
-
-        try {
-            if (mAppOpsManager.checkPackage(callingUid, pkg) != MODE_ALLOWED) return false;
-        } catch (RemoteException e) {
-            // Can't happen: AppOpsManager is running in the same process.
-        }
-        return true;
-    }
-
-    void enforceCallerIsSystemOr(@UserIdInt int userId, @NonNull String pkg) {
-        final int callingUid = getCallingUid();
-        if (callingUid == SYSTEM_UID) return;
-
-        final int callingUserId = getCallingUserId();
-        if (getCallingUserId() != userId) {
-            throw new SecurityException("Calling UserId (" + callingUserId + ") does not match "
-                    + "the expected UserId (" + userId + ")");
-        }
-
-        try {
-            if (mAppOpsManager.checkPackage(callingUid, pkg) != MODE_ALLOWED) {
-                throw new SecurityException(pkg + " doesn't belong to calling uid ("
-                        + callingUid + ")");
-            }
-        } catch (RemoteException e) {
-            // Can't happen: AppOpsManager is running in the same process.
-        }
-    }
-
-    private boolean checkCallerCanManagerCompanionDevice() {
-        if (getCallingUserId() == SYSTEM_UID) return true;
-
-        return getContext().checkCallingPermission(MANAGE_COMPANION_DEVICES) == PERMISSION_GRANTED;
-    }
-
-    void enforceCallerCanManagerCompanionDevice() {
-        if (getCallingUserId() == SYSTEM_UID) return;
-
-        getContext().enforceCallingPermission(MANAGE_COMPANION_DEVICES,
-                "Caller must hold " + MANAGE_COMPANION_DEVICES + " permission.");
-    }
-
-    private boolean checkCallerCanManageAssociationsForPackage(
-            @UserIdInt int userId, @NonNull String packageName) {
-        if (checkCallerIsSystemOr(userId, packageName)) return true;
-
-        if (!checkCallerCanInteractWithUserId(userId)) return false;
-
-        return checkCallerCanManagerCompanionDevice();
     }
 
     void checkUsesFeature(@NonNull String pkg, @UserIdInt int userId) {
