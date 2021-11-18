@@ -51,6 +51,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 class BluetoothRouteProvider {
     private static final String TAG = "BTRouteProvider";
@@ -174,8 +175,9 @@ class BluetoothRouteProvider {
 
     private void buildBluetoothRoutes() {
         mBluetoothRoutes.clear();
-        if (mBluetoothAdapter.getBondedDevices() != null) {
-            for (BluetoothDevice device : mBluetoothAdapter.getBondedDevices()) {
+        Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
+        if (bondedDevices != null) {
+            for (BluetoothDevice device : bondedDevices) {
                 if (device.isConnected()) {
                     BluetoothRouteInfo newBtRoute = createBluetoothRoute(device);
                     if (newBtRoute.connectedProfiles.size() > 0) {
