@@ -157,18 +157,8 @@ public class StagedInstallInternalTest {
 
     @Test
     public void testStagedSessionShouldCleanUpOnVerificationFailure() throws Exception {
-        // APEX verification
         InstallUtils.commitExpectingFailure(AssertionError.class, "apexd verification failed",
                 Install.single(APEX_WRONG_SHA_V2).setStaged());
-        InstallUtils.commitExpectingFailure(AssertionError.class, "apexd verification failed",
-                Install.multi(APEX_WRONG_SHA_V2, TestApp.A1).setStaged());
-        // APK verification
-        Install.single(TestApp.A2).commit();
-        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
-        InstallUtils.commitExpectingFailure(AssertionError.class, "Downgrade detected",
-                Install.single(TestApp.A1).setStaged());
-        InstallUtils.commitExpectingFailure(AssertionError.class, "Downgrade detected",
-                Install.multi(TestApp.A1, TestApp.B1).setStaged());
     }
 
     @Test
@@ -183,12 +173,6 @@ public class StagedInstallInternalTest {
         PackageInstaller.SessionInfo info = InstallUtils.getStagedSessionInfo(sessionId);
         assertThat(info).isNotNull();
         assertThat(info.isStagedSessionApplied()).isTrue();
-    }
-
-    @Test
-    public void testStagedSessionShouldCleanUpOnOnSuccessMultiPackage_Commit() throws Exception {
-        int sessionId = Install.multi(TestApp.A1, TestApp.Apex2).setStaged().commit();
-        storeSessionId(sessionId);
     }
 
     @Test

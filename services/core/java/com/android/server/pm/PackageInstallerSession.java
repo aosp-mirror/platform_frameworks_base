@@ -558,7 +558,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 Slog.d(TAG, "Marking session " + sessionId + " as failed: " + errorMessage);
                 childSessions = getChildSessionsLocked();
             }
-            destroy();
+            destroyInternal();
+            for (PackageInstallerSession child : childSessions) {
+                child.destroyInternal();
+            }
             mCallback.onStagedSessionChanged(PackageInstallerSession.this);
         }
 
@@ -576,7 +579,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 Slog.d(TAG, "Marking session " + sessionId + " as applied");
                 childSessions = getChildSessionsLocked();
             }
-            destroy();
+            destroyInternal();
+            for (PackageInstallerSession child : childSessions) {
+                child.destroyInternal();
+            }
             mCallback.onStagedSessionChanged(PackageInstallerSession.this);
         }
 
@@ -2105,14 +2111,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private void onSessionVerificationFailure(int error, String msg) {
         final String msgWithErrorCode = PackageManager.installStatusToString(error, msg);
         Slog.e(TAG, "Failed to verify session " + sessionId + " [" + msgWithErrorCode + "]");
+        // Session is sealed and committed but could not be verified, we need to destroy it.
+        destroyInternal();
+        if (isMultiPackage()) {
+            for (PackageInstallerSession childSession : getChildSessions()) {
+                childSession.destroyInternal();
+            }
+        }
         if (isStaged()) {
-            // This will clean up the session when it reaches the terminal state
             mStagedSession.setSessionFailed(
                     SessionInfo.STAGED_SESSION_VERIFICATION_FAILED, msgWithErrorCode);
             mStagedSession.notifyEndPreRebootVerification();
         } else {
-            // Session is sealed and committed but could not be verified, we need to destroy it.
-            destroy();
             // Dispatch message to remove session from PackageInstallerService.
             dispatchSessionFinished(error, msg, null);
         }
@@ -4255,24 +4265,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return params.isStaged ? mStagedSession.getSessionErrorMessage() : "";
     }
 
-    /**
-     * Free up storage used by this session and its children.
-     * Must not be called on a child session.
-     */
-    private void destroy() {
-        // TODO(b/173194203): destroyInternal() should be used by destroy() only.
-        //  For the sake of consistency, a session should be destroyed as a whole. The caller
-        //  should always call destroy() for cleanup without knowing it has child sessions or not.
-        assertNotChild("destroy");
-        destroyInternal();
-        for (PackageInstallerSession child : getChildSessions()) {
-            child.destroyInternal();
-        }
-    }
-
-    /**
-     * Free up storage used by this session.
-     */
     private void destroyInternal() {
         final IncrementalFileStorages incrementalFileStorages;
         synchronized (mLock) {
