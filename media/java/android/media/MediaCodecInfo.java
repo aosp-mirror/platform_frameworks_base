@@ -426,6 +426,12 @@ public final class MediaCodecInfo {
         /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format24BitABGR6666           = 43;
 
+        /** @hide
+         * P010 is a 4:2:0 YCbCr semiplanar format comprised of a WxH Y plane
+         * followed by a Wx(H/2) CbCr plane. Each sample is represented by a 16-bit
+         * little-endian value, with the lower 6 bits set to zero. */
+        public static final int COLOR_FormatYUVP010                 = 54;
+
         /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_TI_FormatYUV420PackedSemiPlanar = 0x7f000100;
         // COLOR_FormatSurface indicates that the data will be a GraphicBuffer metadata reference.
