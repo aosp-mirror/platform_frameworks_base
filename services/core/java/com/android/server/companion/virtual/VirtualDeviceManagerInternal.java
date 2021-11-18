@@ -50,6 +50,12 @@ public abstract class VirtualDeviceManagerInternal {
     public abstract void onVirtualDisplayRemoved(IVirtualDevice virtualDevice, int displayId);
 
     /**
+     * Returns the flags that should be added to any virtual displays created on this virtual
+     * device.
+     */
+    public abstract int getBaseVirtualDisplayFlags(IVirtualDevice virtualDevice);
+
+    /**
      * Returns true if the given {@code uid} is the owner of any virtual devices that are
      * currently active.
      */

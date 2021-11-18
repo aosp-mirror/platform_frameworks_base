@@ -1251,6 +1251,14 @@ public final class DisplayManagerService extends SystemService {
         }
         final Surface surface = virtualDisplayConfig.getSurface();
         int flags = virtualDisplayConfig.getFlags();
+        if (virtualDevice != null) {
+            final VirtualDeviceManagerInternal vdm =
+                    getLocalService(VirtualDeviceManagerInternal.class);
+            if (!vdm.isValidVirtualDevice(virtualDevice)) {
+                throw new SecurityException("Invalid virtual device");
+            }
+            flags |= vdm.getBaseVirtualDisplayFlags(virtualDevice);
+        }
 
         if (surface != null && surface.isSingleBuffered()) {
             throw new IllegalArgumentException("Surface can't be single-buffered");
@@ -1280,14 +1288,6 @@ public final class DisplayManagerService extends SystemService {
                 flags = projection.applyVirtualDisplayFlags(flags);
             } catch (RemoteException e) {
                 throw new SecurityException("unable to validate media projection or flags");
-            }
-        }
-
-        if (virtualDevice != null) {
-            final VirtualDeviceManagerInternal vdm =
-                    getLocalService(VirtualDeviceManagerInternal.class);
-            if (!vdm.isValidVirtualDevice(virtualDevice)) {
-                throw new SecurityException("Invalid virtual device");
             }
         }
 

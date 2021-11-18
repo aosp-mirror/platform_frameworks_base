@@ -100,11 +100,11 @@ public final class VirtualDeviceManager {
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Nullable
-    public VirtualDevice createVirtualDevice(int associationId) {
+    public VirtualDevice createVirtualDevice(int associationId, VirtualDeviceParams params) {
         // TODO(b/194949534): Unhide this API
         try {
             IVirtualDevice virtualDevice = mService.createVirtualDevice(
-                    new Binder(), mContext.getPackageName(), associationId);
+                    new Binder(), mContext.getPackageName(), associationId, params);
             return new VirtualDevice(mContext, virtualDevice);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -273,6 +273,12 @@ public final class VirtualDeviceManager {
             }
         }
 
+        /**
+         * Returns the display flags that should be added to a particular virtual display.
+         * Additional device-level flags from {@link
+         * com.android.server.companion.virtual.VirtualDeviceImpl#getBaseVirtualDisplayFlags()} will
+         * be added by DisplayManagerService.
+         */
         private int getVirtualDisplayFlags(@DisplayFlags int flags) {
             int virtualDisplayFlags = DEFAULT_VIRTUAL_DISPLAY_FLAGS;
             if ((flags & DISPLAY_FLAG_TRUSTED) != 0) {

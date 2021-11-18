@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertThrows;
 
 import android.Manifest;
+import android.companion.virtual.VirtualDeviceParams;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.Point;
@@ -84,7 +85,7 @@ public class VirtualDeviceManagerServiceTest {
         mInputController = new InputController(new Object(), mNativeWrapperMock);
         mDeviceImpl = new VirtualDeviceImpl(mContext,
                 /* association info */ null, new Binder(), /* uid */ 0, mInputController,
-                (int associationId) -> {});
+                (int associationId) -> {}, new VirtualDeviceParams.Builder().build());
     }
 
     @Test

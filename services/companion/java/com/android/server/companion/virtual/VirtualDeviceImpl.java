@@ -22,8 +22,10 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 import android.annotation.NonNull;
 import android.companion.AssociationInfo;
 import android.companion.virtual.IVirtualDevice;
+import android.companion.virtual.VirtualDeviceParams;
 import android.content.Context;
 import android.graphics.Point;
+import android.hardware.display.DisplayManager;
 import android.hardware.input.VirtualKeyEvent;
 import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseRelativeEvent;
@@ -56,6 +58,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     final List<Integer> mVirtualDisplayIds = new ArrayList<>();
     private final OnDeviceCloseListener mListener;
     private final IBinder mAppToken;
+    private final VirtualDeviceParams mParams;
 
     /**
      * A mapping from the virtual display ID to its corresponding
@@ -65,17 +68,21 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             new SparseArray<>();
 
     VirtualDeviceImpl(Context context, AssociationInfo associationInfo,
-            IBinder token, int ownerUid, OnDeviceCloseListener listener) {
-        this(context, associationInfo, token, ownerUid, /* inputController= */ null, listener);
+            IBinder token, int ownerUid, OnDeviceCloseListener listener,
+            VirtualDeviceParams params) {
+        this(context, associationInfo, token, ownerUid, /* inputController= */ null, listener,
+                params);
     }
 
     @VisibleForTesting
     VirtualDeviceImpl(Context context, AssociationInfo associationInfo, IBinder token,
-            int ownerUid, InputController inputController, OnDeviceCloseListener listener) {
+            int ownerUid, InputController inputController, OnDeviceCloseListener listener,
+            VirtualDeviceParams params) {
         mContext = context;
         mAssociationInfo = associationInfo;
         mOwnerUid = ownerUid;
         mAppToken = token;
+        mParams = params;
         if (inputController == null) {
             mInputController = new InputController(mVirtualDeviceLock);
         } else {
@@ -89,7 +96,19 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
-    @Override
+    /**
+     * Returns the flags that should be added to any virtual displays created on this virtual
+     * device.
+     */
+    int getBaseVirtualDisplayFlags() {
+        int flags = 0;
+        if (mParams.getLockState() == VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED) {
+            flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
+        }
+        return flags;
+    }
+
+    @Override // Binder call
     public int getAssociationId() {
         return mAssociationInfo.getId();
     }
