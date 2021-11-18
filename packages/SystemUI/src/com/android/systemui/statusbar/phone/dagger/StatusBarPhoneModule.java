@@ -39,6 +39,7 @@ import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -100,7 +101,6 @@ import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -143,6 +143,7 @@ public interface StatusBarPhoneModule {
     static StatusBar provideStatusBar(
             Context context,
             NotificationsController notificationsController,
+            FragmentService fragmentService,
             LightBarController lightBarController,
             AutoHideController autoHideController,
             StatusBarWindowController statusBarWindowController,
@@ -199,7 +200,6 @@ public interface StatusBarPhoneModule {
             CommandQueue commandQueue,
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             StatusBarComponent.Factory statusBarComponentFactory,
-            StatusBarFragmentComponent.Factory statusBarFragmentComponentFactory,
             PluginManager pluginManager,
             Optional<LegacySplitScreen> splitScreenOptional,
             LightsOutNotifController lightsOutNotifController,
@@ -245,6 +245,7 @@ public interface StatusBarPhoneModule {
         return new StatusBar(
                 context,
                 notificationsController,
+                fragmentService,
                 lightBarController,
                 autoHideController,
                 statusBarWindowController,
@@ -301,7 +302,6 @@ public interface StatusBarPhoneModule {
                 commandQueue,
                 collapsedStatusBarFragmentLogger,
                 statusBarComponentFactory,
-                statusBarFragmentComponentFactory,
                 pluginManager,
                 splitScreenOptional,
                 lightsOutNotifController,
