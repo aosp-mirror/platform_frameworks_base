@@ -55,6 +55,8 @@ import android.view.ViewGroup;
 import android.view.WindowManagerGlobal;
 import android.widget.BaseAdapter;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
@@ -77,6 +79,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.qs.tiles.UserDetailView;
+import com.android.systemui.qs.user.UserSwitchDialogController.DialogShower;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -460,7 +463,7 @@ public class UserSwitcherController implements Dumpable {
     }
 
     @VisibleForTesting
-    void onUserListItemClicked(UserRecord record) {
+    void onUserListItemClicked(UserRecord record, DialogShower dialogShower) {
         int id;
         if (record.isGuest && record.info == null) {
             // No guest user. Create one.
@@ -472,7 +475,7 @@ public class UserSwitcherController implements Dumpable {
             mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_ADD);
             id = guestId;
         } else if (record.isAddUser) {
-            showAddUserDialog();
+            showAddUserDialog(dialogShower);
             return;
         } else {
             id = record.info.id;
@@ -481,7 +484,7 @@ public class UserSwitcherController implements Dumpable {
         int currUserId = mUserTracker.getUserId();
         if (currUserId == id) {
             if (record.isGuest) {
-                showExitGuestDialog(id);
+                showExitGuestDialog(id, dialogShower);
             }
             return;
         }
@@ -490,11 +493,15 @@ public class UserSwitcherController implements Dumpable {
             // If switching from guest, we want to bring up the guest exit dialog instead of switching
             UserInfo currUserInfo = mUserManager.getUserInfo(currUserId);
             if (currUserInfo != null && currUserInfo.isGuest()) {
-                showExitGuestDialog(currUserId, record.resolveId());
+                showExitGuestDialog(currUserId, record.resolveId(), dialogShower);
                 return;
             }
         }
-
+        if (dialogShower != null) {
+            // If we haven't morphed into another dialog, it means we have just switched users.
+            // Then, dismiss the dialog.
+            dialogShower.dismiss();
+        }
         switchToUserId(id);
     }
 
@@ -511,7 +518,7 @@ public class UserSwitcherController implements Dumpable {
         }
     }
 
-    protected void showExitGuestDialog(int id) {
+    private void showExitGuestDialog(int id, DialogShower dialogShower) {
         int newId = UserHandle.USER_SYSTEM;
         if (mResumeUserOnGuestLogout && mLastNonGuestUser != UserHandle.USER_SYSTEM) {
             UserInfo info = mUserManager.getUserInfo(mLastNonGuestUser);
@@ -519,23 +526,31 @@ public class UserSwitcherController implements Dumpable {
                 newId = info.id;
             }
         }
-        showExitGuestDialog(id, newId);
+        showExitGuestDialog(id, newId, dialogShower);
     }
 
-    protected void showExitGuestDialog(int id, int targetId) {
+    private void showExitGuestDialog(int id, int targetId, DialogShower dialogShower) {
         if (mExitGuestDialog != null && mExitGuestDialog.isShowing()) {
             mExitGuestDialog.cancel();
         }
         mExitGuestDialog = new ExitGuestDialog(mContext, id, targetId);
-        mExitGuestDialog.show();
+        if (dialogShower != null) {
+            dialogShower.showDialog(mExitGuestDialog);
+        } else {
+            mExitGuestDialog.show();
+        }
     }
 
-    public void showAddUserDialog() {
+    private void showAddUserDialog(DialogShower dialogShower) {
         if (mAddUserDialog != null && mAddUserDialog.isShowing()) {
             mAddUserDialog.cancel();
         }
         mAddUserDialog = new AddUserDialog(mContext);
-        mAddUserDialog.show();
+        if (dialogShower != null) {
+            dialogShower.showDialog(mAddUserDialog);
+        } else {
+            mAddUserDialog.show();
+        }
     }
 
     private void listenForCallState() {
@@ -868,9 +883,17 @@ public class UserSwitcherController implements Dumpable {
 
         /**
          * It handles click events on user list items.
+         *
+         * If the user switcher is hosted in a dialog, passing a non-null {@link DialogShower}
+         * will allow animation to and from the parent dialog.
+         *
          */
+        public void onUserListItemClicked(UserRecord record, @Nullable DialogShower dialogShower) {
+            mController.onUserListItemClicked(record, dialogShower);
+        }
+
         public void onUserListItemClicked(UserRecord record) {
-            mController.onUserListItemClicked(record);
+            onUserListItemClicked(record, null);
         }
 
         public String getName(Context context, UserRecord item) {
@@ -1156,7 +1179,7 @@ public class UserSwitcherController implements Dumpable {
                 cancel();
             } else {
                 mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_REMOVE);
-                dismiss();
+                dismissStack();
                 removeGuestUser(mGuestId, mTargetId);
             }
         }
@@ -1187,7 +1210,7 @@ public class UserSwitcherController implements Dumpable {
             if (which == BUTTON_NEGATIVE) {
                 cancel();
             } else {
-                dismiss();
+                dismissStack();
                 if (ActivityManager.isUserAMonkey()) {
                     return;
                 }

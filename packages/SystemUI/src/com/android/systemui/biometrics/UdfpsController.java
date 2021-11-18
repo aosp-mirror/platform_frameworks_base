@@ -47,6 +47,7 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -162,6 +163,7 @@ public class UdfpsController implements DozeReceiver {
     private boolean mOnFingerDown;
     private boolean mAttemptedToDismissKeyguard;
     private Set<Callback> mCallbacks = new HashSet<>();
+    private final VibrationEffect mLowTick;
 
     @VisibleForTesting
     public static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
@@ -171,6 +173,7 @@ public class UdfpsController implements DozeReceiver {
                     .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
                     .build();
 
+    // haptic to use for successful device entry
     public static final VibrationEffect EFFECT_CLICK =
             VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
 
@@ -276,6 +279,9 @@ public class UdfpsController implements DozeReceiver {
                     return;
                 }
                 mGoodCaptureReceived = true;
+                if (mVibrator != null) {
+                    mVibrator.cancel();
+                }
                 mView.stopIllumination();
                 if (mServerRequest != null) {
                     mServerRequest.onAcquiredGood();
@@ -434,7 +440,7 @@ public class UdfpsController implements DozeReceiver {
                 if (idx == event.getActionIndex()) {
                     boolean actionMoveWithinSensorArea =
                             isWithinSensorArea(udfpsView, event.getX(idx), event.getY(idx),
-                                fromUdfpsView);
+                                    fromUdfpsView);
                     if ((fromUdfpsView || actionMoveWithinSensorArea)
                             && shouldTryToDismissKeyguard()) {
                         Log.v(TAG, "onTouch | dismiss keyguard ACTION_MOVE");
@@ -508,9 +514,9 @@ public class UdfpsController implements DozeReceiver {
 
     private boolean shouldTryToDismissKeyguard() {
         return mView.getAnimationViewController() != null
-            && mView.getAnimationViewController() instanceof UdfpsKeyguardViewController
-            && mKeyguardStateController.canDismissLockScreen()
-            && !mAttemptedToDismissKeyguard;
+                && mView.getAnimationViewController() instanceof UdfpsKeyguardViewController
+                && mKeyguardStateController.canDismissLockScreen()
+                && !mAttemptedToDismissKeyguard;
     }
 
     @Inject
@@ -542,7 +548,6 @@ public class UdfpsController implements DozeReceiver {
             @NonNull UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         mContext = context;
         mExecution = execution;
-        // TODO (b/185124905): inject main handler and vibrator once done prototyping
         mVibrator = vibrator;
         mInflater = inflater;
         // The fingerprint manager is queried for UDFPS before this class is constructed, so the
@@ -567,6 +572,7 @@ public class UdfpsController implements DozeReceiver {
         mConfigurationController = configurationController;
         mSystemClock = systemClock;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mLowTick = lowTick();
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -601,6 +607,27 @@ public class UdfpsController implements DozeReceiver {
         udfpsHapticsSimulator.setUdfpsController(this);
     }
 
+    private VibrationEffect lowTick() {
+        float tickIntensity = Settings.Global.getFloat(
+                mContext.getContentResolver(), "low-tick-intensity", .5f);
+        VibrationEffect.Composition composition = VibrationEffect.startComposition();
+        composition.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK,
+                tickIntensity, 0);
+        int tickDelay = Settings.Global.getInt(
+                mContext.getContentResolver(), "low-tick-delay", 25);
+        int primitives = 1000 / tickDelay;
+        float[] rampUp = new float[]{.48f, .58f, .69f, .83f};
+        for (int i = 0; i < rampUp.length; i++) {
+            composition.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK,
+                    tickIntensity * rampUp[i], tickDelay);
+        }
+        for (int i = rampUp.length; i < primitives; i++) {
+            composition.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK,
+                    tickIntensity, tickDelay);
+        }
+        return composition.compose();
+    }
+
     /**
      * Play haptic to signal udfps scanning started.
      */
@@ -610,8 +637,8 @@ public class UdfpsController implements DozeReceiver {
             mVibrator.vibrate(
                     Process.myUid(),
                     mContext.getOpPackageName(),
-                    EFFECT_CLICK,
-                    "udfps-onStart",
+                    mLowTick,
+                    "udfps-onStart-tick",
                     VIBRATION_SONIFICATION_ATTRIBUTES);
         }
     }
@@ -998,6 +1025,7 @@ public class UdfpsController implements DozeReceiver {
             }
         }
         mOnFingerDown = false;
+        mVibrator.cancel();
         if (mView.isIlluminationRequested()) {
             mView.stopIllumination();
         }

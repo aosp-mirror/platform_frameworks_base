@@ -11,7 +11,6 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
@@ -89,7 +88,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     private int mClockSwitchYAmount;
     @VisibleForTesting boolean mChildrenAreLaidOut = false;
-    private OnPreDrawListener mPreDrawListener;
 
     public KeyguardClockSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -284,30 +282,21 @@ public class KeyguardClockSwitch extends RelativeLayout {
         // translate them properly
         if (mChildrenAreLaidOut) {
             animateClockChange(clockSize == LARGE);
-            mDisplayedClockSize = clockSize;
-        } else if (mPreDrawListener == null) {
-            mPreDrawListener = () -> {
-                switchToClock(clockSize);
-                getViewTreeObserver().removeOnPreDrawListener(mPreDrawListener);
-                mPreDrawListener = null;
-                return true;
-            };
-            getViewTreeObserver().addOnPreDrawListener(mPreDrawListener);
         }
+
+        mDisplayedClockSize = clockSize;
         return true;
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-        mChildrenAreLaidOut = true;
-    }
 
-    void onViewDetached() {
-        if (mPreDrawListener != null) {
-            getViewTreeObserver().removeOnPreDrawListener(mPreDrawListener);
-            mPreDrawListener = null;
+        if (mDisplayedClockSize != null && !mChildrenAreLaidOut) {
+            animateClockChange(mDisplayedClockSize == LARGE);
         }
+
+        mChildrenAreLaidOut = true;
     }
 
     public Paint getPaint() {
@@ -368,5 +357,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
         pw.println("  mDarkAmount: " + mDarkAmount);
         pw.println("  mSupportsDarkText: " + mSupportsDarkText);
         pw.println("  mColorPalette: " + Arrays.toString(mColorPalette));
+        pw.println("  mDisplayedClockSize: " + mDisplayedClockSize);
     }
 }
