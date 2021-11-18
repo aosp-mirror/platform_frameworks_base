@@ -1090,6 +1090,15 @@ public final class ComputerTracker implements Computer {
     }
 
     @Override
+    public int getComponentEnabledSettingInternal(@NonNull ComponentName component, int callingUid,
+            @UserIdInt int userId) {
+        try (ThreadComputer current = snapshot()) {
+            return current.mComputer.getComponentEnabledSettingInternal(
+                    component, callingUid, userId);
+        }
+    }
+
+    @Override
     public boolean isComponentEffectivelyEnabled(@NonNull ComponentInfo componentInfo,
             @UserIdInt int userId) {
         try (ThreadComputer current = snapshot()) {

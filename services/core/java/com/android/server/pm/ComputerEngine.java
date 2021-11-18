@@ -5015,20 +5015,26 @@ public class ComputerEngine implements Computer {
             @UserIdInt int userId) {
         enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
                 false /*checkShell*/, "getComponentEnabled");
+        return getComponentEnabledSettingInternal(component, callingUid, userId);
+    }
 
+    @PackageManager.EnabledState
+    @Override
+    public int getComponentEnabledSettingInternal(@NonNull ComponentName component, int callingUid,
+            @UserIdInt int userId) {
         if (component == null) return COMPONENT_ENABLED_STATE_DEFAULT;
         if (!mUserManager.exists(userId)) return COMPONENT_ENABLED_STATE_DISABLED;
 
-            try {
-                if (shouldFilterApplication(
-                        mSettings.getPackage(component.getPackageName()), callingUid,
-                        component, TYPE_UNKNOWN, userId)) {
-                    throw new PackageManager.NameNotFoundException(component.getPackageName());
-                }
-                return mSettings.getComponentEnabledSetting(component, userId);
-            } catch (PackageManager.NameNotFoundException e) {
-                throw new IllegalArgumentException("Unknown component: " + component);
+        try {
+            if (shouldFilterApplication(
+                    mSettings.getPackage(component.getPackageName()), callingUid,
+                    component, TYPE_UNKNOWN, userId)) {
+                throw new PackageManager.NameNotFoundException(component.getPackageName());
             }
+            return mSettings.getComponentEnabledSetting(component, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new IllegalArgumentException("Unknown component: " + component);
+        }
     }
 
     @Override

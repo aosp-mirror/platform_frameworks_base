@@ -650,6 +650,14 @@ public final class ComputerLocked extends ComputerEngine {
     }
 
     @Override
+    public int getComponentEnabledSettingInternal(@NonNull ComponentName component, int callingUid,
+            @UserIdInt int userId) {
+        synchronized (mLock) {
+            return super.getComponentEnabledSettingInternal(component, callingUid, userId);
+        }
+    }
+
+    @Override
     public boolean isComponentEffectivelyEnabled(@NonNull ComponentInfo componentInfo,
             @UserIdInt int userId) {
         synchronized (mLock) {
