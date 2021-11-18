@@ -379,6 +379,21 @@ public final class Settings {
             "android.settings.REDUCE_BRIGHT_COLORS_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of Color inversion.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_COLOR_INVERSION_SETTINGS =
+            "android.settings.COLOR_INVERSION_SETTINGS";
+
+    /**
      * Activity Action: Show settings to control access to usage information.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
