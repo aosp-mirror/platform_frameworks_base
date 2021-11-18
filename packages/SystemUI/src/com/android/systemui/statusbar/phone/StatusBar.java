@@ -506,6 +506,7 @@ public class StatusBar extends SystemUI implements
     private final NotificationsController mNotificationsController;
     private final OngoingCallController mOngoingCallController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
+    private final StatusBarSignalPolicy mStatusBarSignalPolicy;
     private final StatusBarLocationPublisher mStatusBarLocationPublisher;
     private final StatusBarIconController mStatusBarIconController;
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
@@ -693,6 +694,7 @@ public class StatusBar extends SystemUI implements
             AutoHideController autoHideController,
             StatusBarWindowController statusBarWindowController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
+            StatusBarSignalPolicy statusBarSignalPolicy,
             PulseExpansionHandler pulseExpansionHandler,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             KeyguardBypassController keyguardBypassController,
@@ -870,6 +872,7 @@ public class StatusBar extends SystemUI implements
         mWallpaperController = wallpaperController;
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
+        mStatusBarSignalPolicy = statusBarSignalPolicy;
         mStatusBarLocationPublisher = locationPublisher;
         mStatusBarIconController = statusBarIconController;
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
@@ -923,6 +926,7 @@ public class StatusBar extends SystemUI implements
             mBubblesOptional.get().setExpandListener(mBubbleExpandListener);
         }
 
+        mStatusBarSignalPolicy.init();
         mKeyguardIndicationController.init();
 
         mColorExtractor.addOnColorsChangedListener(mOnColorsChangedListener);

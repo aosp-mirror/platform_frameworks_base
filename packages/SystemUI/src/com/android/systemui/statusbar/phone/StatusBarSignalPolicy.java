@@ -72,17 +72,15 @@ public class StatusBarSignalPolicy implements SignalCallback,
     private boolean mHideWifi;
     private boolean mHideEthernet;
     private boolean mActivityEnabled;
-    private boolean mForceHideWifi;
 
     // Track as little state as possible, and only for padding purposes
     private boolean mIsAirplaneMode = false;
     private boolean mIsWifiEnabled = false;
-    private boolean mWifiVisible = false;
 
-    private ArrayList<MobileIconState> mMobileStates = new ArrayList<MobileIconState>();
-    private ArrayList<CallIndicatorIconState> mCallIndicatorStates =
-            new ArrayList<CallIndicatorIconState>();
+    private ArrayList<MobileIconState> mMobileStates = new ArrayList<>();
+    private ArrayList<CallIndicatorIconState> mCallIndicatorStates = new ArrayList<>();
     private WifiIconState mWifiIconState = new WifiIconState();
+    private boolean mInitialized;
 
     @Inject
     public StatusBarSignalPolicy(
@@ -112,9 +110,15 @@ public class StatusBarSignalPolicy implements SignalCallback,
         mSlotCallStrength =
                 mContext.getString(com.android.internal.R.string.status_bar_call_strength);
         mActivityEnabled = mContext.getResources().getBoolean(R.bool.config_showActivity);
+    }
 
-
-        tunerService.addTunable(this, StatusBarIconController.ICON_HIDE_LIST);
+    /** Call to initilaize and register this classw with the system. */
+    public void init() {
+        if (mInitialized) {
+            return;
+        }
+        mInitialized = true;
+        mTunerService.addTunable(this, StatusBarIconController.ICON_HIDE_LIST);
         mNetworkController.addCallback(this);
         mSecurityController.addCallback(this);
     }
@@ -162,7 +166,7 @@ public class StatusBarSignalPolicy implements SignalCallback,
             mHideAirplane = hideAirplane;
             mHideMobile = hideMobile;
             mHideEthernet = hideEthernet;
-            mHideWifi = hideWifi || mForceHideWifi;
+            mHideWifi = hideWifi;
             // Re-register to get new callbacks.
             mNetworkController.removeCallback(this);
             mNetworkController.addCallback(this);
