@@ -3098,7 +3098,7 @@ public class AudioManager {
     public static final int MODE_CALL_REDIRECT   = AudioSystem.MODE_CALL_REDIRECT;
 
     /**
-     * n audio/video chat or VoIP call is established and its audio is being redirected to another
+     * An audio/video chat or VoIP call is established and its audio is being redirected to another
      * device.
      */
     public static final int MODE_COMMUNICATION_REDIRECT = AudioSystem.MODE_COMMUNICATION_REDIRECT;
