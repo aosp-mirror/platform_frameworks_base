@@ -38,7 +38,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
@@ -54,7 +54,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
     private static final String COLOR_INVERSION_PREFERENCE_KEY = "toggle_inversion_preference";
 
     private final Icon mIcon = ResourceIcon.get(drawable.ic_invert_colors);
-    private final SecureSetting mSetting;
+    private final SettingObserver mSetting;
 
     private boolean mListening;
 
@@ -74,7 +74,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
 
-        mSetting = new SecureSetting(secureSettings, mHandler,
+        mSetting = new SettingObserver(secureSettings, mHandler,
                 Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {

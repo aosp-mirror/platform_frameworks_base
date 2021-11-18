@@ -36,7 +36,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -49,7 +49,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
 
     private final BatteryController mBatteryController;
     @VisibleForTesting
-    protected final SecureSetting mSetting;
+    protected final SettingObserver mSetting;
 
     private int mLevel;
     private boolean mPowerSave;
@@ -76,7 +76,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         mBatteryController = batteryController;
         mBatteryController.observe(getLifecycle(), this);
         int currentUser = host.getUserContext().getUserId();
-        mSetting = new SecureSetting(
+        mSetting = new SettingObserver(
                 secureSettings,
                 mHandler,
                 Secure.LOW_POWER_WARNING_ACKNOWLEDGED,

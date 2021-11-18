@@ -36,7 +36,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
@@ -49,7 +49,7 @@ import javax.inject.Inject;
 public class OneHandedModeTile extends QSTileImpl<BooleanState> {
     private final Icon mIcon = ResourceIcon.get(
             com.android.internal.R.drawable.ic_qs_one_handed_mode);
-    private final SecureSetting mSetting;
+    private final SettingObserver mSetting;
 
     @Inject
     public OneHandedModeTile(
@@ -65,7 +65,7 @@ public class OneHandedModeTile extends QSTileImpl<BooleanState> {
             SecureSettings secureSettings) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
-        mSetting = new SecureSetting(secureSettings, mHandler,
+        mSetting = new SettingObserver(secureSettings, mHandler,
                 Settings.Secure.ONE_HANDED_MODE_ENABLED, userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
