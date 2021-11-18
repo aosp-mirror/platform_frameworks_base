@@ -514,6 +514,11 @@ public interface Computer {
     int getComponentEnabledSetting(@NonNull ComponentName component, int callingUid,
             @UserIdInt int userId);
 
+    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
+    @PackageManager.EnabledState
+    int getComponentEnabledSettingInternal(@NonNull ComponentName component, int callingUid,
+            @UserIdInt int userId);
+
     /**
      * @return true if the runtime app user enabled state, runtime component user enabled state,
      * install-time app manifest enabled state, and install-time component manifest enabled state
