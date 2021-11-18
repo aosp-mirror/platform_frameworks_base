@@ -251,8 +251,8 @@ private:
     sp<SurfaceComposerClient> mSurfaceComposerClient;
 
     struct Locked {
-        Vector<sp<SpriteImpl> > invalidatedSprites;
-        Vector<sp<SurfaceControl> > disposedSurfaces;
+        std::vector<sp<SpriteImpl>> invalidatedSprites;
+        std::vector<sp<SurfaceControl>> disposedSurfaces;
         uint32_t transactionNestingCount;
         bool deferredSpriteUpdate;
     } mLocked; // guarded by mLock
