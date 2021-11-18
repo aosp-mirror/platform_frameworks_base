@@ -69,8 +69,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Рабіць здымкі экрана не дазваляе праграма ці ваша арганізацыя"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Змяніць"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Змяніць здымак экрана"</string>
-    <!-- no translation found for screenshot_share_description (2861628935812656612) -->
-    <skip />
+    <string name="screenshot_share_description" msgid="2861628935812656612">"Абагуліць здымак экрана"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Зняць больш"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Адхіліць здымак экрана"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Перадпрагляд здымка экрана"</string>
@@ -108,6 +107,8 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Тэлефон"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Галасавая дапамога"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Кашалёк"</string>
+    <!-- no translation found for accessibility_qr_code_scanner_button (7521277927692910795) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Разблакiраваць"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Прылада заблакіравана"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Сканіраванне твару"</string>
@@ -285,7 +286,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Уключыць у <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Да <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Цёмная тэма"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Эканомія зараду"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Энергазберажэнне"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Уключана ўвечары"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Да ўсходу сонца"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Уключана ў <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -471,6 +472,10 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Разблакіраваць для выкарыстання"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Узнікла праблема з загрузкай вашых карт. Паўтарыце спробу пазней"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Налады экрана блакіроўкі"</string>
+    <!-- no translation found for qr_code_scanner_title (1598912458255252498) -->
+    <skip />
+    <!-- no translation found for qr_code_scanner_description (7452098243938659945) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Працоўны профіль"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Рэжым палёту"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Вы не пачуеце наступны будзільнік <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -546,7 +551,7 @@
       <item quantity="many">%d хвілін</item>
       <item quantity="other">%d хвіліны</item>
     </plurals>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Эканомія зараду"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Рэжым энергазберажэння"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Кнопка <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Назад"</string>

@@ -69,8 +69,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"L\'acquisizione di screenshot non è consentita dall\'app o dall\'organizzazione"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Modifica"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Modifica screenshot"</string>
-    <!-- no translation found for screenshot_share_description (2861628935812656612) -->
-    <skip />
+    <string name="screenshot_share_description" msgid="2861628935812656612">"Condividi screenshot"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Acquisisci di più"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ignora screenshot"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Anteprima screenshot"</string>
@@ -108,6 +107,8 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefono"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Voice Assist"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Portafoglio"</string>
+    <!-- no translation found for accessibility_qr_code_scanner_button (7521277927692910795) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Sblocca"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispositivo bloccato"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Scansione del viso"</string>
@@ -212,8 +213,8 @@
     <string name="accessibility_clear_all" msgid="970525598287244592">"Cancella tutte le notifiche."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> more notifications inside.</item>
       <item quantity="other">Altre <xliff:g id="NUMBER_1">%s</xliff:g> notifiche nel gruppo.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> altra notifica nel gruppo.</item>
     </plurals>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"Lo schermo è bloccato in orientamento orizzontale."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"Lo schermo è bloccato in orientamento verticale."</string>
@@ -262,8 +263,8 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Attivazione…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Risp. dati attivo"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
+      <item quantity="one">%d devices</item>
       <item quantity="other">%d dispositivi</item>
-      <item quantity="one">%d dispositivo</item>
     </plurals>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Torcia"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Fotocamera in uso"</string>
@@ -342,8 +343,8 @@
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Il nuovo utente, una volta aggiunto, deve impostare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite di utenti raggiunto"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
+      <item quantity="one">You can add up to <xliff:g id="COUNT">%d</xliff:g> users.</item>
       <item quantity="other">Puoi aggiungere fino a <xliff:g id="COUNT">%d</xliff:g> utenti.</item>
-      <item quantity="one">È possibile creare un solo utente.</item>
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"Rimuovere l\'utente?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Tutte le app e i dati di questo utente verranno eliminati."</string>
@@ -465,6 +466,10 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Sblocca per usare"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Si è verificato un problema durante il recupero delle tue carte. Riprova più tardi."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Impostazioni schermata di blocco"</string>
+    <!-- no translation found for qr_code_scanner_title (1598912458255252498) -->
+    <skip />
+    <!-- no translation found for qr_code_scanner_description (7452098243938659945) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Profilo di lavoro"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Modalità aereo"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Non sentirai la tua prossima sveglia <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -529,12 +534,12 @@
     <string name="snooze_undo" msgid="2738844148845992103">"Annulla"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Posticipato di <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
+      <item quantity="one">%d hours</item>
       <item quantity="other">%d ore</item>
-      <item quantity="one">%d ora</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
+      <item quantity="one">%d minutes</item>
       <item quantity="other">%d minuti</item>
-      <item quantity="one">%d minuto</item>
     </plurals>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Risparmio energetico"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Pulsante <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -756,8 +761,8 @@
     <string name="quick_controls_title" msgid="6839108006171302273">"Controllo dispositivi"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Scegli un\'app per aggiungere controlli"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> controlli aggiunti.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> controlli aggiunti.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> controllo aggiunto.</item>
     </plurals>
     <string name="controls_removed" msgid="3731789252222856959">"Rimosso"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Aggiunto ai preferiti"</string>
