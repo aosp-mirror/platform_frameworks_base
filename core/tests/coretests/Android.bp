@@ -23,6 +23,7 @@ android_test {
     ],
 
     aidl: {
+        generate_get_transaction_name: true,
         local_include_dirs: ["aidl"],
     },
 
