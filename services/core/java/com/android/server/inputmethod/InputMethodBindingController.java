@@ -231,19 +231,11 @@ final class InputMethodBindingController {
         return mCurMethod;
     }
 
-    void setCurMethod(@Nullable IInputMethod curMethod) {
-        mCurMethod = curMethod;
-    }
-
     /**
      * If not {@link Process#INVALID_UID}, then the UID of {@link #getCurIntent()}.
      */
     int getCurMethodUid() {
         return mCurMethodUid;
-    }
-
-    void setCurMethodUid(int curMethodUid) {
-        mCurMethodUid = curMethodUid;
     }
 
     /**
@@ -367,6 +359,12 @@ final class InputMethodBindingController {
 
         mCurId = null;
         mService.clearClientSessionsLocked();
+    }
+
+    @GuardedBy("mMethodMap")
+    void clearCurMethodLocked() {
+        mCurMethod = null;
+        mCurMethodUid = Process.INVALID_UID;
     }
 
     @GuardedBy("mMethodMap")

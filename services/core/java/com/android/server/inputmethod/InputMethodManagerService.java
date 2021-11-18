@@ -606,19 +606,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return mBindingController.getCurMethod();
     }
 
-    private void setCurMethod(@Nullable IInputMethod curMethod) {
-        mBindingController.setCurMethod(curMethod);
-    }
-
     /**
      * If not {@link Process#INVALID_UID}, then the UID of {@link #getCurIntent()}.
      */
     private int getCurMethodUid() {
         return mBindingController.getCurMethodUid();
-    }
-
-    private void setCurMethodUid(int curMethodUid) {
-        mBindingController.setCurMethodUid(curMethodUid);
     }
 
     /**
@@ -2598,9 +2590,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             finishSessionLocked(mEnabledSession);
             mEnabledSession = null;
-            setCurMethod(null);
-            setCurMethodUid(Process.INVALID_UID);
-            scheduleNotifyImeUidToAudioService(getCurMethodUid());
+            mBindingController.clearCurMethodLocked();
+            scheduleNotifyImeUidToAudioService(Process.INVALID_UID);
         }
         hideStatusBarIconLocked();
         mInFullscreenMode = false;
