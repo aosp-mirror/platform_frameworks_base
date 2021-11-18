@@ -1623,7 +1623,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     progress);
         }
 
-        public void onStagedSessionChanged(PackageInstallerSession session) {
+        public void onSessionChanged(PackageInstallerSession session) {
             session.markUpdated();
             mSettingsWriteRequest.schedule();
             if (mOkToSendBroadcasts && !session.isDestroyed()) {
