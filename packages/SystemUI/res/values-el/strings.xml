@@ -1179,6 +1179,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Δεν θα γίνεται προς το παρόν αυτόματη σύνδεση Wi-Fi."</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Εμφάνιση όλων"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Για εναλλαγή δικτύων, αποσυνδέστε το ethernet"</string>
-    <!-- no translation found for wifi_scan_notify_message (3753839537448621794) -->
-    <skip />
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Για βελτίωση της εμπειρίας στη συσκευή, οι εφαρμογές και οι υπηρεσίες μπορούν ακόμα να εκτελούν σάρωση για δίκτυα Wi‑Fi ανά πάσα στιγμή, ακόμα και όταν το Wi‑Fi είναι απενεργοποιημένο. Μπορείτε να αλλάξετε αυτήν τη ρύθμιση στις ρυθμίσεις της Σάρωσης Wi‑Fi. "<annotation id="link">"Αλλαγή"</annotation></string>
 </resources>
