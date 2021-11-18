@@ -167,30 +167,29 @@ public class WindowMagnificationTest extends SysuiTestCase {
 
     @Test
     public void overviewProxyIsConnected_controllerIsAvailable_updateSysUiStateFlag() {
-        final WindowMagnificationAnimationController mController = mock(
-                WindowMagnificationAnimationController.class);
-        mWindowMagnification.mAnimationControllerSupplier = new FakeAnimationControllerSupplier(
+        final WindowMagnificationController mController = mock(WindowMagnificationController.class);
+        mWindowMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
                 mContext.getSystemService(DisplayManager.class), mController);
-        mWindowMagnification.mAnimationControllerSupplier.get(TEST_DISPLAY);
+        mWindowMagnification.mMagnificationControllerSupplier.get(TEST_DISPLAY);
 
         mOverviewProxyListener.onConnectionChanged(true);
 
-        verify(mController).updateSysUiStateFlag();
+        verify(mController).updateSysUIStateFlag();
     }
 
-    private static class FakeAnimationControllerSupplier extends
-            DisplayIdIndexSupplier<WindowMagnificationAnimationController> {
+    private static class FakeControllerSupplier extends
+            DisplayIdIndexSupplier<WindowMagnificationController> {
 
-        private final WindowMagnificationAnimationController mController;
+        private final WindowMagnificationController mController;
 
-        FakeAnimationControllerSupplier(DisplayManager displayManager,
-                WindowMagnificationAnimationController controller) {
+        FakeControllerSupplier(DisplayManager displayManager,
+                WindowMagnificationController controller) {
             super(displayManager);
             mController = controller;
         }
 
         @Override
-        protected WindowMagnificationAnimationController createInstance(Display display) {
+        protected WindowMagnificationController createInstance(Display display) {
             return mController;
         }
     }
