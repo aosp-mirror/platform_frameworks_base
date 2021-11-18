@@ -24,6 +24,7 @@ import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.qs.HeaderPrivacyIconsController
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent.StatusBarScope
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.SPLIT_SHADE_BATTERY_CONTROLLER
@@ -35,6 +36,7 @@ import javax.inject.Named
 class SplitShadeHeaderController @Inject constructor(
     @Named(SPLIT_SHADE_HEADER) private val statusBar: View,
     private val statusBarIconController: StatusBarIconController,
+    private val privacyIconsController: HeaderPrivacyIconsController,
     qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder,
     featureFlags: FeatureFlags,
     @Named(SPLIT_SHADE_BATTERY_CONTROLLER) batteryMeterViewController: BatteryMeterViewController
@@ -64,8 +66,7 @@ class SplitShadeHeaderController @Inject constructor(
                 return
             }
             field = value
-            updateVisibility()
-            updatePosition()
+            onShadeExpandedChanged()
         }
 
     var splitShadeMode = false
@@ -74,8 +75,7 @@ class SplitShadeHeaderController @Inject constructor(
                 return
             }
             field = value
-            updateVisibility()
-            updateConstraints()
+            onSplitShadeModeChanged()
         }
 
     var shadeExpandedFraction = -1f
@@ -121,6 +121,26 @@ class SplitShadeHeaderController @Inject constructor(
         qsCarrierGroupController = qsCarrierGroupControllerBuilder
                 .setQSCarrierGroup(statusBar.findViewById(R.id.carrier_group))
                 .build()
+        updateVisibility()
+        updateConstraints()
+    }
+
+    private fun onShadeExpandedChanged() {
+        if (shadeExpanded) {
+            privacyIconsController.startListening()
+        } else {
+            privacyIconsController.stopListening()
+        }
+        updateVisibility()
+        updatePosition()
+    }
+
+    private fun onSplitShadeModeChanged() {
+        if (splitShadeMode) {
+            privacyIconsController.onParentVisible()
+        } else {
+            privacyIconsController.onParentInvisible()
+        }
         updateVisibility()
         updateConstraints()
     }

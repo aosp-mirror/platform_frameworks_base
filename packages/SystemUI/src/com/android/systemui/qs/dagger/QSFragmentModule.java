@@ -26,6 +26,7 @@ import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.qs.FooterActionsController;
 import com.android.systemui.qs.FooterActionsController.ExpansionState;
 import com.android.systemui.qs.FooterActionsControllerBuilder;
@@ -39,6 +40,7 @@ import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.QuickStatusBarHeader;
 import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.statusbar.phone.StatusIconContainer;
 
 import javax.inject.Named;
 
@@ -188,5 +190,19 @@ public interface QSFragmentModule {
     @Named(QS_USING_MEDIA_PLAYER)
     static boolean providesQSUsingMediaPlayer(Context context) {
         return useQsMediaPlayer(context);
+    }
+
+    /** */
+    @Provides
+    @QSScope
+    static OngoingPrivacyChip providesPrivacyChip(QuickStatusBarHeader qsHeader) {
+        return qsHeader.findViewById(R.id.privacy_chip);
+    }
+
+    /** */
+    @Provides
+    @QSScope
+    static StatusIconContainer providesStatusIconContainer(QuickStatusBarHeader qsHeader) {
+        return qsHeader.findViewById(R.id.statusIcons);
     }
 }
