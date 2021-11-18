@@ -10653,15 +10653,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         final int userHandle = user.getIdentifier();
-        final Intent intent = new Intent(DevicePolicyManager.ACTION_MANAGED_USER_CREATED)
-                .putExtra(Intent.EXTRA_USER_HANDLE, userHandle)
-                .putExtra(
-                        DevicePolicyManager.EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED,
-                        leaveAllSystemAppsEnabled)
-                .setPackage(getManagedProvisioningPackage(mContext))
-                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
-
         final long id = mInjector.binderClearCallingIdentity();
         try {
             manageUserUnchecked(admin, profileOwner, userHandle, adminExtras,
@@ -10671,6 +10662,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
                         Settings.Secure.USER_SETUP_COMPLETE, 1, userHandle);
             }
+
+            sendProvisioningCompletedBroadcast(
+                    userHandle, ACTION_PROVISION_MANAGED_USER, leaveAllSystemAppsEnabled);
 
             return user;
         } catch (Throwable re) {
@@ -10684,6 +10678,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
+    }
+
+    private void sendProvisioningCompletedBroadcast(
+            int user, String action, boolean leaveAllSystemAppsEnabled) {
+        final Intent intent = new Intent(DevicePolicyManager.ACTION_PROVISIONING_COMPLETED)
+                .putExtra(Intent.EXTRA_USER_HANDLE, user)
+                .putExtra(
+                        DevicePolicyManager.EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED,
+                        leaveAllSystemAppsEnabled)
+                .putExtra(DevicePolicyManager.EXTRA_PROVISIONING_ACTION,
+                        action)
+                .setPackage(getManagedProvisioningPackage(mContext))
+                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
     }
 
     private void manageUserUnchecked(ComponentName admin, ComponentName profileOwner,
@@ -17277,6 +17285,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
             }
 
+            sendProvisioningCompletedBroadcast(
+                    userInfo.id,
+                    ACTION_PROVISION_MANAGED_PROFILE,
+                    provisioningParams.isLeaveAllSystemAppsEnabled());
+
             return userInfo.getUserHandle();
         } catch (Exception e) {
             DevicePolicyEventLogger
@@ -17557,6 +17570,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             disallowAddUser();
             setAdminCanGrantSensorsPermissionForUserUnchecked(deviceOwnerUserId,
                     provisioningParams.canDeviceOwnerGrantSensorsPermissions());
+            sendProvisioningCompletedBroadcast(
+                    deviceOwnerUserId,
+                    ACTION_PROVISION_MANAGED_DEVICE,
+                    provisioningParams.isLeaveAllSystemAppsEnabled());
         } catch (Exception e) {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.PLATFORM_PROVISIONING_ERROR)
