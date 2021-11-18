@@ -53,6 +53,7 @@ import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.connectivity.StatusBarFlags;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -110,6 +111,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private SecureSettings mSecureSettings;
 
     private final TileServiceRequestController mTileServiceRequestController;
+    private final StatusBarFlags mStatusBarFlags;
 
     @Inject
     public QSTileHost(Context context,
@@ -129,7 +131,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             SecureSettings secureSettings,
             CustomTileStatePersister customTileStatePersister,
             TileServiceRequestController.Builder tileServiceRequestControllerBuilder,
-            FeatureFlags featureFlags
+            FeatureFlags featureFlags,
+            StatusBarFlags statusBarFlags
     ) {
         mIconController = iconController;
         mContext = context;
@@ -141,6 +144,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mUiEventLogger = uiEventLogger;
         mBroadcastDispatcher = broadcastDispatcher;
         mTileServiceRequestController = tileServiceRequestControllerBuilder.create(this);
+        mStatusBarFlags = statusBarFlags;
 
         mInstanceIdSequence = new InstanceIdSequence(MAX_QS_INSTANCE_ID);
         mServices = new TileServices(this, bgLooper, mBroadcastDispatcher, userTracker);
@@ -276,7 +280,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         if (newValue == null && UserManager.isDeviceInDemoMode(mContext)) {
             newValue = mContext.getResources().getString(R.string.quick_settings_tiles_retail_mode);
         }
-        final List<String> tileSpecs = loadTileSpecs(mContext, newValue, mFeatureFlags);
+        final List<String> tileSpecs = loadTileSpecs(mContext, newValue, mStatusBarFlags);
         int currentUser = mUserTracker.getUserId();
         if (currentUser != mCurrentUser) {
             mUserContext = mUserTracker.getUserContext();
@@ -345,7 +349,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         if (newTiles.isEmpty() && !tileSpecs.isEmpty()) {
             // If we didn't manage to create any tiles, set it to empty (default)
             Log.d(TAG, "No valid tiles on tuning changed. Setting to default.");
-            changeTiles(currentSpecs, loadTileSpecs(mContext, "", mFeatureFlags));
+            changeTiles(currentSpecs, loadTileSpecs(mContext, "", mStatusBarFlags));
         } else {
             for (int i = 0; i < mCallbacks.size(); i++) {
                 mCallbacks.get(i).onTilesChanged();
@@ -413,7 +417,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
 
     private void changeTileSpecs(Predicate<List<String>> changeFunction) {
         final String setting = mSecureSettings.getStringForUser(TILES_SETTING, mCurrentUser);
-        final List<String> tileSpecs = loadTileSpecs(mContext, setting, mFeatureFlags);
+        final List<String> tileSpecs = loadTileSpecs(mContext, setting, mStatusBarFlags);
         if (changeFunction.test(tileSpecs)) {
             saveTilesToSettings(tileSpecs);
         }
@@ -503,7 +507,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     }
 
     protected static List<String> loadTileSpecs(
-            Context context, String tileList, FeatureFlags featureFlags) {
+            Context context, String tileList, StatusBarFlags statusBarFlags) {
         final Resources res = context.getResources();
 
         if (TextUtils.isEmpty(tileList)) {
@@ -536,7 +540,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                 }
             }
         }
-        if (featureFlags.isProviderModelSettingEnabled(context)) {
+        if (statusBarFlags.isProviderModelSettingEnabled()) {
             if (!tiles.contains("internet")) {
                 if (tiles.contains("wifi")) {
                     // Replace the WiFi with Internet, and remove the Cell

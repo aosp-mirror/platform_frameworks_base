@@ -16,114 +16,86 @@
 
 package com.android.systemui.flags;
 
-import android.content.Context;
-import android.util.FeatureFlagUtils;
-
-import com.android.systemui.dagger.SysUISingleton;
-
-import javax.inject.Inject;
-
 /**
  * Class to manage simple DeviceConfig-based feature flags.
  *
  * See {@link Flags} for instructions on defining new flags.
  */
-@SysUISingleton
-public class FeatureFlags {
-    private final FlagReader mFlagReader;
-
-    @Inject
-    public FeatureFlags(FlagReader flagReader) {
-        mFlagReader = flagReader;
-    }
-
-    /**
-     * @param flag The {@link BooleanFlag} of interest.
-     * @return The value of the flag.
-     */
-    public boolean isEnabled(BooleanFlag flag) {
-        return mFlagReader.isEnabled(flag);
-    }
-
-    public boolean isNewNotifPipelineRenderingEnabled() {
+public interface FeatureFlags extends FlagReader {
+    default boolean isNewNotifPipelineRenderingEnabled() {
         return isEnabled(Flags.NEW_NOTIFICATION_PIPELINE_RENDERING);
     }
 
     /** */
-    public boolean useNewLockscreenAnimations() {
+    default boolean useNewLockscreenAnimations() {
         return isEnabled(Flags.LOCKSCREEN_ANIMATIONS);
     }
 
-    public boolean isPeopleTileEnabled() {
+    default boolean isPeopleTileEnabled() {
         return isEnabled(Flags.PEOPLE_TILE);
     }
 
-    public boolean isMonetEnabled() {
+    default boolean isMonetEnabled() {
         return isEnabled(Flags.MONET);
     }
 
-    public boolean isPMLiteEnabled() {
+    default boolean isPMLiteEnabled() {
         return isEnabled(Flags.POWER_MENU_LITE);
     }
 
-    public boolean isChargingRippleEnabled() {
+    default boolean isChargingRippleEnabled() {
         return isEnabled(Flags.CHARGING_RIPPLE);
     }
 
-    public boolean isOngoingCallStatusBarChipEnabled() {
+    default boolean isOngoingCallStatusBarChipEnabled() {
         return isEnabled(Flags.ONGOING_CALL_STATUS_BAR_CHIP);
     }
 
-    public boolean isOngoingCallInImmersiveEnabled() {
+    default boolean isOngoingCallInImmersiveEnabled() {
         return isOngoingCallStatusBarChipEnabled() && isEnabled(Flags.ONGOING_CALL_IN_IMMERSIVE);
     }
 
-    public boolean isOngoingCallInImmersiveChipTapEnabled() {
+    default boolean isOngoingCallInImmersiveChipTapEnabled() {
         return isOngoingCallInImmersiveEnabled()
                 && isEnabled(Flags.ONGOING_CALL_IN_IMMERSIVE_CHIP_TAP);
     }
 
-    public boolean isSmartspaceEnabled() {
+    default boolean isSmartspaceEnabled() {
         return isEnabled(Flags.SMARTSPACE);
     }
 
-    public boolean isSmartspaceDedupingEnabled() {
+    default boolean isSmartspaceDedupingEnabled() {
         return isSmartspaceEnabled() && isEnabled(Flags.SMARTSPACE_DEDUPING);
     }
 
-    public boolean isNewKeyguardSwipeAnimationEnabled() {
+    default boolean isNewKeyguardSwipeAnimationEnabled() {
         return isEnabled(Flags.NEW_UNLOCK_SWIPE_ANIMATION);
     }
 
-    public boolean isKeyguardQsUserDetailsShortcutEnabled() {
+    default boolean isKeyguardQsUserDetailsShortcutEnabled() {
         return isEnabled(Flags.QS_USER_DETAIL_SHORTCUT);
     }
 
-    public boolean isSmartSpaceSharedElementTransitionEnabled() {
+    default boolean isSmartSpaceSharedElementTransitionEnabled() {
         return isEnabled(Flags.SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED);
     }
 
     /** Whether or not to use the provider model behavior for the status bar icons */
-    public boolean isCombinedStatusBarSignalIconsEnabled() {
+    default boolean isCombinedStatusBarSignalIconsEnabled() {
         return isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS);
-    }
-
-    /** System setting for provider model behavior */
-    public boolean isProviderModelSettingEnabled(Context context) {
-        return FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);
     }
 
     /**
      * Use the new version of the user switcher
      */
-    public boolean useNewUserSwitcher() {
+    default boolean useNewUserSwitcher() {
         return isEnabled(Flags.NEW_USER_SWITCHER);
     }
 
     /**
      * Use the new single view QS headers
      */
-    public boolean useCombinedQSHeaders() {
+    default boolean useCombinedQSHeaders() {
         return isEnabled(Flags.COMBINED_QS_HEADERS);
     }
 }

@@ -60,7 +60,7 @@ import javax.inject.Inject;
  * To restore a flag back to its default, leave the `--ez value <0|1>` off of the command.
  */
 @SysUISingleton
-public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
+public class FeatureFlagsDebug implements FeatureFlags, FlagWriter, Dumpable {
     private static final String TAG = "SysUIFlags";
 
     private final FlagManager mFlagManager;
@@ -69,7 +69,7 @@ public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
     private final Map<Integer, Boolean> mBooleanFlagCache = new HashMap<>();
 
     @Inject
-    public FeatureFlagManager(
+    public FeatureFlagsDebug(
             FlagManager flagManager,
             Context context,
             SecureSettings secureSettings,

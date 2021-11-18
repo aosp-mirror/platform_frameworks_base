@@ -36,10 +36,10 @@ import javax.inject.Inject;
  * how to set flags.
  */
 @SysUISingleton
-public class FeatureFlagManager implements FlagReader, FlagWriter, Dumpable {
+public class FeatureFlagsRelease implements FeatureFlags, FlagWriter, Dumpable {
     SparseBooleanArray mAccessedFlags = new SparseBooleanArray();
     @Inject
-    public FeatureFlagManager(DumpManager dumpManager) {
+    public FeatureFlagsRelease(DumpManager dumpManager) {
         dumpManager.registerDumpable("SysUIFlags", this);
     }
 
