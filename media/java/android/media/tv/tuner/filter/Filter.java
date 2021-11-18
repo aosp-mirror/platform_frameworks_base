@@ -251,8 +251,8 @@ public class Filter implements AutoCloseable {
     private native int nativeFlushFilter();
     private native int nativeRead(byte[] buffer, long offset, long size);
     private native int nativeClose();
-    private native String nativeCreateSharedFilter();
-    private native void nativeReleaseSharedFilter(String token);
+    private native String nativeAcquireSharedFilterToken();
+    private native void nativeFreeSharedFilterToken(String token);
 
     // Called by JNI
     private Filter(long id) {
@@ -562,20 +562,20 @@ public class Filter implements AutoCloseable {
     }
 
     /**
-     * Creates a shared filter.
+     * Acquires a shared filter token.
      *
      * @return a string shared filter token.
      */
     @Nullable
-    public String createSharedFilter() {
+    public String acquireSharedFilterToken() {
         synchronized (mLock) {
             TunerUtils.checkResourceState(TAG, mIsClosed);
             if (mIsStarted || mIsShared) {
-                Log.d(TAG, "Create shared filter in a wrong state, started: " +
+                Log.d(TAG, "Acquire shared filter in a wrong state, started: " +
                      mIsStarted + "shared: " + mIsShared);
                 return null;
             }
-            String token = nativeCreateSharedFilter();
+            String token = nativeAcquireSharedFilterToken();
             if (token != null) {
                 mIsShared = true;
             }
@@ -584,17 +584,17 @@ public class Filter implements AutoCloseable {
     }
 
     /**
-     * Releases a shared filter.
+     * Frees a shared filter token.
      *
      * @param filterToken the token of the shared filter being released.
      */
-    public void releaseSharedFilter(@NonNull String filterToken) {
+    public void freeSharedFilterToken(@NonNull String filterToken) {
         synchronized (mLock) {
             TunerUtils.checkResourceState(TAG, mIsClosed);
             if (!mIsShared) {
                 return;
             }
-            nativeReleaseSharedFilter(filterToken);
+            nativeFreeSharedFilterToken(filterToken);
             mIsShared = false;
         }
     }

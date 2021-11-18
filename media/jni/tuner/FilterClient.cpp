@@ -196,10 +196,10 @@ Result FilterClient::close() {
     return Result::INVALID_STATE;
 }
 
-string FilterClient::createSharedFilter() {
+string FilterClient::acquireSharedFilterToken() {
     if (mTunerFilter != nullptr) {
         string filterToken;
-        if (mTunerFilter->createSharedFilter(&filterToken).isOk()) {
+        if (mTunerFilter->acquireSharedFilterToken(&filterToken).isOk()) {
             return filterToken;
         }
     }
@@ -207,9 +207,9 @@ string FilterClient::createSharedFilter() {
     return "";
 }
 
-Result FilterClient::releaseSharedFilter(const string& filterToken) {
+Result FilterClient::freeSharedFilterToken(const string& filterToken) {
     if (mTunerFilter != nullptr) {
-        Status s = mTunerFilter->releaseSharedFilter(filterToken);
+        Status s = mTunerFilter->freeSharedFilterToken(filterToken);
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 

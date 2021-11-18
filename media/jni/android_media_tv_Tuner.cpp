@@ -3890,22 +3890,22 @@ static jint android_media_tv_Tuner_close_filter(JNIEnv *env, jobject filter) {
     return (jint)r;
 }
 
-static jstring android_media_tv_Tuner_create_shared_filter(JNIEnv *env, jobject filter) {
+static jstring android_media_tv_Tuner_acquire_shared_filter_token(JNIEnv *env, jobject filter) {
     sp<FilterClient> filterClient = getFilterClient(env, filter);
     if (filterClient == nullptr) {
         jniThrowException(env, "java/lang/IllegalStateException",
-                          "Failed to create shared filter: filter client not found");
+                          "Failed to acquire shared filter token: filter client not found");
         return nullptr;
     }
 
-    string token = filterClient->createSharedFilter();
+    string token = filterClient->acquireSharedFilterToken();
     if (token.empty()) {
         return nullptr;
     }
     return env->NewStringUTF(token.data());
 }
 
-static void android_media_tv_Tuner_release_shared_filter(
+static void android_media_tv_Tuner_free_shared_filter_token(
         JNIEnv *env, jobject filter, jstring token) {
     sp<FilterClient> filterClient = getFilterClient(env, filter);
     if (filterClient == nullptr) {
@@ -3915,7 +3915,7 @@ static void android_media_tv_Tuner_release_shared_filter(
     }
 
     std::string filterToken(env->GetStringUTFChars(token, nullptr));
-    filterClient->releaseSharedFilter(filterToken);
+    filterClient->freeSharedFilterToken(filterToken);
 }
 
 static sp<TimeFilterClient> getTimeFilterClient(JNIEnv *env, jobject filter) {
@@ -4408,10 +4408,10 @@ static const JNINativeMethod gFilterMethods[] = {
     { "nativeFlushFilter", "()I", (void *)android_media_tv_Tuner_flush_filter },
     { "nativeRead", "([BJJ)I", (void *)android_media_tv_Tuner_read_filter_fmq },
     { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_filter },
-    {"nativeCreateSharedFilter", "()Ljava/lang/String;",
-            (void *)android_media_tv_Tuner_create_shared_filter},
-    {"nativeReleaseSharedFilter", "(Ljava/lang/String;)V",
-            (void *)android_media_tv_Tuner_release_shared_filter},
+    {"nativeAcquireSharedFilterToken", "()Ljava/lang/String;",
+            (void *)android_media_tv_Tuner_acquire_shared_filter_token},
+    {"nativeFreeSharedFilterToken", "(Ljava/lang/String;)V",
+            (void *)android_media_tv_Tuner_free_shared_filter_token},
 };
 
 static const JNINativeMethod gSharedFilterMethods[] = {
