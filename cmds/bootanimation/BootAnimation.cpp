@@ -105,6 +105,7 @@ static const int TEXT_MISSING_VALUE = INT_MIN;
 static const char EXIT_PROP_NAME[] = "service.bootanim.exit";
 static const char PROGRESS_PROP_NAME[] = "service.bootanim.progress";
 static const char DISPLAYS_PROP_NAME[] = "persist.service.bootanim.displays";
+static const char CLOCK_ENABLED_PROP_NAME[] = "persist.sys.bootanim.clock.enabled";
 static const int ANIM_ENTRY_NAME_MAX = ANIM_PATH_MAX + 1;
 static constexpr size_t TEXT_POS_LEN_MAX = 16;
 static const int DYNAMIC_COLOR_COUNT = 4;
@@ -1319,6 +1320,8 @@ bool BootAnimation::movie() {
         }
     }
     if (!anyPartHasClock) {
+        mClockEnabled = false;
+    } else if (!android::base::GetBoolProperty(CLOCK_ENABLED_PROP_NAME, false)) {
         mClockEnabled = false;
     }
 
