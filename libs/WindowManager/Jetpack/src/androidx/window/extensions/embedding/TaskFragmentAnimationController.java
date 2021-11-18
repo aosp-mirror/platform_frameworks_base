@@ -16,9 +16,13 @@
 
 package androidx.window.extensions.embedding;
 
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 
 import android.util.Log;
 import android.view.RemoteAnimationAdapter;
@@ -45,8 +49,12 @@ class TaskFragmentAnimationController {
         final RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
         final RemoteAnimationAdapter animationAdapter =
                 new RemoteAnimationAdapter(mRemoteRunner, 0, 0, true /* changeNeedsSnapshot */);
+        definition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_OPEN, animationAdapter);
         definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_OPEN, animationAdapter);
+        definition.addRemoteAnimation(TRANSIT_OLD_TASK_OPEN, animationAdapter);
+        definition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_CLOSE, animationAdapter);
         definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CLOSE, animationAdapter);
+        definition.addRemoteAnimation(TRANSIT_OLD_TASK_CLOSE, animationAdapter);
         definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CHANGE, animationAdapter);
         mOrganizer.registerRemoteAnimations(definition);
     }
