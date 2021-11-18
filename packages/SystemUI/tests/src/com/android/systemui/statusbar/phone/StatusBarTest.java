@@ -210,6 +210,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     @Mock private NotificationLogger.ExpansionStateLogger mExpansionStateLogger;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock private StatusBarSignalPolicy mStatusBarSignalPolicy;
     @Mock private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private AssistManager mAssistManager;
@@ -379,6 +380,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mAutoHideController,
                 mStatusBarWindowController,
                 mKeyguardUpdateMonitor,
+                mStatusBarSignalPolicy,
                 mPulseExpansionHandler,
                 mNotificationWakeUpCoordinator,
                 mKeyguardBypassController,
