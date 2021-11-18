@@ -509,6 +509,11 @@ public class PackageManagerServiceTest {
         for (Method m : coreMethods) {
             if (m != null) {
                 final String name = "ComputerEngine." + displayName(m);
+                if (name.contains(".lambda$static")) {
+                    // skip static lambda function
+                    continue;
+                }
+
                 final int modifiers = m.getModifiers();
                 if (isPrivate(modifiers)) {
                     // Okay

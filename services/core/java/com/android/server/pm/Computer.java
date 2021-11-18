@@ -612,6 +612,10 @@ public interface Computer {
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     int getUidTargetSdkVersion(int uid);
 
+    /**
+     * @see PackageManagerInternal#getProcessesForUid(int)
+     */
+    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ArrayMap<String, ProcessInfo> getProcessesForUid(int uid);
     // End block
