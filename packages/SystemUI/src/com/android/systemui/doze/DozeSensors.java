@@ -513,10 +513,10 @@ public class DozeSensors {
                     true /* settingDef */,
                     configured,
                     pulseReason,
-                    false /* ignoresSetting */,
-                    false /* requiresProx */,
                     reportsTouchCoordinates,
-                    requiresTouchscreen
+                    requiresTouchscreen,
+                    false /* ignoresSetting */,
+                    false /* requiresProx */
             );
         }
 
