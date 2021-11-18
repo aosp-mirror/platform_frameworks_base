@@ -2705,11 +2705,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return false;
     }
 
-    @GuardedBy("mMethodMap")
-    private boolean isKeyguardLocked() {
-        return mKeyguardManager != null && mKeyguardManager.isKeyguardLocked();
-    }
-
     @BinderThread
     @SuppressWarnings("deprecation")
     private void setImeWindowStatus(@NonNull IBinder token, int vis, int backDisposition) {
