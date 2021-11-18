@@ -171,7 +171,9 @@ final class VibrationSettings {
                     }
                 });
 
-        mContext.registerReceiver(mUserReceiver, new IntentFilter(Intent.ACTION_USER_SWITCHED));
+        IntentFilter filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
+        mContext.registerReceiver(mUserReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES));
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_WHEN_RINGING));
         registerSettingsObserver(Settings.Global.getUriFor(Settings.Global.APPLY_RAMPING_RINGER));
