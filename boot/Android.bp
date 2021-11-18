@@ -96,6 +96,10 @@ platform_bootclasspath {
             module: "com.android.sdkext-bootclasspath-fragment",
         },
         {
+            apex: "com.android.supplementalprocess",
+            module: "com.android.supplementalprocess-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.tethering",
             module: "com.android.tethering-bootclasspath-fragment",
         },

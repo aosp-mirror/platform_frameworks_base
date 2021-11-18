@@ -1391,13 +1391,7 @@ public class StorageManager {
                 }
                 packageName = packageNames[0];
             }
-            final int uid = ActivityThread.getPackageManager().getPackageUid(packageName,
-                    PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
-            if (uid <= 0) {
-                Log.w(TAG, "Missing UID; no storage volumes available");
-                return new StorageVolume[0];
-            }
-            return storageManager.getVolumeList(uid, packageName, flags);
+            return storageManager.getVolumeList(userId, packageName, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

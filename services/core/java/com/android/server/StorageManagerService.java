@@ -3713,8 +3713,19 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     @Override
-    public StorageVolume[] getVolumeList(int uid, String packageName, int flags) {
-        final int userId = UserHandle.getUserId(uid);
+    public StorageVolume[] getVolumeList(int userId, String callingPackage, int flags) {
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+
+        if (!isUidOwnerOfPackageOrSystem(callingPackage, callingUid)) {
+            throw new SecurityException("callingPackage does not match UID");
+        }
+        if (callingUserId != userId) {
+            // Callers can ask for volumes of different users, but only with the correct permissions
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS,
+                    "Need INTERACT_ACROSS_USERS to get volumes for another user");
+        }
 
         final boolean forWrite = (flags & StorageManager.FLAG_FOR_WRITE) != 0;
         final boolean realState = (flags & StorageManager.FLAG_REAL_STATE) != 0;
@@ -3730,7 +3741,7 @@ class StorageManagerService extends IStorageManager.Stub
         // should never attempt to augment the actual storage volume state,
         // otherwise we risk confusing it with race conditions as users go
         // through various unlocked states
-        final boolean callerIsMediaStore = UserHandle.isSameApp(Binder.getCallingUid(),
+        final boolean callerIsMediaStore = UserHandle.isSameApp(callingUid,
                 mMediaStoreAuthorityAppId);
 
         final boolean userIsDemo;
@@ -3740,8 +3751,9 @@ class StorageManagerService extends IStorageManager.Stub
         try {
             userIsDemo = LocalServices.getService(UserManagerInternal.class)
                     .getUserInfo(userId).isDemo();
+            storagePermission = mStorageManagerInternal.hasExternalStorage(callingUid,
+                    callingPackage);
             userKeyUnlocked = isUserKeyUnlocked(userId);
-            storagePermission = mStorageManagerInternal.hasExternalStorage(uid, packageName);
         } finally {
             Binder.restoreCallingIdentity(token);
         }

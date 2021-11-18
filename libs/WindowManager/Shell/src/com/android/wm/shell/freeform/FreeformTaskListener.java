@@ -141,16 +141,4 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener {
                 || Settings.Global.getInt(context.getContentResolver(),
                 DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
     }
-
-    /**
-     * Creates {@link FreeformTaskListener} if freeform is enabled.
-     */
-    public static FreeformTaskListener create(Context context,
-            SyncTransactionQueue syncQueue) {
-        if (!isFreeformEnabled(context)) {
-            return null;
-        }
-
-        return new FreeformTaskListener(syncQueue);
-    }
 }

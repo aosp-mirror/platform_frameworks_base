@@ -17,6 +17,7 @@
 
 package com.android.server.wm.flicker.close
 
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -24,6 +25,8 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import org.junit.Assume.assumeFalse
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -78,6 +81,33 @@ class CloseAppBackButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
     @FlakyTest
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun statusBarLayerRotatesScales() {
+        // This test doesn't work in shell transitions because of b/206753786
+        assumeFalse(isShellTransitionsEnabled)
+        super.statusBarLayerRotatesScales()
+    }
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun launcherLayerReplacesApp() {
+        // This test doesn't work in shell transitions because of b/206086894
+        assumeFalse(isShellTransitionsEnabled)
+        super.launcherLayerReplacesApp()
+    }
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun entireScreenCovered() {
+        // This test doesn't work in shell transitions because of b/206086894
+        assumeFalse(isShellTransitionsEnabled)
+        super.entireScreenCovered()
+    }
 
     companion object {
         /**

@@ -17,6 +17,6 @@
 
 <resources>
     <!-- Wear Material standard colors -->
-    <color name="wear_material_red_400">#EE675C</color>
+    <color name="wear_material_red_mid">#CC5D58</color>
     <color name="wear_material_grey_900">#202124</color>
 </resources>

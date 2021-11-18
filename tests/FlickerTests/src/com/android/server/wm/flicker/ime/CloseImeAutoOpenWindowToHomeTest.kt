@@ -34,10 +34,12 @@ import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.entireScreenCovered
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
+import org.junit.Assume.assumeFalse
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -115,7 +117,11 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
 
     @Presubmit
     @Test
-    fun entireScreenCovered() = testSpec.entireScreenCovered()
+    fun entireScreenCovered() {
+        // This test doesn't work in shell transitions because of b/206086894
+        assumeFalse(isShellTransitionsEnabled)
+        testSpec.entireScreenCovered()
+    }
 
     @Presubmit
     @Test
@@ -153,7 +159,11 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
 
     @Presubmit
     @Test
-    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
+    fun statusBarLayerRotatesScales() {
+        // This test doesn't work in shell transitions because of b/206753786
+        assumeFalse(isShellTransitionsEnabled)
+        testSpec.statusBarLayerRotatesScales()
+    }
 
     @Presubmit
     @Test

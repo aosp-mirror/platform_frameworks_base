@@ -21,6 +21,7 @@ import static android.testing.DexmakerShareClassLoaderRule.runWithDexmakerShareC
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.server.am.UserController.COMPLETE_USER_SWITCH_MSG;
 import static com.android.server.am.UserController.CONTINUE_USER_SWITCH_MSG;
 import static com.android.server.am.UserController.REPORT_LOCKED_BOOT_COMPLETE_MSG;
 import static com.android.server.am.UserController.REPORT_USER_SWITCH_COMPLETE_MSG;
@@ -59,6 +60,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.IUserSwitchObserver;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
@@ -325,8 +327,16 @@ public class UserControllerTest {
         assertWithMessage("No messages should be sent").that(actualCodes).isEmpty();
     }
 
+    private void continueAndCompleteUserSwitch(UserState userState, int oldUserId, int newUserId) {
+        mUserController.continueUserSwitch(userState, oldUserId, newUserId);
+        mInjector.mHandler.removeMessages(UserController.COMPLETE_USER_SWITCH_MSG);
+        mUserController.completeUserSwitch(newUserId);
+    }
+
     @Test
     public void testContinueUserSwitch() throws RemoteException {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
         // Start user -- this will update state of mUserController
         mUserController.startUser(TEST_USER_ID, true);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
@@ -336,7 +346,28 @@ public class UserControllerTest {
         int newUserId = reportMsg.arg2;
         mInjector.mHandler.clearAllRecordedMessages();
         // Verify that continueUserSwitch worked as expected
-        mUserController.continueUserSwitch(userState, oldUserId, newUserId);
+        continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
+        verify(mInjector, times(0)).dismissKeyguard(any(), anyString());
+        verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
+        continueUserSwitchAssertions(TEST_USER_ID, false);
+    }
+
+    @Test
+    public void testContinueUserSwitchDismissKeyguard() throws RemoteException {
+        when(mInjector.mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(false);
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+        // Start user -- this will update state of mUserController
+        mUserController.startUser(TEST_USER_ID, true);
+        Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
+        assertNotNull(reportMsg);
+        UserState userState = (UserState) reportMsg.obj;
+        int oldUserId = reportMsg.arg1;
+        int newUserId = reportMsg.arg2;
+        mInjector.mHandler.clearAllRecordedMessages();
+        // Verify that continueUserSwitch worked as expected
+        continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
+        verify(mInjector, times(1)).dismissKeyguard(any(), anyString());
         verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
         continueUserSwitchAssertions(TEST_USER_ID, false);
     }
@@ -355,7 +386,7 @@ public class UserControllerTest {
         int newUserId = reportMsg.arg2;
         mInjector.mHandler.clearAllRecordedMessages();
         // Verify that continueUserSwitch worked as expected
-        mUserController.continueUserSwitch(userState, oldUserId, newUserId);
+        continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
         verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
         continueUserSwitchAssertions(TEST_USER_ID, false);
     }
@@ -363,6 +394,7 @@ public class UserControllerTest {
     private void continueUserSwitchAssertions(int expectedUserId, boolean backgroundUserStopping)
             throws RemoteException {
         Set<Integer> expectedCodes = new LinkedHashSet<>();
+        expectedCodes.add(COMPLETE_USER_SWITCH_MSG);
         expectedCodes.add(REPORT_USER_SWITCH_COMPLETE_MSG);
         if (backgroundUserStopping) {
             expectedCodes.add(0); // this is for directly posting in stopping.
@@ -397,7 +429,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testExplicitSystenUserStartInBackground() {
+    public void testExplicitSystemUserStartInBackground() {
         setUpUser(UserHandle.USER_SYSTEM, 0);
         assertFalse(mUserController.isSystemUserStarted());
         assertTrue(mUserController.startUser(UserHandle.USER_SYSTEM, false, null));
@@ -646,7 +678,7 @@ public class UserControllerTest {
         mUserStates.put(newUserId, userState);
         mInjector.mHandler.clearAllRecordedMessages();
         // Verify that continueUserSwitch worked as expected
-        mUserController.continueUserSwitch(userState, oldUserId, newUserId);
+        continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
         verify(mInjector.getWindowManager(), times(expectedNumberOfCalls))
                 .stopFreezingScreen();
         continueUserSwitchAssertions(newUserId, expectOldUserStopping);
@@ -701,6 +733,7 @@ public class UserControllerTest {
         private final IStorageManager mStorageManagerMock;
         private final UserManagerInternal mUserManagerInternalMock;
         private final WindowManagerService mWindowManagerMock;
+        private final KeyguardManager mKeyguardManagerMock;
 
         private final Context mCtx;
 
@@ -715,6 +748,8 @@ public class UserControllerTest {
             mUserManagerInternalMock = mock(UserManagerInternal.class);
             mWindowManagerMock = mock(WindowManagerService.class);
             mStorageManagerMock = mock(IStorageManager.class);
+            mKeyguardManagerMock = mock(KeyguardManager.class);
+            when(mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(true);
         }
 
         @Override
@@ -754,6 +789,11 @@ public class UserControllerTest {
         }
 
         @Override
+        KeyguardManager getKeyguardManager() {
+            return mKeyguardManagerMock;
+        }
+
+        @Override
         void updateUserConfiguration() {
             Log.i(TAG, "updateUserConfiguration");
         }
@@ -786,6 +826,11 @@ public class UserControllerTest {
         @Override
         protected IStorageManager getStorageManager() {
             return mStorageManagerMock;
+        }
+
+        @Override
+        protected void dismissKeyguard(Runnable runnable, String reason) {
+            runnable.run();
         }
     }
 

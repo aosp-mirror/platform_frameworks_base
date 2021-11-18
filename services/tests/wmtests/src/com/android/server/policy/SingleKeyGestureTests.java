@@ -150,11 +150,12 @@ public class SingleKeyGestureTests {
 
     }
 
-    private void pressKey(long eventTime, int keyCode, long pressTime) {
-        pressKey(eventTime, keyCode, pressTime, true /* interactive */);
+    private void pressKey(int keyCode, long pressTime) {
+        pressKey(keyCode, pressTime, true /* interactive */);
     }
 
-    private void pressKey(long eventTime, int keyCode, long pressTime, boolean interactive) {
+    private void pressKey(int keyCode, long pressTime, boolean interactive) {
+        long eventTime = SystemClock.uptimeMillis();
         final KeyEvent keyDown = new KeyEvent(eventTime, eventTime, ACTION_DOWN,
                 keyCode, 0 /* repeat */, 0 /* metaState */);
         mDetector.interceptKey(keyDown, interactive);
@@ -175,54 +176,48 @@ public class SingleKeyGestureTests {
 
     @Test
     public void testShortPress() throws InterruptedException {
-        final long eventTime = SystemClock.uptimeMillis();
-        pressKey(eventTime, KEYCODE_POWER, 0 /* pressTime */);
+        pressKey(KEYCODE_POWER, 0 /* pressTime */);
         assertTrue(mShortPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
     }
 
     @Test
     public void testLongPress() throws InterruptedException {
-        final long eventTime = SystemClock.uptimeMillis();
-        pressKey(eventTime, KEYCODE_POWER, mLongPressTime);
+        pressKey(KEYCODE_POWER, mLongPressTime);
         assertTrue(mLongPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
     }
 
     @Test
     public void testVeryLongPress() throws InterruptedException {
-        final long eventTime = SystemClock.uptimeMillis();
-        pressKey(eventTime, KEYCODE_POWER, mVeryLongPressTime);
+        pressKey(KEYCODE_POWER, mVeryLongPressTime);
         assertTrue(mVeryLongPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
     }
 
     @Test
     public void testMultiPress() throws InterruptedException {
-        final long eventTime = SystemClock.uptimeMillis();
         // Double presses.
         mExpectedMultiPressCount = 2;
-        pressKey(eventTime, KEYCODE_POWER, 0 /* pressTime */);
-        pressKey(eventTime, KEYCODE_POWER, 0 /* pressTime */);
+        pressKey(KEYCODE_POWER, 0 /* pressTime */);
+        pressKey(KEYCODE_POWER, 0 /* pressTime */);
         assertTrue(mMultiPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
 
         // Triple presses.
         mExpectedMultiPressCount = 3;
         mMultiPressed = new CountDownLatch(1);
-        pressKey(eventTime, KEYCODE_POWER, 0 /* pressTime */);
-        pressKey(eventTime, KEYCODE_POWER, 0 /* pressTime */);
-        pressKey(eventTime, KEYCODE_POWER, 0 /* pressTime */);
+        pressKey(KEYCODE_POWER, 0 /* pressTime */);
+        pressKey(KEYCODE_POWER, 0 /* pressTime */);
+        pressKey(KEYCODE_POWER, 0 /* pressTime */);
         assertTrue(mMultiPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
     }
 
     @Test
     public void testNonInteractive() throws InterruptedException {
-        long eventTime = SystemClock.uptimeMillis();
         // Disallow short press behavior from non interactive.
         mAllowNonInteractiveForPress = false;
-        pressKey(eventTime, KEYCODE_POWER, 0 /* pressTime */, false /* interactive */);
+        pressKey(KEYCODE_POWER, 0 /* pressTime */, false /* interactive */);
         assertFalse(mShortPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
 
         // Allow long press behavior from non interactive.
-        eventTime = SystemClock.uptimeMillis();
-        pressKey(eventTime, KEYCODE_POWER, mLongPressTime, false /* interactive */);
+        pressKey(KEYCODE_POWER, mLongPressTime, false /* interactive */);
         assertTrue(mLongPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
     }
 
@@ -238,9 +233,8 @@ public class SingleKeyGestureTests {
             for (int i = 0; i < 100; i++) {
                 mShortPressed = new CountDownLatch(2);
                 newHandler.runWithScissors(() -> {
-                    final long eventTime = SystemClock.uptimeMillis();
-                    pressKey(eventTime, KEYCODE_POWER, 0 /* pressTime */);
-                    pressKey(eventTime, KEYCODE_BACK, 0 /* pressTime */);
+                    pressKey(KEYCODE_POWER, 0 /* pressTime */);
+                    pressKey(KEYCODE_BACK, 0 /* pressTime */);
                 }, mWaitTimeout);
                 assertTrue(mShortPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
             }
@@ -261,15 +255,13 @@ public class SingleKeyGestureTests {
                 mMultiPressed = new CountDownLatch(1);
                 mShortPressed = new CountDownLatch(1);
                 newHandler.runWithScissors(() -> {
-                    final long eventTime = SystemClock.uptimeMillis();
-                    pressKey(eventTime, KEYCODE_POWER, 0 /* pressTime */);
-                    pressKey(eventTime, KEYCODE_POWER, 0 /* pressTime */);
+                    pressKey(KEYCODE_POWER, 0 /* pressTime */);
+                    pressKey(KEYCODE_POWER, 0 /* pressTime */);
                 }, mWaitTimeout);
                 assertTrue(mMultiPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
 
                 newHandler.runWithScissors(() -> {
-                    final long eventTime = SystemClock.uptimeMillis();
-                    pressKey(eventTime, KEYCODE_POWER, 0 /* pressTime */);
+                    pressKey(KEYCODE_POWER, 0 /* pressTime */);
                 }, mWaitTimeout);
                 assertTrue(mShortPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
             }

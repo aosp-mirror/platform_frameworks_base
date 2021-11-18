@@ -30,6 +30,10 @@ import android.view.Surface;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Central system API to the overall TV interactive application framework (TIAF) architecture, which
  * arbitrates interaction between applications and interactive apps.
@@ -46,9 +50,14 @@ public final class TvIAppManager {
     private final SparseArray<SessionCallbackRecord> mSessionCallbackRecordMap =
             new SparseArray<>();
 
+    // @GuardedBy("mLock")
+    private final List<TvIAppCallbackRecord> mCallbackRecords = new LinkedList<>();
+
     // A sequence number for the next session to be created. Should be protected by a lock
     // {@code mSessionCallbackRecordMap}.
     private int mNextSeq;
+
+    private final Object mLock = new Object();
 
     private final ITvIAppClient mClient;
 
@@ -103,6 +112,154 @@ public final class TvIAppManager {
                 }
             }
         };
+        ITvIAppManagerCallback managerCallback = new ITvIAppManagerCallback.Stub() {
+            // TODO: handle IApp service state changes
+            @Override
+            public void onIAppServiceAdded(String iAppServiceId) {
+                synchronized (mLock) {
+                    for (TvIAppCallbackRecord record : mCallbackRecords) {
+                        record.postIAppServiceAdded(iAppServiceId);
+                    }
+                }
+            }
+
+            @Override
+            public void onIAppServiceRemoved(String iAppServiceId) {
+                synchronized (mLock) {
+                    for (TvIAppCallbackRecord record : mCallbackRecords) {
+                        record.postIAppServiceRemoved(iAppServiceId);
+                    }
+                }
+            }
+
+            @Override
+            public void onIAppServiceUpdated(String iAppServiceId) {
+                synchronized (mLock) {
+                    for (TvIAppCallbackRecord record : mCallbackRecords) {
+                        record.postIAppServiceUpdated(iAppServiceId);
+                    }
+                }
+            }
+
+            @Override
+            public void onTvIAppInfoUpdated(TvIAppInfo iAppInfo) {
+                // TODO: add public API updateIAppInfo()
+                synchronized (mLock) {
+                    for (TvIAppCallbackRecord record : mCallbackRecords) {
+                        record.postTvIAppInfoUpdated(iAppInfo);
+                    }
+                }
+            }
+        };
+        try {
+            if (mService != null) {
+                mService.registerCallback(managerCallback, mUserId);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Callback used to monitor status of the TV IApp.
+     * @hide
+     */
+    public abstract static class TvIAppCallback {
+        /**
+         * This is called when a TV IApp service is added to the system.
+         *
+         * <p>Normally it happens when the user installs a new TV IApp service package that
+         * implements {@link TvIAppService} interface.
+         *
+         * @param iAppServiceId The ID of the TV IApp service.
+         */
+        public void onIAppServiceAdded(String iAppServiceId) {
+        }
+
+        /**
+         * This is called when a TV IApp service is removed from the system.
+         *
+         * <p>Normally it happens when the user uninstalls the previously installed TV IApp service
+         * package.
+         *
+         * @param iAppServiceId The ID of the TV IApp service.
+         */
+        public void onIAppServiceRemoved(String iAppServiceId) {
+        }
+
+        /**
+         * This is called when a TV IApp service is updated on the system.
+         *
+         * <p>Normally it happens when a previously installed TV IApp service package is
+         * re-installed or a newer version of the package exists becomes available/unavailable.
+         *
+         * @param iAppServiceId The ID of the TV IApp service.
+         */
+        public void onIAppServiceUpdated(String iAppServiceId) {
+        }
+
+        /**
+         * This is called when the information about an existing TV IApp service has been updated.
+         *
+         * <p>Because the system automatically creates a <code>TvIAppInfo</code> object for each TV
+         * IApp service based on the information collected from the
+         * <code>AndroidManifest.xml</code>, this method is only called back when such information
+         * has changed dynamically.
+         *
+         * @param iAppInfo The <code>TvIAppInfo</code> object that contains new information.
+         */
+        public void onTvIAppInfoUpdated(TvIAppInfo iAppInfo) {
+        }
+    }
+
+    private static final class TvIAppCallbackRecord {
+        private final TvIAppCallback mCallback;
+        private final Handler mHandler;
+
+        TvIAppCallbackRecord(TvIAppCallback callback, Handler handler) {
+            mCallback = callback;
+            mHandler = handler;
+        }
+
+        public TvIAppCallback getCallback() {
+            return mCallback;
+        }
+
+        public void postIAppServiceAdded(final String iAppServiceId) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onIAppServiceAdded(iAppServiceId);
+                }
+            });
+        }
+
+        public void postIAppServiceRemoved(final String iAppServiceId) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onIAppServiceRemoved(iAppServiceId);
+                }
+            });
+        }
+
+        public void postIAppServiceUpdated(final String iAppServiceId) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onIAppServiceUpdated(iAppServiceId);
+                }
+            });
+        }
+
+        public void postTvIAppInfoUpdated(final TvIAppInfo iAppInfo) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onTvIAppInfoUpdated(iAppInfo);
+                }
+            });
+        }
     }
 
     /**
@@ -135,6 +292,56 @@ public final class TvIAppManager {
                 mService.createSession(mClient, iAppServiceId, type, seq, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the complete list of TV IApp service on the system.
+     *
+     * @return List of {@link TvIAppInfo} for each TV IApp service that describes its meta
+     *         information.
+     * @hide
+     */
+    public List<TvIAppInfo> getTvIAppServiceList() {
+        try {
+            return mService.getTvIAppServiceList(mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Registers a {@link TvIAppManager.TvIAppCallback}.
+     *
+     * @param callback A callback used to monitor status of the TV IApp services.
+     * @param handler A {@link Handler} that the status change will be delivered to.
+     * @hide
+     */
+    public void registerCallback(@NonNull TvIAppCallback callback, @NonNull Handler handler) {
+        Preconditions.checkNotNull(callback);
+        Preconditions.checkNotNull(handler);
+        synchronized (mLock) {
+            mCallbackRecords.add(new TvIAppCallbackRecord(callback, handler));
+        }
+    }
+
+    /**
+     * Unregisters the existing {@link TvIAppManager.TvIAppCallback}.
+     *
+     * @param callback The existing callback to remove.
+     * @hide
+     */
+    public void unregisterCallback(@NonNull final TvIAppCallback callback) {
+        Preconditions.checkNotNull(callback);
+        synchronized (mLock) {
+            for (Iterator<TvIAppCallbackRecord> it = mCallbackRecords.iterator();
+                    it.hasNext(); ) {
+                TvIAppCallbackRecord record = it.next();
+                if (record.getCallback() == callback) {
+                    it.remove();
+                    break;
+                }
             }
         }
     }

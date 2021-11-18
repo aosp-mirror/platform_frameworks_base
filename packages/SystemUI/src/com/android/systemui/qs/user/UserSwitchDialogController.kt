@@ -16,7 +16,9 @@
 
 package com.android.systemui.qs.user
 
+import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.provider.Settings
 import android.view.View
@@ -84,12 +86,26 @@ class UserSwitchDialogController @VisibleForTesting constructor(
             doneButton.setOnClickListener { dismiss() }
 
             val adapter = userDetailViewAdapterProvider.get()
-            adapter.injectCallback {
-                dismiss()
-            }
             adapter.linkToViewGroup(grid)
 
-            dialogLaunchAnimator.showFromView(this, view)
+            val hostDialog = dialogLaunchAnimator.showFromView(this, view)
+            adapter.injectDialogShower(DialogShowerImpl(hostDialog, dialogLaunchAnimator))
         }
+    }
+
+    private class DialogShowerImpl(
+        private val hostDialog: Dialog,
+        private val dialogLaunchAnimator: DialogLaunchAnimator
+    ) : DialogInterface by hostDialog, DialogShower {
+        override fun showDialog(dialog: Dialog): Dialog {
+            return dialogLaunchAnimator.showFromDialog(
+                dialog,
+                parentHostDialog = hostDialog
+            )
+        }
+    }
+
+    interface DialogShower : DialogInterface {
+        fun showDialog(dialog: Dialog): Dialog
     }
 }

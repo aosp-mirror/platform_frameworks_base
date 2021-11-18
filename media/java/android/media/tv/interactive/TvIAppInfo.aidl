@@ -14,20 +14,6 @@
  * limitations under the License.
  */
 
-package android.app;
+package android.media.tv.interactive;
 
-/**
- * Exception used to crash an app process when it didn't call {@link Service#startForeground}
- * in time after the service was started with
- * {@link android.content.Context#startForegroundService}.
- *
- * @hide
- */
-public class ForegroundServiceDidNotStartInTimeException extends RemoteServiceException {
-    /** The type ID passed to {@link IApplicationThread#scheduleCrash}. */
-    public static final int TYPE_ID = 1;
-
-    public ForegroundServiceDidNotStartInTimeException(String msg) {
-        super(msg);
-    }
-}
+parcelable TvIAppInfo;

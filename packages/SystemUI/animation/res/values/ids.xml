@@ -16,4 +16,5 @@
 -->
 <resources>
     <item type="id" name="launch_animation_running"/>
+    <item type="id" name="dialog_content_parent" />
 </resources>
