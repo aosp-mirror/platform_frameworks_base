@@ -507,7 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes i recordatoris"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permet la configuració d\'alarmes i recordatoris"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes i recordatoris"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permet que aquesta aplicació configuri alarmes i programi accions urgents. Això permet a l\'aplicació executar-se en segon pla i, per tant, és possible que consumeixi més bateria.\n\nSi aquest permís està desactivat, les alarmes i els esdeveniments urgents que ja hagi programat l\'aplicació no funcionaran."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permet que aquesta aplicació configuri alarmes i programi accions. Això permet a l\'aplicació executar-se en segon pla i, per tant, és possible que consumeixi més bateria.\n\nSi aquest permís està desactivat, les alarmes i els esdeveniments que ja hagi programat l\'aplicació no funcionaran."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programació, alarma, recordatori, rellotge"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activa"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activa el mode No molestis"</string>
@@ -568,6 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Suprimeix el convidat"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Restableix el convidat"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Convidat"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Vols restablir el convidat?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Restableix"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"S\'està restablint el convidat…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fes una foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Tria una imatge"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Selecciona una foto"</string>

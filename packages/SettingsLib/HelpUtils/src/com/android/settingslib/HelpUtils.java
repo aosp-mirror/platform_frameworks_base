@@ -25,6 +25,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.util.Log;
@@ -32,6 +33,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.widget.R;
@@ -73,6 +75,15 @@ public class HelpUtils {
     private HelpUtils() {
     }
 
+    /**
+     * Prepares the help menu item by doing the following.
+     * - If the helpUrlString is empty or null, the help menu item is made invisible.
+     * - Otherwise, this makes the help menu item visible and sets the intent for the help menu
+     * item to view the URL.
+     *
+     * @return returns whether the help menu item has been made visible.
+     */
+    @RequiresApi(Build.VERSION_CODES.P)
     public static boolean prepareHelpMenuItem(Activity activity, Menu menu, String helpUri,
             String backupContext) {
         // menu contains help item, skip it
@@ -84,6 +95,15 @@ public class HelpUtils {
         return prepareHelpMenuItem(activity, helpItem, helpUri, backupContext);
     }
 
+    /**
+     * Prepares the help menu item by doing the following.
+     * - If the helpUrlString is empty or null, the help menu item is made invisible.
+     * - Otherwise, this makes the help menu item visible and sets the intent for the help menu
+     * item to view the URL.
+     *
+     * @return returns whether the help menu item has been made visible.
+     */
+    @RequiresApi(Build.VERSION_CODES.P)
     public static boolean prepareHelpMenuItem(Activity activity, Menu menu, int helpUriResource,
             String backupContext) {
         // menu contains help item, skip it
@@ -105,6 +125,7 @@ public class HelpUtils {
      * @return returns whether the help menu item has been made visible.
      */
     @VisibleForTesting
+    @RequiresApi(Build.VERSION_CODES.P)
     static boolean prepareHelpMenuItem(final Activity activity, MenuItem helpMenuItem,
             String helpUriString, String backupContext) {
         if (Global.getInt(activity.getContentResolver(), Global.DEVICE_PROVISIONED, 0) == 0) {
@@ -152,6 +173,10 @@ public class HelpUtils {
         }
     }
 
+    /**
+     * Get the help intent from helpUriString.
+     */
+    @RequiresApi(Build.VERSION_CODES.P)
     public static Intent getHelpIntent(Context context, String helpUriString,
             String backupContext) {
         if (Global.getInt(context.getContentResolver(), Global.DEVICE_PROVISIONED, 0) == 0) {
@@ -223,7 +248,8 @@ public class HelpUtils {
      *
      * @return the uri with added query parameters
      */
-    private static Uri uriWithAddedParameters(Context context, Uri baseUri) {
+    @RequiresApi(Build.VERSION_CODES.P)
+    public static Uri uriWithAddedParameters(Context context, Uri baseUri) {
         Uri.Builder builder = baseUri.buildUpon();
 
         // Add in the preferred language

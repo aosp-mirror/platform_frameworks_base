@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS кызматы"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Сенсордун билдирмелеринин кызматы"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight кызматы"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Убакыт алкагын аныктагыч (байланыш жок)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS Убакытты жаңыртуу кызматы"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Музыканы таануу кызматы"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Түзмөгүңүз тазаланат"</string>
@@ -349,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Колдонмого абал тилкесин жайып көрсөтүү же жыйнап коюу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"билдирмелерди кулпуланган түзмөктүн толук экранында көрсөтүү"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Колдонмого билдирмелерди кулпуланган түзмөктүн толук экранында көрсөтүүгө уруксат берет"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"тез чакырма орнотуу"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Ыкчам баскыч түзүү"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Колдонмого үй экранга колдонуучунун катышуусусуз тез чакырма кошууга мүмкүнчүлүк берет."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"тез чакыргычтарды жок кылуу"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Колдонмого колдонуучунун катышуусусуз үй экранынын тез чакырмаларын жок кылуу мүмкүнчүлүгүн берет."</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Башка манжа изин байкап көрүңүз"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Өтө жарык"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Тууралап көрүңүз"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Манжаңыздын абалын ар жолкусунда бир аз өзгөртүп туруңуз"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Манжа изи текшерилди"</string>
@@ -601,23 +601,25 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Бир да манжа изи катталган эмес."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Бул түзмөктө манжа изинин сенсору жок."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Сенсор убактылуу өчүрүлгөн."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Манжа изинин сенсорун колдонууга болбойт. Тейлөө кызматына кайрылыңыз"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>-манжа"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Манжа изин колдонуу"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Манжа изин же экрандын кулпусун колдонуу"</string>
-    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Улантуу үчүн манжаңыздын изин колдонуңуз"</string>
+    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Улантуу үчүн манжаңызды сканерге тийгизиңиз"</string>
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Улантуу үчүн манжа изин же экрандын кулпусун колдонуңуз"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Манжа изинин сүрөтчөсү"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Жүзүнөн таанып ачуу"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Жүзүңүздү кайра таанытыңыз."</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Мыкты таануу үчүн, жүзүңүздү кайра таанытыңыз"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Жүзүнөн таанып ачуу функциясында маселе келип чыкты"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Жүзүңүздүн үлгүсүн өчүрүү үчүн басып, жаңы үлгүнү кошуңуз"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Жүзүнөн таанып ачууну жөндөө"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Телефонуңузду карап туруп эле кулпусун ачып алыңыз"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Кулпусун ачуунун көбүрөөк жолдорун жөндөңүз"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Манжа изин кошуу үчүн басыңыз"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Кулпуланган түзмөктү манжа изи менен ачуу"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Манжа изинин сенсорун колдонууга болбойт"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Тейлөө кызматына кайрылыңыз."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Жүзүңүз жакшы тартылган жок. Кайталап көрүңүз."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Өтө жарык. Жарыктыкты азайтып көрүңүз."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Өтө караңгы. Жарыгыраак жерден тартып көрүңүз."</string>
@@ -646,7 +648,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Жүздүн аныктыгын текшерүү жокко чыгарылды."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Жүзүнөн таанып ачуу функциясын колдонуучу өчүрүп салды"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Өтө көп жолу аракет жасадыңыз. Бир аздан кийин кайталап көрүңүз."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Өтө көп жолу аракет кылдыңыз. Жүзүнөн таануу функциясы өчүрүлдү."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Өтө көп жолу аракет кылдыңыз. Жүзүнөн таанып ачуу функциясы өчүрүлдү."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Өтө көп жолу аракет кылдыңыз. Эрканды кулпулоо функциясын колдонуңуз."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Жүз ырасталбай жатат. Кайталап көрүңүз."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Жүзүнөн таанып ачуу функциясын жөндөй элексиз"</string>
@@ -1252,7 +1254,7 @@
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Планшет күйгүзүлүүдө…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Түзмөк күйүгүзүлүүдө…"</string>
     <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Сактагыч ыңгайлаштырылууда."</string>
-    <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Тутумду жаңыртуу аяктоодо…"</string>
+    <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Система жаңырып бүтөйүн деп калды…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> жаңыртылууда..."</string>
     <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ичинен <xliff:g id="NUMBER_0">%1$d</xliff:g> колдонмо оптималдаштырылууда."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> даярдалууда."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Уруксат берилбейт"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Уруксат талап кылуу"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Кийинки эсепке\nуруксат талап кылынууда: <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> колдонмосу\n<xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунтуна кирүүгө уруксат сурады."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Бул колдонмо жумуш профилиңиздин сыртында колдонулуп жатат"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Бул колдонмону жумуш профилиңизде пайдаланып жатасыз"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Киргизүү ыкмасы"</string>
@@ -1870,8 +1873,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Администраторуңуз жаңыртып койгон"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Администраторуңуз жок кылып салган"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ЖАРАЙТ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Батареяны үнөмдөгүч режиминде Караңгы тема күйгүзүлүп, фондогу аракеттер, айрым визуалдык эффекттер, белгилүү бир функциялар жана айрым тармакка туташуулар чектелип же өчүрүлөт."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"Батареяны үнөмдөгүч режиминде Караңгы тема күйгүзүлүп, фондогу аракеттер, айрым визуалдык эффекттер, белгилүү бир функциялар жана айрым тармакка туташуулар чектелип же өчүрүлөт."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Батареяны үнөмдөөчү режимде Караңгы тема күйгүзүлүп, фондогу аракеттер, айрым визуалдык эффекттер, белгилүү бир функциялар жана айрым тармакка туташуулар чектелип же өчүрүлөт."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Батареяны үнөмдөөчү режимде Караңгы тема күйгүзүлүп, фондогу аракеттер, айрым визуалдык эффекттер, белгилүү бир функциялар жана айрым тармакка туташуулар чектелип же өчүрүлөт."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Трафикти үнөмдөө режиминде айрым колдонмолор маалыматтарды фондо өткөрө алышпайт. Учурда сиз пайдаланып жаткан колдонмо маалыматтарды жөнөтүп/ала алат, бирок адаттагыдан азыраак өткөргөндүктөн, анын айрым функциялары талаптагыдай иштебей коюшу мүмкүн. Мисалы, сүрөттөр басылмайынча жүктөлбөйт."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикти үнөмдөө режимин иштетесизби?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Күйгүзүү"</string>
@@ -2092,7 +2095,7 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Бул билдирменин маанилүүлүгү жогорулатылды. Пикир билдирүү үчүн таптап коюңуз."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Бул билдирменин маанилүүлүгү төмөндөтүлдү. Пикир билдирүү үчүн таптап коюңуз."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Жакшыртылган билдирмелер"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Жакшыртылган билдирмелерде эми ыкчам аракеттер жана жооптор сунушталат. Android\'дин ыңгайлаштырылуучу билдирмелери колдоого алынбай калды."</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Жакшыртылган билдирмелерде эми ыкчам аракеттер жана жооптор сунушталат. Android\'дин ыңгайлаштырылуучу билдирмелерин мындан ары көрбөйсүз."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Макул"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Өчүрүү"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Кененирээк"</string>
@@ -2284,8 +2287,8 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Эми экрандын бир бөлүгүн чоңойто аласыз"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Жөндөөлөрдөн күйгүзүү"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Жабуу"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Түзмөктүн микрофонунун кулпусун ачуу"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Түзмөктүн камерасынын кулпусун ачуу"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Түзмөктүн микрофонун бөгөттөн чыгаруу"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Түзмөктүн камерасын бөгөттөн чыгаруу"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; жана башка бардык колдонмолор менен кызматтар үчүн"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Бөгөттөн чыгаруу"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Сенсордун купуялыгы"</string>

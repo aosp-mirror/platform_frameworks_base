@@ -48,7 +48,7 @@ public class SliceBackupHelper extends BlobBackupHelper {
                 newPayload = sm.getBackupPayload(UserHandle.USER_SYSTEM);
             } catch (Exception e) {
                 // Treat as no data
-                Slog.e(TAG, "Couldn't communicate with slice manager");
+                Slog.e(TAG, "Couldn't communicate with slice manager", e);
                 newPayload = null;
             }
         }
@@ -66,7 +66,7 @@ public class SliceBackupHelper extends BlobBackupHelper {
                 // TODO: http://b/22388012
                 sm.applyRestore(payload, UserHandle.USER_SYSTEM);
             } catch (Exception e) {
-                Slog.e(TAG, "Couldn't communicate with slice manager");
+                Slog.e(TAG, "Couldn't communicate with slice manager", e);
             }
         }
     }

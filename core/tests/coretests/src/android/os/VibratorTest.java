@@ -16,6 +16,8 @@
 
 package android.os;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -26,6 +28,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
 import android.platform.test.annotations.Presubmit;
 
@@ -70,6 +73,54 @@ public class VibratorTest {
     }
 
     @Test
+    public void areEffectsSupported_noVibrator_returnsAlwaysNo() {
+        SystemVibrator.AllVibratorsInfo info = new SystemVibrator.AllVibratorsInfo(
+                new VibratorInfo[0]);
+        assertEquals(Vibrator.VIBRATION_EFFECT_SUPPORT_NO,
+                info.isEffectSupported(VibrationEffect.EFFECT_CLICK));
+    }
+
+    @Test
+    public void areEffectsSupported_unsupportedInOneVibrator_returnsNo() {
+        VibratorInfo supportedVibrator = new VibratorInfo.Builder(/* id= */ 1)
+                .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
+                .build();
+        VibratorInfo unsupportedVibrator = new VibratorInfo.Builder(/* id= */ 2)
+                .setSupportedEffects(new int[0])
+                .build();
+        SystemVibrator.AllVibratorsInfo info = new SystemVibrator.AllVibratorsInfo(
+                new VibratorInfo[]{supportedVibrator, unsupportedVibrator});
+        assertEquals(Vibrator.VIBRATION_EFFECT_SUPPORT_NO,
+                info.isEffectSupported(VibrationEffect.EFFECT_CLICK));
+    }
+
+    @Test
+    public void areEffectsSupported_unknownInOneVibrator_returnsUnknown() {
+        VibratorInfo supportedVibrator = new VibratorInfo.Builder(/* id= */ 1)
+                .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
+                .build();
+        VibratorInfo unknownSupportVibrator = VibratorInfo.EMPTY_VIBRATOR_INFO;
+        SystemVibrator.AllVibratorsInfo info = new SystemVibrator.AllVibratorsInfo(
+                new VibratorInfo[]{supportedVibrator, unknownSupportVibrator});
+        assertEquals(Vibrator.VIBRATION_EFFECT_SUPPORT_UNKNOWN,
+                info.isEffectSupported(VibrationEffect.EFFECT_CLICK));
+    }
+
+    @Test
+    public void arePrimitivesSupported_supportedInAllVibrators_returnsYes() {
+        VibratorInfo firstVibrator = new VibratorInfo.Builder(/* id= */ 1)
+                .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
+                .build();
+        VibratorInfo secondVibrator = new VibratorInfo.Builder(/* id= */ 2)
+                .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
+                .build();
+        SystemVibrator.AllVibratorsInfo info = new SystemVibrator.AllVibratorsInfo(
+                new VibratorInfo[]{firstVibrator, secondVibrator});
+        assertEquals(Vibrator.VIBRATION_EFFECT_SUPPORT_YES,
+                info.isEffectSupported(VibrationEffect.EFFECT_CLICK));
+    }
+
+    @Test
     public void arePrimitivesSupported_returnsArrayOfSameSize() {
         assertEquals(0, mVibratorSpy.arePrimitivesSupported(new int[0]).length);
         assertEquals(1, mVibratorSpy.arePrimitivesSupported(
@@ -80,6 +131,40 @@ public class VibratorTest {
     }
 
     @Test
+    public void arePrimitivesSupported_noVibrator_returnsAlwaysFalse() {
+        SystemVibrator.AllVibratorsInfo info = new SystemVibrator.AllVibratorsInfo(
+                new VibratorInfo[0]);
+        assertFalse(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_CLICK));
+    }
+
+    @Test
+    public void arePrimitivesSupported_unsupportedInOneVibrator_returnsFalse() {
+        VibratorInfo supportedVibrator = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .build();
+        VibratorInfo unsupportedVibrator = VibratorInfo.EMPTY_VIBRATOR_INFO;
+        SystemVibrator.AllVibratorsInfo info = new SystemVibrator.AllVibratorsInfo(
+                new VibratorInfo[]{supportedVibrator, unsupportedVibrator});
+        assertFalse(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_CLICK));
+    }
+
+    @Test
+    public void arePrimitivesSupported_supportedInAllVibrators_returnsTrue() {
+        VibratorInfo firstVibrator = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 5)
+                .build();
+        VibratorInfo secondVibrator = new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 15)
+                .build();
+        SystemVibrator.AllVibratorsInfo info = new SystemVibrator.AllVibratorsInfo(
+                new VibratorInfo[]{firstVibrator, secondVibrator});
+        assertTrue(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_CLICK));
+    }
+
+    @Test
     public void getPrimitivesDurations_returnsArrayOfSameSize() {
         assertEquals(0, mVibratorSpy.getPrimitiveDurations(new int[0]).length);
         assertEquals(1, mVibratorSpy.getPrimitiveDurations(
@@ -87,6 +172,40 @@ public class VibratorTest {
         assertEquals(2, mVibratorSpy.getPrimitiveDurations(
                 new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK,
                         VibrationEffect.Composition.PRIMITIVE_QUICK_RISE}).length);
+    }
+
+    @Test
+    public void getPrimitivesDurations_noVibrator_returnsAlwaysZero() {
+        SystemVibrator.AllVibratorsInfo info = new SystemVibrator.AllVibratorsInfo(
+                new VibratorInfo[0]);
+        assertEquals(0, info.getPrimitiveDuration(VibrationEffect.Composition.PRIMITIVE_CLICK));
+    }
+
+    @Test
+    public void getPrimitivesDurations_unsupportedInOneVibrator_returnsZero() {
+        VibratorInfo supportedVibrator = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .build();
+        VibratorInfo unsupportedVibrator = VibratorInfo.EMPTY_VIBRATOR_INFO;
+        SystemVibrator.AllVibratorsInfo info = new SystemVibrator.AllVibratorsInfo(
+                new VibratorInfo[]{supportedVibrator, unsupportedVibrator});
+        assertEquals(0, info.getPrimitiveDuration(VibrationEffect.Composition.PRIMITIVE_CLICK));
+    }
+
+    @Test
+    public void getPrimitivesDurations_supportedInAllVibrators_returnsMaxDuration() {
+        VibratorInfo firstVibrator = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .build();
+        VibratorInfo secondVibrator = new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 20)
+                .build();
+        SystemVibrator.AllVibratorsInfo info = new SystemVibrator.AllVibratorsInfo(
+                new VibratorInfo[]{firstVibrator, secondVibrator});
+        assertEquals(20, info.getPrimitiveDuration(VibrationEffect.Composition.PRIMITIVE_CLICK));
     }
 
     @Test

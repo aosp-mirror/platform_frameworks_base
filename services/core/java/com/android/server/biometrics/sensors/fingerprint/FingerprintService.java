@@ -215,9 +215,9 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
-        public void enroll(final IBinder token, final byte[] hardwareAuthToken, final int userId,
-                final IFingerprintServiceReceiver receiver, final String opPackageName,
-                @FingerprintManager.EnrollReason int enrollReason) {
+        public void enroll(final IBinder token, @NonNull final byte[] hardwareAuthToken,
+                final int userId, final IFingerprintServiceReceiver receiver,
+                final String opPackageName, @FingerprintManager.EnrollReason int enrollReason) {
             Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
 
             final Pair<Integer, ServiceProvider> provider = getSingleProvider();
@@ -497,6 +497,8 @@ public class FingerprintService extends SystemService {
                 final String opPackageName) {
 
             Utils.checkPermission(getContext(), MANAGE_BIOMETRIC);
+
+            Slog.d(TAG, "cancelAuthenticationFromService, sensorId: " + sensorId);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);
             if (provider == null) {

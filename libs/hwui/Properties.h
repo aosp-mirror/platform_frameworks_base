@@ -182,6 +182,11 @@ enum DebugLevel {
  */
 #define PROPERTY_REDUCE_OPS_TASK_SPLITTING "renderthread.skia.reduceopstasksplitting"
 
+/**
+ * Enable WebView Overlays feature.
+ */
+#define PROPERTY_WEBVIEW_OVERLAYS_ENABLED "debug.hwui.webview_overlays_enabled"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -219,6 +224,7 @@ public:
     static bool skipEmptyFrames;
     static bool useBufferAge;
     static bool enablePartialUpdates;
+    static bool enableRenderEffectCache;
 
     // TODO: Move somewhere else?
     static constexpr float textGamma = 1.45f;
@@ -275,6 +281,8 @@ public:
 
     static bool useHintManager;
     static int targetCpuTimePercentage;
+
+    static bool enableWebViewOverlays;
 
     static StretchEffectBehavior getStretchEffectBehavior() {
         return stretchEffectBehavior;

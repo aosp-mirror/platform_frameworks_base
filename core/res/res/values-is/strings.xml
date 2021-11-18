@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS-þjónusta"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Tilkynningaþjónusta nema"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Ljósaskiptaþjónusta"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Tímabeltisgreinir (engin tenging)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Tímastillingarþjónusta hnattræna gervihnattaleiðsögukerfisins (GNSS)"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Umsjónarþjónusta tónlistargreiningar"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Tækið verður hreinsað"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prófaðu annað fingrafar"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Of bjart"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Prófaðu að breyta stöðu fingursins"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Breyttu stöðu fingursins örlítið í hvert skipti"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingrafar staðfest"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Engin fingraför hafa verið skráð."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Þetta tæki er ekki með fingrafaralesara."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Slökkt tímabundið á skynjara."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Ekki er hægt að nota fingrafaralesara. Þú verður að fara með hann á verkstæði"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Fingur <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Nota fingrafar"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Nota fingrafar eða skjálás"</string>
@@ -611,13 +610,16 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Fingrafaratákn"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Andlitsopnun"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Skráðu andlitið þitt aftur"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Skráðu andlitið þitt til að bæta kennsl"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Setja upp andlitsopnun"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Andlitskenni"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Vandamál varðandi andlitskenni"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Ýttu til að eyða andlitslíkaninu og skráðu svo andlitið aftur"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Setja upp andlitskenni"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Taktu símann úr lás með því að horfa á hann"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Settu upp fleiri leiðir til að taka úr lás"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ýttu til að bæta við fingrafari"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingrafarskenni"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Ekki er hægt að nota fingrafaralesara"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Þú verður að fara á verkstæði."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Nákvæm andlitsgögn fengust ekki. Reyndu aftur."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Of bjart. Prófaðu mýkri lýsingu."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Of dimmt. Prófaðu sterkari lýsingu."</string>
@@ -641,19 +643,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Andlit ekki staðfest. Vélbúnaður er ekki tiltækur."</string>
-    <string name="face_error_timeout" msgid="2598544068593889762">"Prófaðu andlitsopnun aftur."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Prófaðu andlitskenni aftur."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Ekki er hægt að vista ný andlitsgögn. Eyddu gömlu fyrst."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Hætt við andlitsgreiningu."</string>
-    <string name="face_error_user_canceled" msgid="5766472033202928373">"Notandi hætti við andlitsopnun."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Notandi hætti við andlitskenni."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Of margar tilraunir. Reyndu aftur síðar."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Of margar tilraunir. Slökkt á andlitsopnun."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Of margar tilraunir. Slökkt á andlitskenni."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Of margar tilraunir. Sláðu inn skjálásinn í staðinn."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Ekki tókst að staðfesta andlit. Reyndu aftur."</string>
-    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Þú hefur ekki sett upp andlitsopnun."</string>
-    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Þetta tæki styður ekki andlitsopnun"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Þú hefur ekki sett upp andlitskenni."</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Þetta tæki styður ekki andlitskenni"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Slökkt tímabundið á skynjara."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Andlit <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="5854024256907828015">"Nota andlitsopnun"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Nota andlitskenni"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Nota andlit eða skjálás"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Notaðu andlitið þitt til að halda áfram"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Notaðu andlitið eða skjálás til að halda áfram"</string>
@@ -956,7 +958,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Stækka opnunarsvæði."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Opnun með stroku."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Opnun með mynstri."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Andlitsopnun."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Andlitskenni."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Opnun með PIN-númeri."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Taka PIN-númer SIM-korts úr lás."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Taka PUK-númer SIM-korts úr lás."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Hafna"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Beðið um heimild"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Beðið um heimild\nfyrir reikninginn <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Beiðni um heimild frá <xliff:g id="APP">%1$s</xliff:g>\nfyrir reikninginn <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Þú ert að nota þetta forrit utan vinnusniðsins"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Þú ert að nota þetta forrit á vinnusniðinu þínu"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Innsláttaraðferð"</string>
@@ -2284,10 +2287,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Nú geturðu stækkað hluta skjásins"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Kveikja á í stillingum"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Hunsa"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Opna á hljóðnema tækisins"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Opna fyrir hljóðnema tækisins"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Opna fyrir myndavél tækisins"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Fyrir &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; og öll forrit og þjónustur"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Opna á"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Opna fyrir"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Persónuvernd skynjara"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Forritstákn"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Mynd af merki forrits"</string>

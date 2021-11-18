@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
@@ -26,6 +27,9 @@ import static android.window.StartingWindowInfo.TYPE_PARAMETER_USE_EMPTY_SPLASH_
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.SystemProperties;
@@ -33,6 +37,8 @@ import android.util.Slog;
 import android.window.TaskSnapshot;
 
 import com.android.server.policy.WindowManagerPolicy.StartingSurface;
+
+import java.util.function.Supplier;
 
 /**
  * Managing to create and release a starting window surface.
@@ -44,9 +50,11 @@ public class StartingSurfaceController {
     static final boolean DEBUG_ENABLE_SHELL_DRAWER =
             SystemProperties.getBoolean("persist.debug.shell_starting_surface", true);
     private final WindowManagerService mService;
+    private final SplashScreenExceptionList mSplashScreenExceptionsList;
 
     public StartingSurfaceController(WindowManagerService wm) {
         mService = wm;
+        mSplashScreenExceptionsList = new SplashScreenExceptionList(wm.mContext.getMainExecutor());
     }
 
     StartingSurface createSplashScreenStartingSurface(ActivityRecord activity, String packageName,
@@ -61,16 +69,24 @@ public class StartingSurfaceController {
         synchronized (mService.mGlobalLock) {
             final Task task = activity.getTask();
             if (task != null && mService.mAtmService.mTaskOrganizerController.addStartingWindow(
-                    task, activity.token, theme, null /* taskSnapshot */)) {
+                    task, activity, theme, null /* taskSnapshot */)) {
                 return new ShellStartingSurface(task);
             }
         }
         return null;
     }
 
+    /**
+     * @see SplashScreenExceptionList#isException(String, int, Supplier)
+     */
+    boolean isExceptionApp(@NonNull String packageName, int targetSdk,
+            @Nullable Supplier<ApplicationInfo> infoProvider) {
+        return mSplashScreenExceptionsList.isException(packageName, targetSdk, infoProvider);
+    }
+
     int makeStartingWindowTypeParameter(boolean newTask, boolean taskSwitch,
             boolean processRunning, boolean allowTaskSnapshot, boolean activityCreated,
-            boolean useEmpty) {
+            boolean useEmpty, boolean useLegacy) {
         int parameter = 0;
         if (newTask) {
             parameter |= TYPE_PARAMETER_NEW_TASK;
@@ -89,6 +105,9 @@ public class StartingSurfaceController {
         }
         if (useEmpty) {
             parameter |= TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN;
+        }
+        if (useLegacy) {
+            parameter |= TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
         }
         return parameter;
     }
@@ -130,7 +149,7 @@ public class StartingSurfaceController {
             }
             if (DEBUG_ENABLE_SHELL_DRAWER) {
                 mService.mAtmService.mTaskOrganizerController.addStartingWindow(task,
-                        activity.token, 0 /* launchTheme */, taskSnapshot);
+                        activity, 0 /* launchTheme */, taskSnapshot);
                 return new ShellStartingSurface(task);
             }
         }

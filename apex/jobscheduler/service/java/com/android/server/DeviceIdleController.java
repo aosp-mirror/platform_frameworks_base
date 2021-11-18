@@ -3941,11 +3941,15 @@ public class DeviceIdleController extends SystemService
         if (idleUntil) {
             mAlarmManager.setIdleUntil(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     mNextAlarmTime, "DeviceIdleController.deep", mDeepAlarmListener, mHandler);
+        } else if (mState == STATE_LOCATING) {
+            // Use setExact so we don't keep the GPS active for too long.
+            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    mNextAlarmTime, "DeviceIdleController.deep", mDeepAlarmListener, mHandler);
         } else {
             if (mConstants.USE_WINDOW_ALARMS) {
                 mAlarmManager.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        mConstants.FLEX_TIME_SHORT,
-                        mNextAlarmTime, "DeviceIdleController.deep", mDeepAlarmListener, mHandler);
+                        mNextAlarmTime, mConstants.FLEX_TIME_SHORT,
+                        "DeviceIdleController.deep", mDeepAlarmListener, mHandler);
             } else {
                 mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                         mNextAlarmTime, "DeviceIdleController.deep", mDeepAlarmListener, mHandler);

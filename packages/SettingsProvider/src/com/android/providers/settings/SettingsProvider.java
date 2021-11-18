@@ -1145,6 +1145,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
+        final String callingPackage = resolveCallingPackage();
 
         synchronized (mLock) {
             if (isSyncDisabledConfigLocked()) {
@@ -1152,7 +1153,7 @@ public class SettingsProvider extends ContentProvider {
             }
             final int key = makeKey(SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);
             boolean success = mSettingsRegistry.setConfigSettingsLocked(key, prefix, keyValues,
-                    resolveCallingPackage());
+                    callingPackage);
             return success ? SET_ALL_RESULT_SUCCESS : SET_ALL_RESULT_FAILURE;
         }
     }
@@ -1258,6 +1259,7 @@ public class SettingsProvider extends ContentProvider {
     private boolean mutateConfigSetting(String name, String value, String prefix,
             boolean makeDefault, int operation, int mode) {
         enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
+        final String callingPackage = resolveCallingPackage();
 
         // Perform the mutation.
         synchronized (mLock) {
@@ -1265,7 +1267,7 @@ public class SettingsProvider extends ContentProvider {
                 case MUTATION_OPERATION_INSERT: {
                     return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_CONFIG,
                             UserHandle.USER_SYSTEM, name, value, null, makeDefault, true,
-                            resolveCallingPackage(), false, null,
+                            callingPackage, false, null,
                             /* overrideableByRestore */ false);
                 }
 
@@ -1276,7 +1278,7 @@ public class SettingsProvider extends ContentProvider {
 
                 case MUTATION_OPERATION_RESET: {
                     mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_CONFIG,
-                            UserHandle.USER_SYSTEM, resolveCallingPackage(), mode, null, prefix);
+                            UserHandle.USER_SYSTEM, callingPackage, mode, null, prefix);
                 } return true;
             }
         }
@@ -1434,13 +1436,15 @@ public class SettingsProvider extends ContentProvider {
             return false;
         }
 
+        final String callingPackage = getCallingPackage();
+
         // Perform the mutation.
         synchronized (mLock) {
             switch (operation) {
                 case MUTATION_OPERATION_INSERT: {
                     return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_GLOBAL,
                             UserHandle.USER_SYSTEM, name, value, tag, makeDefault,
-                            getCallingPackage(), forceNotify,
+                            callingPackage, forceNotify,
                             CRITICAL_GLOBAL_SETTINGS, overrideableByRestore);
                 }
 
@@ -1452,12 +1456,12 @@ public class SettingsProvider extends ContentProvider {
                 case MUTATION_OPERATION_UPDATE: {
                     return mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_GLOBAL,
                             UserHandle.USER_SYSTEM, name, value, tag, makeDefault,
-                            getCallingPackage(), forceNotify, CRITICAL_GLOBAL_SETTINGS);
+                            callingPackage, forceNotify, CRITICAL_GLOBAL_SETTINGS);
                 }
 
                 case MUTATION_OPERATION_RESET: {
                     mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_GLOBAL,
-                            UserHandle.USER_SYSTEM, getCallingPackage(), mode, tag);
+                            UserHandle.USER_SYSTEM, callingPackage, mode, tag);
                 } return true;
             }
         }
@@ -1466,11 +1470,12 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private PackageInfo getCallingPackageInfo(int userId) {
+        final String callingPackage = getCallingPackage();
         try {
-            return mPackageManager.getPackageInfo(getCallingPackage(),
+            return mPackageManager.getPackageInfo(callingPackage,
                     PackageManager.GET_SIGNATURES, userId);
         } catch (RemoteException e) {
-            throw new IllegalStateException("Package " + getCallingPackage() + " doesn't exist");
+            throw new IllegalStateException("Package " + callingPackage + " doesn't exist");
         }
     }
 
@@ -1720,13 +1725,15 @@ public class SettingsProvider extends ContentProvider {
             return false;
         }
 
+        final String callingPackage = getCallingPackage();
+
         // Mutate the value.
         synchronized (mLock) {
             switch (operation) {
                 case MUTATION_OPERATION_INSERT: {
                     return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SECURE,
                             owningUserId, name, value, tag, makeDefault,
-                            getCallingPackage(), forceNotify, CRITICAL_SECURE_SETTINGS,
+                            callingPackage, forceNotify, CRITICAL_SECURE_SETTINGS,
                             overrideableByRestore);
                 }
 
@@ -1738,12 +1745,12 @@ public class SettingsProvider extends ContentProvider {
                 case MUTATION_OPERATION_UPDATE: {
                     return mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_SECURE,
                             owningUserId, name, value, tag, makeDefault,
-                            getCallingPackage(), forceNotify, CRITICAL_SECURE_SETTINGS);
+                            callingPackage, forceNotify, CRITICAL_SECURE_SETTINGS);
                 }
 
                 case MUTATION_OPERATION_RESET: {
                     mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_SECURE,
-                            UserHandle.USER_SYSTEM, getCallingPackage(), mode, tag);
+                            UserHandle.USER_SYSTEM, callingPackage, mode, tag);
                 } return true;
             }
         }
@@ -1840,11 +1847,12 @@ public class SettingsProvider extends ContentProvider {
 
     private boolean mutateSystemSetting(String name, String value, int runAsUserId, int operation,
             boolean overrideableByRestore) {
+        final String callingPackage = getCallingPackage();
         if (!hasWriteSecureSettingsPermission()) {
             // If the caller doesn't hold WRITE_SECURE_SETTINGS, we verify whether this
             // operation is allowed for the calling package through appops.
             if (!Settings.checkAndNoteWriteSettingsOperation(getContext(),
-                    Binder.getCallingUid(), getCallingPackage(), getCallingAttributionTag(),
+                    Binder.getCallingUid(), callingPackage, getCallingAttributionTag(),
                     true)) {
                 return false;
             }
@@ -1889,7 +1897,7 @@ public class SettingsProvider extends ContentProvider {
                 case MUTATION_OPERATION_INSERT: {
                     validateSystemSettingValue(name, value);
                     return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SYSTEM,
-                            owningUserId, name, value, null, false, getCallingPackage(),
+                            owningUserId, name, value, null, false, callingPackage,
                             false, null, overrideableByRestore);
                 }
 
@@ -1901,7 +1909,7 @@ public class SettingsProvider extends ContentProvider {
                 case MUTATION_OPERATION_UPDATE: {
                     validateSystemSettingValue(name, value);
                     return mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_SYSTEM,
-                            owningUserId, name, value, null, false, getCallingPackage(),
+                            owningUserId, name, value, null, false, callingPackage,
                             false, null);
                 }
             }
@@ -2169,14 +2177,15 @@ public class SettingsProvider extends ContentProvider {
         // user is a system permission and the app must be uninstalled in B and then installed as
         // an Instant App that situation is not realistic or supported.
         ApplicationInfo ai = null;
+        final String callingPackage = getCallingPackage();
         try {
-            ai = mPackageManager.getApplicationInfo(getCallingPackage(), 0
+            ai = mPackageManager.getApplicationInfo(callingPackage, 0
                     , UserHandle.getCallingUserId());
         } catch (RemoteException ignored) {
         }
         if (ai == null) {
             throw new IllegalStateException("Failed to lookup info for package "
-                    + getCallingPackage());
+                    + callingPackage);
         }
         return ai;
     }
@@ -3576,7 +3585,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 203;
+            private static final int SETTINGS_VERSION = 204;
 
             private final int mUserId;
 
@@ -5178,6 +5187,44 @@ public class SettingsProvider extends ContentProvider {
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 203;
+                }
+
+                if (currentVersion == 203) {
+                    // Version 204: Replace 'wifi' or 'cell' tiles with 'internet' if existed.
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting currentValue = secureSettings.getSettingLocked(Secure.QS_TILES);
+                    if (!currentValue.isNull()) {
+                        String tileList = currentValue.getValue();
+                        String[] tileSplit = tileList.split(",");
+                        final ArrayList<String> tiles = new ArrayList<String>();
+                        boolean hasInternetTile = false;
+                        for (int i = 0; i < tileSplit.length; i++) {
+                            String tile = tileSplit[i].trim();
+                            if (tile.isEmpty()) continue;
+                            tiles.add(tile);
+                            if (tile.equals("internet")) hasInternetTile = true;
+                        }
+                        if (!hasInternetTile) {
+                            if (tiles.contains("wifi")) {
+                                // Replace the WiFi with Internet, and remove the Cell
+                                tiles.set(tiles.indexOf("wifi"), "internet");
+                                tiles.remove("cell");
+                            } else if (tiles.contains("cell")) {
+                                // Replace the Cell with Internet
+                                tiles.set(tiles.indexOf("cell"), "internet");
+                            }
+                        } else {
+                            tiles.remove("wifi");
+                            tiles.remove("cell");
+                        }
+                        secureSettings.insertSettingOverrideableByRestoreLocked(
+                                Secure.QS_TILES,
+                                TextUtils.join(",", tiles),
+                                null /* tag */,
+                                true /* makeDefault */,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 204;
                 }
 
                 // vXXX: Add new settings above this point.

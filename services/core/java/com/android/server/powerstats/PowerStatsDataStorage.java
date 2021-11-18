@@ -124,12 +124,8 @@ public class PowerStatsDataStorage {
         @Override
         public void read(InputStream in) throws IOException {
             while (in.available() > 0) {
-                try {
-                    DataElement dataElement = new DataElement(in);
-                    mCallback.onReadDataElement(dataElement.getData());
-                } catch (IOException e) {
-                    Slog.e(TAG, "Failed to read from storage. " + e.getMessage());
-                }
+                DataElement dataElement = new DataElement(in);
+                mCallback.onReadDataElement(dataElement.getData());
             }
         }
     }

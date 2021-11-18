@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
-import android.hardware.HardwareBuffer;
 import android.hardware.camera2.CameraExtensionCharacteristics;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
@@ -76,41 +75,20 @@ public final class CameraExtensionUtils {
         ImageWriter writer = null;
         Image img = null;
         SurfaceInfo surfaceInfo = new SurfaceInfo();
-        int nativeFormat = SurfaceUtils.getSurfaceFormat(s);
+        int nativeFormat = SurfaceUtils.detectSurfaceFormat(s);
         int dataspace = SurfaceUtils.getSurfaceDataspace(s);
+        Size surfaceSize = SurfaceUtils.getSurfaceSize(s);
+        surfaceInfo.mFormat = nativeFormat;
+        surfaceInfo.mWidth = surfaceSize.getWidth();
+        surfaceInfo.mHeight = surfaceSize.getHeight();
+        surfaceInfo.mUsage = SurfaceUtils.getSurfaceUsage(s);
         // Jpeg surfaces cannot be queried for their usage and other parameters
         // in the usual way below. A buffer can only be de-queued after the
         // producer overrides the surface dimensions to (width*height) x 1.
         if ((nativeFormat == StreamConfigurationMap.HAL_PIXEL_FORMAT_BLOB) &&
                 (dataspace == StreamConfigurationMap.HAL_DATASPACE_V0_JFIF)) {
             surfaceInfo.mFormat = ImageFormat.JPEG;
-            Size surfaceSize = SurfaceUtils.getSurfaceSize(s);
-            surfaceInfo.mWidth = surfaceSize.getWidth();
-            surfaceInfo.mHeight = surfaceSize.getHeight();
             return surfaceInfo;
-        }
-
-        HardwareBuffer buffer = null;
-        try {
-            writer = ImageWriter.newInstance(s, 1);
-            img = writer.dequeueInputImage();
-            buffer = img.getHardwareBuffer();
-            surfaceInfo.mFormat = buffer.getFormat();
-            surfaceInfo.mWidth = buffer.getWidth();
-            surfaceInfo.mHeight = buffer.getHeight();
-            surfaceInfo.mUsage = buffer.getUsage();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to query surface, returning defaults!");
-        } finally {
-            if (buffer != null) {
-                buffer.close();
-            }
-            if (img != null) {
-                img.close();
-            }
-            if (writer != null) {
-                writer.close();
-            }
         }
 
         return surfaceInfo;

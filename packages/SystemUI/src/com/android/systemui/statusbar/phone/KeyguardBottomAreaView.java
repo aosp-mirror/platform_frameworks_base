@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
+import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_BUTTON;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_UNLOCK;
@@ -40,6 +41,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -74,12 +76,18 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.settingslib.Utils;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.camera.CameraIntents;
+import com.android.systemui.controls.ControlsServiceInfo;
+import com.android.systemui.controls.dagger.ControlsComponent;
+import com.android.systemui.controls.management.ControlsListingController;
+import com.android.systemui.controls.ui.ControlsActivity;
+import com.android.systemui.controls.ui.ControlsUiController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.IntentButtonProvider;
@@ -96,6 +104,8 @@ import com.android.systemui.tuner.LockscreenFragment.LockButtonFactory;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.systemui.wallet.ui.WalletActivity;
+
+import java.util.List;
 
 /**
  * Implementation for the bottom area of the Keyguard, including camera/phone affordance and status
@@ -132,9 +142,12 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private KeyguardAffordanceView mLeftAffordanceView;
 
     private ImageView mWalletButton;
+    private ImageView mControlsButton;
     private boolean mHasCard = false;
     private WalletCardRetriever mCardRetriever = new WalletCardRetriever();
     private QuickAccessWalletController mQuickAccessWalletController;
+    private ControlsComponent mControlsComponent;
+    private boolean mControlServicesAvailable = false;
 
     private ViewGroup mIndicationArea;
     private TextView mIndicationText;
@@ -186,6 +199,19 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private int mBurnInYOffset;
     private ActivityIntentHelper mActivityIntentHelper;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+
+    private ControlsListingController.ControlsListingCallback mListingCallback =
+            new ControlsListingController.ControlsListingCallback() {
+                public void onServicesUpdated(List<ControlsServiceInfo> serviceInfos) {
+                    boolean available = !serviceInfos.isEmpty();
+
+                    if (available != mControlServicesAvailable) {
+                        mControlServicesAvailable = available;
+                        updateControlsVisibility();
+                        updateAffordanceColors();
+                    }
+                }
+            };
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -252,6 +278,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mRightAffordanceView = findViewById(R.id.camera_button);
         mLeftAffordanceView = findViewById(R.id.left_button);
         mWalletButton = findViewById(R.id.wallet_button);
+        mControlsButton = findViewById(R.id.controls_button);
         mIndicationArea = findViewById(R.id.keyguard_indication_area);
         mIndicationText = findViewById(R.id.keyguard_indication_text);
         mIndicationTextBottom = findViewById(R.id.keyguard_indication_text_bottom);
@@ -275,6 +302,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mIndicationPadding = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_area_padding);
         updateWalletVisibility();
+        updateControlsVisibility();
     }
 
     /**
@@ -327,6 +355,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             mQuickAccessWalletController.unregisterWalletChangeObservers(
                     WALLET_PREFERENCE_CHANGE, DEFAULT_PAYMENT_APP_CHANGE);
         }
+
+        if (mControlsComponent != null) {
+            mControlsComponent.getControlsListingController().ifPresent(
+                    c -> c.removeCallback(mListingCallback));
+        }
     }
 
     private void initAccessibility() {
@@ -368,13 +401,20 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         updateLeftAffordanceIcon();
 
         lp = mWalletButton.getLayoutParams();
-        lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_wallet_width);
-        lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_wallet_width);
+        lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_width);
+        lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_height);
         mWalletButton.setLayoutParams(lp);
+
+        lp = mControlsButton.getLayoutParams();
+        lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_width);
+        lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_height);
+        mControlsButton.setLayoutParams(lp);
 
         mIndicationPadding = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_area_padding);
+
         updateWalletVisibility();
+        updateAffordanceColors();
     }
 
     private void updateRightAffordanceIcon() {
@@ -453,10 +493,34 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 || !mQuickAccessWalletController.isWalletEnabled()
                 || !mHasCard) {
             mWalletButton.setVisibility(GONE);
-            mIndicationArea.setPadding(0, 0, 0, 0);
+
+            if (mControlsButton.getVisibility() == GONE) {
+                mIndicationArea.setPadding(0, 0, 0, 0);
+            }
         } else {
             mWalletButton.setVisibility(VISIBLE);
             mWalletButton.setOnClickListener(this::onWalletClick);
+            mIndicationArea.setPadding(mIndicationPadding, 0, mIndicationPadding, 0);
+        }
+    }
+
+    private void updateControlsVisibility() {
+        if (mControlsComponent == null) return;
+
+        boolean hasFavorites = mControlsComponent.getControlsController()
+                .map(c -> c.getFavorites().size() > 0)
+                .orElse(false);
+        if (mDozing
+                || !hasFavorites
+                || !mControlServicesAvailable
+                || mControlsComponent.getVisibility() != AVAILABLE) {
+            mControlsButton.setVisibility(GONE);
+            if (mWalletButton.getVisibility() == GONE) {
+                mIndicationArea.setPadding(0, 0, 0, 0);
+            }
+        } else {
+            mControlsButton.setVisibility(VISIBLE);
+            mControlsButton.setOnClickListener(this::onControlsClick);
             mIndicationArea.setPadding(mIndicationPadding, 0, mIndicationPadding, 0);
         }
     }
@@ -742,6 +806,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         if (mWalletButton.getVisibility() == View.VISIBLE) {
             startFinishDozeAnimationElement(mWalletButton, delay);
         }
+        if (mControlsButton.getVisibility() == View.VISIBLE) {
+            startFinishDozeAnimationElement(mControlsButton, delay);
+        }
         if (mLeftAffordanceView.getVisibility() == View.VISIBLE) {
             startFinishDozeAnimationElement(mLeftAffordanceView, delay);
             delay += DOZE_ANIMATION_STAGGER_DELAY;
@@ -815,6 +882,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         updateCameraVisibility();
         updateLeftAffordanceIcon();
         updateWalletVisibility();
+        updateControlsVisibility();
 
         if (dozing) {
             mOverlayContainer.setVisibility(INVISIBLE);
@@ -848,6 +916,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mRightAffordanceView.setAlpha(alpha);
         mIndicationArea.setAlpha(alpha);
         mWalletButton.setAlpha(alpha);
+        mControlsButton.setAlpha(alpha);
     }
 
     private class DefaultLeftButton implements IntentButton {
@@ -941,6 +1010,32 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mQuickAccessWalletController.queryWalletCards(mCardRetriever);
 
         updateWalletVisibility();
+        updateAffordanceColors();
+    }
+
+    private void updateAffordanceColors() {
+        int iconColor = Utils.getColorAttrDefaultColor(
+                mContext,
+                com.android.internal.R.attr.textColorPrimary);
+        mWalletButton.getDrawable().setTint(iconColor);
+        mControlsButton.getDrawable().setTint(iconColor);
+
+        ColorStateList bgColor = Utils.getColorAttr(
+                mContext,
+                com.android.internal.R.attr.colorSurface);
+        mWalletButton.setBackgroundTintList(bgColor);
+        mControlsButton.setBackgroundTintList(bgColor);
+    }
+
+    /**
+      * Initialize controls via the ControlsComponent
+      */
+    public void initControls(ControlsComponent controlsComponent) {
+        mControlsComponent = controlsComponent;
+        mControlsComponent.getControlsListingController().ifPresent(
+                c -> c.addCallback(mListingCallback));
+
+        updateAffordanceColors();
     }
 
     private void onWalletClick(View v) {
@@ -965,19 +1060,41 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
     }
 
+    private void onControlsClick(View v) {
+        if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+            return;
+        }
+
+        Intent intent = new Intent(mContext, ControlsActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK)
+                .putExtra(ControlsUiController.EXTRA_ANIMATE, true);
+
+        if (mControlsComponent.getVisibility() == AVAILABLE) {
+            mContext.startActivity(intent);
+        } else {
+            mActivityStarter.postStartActivityDismissingKeyguard(intent, 0 /* delay */);
+        }
+    }
+
     private class WalletCardRetriever implements
             QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
 
         @Override
         public void onWalletCardsRetrieved(@NonNull GetWalletCardsResponse response) {
             mHasCard = !response.getWalletCards().isEmpty();
+            Drawable tileIcon = mQuickAccessWalletController.getWalletClient().getTileIcon();
+            if (tileIcon != null) {
+                mWalletButton.setImageDrawable(tileIcon);
+            }
             updateWalletVisibility();
+            updateAffordanceColors();
         }
 
         @Override
         public void onWalletCardRetrievalError(@NonNull GetWalletCardsError error) {
             mHasCard = false;
             updateWalletVisibility();
+            updateAffordanceColors();
         }
     }
 }

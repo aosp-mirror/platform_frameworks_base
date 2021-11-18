@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.startingsurface;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.graphics.Color.WHITE;
 import static android.graphics.Color.alpha;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -116,11 +117,20 @@ public class TaskSnapshotWindow {
     private static final boolean DEBUG = StartingSurfaceDrawer.DEBUG_TASK_SNAPSHOT;
     private static final String TITLE_FORMAT = "SnapshotStartingWindow for taskId=%s";
 
+    private static final long DELAY_REMOVAL_TIME_GENERAL = 100;
+    /**
+     * The max delay time in milliseconds for removing the task snapshot window with IME visible.
+     * Ideally the delay time will be shorter when receiving
+     * {@link StartingSurfaceDrawer#onImeDrawnOnTask(int)}.
+     */
+    private static final long MAX_DELAY_REMOVAL_TIME_IME_VISIBLE = 600;
+
     //tmp vars for unused relayout params
     private static final Point TMP_SURFACE_SIZE = new Point();
 
     private final Window mWindow;
     private final Runnable mClearWindowHandler;
+    private final long mDelayRemovalTime;
     private final ShellExecutor mSplashScreenExecutor;
     private final SurfaceControl mSurfaceControl;
     private final IWindowSession mSession;
@@ -134,12 +144,15 @@ public class TaskSnapshotWindow {
     private boolean mHasDrawn;
     private boolean mSizeMismatch;
     private final Paint mBackgroundPaint = new Paint();
+    private final int mActivityType;
     private final int mStatusBarColor;
     private final SystemBarBackgroundPainter mSystemBarBackgroundPainter;
     private final int mOrientationOnCreation;
     private final SurfaceControl.Transaction mTransaction;
     private final Matrix mSnapshotMatrix = new Matrix();
     private final float[] mTmpFloat9 = new float[9];
+    private Runnable mScheduledRunnable;
+    private final boolean mHasImeSurface;
 
     static TaskSnapshotWindow create(StartingWindowInfo info, IBinder appToken,
             TaskSnapshot snapshot, ShellExecutor splashScreenExecutor,
@@ -190,6 +203,7 @@ public class TaskSnapshotWindow {
         final Point taskSize = snapshot.getTaskSize();
         final Rect taskBounds = new Rect(0, 0, taskSize.x, taskSize.y);
         final int orientation = snapshot.getOrientation();
+        final int activityType = runningTaskInfo.topActivityType;
         final int displayId = runningTaskInfo.displayId;
 
         final IWindowSession session = WindowManagerGlobal.getWindowSession();
@@ -207,10 +221,13 @@ public class TaskSnapshotWindow {
             taskDescription.setBackgroundColor(WHITE);
         }
 
+        final long delayRemovalTime = snapshot.hasImeSurface() ? MAX_DELAY_REMOVAL_TIME_IME_VISIBLE
+                : DELAY_REMOVAL_TIME_GENERAL;
+
         final TaskSnapshotWindow snapshotSurface = new TaskSnapshotWindow(
                 surfaceControl, snapshot, layoutParams.getTitle(), taskDescription, appearance,
-                windowFlags, windowPrivateFlags, taskBounds, orientation,
-                topWindowInsetsState, clearWindowHandler, splashScreenExecutor);
+                windowFlags, windowPrivateFlags, taskBounds, orientation, activityType,
+                delayRemovalTime, topWindowInsetsState, clearWindowHandler, splashScreenExecutor);
         final Window window = snapshotSurface.mWindow;
 
         final InsetsState mTmpInsetsState = new InsetsState();
@@ -248,7 +265,8 @@ public class TaskSnapshotWindow {
     public TaskSnapshotWindow(SurfaceControl surfaceControl,
             TaskSnapshot snapshot, CharSequence title, TaskDescription taskDescription,
             int appearance, int windowFlags, int windowPrivateFlags, Rect taskBounds,
-            int currentOrientation, InsetsState topWindowInsetsState, Runnable clearWindowHandler,
+            int currentOrientation, int activityType, long delayRemovalTime,
+            InsetsState topWindowInsetsState, Runnable clearWindowHandler,
             ShellExecutor splashScreenExecutor) {
         mSplashScreenExecutor = splashScreenExecutor;
         mSession = WindowManagerGlobal.getWindowSession();
@@ -264,8 +282,19 @@ public class TaskSnapshotWindow {
                 windowPrivateFlags, appearance, taskDescription, 1f, topWindowInsetsState);
         mStatusBarColor = taskDescription.getStatusBarColor();
         mOrientationOnCreation = currentOrientation;
+        mActivityType = activityType;
+        mDelayRemovalTime = delayRemovalTime;
         mTransaction = new SurfaceControl.Transaction();
         mClearWindowHandler = clearWindowHandler;
+        mHasImeSurface = snapshot.hasImeSurface();
+    }
+
+    int getBackgroundColor() {
+        return mBackgroundPaint.getColor();
+    }
+
+    boolean hasImeSurface() {
+        return mHasImeSurface;
     }
 
     /**
@@ -285,10 +314,32 @@ public class TaskSnapshotWindow {
         mSystemBarBackgroundPainter.drawNavigationBarBackground(c);
     }
 
-    void remove() {
+    void scheduleRemove(Runnable onRemove) {
+        // Show the latest content as soon as possible for unlocking to home.
+        if (mActivityType == ACTIVITY_TYPE_HOME) {
+            removeImmediately();
+            onRemove.run();
+            return;
+        }
+        if (mScheduledRunnable != null) {
+            mSplashScreenExecutor.removeCallbacks(mScheduledRunnable);
+            mScheduledRunnable = null;
+        }
+        mScheduledRunnable = () -> {
+            TaskSnapshotWindow.this.removeImmediately();
+            onRemove.run();
+        };
+        mSplashScreenExecutor.executeDelayed(mScheduledRunnable, mDelayRemovalTime);
+        if (DEBUG) {
+            Slog.d(TAG, "Defer removing snapshot surface in " + mDelayRemovalTime);
+        }
+    }
+
+    void removeImmediately() {
+        mSplashScreenExecutor.removeCallbacks(mScheduledRunnable);
         try {
             if (DEBUG) {
-                Slog.d(TAG, "Removing snapshot surface, mHasDrawn: " + mHasDrawn);
+                Slog.d(TAG, "Removing taskSnapshot surface, mHasDrawn: " + mHasDrawn);
             }
             mSession.remove(mWindow);
         } catch (RemoteException e) {

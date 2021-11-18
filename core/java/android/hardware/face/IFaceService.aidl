@@ -46,7 +46,7 @@ interface IFaceService {
 
     // Authenticate the given sessionId with a face
     void authenticate(IBinder token, long operationId, int userId, IFaceServiceReceiver receiver,
-            String opPackageName);
+            String opPackageName, boolean isKeyguardBypassEnabled);
 
     // Uses the face hardware to detect for the presence of a face, without giving details
     // about accept/reject/lockout.
@@ -75,7 +75,7 @@ interface IFaceService {
 
     // Start face enrollment
     void enroll(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,
-            String opPackageName, in int [] disabledFeatures, in Surface surface, boolean debugConsent);
+            String opPackageName, in int [] disabledFeatures, in Surface previewSurface, boolean debugConsent);
 
     // Start remote face enrollment
     void enrollRemotely(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,

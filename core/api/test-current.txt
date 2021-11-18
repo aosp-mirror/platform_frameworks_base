@@ -218,6 +218,7 @@ package android.app {
     field public static final String OPSTR_ACTIVITY_RECOGNITION = "android:activity_recognition";
     field public static final String OPSTR_ACTIVITY_RECOGNITION_SOURCE = "android:activity_recognition_source";
     field public static final String OPSTR_MANAGE_ONGOING_CALLS = "android:manage_ongoing_calls";
+    field public static final String OPSTR_RECORD_AUDIO_HOTWORD = "android:record_audio_hotword";
     field public static final String OPSTR_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER = "android:use_icc_auth_with_device_identifier";
     field public static final int OP_COARSE_LOCATION = 0; // 0x0
     field public static final int OP_RECORD_AUDIO = 27; // 0x1b
@@ -332,8 +333,10 @@ package android.app {
     method public void clickNotification(@Nullable String, int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void collapsePanels();
     method public void expandNotificationsPanel();
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void handleSystemKey(int);
     method public void sendNotificationFeedback(@Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void togglePanel();
   }
 
   public final class SyncNotedAppOp implements android.os.Parcelable {
@@ -1047,8 +1050,16 @@ package android.graphics.fonts {
 package android.hardware {
 
   public final class SensorPrivacyManager {
-    method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacy(int, boolean);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacyForProfileGroup(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacy(int, int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacyForProfileGroup(int, int, boolean);
+  }
+
+  public static class SensorPrivacyManager.Sources {
+    field public static final int DIALOG = 3; // 0x3
+    field public static final int OTHER = 5; // 0x5
+    field public static final int QS_TILE = 1; // 0x1
+    field public static final int SETTINGS = 2; // 0x2
+    field public static final int SHELL = 4; // 0x4
   }
 
 }
@@ -1410,6 +1421,7 @@ package android.media {
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int abandonAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String);
     method @Nullable public static android.media.AudioDeviceInfo getDeviceInfoFromType(int);
     method @IntRange(from=0) @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFadeOutDurationOnFocusLossMillis(@NonNull android.media.AudioAttributes);
+    method @NonNull public java.util.List<java.lang.Integer> getReportedSurroundFormats();
     method @NonNull public java.util.Map<java.lang.Integer,java.lang.Boolean> getSurroundFormats();
     method public boolean hasRegisteredDynamicPolicy();
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.QUERY_AUDIO_STATE}) public boolean isFullVolumeDevice();
@@ -2057,7 +2069,7 @@ package android.permission {
   public final class PermissionManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData();
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData(boolean);
-    method public void registerAttributionSource(@NonNull android.content.AttributionSource);
+    method @NonNull public android.content.AttributionSource registerAttributionSource(@NonNull android.content.AttributionSource);
   }
 
 }
@@ -2155,7 +2167,6 @@ package android.provider {
     field @Deprecated public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES = "enabled_notification_policy_access_packages";
     field public static final String ENABLED_VR_LISTENERS = "enabled_vr_listeners";
     field public static final String IMMERSIVE_MODE_CONFIRMATIONS = "immersive_mode_confirmations";
-    field public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
     field public static final String NOTIFICATION_BADGING = "notification_badging";
     field public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
     field public static final String POWER_MENU_LOCKED_SHOW_CONTENT = "power_menu_locked_show_content";
@@ -2385,6 +2396,7 @@ package android.service.watchdog {
 package android.speech {
 
   public class SpeechRecognizer {
+    method @MainThread @NonNull public static android.speech.SpeechRecognizer createOnDeviceTestingSpeechRecognizer(@NonNull android.content.Context);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SPEECH_RECOGNITION) public void setTemporaryOnDeviceRecognizer(@Nullable android.content.ComponentName);
   }
 
@@ -2724,12 +2736,12 @@ package android.view {
   public final class InputDevice implements android.os.Parcelable {
     method @RequiresPermission("android.permission.DISABLE_INPUT_DEVICE") public void disable();
     method @RequiresPermission("android.permission.DISABLE_INPUT_DEVICE") public void enable();
-    field public static final int ACCESSIBILITY_DEVICE_ID = -2; // 0xfffffffe
   }
 
   public class KeyEvent extends android.view.InputEvent implements android.os.Parcelable {
     method public static String actionToString(int);
     method public final void setDisplayId(int);
+    field public static final int FLAG_IS_ACCESSIBILITY_EVENT = 2048; // 0x800
     field public static final int LAST_KEYCODE = 288; // 0x120
   }
 
@@ -2747,6 +2759,7 @@ package android.view {
     method public void setActionButton(int);
     method public void setButtonState(int);
     method public void setDisplayId(int);
+    field public static final int FLAG_IS_ACCESSIBILITY_EVENT = 2048; // 0x800
   }
 
   @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD}) public @interface RemotableViewMethod {
@@ -3163,7 +3176,6 @@ package android.window {
 
   public final class SplashScreenView extends android.widget.FrameLayout {
     method @Nullable public android.view.View getBrandingView();
-    method @ColorInt public int getIconBackgroundColor();
   }
 
   public final class StartingWindowInfo implements android.os.Parcelable {

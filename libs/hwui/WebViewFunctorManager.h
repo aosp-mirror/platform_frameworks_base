@@ -58,6 +58,8 @@ public:
 
         void removeOverlays() { mReference.removeOverlays(); }
 
+        void onRemovedFromTree() { mReference.onRemovedFromTree(); }
+
     private:
         friend class WebViewFunctor;
 
@@ -74,6 +76,7 @@ public:
     void postDrawVk();
     void destroyContext();
     void removeOverlays();
+    void onRemovedFromTree();
 
     ASurfaceControl* getSurfaceControl();
     void mergeTransaction(ASurfaceTransaction* transaction);
@@ -85,12 +88,16 @@ public:
     }
 
 private:
+    void reparentSurfaceControl(ASurfaceControl* parent);
+
+private:
     WebViewFunctorCallbacks mCallbacks;
     void* const mData;
     int mFunctor;
     RenderMode mMode;
     bool mHasContext = false;
     bool mCreatedHandle = false;
+    int32_t mParentSurfaceControlGenerationId = 0;
     ASurfaceControl* mSurfaceControl = nullptr;
 };
 

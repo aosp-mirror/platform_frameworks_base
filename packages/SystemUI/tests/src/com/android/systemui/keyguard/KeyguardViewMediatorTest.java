@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -33,8 +34,9 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper.RunWithLooper;
+import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
@@ -65,7 +67,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class KeyguardViewMediatorTest extends SysuiTestCase {
     private KeyguardViewMediator mViewMediator;
@@ -124,6 +126,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController,
                 () -> mNotificationShadeDepthController);
         mViewMediator.start();
+        mViewMediator.onSystemReady();
     }
 
     @Test
@@ -159,5 +162,28 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         // Once we're 100% dozed, the screen off animation should be completed.
         mViewMediator.onDozeAmountChanged(1f, 1f);
         assertFalse(mViewMediator.isAnimatingScreenOff());
+    }
+
+    @Test
+    public void restoreBouncerWhenSimLockedAndKeyguardIsGoingAway() {
+        // When showing and provisioned
+        when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
+        mViewMediator.setShowingLocked(true);
+
+        // and a SIM becomes locked and requires a PIN
+        mViewMediator.mUpdateCallback.onSimStateChanged(
+                1 /* subId */,
+                0 /* slotId */,
+                TelephonyManager.SIM_STATE_PIN_REQUIRED);
+
+        // and the keyguard goes away
+        mViewMediator.setShowingLocked(false);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
+        mViewMediator.mUpdateCallback.onKeyguardVisibilityChanged(false);
+
+        TestableLooper.get(this).processAllMessages();
+
+        // then make sure it comes back
+        verify(mStatusBarKeyguardViewManager, atLeast(1)).show(null);
     }
 }

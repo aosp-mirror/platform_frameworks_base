@@ -48,6 +48,7 @@ public class InsetsSourceControl implements Parcelable {
     private Insets mInsetsHint;
 
     private boolean mSkipAnimationOnce;
+    private int mParcelableFlags;
 
     public InsetsSourceControl(@InternalInsetsType int type, @Nullable SurfaceControl leash,
             Point surfacePosition, Insets insetsHint) {
@@ -132,6 +133,10 @@ public class InsetsSourceControl implements Parcelable {
         return result;
     }
 
+    public void setParcelableFlags(int parcelableFlags) {
+        mParcelableFlags = parcelableFlags;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -140,9 +145,9 @@ public class InsetsSourceControl implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mType);
-        dest.writeTypedObject(mLeash, 0 /* parcelableFlags */);
-        dest.writeTypedObject(mSurfacePosition, 0 /* parcelableFlags */);
-        dest.writeTypedObject(mInsetsHint, 0 /* parcelableFlags */);
+        dest.writeTypedObject(mLeash, mParcelableFlags);
+        dest.writeTypedObject(mSurfacePosition, mParcelableFlags);
+        dest.writeTypedObject(mInsetsHint, mParcelableFlags);
         dest.writeBoolean(mSkipAnimationOnce);
     }
 

@@ -41,11 +41,17 @@ interface ISensorPrivacyManager {
 
     void setSensorPrivacy(boolean enable);
 
-    void setIndividualSensorPrivacy(int userId, int sensor, boolean enable);
+    void setIndividualSensorPrivacy(int userId, int source, int sensor, boolean enable);
 
-    void setIndividualSensorPrivacyForProfileGroup(int userId, int sensor, boolean enable);
+    void setIndividualSensorPrivacyForProfileGroup(int userId, int source, int sensor, boolean enable);
     // =============== End of transactions used on native side as well ============================
 
-    void suppressIndividualSensorPrivacyReminders(int userId, String packageName, IBinder token,
+    void suppressIndividualSensorPrivacyReminders(int userId, int sensor, IBinder token,
             boolean suppress);
+
+    void addUserGlobalIndividualSensorPrivacyListener(int sensor, in ISensorPrivacyListener listener);
+
+    void removeUserGlobalIndividualSensorPrivacyListener(int sensor, in ISensorPrivacyListener listener);
+
+    void showSensorUseDialog(int sensor);
 }

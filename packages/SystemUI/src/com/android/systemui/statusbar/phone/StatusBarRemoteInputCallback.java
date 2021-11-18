@@ -27,7 +27,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.view.View;
@@ -35,6 +34,7 @@ import android.view.ViewParent;
 
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.ActionClickLogger;
@@ -49,6 +49,8 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -65,6 +67,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     private final Context mContext;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final ShadeController mShadeController;
+    private Executor mExecutor;
     private final ActivityIntentHelper mActivityIntentHelper;
     private final GroupExpansionManager mGroupExpansionManager;
     private View mPendingWorkRemoteInputView;
@@ -74,7 +77,6 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     private final ActionClickLogger mActionClickLogger;
     private int mDisabled2;
     protected BroadcastReceiver mChallengeReceiver = new ChallengeReceiver();
-    private Handler mMainHandler = new Handler();
 
     /**
      */
@@ -89,10 +91,12 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
             ActivityStarter activityStarter,
             ShadeController shadeController,
             CommandQueue commandQueue,
-            ActionClickLogger clickLogger) {
+            ActionClickLogger clickLogger,
+            @Main Executor executor) {
         mContext = context;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mShadeController = shadeController;
+        mExecutor = executor;
         mContext.registerReceiverAsUser(mChallengeReceiver, UserHandle.ALL,
                 new IntentFilter(ACTION_DEVICE_LOCKED_CHANGED), null, null);
         mLockscreenUserManager = notificationLockscreenUserManager;
@@ -113,9 +117,10 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         boolean hasPendingRemoteInput = mPendingRemoteInputView != null;
         if (state == StatusBarState.SHADE
                 && (mStatusBarStateController.leaveOpenOnKeyguardHide() || hasPendingRemoteInput)) {
-            if (!mStatusBarStateController.isKeyguardRequested()) {
+            if (!mStatusBarStateController.isKeyguardRequested()
+                    && mKeyguardStateController.isUnlocked()) {
                 if (hasPendingRemoteInput) {
-                    mMainHandler.post(mPendingRemoteInputView::callOnClick);
+                    mExecutor.execute(mPendingRemoteInputView::callOnClick);
                 }
                 mPendingRemoteInputView = null;
             }
@@ -127,7 +132,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         if (!row.isPinned()) {
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
         }
-        mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
+        mStatusBarKeyguardViewManager.showGenericBouncer(true /* scrimmed */);
         mPendingRemoteInputView = clicked;
     }
 

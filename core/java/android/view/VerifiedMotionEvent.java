@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.MotionEvent.FLAG_IS_ACCESSIBILITY_EVENT;
 import static android.view.MotionEvent.FLAG_WINDOW_IS_OBSCURED;
 import static android.view.MotionEvent.FLAG_WINDOW_IS_PARTIALLY_OBSCURED;
 
@@ -83,6 +84,9 @@ public final class VerifiedMotionEvent extends VerifiedInputEvent implements Par
      * Returns the flags for this motion event.
      *
      * @see MotionEvent#getFlags()
+     * @see MotionEvent#FLAG_IS_ACCESSIBILITY_EVENT
+     * @see MotionEvent#FLAG_WINDOW_IS_OBSCURED
+     * @see MotionEvent#FLAG_WINDOW_IS_PARTIALLY_OBSCURED
      * @hide
      */
     private int mFlags;
@@ -117,6 +121,7 @@ public final class VerifiedMotionEvent extends VerifiedInputEvent implements Par
         switch(flag) {
             // InputDispatcher only verifies a subset of the MotionEvent flags.
             // These values must be kept in sync with Input.cpp
+            case FLAG_IS_ACCESSIBILITY_EVENT:
             case FLAG_WINDOW_IS_OBSCURED:
             case FLAG_WINDOW_IS_PARTIALLY_OBSCURED:
                 return (mFlags & flag) != 0;

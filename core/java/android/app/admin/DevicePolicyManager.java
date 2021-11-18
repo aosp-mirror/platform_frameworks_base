@@ -1605,20 +1605,29 @@ public class DevicePolicyManager {
             "android.app.extra.PASSWORD_COMPLEXITY";
 
     /**
-     * Constant for {@link #getPasswordComplexity()}: no password.
+     * Constant for {@link #getPasswordComplexity()} and
+     * {@link #setRequiredPasswordComplexity(int)}: no password.
      *
-     * <p>Note that these complexity constants are ordered so that higher values are more complex.
+     * <p> When returned from {@link #getPasswordComplexity()}, the constant represents
+     * the exact complexity band the password is in.
+     * When passed to {@link #setRequiredPasswordComplexity(int), it sets the minimum complexity
+     * band which the password must meet.
      */
     public static final int PASSWORD_COMPLEXITY_NONE = 0;
 
     /**
-     * Constant for {@link #getPasswordComplexity()}: password satisfies one of the following:
+     * Constant for {@link #getPasswordComplexity()} and
+     * {@link #setRequiredPasswordComplexity(int)}.
+     * Define the low password complexity band as:
      * <ul>
      * <li>pattern
      * <li>PIN with repeating (4444) or ordered (1234, 4321, 2468) sequences
      * </ul>
      *
-     * <p>Note that these complexity constants are ordered so that higher values are more complex.
+     * <p> When returned from {@link #getPasswordComplexity()}, the constant represents
+     * the exact complexity band the password is in.
+     * When passed to {@link #setRequiredPasswordComplexity(int), it sets the minimum complexity
+     * band which the password must meet.
      *
      * @see #PASSWORD_QUALITY_SOMETHING
      * @see #PASSWORD_QUALITY_NUMERIC
@@ -1626,7 +1635,9 @@ public class DevicePolicyManager {
     public static final int PASSWORD_COMPLEXITY_LOW = 0x10000;
 
     /**
-     * Constant for {@link #getPasswordComplexity()}: password satisfies one of the following:
+     * Constant for {@link #getPasswordComplexity()} and
+     * {@link #setRequiredPasswordComplexity(int)}.
+     * Define the medium password complexity band as:
      * <ul>
      * <li>PIN with <b>no</b> repeating (4444) or ordered (1234, 4321, 2468) sequences, length at
      * least 4
@@ -1634,7 +1645,10 @@ public class DevicePolicyManager {
      * <li>alphanumeric, length at least 4
      * </ul>
      *
-     * <p>Note that these complexity constants are ordered so that higher values are more complex.
+     * <p> When returned from {@link #getPasswordComplexity()}, the constant represents
+     * the exact complexity band the password is in.
+     * When passed to {@link #setRequiredPasswordComplexity(int), it sets the minimum complexity
+     * band which the password must meet.
      *
      * @see #PASSWORD_QUALITY_NUMERIC_COMPLEX
      * @see #PASSWORD_QUALITY_ALPHABETIC
@@ -1643,7 +1657,9 @@ public class DevicePolicyManager {
     public static final int PASSWORD_COMPLEXITY_MEDIUM = 0x30000;
 
     /**
-     * Constant for {@link #getPasswordComplexity()}: password satisfies one of the following:
+     * Constant for {@link #getPasswordComplexity()} and
+     * {@link #setRequiredPasswordComplexity(int)}.
+     * Define the high password complexity band as:
      * <ul>
      * <li>PIN with <b>no</b> repeating (4444) or ordered (1234, 4321, 2468) sequences, length at
      * least 8
@@ -1651,7 +1667,10 @@ public class DevicePolicyManager {
      * <li>alphanumeric, length at least 6
      * </ul>
      *
-     * <p>Note that these complexity constants are ordered so that higher values are more complex.
+     * <p> When returned from {@link #getPasswordComplexity()}, the constant represents
+     * the exact complexity band the password is in.
+     * When passed to {@link #setRequiredPasswordComplexity(int), it sets the minimum complexity
+     * band which the password must meet.
      *
      * @see #PASSWORD_QUALITY_NUMERIC_COMPLEX
      * @see #PASSWORD_QUALITY_ALPHABETIC
@@ -4455,8 +4474,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets a password complexity requirement for the user's screen lock.
-     * The complexity level is one of the pre-defined levels.
+     * Sets a minimum password complexity requirement for the user's screen lock.
+     * The complexity level is one of the pre-defined levels, and the user is unable to set a
+     * password with a lower complexity level.
      *
      * <p>Note that when called on a profile which uses an unified challenge with its parent, the
      * complexity would apply to the unified challenge.
@@ -10131,8 +10151,8 @@ public class DevicePolicyManager {
      * An example of a supported preferential network service is the Enterprise
      * slice on 5G networks.
      *
-     * By default, preferential network service is enabled on the work profile on supported
-     * carriers and devices. Admins can explicitly disable it with this API.
+     * By default, preferential network service is disabled on the work profile on supported
+     * carriers and devices. Admins can explicitly enable it with this API.
      * On fully-managed devices this method is unsupported because all traffic is considered
      * work traffic.
      *
@@ -10976,6 +10996,16 @@ public class DevicePolicyManager {
      * user control, the admin may opt out of controlling grants for these permissions by including
      * {@link #EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT} in the provisioning parameters.
      * In that case the device owner's control will be limited do denying these permissions.
+     * <p>
+     * NOTE: On devices running {@link android.os.Build.VERSION_CODES#S} and above, control over
+     * the following permissions are restricted for managed profile owners:
+     * <ul>
+     *    <li>Manifest.permission.READ_SMS</li>
+     * </ul>
+     * <p>
+     * A managed profile owner may not grant these permissions (i.e. call this method with any of
+     * the permissions listed above and {@code grantState} of
+     * {@code #PERMISSION_GRANT_STATE_GRANTED}), but may deny them.
      * <p>
      * Attempts by the admin to grant these permissions, when the admin is restricted from doing
      * so, will be silently ignored (no exception will be thrown).

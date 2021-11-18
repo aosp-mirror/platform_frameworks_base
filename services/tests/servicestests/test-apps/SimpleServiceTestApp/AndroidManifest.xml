@@ -24,6 +24,9 @@
                  android:exported="true" />
         <service android:name=".SimpleFgService"
                  android:exported="true" />
+        <service android:name=".SimpleIsolatedService"
+                 android:isolatedProcess="true"
+                 android:exported="true" />
     </application>
 
 </manifest>

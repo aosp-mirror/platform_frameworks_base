@@ -179,14 +179,14 @@
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"অফ অৱস্থাত আছে"</item>
-    <item msgid="6014837961827347618">"সকলো"</item>
-    <item msgid="7387060437894578132">"ৰেডিঅ\'ৰ বাহিৰে সকলো"</item>
+    <item msgid="6014837961827347618">"আটাইবোৰ"</item>
+    <item msgid="7387060437894578132">"ৰেডিঅ\'ৰ বাহিৰে আটাইবোৰ"</item>
     <item msgid="7300881231043255746">"কেৱল কাৰ্ণেল"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
     <item msgid="97587758561106269">"অফ কৰক"</item>
-    <item msgid="7126170197336963369">"সকলো লগ বাফাৰ"</item>
-    <item msgid="7167543126036181392">"ৰেডিঅ\' লগ বাফাৰৰ বাহিৰে সকলো"</item>
+    <item msgid="7126170197336963369">"আটাইবোৰ লগ বাফাৰ"</item>
+    <item msgid="7167543126036181392">"ৰেডিঅ\' লগ বাফাৰৰ বাহিৰে আটাইবোৰ"</item>
     <item msgid="5135340178556563979">"কেৱল কাৰ্ণেল লগ বাফাৰ"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
@@ -228,7 +228,7 @@
     <item msgid="8612549335720461635">"৪কে. (সুৰক্ষিত)"</item>
     <item msgid="7322156123728520872">"৪কে. (বৰ্ধিত)"</item>
     <item msgid="7735692090314849188">"৪কে. (বৰ্ধিত, সুৰক্ষিত)"</item>
-    <item msgid="7346816300608639624">"৭২০পি., ১০৮০পি. (দ্বৈত স্ক্ৰীণ)"</item>
+    <item msgid="7346816300608639624">"৭২০পি., ১০৮০পি. (দ্বৈত স্ক্ৰীন)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"নাই"</item>
@@ -243,7 +243,7 @@
   </string-array>
   <string-array name="track_frame_time_entries">
     <item msgid="634406443901014984">"অফ হৈ আছে"</item>
-    <item msgid="1288760936356000927">"স্ক্ৰীণত দণ্ড হিচাপে"</item>
+    <item msgid="1288760936356000927">"স্ক্ৰীনত দণ্ড হিচাপে"</item>
     <item msgid="5023908510820531131">"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>ত"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">

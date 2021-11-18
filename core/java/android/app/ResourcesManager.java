@@ -46,6 +46,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayAdjustments;
+import android.view.DisplayInfo;
 import android.window.WindowContext;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -56,7 +57,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
-import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,6 +97,12 @@ public class ResourcesManager {
      * resources apply their overrides to this display id.
      */
     private int mResDisplayId = DEFAULT_DISPLAY;
+
+    /**
+     * ApplicationInfo changes that need to be applied to Resources when the next configuration
+     * change occurs.
+     */
+    private ArrayList<Pair<String[], ApplicationInfo>> mPendingAppInfoUpdates;
 
     /**
      * A mapping of ResourceImpls and their configurations. These are heavy weight objects
@@ -251,12 +257,6 @@ public class ResourcesManager {
             new WeakHashMap<>();
 
     /**
-     * A cache of DisplayId, DisplayAdjustments to Display.
-     */
-    private final ArrayMap<Pair<Integer, DisplayAdjustments>, SoftReference<Display>>
-            mAdjustedDisplays = new ArrayMap<>();
-
-    /**
      * Callback implementation for handling updates to Resources objects.
      */
     private final UpdateHandler mUpdateCallbacks = new UpdateHandler();
@@ -331,10 +331,12 @@ public class ResourcesManager {
      */
     @VisibleForTesting
     protected @NonNull DisplayMetrics getDisplayMetrics(int displayId, DisplayAdjustments da) {
-        DisplayMetrics dm = new DisplayMetrics();
-        final Display display = getAdjustedDisplay(displayId, da);
-        if (display != null) {
-            display.getMetrics(dm);
+        final DisplayManagerGlobal displayManagerGlobal = DisplayManagerGlobal.getInstance();
+        final DisplayMetrics dm = new DisplayMetrics();
+        final DisplayInfo displayInfo = displayManagerGlobal != null
+                ? displayManagerGlobal.getDisplayInfo(displayId) : null;
+        if (displayInfo != null) {
+            displayInfo.getAppMetrics(dm, da);
         } else {
             dm.setToDefaults();
         }
@@ -372,45 +374,6 @@ public class ResourcesManager {
             }
             return false;
         }
-    }
-
-    /**
-     * Returns an adjusted {@link Display} object based on the inputs or null if display isn't
-     * available. This method is only used within {@link ResourcesManager} to calculate display
-     * metrics based on a set {@link DisplayAdjustments}. All other usages should instead call
-     * {@link ResourcesManager#getAdjustedDisplay(int, Resources)}.
-     *
-     * @param displayId display Id.
-     * @param displayAdjustments display adjustments.
-     */
-    private Display getAdjustedDisplay(final int displayId,
-            @Nullable DisplayAdjustments displayAdjustments) {
-        final DisplayAdjustments displayAdjustmentsCopy = (displayAdjustments != null)
-                ? new DisplayAdjustments(displayAdjustments) : new DisplayAdjustments();
-        final Pair<Integer, DisplayAdjustments> key =
-                Pair.create(displayId, displayAdjustmentsCopy);
-        SoftReference<Display> sd;
-        synchronized (mLock) {
-            sd = mAdjustedDisplays.get(key);
-        }
-        if (sd != null) {
-            final Display display = sd.get();
-            if (display != null) {
-                return display;
-            }
-        }
-        final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
-        if (dm == null) {
-            // may be null early in system startup
-            return null;
-        }
-        final Display display = dm.getCompatibleDisplay(displayId, key.second);
-        if (display != null) {
-            synchronized (mLock) {
-                mAdjustedDisplays.put(key, new SoftReference<>(display));
-            }
-        }
-        return display;
     }
 
     /**
@@ -1032,7 +995,7 @@ public class ResourcesManager {
      * @param classLoader The classloader to use for the Resources object.
      *                    If null, {@link ClassLoader#getSystemClassLoader()} is used.
      * @return A Resources object that gets updated when
-     *         {@link #applyConfigurationToResourcesLocked(Configuration, CompatibilityInfo)}
+     *         {@link #applyConfigurationToResources(Configuration, CompatibilityInfo)}
      *         is called.
      */
     @Nullable
@@ -1159,8 +1122,8 @@ public class ResourcesManager {
     /**
      * Updates an Activity's Resources object with overrideConfig. The Resources object
      * that was previously returned by {@link #getResources(IBinder, String, String[], String[],
-     * String[], Integer, Configuration, CompatibilityInfo, ClassLoader, List)} is still valid and
-     * will have the updated configuration.
+     * String[], String[], Integer, Configuration, CompatibilityInfo, ClassLoader, List)} is still
+     * valid and will have the updated configuration.
      *
      * @param activityToken The Activity token.
      * @param overrideConfig The configuration override to update.
@@ -1195,8 +1158,14 @@ public class ResourcesManager {
                 } else {
                     activityResources.overrideConfig.unset();
                 }
+
                 // Update the Activity's override display id.
                 activityResources.overrideDisplayId = displayId;
+
+                // If a application info update was scheduled to occur in this process but has not
+                // occurred yet, apply it now so the resources objects will have updated paths if
+                // the assets sequence changed.
+                applyAllPendingAppInfoUpdates();
 
                 if (DEBUG) {
                     Throwable here = new Throwable();
@@ -1311,6 +1280,36 @@ public class ResourcesManager {
         return newKey;
     }
 
+    public void appendPendingAppInfoUpdate(@NonNull String[] oldSourceDirs,
+            @NonNull ApplicationInfo appInfo) {
+        synchronized (mLock) {
+            if (mPendingAppInfoUpdates == null) {
+                mPendingAppInfoUpdates = new ArrayList<>();
+            }
+            // Clear previous app info changes for a package to prevent multiple ResourcesImpl
+            // recreations when the recreation caused by this update completely overrides the
+            // previous pending changes.
+            for (int i = mPendingAppInfoUpdates.size() - 1; i >= 0; i--) {
+                if (ArrayUtils.containsAll(oldSourceDirs, mPendingAppInfoUpdates.get(i).first)) {
+                    mPendingAppInfoUpdates.remove(i);
+                }
+            }
+            mPendingAppInfoUpdates.add(new Pair<>(oldSourceDirs, appInfo));
+        }
+    }
+
+    public final void applyAllPendingAppInfoUpdates() {
+        synchronized (mLock) {
+            if (mPendingAppInfoUpdates != null) {
+                for (int i = 0, n = mPendingAppInfoUpdates.size(); i < n; i++) {
+                    final Pair<String[], ApplicationInfo> appInfo = mPendingAppInfoUpdates.get(i);
+                    applyNewResourceDirsLocked(appInfo.first, appInfo.second);
+                }
+                mPendingAppInfoUpdates = null;
+            }
+        }
+    }
+
     public final boolean applyConfigurationToResources(@NonNull Configuration config,
             @Nullable CompatibilityInfo compat) {
         return applyConfigurationToResources(config, compat, null /* adjustments */);
@@ -1332,9 +1331,6 @@ public class ResourcesManager {
                     return false;
                 }
 
-                // Things might have changed in display manager, so clear the cached displays.
-                mAdjustedDisplays.clear();
-
                 int changes = mResConfiguration.updateFrom(config);
                 if (compat != null && (mResCompatibilityInfo == null
                         || !mResCompatibilityInfo.equals(compat))) {
@@ -1342,6 +1338,13 @@ public class ResourcesManager {
                     changes |= ActivityInfo.CONFIG_SCREEN_LAYOUT
                             | ActivityInfo.CONFIG_SCREEN_SIZE
                             | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+                }
+
+                // If a application info update was scheduled to occur in this process but has not
+                // occurred yet, apply it now so the resources objects will have updated paths when
+                // the assets sequence changes.
+                if ((changes & ActivityInfo.CONFIG_ASSETS_PATHS) != 0) {
+                    applyAllPendingAppInfoUpdates();
                 }
 
                 DisplayMetrics displayMetrics = getDisplayMetrics();
@@ -1454,61 +1457,58 @@ public class ResourcesManager {
         }
     }
 
-    // TODO(adamlesinski): Make this accept more than just overlay directories.
-    void applyNewResourceDirs(@NonNull final ApplicationInfo appInfo,
-            @Nullable final String[] oldPaths) {
-        synchronized (mLock) {
-            try {
-                Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
-                        "ResourcesManager#applyNewResourceDirsLocked");
+    private void applyNewResourceDirsLocked(@Nullable final String[] oldSourceDirs,
+            @NonNull final ApplicationInfo appInfo) {
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
+                    "ResourcesManager#applyNewResourceDirsLocked");
 
-                String baseCodePath = appInfo.getBaseCodePath();
+            String baseCodePath = appInfo.getBaseCodePath();
 
-                final int myUid = Process.myUid();
-                String[] newSplitDirs = appInfo.uid == myUid
-                        ? appInfo.splitSourceDirs
-                        : appInfo.splitPublicSourceDirs;
+            final int myUid = Process.myUid();
+            String[] newSplitDirs = appInfo.uid == myUid
+                    ? appInfo.splitSourceDirs
+                    : appInfo.splitPublicSourceDirs;
 
-                // ApplicationInfo is mutable, so clone the arrays to prevent outside modification
-                String[] copiedSplitDirs = ArrayUtils.cloneOrNull(newSplitDirs);
-                String[] copiedResourceDirs = combinedOverlayPaths(appInfo.resourceDirs,
-                        appInfo.overlayPaths);
+            // ApplicationInfo is mutable, so clone the arrays to prevent outside modification
+            String[] copiedSplitDirs = ArrayUtils.cloneOrNull(newSplitDirs);
+            String[] copiedResourceDirs = combinedOverlayPaths(appInfo.resourceDirs,
+                    appInfo.overlayPaths);
 
-                if (appInfo.uid == myUid) {
-                    addApplicationPathsLocked(baseCodePath, copiedSplitDirs);
-                }
-
-                final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
-                final int implCount = mResourceImpls.size();
-                for (int i = 0; i < implCount; i++) {
-                    final ResourcesKey key = mResourceImpls.keyAt(i);
-                    final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
-                    final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
-
-                    if (impl == null) {
-                        continue;
-                    }
-
-                    if (key.mResDir == null
-                            || key.mResDir.equals(baseCodePath)
-                            || ArrayUtils.contains(oldPaths, key.mResDir)) {
-                        updatedResourceKeys.put(impl, new ResourcesKey(
-                                baseCodePath,
-                                copiedSplitDirs,
-                                copiedResourceDirs,
-                                key.mLibDirs,
-                                key.mDisplayId,
-                                key.mOverrideConfiguration,
-                                key.mCompatInfo,
-                                key.mLoaders
-                        ));
-                    }
-                }
-
-                redirectResourcesToNewImplLocked(updatedResourceKeys);
-            } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+            if (appInfo.uid == myUid) {
+                addApplicationPathsLocked(baseCodePath, copiedSplitDirs);
             }
+
+            final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
+            final int implCount = mResourceImpls.size();
+            for (int i = 0; i < implCount; i++) {
+                final ResourcesKey key = mResourceImpls.keyAt(i);
+                final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
+                final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
+
+                if (impl == null) {
+                    continue;
+                }
+
+                if (key.mResDir == null
+                        || key.mResDir.equals(baseCodePath)
+                        || ArrayUtils.contains(oldSourceDirs, key.mResDir)) {
+                    updatedResourceKeys.put(impl, new ResourcesKey(
+                            baseCodePath,
+                            copiedSplitDirs,
+                            copiedResourceDirs,
+                            key.mLibDirs,
+                            key.mDisplayId,
+                            key.mOverrideConfiguration,
+                            key.mCompatInfo,
+                            key.mLoaders
+                    ));
+                }
+            }
+
+            redirectResourcesToNewImplLocked(updatedResourceKeys);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
     }
 

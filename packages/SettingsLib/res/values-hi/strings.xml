@@ -507,7 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म और रिमाइंडर"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"अलार्म और रिमाइंडर सेट करने की अनुमति दें"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"अलार्म और रिमाइंडर"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"इस ऐप्लिकेशन को अलार्म और तय समय पर होने वाली कार्रवाइयों के रिमाइंडर सेट करने की अनुमति दें. ऐसा करने से, ऐप्लिकेशन को बैकग्राउंड में चलने की अनुमति मिलती है. इससे, बैटरी ज़्यादा खर्च होती है.\n\nअगर आप यह अनुमति नहीं देते हैं, तो इस ऐप्लिकेशन की मदद से सेट किए गए अलार्म और तय समय पर होने वाली कार्रवाइयों के रिमाइंडर काम नहीं करेंगे."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"इस ऐप्लिकेशन को अलार्म और तय समय पर होने वाली कार्रवाइयों के रिमाइंडर सेट करने की अनुमति दें. ऐसा करने से, ऐप्लिकेशन को बैकग्राउंड में चलने की अनुमति मिलती है. इससे बैटरी ज़्यादा खर्च होती है.\n\nअगर आप यह अनुमति नहीं देते हैं, तो इस ऐप्लिकेशन की मदद से सेट किए गए अलार्म और तय समय पर होने वाली कार्रवाइयों के रिमाइंडर काम नहीं करेंगे."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"शेड्यूल, अलार्म, रिमाइंडर, घड़ी"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"चालू करें"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'परेशान न करें\' चालू करें"</string>
@@ -527,7 +527,7 @@
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"कनेक्ट करने में समस्या हो रही है. डिवाइस को बंद करके चालू करें"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"वायर वाला ऑडियो डिवाइस"</string>
     <string name="help_label" msgid="3528360748637781274">"सहायता और सुझाव"</string>
-    <string name="storage_category" msgid="2287342585424631813">"डिवाइस की मेमोरी"</string>
+    <string name="storage_category" msgid="2287342585424631813">"डिवाइस का स्टोरेज"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"शेयर किया गया डेटा"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"शेयर किए गए डेटा को देखें और उसमें बदलाव करें"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"इस उपयोगकर्ता के साथ किसी तरह का डेटा शेयर नहीं किया गया है."</string>
@@ -568,6 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"मेहमान हटाएं"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"मेहमान के तौर पर ब्राउज़ करने का सेशन रीसेट करें"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"मेहमान"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"क्या आप मेहमान के तौर पर ब्राउज़ करने का सेशन रीसेट करना चाहते हैं?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"रीसेट करें"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"मेहमान के तौर पर ब्राउज़ करने का सेशन रीसेट किया जा रहा है…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"फ़ोटो खींचें"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"कोई इमेज चुनें"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"फ़ोटो चुनें"</string>

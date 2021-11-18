@@ -20,8 +20,10 @@ import android.view.CrossWindowBlurListeners.CROSS_WINDOW_BLUR_SUPPORTED
 
 import android.app.ActivityManager
 import android.content.res.Resources
+import android.os.SystemProperties
 import android.util.IndentingPrintWriter
 import android.util.MathUtils
+import android.view.CrossWindowBlurListeners
 import android.view.SurfaceControl
 import android.view.ViewRootImpl
 import androidx.annotation.VisibleForTesting
@@ -37,10 +39,13 @@ import javax.inject.Inject
 @SysUISingleton
 open class BlurUtils @Inject constructor(
     @Main private val resources: Resources,
+    private val crossWindowBlurListeners: CrossWindowBlurListeners,
     dumpManager: DumpManager
 ) : Dumpable {
     val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
     val maxBlurRadius = resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
+
+    private var lastAppliedBlur = 0
 
     init {
         dumpManager.registerDumpable(javaClass.name, this)
@@ -49,22 +54,22 @@ open class BlurUtils @Inject constructor(
     /**
      * Translates a ratio from 0 to 1 to a blur radius in pixels.
      */
-    fun blurRadiusOfRatio(ratio: Float): Int {
+    fun blurRadiusOfRatio(ratio: Float): Float {
         if (ratio == 0f) {
-            return 0
+            return 0f
         }
-        return MathUtils.lerp(minBlurRadius.toFloat(), maxBlurRadius.toFloat(), ratio).toInt()
+        return MathUtils.lerp(minBlurRadius.toFloat(), maxBlurRadius.toFloat(), ratio)
     }
 
     /**
      * Translates a blur radius in pixels to a ratio between 0 to 1.
      */
-    fun ratioOfBlurRadius(blur: Int): Float {
-        if (blur == 0) {
+    fun ratioOfBlurRadius(blur: Float): Float {
+        if (blur == 0f) {
             return 0f
         }
         return MathUtils.map(minBlurRadius.toFloat(), maxBlurRadius.toFloat(),
-                0f /* maxStart */, 1f /* maxStop */, blur.toFloat())
+                0f /* maxStart */, 1f /* maxStop */, blur)
     }
 
     /**
@@ -72,17 +77,25 @@ open class BlurUtils @Inject constructor(
      *
      * @param viewRootImpl The window root.
      * @param radius blur radius in pixels.
+     * @param opaque if surface is opaque, regardless or having blurs or no.
      */
-    fun applyBlur(viewRootImpl: ViewRootImpl?, radius: Int, opaqueBackground: Boolean) {
+    fun applyBlur(viewRootImpl: ViewRootImpl?, radius: Int, opaque: Boolean) {
         if (viewRootImpl == null || !viewRootImpl.surfaceControl.isValid ||
                 !supportsBlursOnWindows()) {
             return
         }
         createTransaction().use {
             it.setBackgroundBlurRadius(viewRootImpl.surfaceControl, radius)
-            it.setOpaque(viewRootImpl.surfaceControl, opaqueBackground)
+            it.setOpaque(viewRootImpl.surfaceControl, opaque)
+            if (lastAppliedBlur == 0 && radius != 0) {
+                it.setEarlyWakeupStart()
+            }
+            if (lastAppliedBlur != 0 && radius == 0) {
+                it.setEarlyWakeupEnd()
+            }
             it.apply()
         }
+        lastAppliedBlur = radius
     }
 
     @VisibleForTesting
@@ -97,7 +110,9 @@ open class BlurUtils @Inject constructor(
      * @return {@code true} when supported.
      */
     open fun supportsBlursOnWindows(): Boolean {
-        return CROSS_WINDOW_BLUR_SUPPORTED && ActivityManager.isHighEndGfx()
+        return CROSS_WINDOW_BLUR_SUPPORTED && ActivityManager.isHighEndGfx() &&
+                crossWindowBlurListeners.isCrossWindowBlurEnabled() &&
+                !SystemProperties.getBoolean("persist.sysui.disableBlur", false)
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {

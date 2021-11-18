@@ -25,6 +25,7 @@ import static com.android.systemui.people.NotificationHelper.shouldMatchNotifica
 
 import android.annotation.Nullable;
 import android.app.Notification;
+import android.app.backup.BackupManager;
 import android.app.people.ConversationChannel;
 import android.app.people.IPeopleManager;
 import android.app.people.PeopleSpaceTile;
@@ -74,7 +75,8 @@ import java.util.stream.Stream;
 /** Utils class for People Space. */
 public class PeopleSpaceUtils {
     /** Turns on debugging information about People Space. */
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
+
     public static final String PACKAGE_NAME = "package_name";
     public static final String USER_ID = "user_id";
     public static final String SHORTCUT_ID = "shortcut_id";
@@ -89,7 +91,7 @@ public class PeopleSpaceUtils {
 
     /** Returns stored widgets for the conversation specified. */
     public static Set<String> getStoredWidgetIds(SharedPreferences sp, PeopleTileKey key) {
-        if (!key.isValid()) {
+        if (!PeopleTileKey.isValid(key)) {
             return new HashSet<>();
         }
         return new HashSet<>(sp.getStringSet(key.toString(), new HashSet<>()));
@@ -97,19 +99,16 @@ public class PeopleSpaceUtils {
 
     /** Sets all relevant storage for {@code appWidgetId} association to {@code tile}. */
     public static void setSharedPreferencesStorageForTile(Context context, PeopleTileKey key,
-            int appWidgetId, Uri contactUri) {
-        if (!key.isValid()) {
+            int appWidgetId, Uri contactUri, BackupManager backupManager) {
+        if (!PeopleTileKey.isValid(key)) {
             Log.e(TAG, "Not storing for invalid key");
             return;
         }
         // Write relevant persisted storage.
         SharedPreferences widgetSp = context.getSharedPreferences(String.valueOf(appWidgetId),
                 Context.MODE_PRIVATE);
-        SharedPreferences.Editor widgetEditor = widgetSp.edit();
-        widgetEditor.putString(PeopleSpaceUtils.PACKAGE_NAME, key.getPackageName());
-        widgetEditor.putString(PeopleSpaceUtils.SHORTCUT_ID, key.getShortcutId());
-        widgetEditor.putInt(PeopleSpaceUtils.USER_ID, key.getUserId());
-        widgetEditor.apply();
+        SharedPreferencesHelper.setPeopleTileKey(widgetSp, key);
+
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sp.edit();
         String contactUriString = contactUri == null ? EMPTY_STRING : contactUri.toString();
@@ -117,14 +116,18 @@ public class PeopleSpaceUtils {
 
         // Don't overwrite existing widgets with the same key.
         addAppWidgetIdForKey(sp, editor, appWidgetId, key.toString());
-        addAppWidgetIdForKey(sp, editor, appWidgetId, contactUriString);
+        if (!TextUtils.isEmpty(contactUriString)) {
+            addAppWidgetIdForKey(sp, editor, appWidgetId, contactUriString);
+        }
         editor.apply();
+        backupManager.dataChanged();
     }
 
     /** Removes stored data when tile is deleted. */
     public static void removeSharedPreferencesStorageForTile(Context context, PeopleTileKey key,
             int widgetId, String contactUriString) {
         // Delete widgetId mapping to key.
+        if (DEBUG) Log.d(TAG, "Removing widget info from sharedPrefs");
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sp.edit();
         editor.remove(String.valueOf(widgetId));
@@ -230,7 +233,7 @@ public class PeopleSpaceUtils {
      */
     public static PeopleSpaceTile augmentTileFromNotification(Context context, PeopleSpaceTile tile,
             PeopleTileKey key, NotificationEntry notificationEntry, int messagesCount,
-            Optional<Integer> appWidgetId) {
+            Optional<Integer> appWidgetId, BackupManager backupManager) {
         if (notificationEntry == null || notificationEntry.getSbn().getNotification() == null) {
             if (DEBUG) Log.d(TAG, "Tile key: " + key.toString() + ". Notification is null");
             return removeNotificationFields(tile);
@@ -246,7 +249,7 @@ public class PeopleSpaceUtils {
             Uri contactUri = Uri.parse(uriFromNotification);
             // Update storage.
             setSharedPreferencesStorageForTile(context, new PeopleTileKey(tile), appWidgetId.get(),
-                    contactUri);
+                    contactUri, backupManager);
             // Update cached tile in-memory.
             updatedTile.setContactUri(contactUri);
         }

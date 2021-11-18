@@ -389,6 +389,10 @@ public class VpnManager {
 
     /**
      * Starts a legacy VPN.
+     *
+     * Legacy VPN is deprecated starting from Android S. So this API shouldn't be called if the
+     * initial SDK version of device is Android S+. Otherwise, UnsupportedOperationException will be
+     * thrown.
      * @hide
      */
     public void startLegacyVpn(VpnProfile profile) {

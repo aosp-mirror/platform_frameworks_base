@@ -48,17 +48,21 @@ import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorProperties;
+import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.WindowManager;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.systemui.SysuiTestCase;
@@ -97,6 +101,8 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private ActivityTaskManager mActivityTaskManager;
     @Mock
+    private WindowManager mWindowManager;
+    @Mock
     private FingerprintManager mFingerprintManager;
     @Mock
     private FaceManager mFaceManager;
@@ -104,6 +110,10 @@ public class AuthControllerTest extends SysuiTestCase {
     private UdfpsController mUdfpsController;
     @Mock
     private SidefpsController mSidefpsController;
+    @Mock
+    private DisplayManager mDisplayManager;
+    @Mock
+    private Handler mHandler;
     @Captor
     ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mAuthenticatorsRegisteredCaptor;
 
@@ -149,7 +159,7 @@ public class AuthControllerTest extends SysuiTestCase {
         when(mFingerprintManager.getSensorPropertiesInternal()).thenReturn(props);
 
         mAuthController = new TestableAuthController(context, mCommandQueue,
-                mActivityTaskManager, mFingerprintManager, mFaceManager,
+                mActivityTaskManager, mWindowManager, mFingerprintManager, mFaceManager,
                 () -> mUdfpsController, () -> mSidefpsController);
 
         mAuthController.start();
@@ -536,6 +546,16 @@ public class AuthControllerTest extends SysuiTestCase {
         verify(mUdfpsController).onAodInterrupt(eq(pos), eq(pos), eq(majorMinor), eq(majorMinor));
     }
 
+    @Test
+    public void testSubscribesToOrientationChangesWhenShowingDialog() {
+        showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
+
+        verify(mDisplayManager).registerDisplayListener(any(), eq(mHandler));
+
+        mAuthController.hideAuthenticationDialog();
+        verify(mDisplayManager).unregisterDisplayListener(any());
+    }
+
     // Helpers
 
     private void showDialog(int[] sensorIds, boolean credentialAllowed) {
@@ -576,15 +596,17 @@ public class AuthControllerTest extends SysuiTestCase {
         private int mBuildCount = 0;
         private PromptInfo mLastBiometricPromptInfo;
 
-        TestableAuthController(Context context, CommandQueue commandQueue,
+        TestableAuthController(Context context,
+                CommandQueue commandQueue,
                 ActivityTaskManager activityTaskManager,
+                WindowManager windowManager,
                 FingerprintManager fingerprintManager,
                 FaceManager faceManager,
                 Provider<UdfpsController> udfpsControllerFactory,
                 Provider<SidefpsController> sidefpsControllerFactory) {
-            super(context, commandQueue, activityTaskManager,
+            super(context, commandQueue, activityTaskManager, windowManager,
                     fingerprintManager, faceManager, udfpsControllerFactory,
-                    sidefpsControllerFactory);
+                    sidefpsControllerFactory, mDisplayManager, mHandler);
         }
 
         @Override

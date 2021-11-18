@@ -40,23 +40,24 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.*
+import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.nullable
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.reset
-
 import org.mockito.MockitoAnnotations
 
 private const val CALL_UID = 900
@@ -117,6 +118,11 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 .thenReturn(PROC_STATE_INVISIBLE)
     }
 
+    @After
+    fun tearDown() {
+        controller.tearDownChipView()
+    }
+
     @Test
     fun onEntryUpdated_isOngoingCallNotif_listenerNotified() {
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
@@ -138,6 +144,59 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
         verify(mockOngoingCallListener, times(2))
                 .onOngoingCallStateChanged(anyBoolean())
+    }
+
+    /** Regression test for b/191472854. */
+    @Test
+    fun onEntryUpdated_notifHasNullContentIntent_noCrash() {
+        notifCollectionListener.onEntryUpdated(
+                createCallNotifEntry(ongoingCallStyle, nullContentIntent = true))
+    }
+
+    /** Regression test for b/192379214. */
+    @Test
+    fun onEntryUpdated_notificationWhenIsZero_timeHidden() {
+        val notification = NotificationEntryBuilder(createOngoingCallNotifEntry())
+        notification.modifyNotification(context).setWhen(0)
+
+        notifCollectionListener.onEntryUpdated(notification.build())
+        chipView.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+
+        assertThat(chipView.findViewById<View>(R.id.ongoing_call_chip_time)?.measuredWidth)
+                .isEqualTo(0)
+    }
+
+    @Test
+    fun onEntryUpdated_notificationWhenIsValid_timeShown() {
+        val notification = NotificationEntryBuilder(createOngoingCallNotifEntry())
+        notification.modifyNotification(context).setWhen(clock.currentTimeMillis())
+
+        notifCollectionListener.onEntryUpdated(notification.build())
+        chipView.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+
+        assertThat(chipView.findViewById<View>(R.id.ongoing_call_chip_time)?.measuredWidth)
+                .isGreaterThan(0)
+    }
+
+    /** Regression test for b/194731244. */
+    @Test
+    fun onEntryUpdated_calledManyTimes_uidObserverUnregisteredManyTimes() {
+        val numCalls = 4
+
+        for (i in 0 until numCalls) {
+            // Re-create the notification each time so that it's considered a different object and
+            // observers will get re-registered (and hopefully unregistered).
+            notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+        }
+
+        // There should be 1 observer still registered, so we should unregister n-1 times.
+        verify(mockIActivityManager, times(numCalls - 1)).unregisterUidObserver(any())
     }
 
     /**
@@ -357,14 +416,22 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     private fun createScreeningCallNotifEntry() = createCallNotifEntry(screeningCallStyle)
 
-    private fun createCallNotifEntry(callStyle: Notification.CallStyle): NotificationEntry {
+    private fun createCallNotifEntry(
+        callStyle: Notification.CallStyle,
+        nullContentIntent: Boolean = false
+    ): NotificationEntry {
         val notificationEntryBuilder = NotificationEntryBuilder()
         notificationEntryBuilder.modifyNotification(context).style = callStyle
-
-        val contentIntent = mock(PendingIntent::class.java)
-        `when`(contentIntent.intent).thenReturn(mock(Intent::class.java))
-        notificationEntryBuilder.modifyNotification(context).setContentIntent(contentIntent)
         notificationEntryBuilder.setUid(CALL_UID)
+
+        if (nullContentIntent) {
+            notificationEntryBuilder.modifyNotification(context).setContentIntent(null)
+        } else {
+            val contentIntent = mock(PendingIntent::class.java)
+            `when`(contentIntent.intent).thenReturn(mock(Intent::class.java))
+            notificationEntryBuilder.modifyNotification(context).setContentIntent(contentIntent)
+        }
+
         return notificationEntryBuilder.build()
     }
 

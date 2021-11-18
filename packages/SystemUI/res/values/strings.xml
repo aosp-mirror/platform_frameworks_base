@@ -438,6 +438,8 @@
     <string name="fingerprint_dialog_use_fingerprint">Use your fingerprint to continue</string>
     <!-- Message shown to ask the user to use screenlock to continue.[CHAR LIMIT=NONE] -->
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock">Can\u2019t recognize fingerprint. Use screen lock instead.</string>
+    <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
+    <string name="keyguard_face_failed_use_fp">@string/fingerprint_dialog_use_fingerprint_instead</string>
 
     <!-- Message shown when the system-provided face dialog is shown, asking for authentication [CHAR LIMIT=30] -->
     <string name="face_dialog_looking_for_face">Looking for you\u2026</string>
@@ -1006,10 +1008,6 @@
     <!-- Default name for the media device shown in the output switcher when the name is not available [CHAR LIMIT=30] -->
     <string name="media_seamless_remote_device">Device</string>
 
-    <!-- Recents: Text that shows above the navigation bar after launching a few apps. [CHAR LIMIT=NONE] -->
-    <string name="recents_swipe_up_onboarding">Swipe up to switch apps</string>
-    <!-- Recents: Text that shows above the navigation bar after launching several apps. [CHAR LIMIT=NONE] -->
-    <string name="recents_quick_scrub_onboarding">Drag right to quickly switch apps</string>
     <!-- QuickStep: Accessibility to toggle overview [CHAR LIMIT=40] -->
     <string name="quick_step_accessibility_toggle_overview">Toggle Overview</string>
 
@@ -1067,6 +1065,9 @@
 
     <!-- Message shown when lock screen is tapped or face authentication fails. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to open</string>
+
+    <!-- Message shown when lock screen is tapped or face authentication fails. Provides extra instructions for how the user can enter their device (unlock or proceed to home) [CHAR LIMIT=60] -->
+    <string name="keyguard_unlock_press">Press to open</string>
 
     <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
     <string name="keyguard_retry">Swipe up to try again</string>
@@ -1148,17 +1149,11 @@
     <!-- Title of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_title">Remove guest?</string>
 
-    <!-- Title of the confirmation dialog when resetting guest session [CHAR LIMIT=NONE] -->
-    <string name="guest_reset_guest_dialog_title">Reset guest?</string>
-
     <!-- Message of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_message">All apps and data in this session will be deleted.</string>
 
     <!-- Label for button in confirmation dialog when exiting guest session [CHAR LIMIT=35] -->
     <string name="guest_exit_guest_dialog_remove">Remove</string>
-
-    <!-- Label for button in confirmation dialog when resetting guest session [CHAR LIMIT=35] -->
-    <string name="guest_reset_guest_dialog_remove">Reset</string>
 
     <!-- Title of the notification when resuming an existing guest session [CHAR LIMIT=NONE] -->
     <string name="guest_wipe_session_title">Welcome back, guest!</string>
@@ -1666,7 +1661,9 @@
     <!-- Label of the button underneath the card carousel prompting user unlock device. [CHAR LIMIT=NONE] -->
     <string name="wallet_action_button_label_unlock">Unlock to pay</string>
     <!-- Secondary label of the quick access wallet tile if no card. [CHAR LIMIT=NONE] -->
-    <string name="wallet_secondary_label_no_card">Not set up</string>
+    <string name="wallet_secondary_label_no_card">Add a card</string>
+    <!-- Secondary label of the quick access wallet tile if wallet is still updating. [CHAR LIMIT=NONE] -->
+    <string name="wallet_secondary_label_updating">Updating</string>
     <!-- Secondary label of the quick access wallet tile if device locked. [CHAR LIMIT=NONE] -->
     <string name="wallet_secondary_label_device_locked">Unlock to use</string>
     <!-- Message shown when an unknown failure occurred when fetching cards. [CHAR LIMIT=NONE] -->
@@ -2732,7 +2729,7 @@
 
     <!-- Device Controls strings -->
     <!-- Device Controls, Quick Settings tile title [CHAR LIMIT=30] -->
-    <string name="quick_controls_title">Home controls</string>
+    <string name="quick_controls_title">Device controls</string>
 
     <!-- Controls management providers screen title [CHAR LIMIT=60]-->
     <string name="controls_providers_title">Choose app to add controls</string>
@@ -2895,7 +2892,7 @@
     <!--Text explaining to tap a conversation to select it show in their Conversation widget [CHAR LIMIT=180] -->
     <string name="select_conversation_text">Tap a conversation to add it to your Home screen</string>
     <!--Text explaining there are no existing conversations to show in their Conversation widget [CHAR LIMIT=100] -->
-    <string name="no_conversations_text">Check back here once you get some messages</string>
+    <string name="no_conversations_text">Your recent conversations will show up here</string>
     <!--Text header for priority conversation tiles available to be added to the home screen [CHAR LIMIT=100] -->
     <string name="priority_conversations">Priority conversations</string>
     <!--Text header for recent conversation tiles available to be added to the home screen [CHAR LIMIT=100] -->
@@ -2938,7 +2935,7 @@
     <string name="audio_status">Listening</string>
     <!-- Status text on the Conversation widget for playing a game [CHAR LIMIT=20] -->
     <string name="game_status">Playing</string>
-    <!-- Empty user name before user has selected a friend for their Conversation widget [CHAR LIMIT=20] -->
+    <!-- Empty user name before user has selected a friend for their Conversation widget [CHAR LIMIT=10] -->
     <string name="empty_user_name">Friends</string>
     <!-- Empty status shown before user has selected a friend for their Conversation widget [CHAR LIMIT=20] -->
     <string name="empty_status">Let’s chat tonight!</string>
@@ -2952,10 +2949,16 @@
     <string name="people_tile_description">See recent messages, missed calls, and status updates</string>
     <!-- Title text displayed for the Conversation widget [CHAR LIMIT=50] -->
     <string name="people_tile_title">Conversation</string>
+    <!-- Text when the Conversation widget when Do Not Disturb is suppressing the notification. [CHAR LIMIT=50] -->
+    <string name="paused_by_dnd">Paused by Do Not Disturb</string>
     <!-- Content description text on the Conversation widget when a person has sent a new text message [CHAR LIMIT=150] -->
-    <string name="new_notification_text_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> sent a message</string>
+    <string name="new_notification_text_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> sent a message: <xliff:g id="notification" example="Hey! How is your day going">%2$s</xliff:g></string>
     <!-- Content description text on the Conversation widget when a person has sent a new image message [CHAR LIMIT=150] -->
     <string name="new_notification_image_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> sent an image</string>
+    <!-- Content description text on the Conversation widget when a person has a new status posted [CHAR LIMIT=150] -->
+    <string name="new_status_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> has a status update: <xliff:g id="status" example="Listening to music">%2$s</xliff:g></string>
+    <!-- Content description text on the Conversation widget when a person is  available, meaning online on an application [CHAR LIMIT=150] -->
+    <string name="person_available">Available</string>
 
     <!-- Title to display in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false
     [CHAR LIMIT=NONE] -->

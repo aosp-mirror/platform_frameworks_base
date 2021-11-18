@@ -370,4 +370,9 @@ public class BinderLatencyObserver {
     public Runnable getStatsdPushRunnable() {
         return mLatencyObserverRunnable;
     }
+
+    @VisibleForTesting
+    public int getProcessSource() {
+        return mProcessSource;
+    }
 }

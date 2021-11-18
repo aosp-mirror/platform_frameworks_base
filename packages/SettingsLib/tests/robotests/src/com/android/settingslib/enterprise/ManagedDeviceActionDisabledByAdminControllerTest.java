@@ -30,6 +30,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ResolveInfo;
+import android.os.UserHandle;
 import android.os.UserManager;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -45,9 +47,11 @@ import org.robolectric.android.controller.ActivityController;
 @RunWith(RobolectricTestRunner.class)
 public class ManagedDeviceActionDisabledByAdminControllerTest {
 
+    private static UserHandle MANAGED_USER = UserHandle.of(123);
     private static final String RESTRICTION = UserManager.DISALLOW_ADJUST_VOLUME;
     private static final String EMPTY_URL = "";
     private static final String SUPPORT_TITLE_FOR_RESTRICTION = DISALLOW_ADJUST_VOLUME_TITLE;
+    public static final ResolveInfo TEST_RESULT_INFO = new ResolveInfo();
 
     private final Context mContext = ApplicationProvider.getApplicationContext();
     private final Activity mActivity = ActivityController.of(new Activity()).get();
@@ -60,8 +64,21 @@ public class ManagedDeviceActionDisabledByAdminControllerTest {
     }
 
     @Test
-    public void setupLearnMoreButton_validUrl_negativeButtonSet() {
-        ManagedDeviceActionDisabledByAdminController controller = createController(URL);
+    public void setupLearnMoreButton_noUrl_negativeButtonSet() {
+        ManagedDeviceActionDisabledByAdminController controller = createController(EMPTY_URL);
+
+        controller.setupLearnMoreButton(mContext);
+
+        mTestUtils.assertLearnMoreAction(LEARN_MORE_ACTION_SHOW_ADMIN_POLICIES);
+    }
+
+    @Test
+    public void setupLearnMoreButton_validUrl_foregroundUser_launchesHelpPage() {
+        ManagedDeviceActionDisabledByAdminController controller = createController(
+                URL,
+                /* isUserForeground= */ true,
+                /* preferredUserHandle= */ MANAGED_USER,
+                /* userContainingBrowser= */ MANAGED_USER);
 
         controller.setupLearnMoreButton(mContext);
 
@@ -69,8 +86,38 @@ public class ManagedDeviceActionDisabledByAdminControllerTest {
     }
 
     @Test
-    public void setupLearnMoreButton_noUrl_negativeButtonSet() {
-        ManagedDeviceActionDisabledByAdminController controller = createController(EMPTY_URL);
+    public void setupLearnMoreButton_validUrl_browserInPreferredUser_notForeground_showsAdminPolicies() {
+        ManagedDeviceActionDisabledByAdminController controller = createController(
+                URL,
+                /* isUserForeground= */ false,
+                /* preferredUserHandle= */ MANAGED_USER,
+                /* userContainingBrowser= */ MANAGED_USER);
+
+        controller.setupLearnMoreButton(mContext);
+
+        mTestUtils.assertLearnMoreAction(LEARN_MORE_ACTION_SHOW_ADMIN_POLICIES);
+    }
+
+    @Test
+    public void setupLearnMoreButton_validUrl_browserInCurrentUser_launchesHelpPage() {
+        ManagedDeviceActionDisabledByAdminController controller = createController(
+                URL,
+                /* isUserForeground= */ false,
+                /* preferredUserHandle= */ MANAGED_USER,
+                /* userContainingBrowser= */ mContext.getUser());
+
+        controller.setupLearnMoreButton(mContext);
+
+        mTestUtils.assertLearnMoreAction(LEARN_MORE_ACTION_LAUNCH_HELP_PAGE);
+    }
+
+    @Test
+    public void setupLearnMoreButton_validUrl_browserNotOnAnyUser_showsAdminPolicies() {
+        ManagedDeviceActionDisabledByAdminController controller = createController(
+                URL,
+                /* isUserForeground= */ false,
+                /* preferredUserHandle= */ MANAGED_USER,
+                /* userContainingBrowser= */ null);
 
         controller.setupLearnMoreButton(mContext);
 
@@ -110,13 +157,33 @@ public class ManagedDeviceActionDisabledByAdminControllerTest {
     }
 
     private ManagedDeviceActionDisabledByAdminController createController() {
-        return createController(/* url= */ null);
+        return createController(
+                /* url= */ null,
+                /* foregroundUserChecker= */ true,
+                mContext.getUser(),
+                /* userContainingBrowser= */ null);
     }
 
     private ManagedDeviceActionDisabledByAdminController createController(String url) {
+        return createController(
+                url,
+                /* foregroundUserChecker= */ true,
+                mContext.getUser(),
+                /* userContainingBrowser= */ null);
+    }
+
+    private ManagedDeviceActionDisabledByAdminController createController(
+            String url,
+            boolean isUserForeground,
+            UserHandle preferredUserHandle,
+            UserHandle userContainingBrowser) {
         ManagedDeviceActionDisabledByAdminController controller =
                 new ManagedDeviceActionDisabledByAdminController(
-                        new FakeDeviceAdminStringProvider(url));
+                        new FakeDeviceAdminStringProvider(url),
+                        preferredUserHandle,
+                        /* foregroundUserChecker= */ (context, userHandle) -> isUserForeground,
+                        /* resolveActivityChecker= */ (packageManager, __, userHandle) ->
+                                userHandle.equals(userContainingBrowser));
         controller.initialize(mTestUtils.createLearnMoreButtonLauncher());
         controller.updateEnforcedAdmin(ENFORCED_ADMIN, ENFORCEMENT_ADMIN_USER_ID);
         return controller;

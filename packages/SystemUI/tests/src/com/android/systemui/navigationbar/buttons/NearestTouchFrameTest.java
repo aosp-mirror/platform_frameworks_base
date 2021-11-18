@@ -25,6 +25,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
@@ -35,11 +36,13 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.navigationbar.buttons.NearestTouchFrame;
+import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Map;
 
@@ -48,10 +51,21 @@ import java.util.Map;
 @SmallTest
 public class NearestTouchFrameTest extends SysuiTestCase {
 
+    @Mock
+    EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
+    @Mock
+    EdgeBackGestureHandler mEdgeBackGestureHandler;
     private NearestTouchFrame mNearestTouchFrame;
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+
+        when(mEdgeBackGestureHandlerFactory.create(any(Context.class)))
+                .thenReturn(mEdgeBackGestureHandler);
+
+        mDependency.injectTestDependency(EdgeBackGestureHandler.Factory.class,
+                mEdgeBackGestureHandlerFactory);
         Configuration c = new Configuration(mContext.getResources().getConfiguration());
         c.smallestScreenWidthDp = 500;
         mNearestTouchFrame = new NearestTouchFrame(mContext, null, c);
