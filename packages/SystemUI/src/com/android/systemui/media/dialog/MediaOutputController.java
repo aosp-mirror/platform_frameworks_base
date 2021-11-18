@@ -242,7 +242,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         for (NotificationEntry entry
                 : mNotificationEntryManager.getActiveNotificationsForCurrentUser()) {
             final Notification notification = entry.getSbn().getNotification();
-            if (notification.hasMediaSession()
+            if (notification.isMediaNotification()
                     && TextUtils.equals(entry.getSbn().getPackageName(), mPackageName)) {
                 final Icon icon = notification.getLargeIcon();
                 if (icon == null) {
