@@ -2589,7 +2589,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("mMethodMap")
-    void clearCurMethodLocked() {
+    void clearClientSessionsLocked() {
         if (getCurMethod() != null) {
             final int numClients = mClients.size();
             for (int i = 0; i < numClients; ++i) {
