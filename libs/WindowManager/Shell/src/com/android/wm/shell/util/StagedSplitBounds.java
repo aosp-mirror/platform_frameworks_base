@@ -19,6 +19,8 @@ import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * Container of various information needed to display split screen
  * tasks/leashes/etc in Launcher
@@ -90,6 +92,24 @@ public class StagedSplitBounds implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof StagedSplitBounds)) {
+            return false;
+        }
+        // Only need to check the base fields (the other fields are derived from these)
+        final StagedSplitBounds other = (StagedSplitBounds) obj;
+        return Objects.equals(leftTopBounds, other.leftTopBounds)
+                && Objects.equals(rightBottomBounds, other.rightBottomBounds)
+                && leftTopTaskId == other.leftTopTaskId
+                && rightBottomTaskId == other.rightBottomTaskId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(leftTopBounds, rightBottomBounds, leftTopTaskId, rightBottomTaskId);
     }
 
     @Override

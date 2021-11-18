@@ -111,6 +111,11 @@ public class RecentTasksController implements TaskStackListenerCallback,
         if (taskId1 == taskId2) {
             return;
         }
+        if (mSplitTasks.get(taskId1, INVALID_TASK_ID) == taskId2
+                && mTaskSplitBoundsMap.get(taskId1).equals(splitBounds)) {
+            // If the two tasks are already paired and the bounds are the same, then skip updating
+            return;
+        }
         // Remove any previous pairs
         removeSplitPair(taskId1);
         removeSplitPair(taskId2);
@@ -121,6 +126,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
         mSplitTasks.put(taskId2, taskId1);
         mTaskSplitBoundsMap.put(taskId1, splitBounds);
         mTaskSplitBoundsMap.put(taskId2, splitBounds);
+        notifyRecentTasksChanged();
     }
 
     /**
@@ -133,6 +139,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
             mSplitTasks.delete(pairedTaskId);
             mTaskSplitBoundsMap.remove(taskId);
             mTaskSplitBoundsMap.remove(pairedTaskId);
+            notifyRecentTasksChanged();
         }
     }
 
@@ -217,7 +224,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
             }
 
             final int pairedTaskId = mSplitTasks.get(taskInfo.taskId);
-            if (pairedTaskId != INVALID_TASK_ID) {
+            if (pairedTaskId != INVALID_TASK_ID && rawMapping.contains(pairedTaskId)) {
                 final ActivityManager.RecentTaskInfo pairedTaskInfo = rawMapping.get(pairedTaskId);
                 rawMapping.remove(pairedTaskId);
                 recentTasks.add(new GroupedRecentTaskInfo(taskInfo, pairedTaskInfo,

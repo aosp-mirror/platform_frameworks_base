@@ -28,6 +28,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import static java.lang.Integer.MAX_VALUE;
@@ -80,6 +81,36 @@ public class RecentTasksControllerTest extends ShellTestCase {
                 mMainExecutor));
         mShellTaskOrganizer = new ShellTaskOrganizer(mMainExecutor, mContext,
                 null /* sizeCompatUI */, Optional.of(mRecentTasksController));
+    }
+
+    @Test
+    public void testAddRemoveSplitNotifyChange() {
+        ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
+        ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
+        setRawList(t1, t2);
+
+        mRecentTasksController.addSplitPair(t1.taskId, t2.taskId, mock(StagedSplitBounds.class));
+        verify(mRecentTasksController).notifyRecentTasksChanged();
+
+        reset(mRecentTasksController);
+        mRecentTasksController.removeSplitPair(t1.taskId);
+        verify(mRecentTasksController).notifyRecentTasksChanged();
+    }
+
+    @Test
+    public void testAddSameSplitBoundsInfoSkipNotifyChange() {
+        ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
+        ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
+        setRawList(t1, t2);
+
+        // Verify only one update if the split info is the same
+        StagedSplitBounds bounds1 = new StagedSplitBounds(new Rect(0, 0, 50, 50),
+                new Rect(50, 50, 100, 100), t1.taskId, t2.taskId);
+        mRecentTasksController.addSplitPair(t1.taskId, t2.taskId, bounds1);
+        StagedSplitBounds bounds2 = new StagedSplitBounds(new Rect(0, 0, 50, 50),
+                new Rect(50, 50, 100, 100), t1.taskId, t2.taskId);
+        mRecentTasksController.addSplitPair(t1.taskId, t2.taskId, bounds2);
+        verify(mRecentTasksController, times(1)).notifyRecentTasksChanged();
     }
 
     @Test
