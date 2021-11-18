@@ -25,6 +25,7 @@ import static android.content.pm.SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND;
 import static android.content.pm.parsing.ParsingPackageUtils.parsePublicKey;
 import static android.content.res.Resources.ID_NULL;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -86,7 +87,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -1004,6 +1004,13 @@ public class PackageManagerSettingsTests {
         }
     }
 
+    private void verifyKeySetData(PackageKeySetData originalData, PackageKeySetData testData) {
+        assertThat(originalData.getProperSigningKeySet(),
+                equalTo(testData.getProperSigningKeySet()));
+        assertThat(originalData.getUpgradeKeySets(), is(testData.getUpgradeKeySets()));
+        assertThat(originalData.getAliases(), is(testData.getAliases()));
+    }
+
     private void verifySettingCopy(PackageSetting origPkgSetting, PackageSetting testPkgSetting) {
         assertThat(origPkgSetting, is(not(testPkgSetting)));
         assertThat(origPkgSetting.getAppId(), is(testPkgSetting.getAppId()));
@@ -1018,8 +1025,7 @@ public class PackageManagerSettingsTests {
         assertSame(origPkgSetting.getInstallSource(), testPkgSetting.getInstallSource());
         assertThat(origPkgSetting.isInstallPermissionsFixed(),
                 is(testPkgSetting.isInstallPermissionsFixed()));
-        assertSame(origPkgSetting.getKeySetData(), testPkgSetting.getKeySetData());
-        assertThat(origPkgSetting.getKeySetData(), is(testPkgSetting.getKeySetData()));
+        verifyKeySetData(origPkgSetting.getKeySetData(), testPkgSetting.getKeySetData());
         assertThat(origPkgSetting.getLastUpdateTime(), is(testPkgSetting.getLastUpdateTime()));
         assertSame(origPkgSetting.getLegacyNativeLibraryPath(),
                 testPkgSetting.getLegacyNativeLibraryPath());
