@@ -395,7 +395,7 @@ public class NotifCollection implements Dumpable {
         final NotificationEntry entry = mNotificationSet.get(sbn.getKey());
         if (entry == null) {
             // TODO (b/160008901): Throw an exception here
-            mLogger.logNoNotificationToRemoveWithKey(sbn.getKey());
+            mLogger.logNoNotificationToRemoveWithKey(sbn.getKey(), reason);
             return;
         }
 
