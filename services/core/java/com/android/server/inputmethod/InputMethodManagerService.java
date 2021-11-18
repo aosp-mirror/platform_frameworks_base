@@ -1780,9 +1780,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
                 mNotificationManager = mContext.getSystemService(NotificationManager.class);
                 mStatusBar = statusBar;
-                if (mStatusBar != null) {
-                    mStatusBar.setIconVisibility(mSlotIme, false);
-                }
+                hideStatusBarIconLocked();
                 updateSystemUiLocked(mImeWindowVis, mBackDisposition);
                 mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
                         com.android.internal.R.bool.show_ongoing_ime_switcher);
@@ -2604,9 +2602,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             setCurMethodUid(Process.INVALID_UID);
             scheduleNotifyImeUidToAudioService(getCurMethodUid());
         }
-        if (mStatusBar != null) {
-            mStatusBar.setIconVisibility(mSlotIme, false);
-        }
+        hideStatusBarIconLocked();
         mInFullscreenMode = false;
     }
 
@@ -2621,9 +2617,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             try {
                 if (iconId == 0) {
                     if (DEBUG) Slog.d(TAG, "hide the small icon for the input method");
-                    if (mStatusBar != null) {
-                        mStatusBar.setIconVisibility(mSlotIme, false);
-                    }
+                    hideStatusBarIconLocked();
                 } else if (packageName != null) {
                     if (DEBUG) Slog.d(TAG, "show a small icon for the input method");
                     CharSequence contentDescription = null;
@@ -2646,6 +2640,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+    }
+
+    @GuardedBy("mMethodMap")
+    private void hideStatusBarIconLocked() {
+        if (mStatusBar != null) {
+            mStatusBar.setIconVisibility(mSlotIme, false);
         }
     }
 
