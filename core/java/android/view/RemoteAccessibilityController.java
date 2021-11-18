@@ -28,7 +28,7 @@ class RemoteAccessibilityController {
     private static final String TAG = "RemoteAccessibilityController";
     private int mHostId;
     private RemoteAccessibilityEmbeddedConnection mConnectionWrapper;
-    private Matrix mScreenMatrixForEmbeddedHierarchy = new Matrix();
+    private Matrix mWindowMatrixForEmbeddedHierarchy = new Matrix();
     private final float[] mMatrixValues = new float[9];
     private View mHostView;
 
@@ -140,9 +140,9 @@ class RemoteAccessibilityController {
         return mConnectionWrapper;
     }
 
-    void setScreenMatrix(Matrix m) {
-        // If the screen matrix is identity or doesn't change, do nothing.
-        if (m.isIdentity() || m.equals(mScreenMatrixForEmbeddedHierarchy)) {
+    void setWindowMatrix(Matrix m) {
+        // If the window matrix is identity or doesn't change, do nothing.
+        if (m.isIdentity() || m.equals(mWindowMatrixForEmbeddedHierarchy)) {
             return;
         }
 
@@ -153,8 +153,8 @@ class RemoteAccessibilityController {
                 return;
             }
             m.getValues(mMatrixValues);
-            wrapper.getConnection().setScreenMatrix(mMatrixValues);
-            mScreenMatrixForEmbeddedHierarchy.set(m);
+            wrapper.getConnection().setWindowMatrix(mMatrixValues);
+            mWindowMatrixForEmbeddedHierarchy.set(m);
         } catch (RemoteException e) {
             Log.d(TAG, "Error while setScreenMatrix " + e);
         }

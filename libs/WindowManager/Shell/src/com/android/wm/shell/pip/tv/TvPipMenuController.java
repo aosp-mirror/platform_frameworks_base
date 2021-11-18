@@ -96,7 +96,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         mMoveTransform.getValues(mTmpValues);
         try {
             mPipMenuView.getViewRootImpl().getAccessibilityEmbeddedConnection()
-                    .setScreenMatrix(mTmpValues);
+                    .setWindowMatrix(mTmpValues);
         } catch (RemoteException e) {
             if (DEBUG) e.printStackTrace();
         }

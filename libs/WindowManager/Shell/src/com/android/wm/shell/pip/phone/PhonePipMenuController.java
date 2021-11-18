@@ -143,7 +143,7 @@ public class PhonePipMenuController implements PipMenuController {
         mMoveTransform.getValues(mTmpValues);
         try {
             mPipMenuView.getViewRootImpl().getAccessibilityEmbeddedConnection()
-                    .setScreenMatrix(mTmpValues);
+                    .setWindowMatrix(mTmpValues);
         } catch (RemoteException e) {
         }
     };

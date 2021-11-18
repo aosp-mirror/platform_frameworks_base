@@ -254,7 +254,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         }
         mTmpMatrix.getValues(mTmpValues);
         try {
-            getViewRootImpl().getAccessibilityEmbeddedConnection().setScreenMatrix(mTmpValues);
+            getViewRootImpl().getAccessibilityEmbeddedConnection().setWindowMatrix(mTmpValues);
         } catch (RemoteException e) {
         }
     };
