@@ -39,12 +39,12 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
-import android.media.AudioAttributes;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.Trace;
+import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -166,11 +166,10 @@ public class UdfpsController implements DozeReceiver {
     private final VibrationEffect mLowTick;
 
     @VisibleForTesting
-    public static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
-            new AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+    public static final VibrationAttributes VIBRATION_ATTRIBUTES =
+            new VibrationAttributes.Builder()
                     // vibration will bypass battery saver mode:
-                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
+                    .setUsage(VibrationAttributes.USAGE_COMMUNICATION_REQUEST)
                     .build();
 
     // haptic to use for successful device entry
@@ -639,7 +638,7 @@ public class UdfpsController implements DozeReceiver {
                     mContext.getOpPackageName(),
                     mLowTick,
                     "udfps-onStart-tick",
-                    VIBRATION_SONIFICATION_ATTRIBUTES);
+                    VIBRATION_ATTRIBUTES);
         }
     }
 

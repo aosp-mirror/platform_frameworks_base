@@ -379,6 +379,21 @@ public final class Settings {
             "android.settings.REDUCE_BRIGHT_COLORS_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of Color inversion.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_COLOR_INVERSION_SETTINGS =
+            "android.settings.COLOR_INVERSION_SETTINGS";
+
+    /**
      * Activity Action: Show settings to control access to usage information.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -9658,6 +9673,14 @@ public final class Settings {
         public static final String LOCKSCREEN_SHOW_WALLET = "lockscreen_show_wallet";
 
         /**
+         * Whether to use the lockscreen double-line clock
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_USE_DOUBLE_LINE_CLOCK =
+                "lockscreen_use_double_line_clock";
+
+        /**
          * Specifies whether the web action API is enabled.
          *
          * @hide
@@ -16665,12 +16688,6 @@ public final class Settings {
              * @hide
              */
             public static final String AMBIENT_FORCE_WHEN_DOCKED = "ambient_force_when_docked";
-
-            /**
-             * The id of the gesture sensor.
-             * @hide
-             */
-            public static final String AMBIENT_GESTURE_SENSOR_ID = "ambient_gesture_sensor_id";
 
             /**
              * Whether the ambient low bit mode is enabled.

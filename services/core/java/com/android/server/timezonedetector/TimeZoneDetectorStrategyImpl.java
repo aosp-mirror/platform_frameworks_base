@@ -27,7 +27,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.time.TimeZoneCapabilities;
 import android.app.time.TimeZoneCapabilitiesAndConfig;
-import android.app.time.TimeZoneConfiguration;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.content.Context;
@@ -39,7 +38,6 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -63,16 +61,13 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
 
         /**
          * Sets a {@link ConfigurationChangeListener} that will be invoked when there are any
-         * changes that could affect time zone detection. This is invoked during system server
-         * setup.
+         * changes that could affect the content of {@link ConfigurationInternal}.
+         * This is invoked during system server setup.
          */
-        void setConfigChangeListener(@NonNull ConfigurationChangeListener listener);
+        void setConfigurationInternalChangeListener(@NonNull ConfigurationChangeListener listener);
 
-        /** Returns the current user at the instant it is called. */
-        @UserIdInt int getCurrentUserId();
-
-        /** Returns the {@link ConfigurationInternal} for the specified user. */
-        ConfigurationInternal getConfigurationInternal(@UserIdInt int userId);
+        /** Returns the {@link ConfigurationInternal} for the current user. */
+        @NonNull ConfigurationInternal getCurrentUserConfigurationInternal();
 
         /**
          * Returns true if the device has had an explicit time zone set.
@@ -88,13 +83,6 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
          * Sets the device's time zone.
          */
         void setDeviceTimeZone(@NonNull String zoneId);
-
-        /**
-         * Stores the configuration properties contained in {@code newConfiguration}.
-         * All checks about user capabilities must be done by the caller and
-         * {@link TimeZoneConfiguration#isComplete()} must be {@code true}.
-         */
-        void storeConfiguration(@UserIdInt int userId, TimeZoneConfiguration newConfiguration);
     }
 
     private static final String LOG_TAG = TimeZoneDetectorService.TAG;
@@ -166,10 +154,6 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     @NonNull
     private final Environment mEnvironment;
 
-    @GuardedBy("this")
-    @NonNull
-    private final List<ConfigurationChangeListener> mConfigChangeListeners = new ArrayList<>();
-
     /**
      * A log that records the decisions / decision metadata that affected the device's time zone.
      * This is logged in bug reports to assist with debugging issues with detection.
@@ -202,6 +186,9 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     private final ReferenceWithHistory<ManualTimeZoneSuggestion> mLatestManualSuggestion =
             new ReferenceWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
 
+    @GuardedBy("this")
+    @NonNull
+    private ConfigurationInternal mCurrentConfigurationInternal;
 
     /**
      * Creates a new instance of {@link TimeZoneDetectorStrategyImpl}.
@@ -217,71 +204,19 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     @VisibleForTesting
     public TimeZoneDetectorStrategyImpl(@NonNull Environment environment) {
         mEnvironment = Objects.requireNonNull(environment);
-        mEnvironment.setConfigChangeListener(this::handleConfigChanged);
-    }
 
-    /**
-     * Adds a listener that allows the strategy to communicate with the surrounding service /
-     * internal. This must be called before the instance is used.
-     */
-    @Override
-    public synchronized void addConfigChangeListener(
-            @NonNull ConfigurationChangeListener listener) {
-        Objects.requireNonNull(listener);
-        mConfigChangeListeners.add(listener);
-    }
-
-    @Override
-    @NonNull
-    public ConfigurationInternal getConfigurationInternal(@UserIdInt int userId) {
-        return mEnvironment.getConfigurationInternal(userId);
-    }
-
-    @Override
-    @NonNull
-    public synchronized ConfigurationInternal getCurrentUserConfigurationInternal() {
-        int currentUserId = mEnvironment.getCurrentUserId();
-        return getConfigurationInternal(currentUserId);
-    }
-
-    @Override
-    public synchronized boolean updateConfiguration(@UserIdInt int userId,
-            @NonNull TimeZoneConfiguration requestedConfiguration) {
-        Objects.requireNonNull(requestedConfiguration);
-
-        TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
-                getConfigurationInternal(userId).createCapabilitiesAndConfig();
-        TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
-        TimeZoneConfiguration oldConfiguration = capabilitiesAndConfig.getConfiguration();
-
-        final TimeZoneConfiguration newConfiguration =
-                capabilities.tryApplyConfigChanges(oldConfiguration, requestedConfiguration);
-        if (newConfiguration == null) {
-            // The changes could not be made because the user's capabilities do not allow it.
-            return false;
+        synchronized (this) {
+            mEnvironment.setConfigurationInternalChangeListener(
+                    this::handleConfigurationInternalChanged);
+            mCurrentConfigurationInternal = mEnvironment.getCurrentUserConfigurationInternal();
         }
-
-        // Store the configuration / notify as needed. This will cause the mEnvironment to invoke
-        // handleConfigChanged() asynchronously.
-        mEnvironment.storeConfiguration(userId, newConfiguration);
-
-        String logMsg = "Configuration changed:"
-                + " oldConfiguration=" + oldConfiguration
-                + ", newConfiguration=" + newConfiguration;
-        mTimeZoneChangesLog.log(logMsg);
-        if (DBG) {
-            Slog.d(LOG_TAG, logMsg);
-        }
-        return true;
     }
 
     @Override
     public synchronized void suggestGeolocationTimeZone(
             @NonNull GeolocationTimeZoneSuggestion suggestion) {
 
-        int currentUserId = mEnvironment.getCurrentUserId();
-        ConfigurationInternal currentUserConfig =
-                mEnvironment.getConfigurationInternal(currentUserId);
+        ConfigurationInternal currentUserConfig = mCurrentConfigurationInternal;
         if (DBG) {
             Slog.d(LOG_TAG, "Geolocation suggestion received."
                     + " currentUserConfig=" + currentUserConfig
@@ -308,8 +243,8 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     public synchronized boolean suggestManualTimeZone(
             @UserIdInt int userId, @NonNull ManualTimeZoneSuggestion suggestion) {
 
-        int currentUserId = mEnvironment.getCurrentUserId();
-        if (userId != currentUserId) {
+        ConfigurationInternal currentUserConfig = mCurrentConfigurationInternal;
+        if (currentUserConfig.getUserId() != userId) {
             Slog.w(LOG_TAG, "Manual suggestion received but user != current user, userId=" + userId
                     + " suggestion=" + suggestion);
 
@@ -323,7 +258,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         String cause = "Manual time suggestion received: suggestion=" + suggestion;
 
         TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
-                getConfigurationInternal(userId).createCapabilitiesAndConfig();
+                currentUserConfig.createCapabilitiesAndConfig();
         TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
         if (capabilities.getSuggestManualTimeZoneCapability() != CAPABILITY_POSSESSED) {
             Slog.i(LOG_TAG, "User does not have the capability needed to set the time zone manually"
@@ -347,9 +282,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     public synchronized void suggestTelephonyTimeZone(
             @NonNull TelephonyTimeZoneSuggestion suggestion) {
 
-        int currentUserId = mEnvironment.getCurrentUserId();
-        ConfigurationInternal currentUserConfig =
-                mEnvironment.getConfigurationInternal(currentUserId);
+        ConfigurationInternal currentUserConfig = mCurrentConfigurationInternal;
         if (DBG) {
             Slog.d(LOG_TAG, "Telephony suggestion received. currentUserConfig=" + currentUserConfig
                     + " newSuggestion=" + suggestion);
@@ -364,8 +297,8 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         // Store the suggestion against the correct slotIndex.
         mTelephonySuggestionsBySlotIndex.put(suggestion.getSlotIndex(), scoredSuggestion);
 
-        // Now perform auto time zone detection. The new suggestion may be used to modify the time
-        // zone setting.
+        // Now perform auto time zone detection: the new suggestion might be used to modify the
+        // time zone setting.
         String reason = "New telephony time zone suggested. suggestion=" + suggestion;
         doAutoTimeZoneDetection(currentUserConfig, reason);
     }
@@ -373,7 +306,6 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     @Override
     @NonNull
     public synchronized MetricsTimeZoneDetectorState generateMetricsState() {
-        int currentUserId = mEnvironment.getCurrentUserId();
         // Just capture one telephony suggestion: the one that would be used right now if telephony
         // detection is in use.
         QualifiedTelephonyTimeZoneSuggestion bestQualifiedTelephonySuggestion =
@@ -386,7 +318,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
                 new OrdinalGenerator<>(new TimeZoneCanonicalizer());
         return MetricsTimeZoneDetectorState.create(
                 tzIdOrdinalGenerator,
-                getConfigurationInternal(currentUserId),
+                mCurrentConfigurationInternal,
                 mEnvironment.getDeviceTimeZone(),
                 getLatestManualSuggestion(),
                 telephonySuggestion,
@@ -593,26 +525,20 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         return findBestTelephonySuggestion();
     }
 
-    private synchronized void handleConfigChanged() {
-        if (DBG) {
-            Slog.d(LOG_TAG, "handleConfigChanged()");
-        }
-
-        // This method is called whenever the user changes or the config for any user changes. We
-        // don't know what happened, so we capture the current user's config, check to see if we
-        // need to clear state associated with a previous user, and rerun detection.
-        int currentUserId = mEnvironment.getCurrentUserId();
+    private synchronized void handleConfigurationInternalChanged() {
         ConfigurationInternal currentUserConfig =
-                mEnvironment.getConfigurationInternal(currentUserId);
+                mEnvironment.getCurrentUserConfigurationInternal();
+        String logMsg = "handleConfigurationInternalChanged:"
+                + " oldConfiguration=" + mCurrentConfigurationInternal
+                + ", newConfiguration=" + currentUserConfig;
+        if (DBG) {
+            Slog.d(LOG_TAG, logMsg);
+        }
+        mCurrentConfigurationInternal = currentUserConfig;
 
         // The configuration change may have changed available suggestions or the way suggestions
         // are used, so re-run detection.
-        doAutoTimeZoneDetection(currentUserConfig, "handleConfigChanged()");
-
-        // Pass on the signal to sub-components.
-        for (ConfigurationChangeListener listener : mConfigChangeListeners) {
-            listener.onChange();
-        }
+        doAutoTimeZoneDetection(currentUserConfig, logMsg);
     }
 
     /**
@@ -623,11 +549,9 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         ipw.println("TimeZoneDetectorStrategy:");
 
         ipw.increaseIndent(); // level 1
-        int currentUserId = mEnvironment.getCurrentUserId();
-        ipw.println("mEnvironment.getCurrentUserId()=" + currentUserId);
-        ConfigurationInternal configuration = mEnvironment.getConfigurationInternal(currentUserId);
-        ipw.println("mEnvironment.getConfiguration(currentUserId)=" + configuration);
-        ipw.println("[Capabilities=" + configuration.createCapabilitiesAndConfig() + "]");
+        ipw.println("mCurrentConfigurationInternal=" + mCurrentConfigurationInternal);
+        ipw.println("[Capabilities=" + mCurrentConfigurationInternal.createCapabilitiesAndConfig()
+                + "]");
         ipw.println("mEnvironment.isDeviceTimeZoneInitialized()="
                 + mEnvironment.isDeviceTimeZoneInitialized());
         ipw.println("mEnvironment.getDeviceTimeZone()=" + mEnvironment.getDeviceTimeZone());

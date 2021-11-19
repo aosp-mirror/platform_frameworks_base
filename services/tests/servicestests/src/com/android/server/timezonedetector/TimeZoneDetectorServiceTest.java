@@ -65,6 +65,7 @@ public class TimeZoneDetectorServiceTest {
     private HandlerThread mHandlerThread;
     private TestHandler mTestHandler;
     private TestCallerIdentityInjector mTestCallerIdentityInjector;
+    private FakeServiceConfigAccessor mFakeServiceConfigAccessor;
     private FakeTimeZoneDetectorStrategy mFakeTimeZoneDetectorStrategy;
 
 
@@ -81,10 +82,11 @@ public class TimeZoneDetectorServiceTest {
         mTestCallerIdentityInjector.initializeCallingUserId(ARBITRARY_USER_ID);
 
         mFakeTimeZoneDetectorStrategy = new FakeTimeZoneDetectorStrategy();
+        mFakeServiceConfigAccessor = new FakeServiceConfigAccessor();
 
         mTimeZoneDetectorService = new TimeZoneDetectorService(
                 mMockContext, mTestHandler, mTestCallerIdentityInjector,
-                mFakeTimeZoneDetectorStrategy);
+                mFakeServiceConfigAccessor, mFakeTimeZoneDetectorStrategy);
     }
 
     @After
@@ -114,7 +116,7 @@ public class TimeZoneDetectorServiceTest {
 
         ConfigurationInternal configuration =
                 createConfigurationInternal(true /* autoDetectionEnabled*/);
-        mFakeTimeZoneDetectorStrategy.initializeConfiguration(configuration);
+        mFakeServiceConfigAccessor.initializeConfiguration(configuration);
 
         assertEquals(configuration.createCapabilitiesAndConfig(),
                 mTimeZoneDetectorService.getCapabilitiesAndConfig());
@@ -160,7 +162,7 @@ public class TimeZoneDetectorServiceTest {
     public void testListenerRegistrationAndCallbacks() throws Exception {
         ConfigurationInternal initialConfiguration =
                 createConfigurationInternal(false /* autoDetectionEnabled */);
-        mFakeTimeZoneDetectorStrategy.initializeConfiguration(initialConfiguration);
+        mFakeServiceConfigAccessor.initializeConfiguration(initialConfiguration);
 
         IBinder mockListenerBinder = mock(IBinder.class);
         ITimeZoneDetectorListener mockListener = mock(ITimeZoneDetectorListener.class);

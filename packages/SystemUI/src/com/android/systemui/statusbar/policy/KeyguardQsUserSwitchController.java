@@ -37,6 +37,7 @@ import com.android.systemui.R;
 import com.android.systemui.communal.CommunalStateController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -173,7 +174,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
             }
 
             // Tapping anywhere in the view will open QS user panel
-            if (mFeatureFlags.useNewUserSwitcher()) {
+            if (mFeatureFlags.isEnabled(Flags.NEW_USER_SWITCHER)) {
                 mUserSwitchDialogController.showDialog(mView);
             } else {
                 openQsUserPanel();

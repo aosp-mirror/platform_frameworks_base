@@ -150,7 +150,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             NotificationListContainer listContainer) {
         mPresenter = presenter;
         mListContainer = listContainer;
-        if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
             mDynamicPrivacyController.addListener(this);
         }
     }
@@ -528,7 +528,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
     @Override
     public void onDynamicPrivacyChanged() {
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
             throw new IllegalStateException("Old pipeline code running w/ new pipeline enabled");
         }
         if (mPerformingUpdate) {

@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.phone.dagger;
 
 import android.annotation.Nullable;
+import android.content.ContentResolver;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewStub;
@@ -24,19 +26,46 @@ import android.view.ViewStub;
 import com.android.keyguard.LockIconView;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
+import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.biometrics.AuthRippleView;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
+import com.android.systemui.statusbar.OperatorNameViewController;
+import com.android.systemui.statusbar.connectivity.NetworkController;
+import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
+import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
+import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.TapAgainView;
+import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
+import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
+import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.tuner.TunerService;
+
+import java.util.Optional;
 
 import javax.inject.Named;
 
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
@@ -44,6 +73,8 @@ import dagger.Provides;
 public abstract class StatusBarViewModule {
 
     public static final String SPLIT_SHADE_HEADER = "split_shade_header";
+    private static final String SPLIT_SHADE_BATTERY_VIEW = "split_shade_battery_view";
+    public static final String SPLIT_SHADE_BATTERY_CONTROLLER = "split_shade_battery_controller";
 
     /** */
     @Provides
@@ -132,7 +163,7 @@ public abstract class StatusBarViewModule {
             NotificationShadeWindowView notificationShadeWindowView,
             FeatureFlags featureFlags) {
         ViewStub stub = notificationShadeWindowView.findViewById(R.id.qs_header_stub);
-        int layoutId = featureFlags.useCombinedQSHeaders()
+        int layoutId = featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)
                 ? R.layout.combined_qs_header
                 : R.layout.split_shade_header;
         stub.setLayoutResource(layoutId);
@@ -143,8 +174,32 @@ public abstract class StatusBarViewModule {
     /** */
     @Provides
     @StatusBarComponent.StatusBarScope
+    @Named(SPLIT_SHADE_BATTERY_VIEW)
     static BatteryMeterView getBatteryMeterView(@Named(SPLIT_SHADE_HEADER) View view) {
         return view.findViewById(R.id.batteryRemainingIcon);
+    }
+
+    @Provides
+    @StatusBarComponent.StatusBarScope
+    @Named(SPLIT_SHADE_BATTERY_CONTROLLER)
+    static BatteryMeterViewController getBatteryMeterViewController(
+            @Named(SPLIT_SHADE_BATTERY_VIEW) BatteryMeterView batteryMeterView,
+            ConfigurationController configurationController,
+            TunerService tunerService,
+            BroadcastDispatcher broadcastDispatcher,
+            @Main Handler mainHandler,
+            ContentResolver contentResolver,
+            BatteryController batteryController
+    ) {
+        return new BatteryMeterViewController(
+                batteryMeterView,
+                configurationController,
+                tunerService,
+                broadcastDispatcher,
+                mainHandler,
+                contentResolver,
+                batteryController);
+
     }
 
     /** */
@@ -160,5 +215,55 @@ public abstract class StatusBarViewModule {
     public static NotificationsQuickSettingsContainer getNotificationsQuickSettingsContainer(
             NotificationShadeWindowView notificationShadeWindowView) {
         return notificationShadeWindowView.findViewById(R.id.notification_container_parent);
+    }
+
+    /**
+     * Creates a new {@link CollapsedStatusBarFragment}.
+     *
+     * **IMPORTANT**: This method intentionally does not have
+     * {@link StatusBarComponent.StatusBarScope}, which means a new fragment *will* be created each
+     * time this method is called. This is intentional because we need fragments to re-created in
+     * certain lifecycle scenarios.
+     *
+     * **IMPORTANT**: This method also intentionally does not have a {@link Provides} annotation. If
+     * you need to get access to a {@link CollapsedStatusBarFragment}, go through
+     * {@link StatusBarFragmentComponent} instead.
+     */
+    public static CollapsedStatusBarFragment createCollapsedStatusBarFragment(
+            StatusBarFragmentComponent.Factory statusBarFragmentComponentFactory,
+            OngoingCallController ongoingCallController,
+            SystemStatusAnimationScheduler animationScheduler,
+            StatusBarLocationPublisher locationPublisher,
+            NotificationIconAreaController notificationIconAreaController,
+            PanelExpansionStateManager panelExpansionStateManager,
+            FeatureFlags featureFlags,
+            StatusBarIconController statusBarIconController,
+            StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
+            KeyguardStateController keyguardStateController,
+            NotificationPanelViewController notificationPanelViewController,
+            NetworkController networkController,
+            StatusBarStateController statusBarStateController,
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            CommandQueue commandQueue,
+            CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
+            OperatorNameViewController.Factory operatorNameViewControllerFactory
+    ) {
+        return new CollapsedStatusBarFragment(statusBarFragmentComponentFactory,
+                ongoingCallController,
+                animationScheduler,
+                locationPublisher,
+                notificationIconAreaController,
+                panelExpansionStateManager,
+                featureFlags,
+                statusBarIconController,
+                statusBarHideIconsForBouncerManager,
+                keyguardStateController,
+                notificationPanelViewController,
+                networkController,
+                statusBarStateController,
+                statusBarOptionalLazy,
+                commandQueue,
+                collapsedStatusBarFragmentLogger,
+                operatorNameViewControllerFactory);
     }
 }

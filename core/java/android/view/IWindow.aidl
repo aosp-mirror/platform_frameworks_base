@@ -94,12 +94,6 @@ oneway interface IWindow {
     void dispatchAppVisibility(boolean visible);
     void dispatchGetNewSurface();
 
-    /**
-     * Tell the window that it is either gaining or losing focus.  Keep it up
-     * to date on the current state showing navigational focus too.
-     */
-    void windowFocusChanged(boolean hasFocus);
-
     void closeSystemDialogs(String reason);
 
     /**

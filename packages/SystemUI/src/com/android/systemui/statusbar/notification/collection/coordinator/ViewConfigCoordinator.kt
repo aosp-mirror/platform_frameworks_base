@@ -19,9 +19,9 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import com.android.internal.widget.MessagingGroup
 import com.android.internal.widget.MessagingMessage
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl
+import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager
@@ -37,7 +37,7 @@ import javax.inject.Inject
 class ViewConfigCoordinator @Inject internal constructor(
     configurationController: ConfigurationController,
     lockscreenUserManager: NotificationLockscreenUserManagerImpl,
-    featureFlags: FeatureFlags,
+    notifPipelineFlags: NotifPipelineFlags,
     private val mGutsManager: NotificationGutsManager,
     private val mKeyguardUpdateMonitor: KeyguardUpdateMonitor
 ) : Coordinator, UserChangedListener, ConfigurationController.ConfigurationListener {
@@ -47,7 +47,7 @@ class ViewConfigCoordinator @Inject internal constructor(
     private var mPipeline: NotifPipeline? = null
 
     init {
-        if (featureFlags.isNewNotifPipelineRenderingEnabled) {
+        if (notifPipelineFlags.isNewPipelineEnabled()) {
             lockscreenUserManager.addUserChangedListener(this)
             configurationController.addCallback(this)
         }

@@ -21,11 +21,18 @@ import android.database.ContentObserver;
 import android.os.Handler;
 
 import com.android.systemui.statusbar.policy.Listenable;
+import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.settings.SettingsProxy;
+import com.android.systemui.util.settings.SystemSettings;
 
-/** Helper for managing a secure setting. **/
-public abstract class SecureSetting extends ContentObserver implements Listenable {
-    private final SecureSettings mSecureSettings;
+/**
+ * Helper for managing secure, global, and system settings through use of {@link SettingsProxy},
+ * which is the common superclass of {@link SecureSettings}, {@link GlobalSettings}, and
+ * {@link SystemSettings}.
+ */
+public abstract class SettingObserver extends ContentObserver implements Listenable {
+    private final SettingsProxy mSettingsProxy;
     private final String mSettingName;
     private final int mDefaultValue;
 
@@ -35,19 +42,19 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
 
     protected abstract void handleValueChanged(int value, boolean observedChange);
 
-    public SecureSetting(SecureSettings secureSettings, Handler handler, String settingName,
+    public SettingObserver(SettingsProxy settingsProxy, Handler handler, String settingName,
             int userId) {
-        this(secureSettings, handler, settingName, userId, 0);
+        this(settingsProxy, handler, settingName, userId, 0);
     }
 
-    public SecureSetting(SecureSettings secureSetting, Handler handler, String settingName) {
-        this(secureSetting, handler, settingName, ActivityManager.getCurrentUser());
+    public SettingObserver(SettingsProxy settingsProxy, Handler handler, String settingName) {
+        this(settingsProxy, handler, settingName, ActivityManager.getCurrentUser());
     }
 
-    public SecureSetting(SecureSettings secureSettings, Handler handler, String settingName,
+    public SettingObserver(SettingsProxy settingsProxy, Handler handler, String settingName,
             int userId, int defaultValue) {
         super(handler);
-        mSecureSettings = secureSettings;
+        mSettingsProxy = settingsProxy;
         mSettingName = settingName;
         mObservedValue = mDefaultValue = defaultValue;
         mUserId = userId;
@@ -57,12 +64,17 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
         return mListening ? mObservedValue : getValueFromProvider();
     }
 
+    /**
+     * Set the value of the observed setting.
+     *
+     * @param value The new value for the setting.
+     */
     public void setValue(int value) {
-        mSecureSettings.putIntForUser(mSettingName, value, mUserId);
+        mSettingsProxy.putIntForUser(mSettingName, value, mUserId);
     }
 
     private int getValueFromProvider() {
-        return mSecureSettings.getIntForUser(mSettingName, mDefaultValue, mUserId);
+        return mSettingsProxy.getIntForUser(mSettingName, mDefaultValue, mUserId);
     }
 
     @Override
@@ -71,10 +83,10 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
         mListening = listening;
         if (listening) {
             mObservedValue = getValueFromProvider();
-            mSecureSettings.registerContentObserverForUser(
-                    mSecureSettings.getUriFor(mSettingName), false, this, mUserId);
+            mSettingsProxy.registerContentObserverForUser(
+                    mSettingsProxy.getUriFor(mSettingName), false, this, mUserId);
         } else {
-            mSecureSettings.unregisterContentObserver(this);
+            mSettingsProxy.unregisterContentObserver(this);
             mObservedValue = mDefaultValue;
         }
     }
@@ -87,6 +99,9 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
         handleValueChanged(value, changed);
     }
 
+    /**
+     * Set user handle for which to observe the setting.
+     */
     public void setUserId(int userId) {
         mUserId = userId;
         if (mListening) {

@@ -41,7 +41,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceNotificationListener;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.statusbar.CommandQueue;
@@ -100,7 +99,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private final DozeScrimController mDozeScrimController;
     private final ScrimController mScrimController;
     private final KeyguardIndicationController mKeyguardIndicationController;
-    private final FeatureFlags mFeatureFlags;
     private final StatusBar mStatusBar;
     private final ShadeController mShadeController;
     private final LockscreenShadeTransitionController mShadeTransitionController;
@@ -129,7 +127,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardStateController keyguardStateController,
             KeyguardIndicationController keyguardIndicationController,
-            FeatureFlags featureFlags,
             StatusBar statusBar,
             ShadeController shadeController,
             LockscreenShadeTransitionController shadeTransitionController,
@@ -153,7 +150,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mHeadsUpManager = headsUp;
         mDynamicPrivacyController = dynamicPrivacyController;
         mKeyguardIndicationController = keyguardIndicationController;
-        mFeatureFlags = featureFlags;
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
         mStatusBar = statusBar;
         mShadeController = shadeController;
@@ -199,7 +195,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                     stackScrollerController.getNotificationListContainer());
             mNotifShadeEventSource.setShadeEmptiedCallback(this::maybeClosePanelForShadeEmptied);
             mNotifShadeEventSource.setNotifRemovedByUserCallback(this::maybeEndAmbientPulse);
-            if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
                 mEntryManager.setUpWithPresenter(this);
                 mEntryManager.addNotificationLifetimeExtender(mHeadsUpManager);
                 mEntryManager.addNotificationLifetimeExtender(mGutsManager);
@@ -236,7 +232,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     @Override
     public void onDensityOrFontScaleChanged() {
         // TODO(b/145659174): Remove legacy pipeline code
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) return;
+        if (mNotifPipelineFlags.isNewPipelineEnabled()) return;
         MessagingMessage.dropCache();
         MessagingGroup.dropCache();
         if (!mKeyguardUpdateMonitor.isSwitchingUser()) {
@@ -249,7 +245,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     @Override
     public void onUiModeChanged() {
         // TODO(b/145659174): Remove legacy pipeline code
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) return;
+        if (mNotifPipelineFlags.isNewPipelineEnabled()) return;
         if (!mKeyguardUpdateMonitor.isSwitchingUser()) {
             updateNotificationsOnUiModeChanged();
         } else {
@@ -264,7 +260,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
     private void updateNotificationsOnUiModeChanged() {
         // TODO(b/145659174): Remove legacy pipeline code
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) return;
+        if (mNotifPipelineFlags.isNewPipelineEnabled()) return;
         List<NotificationEntry> userNotifications =
                 mEntryManager.getActiveNotificationsForCurrentUser();
         for (int i = 0; i < userNotifications.size(); i++) {
@@ -278,7 +274,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
     private void updateNotificationsOnDensityOrFontScaleChanged() {
         // TODO(b/145659174): Remove legacy pipeline code
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) return;
+        if (mNotifPipelineFlags.isNewPipelineEnabled()) return;
         List<NotificationEntry> userNotifications =
                 mEntryManager.getActiveNotificationsForCurrentUser();
         for (int i = 0; i < userNotifications.size(); i++) {
@@ -332,7 +328,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         // End old BaseStatusBar.userSwitched
         if (MULTIUSER_DEBUG) mNotificationPanel.setHeaderDebugInfo("USER " + newUserId);
         mCommandQueue.animateCollapsePanels();
-        if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
             if (mReinflateNotificationsOnUserSwitched) {
                 updateNotificationsOnDensityOrFontScaleChanged();
                 mReinflateNotificationsOnUserSwitched = false;

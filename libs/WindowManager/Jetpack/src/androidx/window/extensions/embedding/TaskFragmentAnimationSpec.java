@@ -43,6 +43,7 @@ import com.android.internal.policy.AttributeCache;
 import com.android.internal.policy.TransitionAnimation;
 
 /** Animation spec for TaskFragment transition. */
+// TODO(b/206557124): provide an easier way to customize animation
 class TaskFragmentAnimationSpec {
 
     private static final String TAG = "TaskFragAnimationSpec";
@@ -179,9 +180,9 @@ class TaskFragmentAnimationSpec {
     Animation loadOpenAnimation(@NonNull RemoteAnimationTarget target,
             @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = target.mode != MODE_CLOSING;
-        final Animation animation = mTransitionAnimation.loadDefaultAnimationAttr(isEnter
-                ? R.styleable.WindowAnimation_activityOpenEnterAnimation
-                : R.styleable.WindowAnimation_activityOpenExitAnimation);
+        final Animation animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
+                ? com.android.internal.R.anim.task_fragment_open_enter
+                : com.android.internal.R.anim.task_fragment_open_exit);
         animation.initialize(target.localBounds.width(), target.localBounds.height(),
                 wholeAnimationBounds.width(), wholeAnimationBounds.height());
         animation.scaleCurrentDuration(mTransitionAnimationScaleSetting);
@@ -191,9 +192,9 @@ class TaskFragmentAnimationSpec {
     Animation loadCloseAnimation(@NonNull RemoteAnimationTarget target,
             @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = target.mode != MODE_CLOSING;
-        final Animation animation = mTransitionAnimation.loadDefaultAnimationAttr(isEnter
-                ? R.styleable.WindowAnimation_activityCloseEnterAnimation
-                : R.styleable.WindowAnimation_activityCloseExitAnimation);
+        final Animation animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
+                ? com.android.internal.R.anim.task_fragment_close_enter
+                : com.android.internal.R.anim.task_fragment_close_exit);
         animation.initialize(target.localBounds.width(), target.localBounds.height(),
                 wholeAnimationBounds.width(), wholeAnimationBounds.height());
         animation.scaleCurrentDuration(mTransitionAnimationScaleSetting);

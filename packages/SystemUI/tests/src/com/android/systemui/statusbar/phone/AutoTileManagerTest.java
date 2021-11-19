@@ -51,7 +51,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
-import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
@@ -249,7 +249,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
         verify(mWalletController, times(2)).getWalletPosition();
 
-        SecureSetting setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
+        SettingObserver setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
         assertEquals(USER + 1, setting.getCurrentUser());
         assertTrue(setting.isListening());
     }
@@ -299,7 +299,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
         verify(mWalletController, times(2)).getWalletPosition();
 
-        SecureSetting setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
+        SettingObserver setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
         assertEquals(USER + 1, setting.getCurrentUser());
         assertFalse(setting.isListening());
     }

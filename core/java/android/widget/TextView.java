@@ -12501,6 +12501,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return TextUtils.trimToParcelableSize(mTransformed);
     }
 
+    boolean isVisibleToAccessibility() {
+        return AccessibilityManager.getInstance(mContext).isEnabled()
+                && (isFocused() || (isSelected() && isShown()));
+    }
+
     void sendAccessibilityEventTypeViewTextChanged(CharSequence beforeText,
             int fromIndex, int removedCount, int addedCount) {
         AccessibilityEvent event =
@@ -12508,6 +12513,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         event.setFromIndex(fromIndex);
         event.setRemovedCount(removedCount);
         event.setAddedCount(addedCount);
+        event.setBeforeText(beforeText);
+        sendAccessibilityEventUnchecked(event);
+    }
+
+    void sendAccessibilityEventTypeViewTextChanged(CharSequence beforeText,
+            int fromIndex, int toIndex) {
+        AccessibilityEvent event =
+                AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
+        event.setFromIndex(fromIndex);
+        event.setToIndex(toIndex);
         event.setBeforeText(beforeText);
         sendAccessibilityEventUnchecked(event);
     }
@@ -13826,10 +13841,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             TextView.this.handleTextChanged(buffer, start, before, after);
 
-            if (AccessibilityManager.getInstance(mContext).isEnabled()
-                    && (isFocused() || (isSelected() && isShown()))) {
+            if (isVisibleToAccessibility()) {
                 sendAccessibilityEventTypeViewTextChanged(mBeforeText, start, before, after);
-                mBeforeText = TextUtils.stringOrSpannedString(mTransformed);
+                mBeforeText = null;
             }
         }
 
@@ -13857,54 +13871,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 Log.v(LOG_TAG, "onSpanAdded s=" + s + " e=" + e + " what=" + what + ": " + buf);
             }
             TextView.this.spanChange(buf, what, -1, s, -1, e);
-            // Note we don't update mBeforeText here. We look for SuggestionSpans added after the
-            // text content changes.
-            if (AccessibilityManager.getInstance(mContext).isEnabled()
-                    && (isFocused() || (isSelected() && isShown()))
-                    && (what instanceof SuggestionSpan)) {
-                // When the user types a new word, and SuggestionSpans on the existing words will be
-                // removed and added again. We don't need to send out events for existing
-                // SuggestionSpans. Multiple spans can be placed on the range.
-                if (mBeforeText instanceof SpannedString) {
-                    final SpannedString beforeSpannedString = (SpannedString) mBeforeText;
-                    if ((beforeSpannedString.getSpanStart(what) == s)
-                            && (beforeSpannedString.getSpanEnd(what) == e)) {
-                        // Exactly same span is found.
-                        return;
-                    }
-                    // Suggestion span couldn't be found. Try to find a suggestion span that has the
-                    // same contents.
-                    SuggestionSpan[] suggestionSpans = beforeSpannedString.getSpans(s, e,
-                            SuggestionSpan.class);
-                    for (final SuggestionSpan suggestionSpan : suggestionSpans) {
-                        final int start = beforeSpannedString.getSpanStart(suggestionSpan);
-                        if (start != s) {
-                            continue;
-                        }
-                        final int end = beforeSpannedString.getSpanEnd(suggestionSpan);
-                        if (end != e) {
-                            continue;
-                        }
-                        if (equalSuggestionSpan(suggestionSpan, (SuggestionSpan) what)) {
-                            return;
-                        }
-                    }
-                }
-                AccessibilityEvent event =
-                        AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
-                event.setFromIndex(s);
-                event.setToIndex(e);
-                event.setBeforeText(mBeforeText);
-                sendAccessibilityEventUnchecked(event);
-            }
-        }
-
-        private boolean equalSuggestionSpan(SuggestionSpan span1, SuggestionSpan span2) {
-            // We compare flags because flags will determine the underline color.
-            return Arrays.equals(span1.getSuggestions(), span2.getSuggestions())
-                    && Objects.equals(span1.getLocaleObject(), span2.getLocaleObject())
-                    && span1.getLocale().equals(span2.getLocale())
-                    && (span1.getFlags() == span2.getFlags());
         }
 
         public void onSpanRemoved(Spannable buf, Object what, int s, int e) {

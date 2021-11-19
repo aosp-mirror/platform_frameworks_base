@@ -3004,10 +3004,11 @@ public abstract class Context {
      * {@link android.os.Build.VERSION_CODES#TIRAMISU},
      *              either {@link #RECEIVER_EXPORTED} or
      * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
-     *              for protected broadcasts or an exception will be thrown. If
+     *              for
+     *              <a href="https://developer.android.com/guide/components/broadcasts#system-broadcasts">system broadcasts</a> or an exception will be thrown. If
      *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
      *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
-     *              protected broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
+     *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
      *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
      *              {@link #RECEIVER_NOT_EXPORTED} are specified, an exception will be thrown as
      *              well.
@@ -3082,12 +3083,18 @@ public abstract class Context {
      *      no permission is required.
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent.  If null, the main thread of the process will be used.
-     * @param flags Additional options for the receiver. As of
-     * Android T, either {@link #RECEIVER_EXPORTED} or
+     * @param flags Additional options for the receiver. For apps targeting
+     * {@link android.os.Build.VERSION_CODES#TIRAMISU},
+     *              either {@link #RECEIVER_EXPORTED} or
      * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
-     *            for protected broadcasts, and may additionally specify
-     *            {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS} if {@link #RECEIVER_EXPORTED} is
-     *            specified.
+     *              for
+     *              <a href="https://developer.android.com/guide/components/broadcasts#system-broadcasts">system broadcasts</a> or an exception will be thrown. If
+     *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
+     *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
+     *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
+     *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
+     *              {@link #RECEIVER_NOT_EXPORTED} are specified, an exception will be thrown as
+     *              well.
      *
      * @return The first sticky intent found that matches <var>filter</var>,
      *         or null if there are none.
@@ -3146,10 +3153,18 @@ public abstract class Context {
      *      no permission is required.
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent. If {@code null}, the main thread of the process will be used.
-     * @param flags Additional options for the receiver. As of
-     *      Android T, either {@link #RECEIVER_EXPORTED} or
-     *      {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being
-     *      registered for protected broadcasts
+     * @param flags Additional options for the receiver. For apps targeting
+     * {@link android.os.Build.VERSION_CODES#TIRAMISU},
+     *              either {@link #RECEIVER_EXPORTED} or
+     * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
+     *              for
+     *              <a href="https://developer.android.com/guide/components/broadcasts#system-broadcasts">system broadcasts</a> or an exception will be thrown. If
+     *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
+     *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
+     *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
+     *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
+     *              {@link #RECEIVER_NOT_EXPORTED} are specified, an exception will be thrown as
+     *              well.
      *
      * @return The first sticky intent found that matches <var>filter</var>,
      *         or {@code null} if there are none.
@@ -3213,10 +3228,18 @@ public abstract class Context {
      *      no permission is required.
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent.  If null, the main thread of the process will be used.
-     * @param flags Additional options for the receiver. As of
-     *      Android T, either {@link #RECEIVER_EXPORTED} or
-     *      {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being
-     *      registered for protected broadcasts
+     * @param flags Additional options for the receiver. For apps targeting
+     * {@link android.os.Build.VERSION_CODES#TIRAMISU},
+     *              either {@link #RECEIVER_EXPORTED} or
+     * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
+     *              for
+     *              <a href="https://developer.android.com/guide/components/broadcasts#system-broadcasts">system broadcasts</a> or an exception will be thrown. If
+     *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
+     *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
+     *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
+     *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
+     *              {@link #RECEIVER_NOT_EXPORTED} are specified, an exception will be thrown as
+     *              well.
      *
      * @return The first sticky intent found that matches <var>filter</var>,
      *         or null if there are none.
@@ -3818,6 +3841,7 @@ public abstract class Context {
             //@hide: SPEECH_RECOGNITION_SERVICE,
             UWB_SERVICE,
             MEDIA_METRICS_SERVICE,
+            SUPPLEMENTAL_PROCESS_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -5832,6 +5856,13 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String LOCALE_SERVICE = "locale";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a Supplemental Process Manager.
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String SUPPLEMENTAL_PROCESS_SERVICE = "supplemental_process";
 
     /**
      * Determine whether the given permission is allowed for a particular

@@ -101,6 +101,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // State guarded by mLock.
     private final Object mLock = new Object();
+
     private final SparseArray<UserRecord> mUserRecords = new SparseArray<>();
     private final ArrayMap<IBinder, ClientRecord> mAllClientRecords = new ArrayMap<>();
     private int mCurrentUserId = -1;
@@ -351,9 +352,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
         final long token = Binder.clearCallingIdentity();
         try {
-            synchronized (mLock) {
-                mAudioService.setBluetoothA2dpOn(on);
-            }
+            mAudioService.setBluetoothA2dpOn(on);
         } catch (RemoteException ex) {
             Slog.w(TAG, "RemoteException while calling setBluetoothA2dpOn. on=" + on);
         } finally {

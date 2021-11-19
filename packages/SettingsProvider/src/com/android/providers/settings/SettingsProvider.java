@@ -5325,9 +5325,6 @@ public class SettingsProvider extends ContentProvider {
                             Settings.Global.Wearable.AMBIENT_FORCE_WHEN_DOCKED,
                             SystemProperties.getBoolean("ro.ambient.force_when_docked", false));
                     initGlobalSettingsDefaultValForWearLocked(
-                            Settings.Global.Wearable.AMBIENT_GESTURE_SENSOR_ID,
-                            SystemProperties.getInt("ro.ambient.gesture_sensor_id", 0));
-                    initGlobalSettingsDefaultValForWearLocked(
                             Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED,
                             SystemProperties.getBoolean("ro.ambient.low_bit_enabled", false));
                     initGlobalSettingsDefaultValForWearLocked(

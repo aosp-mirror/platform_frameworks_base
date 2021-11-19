@@ -99,7 +99,7 @@ public class ExternalVibration implements Parcelable {
     }
 
     public VibrationAttributes getVibrationAttributes() {
-        return new VibrationAttributes.Builder(mAttrs, null).build();
+        return new VibrationAttributes.Builder(mAttrs).build();
     }
 
     /**

@@ -60,7 +60,6 @@ import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 
-import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.settingslib.R;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.mobile.MobileMappings.Config;
@@ -72,6 +71,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.telephony.TelephonyListenerManager;
@@ -87,7 +87,6 @@ import org.junit.runner.Description;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.MockitoSession;
-import org.mockito.quality.Strictness;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -127,6 +126,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected CarrierConfigTracker mCarrierConfigTracker;
     protected FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     protected FeatureFlags mFeatureFlags;
+    protected StatusBarFlags mStatusBarFlags;
 
     protected int mSubId;
 
@@ -156,11 +156,10 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        mMockingSession = ExtendedMockito.mockitoSession().strictness(Strictness.LENIENT)
-                .mockStatic(FeatureFlags.class).startMocking();
         mFeatureFlags = mock(FeatureFlags.class);
-        when(mFeatureFlags.isCombinedStatusBarSignalIconsEnabled()).thenReturn(false);
-        when(mFeatureFlags.isProviderModelSettingEnabled(mContext)).thenReturn(true);
+        mStatusBarFlags = mock(StatusBarFlags.class);
+        when(mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)).thenReturn(false);
+        when(mStatusBarFlags.isProviderModelSettingEnabled()).thenReturn(true);
 
 
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
@@ -239,6 +238,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 mDemoModeController,
                 mCarrierConfigTracker,
                 mFeatureFlags,
+                mStatusBarFlags,
                 mock(DumpManager.class)
         );
         setupNetworkController();
@@ -308,7 +308,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                         mock(AccessPointControllerImpl.class),
                         mock(DataUsageController.class), mMockSubDefaults,
                         mock(DeviceProvisionedController.class), mMockBd, mDemoModeController,
-                        mCarrierConfigTracker, mFeatureFlags,
+                        mCarrierConfigTracker, mFeatureFlags, mStatusBarFlags,
                         mock(DumpManager.class));
 
         setupNetworkController();

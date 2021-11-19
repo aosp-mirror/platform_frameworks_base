@@ -100,12 +100,13 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mWaitingAnimationPeriod = 2 * ANIMATION_DURATION_MS;
         mWaitIntermediateAnimationPeriod = ANIMATION_DURATION_MS / 2;
+        mWindowMagnificationAnimationController = new WindowMagnificationAnimationController(
+                mContext, newValueAnimator());
         mController = new SpyWindowMagnificationController(mContext, mHandler,
+                mWindowMagnificationAnimationController,
                 mSfVsyncFrameProvider, null, new SurfaceControl.Transaction(),
                 mWindowMagnifierCallback, mSysUiState);
         mSpyController = mController.getSpyController();
-        mWindowMagnificationAnimationController = new WindowMagnificationAnimationController(
-                mContext, mController, newValueAnimator());
     }
 
     @After
@@ -383,17 +384,6 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void setScale_enabled_expectedScale() {
-        enableWindowMagnificationWithoutAnimation();
-
-        mInstrumentation.runOnMainSync(
-                () -> mWindowMagnificationAnimationController.setScale(DEFAULT_SCALE + 1));
-
-        verify(mSpyController).setScale(DEFAULT_SCALE + 1);
-        verifyFinalSpec(DEFAULT_SCALE + 1, DEFAULT_CENTER_X, DEFAULT_CENTER_Y);
-    }
-
-    @Test
     public void deleteWindowMagnification_enabled_expectedValuesAndInvokeCallback()
             throws RemoteException {
         enableWindowMagnificationWithoutAnimation();
@@ -508,24 +498,10 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         enableWindowMagnificationWithoutAnimation();
 
         mInstrumentation.runOnMainSync(
-                () -> mWindowMagnificationAnimationController.moveWindowMagnifier(100f, 200f));
+                () -> mController.moveWindowMagnifier(100f, 200f));
 
         verify(mSpyController).moveWindowMagnifier(100f, 200f);
         verifyFinalSpec(DEFAULT_SCALE, DEFAULT_CENTER_X + 100f, DEFAULT_CENTER_Y + 100f);
-    }
-
-    @Test
-    public void onConfigurationChanged_passThrough() {
-        mWindowMagnificationAnimationController.onConfigurationChanged(100);
-
-        verify(mSpyController).onConfigurationChanged(100);
-    }
-
-    @Test
-    public void updateSysUiStateFlag_passThrough() {
-        mWindowMagnificationAnimationController.updateSysUiStateFlag();
-
-        verify(mSpyController).updateSysUIStateFlag();
     }
 
     private void verifyFinalSpec(float expectedScale, float expectedCenterX,
@@ -581,11 +557,12 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         private WindowMagnificationController mSpyController;
 
         SpyWindowMagnificationController(Context context, Handler handler,
+                WindowMagnificationAnimationController animationController,
                 SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
                 MirrorWindowControl mirrorWindowControl, SurfaceControl.Transaction transaction,
                 WindowMagnifierCallback callback, SysUiState sysUiState) {
-            super(context, handler, sfVsyncFrameProvider, mirrorWindowControl, transaction,
-                    callback, sysUiState);
+            super(context, handler, animationController, sfVsyncFrameProvider, mirrorWindowControl,
+                    transaction, callback, sysUiState);
             mSpyController = Mockito.mock(WindowMagnificationController.class);
         }
 
@@ -621,12 +598,6 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         public void updateSysUIStateFlag() {
             super.updateSysUIStateFlag();
             mSpyController.updateSysUIStateFlag();
-        }
-
-        @Override
-        void onConfigurationChanged(int configDiff) {
-            super.onConfigurationChanged(configDiff);
-            mSpyController.onConfigurationChanged(configDiff);
         }
     }
 

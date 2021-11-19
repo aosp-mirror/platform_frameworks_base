@@ -118,8 +118,7 @@ public class VibratorManagerServiceTest {
     private static final VibrationAttributes ALARM_ATTRS =
             new VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_ALARM).build();
     private static final VibrationAttributes HAPTIC_FEEDBACK_ATTRS =
-            new VibrationAttributes.Builder().setUsage(
-                    VibrationAttributes.USAGE_TOUCH).build();
+            new VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_TOUCH).build();
     private static final VibrationAttributes NOTIFICATION_ATTRS =
             new VibrationAttributes.Builder().setUsage(
                     VibrationAttributes.USAGE_NOTIFICATION).build();
@@ -658,8 +657,7 @@ public class VibratorManagerServiceTest {
                 service, TEST_TIMEOUT_MILLIS));
 
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
-                new VibrationAttributes.Builder().setUsage(
-                        VibrationAttributes.USAGE_TOUCH).build());
+                HAPTIC_FEEDBACK_ATTRS);
 
         // Wait before checking it never played a second effect.
         assertFalse(waitUntil(s -> mVibratorProviders.get(1).getEffectSegments().size() > 1,
@@ -682,8 +680,7 @@ public class VibratorManagerServiceTest {
                 service, TEST_TIMEOUT_MILLIS));
 
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
-                new VibrationAttributes.Builder().setUsage(
-                        VibrationAttributes.USAGE_TOUCH).build());
+                HAPTIC_FEEDBACK_ATTRS);
 
         // Wait before checking it never played a second effect.
         assertFalse(waitUntil(s -> mVibratorProviders.get(1).getEffectSegments().size() > 1,

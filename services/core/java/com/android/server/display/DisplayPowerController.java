@@ -925,7 +925,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     PowerManager.BRIGHTNESS_MAX, dozeScaleFactor, lightSensorRate,
                     initialLightSensorRate, brighteningLightDebounce, darkeningLightDebounce,
                     autoBrightnessResetAmbientLuxAfterWarmUp, ambientBrightnessThresholds,
-                    screenBrightnessThresholds, mLogicalDisplay, mContext, mHbmController);
+                    screenBrightnessThresholds, mContext, mHbmController);
         } else {
             mUseSoftwareAutoBrightnessConfig = false;
         }

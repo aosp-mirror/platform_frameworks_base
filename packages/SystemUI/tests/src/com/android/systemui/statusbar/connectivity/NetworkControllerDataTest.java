@@ -130,7 +130,8 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 mock(AccessPointControllerImpl.class),
                 mock(DataUsageController.class), mMockSubDefaults,
                 mock(DeviceProvisionedController.class), mMockBd, mDemoModeController,
-                mock(CarrierConfigTracker.class), mFeatureFlags, mock(DumpManager.class));
+                mock(CarrierConfigTracker.class), mFeatureFlags, mStatusBarFlags,
+                mock(DumpManager.class));
         setupNetworkController();
 
         setupDefaultSignal();

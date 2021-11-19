@@ -108,6 +108,8 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telepon"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Bantuan Suara"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
+    <!-- no translation found for accessibility_qr_code_scanner_button (7521277927692910795) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Buka kunci"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Perangkat terkunci"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Memindai wajah"</string>
@@ -465,6 +467,10 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Buka kunci untuk menggunakan"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Terjadi masalah saat mendapatkan kartu Anda, coba lagi nanti"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Setelan layar kunci"</string>
+    <!-- no translation found for qr_code_scanner_title (1598912458255252498) -->
+    <skip />
+    <!-- no translation found for qr_code_scanner_description (7452098243938659945) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Profil kerja"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mode pesawat"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Anda tidak akan mendengar alarm berikutnya <xliff:g id="WHEN">%1$s</xliff:g>"</string>

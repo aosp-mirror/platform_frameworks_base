@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"বন্ধ করুন"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"বড় করুন"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"সেটিংস"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"\'স্প্লিট স্ক্রিন\' মোড চালু করুন"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"মেনু"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"ছবির-মধ্যে-ছবি তে <xliff:g id="NAME">%s</xliff:g> আছেন"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> কে এই বৈশিষ্ট্যটি ব্যবহার করতে দিতে না চাইলে ট্যাপ করে সেটিংসে গিয়ে সেটি বন্ধ করে দিন।"</string>

@@ -527,6 +527,9 @@ final class PackageSessionVerifier {
     @VisibleForTesting
     void checkRollbacks(StagingManager.StagedSession session)
             throws PackageManagerException {
+        if (session.isDestroyed() || session.isInTerminalState()) {
+            return;
+        }
         for (StagingManager.StagedSession stagedSession : mStagedSessions) {
             if (stagedSession.isDestroyed() || stagedSession.isInTerminalState()) {
                 continue;
@@ -565,6 +568,9 @@ final class PackageSessionVerifier {
     @VisibleForTesting
     void checkOverlaps(StagingManager.StagedSession parent,
             StagingManager.StagedSession child) throws PackageManagerException {
+        if (parent.isDestroyed() || parent.isInTerminalState()) {
+            return;
+        }
         final String packageName = child.getPackageName();
         if (packageName == null) {
             throw new PackageManagerException(

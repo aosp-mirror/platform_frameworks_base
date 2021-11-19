@@ -79,7 +79,7 @@ static void nativeMergeWithNextTransaction(JNIEnv*, jclass clazz, jlong ptr, jlo
                                            jlong framenumber) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionPtr);
-    queue->mergeWithNextTransaction(transaction, framenumber);
+    queue->mergeWithNextTransaction(transaction, CC_UNLIKELY(framenumber < 0) ? 0 : framenumber);
 }
 
 static jlong nativeGetLastAcquiredFrameNum(JNIEnv* env, jclass clazz, jlong ptr) {

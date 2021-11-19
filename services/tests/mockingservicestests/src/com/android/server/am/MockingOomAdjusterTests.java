@@ -67,7 +67,6 @@ import static org.mockito.AdditionalAnswers.answer;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
@@ -2180,7 +2179,7 @@ public class MockingOomAdjusterTests {
         record.addConnection(binder, cr);
         client.mServices.addConnection(cr);
         binding.connections.add(cr);
-        doNothing().when(cr).trackProcState(anyInt(), anyInt(), anyLong());
+        doNothing().when(cr).trackProcState(anyInt(), anyInt());
         return record;
     }
 

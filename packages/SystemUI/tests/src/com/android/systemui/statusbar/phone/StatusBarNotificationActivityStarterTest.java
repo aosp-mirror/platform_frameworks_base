@@ -54,7 +54,6 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -63,6 +62,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
@@ -122,7 +122,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private ShadeControllerImpl mShadeController;
     @Mock
-    private FeatureFlags mFeatureFlags;
+    private NotifPipelineFlags mNotifPipelineFlags;
     @Mock
     private NotifPipeline mNotifPipeline;
     @Mock
@@ -180,7 +180,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         mActiveNotifications.add(mBubbleNotificationRow.getEntry());
         when(mEntryManager.getVisibleNotifications()).thenReturn(mActiveNotifications);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
-        when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
+        when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(false);
         when(mOnUserInteractionCallback.getGroupSummaryToDismiss(mNotificationRow.getEntry()))
                 .thenReturn(null);
         when(mVisibilityProvider.obtain(anyString(), anyBoolean())).thenAnswer(
@@ -224,7 +224,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mock(StatusBarRemoteInputCallback.class),
                         mActivityIntentHelper,
 
-                        mFeatureFlags,
+                        mNotifPipelineFlags,
                         mock(MetricsLogger.class),
                         mock(StatusBarNotificationActivityStarterLogger.class),
                         mOnUserInteractionCallback)

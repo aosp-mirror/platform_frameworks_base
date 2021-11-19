@@ -51,6 +51,7 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.connectivity.StatusBarFlags;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -107,6 +108,8 @@ public class TileServicesTest extends SysuiTestCase {
     private TileServiceRequestController mTileServiceRequestController;
     @Mock
     private FeatureFlags mFeatureFlags;
+    @Mock
+    private StatusBarFlags mStatusBarFlags;
 
     @Before
     public void setUp() throws Exception {
@@ -134,7 +137,8 @@ public class TileServicesTest extends SysuiTestCase {
                 mSecureSettings,
                 mock(CustomTileStatePersister.class),
                 mTileServiceRequestControllerBuilder,
-                mFeatureFlags);
+                mFeatureFlags,
+                mStatusBarFlags);
         mTileService = new TestTileServices(host, Looper.getMainLooper(), mBroadcastDispatcher,
                 mUserTracker);
     }

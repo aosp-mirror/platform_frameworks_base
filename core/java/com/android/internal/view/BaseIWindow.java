@@ -90,10 +90,6 @@ public class BaseIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void windowFocusChanged(boolean hasFocus) {
-    }
-
-    @Override
     public void executeCommand(String command, String parameters, ParcelFileDescriptor out) {
         if (out != null) {
             try {
