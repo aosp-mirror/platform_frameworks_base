@@ -369,7 +369,6 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.Watchdog;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
-import com.android.server.apphibernation.AppHibernationService;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -1460,7 +1459,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     final ArtManagerService mArtManagerService;
 
-    private final PackageDexOptimizer mPackageDexOptimizer;
+    final PackageDexOptimizer mPackageDexOptimizer;
     // DexManager handles the usage of dex files (e.g. secondary files, whether or not a package
     // is used by other apps).
     private final DexManager mDexManager;
@@ -12750,7 +12749,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            if (!PackageDexOptimizer.canOptimizePackage(pkg)) {
+            if (!mPackageDexOptimizer.canOptimizePackage(pkg)) {
                 if (DEBUG_DEXOPT) {
                     Log.i(TAG, "Skipping update of non-optimizable app " + pkg.getPackageName());
                 }
@@ -13001,15 +13000,10 @@ public class PackageManagerService extends IPackageManager.Stub
         ArraySet<String> pkgs = new ArraySet<>();
         synchronized (mLock) {
             for (AndroidPackage p : mPackages.values()) {
-                if (PackageDexOptimizer.canOptimizePackage(p)) {
+                if (mPackageDexOptimizer.canOptimizePackage(p)) {
                     pkgs.add(p.getPackageName());
                 }
             }
-        }
-        if (AppHibernationService.isAppHibernationEnabled()) {
-            AppHibernationManagerInternal appHibernationManager =
-                    mInjector.getLocalService(AppHibernationManagerInternal.class);
-            pkgs.removeIf(pkgName -> appHibernationManager.isHibernatingGlobally(pkgName));
         }
         return pkgs;
     }
