@@ -297,4 +297,12 @@ public interface ParsingPackageRead extends PkgWithoutStateAppInfo, PkgWithoutSt
      * @see R.styleable#AndroidManifestService_visibleToInstantApps
      */
     boolean isVisibleToInstantApps();
+
+    /**
+     * Whether the enabled settings of components in the application should be reset to the default,
+     * when the application's user data is cleared.
+     *
+     * @see R.styleable#AndroidManifestApplication_resetEnabledSettingsOnAppDataCleared
+     */
+    boolean isResetEnabledSettingsOnAppDataCleared();
 }
