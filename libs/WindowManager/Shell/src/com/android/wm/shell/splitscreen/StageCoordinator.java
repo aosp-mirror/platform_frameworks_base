@@ -155,6 +155,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private boolean mShouldUpdateRecents;
     private boolean mExitSplitScreenOnHide;
     private boolean mKeyguardOccluded;
+    private boolean mDeviceSleep;
 
     @SplitScreen.StageType
     private int mDismissTop = NO_DISMISS;
@@ -547,6 +548,17 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
+    void onFinishedWakingUp() {
+        if (mMainStage.isActive()) {
+            exitSplitScreenIfKeyguardOccluded();
+        }
+        mDeviceSleep = false;
+    }
+
+    void onFinishedGoingToSleep() {
+        mDeviceSleep = true;
+    }
+
     void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
         mExitSplitScreenOnHide = exitSplitScreenOnHide;
     }
@@ -573,6 +585,19 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         applyExitSplitScreen(childrenToTop, wct, exitReason);
+    }
+
+    private void exitSplitScreenIfKeyguardOccluded() {
+        final boolean mainStageVisible = mMainStageListener.mVisible;
+        final boolean oneStageVisible = mainStageVisible ^ mSideStageListener.mVisible;
+        if (mDeviceSleep && mKeyguardOccluded && oneStageVisible) {
+            // Only the stages include show-when-locked activity is visible while keyguard occluded.
+            // Dismiss split because there's show-when-locked activity showing on top of keyguard.
+            // Also make sure the task contains show-when-locked activity remains on top after split
+            // dismissed.
+            final StageTaskListener toTop = mainStageVisible ? mMainStage : mSideStage;
+            exitSplitScreen(toTop, EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
+        }
     }
 
     private void applyExitSplitScreen(StageTaskListener childrenToTop,
@@ -790,14 +815,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // like the cases keyguard showing or screen off.
                 exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RETURN_HOME);
             }
-        } else if (mKeyguardOccluded) {
-            // At least one of the stages is visible while keyguard occluded. Dismiss split because
-            // there's show-when-locked activity showing on top of keyguard. Also make sure the
-            // task contains show-when-locked activity remains on top after split dismissed.
-            final StageTaskListener toTop =
-                    mainStageVisible ? mMainStage : (sideStageVisible ? mSideStage : null);
-            exitSplitScreen(toTop, EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
         }
+        exitSplitScreenIfKeyguardOccluded();
 
         mSyncQueue.runInSync(t -> {
             // Same above, we only set root tasks and divider leash visibility when both stage
