@@ -64,10 +64,7 @@ class RowAppearanceCoordinator @Inject internal constructor(
         // very first notification and if it's not a child of grouped notifications.
         controller.setSystemExpanded(mAlwaysExpandNonGroupedNotification || entry == entryToExpand)
         // Show/hide the feedback icon
-        controller.showFeedbackIcon(
-            mAssistantFeedbackController.showFeedbackIndicator(entry),
-            mAssistantFeedbackController.getFeedbackResources(entry)
-        )
+        controller.setFeedbackIcon(mAssistantFeedbackController.getFeedbackIcon(entry))
         // Show the "alerted" bell icon
         controller.setLastAudiblyAlertedMs(entry.lastAudiblyAlertedMs)
     }
