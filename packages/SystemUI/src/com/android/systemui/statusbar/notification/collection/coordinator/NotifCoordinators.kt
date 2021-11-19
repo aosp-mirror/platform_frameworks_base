@@ -49,6 +49,7 @@ class NotifCoordinatorsImpl @Inject constructor(
     groupCountCoordinator: GroupCountCoordinator,
     mediaCoordinator: MediaCoordinator,
     remoteInputCoordinator: RemoteInputCoordinator,
+    rowAppearanceCoordinator: RowAppearanceCoordinator,
     stackCoordinator: StackCoordinator,
     shadeEventCoordinator: ShadeEventCoordinator,
     smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
@@ -77,6 +78,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(groupCountCoordinator)
         mCoordinators.add(mediaCoordinator)
         mCoordinators.add(remoteInputCoordinator)
+        mCoordinators.add(rowAppearanceCoordinator)
         mCoordinators.add(stackCoordinator)
         mCoordinators.add(shadeEventCoordinator)
         mCoordinators.add(viewConfigCoordinator)

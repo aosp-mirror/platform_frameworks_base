@@ -473,7 +473,8 @@ public class NotificationChildrenContainer extends ViewGroup {
         return result;
     }
 
-    private void updateExpansionStates() {
+    /** To be called any time the rows have been updated */
+    public void updateExpansionStates() {
         if (mChildrenExpanded || mUserLocked) {
             // we don't modify it the group is expanded or if we are expanding it
             return;

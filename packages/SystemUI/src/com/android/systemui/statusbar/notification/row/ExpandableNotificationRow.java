@@ -812,6 +812,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mChildrenContainer.setUntruncatedChildCount(childCount);
     }
 
+    /** Called after children have been attached to set the expansion states */
+    public void resetChildSystemExpandedStates() {
+        if (isSummaryWithChildren()) {
+            mChildrenContainer.updateExpansionStates();
+        }
+    }
+
     /**
      * Add a child notification to this view.
      *
@@ -2339,6 +2346,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             onExpansionChanged(false /* userAction */, wasExpanded);
             if (mIsSummaryWithChildren) {
                 mChildrenContainer.updateGroupOverflow();
+                resetChildSystemExpandedStates();
             }
         }
     }
