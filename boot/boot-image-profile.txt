@@ -2899,10 +2899,8 @@ HSPLandroid/app/assist/AssistStructure$ViewNode;->getAutofillId()Landroid/view/a
 HSPLandroid/app/assist/AssistStructure$ViewNode;->getChildCount()I
 HSPLandroid/app/assist/AssistStructure$ViewNode;->writeSelfToParcel(Landroid/os/Parcel;Landroid/os/PooledStringWriter;Z[FZ)I+]Landroid/view/autofill/AutofillId;Landroid/view/autofill/AutofillId;]Landroid/graphics/Matrix;Landroid/graphics/Matrix;]Landroid/app/assist/AssistStructure$ViewNodeText;Landroid/app/assist/AssistStructure$ViewNodeText;]Landroid/os/Parcel;Landroid/os/Parcel;
 HSPLandroid/app/assist/AssistStructure$ViewNode;->writeString(Landroid/os/Parcel;Landroid/os/PooledStringWriter;Ljava/lang/String;)V+]Landroid/os/PooledStringWriter;Landroid/os/PooledStringWriter;]Landroid/os/Parcel;Landroid/os/Parcel;
-HSPLandroid/app/assist/AssistStructure$ViewNodeBuilder;-><init>()V
 HSPLandroid/app/assist/AssistStructure$ViewNodeBuilder;->getChildCount()I
 HSPLandroid/app/assist/AssistStructure$ViewNodeBuilder;->getNodeText()Landroid/app/assist/AssistStructure$ViewNodeText;
-HSPLandroid/app/assist/AssistStructure$ViewNodeBuilder;->getViewNode()Landroid/app/assist/AssistStructure$ViewNode;
 HSPLandroid/app/assist/AssistStructure$ViewNodeBuilder;->newChild(I)Landroid/view/ViewStructure;
 HSPLandroid/app/assist/AssistStructure$ViewNodeBuilder;->setAutofillHints([Ljava/lang/String;)V
 HSPLandroid/app/assist/AssistStructure$ViewNodeBuilder;->setAutofillId(Landroid/view/autofill/AutofillId;)V
@@ -3883,8 +3881,6 @@ HSPLandroid/content/ContentResolver$ResultListener;-><init>()V
 HSPLandroid/content/ContentResolver$ResultListener;-><init>(Landroid/content/ContentResolver$1;)V
 HSPLandroid/content/ContentResolver$ResultListener;->onResult(Landroid/os/Bundle;)V+]Landroid/os/ParcelableException;Landroid/os/ParcelableException;]Ljava/lang/Object;Landroid/content/ContentResolver$StringResultListener;,Landroid/content/ContentResolver$UriResultListener;]Landroid/os/Bundle;Landroid/os/Bundle;]Landroid/content/ContentResolver$ResultListener;Landroid/content/ContentResolver$UriResultListener;,Landroid/content/ContentResolver$StringResultListener;
 HSPLandroid/content/ContentResolver$ResultListener;->waitForResult(J)V+]Ljava/lang/Object;Landroid/content/ContentResolver$StringResultListener;
-HSPLandroid/content/ContentResolver$StringResultListener;-><init>()V
-HSPLandroid/content/ContentResolver$StringResultListener;-><init>(Landroid/content/ContentResolver$1;)V
 HSPLandroid/content/ContentResolver$StringResultListener;->getResultFromBundle(Landroid/os/Bundle;)Ljava/lang/Object;+]Landroid/content/ContentResolver$StringResultListener;Landroid/content/ContentResolver$StringResultListener;
 HSPLandroid/content/ContentResolver$StringResultListener;->getResultFromBundle(Landroid/os/Bundle;)Ljava/lang/String;+]Landroid/os/Bundle;Landroid/os/Bundle;
 HSPLandroid/content/ContentResolver;-><init>(Landroid/content/Context;)V
@@ -7029,7 +7025,6 @@ HSPLandroid/graphics/RectF;->width()F
 HSPLandroid/graphics/Region$1;->createFromParcel(Landroid/os/Parcel;)Landroid/graphics/Region;
 HSPLandroid/graphics/Region$1;->createFromParcel(Landroid/os/Parcel;)Ljava/lang/Object;+]Landroid/graphics/Region$1;Landroid/graphics/Region$1;
 HSPLandroid/graphics/Region;-><init>()V
-HSPLandroid/graphics/Region;-><init>(IIII)V
 HSPLandroid/graphics/Region;-><init>(J)V
 HSPLandroid/graphics/Region;->access$000(Landroid/os/Parcel;)J
 HSPLandroid/graphics/Region;->equals(Ljava/lang/Object;)Z
@@ -7075,7 +7070,6 @@ HSPLandroid/graphics/RenderNode;->getTranslationZ()F
 HSPLandroid/graphics/RenderNode;->hasDisplayList()Z
 HSPLandroid/graphics/RenderNode;->hasIdentityMatrix()Z
 HSPLandroid/graphics/RenderNode;->isAttached()Z+]Landroid/graphics/RenderNode$AnimationHost;Landroid/view/ViewAnimationHostBridge;
-HSPLandroid/graphics/RenderNode;->isPivotExplicitlySet()Z
 HSPLandroid/graphics/RenderNode;->offsetTopAndBottom(I)Z
 HSPLandroid/graphics/RenderNode;->setAlpha(F)Z
 HSPLandroid/graphics/RenderNode;->setAnimationMatrix(Landroid/graphics/Matrix;)Z+]Landroid/graphics/Matrix;Landroid/graphics/Matrix;
@@ -8283,7 +8277,6 @@ HSPLandroid/hardware/CameraStatus$1;->newArray(I)[Ljava/lang/Object;
 HSPLandroid/hardware/GeomagneticField$LegendreTable;-><init>(IF)V
 HSPLandroid/hardware/GeomagneticField;-><init>(FFFJ)V
 HSPLandroid/hardware/GeomagneticField;->computeGeocentricCoordinates(FFF)V
-HSPLandroid/hardware/GeomagneticField;->getDeclination()F
 HSPLandroid/hardware/HardwareBuffer$1;->createFromParcel(Landroid/os/Parcel;)Landroid/hardware/HardwareBuffer;
 HSPLandroid/hardware/HardwareBuffer$1;->createFromParcel(Landroid/os/Parcel;)Ljava/lang/Object;
 HSPLandroid/hardware/HardwareBuffer;-><init>(J)V+]Llibcore/util/NativeAllocationRegistry;Llibcore/util/NativeAllocationRegistry;]Ljava/lang/Class;Ljava/lang/Class;]Ldalvik/system/CloseGuard;Ldalvik/system/CloseGuard;
@@ -11353,7 +11346,6 @@ HSPLandroid/media/SoundPool$Builder;->setMaxStreams(I)Landroid/media/SoundPool$B
 HSPLandroid/media/SoundPool$EventHandler;->handleMessage(Landroid/os/Message;)V
 HSPLandroid/media/SoundPool;-><init>(ILandroid/media/AudioAttributes;)V
 HSPLandroid/media/SoundPool;-><init>(ILandroid/media/AudioAttributes;Landroid/media/SoundPool$1;)V
-HSPLandroid/media/SoundPool;->load(Ljava/lang/String;I)I
 HSPLandroid/media/SoundPool;->postEventFromNative(Ljava/lang/Object;IIILjava/lang/Object;)V
 HSPLandroid/media/SoundPool;->setOnLoadCompleteListener(Landroid/media/SoundPool$OnLoadCompleteListener;)V
 HSPLandroid/media/SubtitleController$1;->handleMessage(Landroid/os/Message;)Z
@@ -11389,10 +11381,8 @@ HSPLandroid/media/Utils;->parseSizeRange(Ljava/lang/Object;)Landroid/util/Pair;
 HSPLandroid/media/Utils;->sortDistinctRanges([Landroid/util/Range;)V
 HSPLandroid/media/audiofx/AudioEffect$Descriptor;-><init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 HSPLandroid/media/audiopolicy/AudioProductStrategy$AudioAttributesGroup;-><init>(II[Landroid/media/AudioAttributes;)V
-HSPLandroid/media/audiopolicy/AudioProductStrategy$AudioAttributesGroup;->supportsStreamType(I)Z
 HSPLandroid/media/audiopolicy/AudioProductStrategy;-><init>(Ljava/lang/String;I[Landroid/media/audiopolicy/AudioProductStrategy$AudioAttributesGroup;)V
 HSPLandroid/media/audiopolicy/AudioProductStrategy;->attributesMatches(Landroid/media/AudioAttributes;Landroid/media/AudioAttributes;)Z+]Landroid/media/AudioAttributes;Landroid/media/AudioAttributes;
-HSPLandroid/media/audiopolicy/AudioProductStrategy;->getAudioAttributesForLegacyStreamType(I)Landroid/media/AudioAttributes;+]Landroid/media/audiopolicy/AudioProductStrategy$AudioAttributesGroup;Landroid/media/audiopolicy/AudioProductStrategy$AudioAttributesGroup;
 HSPLandroid/media/audiopolicy/AudioProductStrategy;->getAudioAttributesForStrategyWithLegacyStreamType(I)Landroid/media/AudioAttributes;
 HSPLandroid/media/audiopolicy/AudioProductStrategy;->getAudioProductStrategies()Ljava/util/List;
 HSPLandroid/media/audiopolicy/AudioProductStrategy;->getLegacyStreamTypeForStrategyWithAudioAttributes(Landroid/media/AudioAttributes;)I+]Landroid/media/audiopolicy/AudioProductStrategy;Landroid/media/audiopolicy/AudioProductStrategy;]Ljava/util/List;Ljava/util/ArrayList;]Ljava/util/Iterator;Ljava/util/ArrayList$Itr;
@@ -13125,7 +13115,6 @@ HSPLandroid/os/ParcelableException;-><init>(Ljava/lang/Throwable;)V
 HSPLandroid/os/ParcelableParcel$1;->createFromParcel(Landroid/os/Parcel;)Landroid/os/ParcelableParcel;
 HSPLandroid/os/ParcelableParcel$1;->createFromParcel(Landroid/os/Parcel;)Ljava/lang/Object;
 HSPLandroid/os/ParcelableParcel;-><init>(Landroid/os/Parcel;Ljava/lang/ClassLoader;)V
-HSPLandroid/os/ParcelableParcel;-><init>(Ljava/lang/ClassLoader;)V
 HSPLandroid/os/ParcelableParcel;->getClassLoader()Ljava/lang/ClassLoader;
 HSPLandroid/os/ParcelableParcel;->getParcel()Landroid/os/Parcel;
 HSPLandroid/os/ParcelableParcel;->writeToParcel(Landroid/os/Parcel;I)V
@@ -13481,7 +13470,6 @@ HSPLandroid/os/TelephonyServiceManager;->getTelephonyServiceRegisterer()Landroid
 HSPLandroid/os/Temperature;-><init>(FILjava/lang/String;I)V
 HSPLandroid/os/Temperature;->getStatus()I
 HSPLandroid/os/Temperature;->isValidStatus(I)Z
-HSPLandroid/os/Temperature;->isValidType(I)Z
 HSPLandroid/os/ThreadLocalWorkSource$$ExternalSyntheticLambda0;->get()Ljava/lang/Object;
 HSPLandroid/os/ThreadLocalWorkSource;->getToken()J+]Ljava/lang/Integer;Ljava/lang/Integer;]Ljava/lang/ThreadLocal;Ljava/lang/ThreadLocal$SuppliedThreadLocal;
 HSPLandroid/os/ThreadLocalWorkSource;->getUid()I+]Ljava/lang/Integer;Ljava/lang/Integer;]Ljava/lang/ThreadLocal;Ljava/lang/ThreadLocal$SuppliedThreadLocal;
@@ -18488,7 +18476,6 @@ HSPLandroid/view/ViewRootImpl$HighContrastTextManager;-><init>(Landroid/view/Vie
 HSPLandroid/view/ViewRootImpl$ImeInputStage;-><init>(Landroid/view/ViewRootImpl;Landroid/view/ViewRootImpl$InputStage;Ljava/lang/String;)V
 HSPLandroid/view/ViewRootImpl$ImeInputStage;->onFinishedInputEvent(Ljava/lang/Object;Z)V
 HSPLandroid/view/ViewRootImpl$ImeInputStage;->onProcess(Landroid/view/ViewRootImpl$QueuedInputEvent;)I
-HSPLandroid/view/ViewRootImpl$InputMetricsListener;-><init>(Landroid/view/ViewRootImpl;)V
 HSPLandroid/view/ViewRootImpl$InputMetricsListener;->onFrameMetricsAvailable(I)V+]Landroid/view/ViewRootImpl$WindowInputEventReceiver;Landroid/view/ViewRootImpl$WindowInputEventReceiver;]Ljava/lang/StringBuilder;Ljava/lang/StringBuilder;]Landroid/view/InputEventReceiver;Landroid/view/ViewRootImpl$WindowInputEventReceiver;
 HSPLandroid/view/ViewRootImpl$InputStage;-><init>(Landroid/view/ViewRootImpl;Landroid/view/ViewRootImpl$InputStage;)V
 HSPLandroid/view/ViewRootImpl$InputStage;->apply(Landroid/view/ViewRootImpl$QueuedInputEvent;I)V+]Landroid/view/ViewRootImpl$InputStage;megamorphic_types
@@ -20395,7 +20382,6 @@ HSPLandroid/widget/OverScroller$SplineOverScroller;->finish()V
 HSPLandroid/widget/OverScroller$SplineOverScroller;->fling(IIIII)V
 HSPLandroid/widget/OverScroller$SplineOverScroller;->getSplineDeceleration(I)D
 HSPLandroid/widget/OverScroller$SplineOverScroller;->getSplineFlingDistance(I)D
-HSPLandroid/widget/OverScroller$SplineOverScroller;->getSplineFlingDuration(I)I
 HSPLandroid/widget/OverScroller$SplineOverScroller;->onEdgeReached()V
 HSPLandroid/widget/OverScroller$SplineOverScroller;->springback(III)Z
 HSPLandroid/widget/OverScroller$SplineOverScroller;->startScroll(III)V
@@ -22568,10 +22554,7 @@ HSPLcom/android/internal/widget/ILockSettings$Stub;->asInterface(Landroid/os/IBi
 HSPLcom/android/internal/widget/LockPatternUtils$StrongAuthTracker$1;->onIsNonStrongBiometricAllowedChanged(ZI)V
 HSPLcom/android/internal/widget/LockPatternUtils$StrongAuthTracker$1;->onStrongAuthRequiredChanged(II)V
 HSPLcom/android/internal/widget/LockPatternUtils$StrongAuthTracker$H;->handleMessage(Landroid/os/Message;)V
-HSPLcom/android/internal/widget/LockPatternUtils$StrongAuthTracker;-><init>(Landroid/content/Context;)V
-HSPLcom/android/internal/widget/LockPatternUtils$StrongAuthTracker;-><init>(Landroid/content/Context;Landroid/os/Looper;)V
 HSPLcom/android/internal/widget/LockPatternUtils$StrongAuthTracker;->getStrongAuthForUser(I)I+]Landroid/util/SparseIntArray;Landroid/util/SparseIntArray;
-HSPLcom/android/internal/widget/LockPatternUtils$StrongAuthTracker;->getStub()Landroid/app/trust/IStrongAuthTracker$Stub;
 HSPLcom/android/internal/widget/LockPatternUtils$StrongAuthTracker;->handleIsNonStrongBiometricAllowedChanged(ZI)V
 HSPLcom/android/internal/widget/LockPatternUtils$StrongAuthTracker;->handleStrongAuthRequiredChanged(II)V
 HSPLcom/android/internal/widget/LockPatternUtils$StrongAuthTracker;->isNonStrongBiometricAllowedAfterIdleTimeout(I)Z
