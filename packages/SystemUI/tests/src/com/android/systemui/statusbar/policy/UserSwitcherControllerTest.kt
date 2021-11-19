@@ -31,6 +31,7 @@ import android.os.UserHandle
 import android.os.UserManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.view.ThreadedRenderer
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.testing.UiEventLoggerFake
@@ -63,6 +64,8 @@ import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyString
+import org.mockito.Mockito.doNothing
+import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -90,6 +93,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var latencyTracker: LatencyTracker
     @Mock private lateinit var dialogShower: UserSwitchDialogController.DialogShower
     @Mock private lateinit var notificationShadeWindowView: NotificationShadeWindowView
+    @Mock private lateinit var threadedRenderer: ThreadedRenderer
     private lateinit var testableLooper: TestableLooper
     private lateinit var uiBgExecutor: FakeExecutor
     private lateinit var uiEventLogger: UiEventLoggerFake
@@ -145,6 +149,16 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 latencyTracker,
                 dumpManager)
         userSwitcherController.mPauseRefreshUsers = true
+
+        // Since userSwitcherController involves InteractionJankMonitor.
+        // Let's fulfill the dependencies.
+        val mockedContext = mock(Context::class.java)
+        doReturn(mockedContext).`when`(notificationShadeWindowView).context
+        doReturn(true).`when`(notificationShadeWindowView).isAttachedToWindow
+        doNothing().`when`(threadedRenderer).addObserver(any())
+        doNothing().`when`(threadedRenderer).removeObserver(any())
+        doReturn(threadedRenderer).`when`(notificationShadeWindowView).threadedRenderer
+        userSwitcherController.init(notificationShadeWindowView)
 
         picture = UserIcons.convertToBitmap(context.getDrawable(R.drawable.ic_avatar_user))
         userSwitcherController.init(notificationShadeWindowView)
