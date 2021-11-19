@@ -1413,29 +1413,29 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
         boolean pauseImmediately = false;
         boolean shouldAutoPip = false;
-        if (resuming != null && (resuming.info.flags & FLAG_RESUME_WHILE_PAUSING) != 0) {
-            // If the flag RESUME_WHILE_PAUSING is set, then continue to schedule the previous
-            // activity to be paused, while at the same time resuming the new resume activity
-            // only if the previous activity can't go into Pip since we want to give Pip
-            // activities a chance to enter Pip before resuming the next activity.
-            final boolean lastResumedCanPip = prev != null && prev.checkEnterPictureInPictureState(
-                    "shouldResumeWhilePausing", userLeaving);
+        if (resuming != null) {
+            // Resuming the new resume activity only if the previous activity can't go into Pip
+            // since we want to give Pip activities a chance to enter Pip before resuming the
+            // next activity.
+            final boolean lastResumedCanPip = prev.checkEnterPictureInPictureState(
+                    "shouldAutoPipWhilePausing", userLeaving);
             if (lastResumedCanPip && prev.pictureInPictureArgs.isAutoEnterEnabled()) {
                 shouldAutoPip = true;
             } else if (!lastResumedCanPip) {
-                pauseImmediately = true;
+                // If the flag RESUME_WHILE_PAUSING is set, then continue to schedule the previous
+                // activity to be paused.
+                pauseImmediately = (resuming.info.flags & FLAG_RESUME_WHILE_PAUSING) != 0;
             } else {
                 // The previous activity may still enter PIP even though it did not allow auto-PIP.
             }
         }
 
-        boolean didAutoPip = false;
         if (prev.attachedToProcess()) {
             if (shouldAutoPip) {
+                boolean didAutoPip = mAtmService.enterPictureInPictureMode(
+                        prev, prev.pictureInPictureArgs);
                 ProtoLog.d(WM_DEBUG_STATES, "Auto-PIP allowed, entering PIP mode "
-                        + "directly: %s", prev);
-
-                didAutoPip = mAtmService.enterPictureInPictureMode(prev, prev.pictureInPictureArgs);
+                        + "directly: %s, didAutoPip: %b", prev, didAutoPip);
             } else {
                 schedulePauseActivity(prev, userLeaving, pauseImmediately, reason);
             }
