@@ -1323,7 +1323,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Maximum flashlight brightness level.</p>
      * <p>If this value is greater than 1, then the device supports controlling the
      * flashlight brightness level via
-     * {android.hardware.camera2.CameraManager#setTorchStrengthLevel}.
+     * {android.hardware.camera2.CameraManager#turnOnTorchWithStrengthLevel}.
      * If this value is equal to 1, flashlight brightness control is not supported.
      * The value for this key will be null for devices with no flash unit.</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
@@ -1335,7 +1335,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>Default flashlight brightness level to be set via
-     * {android.hardware.camera2.CameraManager#setTorchStrengthLevel}.</p>
+     * {android.hardware.camera2.CameraManager#turnOnTorchWithStrengthLevel}.</p>
      * <p>If flash unit is available this will be greater than or equal to 1 and less
      * or equal to <code>{@link CameraCharacteristics#FLASH_INFO_STRENGTH_MAXIMUM_LEVEL android.flash.info.strengthMaximumLevel}</code>.</p>
      * <p>Setting flashlight brightness above the default level
