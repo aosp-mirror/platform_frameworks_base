@@ -2590,7 +2590,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             finishSessionLocked(mEnabledSession);
             mEnabledSession = null;
-            mBindingController.clearCurMethodLocked();
             scheduleNotifyImeUidToAudioService(Process.INVALID_UID);
         }
         hideStatusBarIconLocked();

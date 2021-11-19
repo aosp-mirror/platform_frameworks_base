@@ -334,7 +334,7 @@ final class InputMethodBindingController {
                     // We consider this to be a new bind attempt, since the system
                     // should now try to restart the service for us.
                     mLastBindTime = SystemClock.uptimeMillis();
-                    mService.clearClientSessionsLocked();
+                    clearCurMethodAndSessionsLocked();
                     mService.clearInputShowRequestLocked();
                     mService.unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME);
                 }
@@ -358,11 +358,12 @@ final class InputMethodBindingController {
         }
 
         mCurId = null;
-        mService.clearClientSessionsLocked();
+        clearCurMethodAndSessionsLocked();
     }
 
     @GuardedBy("mMethodMap")
-    void clearCurMethodLocked() {
+    private void clearCurMethodAndSessionsLocked() {
+        mService.clearClientSessionsLocked();
         mCurMethod = null;
         mCurMethodUid = Process.INVALID_UID;
     }
