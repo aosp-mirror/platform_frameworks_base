@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -103,6 +104,8 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected LinearLayout mHorizontalContentContainer;
 
     protected QSTileLayout mTileLayout;
+    private float mSquishinessFraction = 1f;
+    private final ArrayMap<View, Integer> mChildrenLayoutTop = new ArrayMap<>();
 
     public QSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -179,8 +182,24 @@ public class QSPanel extends LinearLayout implements Tunable {
         if (mTileLayout == null) {
             mTileLayout = (QSTileLayout) LayoutInflater.from(mContext)
                     .inflate(R.layout.qs_paged_tile_layout, this, false);
+            mTileLayout.setSquishinessFraction(mSquishinessFraction);
         }
         return mTileLayout;
+    }
+
+    public void setSquishinessFraction(float squishinessFraction) {
+        if (Float.compare(squishinessFraction, mSquishinessFraction) == 0) {
+            return;
+        }
+        mSquishinessFraction = squishinessFraction;
+        if (mTileLayout == null) {
+            return;
+        }
+        mTileLayout.setSquishinessFraction(squishinessFraction);
+        if (getMeasuredWidth() == 0) {
+            return;
+        }
+        updateViewPositions();
     }
 
     @Override
@@ -226,6 +245,39 @@ public class QSPanel extends LinearLayout implements Tunable {
             }
         }
         setMeasuredDimension(getMeasuredWidth(), height);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            mChildrenLayoutTop.put(child, child.getTop());
+        }
+        updateViewPositions();
+    }
+
+    private void updateViewPositions() {
+        if (!(mTileLayout instanceof TileLayout)) {
+            return;
+        }
+        TileLayout layout = (TileLayout) mTileLayout;
+
+        // Adjust view positions based on tile squishing
+        int tileHeightOffset = layout.getTilesHeight() - layout.getHeight();
+
+        boolean move = false;
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (move) {
+                int top = mChildrenLayoutTop.get(child);
+                child.setLeftTopRightBottom(child.getLeft(), top + tileHeightOffset,
+                        child.getRight(), top + tileHeightOffset + child.getHeight());
+            }
+            if (child == mTileLayout) {
+                move = true;
+            }
+        }
     }
 
     protected String getDumpableTag() {
