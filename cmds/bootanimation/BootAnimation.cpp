@@ -1577,7 +1577,7 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                     int err;
                     do {
                         err = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &spec, nullptr);
-                    } while (err<0 && errno == EINTR);
+                    } while (err == EINTR);
                 }
 
                 checkExit();
