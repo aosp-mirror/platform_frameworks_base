@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.platform.test.annotations.Postsubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -74,7 +73,7 @@ class ExitLegacySplitScreenFromBottom(
             splitScreenApp.component, secondaryApp.component,
             FlickerComponentName.SNAPSHOT)
 
-    @Postsubmit
+    @FlakyTest
     @Test
     fun layerBecomesInvisible() {
         testSpec.assertLayers {
@@ -94,11 +93,11 @@ class ExitLegacySplitScreenFromBottom(
         }
     }
 
-    @Postsubmit
+    @FlakyTest
     @Test
     fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
 
-    @Postsubmit
+    @FlakyTest
     @Test
     fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
 

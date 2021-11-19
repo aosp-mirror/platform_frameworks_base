@@ -18,6 +18,7 @@ package com.android.server.wm.flicker.quickswitch
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -133,7 +134,7 @@ class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestParamet
     /**
      * Checks that the transition starts with [testApp2] being the top window.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun startsWithApp2WindowBeingOnTop() {
         testSpec.assertWmStart {
@@ -284,7 +285,7 @@ class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestParamet
     /**
      * Checks that the navbar layer is visible throughout the entire transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarLayerAlwaysIsVisible() = testSpec.navBarLayerIsVisible()
 
@@ -293,21 +294,21 @@ class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestParamet
      *
      * NOTE: This doesn't check that the navbar is visible or not.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun navbarIsAlwaysInRightPosition() = testSpec.navBarLayerRotatesAndScales()
 
     /**
      * Checks that the status bar window is visible throughout the entire transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsVisible()
 
     /**
      * Checks that the status bar layer is visible throughout the entire transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsVisible()
 
