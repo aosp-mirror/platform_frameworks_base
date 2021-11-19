@@ -19,11 +19,14 @@ package com.android.wm.shell.splitscreen;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RETURN_HOME;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -49,7 +52,6 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
-import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -110,12 +112,39 @@ public class StageCoordinatorTests extends ShellTestCase {
     }
 
     @Test
-    public void testMoveToSideStage() {
+    public void testMoveToStage() {
         final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
 
-        mStageCoordinator.moveToSideStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT);
+        mStageCoordinator.moveToStage(task, STAGE_TYPE_MAIN, SPLIT_POSITION_BOTTOM_OR_RIGHT,
+                new WindowContainerTransaction());
+        verify(mMainStage).addTask(eq(task), any(WindowContainerTransaction.class));
+        assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getMainStagePosition());
 
+        mStageCoordinator.moveToStage(task, STAGE_TYPE_SIDE, SPLIT_POSITION_BOTTOM_OR_RIGHT,
+                new WindowContainerTransaction());
         verify(mSideStage).addTask(eq(task), any(WindowContainerTransaction.class));
+        assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
+    }
+
+    @Test
+    public void testMoveToUndefinedStage() {
+        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
+
+        // Verify move to undefined stage while split screen not activated moves task to side stage.
+        when(mMainStage.isActive()).thenReturn(false);
+        mStageCoordinator.setSideStagePosition(SPLIT_POSITION_TOP_OR_LEFT, null);
+        mStageCoordinator.moveToStage(task, STAGE_TYPE_UNDEFINED, SPLIT_POSITION_BOTTOM_OR_RIGHT,
+                new WindowContainerTransaction());
+        verify(mSideStage).addTask(eq(task), any(WindowContainerTransaction.class));
+        assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
+
+        // Verify move to undefined stage after split screen activated moves task based on position.
+        when(mMainStage.isActive()).thenReturn(true);
+        assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getMainStagePosition());
+        mStageCoordinator.moveToStage(task, STAGE_TYPE_UNDEFINED, SPLIT_POSITION_TOP_OR_LEFT,
+                new WindowContainerTransaction());
+        verify(mMainStage).addTask(eq(task), any(WindowContainerTransaction.class));
+        assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getMainStagePosition());
     }
 
     @Test
