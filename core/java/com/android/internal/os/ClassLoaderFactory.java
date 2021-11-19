@@ -24,6 +24,7 @@ import dalvik.system.DelegateLastClassLoader;
 import dalvik.system.DexClassLoader;
 import dalvik.system.PathClassLoader;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -100,14 +101,25 @@ public class ClassLoaderFactory {
     }
 
     /**
-     * Same as {@code createClassLoader} below, but passes a null list of shared
-     * libraries.
+     * Same as {@code createClassLoader} below, but passes a null list of shared libraries. This
+     * method is used only to load platform classes (i.e. those in framework.jar or services.jar),
+     * and MUST NOT be used for loading untrusted classes, especially the app classes. For the
+     * latter case, use the below method which accepts list of shared libraries so that the classes
+     * don't have unlimited access to all shared libraries.
      */
     public static ClassLoader createClassLoader(String dexPath,
             String librarySearchPath, String libraryPermittedPath, ClassLoader parent,
             int targetSdkVersion, boolean isNamespaceShared, String classLoaderName) {
+        // b/205164833: allow framework classes to have access to all public vendor libraries.
+        // This is because those classes are part of the platform and don't have an app manifest
+        // where required libraries can be specified using the <uses-native-library> tag.
+        // Note that this still does not give access to "private" vendor libraries.
+        List<String> nativeSharedLibraries = new ArrayList<>();
+        nativeSharedLibraries.add("ALL");
+
         return createClassLoader(dexPath, librarySearchPath, libraryPermittedPath,
-            parent, targetSdkVersion, isNamespaceShared, classLoaderName, null, null, null);
+            parent, targetSdkVersion, isNamespaceShared, classLoaderName, null,
+            nativeSharedLibraries, null);
     }
 
     /**
