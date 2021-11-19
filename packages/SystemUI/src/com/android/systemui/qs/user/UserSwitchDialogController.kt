@@ -21,13 +21,16 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.provider.Settings
+import android.view.LayoutInflater
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.R
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.tiles.UserDetailView
+import com.android.systemui.statusbar.phone.SystemUIDialog
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -40,7 +43,7 @@ class UserSwitchDialogController @VisibleForTesting constructor(
     private val activityStarter: ActivityStarter,
     private val falsingManager: FalsingManager,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
-    private val dialogFactory: (Context) -> UserDialog
+    private val dialogFactory: (Context) -> SystemUIDialog
 ) {
 
     @Inject
@@ -54,7 +57,7 @@ class UserSwitchDialogController @VisibleForTesting constructor(
         activityStarter,
         falsingManager,
         dialogLaunchAnimator,
-        { UserDialog(it) }
+        { SystemUIDialog(it) }
     )
 
     companion object {
@@ -71,9 +74,10 @@ class UserSwitchDialogController @VisibleForTesting constructor(
         with(dialogFactory(view.context)) {
             setShowForAllUsers(true)
             setCanceledOnTouchOutside(true)
-            create() // Needs to be called before we can retrieve views
 
-            settingsButton.setOnClickListener {
+            setTitle(R.string.qs_user_switch_dialog_title)
+            setPositiveButton(R.string.quick_settings_done, null)
+            setNeutralButton(R.string.quick_settings_more_user_settings) { _, _ ->
                 if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                     dialogLaunchAnimator.disableAllCurrentDialogsExitAnimations()
                     activityStarter.postStartActivityDismissingKeyguard(
@@ -81,12 +85,14 @@ class UserSwitchDialogController @VisibleForTesting constructor(
                         0
                     )
                 }
-                dismiss()
             }
-            doneButton.setOnClickListener { dismiss() }
+            val gridFrame = LayoutInflater.from(this.context)
+                .inflate(R.layout.qs_user_dialog_content, null)
+            setView(gridFrame)
 
             val adapter = userDetailViewAdapterProvider.get()
-            adapter.linkToViewGroup(grid)
+
+            adapter.linkToViewGroup(gridFrame.findViewById(R.id.grid))
 
             val hostDialog = dialogLaunchAnimator.showFromView(this, view)
             adapter.injectDialogShower(DialogShowerImpl(hostDialog, dialogLaunchAnimator))
