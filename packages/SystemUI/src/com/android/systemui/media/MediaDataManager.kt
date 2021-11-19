@@ -85,15 +85,7 @@ internal val EMPTY_SMARTSPACE_MEDIA_DATA = SmartspaceMediaData("INVALID", false,
     "INVALID", null, emptyList(), null, 0)
 
 fun isMediaNotification(sbn: StatusBarNotification): Boolean {
-    if (!sbn.notification.hasMediaSession()) {
-        return false
-    }
-    val notificationStyle = sbn.notification.notificationStyle
-    if (Notification.DecoratedMediaCustomViewStyle::class.java.equals(notificationStyle) ||
-            Notification.MediaStyle::class.java.equals(notificationStyle)) {
-        return true
-    }
-    return false
+    return sbn.notification.isMediaNotification()
 }
 
 /**
