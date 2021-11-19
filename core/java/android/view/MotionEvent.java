@@ -1495,6 +1495,15 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     public static final int TOOL_TYPE_ERASER = 4;
 
+    /**
+     * Tool type constant: The tool is a palm and should be rejected.
+     *
+     * @see #getToolType
+     *
+     * @hide
+     */
+    public static final int TOOL_TYPE_PALM = 5;
+
     // NOTE: If you add a new tool type here you must also add it to:
     //  native/include/android/input.h
 

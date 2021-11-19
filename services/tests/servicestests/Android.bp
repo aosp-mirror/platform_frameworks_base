@@ -32,6 +32,7 @@ android_test {
         "services.appwidget",
         "services.autofill",
         "services.backup",
+        "services.companion",
         "services.core",
         "services.devicepolicy",
         "services.net",
