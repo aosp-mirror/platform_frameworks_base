@@ -293,6 +293,10 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
     }
 
+    void addTask(ActivityManager.RunningTaskInfo task, WindowContainerTransaction wct) {
+        wct.reparent(task.token, mRootTaskInfo.token, true /* onTop*/);
+    }
+
     void setBounds(Rect bounds, WindowContainerTransaction wct) {
         wct.setBounds(mRootTaskInfo.token, bounds);
     }
