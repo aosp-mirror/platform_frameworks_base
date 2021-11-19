@@ -82,9 +82,9 @@ data class MediaData(
      */
     var resumeAction: Runnable?,
     /**
-     * Local or remote playback
+     * Playback location: one of PLAYBACK_LOCAL, PLAYBACK_CAST_LOCAL, or PLAYBACK_CAST_REMOTE
      */
-    var isLocalSession: Boolean = true,
+    var playbackLocation: Int = PLAYBACK_LOCAL,
     /**
      * Indicates that this player is a resumption player (ie. It only shows a play actions which
      * will start the app and start playing).
@@ -110,7 +110,20 @@ data class MediaData(
      * Timestamp when this player was last active.
      */
     var lastActive: Long = 0L
-)
+) {
+    companion object {
+        /** Media is playing on the local device */
+        const val PLAYBACK_LOCAL = 0
+        /** Media is cast but originated on the local device */
+        const val PLAYBACK_CAST_LOCAL = 1
+        /** Media is from a remote cast notification */
+        const val PLAYBACK_CAST_REMOTE = 2
+    }
+
+    fun isLocalSession(): Boolean {
+        return playbackLocation == PLAYBACK_LOCAL
+    }
+}
 
 /** State of a media action. */
 data class MediaAction(
