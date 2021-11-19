@@ -351,9 +351,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         mSystemClock.advanceTime(205);
         mController.onTouchOutsideView();
 
-        // THEN show the bouncer and reset alt auth
+        // THEN show the bouncer
         verify(mStatusBarKeyguardViewManager).showBouncer(eq(true));
-        verify(mStatusBarKeyguardViewManager).resetAlternateAuth(anyBoolean());
     }
 
     @Test
