@@ -63,7 +63,7 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
                 val pipCenterY = pipRegion.centerY()
                 val displayCenterX = device.displayWidth / 2
                 device.swipe(pipCenterX, pipCenterY, displayCenterX, device.displayHeight, 10)
-                wmHelper.waitFor("!hasPipWindow") { !it.wmState.hasPipWindow() }
+                wmHelper.waitPipGone()
                 wmHelper.waitForWindowSurfaceDisappeared(pipApp.component)
                 wmHelper.waitForAppTransitionIdle()
             }
