@@ -43,4 +43,9 @@ public abstract class AppHibernationManagerInternal {
      * @see AppHibernationService#setHibernatingGlobally
      */
     public abstract void setHibernatingGlobally(String packageName, boolean isHibernating);
+
+    /**
+     * @see AppHibernationService#isOatArtifactDeletionEnabled
+     */
+    public abstract boolean isOatArtifactDeletionEnabled();
 }
