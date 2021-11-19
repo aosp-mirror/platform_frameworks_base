@@ -506,23 +506,11 @@ public class NotificationPanelViewController extends PanelViewController {
                     mPanelAlphaAnimator.getProperty(), Interpolators.ALPHA_IN);
     private final NotificationEntryManager mEntryManager;
 
-    private final CommunalSourceMonitor.Callback mCommunalSourceMonitorCallback =
-            new CommunalSourceMonitor.Callback() {
-                @Override
-                public void onSourceAvailable(WeakReference<CommunalSource> source) {
-                    setCommunalSource(source);
-                }
-            };
+    private final CommunalSourceMonitor.Callback mCommunalSourceMonitorCallback;
 
     private WeakReference<CommunalSource> mCommunalSource;
 
-    private final CommunalSource.Callback mCommunalSourceCallback =
-            new CommunalSource.Callback() {
-                @Override
-                public void onDisconnected() {
-                    setCommunalSource(null /*source*/);
-                }
-            };
+    private final CommunalSource.Callback mCommunalSourceCallback;
 
     private final CommandQueue mCommandQueue;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
@@ -904,6 +892,15 @@ public class NotificationPanelViewController extends PanelViewController {
 
         mMaxKeyguardNotifications = resources.getInteger(R.integer.keyguard_max_notification_count);
         mKeyguardUnfoldTransition = unfoldComponent.map(c -> c.getKeyguardUnfoldTransition());
+
+        mCommunalSourceCallback = () -> {
+            mUiExecutor.execute(() -> setCommunalSource(null /*source*/));
+        };
+
+        mCommunalSourceMonitorCallback = (source) -> {
+            mUiExecutor.execute(() -> setCommunalSource(source));
+        };
+
         updateUserSwitcherFlags();
         onFinishInflate();
     }
