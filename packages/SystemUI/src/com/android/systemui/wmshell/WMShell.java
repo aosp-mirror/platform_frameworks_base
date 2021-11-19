@@ -260,6 +260,18 @@ public final class WMShell extends CoreStartable
             }
         };
         mKeyguardUpdateMonitor.registerCallback(mSplitScreenKeyguardCallback);
+
+        mWakefulnessLifecycle.addObserver(new WakefulnessLifecycle.Observer() {
+            @Override
+            public void onFinishedWakingUp() {
+                splitScreen.onFinishedWakingUp();
+            }
+
+            @Override
+            public void onFinishedGoingToSleep() {
+                splitScreen.onFinishedGoingToSleep();
+            }
+        });
     }
 
     @VisibleForTesting
