@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.test.suitebuilder.annotation.SmallTest;
@@ -29,6 +30,8 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,6 +42,8 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 public class CommunalCoordinatorTest extends SysuiTestCase {
+    private final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
+
     @Mock
     CommunalStateController mCommunalStateController;
     @Mock
@@ -57,7 +62,7 @@ public class CommunalCoordinatorTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mCoordinator = new CommunalCoordinator(mNotificationEntryManager,
+        mCoordinator = new CommunalCoordinator(mExecutor, mNotificationEntryManager,
                 mNotificationLockscreenUserManager, mCommunalStateController);
     }
 
@@ -84,6 +89,12 @@ public class CommunalCoordinatorTest extends SysuiTestCase {
         // Verify that notifications are filtered out when communal is showing and that the filter
         // pipeline is notified.
         stateCallback.onCommunalViewShowingChanged();
+        // Make sure callback depends on executor to run.
+        verify(mFilterListener, never()).onPluggableInvalidated(any());
+        verify(mNotificationEntryManager, never()).updateNotifications(any());
+
+        mExecutor.runAllReady();
+
         verify(mFilterListener).onPluggableInvalidated(any());
         verify(mNotificationEntryManager).updateNotifications(any());
         assert (filter.shouldFilterOut(mNotificationEntry, 0));
