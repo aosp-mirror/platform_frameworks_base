@@ -69,7 +69,7 @@ class WallpaperAnimationAdapter implements AnimationAdapter {
             long durationHint, long statusBarTransitionDelay,
             Consumer<WallpaperAnimationAdapter> animationCanceledRunnable,
             ArrayList<WallpaperAnimationAdapter> adaptersOut) {
-        if (!displayContent.mWallpaperController.isWallpaperVisible()) {
+        if (!shouldStartWallpaperAnimation(displayContent)) {
             ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS,
                     "\tWallpaper of display=%s is not visible", displayContent);
             return new RemoteAnimationTarget[0];
@@ -85,6 +85,10 @@ class WallpaperAnimationAdapter implements AnimationAdapter {
             adaptersOut.add(wallpaperAdapter);
         });
         return targets.toArray(new RemoteAnimationTarget[targets.size()]);
+    }
+
+    static boolean shouldStartWallpaperAnimation(DisplayContent displayContent) {
+        return displayContent.mWallpaperController.isWallpaperVisible();
     }
 
     /**

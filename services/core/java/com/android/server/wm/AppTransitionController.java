@@ -65,7 +65,10 @@ import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_S
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_SPLASH_SCREEN;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
 import static com.android.server.wm.AppTransition.isNormalTransit;
+import static com.android.server.wm.NonAppWindowAnimationAdapter.shouldAttachNavBarToApp;
+import static com.android.server.wm.NonAppWindowAnimationAdapter.shouldStartNonAppWindowAnimationsForKeyguardExit;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.WallpaperAnimationAdapter.shouldStartWallpaperAnimation;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -529,18 +532,9 @@ public class AppTransitionController {
         // Having {@code transit} of those types doesn't mean it will contain non-app windows, but
         // non-app windows will only be included with those transition types. And we don't currently
         // have any use case of those for TaskFragment transition.
-        // @see NonAppWindowAnimationAdapter#startNonAppWindowAnimations
-        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
-                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER
-                || transit == TRANSIT_OLD_TASK_OPEN || transit == TRANSIT_OLD_TASK_TO_FRONT
-                || transit == TRANSIT_OLD_WALLPAPER_CLOSE) {
-            return true;
-        }
-
-        // Check if the wallpaper is going to participate in the transition. We don't want to have
-        // the client to animate the wallpaper windows.
-        // @see WallpaperAnimationAdapter#startWallpaperAnimations
-        return mDisplayContent.mWallpaperController.isWallpaperVisible();
+        return shouldStartNonAppWindowAnimationsForKeyguardExit(transit)
+                || shouldAttachNavBarToApp(mService, mDisplayContent, transit)
+                || shouldStartWallpaperAnimation(mDisplayContent);
     }
 
     /**

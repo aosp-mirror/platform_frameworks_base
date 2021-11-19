@@ -23,6 +23,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
@@ -38,10 +40,12 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowStateAnimator.PRESERVED_SURFACE_LAYER;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -294,6 +298,7 @@ public class ZOrderingTests extends WindowTestsBase {
         final WindowState appAboveImeTarget = createWindow("appAboveImeTarget");
 
         mDisplayContent.setImeLayeringTarget(imeAppTarget);
+        mDisplayContent.setImeControlTarget(imeAppTarget);
         mDisplayContent.assignChildLayers(mTransaction);
 
         // Ime should be above all app windows except for non-fullscreen app window above it and
@@ -340,6 +345,7 @@ public class ZOrderingTests extends WindowTestsBase {
     @Test
     public void testAssignWindowLayers_ForStatusBarImeTarget() {
         mDisplayContent.setImeLayeringTarget(mStatusBarWindow);
+        mDisplayContent.setImeControlTarget(mStatusBarWindow);
         mDisplayContent.assignChildLayers(mTransaction);
 
         assertWindowHigher(mImeWindow, mChildAppWindowAbove);
@@ -398,6 +404,31 @@ public class ZOrderingTests extends WindowTestsBase {
         assertWindowHigher(statusBarPanel, mStatusBarWindow);
         assertWindowHigher(statusBarSubPanel, statusBarPanel);
     }
+
+    @Test
+    public void testAssignWindowLayers_ForImeOnAppWithRecentsAnimating() {
+        final WindowState imeAppTarget = createWindow(null, TYPE_APPLICATION,
+                mAppWindow.mActivityRecord, "imeAppTarget");
+        mDisplayContent.setImeInputTarget(imeAppTarget);
+        mDisplayContent.setImeLayeringTarget(imeAppTarget);
+        mDisplayContent.setImeControlTarget(imeAppTarget);
+        mDisplayContent.updateImeParent();
+
+        // Simulate the ime layering target task is animating with recents animation.
+        final Task imeAppTargetTask = imeAppTarget.getTask();
+        final SurfaceAnimator imeTargetTaskAnimator = imeAppTargetTask.mSurfaceAnimator;
+        spyOn(imeTargetTaskAnimator);
+        doReturn(ANIMATION_TYPE_RECENTS).when(imeTargetTaskAnimator).getAnimationType();
+        doReturn(true).when(imeTargetTaskAnimator).isAnimating();
+
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        // Ime should on top of the application window when in recents animation and keep
+        // attached on app.
+        assertTrue(mDisplayContent.shouldImeAttachedToApp());
+        assertWindowHigher(mImeWindow, imeAppTarget);
+    }
+
 
     @Test
     public void testAssignWindowLayers_ForNegativelyZOrderedSubtype() {

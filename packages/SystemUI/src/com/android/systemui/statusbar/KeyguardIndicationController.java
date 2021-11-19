@@ -138,6 +138,7 @@ public class KeyguardIndicationController {
 
     private boolean mPowerPluggedIn;
     private boolean mPowerPluggedInWired;
+    private boolean mPowerPluggedInWireless;
     private boolean mPowerCharged;
     private boolean mBatteryOverheated;
     private boolean mEnableBatteryDefender;
@@ -751,10 +752,14 @@ public class KeyguardIndicationController {
                             : R.string.keyguard_plugged_in;
                     break;
             }
-        } else {
+        } else if (mPowerPluggedInWireless) {
             chargingId = hasChargingTime
                     ? R.string.keyguard_indication_charging_time_wireless
                     : R.string.keyguard_plugged_in_wireless;
+        } else {
+            chargingId = hasChargingTime
+                    ? R.string.keyguard_indication_charging_time
+                    : R.string.keyguard_plugged_in;
         }
 
         String percentage = NumberFormat.getPercentInstance().format(mBatteryLevel / 100f);
@@ -866,6 +871,7 @@ public class KeyguardIndicationController {
                     || status.status == BatteryManager.BATTERY_STATUS_FULL;
             boolean wasPluggedIn = mPowerPluggedIn;
             mPowerPluggedInWired = status.isPluggedInWired() && isChargingOrFull;
+            mPowerPluggedInWireless = status.isPluggedInWireless() && isChargingOrFull;
             mPowerPluggedIn = status.isPluggedIn() && isChargingOrFull;
             mPowerCharged = status.isCharged();
             mChargingWattage = status.maxChargingWattage;

@@ -46,7 +46,6 @@ import android.view.accessibility.AccessibilityManager;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.UiEventLogger;
@@ -76,7 +75,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
     private static final int OVERLAY_ENABLED_DELAY_MS = 250;
     private static final int DISPLAY_AREA_READY_RETRY_MS = 10;
 
-    static final String SUPPORT_ONE_HANDED_MODE = "ro.support_one_handed_mode";
+    public static final String SUPPORT_ONE_HANDED_MODE = "ro.support_one_handed_mode";
 
     private volatile boolean mIsOneHandedEnabled;
     private volatile boolean mIsSwipeToNotificationEnabled;
@@ -198,16 +197,10 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
     /**
      * Creates {@link OneHandedController}, returns {@code null} if the feature is not supported.
      */
-    @Nullable
     public static OneHandedController create(
             Context context, WindowManager windowManager, DisplayController displayController,
             DisplayLayout displayLayout, TaskStackListenerImpl taskStackListener,
             UiEventLogger uiEventLogger, ShellExecutor mainExecutor, Handler mainHandler) {
-        if (!SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false)) {
-            Slog.w(TAG, "Device doesn't support OneHanded feature");
-            return null;
-        }
-
         OneHandedSettingsUtil settingsUtil = new OneHandedSettingsUtil();
         OneHandedAccessibilityUtil accessibilityUtil = new OneHandedAccessibilityUtil(context);
         OneHandedTimeoutHandler timeoutHandler = new OneHandedTimeoutHandler(mainExecutor);
