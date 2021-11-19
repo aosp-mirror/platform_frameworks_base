@@ -6214,15 +6214,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     public boolean inputDispatchingTimedOut(String reason, int windowPid) {
         ActivityRecord anrActivity;
         WindowProcessController anrApp;
-        boolean windowFromSameProcessAsActivity;
+        boolean blameActivityProcess;
         synchronized (mAtmService.mGlobalLock) {
             anrActivity = getWaitingHistoryRecordLocked();
             anrApp = app;
-            windowFromSameProcessAsActivity =
-                    !hasProcess() || app.getPid() == windowPid || windowPid == INVALID_PID;
+            blameActivityProcess =  hasProcess()
+                    && (app.getPid() == windowPid || windowPid == INVALID_PID);
         }
 
-        if (windowFromSameProcessAsActivity) {
+        if (blameActivityProcess) {
             return mAtmService.mAmInternal.inputDispatchingTimedOut(anrApp.mOwner,
                     anrActivity.shortComponentName, anrActivity.info.applicationInfo,
                     shortComponentName, app, false, reason);
