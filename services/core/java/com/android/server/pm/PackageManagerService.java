@@ -1500,16 +1500,19 @@ public class PackageManagerService extends IPackageManager.Stub
         final CompatChange.ChangeListener selinuxChangeListener = packageName -> {
             synchronized (m.mInstallLock) {
                 final AndroidPackage pkg;
+                final PackageSetting ps;
                 final SharedUserSetting sharedUser;
                 final String oldSeInfo;
-                final PackageStateInternal packageState = m.getPackageStateInternal(packageName);
-                if (packageState == null) {
-                    Slog.e(TAG, "Failed to find package setting " + packageName);
-                    return;
+                synchronized (m.mLock) {
+                    ps = m.mSettings.getPackageLPr(packageName);
+                    if (ps == null) {
+                        Slog.e(TAG, "Failed to find package setting " + packageName);
+                        return;
+                    }
+                    pkg = ps.getPkg();
+                    sharedUser = ps.getSharedUser();
+                    oldSeInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
                 }
-                pkg = packageState.getPkg();
-                sharedUser = packageState.getSharedUser();
-                oldSeInfo = AndroidPackageUtils.getSeInfo(pkg, packageState);
 
                 if (pkg == null) {
                     Slog.e(TAG, "Failed to find package " + packageName);
@@ -1521,7 +1524,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (!newSeInfo.equals(oldSeInfo)) {
                     Slog.i(TAG, "Updating seInfo for package " + packageName + " from: "
                             + oldSeInfo + " to: " + newSeInfo);
-                    packageState.getTransientState().setOverrideSeInfo(newSeInfo);
+                    ps.getPkgState().setOverrideSeInfo(newSeInfo);
                     m.mAppDataHelper.prepareAppDataAfterInstallLIF(pkg);
                 }
             }
