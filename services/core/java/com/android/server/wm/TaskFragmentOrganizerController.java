@@ -31,10 +31,8 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.RemoteAnimationDefinition;
-import android.view.SurfaceControl;
 import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskFragmentOrganizerController;
-import android.window.TaskFragmentAppearedInfo;
 import android.window.TaskFragmentInfo;
 
 import com.android.internal.protolog.common.ProtoLog;
@@ -135,11 +133,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         void onTaskFragmentAppeared(ITaskFragmentOrganizer organizer, TaskFragment tf) {
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "TaskFragment appeared name=%s", tf.getName());
             final TaskFragmentInfo info = tf.getTaskFragmentInfo();
-            final SurfaceControl outSurfaceControl = new SurfaceControl(tf.getSurfaceControl(),
-                    "TaskFragmentOrganizerController.onTaskFragmentInfoAppeared");
             try {
-                organizer.onTaskFragmentAppeared(
-                        new TaskFragmentAppearedInfo(info, outSurfaceControl));
+                organizer.onTaskFragmentAppeared(info);
                 mLastSentTaskFragmentInfos.put(tf, info);
                 tf.mTaskFragmentAppearedSent = true;
             } catch (RemoteException e) {

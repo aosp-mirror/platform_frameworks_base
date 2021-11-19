@@ -19,12 +19,11 @@ package android.window;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.window.TaskFragmentAppearedInfo;
 import android.window.TaskFragmentInfo;
 
 /** @hide */
 oneway interface ITaskFragmentOrganizer {
-    void onTaskFragmentAppeared(in TaskFragmentAppearedInfo taskFragmentAppearedInfo);
+    void onTaskFragmentAppeared(in TaskFragmentInfo taskFragmentInfo);
     void onTaskFragmentInfoChanged(in TaskFragmentInfo taskFragmentInfo);
     void onTaskFragmentVanished(in TaskFragmentInfo taskFragmentInfo);
 
