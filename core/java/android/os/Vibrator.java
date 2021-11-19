@@ -330,16 +330,15 @@ public abstract class Vibrator {
      *
      * @param alwaysOnId The board-specific always-on ID to configure.
      * @param effect     Vibration effect to assign to always-on id. Passing null will disable it.
-     * @param attributes {@link AudioAttributes} corresponding to the vibration. For example,
-     *                   specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
-     *                   {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
-     *                   vibrations associated with incoming calls. May only be null when effect is
-     *                   null.
+     * @param attributes {@link VibrationAttributes} corresponding to the vibration. For example,
+     *                   specify {@link VibrationAttributes#USAGE_ALARM} for alarm vibrations or
+     *                   {@link VibrationAttributes#USAGE_RINGTONE} for vibrations associated with
+     *                   incoming calls. May only be null when effect is null.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE_ALWAYS_ON)
     public boolean setAlwaysOnEffect(int alwaysOnId, @Nullable VibrationEffect effect,
-            @Nullable AudioAttributes attributes) {
+            @Nullable VibrationAttributes attributes) {
         return setAlwaysOnEffect(Process.myUid(), mPackageName, alwaysOnId, effect, attributes);
     }
 
@@ -348,7 +347,7 @@ public abstract class Vibrator {
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE_ALWAYS_ON)
     public boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId,
-            @Nullable VibrationEffect effect, @Nullable AudioAttributes attributes) {
+            @Nullable VibrationEffect effect, @Nullable VibrationAttributes attributes) {
         Log.w(TAG, "Always-on effects aren't supported");
         return false;
     }
@@ -378,7 +377,7 @@ public abstract class Vibrator {
      *                     specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
      *                     {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
      *                     vibrations associated with incoming calls.
-     * @deprecated Use {@link #vibrate(VibrationEffect, AudioAttributes)} instead.
+     * @deprecated Use {@link #vibrate(VibrationEffect, VibrationAttributes)} instead.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.VIBRATE)
@@ -444,7 +443,7 @@ public abstract class Vibrator {
      *                   specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
      *                   {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
      *                   vibrations associated with incoming calls.
-     * @deprecated Use {@link #vibrate(VibrationEffect, AudioAttributes)} instead.
+     * @deprecated Use {@link #vibrate(VibrationEffect, VibrationAttributes)} instead.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.VIBRATE)
@@ -473,7 +472,7 @@ public abstract class Vibrator {
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public void vibrate(VibrationEffect vibe) {
-        vibrate(vibe, null);
+        vibrate(vibe, new VibrationAttributes.Builder().build());
     }
 
     /**
@@ -487,31 +486,36 @@ public abstract class Vibrator {
      *                   specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
      *                   {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
      *                   vibrations associated with incoming calls.
+     * @deprecated Use {@link #vibrate(VibrationEffect, VibrationAttributes)} instead.
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public void vibrate(VibrationEffect vibe, AudioAttributes attributes) {
+        vibrate(vibe,
+                attributes == null
+                        ? new VibrationAttributes.Builder().build()
+                        : new VibrationAttributes.Builder(attributes, vibe).build());
+    }
+
+    /**
+     * Vibrate with a given effect.
+     *
+     * <p>The app should be in foreground for the vibration to happen. Background apps should
+     * specify a ringtone, notification or alarm usage in order to vibrate.</p>
+     *
+     * @param vibe       {@link VibrationEffect} describing the vibration to be performed.
+     * @param attributes {@link VibrationAttributes} corresponding to the vibration. For example,
+     *                   specify {@link VibrationAttributes#USAGE_ALARM} for alarm vibrations or
+     *                   {@link VibrationAttributes#USAGE_RINGTONE} for vibrations associated with
+     *                   incoming calls.
+     */
+    @RequiresPermission(android.Manifest.permission.VIBRATE)
+    public void vibrate(@NonNull VibrationEffect vibe, @NonNull VibrationAttributes attributes) {
         vibrate(Process.myUid(), mPackageName, vibe, null, attributes);
     }
 
     /**
-     * Like {@link #vibrate(VibrationEffect, AudioAttributes)}, but allows the
+     * Like {@link #vibrate(VibrationEffect, VibrationAttributes)}, but allows the
      * caller to specify the vibration is owned by someone else and set reason for vibration.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.VIBRATE)
-    public final void vibrate(int uid, String opPkg, VibrationEffect vibe,
-            String reason, AudioAttributes attributes) {
-        if (attributes == null) {
-            attributes = new AudioAttributes.Builder().build();
-        }
-        VibrationAttributes attr = new VibrationAttributes.Builder(attributes, vibe).build();
-        vibrate(uid, opPkg, vibe, reason, attr);
-    }
-
-    /**
-     * Like {@link #vibrate(int, String, VibrationEffect, String, AudioAttributes)}, but allows the
-     * caller to specify {@link VibrationAttributes} instead of {@link AudioAttributes}.
      *
      * @hide
      */

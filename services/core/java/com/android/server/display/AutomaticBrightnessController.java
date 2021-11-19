@@ -220,13 +220,13 @@ class AutomaticBrightnessController {
             float dozeScaleFactor, int lightSensorRate, int initialLightSensorRate,
             long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
             boolean resetAmbientLuxAfterWarmUpConfig, HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds, LogicalDisplay display, Context context,
+            HysteresisLevels screenBrightnessThresholds, Context context,
             HighBrightnessModeController hbmController) {
         this(new Injector(), callbacks, looper, sensorManager, lightSensor, mapper,
                 lightSensorWarmUpTime, brightnessMin, brightnessMax, dozeScaleFactor,
                 lightSensorRate, initialLightSensorRate, brighteningLightDebounceConfig,
                 darkeningLightDebounceConfig, resetAmbientLuxAfterWarmUpConfig,
-                ambientBrightnessThresholds, screenBrightnessThresholds, display, context,
+                ambientBrightnessThresholds, screenBrightnessThresholds, context,
                 hbmController
         );
     }
@@ -238,7 +238,7 @@ class AutomaticBrightnessController {
             float dozeScaleFactor, int lightSensorRate, int initialLightSensorRate,
             long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
             boolean resetAmbientLuxAfterWarmUpConfig, HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds, LogicalDisplay display, Context context,
+            HysteresisLevels screenBrightnessThresholds, Context context,
             HighBrightnessModeController hbmController) {
         mInjector = injector;
         mContext = context;

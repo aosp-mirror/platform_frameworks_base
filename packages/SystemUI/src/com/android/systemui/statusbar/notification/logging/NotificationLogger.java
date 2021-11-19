@@ -34,11 +34,11 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -75,7 +75,7 @@ public class NotificationLogger implements StateListener {
     // Dependencies:
     private final NotificationListenerService mNotificationListener;
     private final Executor mUiBgExecutor;
-    private final FeatureFlags mFeatureFlags;
+    private final NotifPipelineFlags mNotifPipelineFlags;
     private final NotificationVisibilityProvider mVisibilityProvider;
     private final NotificationEntryManager mEntryManager;
     private final NotifPipeline mNotifPipeline;
@@ -175,7 +175,7 @@ public class NotificationLogger implements StateListener {
     };
 
     private List<NotificationEntry> getVisibleNotifications() {
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
             return mNotifPipeline.getFlatShadeList();
         } else {
             return mEntryManager.getVisibleNotifications();
@@ -218,7 +218,7 @@ public class NotificationLogger implements StateListener {
      */
     public NotificationLogger(NotificationListener notificationListener,
             @UiBackground Executor uiBgExecutor,
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
@@ -227,7 +227,7 @@ public class NotificationLogger implements StateListener {
             NotificationPanelLogger notificationPanelLogger) {
         mNotificationListener = notificationListener;
         mUiBgExecutor = uiBgExecutor;
-        mFeatureFlags = featureFlags;
+        mNotifPipelineFlags = notifPipelineFlags;
         mVisibilityProvider = visibilityProvider;
         mEntryManager = entryManager;
         mNotifPipeline = notifPipeline;
@@ -238,7 +238,7 @@ public class NotificationLogger implements StateListener {
         // Not expected to be destroyed, don't need to unsubscribe
         statusBarStateController.addCallback(this);
 
-        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
             registerNewPipelineListener();
         } else {
             registerLegacyListener();

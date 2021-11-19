@@ -23,6 +23,7 @@ import android.app.IServiceConnection;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.SystemClock;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
@@ -158,10 +159,10 @@ final class ConnectionRecord {
         }
     }
 
-    public void trackProcState(int procState, int seq, long now) {
+    public void trackProcState(int procState, int seq) {
         if (association != null) {
             synchronized (mProcStatsLock) {
-                association.trackProcState(procState, seq, now);
+                association.trackProcState(procState, seq, SystemClock.uptimeMillis());
             }
         }
     }

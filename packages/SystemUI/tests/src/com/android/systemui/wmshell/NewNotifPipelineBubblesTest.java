@@ -64,7 +64,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -72,6 +71,7 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -199,7 +199,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     @Mock
     private NotifPipeline mNotifPipeline;
     @Mock
-    private FeatureFlags mFeatureFlagsNewPipeline;
+    private NotifPipelineFlags mNotifPipelineFlags;
     @Mock
     private DumpManager mDumpManager;
     @Mock
@@ -291,7 +291,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                         mock(HeadsUpManager.class),
                         mock(Handler.class)
                 );
-        when(mFeatureFlagsNewPipeline.isNewNotifPipelineRenderingEnabled()).thenReturn(true);
+        when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(true);
         when(mShellTaskOrganizer.getExecutor()).thenReturn(syncExecutor);
         mBubbleController = new TestableBubbleController(
                 mContext,
@@ -330,7 +330,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mNotificationEntryManager,
                 mNotifPipeline,
                 mSysUiState,
-                mFeatureFlagsNewPipeline,
+                mNotifPipelineFlags,
                 mDumpManager,
                 syncExecutor);
         mBubblesManager.addNotifCallback(mNotifCallback);

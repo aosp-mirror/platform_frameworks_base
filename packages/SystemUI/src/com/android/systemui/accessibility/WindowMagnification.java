@@ -68,15 +68,15 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     private Configuration mLastConfiguration;
     private SysUiState mSysUiState;
 
-    private static class AnimationControllerSupplier extends
-            DisplayIdIndexSupplier<WindowMagnificationAnimationController> {
+    private static class ControllerSupplier extends
+            DisplayIdIndexSupplier<WindowMagnificationController> {
 
         private final Context mContext;
         private final Handler mHandler;
         private final WindowMagnifierCallback mWindowMagnifierCallback;
         private final SysUiState mSysUiState;
 
-        AnimationControllerSupplier(Context context, Handler handler,
+        ControllerSupplier(Context context, Handler handler,
                 WindowMagnifierCallback windowMagnifierCallback,
                 DisplayManager displayManager, SysUiState sysUiState) {
             super(displayManager);
@@ -87,19 +87,19 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
         }
 
         @Override
-        protected WindowMagnificationAnimationController createInstance(Display display) {
+        protected WindowMagnificationController createInstance(Display display) {
             final Context windowContext = mContext.createWindowContext(display,
                     TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, /* options */ null);
-            final WindowMagnificationController controller = new WindowMagnificationController(
+            return new WindowMagnificationController(
                     windowContext,
-                    mHandler, new SfVsyncFrameCallbackProvider(), null,
+                    mHandler, new WindowMagnificationAnimationController(windowContext),
+                    new SfVsyncFrameCallbackProvider(), null,
                     new SurfaceControl.Transaction(), mWindowMagnifierCallback, mSysUiState);
-            return new WindowMagnificationAnimationController(windowContext, controller);
         }
     }
 
     @VisibleForTesting
-    DisplayIdIndexSupplier<WindowMagnificationAnimationController> mAnimationControllerSupplier;
+    DisplayIdIndexSupplier<WindowMagnificationController> mMagnificationControllerSupplier;
 
     @Inject
     public WindowMagnification(Context context, @Main Handler mainHandler,
@@ -113,7 +113,7 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
         mModeSwitchesController = modeSwitchesController;
         mSysUiState = sysUiState;
         mOverviewProxyService = overviewProxyService;
-        mAnimationControllerSupplier = new AnimationControllerSupplier(context,
+        mMagnificationControllerSupplier = new ControllerSupplier(context,
                 mHandler, this, context.getSystemService(DisplayManager.class), sysUiState);
     }
 
@@ -121,8 +121,9 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     public void onConfigurationChanged(Configuration newConfig) {
         final int configDiff = newConfig.diff(mLastConfiguration);
         mLastConfiguration.setTo(newConfig);
-        mAnimationControllerSupplier.forEach(
-                animationController -> animationController.onConfigurationChanged(configDiff));
+        mMagnificationControllerSupplier.forEach(
+                magnificationController -> magnificationController.onConfigurationChanged(
+                        configDiff));
         if (mModeSwitchesController != null) {
             mModeSwitchesController.onConfigurationChanged(configDiff);
         }
@@ -143,10 +144,10 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
 
     private void updateSysUiStateFlag() {
         //TODO(b/187510533): support multi-display once SysuiState supports it.
-        final WindowMagnificationAnimationController controller =
-                mAnimationControllerSupplier.valueAt(Display.DEFAULT_DISPLAY);
+        final WindowMagnificationController controller =
+                mMagnificationControllerSupplier.valueAt(Display.DEFAULT_DISPLAY);
         if (controller != null) {
-            controller.updateSysUiStateFlag();
+            controller.updateSysUIStateFlag();
         } else {
             // The instance is initialized when there is an IPC request. Considering
             // self-crash cases, we need to reset the flag in such situation.
@@ -158,39 +159,39 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     @MainThread
     void enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
             @Nullable IRemoteMagnificationAnimationCallback callback) {
-        final WindowMagnificationAnimationController windowMagnificationAnimationController =
-                mAnimationControllerSupplier.get(displayId);
-        if (windowMagnificationAnimationController != null) {
-            windowMagnificationAnimationController.enableWindowMagnification(scale, centerX,
+        final WindowMagnificationController windowMagnificationController =
+                mMagnificationControllerSupplier.get(displayId);
+        if (windowMagnificationController != null) {
+            windowMagnificationController.enableWindowMagnification(scale, centerX,
                     centerY, callback);
         }
     }
 
     @MainThread
     void setScale(int displayId, float scale) {
-        final WindowMagnificationAnimationController windowMagnificationAnimationController =
-                mAnimationControllerSupplier.get(displayId);
-        if (windowMagnificationAnimationController != null) {
-            windowMagnificationAnimationController.setScale(scale);
+        final WindowMagnificationController windowMagnificationController =
+                mMagnificationControllerSupplier.get(displayId);
+        if (windowMagnificationController != null) {
+            windowMagnificationController.setScale(scale);
         }
     }
 
     @MainThread
     void moveWindowMagnifier(int displayId, float offsetX, float offsetY) {
-        final WindowMagnificationAnimationController windowMagnificationAnimationController =
-                mAnimationControllerSupplier.get(displayId);
-        if (windowMagnificationAnimationController != null) {
-            windowMagnificationAnimationController.moveWindowMagnifier(offsetX, offsetY);
+        final WindowMagnificationController windowMagnificationcontroller =
+                mMagnificationControllerSupplier.get(displayId);
+        if (windowMagnificationcontroller != null) {
+            windowMagnificationcontroller.moveWindowMagnifier(offsetX, offsetY);
         }
     }
 
     @MainThread
     void disableWindowMagnification(int displayId,
             @Nullable IRemoteMagnificationAnimationCallback callback) {
-        final WindowMagnificationAnimationController windowMagnificationAnimationController =
-                mAnimationControllerSupplier.get(displayId);
-        if (windowMagnificationAnimationController != null) {
-            windowMagnificationAnimationController.deleteWindowMagnification(callback);
+        final WindowMagnificationController windowMagnificationController =
+                mMagnificationControllerSupplier.get(displayId);
+        if (windowMagnificationController != null) {
+            windowMagnificationController.deleteWindowMagnification(callback);
         }
     }
 
@@ -234,8 +235,8 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(TAG);
-        mAnimationControllerSupplier.forEach(
-                animationController -> animationController.dump(pw));
+        mMagnificationControllerSupplier.forEach(
+                magnificationController -> magnificationController.dump(pw));
     }
 
     private void setWindowMagnificationConnection() {

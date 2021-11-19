@@ -395,6 +395,11 @@ public final class SystemServer implements Dumpable {
             "/apex/com.android.uwb/javalib/service-uwb.jar";
     private static final String UWB_SERVICE_CLASS = "com.android.server.uwb.UwbService";
 
+    private static final String SUPPLEMENTALPROCESS_APEX_PATH =
+            "/apex/com.android.supplementalprocess/javalib/service-supplementalprocess.jar";
+    private static final String SUPPLEMENTALPROCESS_SERVICE_CLASS =
+            "com.android.server.supplementalprocess.SupplementalProcessManagerService$Lifecycle";
+
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
@@ -2539,6 +2544,12 @@ public final class SystemServer implements Dumpable {
         // Incidentd and dumpstated helper
         t.traceBegin("StartIncidentCompanionService");
         mSystemServiceManager.startService(IncidentCompanionService.class);
+        t.traceEnd();
+
+        // Supplemental Process
+        t.traceBegin("StartSupplementalProcessManagerService");
+        mSystemServiceManager.startServiceFromJar(SUPPLEMENTALPROCESS_SERVICE_CLASS,
+                SUPPLEMENTALPROCESS_APEX_PATH);
         t.traceEnd();
 
         if (safeMode) {

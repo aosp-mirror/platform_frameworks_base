@@ -133,7 +133,7 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             //  frame instead.
             final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
             mApplier.applyParams(t, params);
-            mApplier.applyTransaction(t, -1);
+            t.apply();
         }
     }
 

@@ -43,6 +43,7 @@ import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.MicrophoneToggleTile;
 import com.android.systemui.qs.tiles.NfcTile;
 import com.android.systemui.qs.tiles.NightDisplayTile;
+import com.android.systemui.qs.tiles.OneHandedModeTile;
 import com.android.systemui.qs.tiles.QRCodeScannerTile;
 import com.android.systemui.qs.tiles.QuickAccessWalletTile;
 import com.android.systemui.qs.tiles.ReduceBrightColorsTile;
@@ -92,6 +93,7 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<AlarmTile> mAlarmTileProvider;
     private final Provider<QuickAccessWalletTile> mQuickAccessWalletTileProvider;
     private final Provider<QRCodeScannerTile> mQRCodeScannerTileProvider;
+    private final Provider<OneHandedModeTile> mOneHandedModeTileProvider;
 
     private final Lazy<QSHost> mQsHostLazy;
     private final Provider<CustomTile.Builder> mCustomTileBuilderProvider;
@@ -127,7 +129,8 @@ public class QSFactoryImpl implements QSFactory {
             Provider<DeviceControlsTile> deviceControlsTileProvider,
             Provider<AlarmTile> alarmTileProvider,
             Provider<QuickAccessWalletTile> quickAccessWalletTileProvider,
-            Provider<QRCodeScannerTile> qrCodeScannerTileProvider) {
+            Provider<QRCodeScannerTile> qrCodeScannerTileProvider,
+            Provider<OneHandedModeTile> oneHandedModeTileProvider) {
         mQsHostLazy = qsHostLazy;
         mCustomTileBuilderProvider = customTileBuilderProvider;
 
@@ -159,6 +162,7 @@ public class QSFactoryImpl implements QSFactory {
         mAlarmTileProvider = alarmTileProvider;
         mQuickAccessWalletTileProvider = quickAccessWalletTileProvider;
         mQRCodeScannerTileProvider = qrCodeScannerTileProvider;
+        mOneHandedModeTileProvider = oneHandedModeTileProvider;
     }
 
     public QSTile createTile(String tileSpec) {
@@ -227,6 +231,8 @@ public class QSFactoryImpl implements QSFactory {
                 return mQuickAccessWalletTileProvider.get();
             case "qr_code_scanner":
                 return mQRCodeScannerTileProvider.get();
+            case "onehanded":
+                return mOneHandedModeTileProvider.get();
         }
 
         // Custom tiles

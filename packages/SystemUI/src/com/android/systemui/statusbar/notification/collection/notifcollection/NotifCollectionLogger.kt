@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.notifcollection
 
 import android.os.RemoteException
+import android.service.notification.NotificationListenerService
 import android.service.notification.NotificationListenerService.RankingMap
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel.DEBUG
@@ -25,8 +26,35 @@ import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.LogLevel.WTF
 import com.android.systemui.log.dagger.NotificationLog
+import com.android.systemui.statusbar.notification.collection.NotifCollection
+import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import javax.inject.Inject
+
+fun cancellationReasonDebugString(@CancellationReason reason: Int) =
+    "$reason:" + when (reason) {
+        -1 -> "REASON_NOT_CANCELED" // NotifCollection.REASON_NOT_CANCELED
+        NotifCollection.REASON_UNKNOWN -> "REASON_UNKNOWN"
+        NotificationListenerService.REASON_CLICK -> "REASON_CLICK"
+        NotificationListenerService.REASON_CANCEL_ALL -> "REASON_CANCEL_ALL"
+        NotificationListenerService.REASON_ERROR -> "REASON_ERROR"
+        NotificationListenerService.REASON_PACKAGE_CHANGED -> "REASON_PACKAGE_CHANGED"
+        NotificationListenerService.REASON_USER_STOPPED -> "REASON_USER_STOPPED"
+        NotificationListenerService.REASON_PACKAGE_BANNED -> "REASON_PACKAGE_BANNED"
+        NotificationListenerService.REASON_APP_CANCEL -> "REASON_APP_CANCEL"
+        NotificationListenerService.REASON_APP_CANCEL_ALL -> "REASON_APP_CANCEL_ALL"
+        NotificationListenerService.REASON_LISTENER_CANCEL -> "REASON_LISTENER_CANCEL"
+        NotificationListenerService.REASON_LISTENER_CANCEL_ALL -> "REASON_LISTENER_CANCEL_ALL"
+        NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED -> "REASON_GROUP_SUMMARY_CANCELED"
+        NotificationListenerService.REASON_GROUP_OPTIMIZATION -> "REASON_GROUP_OPTIMIZATION"
+        NotificationListenerService.REASON_PACKAGE_SUSPENDED -> "REASON_PACKAGE_SUSPENDED"
+        NotificationListenerService.REASON_PROFILE_TURNED_OFF -> "REASON_PROFILE_TURNED_OFF"
+        NotificationListenerService.REASON_UNAUTOBUNDLED -> "REASON_UNAUTOBUNDLED"
+        NotificationListenerService.REASON_CHANNEL_BANNED -> "REASON_CHANNEL_BANNED"
+        NotificationListenerService.REASON_SNOOZED -> "REASON_SNOOZED"
+        NotificationListenerService.REASON_TIMEOUT -> "REASON_TIMEOUT"
+        else -> "unknown"
+    }
 
 class NotifCollectionLogger @Inject constructor(
     @NotificationLog private val buffer: LogBuffer
@@ -56,12 +84,12 @@ class NotifCollectionLogger @Inject constructor(
         })
     }
 
-    fun logNotifRemoved(key: String, reason: Int) {
+    fun logNotifRemoved(key: String, @CancellationReason reason: Int) {
         buffer.log(TAG, INFO, {
             str1 = key
             int1 = reason
         }, {
-            "REMOVED $str1 reason=$int1"
+            "REMOVED $str1 reason=${cancellationReasonDebugString(int1)}"
         })
     }
 
@@ -141,11 +169,12 @@ class NotifCollectionLogger @Inject constructor(
         })
     }
 
-    fun logNoNotificationToRemoveWithKey(key: String) {
+    fun logNoNotificationToRemoveWithKey(key: String, @CancellationReason reason: Int) {
         buffer.log(TAG, ERROR, {
             str1 = key
+            int1 = reason
         }, {
-            "No notification to remove with key $str1"
+            "No notification to remove with key $str1 reason=${cancellationReasonDebugString(int1)}"
         })
     }
 

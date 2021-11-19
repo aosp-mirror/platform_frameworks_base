@@ -87,7 +87,7 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.tuner.TunerService;
@@ -155,7 +155,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable {
     private float mDensity;
     private WindowManager mWindowManager;
     private int mRotation;
-    private SecureSetting mColorInversionSetting;
+    private SettingObserver mColorInversionSetting;
     private DelayableExecutor mExecutor;
     private Handler mHandler;
     private boolean mPendingRotationChange;
@@ -346,7 +346,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable {
 
             // Watch color inversion and invert the overlay as needed.
             if (mColorInversionSetting == null) {
-                mColorInversionSetting = new SecureSetting(mSecureSettings, mHandler,
+                mColorInversionSetting = new SettingObserver(mSecureSettings, mHandler,
                         Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
                         mUserTracker.getUserId()) {
                     @Override

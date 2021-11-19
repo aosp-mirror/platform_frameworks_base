@@ -66,7 +66,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.LogBufferEulogizer;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.coalescer.CoalescedEvent;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer.BatchableNotificationHandler;
@@ -132,7 +132,7 @@ import javax.inject.Inject;
 public class NotifCollection implements Dumpable {
     private final IStatusBarService mStatusBarService;
     private final SystemClock mClock;
-    private final FeatureFlags mFeatureFlags;
+    private final NotifPipelineFlags mNotifPipelineFlags;
     private final NotifCollectionLogger mLogger;
     private final Handler mMainHandler;
     private final LogBufferEulogizer mEulogizer;
@@ -156,7 +156,7 @@ public class NotifCollection implements Dumpable {
     public NotifCollection(
             IStatusBarService statusBarService,
             SystemClock clock,
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             NotifCollectionLogger logger,
             @Main Handler mainHandler,
             LogBufferEulogizer logBufferEulogizer,
@@ -164,7 +164,7 @@ public class NotifCollection implements Dumpable {
         Assert.isMainThread();
         mStatusBarService = statusBarService;
         mClock = clock;
-        mFeatureFlags = featureFlags;
+        mNotifPipelineFlags = notifPipelineFlags;
         mLogger = logger;
         mMainHandler = mainHandler;
         mEulogizer = logBufferEulogizer;
@@ -395,7 +395,7 @@ public class NotifCollection implements Dumpable {
         final NotificationEntry entry = mNotificationSet.get(sbn.getKey());
         if (entry == null) {
             // TODO (b/160008901): Throw an exception here
-            mLogger.logNoNotificationToRemoveWithKey(sbn.getKey());
+            mLogger.logNoNotificationToRemoveWithKey(sbn.getKey(), reason);
             return;
         }
 
@@ -503,7 +503,7 @@ public class NotifCollection implements Dumpable {
                     // TODO: (b/145659174) update the sbn's overrideGroupKey in
                     //  NotificationEntry.setRanking instead of here once we fully migrate to the
                     //  NewNotifPipeline
-                    if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+                    if (mNotifPipelineFlags.isNewPipelineEnabled()) {
                         final String newOverrideGroupKey = ranking.getOverrideGroupKey();
                         if (!Objects.equals(entry.getSbn().getOverrideGroupKey(),
                                 newOverrideGroupKey)) {

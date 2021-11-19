@@ -953,7 +953,6 @@ public class AppProfiler {
 
     @GuardedBy({"mService", "mProcLock"})
     boolean updateLowMemStateLSP(int numCached, int numEmpty, int numTrimming) {
-        final long now = SystemClock.uptimeMillis();
         int memFactor;
         if (mLowMemDetector != null && mLowMemDetector.isAvailable()) {
             memFactor = mLowMemDetector.getMemFactor();
@@ -1008,7 +1007,9 @@ public class AppProfiler {
         mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
         boolean allChanged;
         int trackerMemFactor;
+        final long now;
         synchronized (mService.mProcessStats.mLock) {
+            now = SystemClock.uptimeMillis();
             allChanged = mService.mProcessStats.setMemFactorLocked(memFactor,
                     mService.mAtmInternal == null || !mService.mAtmInternal.isSleeping(), now);
             trackerMemFactor = mService.mProcessStats.getMemFactorLocked();
@@ -1044,7 +1045,7 @@ public class AppProfiler {
                 final int curProcState = state.getCurProcState();
                 IApplicationThread thread;
                 if (allChanged || state.hasProcStateChanged()) {
-                    mService.setProcessTrackerStateLOSP(app, trackerMemFactor, now);
+                    mService.setProcessTrackerStateLOSP(app, trackerMemFactor);
                     state.setProcStateChanged(false);
                 }
                 trimMemoryUiHiddenIfNecessaryLSP(app);
@@ -1113,7 +1114,7 @@ public class AppProfiler {
                 final IApplicationThread thread;
                 final ProcessStateRecord state = app.mState;
                 if (allChanged || state.hasProcStateChanged()) {
-                    mService.setProcessTrackerStateLOSP(app, trackerMemFactor, now);
+                    mService.setProcessTrackerStateLOSP(app, trackerMemFactor);
                     state.setProcStateChanged(false);
                 }
                 trimMemoryUiHiddenIfNecessaryLSP(app);

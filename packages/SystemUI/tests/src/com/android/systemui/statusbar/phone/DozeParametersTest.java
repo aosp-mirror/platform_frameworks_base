@@ -39,6 +39,7 @@ import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.tuner.TunerService;
 
@@ -126,7 +127,7 @@ public class DozeParametersTest extends SysuiTestCase {
     public void testControlUnlockedScreenOffAnimation_dozeAfterScreenOff_false() {
         when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
         mDozeParameters.onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, "1");
-        when(mFeatureFlags.useNewLockscreenAnimations()).thenReturn(true);
+        when(mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)).thenReturn(true);
         when(mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation())
                 .thenReturn(true);
         assertTrue(mDozeParameters.shouldControlUnlockedScreenOff());
@@ -143,7 +144,7 @@ public class DozeParametersTest extends SysuiTestCase {
     public void testControlUnlockedScreenOffAnimationDisabled_dozeAfterScreenOff() {
         when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
         mDozeParameters.onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, "1");
-        when(mFeatureFlags.useNewLockscreenAnimations()).thenReturn(false);
+        when(mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)).thenReturn(false);
 
         assertFalse(mDozeParameters.shouldControlUnlockedScreenOff());
 

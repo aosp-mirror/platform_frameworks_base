@@ -35,13 +35,16 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayInsetsController.OnInsetsChangedListener;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.common.annotations.ExternalThread;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Controls to show/update restart-activity buttons on Tasks based on whether the foreground
@@ -78,24 +81,35 @@ public class SizeCompatUIController implements OnDisplaysChangedListener,
     private final DisplayInsetsController mDisplayInsetsController;
     private final DisplayImeController mImeController;
     private final SyncTransactionQueue mSyncQueue;
+    private final ShellExecutor mMainExecutor;
+    private final SizeCompatUIImpl mImpl = new SizeCompatUIImpl();
 
     private SizeCompatUICallback mCallback;
 
     /** Only show once automatically in the process life. */
     private boolean mHasShownHint;
+    /** Indicates if the keyguard is currently occluded, in which case size compat UIs shouldn't
+     * be shown. */
+    private boolean mKeyguardOccluded;
 
     public SizeCompatUIController(Context context,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
             DisplayImeController imeController,
-            SyncTransactionQueue syncQueue) {
+            SyncTransactionQueue syncQueue,
+            ShellExecutor mainExecutor) {
         mContext = context;
         mDisplayController = displayController;
         mDisplayInsetsController = displayInsetsController;
         mImeController = imeController;
         mSyncQueue = syncQueue;
+        mMainExecutor = mainExecutor;
         mDisplayController.addDisplayWindowListener(this);
         mImeController.addPositionProcessor(this);
+    }
+
+    public SizeCompatUI asSizeCompatUI() {
+        return mImpl;
     }
 
     /** Sets the callback for UI interactions. */
@@ -106,6 +120,7 @@ public class SizeCompatUIController implements OnDisplaysChangedListener,
     /**
      * Called when the Task info changed. Creates and updates the size compat UI if there is an
      * activity in size compat, or removes the UI if there is no size compat activity.
+     *
      * @param displayId display the task and activity are in.
      * @param taskId task the activity is in.
      * @param taskConfig task config to place the size compat UI with.
@@ -180,7 +195,19 @@ public class SizeCompatUIController implements OnDisplaysChangedListener,
         }
 
         // Hide the size compat UIs when input method is showing.
-        forAllLayoutsOnDisplay(displayId, layout -> layout.updateImeVisibility(isShowing));
+        forAllLayoutsOnDisplay(displayId,
+                layout -> layout.updateVisibility(showOnDisplay(displayId)));
+    }
+
+    @VisibleForTesting
+    void onKeyguardOccludedChanged(boolean occluded) {
+        mKeyguardOccluded = occluded;
+        // Hide the size compat UIs when keyguard is occluded.
+        forAllLayouts(layout -> layout.updateVisibility(showOnDisplay(layout.getDisplayId())));
+    }
+
+    private boolean showOnDisplay(int displayId) {
+        return !mKeyguardOccluded && !isImeShowingOnDisplay(displayId);
     }
 
     private boolean isImeShowingOnDisplay(int displayId) {
@@ -198,7 +225,7 @@ public class SizeCompatUIController implements OnDisplaysChangedListener,
         final SizeCompatUILayout layout = createLayout(context, displayId, taskId, taskConfig,
                 taskListener);
         mActiveLayouts.put(taskId, layout);
-        layout.createSizeCompatButton(isImeShowingOnDisplay(displayId));
+        layout.createSizeCompatButton(showOnDisplay(displayId));
     }
 
     @VisibleForTesting
@@ -218,8 +245,7 @@ public class SizeCompatUIController implements OnDisplaysChangedListener,
         if (layout == null) {
             return;
         }
-        layout.updateSizeCompatInfo(taskConfig, taskListener,
-                isImeShowingOnDisplay(layout.getDisplayId()));
+        layout.updateSizeCompatInfo(taskConfig, taskListener, showOnDisplay(layout.getDisplayId()));
     }
 
     private void removeLayout(int taskId) {
@@ -250,12 +276,34 @@ public class SizeCompatUIController implements OnDisplaysChangedListener,
     }
 
     private void forAllLayoutsOnDisplay(int displayId, Consumer<SizeCompatUILayout> callback) {
+        forAllLayouts(layout -> layout.getDisplayId() == displayId, callback);
+    }
+
+    private void forAllLayouts(Consumer<SizeCompatUILayout> callback) {
+        forAllLayouts(layout -> true, callback);
+    }
+
+    private void forAllLayouts(Predicate<SizeCompatUILayout> condition,
+            Consumer<SizeCompatUILayout> callback) {
         for (int i = 0; i < mActiveLayouts.size(); i++) {
             final int taskId = mActiveLayouts.keyAt(i);
             final SizeCompatUILayout layout = mActiveLayouts.get(taskId);
-            if (layout != null && layout.getDisplayId() == displayId) {
+            if (layout != null && condition.test(layout)) {
                 callback.accept(layout);
             }
+        }
+    }
+
+    /**
+     * The interface for calls from outside the Shell, within the host process.
+     */
+    @ExternalThread
+    private class SizeCompatUIImpl implements SizeCompatUI {
+        @Override
+        public void onKeyguardOccludedChanged(boolean occluded) {
+            mMainExecutor.execute(() -> {
+                SizeCompatUIController.this.onKeyguardOccludedChanged(occluded);
+            });
         }
     }
 

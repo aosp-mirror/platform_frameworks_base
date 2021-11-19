@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.flags
+package com.android.wm.shell.sizecompatui;
 
-interface FlagWriter {
-    fun setEnabled(key: Int, value: Boolean) {}
+import com.android.wm.shell.common.annotations.ExternalThread;
+
+/**
+ * Interface to engage size compat UI.
+ */
+@ExternalThread
+public interface SizeCompatUI {
+    /**
+     * Called when the keyguard occluded state changes. Removes all size compat UIs if the
+     * keyguard is now occluded.
+     * @param occluded indicates if the keyguard is now occluded.
+     */
+    void onKeyguardOccludedChanged(boolean occluded);
 }

@@ -61,6 +61,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.settings.UserTracker;
@@ -311,7 +312,7 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
             WakefulnessLifecycle wakefulnessLifecycle) {
         super(context);
 
-        mIsMonetEnabled = featureFlags.isMonetEnabled();
+        mIsMonetEnabled = featureFlags.isEnabled(Flags.MONET);
         mDeviceProvisionedController = deviceProvisionedController;
         mBroadcastDispatcher = broadcastDispatcher;
         mUserManager = userManager;

@@ -102,6 +102,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityTaskManager;
 import android.app.WindowConfiguration;
@@ -134,6 +135,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.WindowManager;
+import android.window.IDisplayAreaOrganizer;
 import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
@@ -388,6 +390,32 @@ public class DisplayContentTests extends WindowTestsBase {
         // Compute IME parent returns nothing if current target and window receiving input
         // are different i.e. if current window didn't request IME.
         assertNull("computeImeParent() should be null", mDisplayContent.computeImeParent());
+    }
+
+    @Test
+    public void testUpdateImeParent_skipForOrganizedImeContainer() {
+        final DisplayArea.Tokens imeContainer = mDisplayContent.getImeContainer();
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
+
+        final WindowState startingWin = createWindow(null, TYPE_APPLICATION_STARTING, activity,
+                "startingWin");
+        startingWin.setHasSurface(true);
+        assertTrue(startingWin.canBeImeTarget());
+        final SurfaceControl imeSurfaceParent = mock(SurfaceControl.class);
+        doReturn(imeSurfaceParent).when(mDisplayContent).computeImeParent();
+
+        // Main precondition for this test: organize the ImeContainer.
+        final IDisplayAreaOrganizer mockImeOrganizer = mock(IDisplayAreaOrganizer.class);
+        when(mockImeOrganizer.asBinder()).thenReturn(new Binder());
+        imeContainer.setOrganizer(mockImeOrganizer);
+
+        mDisplayContent.updateImeParent();
+
+        assertNull("Don't reparent the surface of an organized ImeContainer.",
+                mDisplayContent.mInputMethodSurfaceParent);
+
+        // Clean up organizer.
+        imeContainer.setOrganizer(null);
     }
 
     /**

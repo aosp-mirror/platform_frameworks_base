@@ -16,11 +16,10 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-
-import androidx.annotation.NonNull;
 
 /** Fake implementation of {@link Vibrator} for service tests. */
 final class FakeVibrator extends Vibrator {

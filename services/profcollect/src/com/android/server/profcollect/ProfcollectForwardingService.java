@@ -234,14 +234,16 @@ public final class ProfcollectForwardingService extends SystemService {
                 "applaunch_trace_freq", 2);
         int randomNum = ThreadLocalRandom.current().nextInt(100);
         if (randomNum < traceFrequency) {
-            try {
-                if (DEBUG) {
-                    Log.d(LOG_TAG, "Tracing on app launch event: " + packageName);
-                }
-                mIProfcollect.trace_once("applaunch");
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, e.getMessage());
+            if (DEBUG) {
+                Log.d(LOG_TAG, "Tracing on app launch event: " + packageName);
             }
+            BackgroundThread.get().getThreadHandler().post(() -> {
+                try {
+                    mIProfcollect.trace_once("applaunch");
+                } catch (RemoteException e) {
+                    Log.e(LOG_TAG, e.getMessage());
+                }
+            });
         }
     }
 

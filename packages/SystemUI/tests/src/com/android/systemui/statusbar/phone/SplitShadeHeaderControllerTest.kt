@@ -9,6 +9,7 @@ import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -54,7 +55,7 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
             null
         }
         whenever(view.visibility).thenAnswer { _ -> viewVisibility }
-        whenever(featureFlags.useCombinedQSHeaders()).thenReturn(false)
+        whenever(featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)).thenReturn(false)
         splitShadeHeaderController = SplitShadeHeaderController(view, statusBarIconController,
         qsCarrierGroupControllerBuilder, featureFlags, batteryMeterViewController)
     }

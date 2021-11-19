@@ -30,6 +30,7 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.privacy.PrivacyChipEvent;
@@ -218,7 +219,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
 
         List<String> rssiIgnoredSlots;
 
-        if (mFeatureFlags.isCombinedStatusBarSignalIconsEnabled()) {
+        if (mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)) {
             rssiIgnoredSlots = List.of(
                     getResources().getString(com.android.internal.R.string.status_bar_no_calling),
                     getResources().getString(com.android.internal.R.string.status_bar_call_strength)
@@ -230,7 +231,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         }
 
         mView.onAttach(mIconManager, mQSExpansionPathInterpolator, rssiIgnoredSlots,
-                mInsetsProvider, mFeatureFlags.useCombinedQSHeaders());
+                mInsetsProvider, mFeatureFlags.isEnabled(Flags.COMBINED_QS_HEADERS));
 
         mDemoModeController.addCallback(mDemoModeReceiver);
 

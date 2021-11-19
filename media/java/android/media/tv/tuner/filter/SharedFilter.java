@@ -145,7 +145,7 @@ public final class SharedFilter implements AutoCloseable {
     }
 
     /**
-     * Flushes the filter.
+     * Flushes the shared filter.
      *
      * <p>The data which is already produced by filter but not consumed yet will
      * be cleared.
@@ -162,7 +162,7 @@ public final class SharedFilter implements AutoCloseable {
     }
 
     /**
-     * Copies filtered data from filter output to the given byte array.
+     * Copies filtered data from shared filter output to the given byte array.
      *
      * @param buffer the buffer to store the filtered data.
      * @param offset the index of the first byte in {@code buffer} to write.
@@ -179,7 +179,7 @@ public final class SharedFilter implements AutoCloseable {
     }
 
     /**
-     * Stops filtering data and releases the Filter instance.
+     * Stops filtering data and releases the shared filter instance.
      */
     @Override
     public void close() {

@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
@@ -43,6 +44,7 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayInsetsController.OnInsetsChangedListener;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
 import org.junit.Before;
@@ -72,6 +74,7 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
     private @Mock DisplayImeController mMockImeController;
     private @Mock ShellTaskOrganizer.TaskListener mMockTaskListener;
     private @Mock SyncTransactionQueue mMockSyncQueue;
+    private @Mock ShellExecutor mMockExecutor;
     private @Mock SizeCompatUILayout mMockLayout;
 
     @Captor
@@ -85,7 +88,7 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
         doReturn(DISPLAY_ID).when(mMockLayout).getDisplayId();
         doReturn(TASK_ID).when(mMockLayout).getTaskId();
         mController = new SizeCompatUIController(mContext, mMockDisplayController,
-                mMockDisplayInsetsController, mMockImeController, mMockSyncQueue) {
+                mMockDisplayInsetsController, mMockImeController, mMockSyncQueue, mMockExecutor) {
             @Override
             SizeCompatUILayout createLayout(Context context, int displayId, int taskId,
                     Configuration taskConfig, ShellTaskOrganizer.TaskListener taskListener) {
@@ -106,19 +109,17 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
         final Configuration taskConfig = new Configuration();
 
         // Verify that the restart button is added with non-null size compat info.
-        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig,
-                mMockTaskListener);
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig, mMockTaskListener);
 
         verify(mController).createLayout(any(), eq(DISPLAY_ID), eq(TASK_ID), eq(taskConfig),
                 eq(mMockTaskListener));
 
         // Verify that the restart button is updated with non-null new size compat info.
         final Configuration newTaskConfig = new Configuration();
-        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, newTaskConfig,
-                mMockTaskListener);
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, newTaskConfig, mMockTaskListener);
 
         verify(mMockLayout).updateSizeCompatInfo(taskConfig, mMockTaskListener,
-                false /* isImeShowing */);
+                true /* show */);
 
         // Verify that the restart button is removed with null size compat info.
         mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, null, mMockTaskListener);
@@ -196,15 +197,90 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
     @Test
     public void testChangeButtonVisibilityOnImeShowHide() {
         final Configuration taskConfig = new Configuration();
-        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig,
-                mMockTaskListener);
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig, mMockTaskListener);
 
+        // Verify that the restart button is hidden after IME is showing.
         mController.onImeVisibilityChanged(DISPLAY_ID, true /* isShowing */);
 
-        verify(mMockLayout).updateImeVisibility(true);
+        verify(mMockLayout).updateVisibility(false);
 
+        // Verify button remains hidden while IME is showing.
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig, mMockTaskListener);
+
+        verify(mMockLayout).updateSizeCompatInfo(taskConfig, mMockTaskListener,
+                false /* show */);
+
+        // Verify button is shown after IME is hidden.
         mController.onImeVisibilityChanged(DISPLAY_ID, false /* isShowing */);
 
-        verify(mMockLayout).updateImeVisibility(false);
+        verify(mMockLayout).updateVisibility(true);
+    }
+
+    @Test
+    public void testChangeButtonVisibilityOnKeyguardOccludedChanged() {
+        final Configuration taskConfig = new Configuration();
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig, mMockTaskListener);
+
+        // Verify that the restart button is hidden after keyguard becomes occluded.
+        mController.onKeyguardOccludedChanged(true);
+
+        verify(mMockLayout).updateVisibility(false);
+
+        // Verify button remains hidden while keyguard is occluded.
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig, mMockTaskListener);
+
+        verify(mMockLayout).updateSizeCompatInfo(taskConfig, mMockTaskListener,
+                false /* show */);
+
+        // Verify button is shown after keyguard becomes not occluded.
+        mController.onKeyguardOccludedChanged(false);
+
+        verify(mMockLayout).updateVisibility(true);
+    }
+
+    @Test
+    public void testButtonRemainsHiddenOnKeyguardOccludedFalseWhenImeIsShowing() {
+        final Configuration taskConfig = new Configuration();
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig, mMockTaskListener);
+
+        mController.onImeVisibilityChanged(DISPLAY_ID, true /* isShowing */);
+        mController.onKeyguardOccludedChanged(true);
+
+        verify(mMockLayout, times(2)).updateVisibility(false);
+
+        clearInvocations(mMockLayout);
+
+        // Verify button remains hidden after keyguard becomes not occluded since IME is showing.
+        mController.onKeyguardOccludedChanged(false);
+
+        verify(mMockLayout).updateVisibility(false);
+
+        // Verify button is shown after IME is not showing.
+        mController.onImeVisibilityChanged(DISPLAY_ID, false /* isShowing */);
+
+        verify(mMockLayout).updateVisibility(true);
+    }
+
+    @Test
+    public void testButtonRemainsHiddenOnImeHideWhenKeyguardIsOccluded() {
+        final Configuration taskConfig = new Configuration();
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig, mMockTaskListener);
+
+        mController.onImeVisibilityChanged(DISPLAY_ID, true /* isShowing */);
+        mController.onKeyguardOccludedChanged(true);
+
+        verify(mMockLayout, times(2)).updateVisibility(false);
+
+        clearInvocations(mMockLayout);
+
+        // Verify button remains hidden after IME is hidden since keyguard is occluded.
+        mController.onImeVisibilityChanged(DISPLAY_ID, false /* isShowing */);
+
+        verify(mMockLayout).updateVisibility(false);
+
+        // Verify button is shown after keyguard becomes not occluded.
+        mController.onKeyguardOccludedChanged(false);
+
+        verify(mMockLayout).updateVisibility(true);
     }
 }

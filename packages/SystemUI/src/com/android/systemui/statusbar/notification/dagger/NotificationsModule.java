@@ -31,7 +31,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -40,6 +39,7 @@ import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
@@ -116,7 +116,7 @@ public interface NotificationsModule {
     static NotificationEntryManager provideNotificationEntryManager(
             NotificationEntryManagerLogger logger,
             NotificationGroupManagerLegacy groupManager,
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
@@ -126,7 +126,7 @@ public interface NotificationsModule {
         return new NotificationEntryManager(
                 logger,
                 groupManager,
-                featureFlags,
+                notifPipelineFlags,
                 notificationRowBinderLazy,
                 notificationRemoteInputManagerLazy,
                 leakDetector,
@@ -211,7 +211,7 @@ public interface NotificationsModule {
     static NotificationLogger provideNotificationLogger(
             NotificationListener notificationListener,
             @UiBackground Executor uiBgExecutor,
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
@@ -221,7 +221,7 @@ public interface NotificationsModule {
         return new NotificationLogger(
                 notificationListener,
                 uiBgExecutor,
-                featureFlags,
+                notifPipelineFlags,
                 visibilityProvider,
                 entryManager,
                 notifPipeline,
@@ -241,9 +241,9 @@ public interface NotificationsModule {
     @SysUISingleton
     @Provides
     static GroupMembershipManager provideGroupMembershipManager(
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             Lazy<NotificationGroupManagerLegacy> groupManagerLegacy) {
-        return featureFlags.isNewNotifPipelineRenderingEnabled()
+        return notifPipelineFlags.isNewPipelineEnabled()
                 ? new GroupMembershipManagerImpl()
                 : groupManagerLegacy.get();
     }
@@ -252,10 +252,10 @@ public interface NotificationsModule {
     @SysUISingleton
     @Provides
     static GroupExpansionManager provideGroupExpansionManager(
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             Lazy<GroupMembershipManager> groupMembershipManager,
             Lazy<NotificationGroupManagerLegacy> groupManagerLegacy) {
-        return featureFlags.isNewNotifPipelineRenderingEnabled()
+        return notifPipelineFlags.isNewPipelineEnabled()
                 ? new GroupExpansionManagerImpl(groupMembershipManager.get())
                 : groupManagerLegacy.get();
     }
@@ -280,10 +280,11 @@ public interface NotificationsModule {
     @Provides
     @SysUISingleton
     static CommonNotifCollection provideCommonNotifCollection(
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             Lazy<NotifPipeline> pipeline,
             NotificationEntryManager entryManager) {
-        return featureFlags.isNewNotifPipelineRenderingEnabled() ? pipeline.get() : entryManager;
+        return notifPipelineFlags.isNewPipelineEnabled()
+                ? pipeline.get() : entryManager;
     }
 
     /**
@@ -292,10 +293,10 @@ public interface NotificationsModule {
     @Provides
     @SysUISingleton
     static NotificationVisibilityProvider provideNotificationVisibilityProvider(
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             Lazy<NotificationVisibilityProviderImpl> newProvider,
             Lazy<LegacyNotificationVisibilityProvider> legacyProvider) {
-        return featureFlags.isNewNotifPipelineRenderingEnabled()
+        return notifPipelineFlags.isNewPipelineEnabled()
                 ? newProvider.get()
                 : legacyProvider.get();
     }
@@ -306,10 +307,10 @@ public interface NotificationsModule {
     @Provides
     @SysUISingleton
     static NotifShadeEventSource provideNotifShadeEventSource(
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             Lazy<ShadeEventCoordinator> shadeEventCoordinatorLazy,
             Lazy<LegacyNotificationPresenterExtensions> legacyNotificationPresenterExtensionsLazy) {
-        return featureFlags.isNewNotifPipelineRenderingEnabled()
+        return notifPipelineFlags.isNewPipelineEnabled()
                 ? shadeEventCoordinatorLazy.get()
                 : legacyNotificationPresenterExtensionsLazy.get();
     }
@@ -321,7 +322,7 @@ public interface NotificationsModule {
     @Provides
     @SysUISingleton
     static OnUserInteractionCallback provideOnUserInteractionCallback(
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             HeadsUpManager headsUpManager,
             StatusBarStateController statusBarStateController,
             Lazy<NotifCollection> notifCollection,
@@ -330,7 +331,7 @@ public interface NotificationsModule {
             NotificationEntryManager entryManager,
             VisualStabilityManager visualStabilityManager,
             Lazy<GroupMembershipManager> groupMembershipManagerLazy) {
-        return featureFlags.isNewNotifPipelineRenderingEnabled()
+        return notifPipelineFlags.isNewPipelineEnabled()
                 ? new OnUserInteractionCallbackImpl(
                         visibilityProvider.get(),
                         notifCollection.get(),

@@ -41,10 +41,10 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -81,7 +81,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Mock private NotificationLogger.ExpansionStateLogger mExpansionStateLogger;
 
     // Dependency mocks:
-    @Mock private FeatureFlags mFeatureFlags;
+    @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotifPipeline mNotifPipeline;
@@ -97,7 +97,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(true);
+        when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(true);
 
         mEntry = new NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_NAME)
@@ -112,7 +112,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         mLogger = new TestableNotificationLogger(
                 mListener,
                 mUiBgExecutor,
-                mFeatureFlags,
+                mNotifPipelineFlags,
                 mVisibilityProvider,
                 mEntryManager,
                 mNotifPipeline,
@@ -254,7 +254,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
         TestableNotificationLogger(NotificationListener notificationListener,
                 Executor uiBgExecutor,
-                FeatureFlags featureFlags,
+                NotifPipelineFlags notifPipelineFlags,
                 NotificationVisibilityProvider visibilityProvider,
                 NotificationEntryManager entryManager,
                 NotifPipeline notifPipeline,
@@ -264,7 +264,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
             super(
                     notificationListener,
                     uiBgExecutor,
-                    featureFlags,
+                    notifPipelineFlags,
                     visibilityProvider,
                     entryManager,
                     notifPipeline,

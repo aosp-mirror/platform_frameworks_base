@@ -19,6 +19,7 @@ package com.android.systemui.accessibility;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
 import android.content.Context;
@@ -31,7 +32,6 @@ import android.view.animation.AccelerateInterpolator;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 
-import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -54,11 +54,11 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     // The window magnification is enabled.
     private static final int STATE_ENABLED = 1;
     // The window magnification is going to be disabled when the animation is end.
-    private  static final int STATE_DISABLING = 2;
+    private static final int STATE_DISABLING = 2;
     // The animation is running for enabling the window magnification.
     private static final int STATE_ENABLING = 3;
 
-    private final WindowMagnificationController mController;
+    private WindowMagnificationController mController;
     private final ValueAnimator mValueAnimator;
     private final AnimationSpec mStartSpec = new AnimationSpec();
     private final AnimationSpec mEndSpec = new AnimationSpec();
@@ -71,19 +71,20 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     @MagnificationState
     private int mState = STATE_DISABLED;
 
-    WindowMagnificationAnimationController(@UiContext Context context,
-            WindowMagnificationController controller) {
-        this(context, controller, newValueAnimator(context.getResources()));
+    WindowMagnificationAnimationController(@UiContext Context context) {
+        this(context, newValueAnimator(context.getResources()));
     }
 
     @VisibleForTesting
-    WindowMagnificationAnimationController(Context context,
-            WindowMagnificationController controller, ValueAnimator valueAnimator) {
+    WindowMagnificationAnimationController(Context context, ValueAnimator valueAnimator) {
         mContext = context;
-        mController = controller;
         mValueAnimator = valueAnimator;
         mValueAnimator.addUpdateListener(this);
         mValueAnimator.addListener(this);
+    }
+
+    void setWindowMagnificationController(@NonNull WindowMagnificationController controller) {
+        mController = controller;
     }
 
     /**
@@ -105,6 +106,9 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
      */
     void enableWindowMagnification(float scale, float centerX, float centerY,
             @Nullable IRemoteMagnificationAnimationCallback animationCallback) {
+        if (mController == null) {
+            return;
+        }
         sendAnimationCallback(false);
         // Enable window magnification without animation immediately.
         if (animationCallback == null) {
@@ -139,6 +143,9 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     }
 
     private void setupEnableAnimationSpecs(float scale, float centerX, float centerY) {
+        if (mController == null) {
+            return;
+        }
         final float currentScale = mController.getScale();
         final float currentCenterX = mController.getCenterX();
         final float currentCenterY = mController.getCenterY();
@@ -160,15 +167,9 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
         }
     }
 
-    /**
-     * Wraps {@link WindowMagnificationController#setScale(float)}. If the animation is
-     * running, it has no effect.
-     */
-    void setScale(float scale) {
-        if (mValueAnimator.isRunning()) {
-            return;
-        }
-        mController.setScale(scale);
+    /** Returns {@code true} if the animator is running. */
+    boolean isAnimating() {
+        return mValueAnimator.isRunning();
     }
 
     /**
@@ -181,6 +182,9 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
      */
     void deleteWindowMagnification(
             @Nullable IRemoteMagnificationAnimationCallback animationCallback) {
+        if (mController == null) {
+            return;
+        }
         sendAnimationCallback(false);
         // Delete window magnification without animation.
         if (animationCallback == null) {
@@ -206,25 +210,6 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
         setState(STATE_DISABLING);
     }
 
-    /**
-     * Wraps {@link WindowMagnificationController#moveWindowMagnifier(float, float)}. If the
-     * animation is running, it has no effect.
-     * @param offsetX The amount in pixels to offset the window magnifier in the X direction, in
-     *                current screen pixels.
-     * @param offsetY The amount in pixels to offset the window magnifier in the Y direction, in
-     *                current screen pixels.
-     */
-    void moveWindowMagnifier(float offsetX, float offsetY) {
-        if (mValueAnimator.isRunning()) {
-            return;
-        }
-        mController.moveWindowMagnifier(offsetX, offsetY);
-    }
-
-    void onConfigurationChanged(int configDiff) {
-        mController.onConfigurationChanged(configDiff);
-    }
-
     private void setState(@MagnificationState int state) {
         if (DEBUG) {
             Log.d(TAG, "setState from " + mState + " to " + state);
@@ -239,7 +224,7 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
 
     @Override
     public void onAnimationEnd(Animator animation, boolean isReverse) {
-        if (mEndAnimationCanceled) {
+        if (mEndAnimationCanceled || mController == null) {
             return;
         }
         if (Float.isNaN(mController.getScale())) {
@@ -279,6 +264,9 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
 
     @Override
     public void onAnimationUpdate(ValueAnimator animation) {
+        if (mController == null) {
+            return;
+        }
         final float fract = animation.getAnimatedFraction();
         final float sentScale = mStartSpec.mScale + (mEndSpec.mScale - mStartSpec.mScale) * fract;
         final float centerX =
@@ -286,14 +274,6 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
         final float centerY =
                 mStartSpec.mCenterY + (mEndSpec.mCenterY - mStartSpec.mCenterY) * fract;
         mController.enableWindowMagnification(sentScale, centerX, centerY);
-    }
-
-    public void updateSysUiStateFlag() {
-        mController.updateSysUIStateFlag();
-    }
-
-    void dump(PrintWriter pw) {
-        mController.dump(pw);
     }
 
     private static ValueAnimator newValueAnimator(Resources resources) {

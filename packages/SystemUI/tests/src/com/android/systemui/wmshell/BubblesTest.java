@@ -76,7 +76,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -85,6 +84,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
@@ -221,7 +221,7 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private NotifPipeline mNotifPipeline;
     @Mock
-    private FeatureFlags mFeatureFlagsOldPipeline;
+    private NotifPipelineFlags mNotifPipelineFlags;
     @Mock
     private DumpManager mDumpManager;
     @Mock
@@ -326,7 +326,7 @@ public class BubblesTest extends SysuiTestCase {
                         mock(Handler.class)
                 );
 
-        when(mFeatureFlagsOldPipeline.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
+        when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(false);
         when(mShellTaskOrganizer.getExecutor()).thenReturn(syncExecutor);
         mBubbleController = new TestableBubbleController(
                 mContext,
@@ -365,7 +365,7 @@ public class BubblesTest extends SysuiTestCase {
                 mNotificationEntryManager,
                 mNotifPipeline,
                 mSysUiState,
-                mFeatureFlagsOldPipeline,
+                mNotifPipelineFlags,
                 mDumpManager,
                 syncExecutor);
 

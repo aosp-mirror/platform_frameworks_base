@@ -181,7 +181,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
         public WipeDataTask(Context context, Thread chainedTask) {
             mContext = context;
             mChainedTask = chainedTask;
-            mProgressDialog = new ProgressDialog(context);
+            mProgressDialog = new ProgressDialog(context, R.style.Theme_DeviceDefault_System);
         }
 
         @Override

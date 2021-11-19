@@ -31,8 +31,6 @@ import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.navigationbar.gestural.BackGestureTfClassifierProvider;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
 import com.android.wm.shell.transition.ShellTransitions;
-import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.recents.RecentTasks;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -122,7 +120,8 @@ public class SystemUIFactory {
                     .setStartingSurface(mWMComponent.getStartingSurface())
                     .setDisplayAreaHelper(mWMComponent.getDisplayAreaHelper())
                     .setTaskSurfaceHelper(mWMComponent.getTaskSurfaceHelper())
-                    .setRecentTasks(mWMComponent.getRecentTasks());
+                    .setRecentTasks(mWMComponent.getRecentTasks())
+                    .setSizeCompatUI(Optional.of(mWMComponent.getSizeCompatUI()));
         } else {
             // TODO: Call on prepareSysUIComponentBuilder but not with real components. Other option
             // is separating this logic into newly creating SystemUITestsFactory.
@@ -140,7 +139,8 @@ public class SystemUIFactory {
                     .setDisplayAreaHelper(Optional.ofNullable(null))
                     .setStartingSurface(Optional.ofNullable(null))
                     .setTaskSurfaceHelper(Optional.ofNullable(null))
-                    .setRecentTasks(Optional.ofNullable(null));
+                    .setRecentTasks(Optional.ofNullable(null))
+                    .setSizeCompatUI(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();
         if (mInitializeComponents) {

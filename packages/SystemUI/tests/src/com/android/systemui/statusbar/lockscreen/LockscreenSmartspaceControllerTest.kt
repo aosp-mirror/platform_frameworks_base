@@ -42,6 +42,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -144,7 +145,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(featureFlags.isSmartspaceEnabled).thenReturn(true)
+        `when`(featureFlags.isEnabled(Flags.SMARTSPACE)).thenReturn(true)
 
         `when`(secureSettings.getUriFor(PRIVATE_LOCKSCREEN_SETTING))
                 .thenReturn(fakePrivateLockscreenSettingUri)
@@ -185,7 +186,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     @Test(expected = RuntimeException::class)
     fun testThrowsIfFlagIsDisabled() {
         // GIVEN the feature flag is disabled
-        `when`(featureFlags.isSmartspaceEnabled).thenReturn(false)
+        `when`(featureFlags.isEnabled(Flags.SMARTSPACE)).thenReturn(false)
 
         // WHEN we try to build the view
         controller.buildAndConnectView(fakeParent)

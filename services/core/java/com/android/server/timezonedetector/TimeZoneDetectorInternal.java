@@ -27,23 +27,6 @@ import android.annotation.NonNull;
  */
 public interface TimeZoneDetectorInternal {
 
-    /** Adds a listener that will be invoked when {@link ConfigurationInternal} may have changed. */
-    void addConfigurationListener(@NonNull ConfigurationChangeListener listener);
-
-    /**
-     * Removes a listener previously added via {@link
-     * #addConfigurationListener(ConfigurationChangeListener)}.
-     */
-    void removeConfigurationListener(@NonNull ConfigurationChangeListener listener);
-
-    /**
-     * Returns a snapshot of the {@link ConfigurationInternal} for the current user. This is only a
-     * snapshot so callers must use {@link #addConfigurationListener(ConfigurationChangeListener)}
-     * to be notified when it changes.
-     */
-    @NonNull
-    ConfigurationInternal getCurrentUserConfigurationInternal();
-
     /**
      * Suggests the current time zone, determined using geolocation, to the detector. The
      * detector may ignore the signal based on system settings, whether better information is

@@ -33,7 +33,7 @@ import java.util.Map;
  * On public release builds, flags will always return their default value. There is no way to
  * change their value on release builds.
  *
- * See {@link FeatureFlagManager} for instructions on flipping the flags via adb.
+ * See {@link FeatureFlagsDebug} for instructions on flipping the flags via adb.
  */
 public class Flags {
     public static final BooleanFlag TEAMFOOD = new BooleanFlag(1, false);

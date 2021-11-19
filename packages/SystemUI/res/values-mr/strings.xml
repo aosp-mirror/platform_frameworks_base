@@ -107,6 +107,8 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"फोन"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"व्हॉइस सहाय्य"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"वॉलेट"</string>
+    <!-- no translation found for accessibility_qr_code_scanner_button (7521277927692910795) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="122785427241471085">"अनलॉक करा"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"डिव्हाइस लॉक केले"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"चेहरा स्कॅन करत आहे"</string>
@@ -438,7 +440,7 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"रिंग करा"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"व्हायब्रेट"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"म्यूट करा"</string>
-    <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. सशब्द करण्यासाठी टॅप करा."</string>
+    <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. अनम्यूट करण्यासाठी टॅप करा."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. व्हायब्रेट सेट करण्यासाठी टॅप करा. प्रवेशयोग्यता सेवा म्यूट केल्या जाऊ शकतात."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. म्यूट करण्यासाठी टॅप करा. प्रवेशक्षमता सेवा म्यूट केल्या जाऊ शकतात."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. व्हायब्रेट सेट करण्यासाठी टॅप करा."</string>
@@ -464,6 +466,10 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"वापरण्यासाठी अनलॉक करा"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"तुमची कार्ड मिळवताना समस्या आली, कृपया नंतर पुन्हा प्रयत्न करा"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"लॉक स्क्रीन सेटिंग्ज"</string>
+    <!-- no translation found for qr_code_scanner_title (1598912458255252498) -->
+    <skip />
+    <!-- no translation found for qr_code_scanner_description (7452098243938659945) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"कार्य प्रोफाईल"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"विमान मोड"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"तुम्ही तुमचा <xliff:g id="WHEN">%1$s</xliff:g> वाजता होणारा पुढील अलार्म ऐकणार नाही"</string>

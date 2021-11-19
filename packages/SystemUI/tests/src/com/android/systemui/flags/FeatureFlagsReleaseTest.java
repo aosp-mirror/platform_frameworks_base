@@ -25,7 +25,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.content.Context;
 
@@ -33,7 +32,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -50,17 +48,16 @@ import java.io.StringWriter;
  * overriding, and should never return any value other than the one provided as the default.
  */
 @SmallTest
-public class FeatureFlagManagerTest extends SysuiTestCase {
-    FeatureFlagManager mFeatureFlagManager;
+public class FeatureFlagsReleaseTest extends SysuiTestCase {
+    FeatureFlagsRelease mFeatureFlagsRelease;
 
-    @Mock private Context mContext;
     @Mock private DumpManager mDumpManager;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mFeatureFlagManager = new FeatureFlagManager(mDumpManager);
+        mFeatureFlagsRelease = new FeatureFlagsRelease(mDumpManager);
     }
 
     @After
@@ -71,23 +68,10 @@ public class FeatureFlagManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testIsEnabled() {
-        mFeatureFlagManager.setEnabled(1, true);
-        // Again, nothing changes.
-        assertThat(mFeatureFlagManager.isEnabled(1, false)).isFalse();
-    }
-
-    @Test
     public void testDump() {
-        // Even if a flag is set before
-        mFeatureFlagManager.setEnabled(1, true);
-
         // WHEN the flags have been accessed
-        assertFalse(mFeatureFlagManager.isEnabled(1, false));
-        assertTrue(mFeatureFlagManager.isEnabled(2, true));
-
-        // Even if a flag is set after
-        mFeatureFlagManager.setEnabled(2, false);
+        assertFalse(mFeatureFlagsRelease.isEnabled(1, false));
+        assertTrue(mFeatureFlagsRelease.isEnabled(2, true));
 
         // THEN the dump contains the flags and the default values
         String dump = dumpToString();
@@ -98,7 +82,7 @@ public class FeatureFlagManagerTest extends SysuiTestCase {
     private String dumpToString() {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
-        mFeatureFlagManager.dump(mock(FileDescriptor.class), pw, new String[0]);
+        mFeatureFlagsRelease.dump(mock(FileDescriptor.class), pw, new String[0]);
         pw.flush();
         String dump = sw.toString();
         return dump;

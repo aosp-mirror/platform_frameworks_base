@@ -80,7 +80,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             Handler handler = FgThread.getHandler();
 
             ServiceConfigAccessor serviceConfigAccessor =
-                    ServiceConfigAccessor.getInstance(context);
+                    ServiceConfigAccessorImpl.getInstance(context);
             TimeZoneDetectorStrategy timeZoneDetectorStrategy =
                     TimeZoneDetectorStrategyImpl.create(context, handler, serviceConfigAccessor);
 
@@ -92,7 +92,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             // Publish the binder service so it can be accessed from other (appropriately
             // permissioned) processes.
             TimeZoneDetectorService service = TimeZoneDetectorService.create(
-                    context, handler, timeZoneDetectorStrategy);
+                    context, handler, serviceConfigAccessor, timeZoneDetectorStrategy);
             publishBinderService(Context.TIME_ZONE_DETECTOR_SERVICE, service);
         }
     }
@@ -105,6 +105,9 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
     @NonNull
     private final CallerIdentityInjector mCallerIdentityInjector;
+
+    @NonNull
+    private final ServiceConfigAccessor mServiceConfigAccessor;
 
     @NonNull
     private final TimeZoneDetectorStrategy mTimeZoneDetectorStrategy;
@@ -126,25 +129,29 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
     private static TimeZoneDetectorService create(
             @NonNull Context context, @NonNull Handler handler,
+            @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull TimeZoneDetectorStrategy timeZoneDetectorStrategy) {
 
         CallerIdentityInjector callerIdentityInjector = CallerIdentityInjector.REAL;
-        return new TimeZoneDetectorService(
-                context, handler, callerIdentityInjector, timeZoneDetectorStrategy);
+        return new TimeZoneDetectorService(context, handler, callerIdentityInjector,
+                serviceConfigAccessor, timeZoneDetectorStrategy);
     }
 
     @VisibleForTesting
     public TimeZoneDetectorService(@NonNull Context context, @NonNull Handler handler,
             @NonNull CallerIdentityInjector callerIdentityInjector,
+            @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull TimeZoneDetectorStrategy timeZoneDetectorStrategy) {
         mContext = Objects.requireNonNull(context);
         mHandler = Objects.requireNonNull(handler);
         mCallerIdentityInjector = Objects.requireNonNull(callerIdentityInjector);
+        mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
         mTimeZoneDetectorStrategy = Objects.requireNonNull(timeZoneDetectorStrategy);
 
         // Wire up a change listener so that ITimeZoneDetectorListeners can be notified when
         // the configuration changes for any reason.
-        mTimeZoneDetectorStrategy.addConfigChangeListener(this::handleConfigurationChanged);
+        mServiceConfigAccessor.addConfigurationInternalChangeListener(
+                () -> mHandler.post(this::handleConfigurationInternalChangedOnHandlerThread));
     }
 
     @Override
@@ -160,7 +167,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
             ConfigurationInternal configurationInternal =
-                    mTimeZoneDetectorStrategy.getConfigurationInternal(userId);
+                    mServiceConfigAccessor.getConfigurationInternal(userId);
             return configurationInternal.createCapabilitiesAndConfig();
         } finally {
             mCallerIdentityInjector.restoreCallingIdentity(token);
@@ -184,7 +191,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
-            return mTimeZoneDetectorStrategy.updateConfiguration(userId, configuration);
+            return mServiceConfigAccessor.updateConfiguration(userId, configuration);
         } finally {
             mCallerIdentityInjector.restoreCallingIdentity(token);
         }
@@ -264,7 +271,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         }
     }
 
-    void handleConfigurationChanged() {
+    void handleConfigurationInternalChangedOnHandlerThread() {
         // Configuration has changed, but each user may have a different view of the configuration.
         // It's possible that this will cause unnecessary notifications but that shouldn't be a
         // problem.
@@ -315,14 +322,13 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     boolean isTelephonyTimeZoneDetectionSupported() {
         enforceManageTimeZoneDetectorPermission();
 
-        return ServiceConfigAccessor.getInstance(mContext)
-                .isTelephonyTimeZoneDetectionFeatureSupported();
+        return mServiceConfigAccessor.isTelephonyTimeZoneDetectionFeatureSupported();
     }
 
     boolean isGeoTimeZoneDetectionSupported() {
         enforceManageTimeZoneDetectorPermission();
 
-        return ServiceConfigAccessor.getInstance(mContext).isGeoTimeZoneDetectionFeatureSupported();
+        return mServiceConfigAccessor.isGeoTimeZoneDetectionFeatureSupported();
     }
 
     /**

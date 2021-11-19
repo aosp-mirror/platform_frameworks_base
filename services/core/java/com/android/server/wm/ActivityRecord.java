@@ -5971,10 +5971,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // because it may be a trampoline.
         if (!wasTaskVisible && mStartingData != null && !finishing && !mLaunchedFromBubble
                 && !mDisplayContent.mAppTransition.isReady()
-                && !mDisplayContent.mAppTransition.isRunning()) {
+                && !mDisplayContent.mAppTransition.isRunning()
+                && mDisplayContent.isNextTransitionForward()) {
             // The pending transition state will be cleared after the transition is started, so
             // save the state for launching the client later (used by LaunchActivityItem).
-            mStartingData.mIsTransitionForward = mDisplayContent.isNextTransitionForward();
+            mStartingData.mIsTransitionForward = true;
             mDisplayContent.executeAppTransition();
         }
     }

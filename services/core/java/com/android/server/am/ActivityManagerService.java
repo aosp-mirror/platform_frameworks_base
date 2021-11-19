@@ -14743,10 +14743,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy(anyOf = {"this", "mProcLock"})
-    final void setProcessTrackerStateLOSP(ProcessRecord proc, int memFactor, long now) {
+    final void setProcessTrackerStateLOSP(ProcessRecord proc, int memFactor) {
         if (proc.getThread() != null) {
             proc.mProfile.setProcessTrackerState(
-                    proc.mState.getReportedProcState(), memFactor, now);
+                    proc.mState.getReportedProcState(), memFactor);
         }
     }
 
