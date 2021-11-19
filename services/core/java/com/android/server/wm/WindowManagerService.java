@@ -60,6 +60,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
@@ -1653,6 +1654,8 @@ public class WindowManagerService extends IWindowManager.Stub
             final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
             displayPolicy.adjustWindowParamsLw(win, win.mAttrs);
             attrs.flags = sanitizeFlagSlippery(attrs.flags, win.getName(), callingUid, callingPid);
+            attrs.inputFeatures = sanitizeSpyWindow(attrs.inputFeatures, win.getName(), callingUid,
+                    callingPid);
             win.setRequestedVisibilities(requestedVisibilities);
 
             res = displayPolicy.validateAddingWindowLw(attrs, callingPid, callingUid);
@@ -2209,6 +2212,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayPolicy.adjustWindowParamsLw(win, attrs);
                 win.mToken.adjustWindowParams(win, attrs);
                 attrs.flags = sanitizeFlagSlippery(attrs.flags, win.getName(), uid, pid);
+                attrs.inputFeatures = sanitizeSpyWindow(attrs.inputFeatures, win.getName(), uid,
+                        pid);
                 int disableFlags =
                         (attrs.systemUiVisibility | attrs.subtreeSystemUiVisibility) & DISABLE_MASK;
                 if (disableFlags != 0 && !hasStatusBarPermission(pid, uid)) {
@@ -8239,6 +8244,23 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
+     * You need MONITOR_INPUT permission to be able to set INPUT_FEATURE_SPY.
+     */
+    private int sanitizeSpyWindow(int inputFeatures, String windowName, int callingUid,
+            int callingPid) {
+        if ((inputFeatures & INPUT_FEATURE_SPY) == 0) {
+            return inputFeatures;
+        }
+        final int permissionResult = mContext.checkPermission(
+                permission.MONITOR_INPUT, callingPid, callingUid);
+        if (permissionResult != PackageManager.PERMISSION_GRANTED) {
+            throw new IllegalArgumentException("Cannot use INPUT_FEATURE_SPY from '" + windowName
+                    + "' because it doesn't the have MONITOR_INPUT permission");
+        }
+        return inputFeatures;
+    }
+
+    /**
      * Assigns an InputChannel to a SurfaceControl and configures it to receive
      * touch input according to it's on-screen geometry.
      *
@@ -8291,6 +8313,7 @@ public class WindowManagerService extends IWindowManager.Stub
         h.ownerUid = callingUid;
         h.ownerPid = callingPid;
 
+        // Do not allow any input features to be set without sanitizing them first.
         h.inputFeatures = 0;
 
         if (region == null) {

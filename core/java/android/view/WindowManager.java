@@ -3355,6 +3355,15 @@ public interface WindowManager extends ViewManager {
         public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY = 0x00000004;
 
         /**
+         * An input spy window. This window will receive all pointer events within its touchable
+         * area, but will will not stop events from being sent to other windows below it in z-order.
+         * An input event will be dispatched to all spy windows above the top non-spy window at the
+         * event's coordinates.
+         * @hide
+         */
+        public static final int INPUT_FEATURE_SPY = 0x00000020;
+
+        /**
          * An internal annotation for flags that can be specified to {@link #inputFeatures}.
          *
          * @hide
