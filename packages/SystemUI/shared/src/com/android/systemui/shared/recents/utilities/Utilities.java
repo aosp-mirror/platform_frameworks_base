@@ -18,7 +18,6 @@ package com.android.systemui.shared.recents.utilities;
 
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
-import static android.util.DisplayMetrics.DENSITY_DEVICE_STABLE;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -126,10 +125,9 @@ public class Utilities {
         final WindowManager windowManager = context.getSystemService(WindowManager.class);
         final Rect bounds = windowManager.getCurrentWindowMetrics().getBounds();
 
-        float originalSmallestWidth = dpiFromPx(Math.min(bounds.width(), bounds.height()),
+        float smallestWidth = dpiFromPx(Math.min(bounds.width(), bounds.height()),
                 context.getResources().getConfiguration().densityDpi);
-        return dpiFromPx(Math.min(bounds.width(), bounds.height()), DENSITY_DEVICE_STABLE)
-                >= TABLET_MIN_DPS && originalSmallestWidth >= TABLET_MIN_DPS;
+        return smallestWidth >= TABLET_MIN_DPS;
     }
 
     public static float dpiFromPx(float size, int densityDpi) {
