@@ -687,6 +687,15 @@ public final class DeviceConfig {
     @SystemApi
     public static final String NAMESPACE_UWB = "uwb";
 
+    /**
+     * Namespace for AmbientContextEventManagerService related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_AMBIENT_CONTEXT_MANAGER_SERVICE =
+            "ambient_context_manager_service";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =

@@ -951,6 +951,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mRetailDemoPackage;
     final @Nullable String mOverlayConfigSignaturePackage;
     final @Nullable String mRecentsPackage;
+    final @Nullable String mAmbientContextDetectionPackage;
 
     @GuardedBy("mLock")
     private final PackageUsage mPackageUsage = new PackageUsage();
@@ -1669,6 +1670,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mSystemTextClassifierPackageName = testParams.systemTextClassifierPackage;
         mRetailDemoPackage = testParams.retailDemoPackage;
         mRecentsPackage = testParams.recentsPackage;
+        mAmbientContextDetectionPackage = testParams.ambientContextDetectionPackage;
         mConfiguratorPackage = testParams.configuratorPackage;
         mAppPredictionServicePackage = testParams.appPredictionServicePackage;
         mIncidentReportApproverPackage = testParams.incidentReportApproverPackage;
@@ -1996,6 +1998,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mRetailDemoPackage = getRetailDemoPackageName();
             mOverlayConfigSignaturePackage = getOverlayConfigSignaturePackageName();
             mRecentsPackage = getRecentsPackageName();
+            mAmbientContextDetectionPackage = getAmbientContextDetectionPackageName();
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -5643,6 +5646,11 @@ public class PackageManagerService extends IPackageManager.Stub
         return mPmInternal.getSetupWizardPackageName();
     }
 
+    public @Nullable String getAmbientContextDetectionPackageName() {
+        return ensureSystemPackageName(getPackageFromComponentString(
+                        R.string.config_defaultAmbientContextDetectionService));
+    }
+
     public String getIncidentReportApproverPackageName() {
         return ensureSystemPackageName(mContext.getString(
                 R.string.config_incidentReportApproverPackage));
@@ -8718,6 +8726,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 return mComputer.filterOnlySystemPackages(mConfiguratorPackage);
             case PackageManagerInternal.PACKAGE_INCIDENT_REPORT_APPROVER:
                 return mComputer.filterOnlySystemPackages(mIncidentReportApproverPackage);
+            case PackageManagerInternal.PACKAGE_AMBIENT_CONTEXT_DETECTION:
+                return mComputer.filterOnlySystemPackages(mAmbientContextDetectionPackage);
             case PackageManagerInternal.PACKAGE_APP_PREDICTOR:
                 return mComputer.filterOnlySystemPackages(mAppPredictionServicePackage);
             case PackageManagerInternal.PACKAGE_COMPANION:

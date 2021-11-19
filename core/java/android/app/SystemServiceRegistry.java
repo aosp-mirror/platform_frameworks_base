@@ -24,6 +24,8 @@ import android.annotation.SystemApi;
 import android.app.ContextImpl.ServiceInitializationState;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
+import android.app.ambientcontext.AmbientContextManager;
+import android.app.ambientcontext.IAmbientContextEventObserver;
 import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
 import android.app.contentsuggestions.ContentSuggestionsManager;
@@ -1517,6 +1519,18 @@ public final class SystemServiceRegistry {
                         return new DisplayHashManager();
                     }
                 });
+
+        registerService(Context.AMBIENT_CONTEXT_SERVICE, AmbientContextManager.class,
+                new CachedServiceFetcher<AmbientContextManager>() {
+                    @Override
+                    public AmbientContextManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder iBinder = ServiceManager.getServiceOrThrow(
+                                Context.AMBIENT_CONTEXT_SERVICE);
+                        IAmbientContextEventObserver manager =
+                                IAmbientContextEventObserver.Stub.asInterface(iBinder);
+                        return new AmbientContextManager(ctx.getOuterContext(), manager);
+                    }});
 
         sInitializing = true;
         try {
