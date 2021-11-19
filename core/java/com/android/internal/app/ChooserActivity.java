@@ -186,6 +186,17 @@ public class ChooserActivity extends ResolverActivity implements
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
 
     /**
+     * Boolean extra added to "unbundled Sharesheet" delegation intents to signal whether the app
+     * prediction service is available. Our query of the service <em>availability</em> depends on
+     * privileges that are only available in the system, even though the service itself would then
+     * be available to the unbundled component. For now, we just include the query result as part of
+     * the handover intent.
+     * TODO: investigate whether the privileged query is necessary to determine the availability.
+     */
+    protected static final String EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE =
+            "com.android.internal.app.ChooserActivity.EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE";
+
+    /**
      * Transition name for the first image preview.
      * To be used for shared element transition into this activity.
      * @hide
@@ -757,6 +768,11 @@ public class ChooserActivity extends ResolverActivity implements
             delegationIntent.setComponent(delegateActivity);
             delegationIntent.putExtra(Intent.EXTRA_INTENT, getIntent());
             delegationIntent.putExtra(ActivityTaskManager.EXTRA_PERMISSION_TOKEN, permissionToken);
+
+            // Query prediction availability; mIsAppPredictorComponentAvailable isn't initialized.
+            delegationIntent.putExtra(
+                    EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE, isAppPredictionServiceAvailable());
+
             delegationIntent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
 
             // Don't close until the delegate finishes, or the token will be invalidated.
@@ -971,7 +987,8 @@ public class ChooserActivity extends ResolverActivity implements
             return false;
         }
 
-        // Check if the app prediction component actually exists on the device.
+        // Check if the app prediction component actually exists on the device. The component is
+        // only visible when this is running in a system activity; otherwise this check will fail.
         Intent intent = new Intent();
         intent.setComponent(appPredictionComponentName);
         if (getPackageManager().resolveService(intent, PackageManager.MATCH_ALL) == null) {
