@@ -17273,8 +17273,12 @@ package android.graphics.text {
     method @NonNull public android.graphics.text.MeasuredText.Builder appendReplacementRun(@NonNull android.graphics.Paint, @IntRange(from=0) int, @FloatRange(from=0) @Px float);
     method @NonNull public android.graphics.text.MeasuredText.Builder appendStyleRun(@NonNull android.graphics.Paint, @IntRange(from=0) int, boolean);
     method @NonNull public android.graphics.text.MeasuredText build();
-    method @NonNull public android.graphics.text.MeasuredText.Builder setComputeHyphenation(boolean);
+    method @Deprecated @NonNull public android.graphics.text.MeasuredText.Builder setComputeHyphenation(boolean);
+    method @NonNull public android.graphics.text.MeasuredText.Builder setComputeHyphenation(int);
     method @NonNull public android.graphics.text.MeasuredText.Builder setComputeLayout(boolean);
+    field public static final int HYPHENATION_MODE_FAST = 2; // 0x2
+    field public static final int HYPHENATION_MODE_NONE = 0; // 0x0
+    field public static final int HYPHENATION_MODE_NORMAL = 1; // 0x1
   }
 
   public final class PositionedGlyphs {
@@ -44523,8 +44527,10 @@ package android.text {
     field public static final int DIR_LEFT_TO_RIGHT = 1; // 0x1
     field public static final int DIR_RIGHT_TO_LEFT = -1; // 0xffffffff
     field public static final int HYPHENATION_FREQUENCY_FULL = 2; // 0x2
+    field public static final int HYPHENATION_FREQUENCY_FULL_FAST = 4; // 0x4
     field public static final int HYPHENATION_FREQUENCY_NONE = 0; // 0x0
     field public static final int HYPHENATION_FREQUENCY_NORMAL = 1; // 0x1
+    field public static final int HYPHENATION_FREQUENCY_NORMAL_FAST = 3; // 0x3
     field public static final int JUSTIFICATION_MODE_INTER_WORD = 1; // 0x1
     field public static final int JUSTIFICATION_MODE_NONE = 0; // 0x0
   }

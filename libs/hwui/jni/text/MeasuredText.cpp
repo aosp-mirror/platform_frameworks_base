@@ -80,15 +80,17 @@ static void nAddReplacementRun(JNIEnv* /* unused */, jclass /* unused */, jlong 
 }
 
 // Regular JNI
-static jlong nBuildMeasuredText(JNIEnv* env, jclass /* unused */, jlong builderPtr,
-                                jlong hintPtr, jcharArray javaText, jboolean computeHyphenation,
-                                jboolean computeLayout) {
+static jlong nBuildMeasuredText(JNIEnv* env, jclass /* unused */, jlong builderPtr, jlong hintPtr,
+                                jcharArray javaText, jboolean computeHyphenation,
+                                jboolean computeLayout, jboolean fastHyphenationMode) {
     ScopedCharArrayRO text(env, javaText);
     const minikin::U16StringPiece textBuffer(text.get(), text.size());
 
     // Pass the ownership to Java.
-    return toJLong(toBuilder(builderPtr)->build(textBuffer, computeHyphenation, computeLayout,
-                                                toMeasuredParagraph(hintPtr)).release());
+    return toJLong(toBuilder(builderPtr)
+                           ->build(textBuffer, computeHyphenation, computeLayout,
+                                   fastHyphenationMode, toMeasuredParagraph(hintPtr))
+                           .release());
 }
 
 // Regular JNI
@@ -140,12 +142,12 @@ static jint nGetMemoryUsage(CRITICAL_JNI_PARAMS_COMMA jlong ptr) {
 }
 
 static const JNINativeMethod gMTBuilderMethods[] = {
-    // MeasuredParagraphBuilder native functions.
-    {"nInitBuilder", "()J", (void*) nInitBuilder},
-    {"nAddStyleRun", "(JJIIZ)V", (void*) nAddStyleRun},
-    {"nAddReplacementRun", "(JJIIF)V", (void*) nAddReplacementRun},
-    {"nBuildMeasuredText", "(JJ[CZZ)J", (void*) nBuildMeasuredText},
-    {"nFreeBuilder", "(J)V", (void*) nFreeBuilder},
+        // MeasuredParagraphBuilder native functions.
+        {"nInitBuilder", "()J", (void*)nInitBuilder},
+        {"nAddStyleRun", "(JJIIZ)V", (void*)nAddStyleRun},
+        {"nAddReplacementRun", "(JJIIF)V", (void*)nAddReplacementRun},
+        {"nBuildMeasuredText", "(JJ[CZZZ)J", (void*)nBuildMeasuredText},
+        {"nFreeBuilder", "(J)V", (void*)nFreeBuilder},
 };
 
 static const JNINativeMethod gMTMethods[] = {
