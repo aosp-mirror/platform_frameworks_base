@@ -31,7 +31,7 @@
         android:layout_width="0dp"
         android:textAlignment="center"
         android:text="@string/qs_user_switch_dialog_title"
-        android:textAppearance="@style/TextAppearance.QSDialog.Title"
+        android:textAppearance="@style/TextAppearance.Dialog.Title"
         android:layout_marginBottom="32dp"
         sysui:layout_constraintTop_toTopOf="parent"
         sysui:layout_constraintStart_toStartOf="parent"
@@ -71,7 +71,7 @@
         sysui:layout_constraintStart_toStartOf="parent"
         sysui:layout_constraintEnd_toStartOf="@id/done"
         sysui:layout_constraintHorizontal_chainStyle="spread_inside"
-        style="@style/Widget.QSDialog.Button.BorderButton"
+        style="@style/Widget.Dialog.Button.BorderButton"
         />
 
     <Button
@@ -83,7 +83,7 @@
         sysui:layout_constraintBottom_toBottomOf="parent"
         sysui:layout_constraintStart_toEndOf="@id/settings"
         sysui:layout_constraintEnd_toEndOf="parent"
-        style="@style/Widget.QSDialog.Button"
+        style="@style/Widget.Dialog.Button"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
