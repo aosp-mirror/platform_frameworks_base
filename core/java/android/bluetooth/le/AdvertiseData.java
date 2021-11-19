@@ -25,6 +25,7 @@ import android.util.ArrayMap;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -47,6 +48,9 @@ public final class AdvertiseData implements Parcelable {
     @NonNull
     private final List<ParcelUuid> mServiceSolicitationUuids;
 
+    @Nullable
+    private final List<TransportDiscoveryData> mTransportDiscoveryData;
+
     private final SparseArray<byte[]> mManufacturerSpecificData;
     private final Map<ParcelUuid, byte[]> mServiceData;
     private final boolean mIncludeTxPowerLevel;
@@ -54,12 +58,14 @@ public final class AdvertiseData implements Parcelable {
 
     private AdvertiseData(List<ParcelUuid> serviceUuids,
             List<ParcelUuid> serviceSolicitationUuids,
+            List<TransportDiscoveryData> transportDiscoveryData,
             SparseArray<byte[]> manufacturerData,
             Map<ParcelUuid, byte[]> serviceData,
             boolean includeTxPowerLevel,
             boolean includeDeviceName) {
         mServiceUuids = serviceUuids;
         mServiceSolicitationUuids = serviceSolicitationUuids;
+        mTransportDiscoveryData = transportDiscoveryData;
         mManufacturerSpecificData = manufacturerData;
         mServiceData = serviceData;
         mIncludeTxPowerLevel = includeTxPowerLevel;
@@ -80,6 +86,17 @@ public final class AdvertiseData implements Parcelable {
     @NonNull
     public List<ParcelUuid> getServiceSolicitationUuids() {
         return mServiceSolicitationUuids;
+    }
+
+    /**
+     * Returns a list of {@link TransportDiscoveryData} within the advertisement.
+     */
+    @NonNull
+    public List<TransportDiscoveryData> getTransportDiscoveryData() {
+        if (mTransportDiscoveryData == null) {
+            return Collections.emptyList();
+        }
+        return mTransportDiscoveryData;
     }
 
     /**
@@ -116,8 +133,8 @@ public final class AdvertiseData implements Parcelable {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(mServiceUuids, mServiceSolicitationUuids, mManufacturerSpecificData,
-                mServiceData, mIncludeDeviceName, mIncludeTxPowerLevel);
+        return Objects.hash(mServiceUuids, mServiceSolicitationUuids, mTransportDiscoveryData,
+                mManufacturerSpecificData, mServiceData, mIncludeDeviceName, mIncludeTxPowerLevel);
     }
 
     /**
@@ -134,6 +151,7 @@ public final class AdvertiseData implements Parcelable {
         AdvertiseData other = (AdvertiseData) obj;
         return Objects.equals(mServiceUuids, other.mServiceUuids)
                 && Objects.equals(mServiceSolicitationUuids, other.mServiceSolicitationUuids)
+                && Objects.equals(mTransportDiscoveryData, other.mTransportDiscoveryData)
                 && BluetoothLeUtils.equals(mManufacturerSpecificData,
                     other.mManufacturerSpecificData)
                 && BluetoothLeUtils.equals(mServiceData, other.mServiceData)
@@ -144,7 +162,8 @@ public final class AdvertiseData implements Parcelable {
     @Override
     public String toString() {
         return "AdvertiseData [mServiceUuids=" + mServiceUuids + ", mServiceSolicitationUuids="
-                + mServiceSolicitationUuids + ", mManufacturerSpecificData="
+                + mServiceSolicitationUuids + ", mTransportDiscoveryData="
+                + mTransportDiscoveryData + ", mManufacturerSpecificData="
                 + BluetoothLeUtils.toString(mManufacturerSpecificData) + ", mServiceData="
                 + BluetoothLeUtils.toString(mServiceData)
                 + ", mIncludeTxPowerLevel=" + mIncludeTxPowerLevel + ", mIncludeDeviceName="
@@ -161,6 +180,8 @@ public final class AdvertiseData implements Parcelable {
         dest.writeTypedArray(mServiceUuids.toArray(new ParcelUuid[mServiceUuids.size()]), flags);
         dest.writeTypedArray(mServiceSolicitationUuids.toArray(
                 new ParcelUuid[mServiceSolicitationUuids.size()]), flags);
+
+        dest.writeTypedList(mTransportDiscoveryData);
 
         // mManufacturerSpecificData could not be null.
         dest.writeInt(mManufacturerSpecificData.size());
@@ -197,6 +218,12 @@ public final class AdvertiseData implements Parcelable {
                         builder.addServiceSolicitationUuid(uuid);
                     }
 
+                    List<TransportDiscoveryData> transportDiscoveryData =
+                            in.createTypedArrayList(TransportDiscoveryData.CREATOR);
+                    for (TransportDiscoveryData tdd : transportDiscoveryData) {
+                        builder.addTransportDiscoveryData(tdd);
+                    }
+
                     int manufacturerSize = in.readInt();
                     for (int i = 0; i < manufacturerSize; ++i) {
                         int manufacturerId = in.readInt();
@@ -223,6 +250,9 @@ public final class AdvertiseData implements Parcelable {
         private List<ParcelUuid> mServiceUuids = new ArrayList<ParcelUuid>();
         @NonNull
         private List<ParcelUuid> mServiceSolicitationUuids = new ArrayList<ParcelUuid>();
+        @Nullable
+        private List<TransportDiscoveryData> mTransportDiscoveryData =
+                new ArrayList<TransportDiscoveryData>();
         private SparseArray<byte[]> mManufacturerSpecificData = new SparseArray<byte[]>();
         private Map<ParcelUuid, byte[]> mServiceData = new ArrayMap<ParcelUuid, byte[]>();
         private boolean mIncludeTxPowerLevel;
@@ -256,6 +286,7 @@ public final class AdvertiseData implements Parcelable {
             mServiceSolicitationUuids.add(serviceSolicitationUuid);
             return this;
         }
+
         /**
          * Add service data to advertise data.
          *
@@ -270,6 +301,23 @@ public final class AdvertiseData implements Parcelable {
                         "serviceDataUuid or serviceDataUuid is null");
             }
             mServiceData.put(serviceDataUuid, serviceData);
+            return this;
+        }
+
+        /**
+         * Add Transport Discovery Data to advertise data.
+         *
+         * @param transportDiscoveryData Transport Discovery Data, consisting of one or more
+         * Transport Blocks. Transport Discovery Data AD Type Code is already included.
+         * @throws IllegalArgumentException If the {@code transportDiscoveryData} is empty
+         */
+        @NonNull
+        public Builder addTransportDiscoveryData(
+                @NonNull TransportDiscoveryData transportDiscoveryData) {
+            if (transportDiscoveryData == null) {
+                throw new IllegalArgumentException("transportDiscoveryData is null");
+            }
+            mTransportDiscoveryData.add(transportDiscoveryData);
             return this;
         }
 
@@ -319,8 +367,8 @@ public final class AdvertiseData implements Parcelable {
          */
         public AdvertiseData build() {
             return new AdvertiseData(mServiceUuids, mServiceSolicitationUuids,
-                    mManufacturerSpecificData, mServiceData, mIncludeTxPowerLevel,
-                    mIncludeDeviceName);
+                    mTransportDiscoveryData, mManufacturerSpecificData, mServiceData,
+                    mIncludeTxPowerLevel, mIncludeDeviceName);
         }
     }
 }
