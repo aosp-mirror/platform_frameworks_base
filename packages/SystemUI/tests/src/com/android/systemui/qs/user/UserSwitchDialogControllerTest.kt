@@ -17,6 +17,7 @@
 package com.android.systemui.qs.user
 
 import android.app.Dialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.provider.Settings
 import android.testing.AndroidTestingRunner
@@ -28,6 +29,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PseudoGridView
 import com.android.systemui.qs.tiles.UserDetailView
+import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
@@ -43,7 +45,6 @@ import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.argThat
-import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -53,13 +54,9 @@ import org.mockito.MockitoAnnotations
 class UserSwitchDialogControllerTest : SysuiTestCase() {
 
     @Mock
-    private lateinit var dialog: UserDialog
+    private lateinit var dialog: SystemUIDialog
     @Mock
     private lateinit var falsingManager: FalsingManager
-    @Mock
-    private lateinit var settingsView: View
-    @Mock
-    private lateinit var doneView: View
     @Mock
     private lateinit var activityStarter: ActivityStarter
     @Mock
@@ -67,13 +64,11 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var launchView: View
     @Mock
-    private lateinit var gridView: PseudoGridView
-    @Mock
     private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
     @Mock
     private lateinit var hostDialog: Dialog
     @Captor
-    private lateinit var clickCaptor: ArgumentCaptor<View.OnClickListener>
+    private lateinit var clickCaptor: ArgumentCaptor<DialogInterface.OnClickListener>
 
     private lateinit var controller: UserSwitchDialogController
 
@@ -81,11 +76,8 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(dialog.settingsButton).thenReturn(settingsView)
-        `when`(dialog.doneButton).thenReturn(doneView)
-        `when`(dialog.grid).thenReturn(gridView)
-
         `when`(launchView.context).thenReturn(mContext)
+        `when`(dialog.context).thenReturn(mContext)
         `when`(dialogLaunchAnimator.showFromView(any(), any(), anyBoolean()))
                 .thenReturn(hostDialog)
 
@@ -105,30 +97,6 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun createCalledBeforeDoneButton() {
-        controller.showDialog(launchView)
-        val inOrder = inOrder(dialog)
-        inOrder.verify(dialog).create()
-        inOrder.verify(dialog).doneButton
-    }
-
-    @Test
-    fun createCalledBeforeSettingsButton() {
-        controller.showDialog(launchView)
-        val inOrder = inOrder(dialog)
-        inOrder.verify(dialog).create()
-        inOrder.verify(dialog).settingsButton
-    }
-
-    @Test
-    fun createCalledBeforeGrid() {
-        controller.showDialog(launchView)
-        val inOrder = inOrder(dialog)
-        inOrder.verify(dialog).create()
-        inOrder.verify(dialog).grid
-    }
-
-    @Test
     fun dialog_showForAllUsers() {
         controller.showDialog(launchView)
         verify(dialog).setShowForAllUsers(true)
@@ -143,51 +111,44 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     @Test
     fun adapterAndGridLinked() {
         controller.showDialog(launchView)
-        verify(userDetailViewAdapter).linkToViewGroup(gridView)
+        verify(userDetailViewAdapter).linkToViewGroup(any<PseudoGridView>())
     }
 
     @Test
-    fun clickDoneButton_dismiss() {
+    fun doneButtonSetWithNullHandler() {
         controller.showDialog(launchView)
 
-        verify(doneView).setOnClickListener(capture(clickCaptor))
-
-        clickCaptor.value.onClick(doneView)
-
-        verify(activityStarter, never()).postStartActivityDismissingKeyguard(any(), anyInt())
-        verify(dialog).dismiss()
+        verify(dialog).setPositiveButton(anyInt(), eq(null))
     }
 
     @Test
-    fun clickSettingsButton_noFalsing_opensSettingsAndDismisses() {
+    fun clickSettingsButton_noFalsing_opensSettings() {
         `when`(falsingManager.isFalseTap(anyInt())).thenReturn(false)
 
         controller.showDialog(launchView)
 
-        verify(settingsView).setOnClickListener(capture(clickCaptor))
+        verify(dialog).setNeutralButton(anyInt(), capture(clickCaptor))
 
-        clickCaptor.value.onClick(settingsView)
+        clickCaptor.value.onClick(dialog, DialogInterface.BUTTON_NEUTRAL)
 
         verify(activityStarter)
                 .postStartActivityDismissingKeyguard(
                         argThat(IntentMatcher(Settings.ACTION_USER_SETTINGS)),
                         eq(0)
                 )
-        verify(dialog).dismiss()
     }
 
     @Test
-    fun clickSettingsButton_Falsing_notOpensSettingsAndDismisses() {
+    fun clickSettingsButton_Falsing_notOpensSettings() {
         `when`(falsingManager.isFalseTap(anyInt())).thenReturn(true)
 
         controller.showDialog(launchView)
 
-        verify(settingsView).setOnClickListener(capture(clickCaptor))
+        verify(dialog).setNeutralButton(anyInt(), capture(clickCaptor))
 
-        clickCaptor.value.onClick(settingsView)
+        clickCaptor.value.onClick(dialog, DialogInterface.BUTTON_NEUTRAL)
 
         verify(activityStarter, never()).postStartActivityDismissingKeyguard(any(), anyInt())
-        verify(dialog).dismiss()
     }
 
     @Test

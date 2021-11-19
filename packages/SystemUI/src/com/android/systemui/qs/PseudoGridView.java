@@ -133,10 +133,7 @@ public class PseudoGridView extends ViewGroup {
                     x += width + mHorizontalSpacing;
                 }
             }
-            y += maxHeight;
-            if (row > 0) {
-                y += mVerticalSpacing;
-            }
+            y += maxHeight + mVerticalSpacing;
         }
     }
 
