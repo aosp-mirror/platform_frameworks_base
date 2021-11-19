@@ -791,6 +791,7 @@ public class NotificationEntryManager implements
      * these don't exist, although there are a couple exceptions.
      */
     public Iterable<NotificationEntry> getPendingNotificationsIterator() {
+        mNotifPipelineFlags.checkLegacyPipelineEnabled();
         return mPendingNotifications.values();
     }
 
@@ -803,6 +804,7 @@ public class NotificationEntryManager implements
      * @return a {@link NotificationEntry} if it has been prepared, else null
      */
     public NotificationEntry getActiveNotificationUnfiltered(String key) {
+        mNotifPipelineFlags.checkLegacyPipelineEnabled();
         return mActiveNotifications.get(key);
     }
 
@@ -811,6 +813,7 @@ public class NotificationEntryManager implements
      * notification doesn't exist.
      */
     public NotificationEntry getPendingOrActiveNotif(String key) {
+        mNotifPipelineFlags.checkLegacyPipelineEnabled();
         NotificationEntry entry = mPendingNotifications.get(key);
         if (entry != null) {
             return entry;
@@ -945,6 +948,7 @@ public class NotificationEntryManager implements
      * @return A read-only list of the currently active notifications
      */
     public List<NotificationEntry> getVisibleNotifications() {
+        mNotifPipelineFlags.checkLegacyPipelineEnabled();
         return mReadOnlyNotifications;
     }
 
@@ -954,17 +958,20 @@ public class NotificationEntryManager implements
      */
     @Override
     public Collection<NotificationEntry> getAllNotifs() {
+        mNotifPipelineFlags.checkLegacyPipelineEnabled();
         return mReadOnlyAllNotifications;
     }
 
     @Nullable
     @Override
     public NotificationEntry getEntry(String key) {
+        mNotifPipelineFlags.checkLegacyPipelineEnabled();
         return getPendingOrActiveNotif(key);
     }
 
     /** @return A count of the active notifications */
     public int getActiveNotificationsCount() {
+        mNotifPipelineFlags.checkLegacyPipelineEnabled();
         return mReadOnlyNotifications.size();
     }
 
@@ -972,6 +979,7 @@ public class NotificationEntryManager implements
      * @return {@code true} if there is at least one notification that should be visible right now
      */
     public boolean hasActiveNotifications() {
+        mNotifPipelineFlags.checkLegacyPipelineEnabled();
         return mReadOnlyNotifications.size() != 0;
     }
 
