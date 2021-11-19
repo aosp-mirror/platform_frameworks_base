@@ -211,10 +211,20 @@ class MediaResumeListenerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnLoad_remotePlayback_doesNotCheck() {
-        // When media data is loaded that has not been checked yet, and is not local
-        val dataRemote = data.copy(isLocalSession = false)
-        resumeListener.onMediaDataLoaded(KEY, null, dataRemote)
+    fun testOnLoad_localCast_doesNotCheck() {
+        // When media data is loaded that has not been checked yet, and is a local cast
+        val dataCast = data.copy(playbackLocation = MediaData.PLAYBACK_CAST_LOCAL)
+        resumeListener.onMediaDataLoaded(KEY, null, dataCast)
+
+        // Then we do not take action
+        verify(mediaDataManager, never()).setResumeAction(any(), any())
+    }
+
+    @Test
+    fun testOnload_remoteCast_doesNotCheck() {
+        // When media data is loaded that has not been checked yet, and is a remote cast
+        val dataRcn = data.copy(playbackLocation = MediaData.PLAYBACK_CAST_REMOTE)
+        resumeListener.onMediaDataLoaded(KEY, null, dataRcn)
 
         // Then we do not take action
         verify(mediaDataManager, never()).setResumeAction(any(), any())
