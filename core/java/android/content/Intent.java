@@ -1564,15 +1564,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_POWER_USAGE_SUMMARY = "android.intent.action.POWER_USAGE_SUMMARY";
 
     /**
-     * Activity Action: Show one-handed mode settings to the user.
-     * <p>Input: Nothing.
-     * <p>Output: Nothing.
-     * @hide
-     */
-    public static final String ACTION_ONE_HANDED_SETTINGS =
-            "android.intent.action.ONE_HANDED_SETTINGS";
-
-    /**
      * Activity Action: Setup wizard action provided for OTA provisioning to determine if it needs
      * to run.
      * <p>Input: Nothing.
