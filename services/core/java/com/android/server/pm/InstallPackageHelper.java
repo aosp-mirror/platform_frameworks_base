@@ -649,12 +649,17 @@ final class InstallPackageHelper {
             mPm.checkPackageFrozen(pkgName);
         }
 
-        // Also need to kill any apps that are dependent on the library.
+        final boolean isReplace =
+                reconciledPkg.mPrepareResult != null && reconciledPkg.mPrepareResult.mReplace;
+        // Also need to kill any apps that are dependent on the library, except the case of
+        // installation of new version static shared library.
         if (clientLibPkgs != null) {
-            for (int i = 0; i < clientLibPkgs.size(); i++) {
-                AndroidPackage clientPkg = clientLibPkgs.get(i);
-                mPm.killApplication(clientPkg.getPackageName(),
-                        clientPkg.getUid(), "update lib");
+            if (pkg.getStaticSharedLibName() == null || isReplace) {
+                for (int i = 0; i < clientLibPkgs.size(); i++) {
+                    AndroidPackage clientPkg = clientLibPkgs.get(i);
+                    mPm.killApplication(clientPkg.getPackageName(),
+                            clientPkg.getUid(), "update lib");
+                }
             }
         }
 
@@ -676,8 +681,6 @@ final class InstallPackageHelper {
             ksms.addScannedPackageLPw(pkg);
 
             mPm.mComponentResolver.addAllComponents(pkg, chatty);
-            final boolean isReplace =
-                    reconciledPkg.mPrepareResult != null && reconciledPkg.mPrepareResult.mReplace;
             mPm.mAppsFilter.addPackage(pkgSetting, isReplace);
             mPm.addAllPackageProperties(pkg);
 
@@ -3126,10 +3129,12 @@ final class InstallPackageHelper {
                             true, true, pkgList, uidArray, null);
                 }
             } else if (!ArrayUtils.isEmpty(res.mLibraryConsumers)) { // if static shared lib
+                // No need to kill consumers if it's installation of new version static shared lib.
+                final boolean dontKillApp = !update && res.mPkg.getStaticSharedLibName() != null;
                 for (int i = 0; i < res.mLibraryConsumers.size(); i++) {
                     AndroidPackage pkg = res.mLibraryConsumers.get(i);
                     // send broadcast that all consumers of the static shared library have changed
-                    mPm.sendPackageChangedBroadcast(pkg.getPackageName(), false /* dontKillApp */,
+                    mPm.sendPackageChangedBroadcast(pkg.getPackageName(), dontKillApp,
                             new ArrayList<>(Collections.singletonList(pkg.getPackageName())),
                             pkg.getUid(), null);
                 }
