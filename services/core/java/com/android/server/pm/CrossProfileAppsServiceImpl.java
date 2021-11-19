@@ -19,6 +19,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_APP_OPS_MODES;
+import static android.Manifest.permission.START_CROSS_PROFILE_ACTIVITIES;
 import static android.app.AppOpsManager.OP_INTERACT_ACROSS_PROFILES;
 import static android.content.Intent.FLAG_RECEIVER_REGISTERED_ONLY;
 import static android.content.pm.CrossProfileApps.ACTION_CAN_INTERACT_ACROSS_PROFILES_CHANGED;
@@ -154,17 +155,15 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             // must have the required permission and the users must be in the same profile group
             // in order to launch any of its own activities.
             if (callerUserId != userId) {
-                final int permissionFlag = PermissionChecker.checkPermissionForPreflight(
-                        mContext,
-                        INTERACT_ACROSS_PROFILES,
-                        callingPid,
-                        callingUid,
-                        callingPackage);
-                if (permissionFlag != PermissionChecker.PERMISSION_GRANTED
-                        || !isSameProfileGroup(callerUserId, userId)) {
-                    throw new SecurityException("Attempt to launch activity without required "
-                            + INTERACT_ACROSS_PROFILES
-                            + " permission or target user is not in the same profile group.");
+                if (!hasInteractAcrossProfilesPermission(callingPackage, callingUid, callingPid)
+                        && !isPermissionGranted(START_CROSS_PROFILE_ACTIVITIES, callingUid)) {
+                    throw new SecurityException("Attempt to launch activity without one of the"
+                            + " required " + INTERACT_ACROSS_PROFILES + " or "
+                            + START_CROSS_PROFILE_ACTIVITIES + " permissions.");
+                }
+                if (!isSameProfileGroup(callerUserId, userId)) {
+                    throw new SecurityException("Attempt to launch activity when target user is"
+                            + " not in the same profile group.");
                 }
             }
             launchIntent.setComponent(component);
