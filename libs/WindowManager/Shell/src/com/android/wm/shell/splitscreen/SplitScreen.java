@@ -87,6 +87,12 @@ public interface SplitScreen {
      */
     void onKeyguardVisibilityChanged(boolean showing);
 
+    /** Called when device waking up finished. */
+    void onFinishedWakingUp();
+
+    /** Called when device going to sleep finished. */
+    void onFinishedGoingToSleep();
+
     /** Get a string representation of a stage type */
     static String stageTypeToString(@StageType int stage) {
         switch (stage) {
