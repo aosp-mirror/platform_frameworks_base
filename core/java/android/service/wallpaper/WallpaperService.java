@@ -1490,7 +1490,7 @@ public abstract class WallpaperService extends Service {
             //below is the default implementation
             if (xOffset % xOffsetStep > MIN_PAGE_ALLOWED_MARGIN
                     || !mSurfaceHolder.getSurface().isValid()) return;
-            int xPage;
+            int xCurrentPage;
             int xPages;
             if (!validStep(xOffsetStep)) {
                 if (DEBUG) {
@@ -1498,30 +1498,34 @@ public abstract class WallpaperService extends Service {
                 }
                 xOffset = 0;
                 xOffsetStep = 1;
-                xPage = 0;
+                xCurrentPage = 0;
                 xPages = 1;
             } else {
                 xPages = Math.round(1 / xOffsetStep) + 1;
                 xOffsetStep = (float) 1 / (float) xPages;
                 float shrink = (float) (xPages - 1) / (float) xPages;
                 xOffset *= shrink;
-                xPage = Math.round(xOffset / xOffsetStep);
+                xCurrentPage = Math.round(xOffset / xOffsetStep);
             }
             if (DEBUG) {
-                Log.d(TAG, "xPages " + xPages + " xPage " + xPage);
+                Log.d(TAG, "xPages " + xPages + " xPage " + xCurrentPage);
                 Log.d(TAG, "xOffsetStep " + xOffsetStep + " xOffset " + xOffset);
             }
-            EngineWindowPage current;
-            synchronized (mLock) {
+
+            float finalXOffsetStep = xOffsetStep;
+            float finalXOffset = xOffset;
+            mHandler.post(() -> {
+                int xPage = xCurrentPage;
+                EngineWindowPage current;
                 if (mWindowPages.length == 0 || (mWindowPages.length != xPages)) {
                     mWindowPages = new EngineWindowPage[xPages];
-                    initWindowPages(mWindowPages, xOffsetStep);
+                    initWindowPages(mWindowPages, finalXOffsetStep);
                 }
                 if (mLocalColorsToAdd.size() != 0) {
                     for (RectF colorArea : mLocalColorsToAdd) {
                         if (!isValid(colorArea)) continue;
                         mLocalColorAreas.add(colorArea);
-                        int colorPage = getRectFPage(colorArea, xOffsetStep);
+                        int colorPage = getRectFPage(colorArea, finalXOffsetStep);
                         EngineWindowPage currentPage = mWindowPages[colorPage];
                         if (currentPage == null) {
                             currentPage = new EngineWindowPage();
@@ -1539,7 +1543,8 @@ public abstract class WallpaperService extends Service {
                         Log.e(TAG, "error xPage >= mWindowPages.length page: " + xPage);
                         Log.e(TAG, "error on page " + xPage + " out of " + xPages);
                         Log.e(TAG,
-                                "error on xOffsetStep " + xOffsetStep + " xOffset " + xOffset);
+                                "error on xOffsetStep " + finalXOffsetStep
+                                        + " xOffset " + finalXOffset);
                     }
                     xPage = mWindowPages.length - 1;
                 }
@@ -1547,13 +1552,14 @@ public abstract class WallpaperService extends Service {
                 if (current == null) {
                     if (DEBUG) Log.d(TAG, "making page " + xPage + " out of " + xPages);
                     if (DEBUG) {
-                        Log.d(TAG, "xOffsetStep " + xOffsetStep + " xOffset " + xOffset);
+                        Log.d(TAG, "xOffsetStep " + finalXOffsetStep + " xOffset "
+                                + finalXOffset);
                     }
                     current = new EngineWindowPage();
                     mWindowPages[xPage] = current;
                 }
-            }
-            updatePage(current, xPage, xPages, xOffsetStep);
+                updatePage(current, xPage, xPages, finalXOffsetStep);
+            });
         }
 
         private void initWindowPages(EngineWindowPage[] windowPages, float step) {
@@ -1603,10 +1609,8 @@ public abstract class WallpaperService extends Service {
                 if (DEBUG) Log.d(TAG, "result of pixel copy is " + res);
                 if (res != PixelCopy.SUCCESS) {
                     Bitmap lastBitmap = currentPage.getBitmap();
-                    currentPage.execSync((p) -> {
-                        // assign the last bitmap taken for now
-                        p.setBitmap(mLastScreenshot);
-                    });
+                    // assign the last bitmap taken for now
+                    currentPage.setBitmap(mLastScreenshot);
                     Bitmap lastScreenshot = mLastScreenshot;
                     if (lastScreenshot != null && !lastScreenshot.isRecycled()
                             && !Objects.equals(lastBitmap, lastScreenshot)) {
@@ -1615,10 +1619,8 @@ public abstract class WallpaperService extends Service {
                 } else {
                     mLastScreenshot = finalScreenShot;
                     // going to hold this lock for a while
-                    currentPage.execSync((p) -> {
-                        p.setBitmap(finalScreenShot);
-                        p.setLastUpdateTime(current);
-                    });
+                    currentPage.setBitmap(finalScreenShot);
+                    currentPage.setLastUpdateTime(current);
                     updatePageColors(currentPage, pageIndx, numPages, xOffsetStep);
                 }
             }, mHandler);
@@ -1698,16 +1700,14 @@ public abstract class WallpaperService extends Service {
         private void resetWindowPages() {
             if (supportsLocalColorExtraction()) return;
             mLastWindowPage = -1;
-            synchronized (mLock) {
+            mHandler.post(() -> {
                 for (int i = 0; i < mWindowPages.length; i++) {
                     EngineWindowPage page = mWindowPages[i];
                     if (page != null) {
-                        page.execSync((p) -> {
-                            p.setLastUpdateTime(0L);
-                        });
+                        page.setLastUpdateTime(0L);
                     }
                 }
-            }
+            });
         }
 
         private int getRectFPage(RectF area, float step) {
@@ -1730,10 +1730,10 @@ public abstract class WallpaperService extends Service {
             if (DEBUG) {
                 Log.d(TAG, "addLocalColorsAreas adding local color areas " + regions);
             }
-            float step = mPendingXOffsetStep;
 
             List<WallpaperColors> colors = getLocalWallpaperColors(regions);
-            synchronized (mLock) {
+            mHandler.post(() -> {
+                float step = mPendingXOffsetStep;
                 if (!validStep(step)) {
                     step = 0;
                 }
@@ -1749,26 +1749,25 @@ public abstract class WallpaperService extends Service {
                         page.addArea(area);
                         WallpaperColors color = colors.get(i);
                         if (color != null && !color.equals(page.getColors(area))) {
-                            page.execSync(p -> {
-                                p.addWallpaperColors(area, color);
-                            });
+                            page.addWallpaperColors(area, color);
                         }
                     } else {
                         mLocalColorsToAdd.add(area);
                     }
                 }
-            }
-
-            for (int i = 0; i < colors.size() && colors.get(i) != null; i++) {
-                try {
-                    mConnection.onLocalWallpaperColorsChanged(regions.get(i), colors.get(i),
-                            mDisplayContext.getDisplayId());
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error calling Connection.onLocalWallpaperColorsChanged", e);
-                    return;
+                for (int i = 0; i < colors.size() && colors.get(i) != null; i++) {
+                    try {
+                        mConnection.onLocalWallpaperColorsChanged(regions.get(i), colors.get(i),
+                                mDisplayContext.getDisplayId());
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Error calling Connection.onLocalWallpaperColorsChanged", e);
+                        return;
+                    }
                 }
-            }
-            processLocalColors(mPendingXOffset, mPendingYOffset);
+                processLocalColors(mPendingXOffset, mPendingYOffset);
+            });
+
+
         }
 
         /**
@@ -1778,7 +1777,7 @@ public abstract class WallpaperService extends Service {
          */
         public void removeLocalColorsAreas(@NonNull List<RectF> regions) {
             if (supportsLocalColorExtraction()) return;
-            synchronized (mLock) {
+            mHandler.post(() -> {
                 float step = mPendingXOffsetStep;
                 mLocalColorsToAdd.removeAll(regions);
                 mLocalColorAreas.removeAll(regions);
@@ -1792,12 +1791,10 @@ public abstract class WallpaperService extends Service {
                     // no page should be null
                     EngineWindowPage page = mWindowPages[pageInx];
                     if (page != null) {
-                        page.execSync(p -> {
-                            p.removeArea(area);
-                        });
+                        page.removeArea(area);
                     }
                 }
-            }
+            });
         }
 
         private @NonNull List<WallpaperColors> getLocalWallpaperColors(@NonNull List<RectF> areas) {

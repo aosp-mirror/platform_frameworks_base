@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Zatvori"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Proširivanje"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Postavke"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Otvorite podijeljeni zaslon"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Izbornik"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> jest na slici u slici"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Ako ne želite da aplikacija <xliff:g id="NAME">%s</xliff:g> upotrebljava tu značajku, dodirnite da biste otvorili postavke i isključili je."</string>

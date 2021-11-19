@@ -17,9 +17,13 @@
 package androidx.window.extensions.embedding;
 
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
@@ -155,9 +159,13 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
             @WindowManager.TransitionOldType int transit,
             @NonNull RemoteAnimationTarget[] targets) {
         switch (transit) {
+            case TRANSIT_OLD_ACTIVITY_OPEN:
             case TRANSIT_OLD_TASK_FRAGMENT_OPEN:
+            case TRANSIT_OLD_TASK_OPEN:
                 return createOpenAnimationAdapters(targets);
+            case TRANSIT_OLD_ACTIVITY_CLOSE:
             case TRANSIT_OLD_TASK_FRAGMENT_CLOSE:
+            case TRANSIT_OLD_TASK_CLOSE:
                 return createCloseAnimationAdapters(targets);
             case TRANSIT_OLD_TASK_FRAGMENT_CHANGE:
                 return createChangeAnimationAdapters(targets);

@@ -1077,6 +1077,9 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         params.width = WindowManager.LayoutParams.WRAP_CONTENT;
         params.format = PixelFormat.TRANSLUCENT;
         params.type = WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
+        params.flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         params.y = systemUIToast.getYOffset();
 
         int absGravity = Gravity.getAbsoluteGravity(systemUIToast.getGravity(),
