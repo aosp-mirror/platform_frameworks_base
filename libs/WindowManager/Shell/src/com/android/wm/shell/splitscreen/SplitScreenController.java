@@ -24,6 +24,8 @@ import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -182,30 +184,17 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     public boolean moveToSideStage(int taskId, @SplitPosition int sideStagePosition) {
+        return moveToStage(taskId, STAGE_TYPE_SIDE, sideStagePosition,
+                new WindowContainerTransaction());
+    }
+
+    private boolean moveToStage(int taskId, @SplitScreen.StageType int stageType,
+            @SplitPosition int stagePosition, WindowContainerTransaction wct) {
         final ActivityManager.RunningTaskInfo task = mTaskOrganizer.getRunningTaskInfo(taskId);
         if (task == null) {
             throw new IllegalArgumentException("Unknown taskId" + taskId);
         }
-        return moveToSideStage(task, sideStagePosition);
-    }
-
-    public boolean moveToSideStage(int taskId, @SplitPosition int sideStagePosition,
-            WindowContainerTransaction wct) {
-        final ActivityManager.RunningTaskInfo task = mTaskOrganizer.getRunningTaskInfo(taskId);
-        if (task == null) {
-            throw new IllegalArgumentException("Unknown taskId" + taskId);
-        }
-        return moveToSideStage(task, sideStagePosition, wct);
-    }
-
-    public boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
-            @SplitPosition int sideStagePosition) {
-        return mStageCoordinator.moveToSideStage(task, sideStagePosition);
-    }
-
-    public boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
-            @SplitPosition int sideStagePosition, WindowContainerTransaction wct) {
-        return mStageCoordinator.moveToSideStage(task, sideStagePosition, wct);
+        return mStageCoordinator.moveToStage(task, stageType, stagePosition, wct);
     }
 
     public boolean removeFromSideStage(int taskId) {
@@ -221,13 +210,14 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     public void enterSplitScreen(int taskId, boolean leftOrTop) {
-        moveToSideStage(taskId,
-                leftOrTop ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT);
+        enterSplitScreen(taskId, leftOrTop, new WindowContainerTransaction());
     }
 
     public void enterSplitScreen(int taskId, boolean leftOrTop, WindowContainerTransaction wct) {
-        moveToSideStage(taskId,
-                leftOrTop ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
+        final int stageType = isSplitScreenVisible() ? STAGE_TYPE_UNDEFINED : STAGE_TYPE_SIDE;
+        final int stagePosition =
+                leftOrTop ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT;
+        moveToStage(taskId, stageType, stagePosition, wct);
     }
 
     public void exitSplitScreen(int toTopTaskId, @ExitReason int exitReason) {
@@ -240,6 +230,14 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public void onKeyguardVisibilityChanged(boolean showing) {
         mStageCoordinator.onKeyguardVisibilityChanged(showing);
+    }
+
+    public void onFinishedWakingUp() {
+        mStageCoordinator.onFinishedWakingUp();
+    }
+
+    public void onFinishedGoingToSleep() {
+        mStageCoordinator.onFinishedGoingToSleep();
     }
 
     public void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
@@ -499,6 +497,20 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         public void onKeyguardVisibilityChanged(boolean showing) {
             mMainExecutor.execute(() -> {
                 SplitScreenController.this.onKeyguardVisibilityChanged(showing);
+            });
+        }
+
+        @Override
+        public void onFinishedWakingUp() {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.onFinishedWakingUp();
+            });
+        }
+
+        @Override
+        public void onFinishedGoingToSleep() {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.onFinishedGoingToSleep();
             });
         }
     }

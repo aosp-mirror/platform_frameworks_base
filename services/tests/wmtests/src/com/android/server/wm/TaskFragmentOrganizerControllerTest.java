@@ -424,4 +424,26 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         verify(mAtm.mRootWindowContainer).resumeFocusedTasksTopActivities();
     }
+
+    @Test
+    public void testDeferPendingTaskFragmentEventsOfInvisibleTask() {
+        // Task - TaskFragment - Activity.
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setOrganizer(mOrganizer)
+                .build();
+
+        // Mock the task to invisible
+        doReturn(false).when(task).shouldBeVisible(any());
+
+        // Sending events
+        mController.registerOrganizer(mIOrganizer);
+        taskFragment.mTaskFragmentAppearedSent = true;
+        mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
+        mController.dispatchPendingEvents();
+
+        // Verifies that event was not sent
+        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
+    }
 }
