@@ -513,9 +513,13 @@ public class CommandQueue extends IStatusBar.Stub implements
      * @param animate {@code true} to show animations.
      */
     public void recomputeDisableFlags(int displayId, boolean animate) {
-        int disabled1 = getDisabled1(displayId);
-        int disabled2 = getDisabled2(displayId);
-        disable(displayId, disabled1, disabled2, animate);
+        // This must update holding the lock otherwise it can clobber the disabled flags set on the
+        // binder thread from the disable() call
+        synchronized (mLock) {
+            int disabled1 = getDisabled1(displayId);
+            int disabled2 = getDisabled2(displayId);
+            disable(displayId, disabled1, disabled2, animate);
+        }
     }
 
     private void setDisabled(int displayId, int disabled1, int disabled2) {
