@@ -269,6 +269,16 @@ public final class Settings {
     public static final String EXTRA_NETWORK_TEMPLATE = "network_template";
 
     /**
+     * Activity Action: Show One-handed mode Settings page.
+     * <p>
+     * Input: Nothing
+     * <p>
+     * Output: Nothing
+     * @hide
+     */
+    public static final String ACTION_ONE_HANDED_SETTINGS =
+            "android.settings.action.ONE_HANDED_SETTINGS";
+    /**
      * The return values for {@link Settings.Config#set}
      * @hide
      */
