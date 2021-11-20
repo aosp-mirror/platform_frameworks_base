@@ -593,7 +593,7 @@ public class AudioDeviceInventory {
     }
 
     //------------------------------------------------------------
-    //
+    // preferred device(s)
 
     /*package*/ int setPreferredDevicesForStrategySync(int strategy,
             @NonNull List<AudioDeviceAttributes> devices) {
@@ -672,6 +672,22 @@ public class AudioDeviceInventory {
     /*package*/ void unregisterCapturePresetDevicesRoleDispatcher(
             @NonNull ICapturePresetDevicesRoleDispatcher dispatcher) {
         mDevRoleCapturePresetDispatchers.unregister(dispatcher);
+    }
+
+    //-----------------------------------------------------------------------
+
+    /**
+     * Check if a device is in the list of connected devices
+     * @param device the device whose connection state is queried
+     * @return true if connected
+     */
+    @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
+    public boolean isDeviceConnected(@NonNull AudioDeviceAttributes device) {
+        final String key = DeviceInfo.makeDeviceListKey(device.getInternalType(),
+                device.getAddress());
+        synchronized (mDevicesLock) {
+            return (mConnectedDevices.get(key) != null);
+        }
     }
 
     /**

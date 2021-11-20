@@ -5403,6 +5403,7 @@ package android.media {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addOnPreferredDeviceForStrategyChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnPreferredDeviceForStrategyChangedListener) throws java.lang.SecurityException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addOnPreferredDevicesForCapturePresetChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnPreferredDevicesForCapturePresetChangedListener) throws java.lang.SecurityException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addOnPreferredDevicesForStrategyChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnPreferredDevicesForStrategyChangedListener) throws java.lang.SecurityException;
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void cancelMuteAwaitConnection(@NonNull android.media.AudioDeviceAttributes) throws java.lang.IllegalStateException;
     method public void clearAudioServerStateCallback();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean clearPreferredDevicesForCapturePreset(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int dispatchAudioFocusChange(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
@@ -5416,6 +5417,7 @@ package android.media {
     method @IntRange(from=0) public long getMaxAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMaxVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMinVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioDeviceAttributes getMutingExpectedDevice();
     method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioDeviceAttributes getPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAttributes> getPreferredDevicesForCapturePreset(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAttributes> getPreferredDevicesForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
@@ -5424,7 +5426,9 @@ package android.media {
     method public boolean isAudioServerRunning();
     method public boolean isHdmiSystemAudioSupported();
     method @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public boolean isPstnCallAudioInterceptable();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void muteAwaitConnection(@NonNull int[], @NonNull android.media.AudioDeviceAttributes, long, @NonNull java.util.concurrent.TimeUnit) throws java.lang.IllegalStateException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int registerAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void registerMuteAwaitConnectionCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.MuteAwaitConnectionCallback);
     method public void registerVolumeGroupCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.VolumeGroupCallback);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void removeOnPreferredDeviceForStrategyChangedListener(@NonNull android.media.AudioManager.OnPreferredDeviceForStrategyChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void removeOnPreferredDevicesForCapturePresetChangedListener(@NonNull android.media.AudioManager.OnPreferredDevicesForCapturePresetChangedListener);
@@ -5444,6 +5448,7 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setVolumeIndexForAttributes(@NonNull android.media.AudioAttributes, int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void unregisterAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void unregisterAudioPolicyAsync(@NonNull android.media.audiopolicy.AudioPolicy);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void unregisterMuteAwaitConnectionCallback(@NonNull android.media.AudioManager.MuteAwaitConnectionCallback);
     method public void unregisterVolumeGroupCallback(@NonNull android.media.AudioManager.VolumeGroupCallback);
     field public static final int AUDIOFOCUS_FLAG_DELAY_OK = 1; // 0x1
     field public static final int AUDIOFOCUS_FLAG_LOCK = 4; // 0x4
@@ -5461,6 +5466,15 @@ package android.media {
     ctor public AudioManager.AudioServerStateCallback();
     method public void onAudioServerDown();
     method public void onAudioServerUp();
+  }
+
+  public abstract static class AudioManager.MuteAwaitConnectionCallback {
+    ctor public AudioManager.MuteAwaitConnectionCallback();
+    method public void onMutedUntilConnection(@NonNull android.media.AudioDeviceAttributes, @NonNull int[]);
+    method public void onUnmutedEvent(int, @NonNull android.media.AudioDeviceAttributes, @NonNull int[]);
+    field public static final int EVENT_CANCEL = 3; // 0x3
+    field public static final int EVENT_CONNECTION = 1; // 0x1
+    field public static final int EVENT_TIMEOUT = 2; // 0x2
   }
 
   @Deprecated public static interface AudioManager.OnPreferredDeviceForStrategyChangedListener {

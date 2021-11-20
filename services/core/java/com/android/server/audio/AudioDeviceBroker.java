@@ -493,6 +493,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
         return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLUETOOTH_SCO);
     }
 
+    /*package*/ boolean isDeviceConnected(@NonNull AudioDeviceAttributes device) {
+        synchronized (mDeviceStateLock) {
+            return mDeviceInventory.isDeviceConnected(device);
+        }
+    }
+
     /*package*/ void setWiredDeviceConnectionState(int type,
             @AudioService.ConnectionState int state, String address, String name,
             String caller) {
