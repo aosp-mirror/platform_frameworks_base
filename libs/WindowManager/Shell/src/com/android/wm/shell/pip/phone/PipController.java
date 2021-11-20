@@ -88,7 +88,6 @@ import com.android.wm.shell.pip.PipUtils;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -469,7 +468,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     }
 
     private void onDisplayChanged(DisplayLayout layout, boolean saveRestoreSnapFraction) {
-        if (Objects.equals(layout, mPipBoundsState.getDisplayLayout())) {
+        if (mPipBoundsState.getDisplayLayout().isSameGeometry(layout)) {
             return;
         }
         Runnable updateDisplayLayout = () -> {

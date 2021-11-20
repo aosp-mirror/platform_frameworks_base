@@ -3182,11 +3182,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return getCurrentBottomRoundness() == 0.0f && getCurrentTopRoundness() == 0.0f;
     }
 
-    //TODO: this logic can't depend on layout if we are recycling!
     public boolean isMediaRow() {
-        return getExpandedContentView() != null
-                && getExpandedContentView().findViewById(
-                com.android.internal.R.id.media_actions) != null;
+        return mEntry.getSbn().getNotification().isMediaNotification();
     }
 
     public boolean isTopLevelChild() {

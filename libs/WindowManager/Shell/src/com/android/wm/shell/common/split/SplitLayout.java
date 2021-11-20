@@ -34,6 +34,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -60,6 +61,8 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
+
+import java.io.PrintWriter;
 
 /**
  * Records and handles layout of splits. Helps to calculate proper bounds when configuration or
@@ -415,6 +418,19 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return bounds.width() > bounds.height();
     }
 
+    /** Reverse the split position. */
+    @SplitPosition
+    public static int reversePosition(@SplitPosition int position) {
+        switch (position) {
+            case SPLIT_POSITION_TOP_OR_LEFT:
+                return SPLIT_POSITION_BOTTOM_OR_RIGHT;
+            case SPLIT_POSITION_BOTTOM_OR_RIGHT:
+                return SPLIT_POSITION_TOP_OR_LEFT;
+            default:
+                return SPLIT_POSITION_UNDEFINED;
+        }
+    }
+
     /**
      * Return if this layout is landscape.
      */
@@ -500,6 +516,13 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                     taskInfo2.configuration.screenWidthDp,
                     taskInfo2.configuration.screenHeightDp);
         }
+    }
+
+    /** Dumps the current split bounds recorded in this layout. */
+    public void dump(@NonNull PrintWriter pw, String prefix) {
+        pw.println(prefix + "bounds1=" + mBounds1.toShortString());
+        pw.println(prefix + "dividerBounds=" + mDividerBounds.toShortString());
+        pw.println(prefix + "bounds2=" + mBounds2.toShortString());
     }
 
     /** Handles layout change event. */
