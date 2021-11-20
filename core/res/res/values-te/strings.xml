@@ -90,12 +90,12 @@
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"అలర్ట్‌లు"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"కాల్ ఫార్వార్డింగ్"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"అత్యవసర కాల్‌బ్యాక్ మోడ్"</string>
-    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"మొబైల్ డేటా స్థితి"</string>
+    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"మొబైల్ డేటా స్టేటస్‌"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS మెసేజ్‌లు"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"వాయిస్ మెయిల్ మెసేజ్‌లు"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"Wi-Fi కాలింగ్"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"SIM స్టేటస్"</string>
-    <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"అధిక ప్రాధాన్యత గల SIM స్థితి"</string>
+    <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"అధిక ప్రాధాన్యత గల SIM స్టేటస్‌"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"అవతలి వారు FULL TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeHco" msgid="5626377160840915617">"అవతలి వారు HCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeVco" msgid="572208600818270944">"అవతలి వారు VCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
@@ -278,14 +278,14 @@
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"భౌతిక కీబోర్డ్"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"సెక్యూరిటీ"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"కార్‌ మోడ్"</string>
-    <string name="notification_channel_account" msgid="6436294521740148173">"ఖాతా స్థితి"</string>
+    <string name="notification_channel_account" msgid="6436294521740148173">"ఖాతా స్టేటస్‌"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"డెవలపర్ మెసేజ్‌లు"</string>
     <string name="notification_channel_developer_important" msgid="7197281908918789589">"ముఖ్యమైన డెవలపర్ మెసేజ్‌లు"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"అప్‌డేట్‌లు"</string>
-    <string name="notification_channel_network_status" msgid="2127687368725272809">"నెట్‌వర్క్ స్థితి"</string>
+    <string name="notification_channel_network_status" msgid="2127687368725272809">"నెట్‌వర్క్ స్టేటస్‌"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"నెట్‌వర్క్ హెచ్చరికలు"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"నెట్‌వర్క్ అందుబాటులో ఉంది"</string>
-    <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN స్థితి"</string>
+    <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN స్టేటస్‌"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"మీ IT నిర్వాహకుల నుండి వచ్చే హెచ్చరికలు"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"అలర్ట్‌లు"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"రిటైల్ డెమో"</string>
@@ -340,12 +340,12 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"పరికర వేలిముద్ర సెన్సార్‌లో ఉపయోగించిన సంజ్ఞలను క్యాప్చర్ చేయవచ్చు."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"స్క్రీన్‌షాట్‌ను తీయండి"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"డిస్‌ప్లే యొక్క స్క్రీన్‌షాట్ తీసుకోవచ్చు."</string>
-    <string name="permlab_statusBar" msgid="8798267849526214017">"స్థితి బార్‌ను నిలిపివేయడం లేదా సవరించడం"</string>
-    <string name="permdesc_statusBar" msgid="5809162768651019642">"స్థితి బార్‌ను నిలిపివేయడానికి లేదా సిస్టమ్ చిహ్నాలను జోడించడానికి మరియు తీసివేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_statusBarService" msgid="2523421018081437981">"స్థితి పట్టీగా ఉండటం"</string>
-    <string name="permdesc_statusBarService" msgid="6652917399085712557">"స్థితి బార్‌ ఉండేలా చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_expandStatusBar" msgid="1184232794782141698">"స్థితి పట్టీని విస్తరింపజేయడం/కుదించడం"</string>
-    <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"స్థితి బార్‌ను విస్తరింపజేయడానికి లేదా కుదించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_statusBar" msgid="8798267849526214017">"స్టేటస్‌ బార్‌ను డిజేబుల్ చేయడం లేదా మార్చడం"</string>
+    <string name="permdesc_statusBar" msgid="5809162768651019642">"స్టేటస్‌ బార్‌ను డిజేబుల్ చేయడానికి లేదా సిస్టమ్ చిహ్నాలను జోడించడానికి మరియు తీసివేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_statusBarService" msgid="2523421018081437981">"స్టేటస్‌ పట్టీగా ఉండటం"</string>
+    <string name="permdesc_statusBarService" msgid="6652917399085712557">"స్టేటస్‌ బార్‌ ఉండేలా చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_expandStatusBar" msgid="1184232794782141698">"స్టేటస్‌ పట్టీని విస్తరింపజేయడం/కుదించడం"</string>
+    <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"స్టేటస్‌ బార్‌ను విస్తరింపజేయడానికి లేదా కుదించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"లాక్ చేసి ఉన్న పరికరంలో నోటిఫికేషన్‌లను ఫుల్ స్క్రీన్ యాక్టివిటీలుగా డిస్‌ప్లే చేస్తుంది"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"లాక్ చేసి ఉన్న పరికరంలో నోటిఫికేషన్‌లను ఫుల్ స్క్రీన్ యాక్టివిటీలుగా డిస్‌ప్లే చేయడానికి యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"షార్ట్‌కట్‌లను ఇన్‌స్టాల్ చేయడం"</string>
@@ -467,7 +467,7 @@
     <string name="permdesc_callPhone" msgid="5439809516131609109">"మీ ప్రమేయం లేకుండా ఫోన్ నంబర్‌లకు కాల్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. దీని వలన అనుకోని ఛార్జీలు విధించబడవచ్చు లేదా కాల్స్‌ రావచ్చు. ఇది అత్యవసర నంబర్‌లకు కాల్ చేయడానికి యాప్‌ను అనుమతించదని గుర్తుంచుకోండి. హానికరమైన యాప్‌లు మీ నిర్ధారణ లేకుండానే కాల్స్‌ చేయడం ద్వారా మీకు డబ్బు ఖర్చయ్యేలా చేయవచ్చు."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS కాల్ సేవ యాక్సెస్ అనుమతి"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"మీ ప్రమేయం లేకుండా కాల్స్‌ చేయడం కోసం IMS సేవను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_readPhoneState" msgid="8138526903259297969">"ఫోన్ స్థితి మరియు గుర్తింపుని చదవడం"</string>
+    <string name="permlab_readPhoneState" msgid="8138526903259297969">"ఫోన్ స్టేటస్‌ మరియు గుర్తింపుని చదవడం"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"పరికరం యొక్క ఫోన్ ఫీచర్‌లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి ఫోన్ నంబర్ మరియు పరికరం IDలను, కాల్ సక్రియంగా ఉందా లేదా అనే విషయాన్ని మరియు కాల్ ద్వారా కనెక్ట్ చేయబడిన రిమోట్ నంబర్‌ను కనుగొనడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"కాల్స్‌ను సిస్టమ్ ద్వారా వెళ్లేలా చేయి"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"కాలింగ్ అనుభవాన్ని మెరుగుపరచడం కోసం తన కాల్స్‌ను సిస్టమ్ ద్వారా వెళ్లేలా చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
@@ -708,7 +708,7 @@
     <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"టచ్ స్క్రీన్ యొక్క క్రమాంకన పరామితులను సవరించడానికి యాప్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_accessDrmCertificates" msgid="6473765454472436597">"DRM ప్రమాణపత్రాలను యాక్సెస్ చేయడం"</string>
     <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"DRM ప్రమాణపత్రాలను కేటాయించడానికి మరియు ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_handoverStatus" msgid="7620438488137057281">"Android Beam బదిలీ స్థితిని స్వీకరించడం"</string>
+    <string name="permlab_handoverStatus" msgid="7620438488137057281">"Android Beam బదిలీ స్టేటస్‌ని స్వీకరించడం"</string>
     <string name="permdesc_handoverStatus" msgid="3842269451732571070">"ప్రస్తుత Android Beam బదిలీలకు సంబంధించిన సమాచారాన్ని స్వీకరించడానికి ఈ యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"DRM ప్రమాణపత్రాలను తీసివేయడం"</string>
     <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"DRM ప్రమాణపత్రాలను తీసివేయడానికి యాప్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ అవసరం ఉండదు."</string>
@@ -949,7 +949,7 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"అన్‌లాక్ ప్రాంతం కుదించబడింది."</string>
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> విడ్జెట్."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"వినియోగదారు ఎంపికకర్త"</string>
-    <string name="keyguard_accessibility_status" msgid="6792745049712397237">"స్థితి"</string>
+    <string name="keyguard_accessibility_status" msgid="6792745049712397237">"స్టేటస్‌"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"కెమెరా"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"మీడియా నియంత్రణలు"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"విడ్జెట్ పునఃక్రమం ప్రారంభించబడింది."</string>
@@ -1193,9 +1193,9 @@
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"<xliff:g id="APPLICATION">%1$s</xliff:g>తో లింక్‌లను తెరవండి"</string>
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"<xliff:g id="HOST">%1$s</xliff:g> లింక్‌లను <xliff:g id="APPLICATION">%2$s</xliff:g>తో తెరవండి"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"యాక్సెస్ ఇవ్వండి"</string>
-    <string name="whichEditApplication" msgid="6191568491456092812">"దీనితో సవరించు"</string>
-    <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$sతో సవరించు"</string>
-    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"సవరించు"</string>
+    <string name="whichEditApplication" msgid="6191568491456092812">"దీనితో ఎడిట్ చేయండి"</string>
+    <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$sతో ఎడిట్ చేయండి"</string>
+    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"ఎడిట్"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"షేర్ చేయండి"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"%1$sతో షేర్ చేయండి"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"షేర్ చేయి"</string>

@@ -202,7 +202,7 @@
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Дізнатися більше можна в IT-адміністратора"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"Сервіс геозонування"</string>
     <string name="country_detector" msgid="7023275114706088854">"Визначення країни"</string>
-    <string name="location_service" msgid="2439187616018455546">"Служби локації"</string>
+    <string name="location_service" msgid="2439187616018455546">"Геолокація"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Сервіс GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Сервіс \"Сповіщення датчика\""</string>
     <string name="twilight_service" msgid="8964898045693187224">"Сервіс \"Сутінки\""</string>
