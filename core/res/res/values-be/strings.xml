@@ -2169,7 +2169,7 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Апавяшчэнне з інфармацыяй пра ўсталяваны рэжым"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятар можа разрадзіцца хутчэй, чым прыйдзе час звычайнай зарадкі"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Каб павялічыць тэрмін работы акумулятара, уключаны рэжым эканоміі зараду"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Эканомія зараду"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Рэжым энергазберажэння"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Рэжым эканоміі зараду выключаны"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"У тэлефона дастатковы ўзровень зараду. Функцыі больш не абмежаваны."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"У планшэта дастатковы ўзровень зараду. Функцыі больш не абмежаваны."</string>
