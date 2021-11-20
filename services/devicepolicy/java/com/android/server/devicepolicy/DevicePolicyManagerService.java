@@ -18,7 +18,6 @@ package com.android.server.devicepolicy;
 
 import static android.Manifest.permission.BIND_DEVICE_ADMIN;
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
-import static android.Manifest.permission.QUERY_ALL_PACKAGES;
 import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
@@ -628,15 +627,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     private static final long PREVENT_SETTING_PASSWORD_QUALITY_ON_PARENT = 165573442L;
-
-    /**
-     * Apps targeting Android S_V2+ need to have
-     * {@link android.Manifest.permission#QUERY_ALL_PACKAGES} permission to call
-     * getDeviceOwnerComponent API.
-     */
-    @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S_V2)
-    private static final long ENFORCE_QUERY_ALL_PACKAGES_GET_DEVICE_OWNER_COMPONENT = 185896465L;
 
     private static final String CREDENTIAL_MANAGEMENT_APP_INVALID_ALIAS_MSG =
             "The alias provided must be contained in the aliases specified in the credential "
@@ -8609,12 +8599,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return null;
         }
-
-        if (CompatChanges.isChangeEnabled(ENFORCE_QUERY_ALL_PACKAGES_GET_DEVICE_OWNER_COMPONENT,
-                Binder.getCallingUid())) {
-            Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(QUERY_ALL_PACKAGES));
-        }
-
         if (!callingUserOnly) {
             Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity())
                     || hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));

@@ -7289,7 +7289,7 @@ package android.app.admin {
     method public boolean isCommonCriteriaModeEnabled(@Nullable android.content.ComponentName);
     method public boolean isComplianceAcknowledgementRequired();
     method public boolean isDeviceIdAttestationSupported();
-    method @RequiresPermission(value=android.Manifest.permission.QUERY_ALL_PACKAGES, conditional=true) public boolean isDeviceOwnerApp(String);
+    method public boolean isDeviceOwnerApp(String);
     method public boolean isEphemeralUser(@NonNull android.content.ComponentName);
     method public boolean isKeyPairGrantedToWifiAuth(@NonNull String);
     method public boolean isLockTaskPermitted(String);

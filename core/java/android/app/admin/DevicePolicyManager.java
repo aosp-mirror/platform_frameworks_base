@@ -7818,16 +7818,10 @@ public class DevicePolicyManager {
      * admin apps that want to check whether they are also registered as the device owner app. The
      * exact mechanism by which a device admin app is registered as a device owner app is defined by
      * the setup process.
-     * Starting from {@link android.os.Build.VERSION_CODES#S_V2}, if the caller application's target
-     * SDK version is {@link android.os.Build.VERSION_CODES#S_V2} or newer, the caller should have
-     * {@link android.Manifest.permission#QUERY_ALL_PACKAGES} permission otherwise
-     * {@link SecurityException} will be thrown.
-     *
      * @param packageName the package name of the app, to compare with the registered device owner
      * app, if any.
      * @return whether or not the package is registered as the device owner app.
      */
-    @RequiresPermission(value = permission.QUERY_ALL_PACKAGES, conditional = true)
     public boolean isDeviceOwnerApp(String packageName) {
         throwIfParentInstance("isDeviceOwnerApp");
         return isDeviceOwnerAppOnCallingUser(packageName);
