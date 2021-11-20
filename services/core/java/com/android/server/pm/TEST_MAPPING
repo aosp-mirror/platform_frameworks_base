@@ -24,63 +24,10 @@
       "name": "CtsMatchFlagTestCases"
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.pm."
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
-    },
-    {
       "name": "FrameworksMockingServicesTests",
       "options": [
         {
           "include-filter": "com.android.server.pm."
-        }
-      ]
-    },
-    {
-      "name": "FrameworksServicesTests",
-      "file_patterns": ["(/|^)ShortcutService\\.java"],
-      "options": [
-        {
-          "include-filter": "com.android.server.pm.ShortcutManagerTest1"
-        },
-        {
-          "include-filter": "com.android.server.pm.ShortcutManagerTest2"
-        },
-        {
-          "include-filter": "com.android.server.pm.ShortcutManagerTest3"
-        },
-        {
-          "include-filter": "com.android.server.pm.ShortcutManagerTest4"
-        },
-        {
-          "include-filter": "com.android.server.pm.ShortcutManagerTest5"
-        },
-        {
-          "include-filter": "com.android.server.pm.ShortcutManagerTest6"
-        },
-        {
-          "include-filter": "com.android.server.pm.ShortcutManagerTest7"
-        },
-        {
-          "include-filter": "com.android.server.pm.ShortcutManagerTest8"
-        },
-        {
-          "include-filter": "com.android.server.pm.ShortcutManagerTest9"
-        },
-        {
-          "include-filter": "com.android.server.pm.ShortcutManagerTest10"
-        },
-        {
-          "include-filter": "com.android.server.pm.ShortcutManagerTest11"
         }
       ]
     },
@@ -188,47 +135,6 @@
     },
     {
       "name": "PackageManagerServiceHostTests"
-    },
-    {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "install-arg": "-t"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserDataPreparerTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserLifecycleStressTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserManagerServiceCreateProfileTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserManagerServiceIdRecyclingTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserManagerServiceTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserManagerServiceUserInfoTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserManagerServiceUserTypeTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserManagerTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserRestrictionsUtilsTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserSystemPackageInstallerTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.parsing.SystemPartitionParseTest"
-        }
-      ]
     }
   ],
   "imports": [

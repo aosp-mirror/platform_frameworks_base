@@ -37,6 +37,7 @@ import android.content.pm.PackageManagerInternal;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.Postsubmit;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
@@ -69,6 +70,7 @@ import java.util.regex.Pattern;
 // atest PackageManagerServiceTest
 // runtest -c com.android.server.pm.PackageManagerServiceTest frameworks-services
 // bit FrameworksServicesTests:com.android.server.pm.PackageManagerServiceTest
+@Postsubmit
 @RunWith(AndroidJUnit4.class)
 public class PackageManagerServiceTest {
 

@@ -47,6 +47,7 @@ import android.os.BaseBundle;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -91,6 +92,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PackageManagerSettingsTests {
