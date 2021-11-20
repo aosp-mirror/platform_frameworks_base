@@ -377,7 +377,7 @@ public class MeasuredParagraph {
      * @param start the inclusive start offset of the target region in the text
      * @param end the exclusive end offset of the target region in the text
      * @param textDir the text direction
-     * @param computeHyphenation true if need to compute hyphenation, otherwise false
+     * @param hyphenationMode a hyphenation mode
      * @param computeLayout true if need to compute full layout, otherwise false.
      * @param hint pass if you already have measured paragraph.
      * @param recycle pass existing MeasuredParagraph if you want to recycle it.
@@ -390,7 +390,7 @@ public class MeasuredParagraph {
             @IntRange(from = 0) int start,
             @IntRange(from = 0) int end,
             @NonNull TextDirectionHeuristic textDir,
-            boolean computeHyphenation,
+            int hyphenationMode,
             boolean computeLayout,
             @Nullable MeasuredParagraph hint,
             @Nullable MeasuredParagraph recycle) {
@@ -399,7 +399,7 @@ public class MeasuredParagraph {
         final MeasuredText.Builder builder;
         if (hint == null) {
             builder = new MeasuredText.Builder(mt.mCopiedBuffer)
-                    .setComputeHyphenation(computeHyphenation)
+                    .setComputeHyphenation(hyphenationMode)
                     .setComputeLayout(computeLayout);
         } else {
             builder = new MeasuredText.Builder(hint.mMeasuredText);

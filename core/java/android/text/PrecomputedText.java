@@ -22,6 +22,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
+import android.graphics.text.MeasuredText;
 import android.text.style.MetricAffectingSpan;
 
 import com.android.internal.util.Preconditions;
@@ -395,17 +396,30 @@ public class PrecomputedText implements Spannable {
         return new PrecomputedText(text, 0, text.length(), params, paraInfo);
     }
 
+    private static boolean isFastHyphenation(int frequency) {
+        return frequency == Layout.HYPHENATION_FREQUENCY_FULL_FAST
+                || frequency == Layout.HYPHENATION_FREQUENCY_NORMAL_FAST;
+    }
+
     private static ParagraphInfo[] createMeasuredParagraphsFromPrecomputedText(
             @NonNull PrecomputedText pct, @NonNull Params params, boolean computeLayout) {
         final boolean needHyphenation = params.getBreakStrategy() != Layout.BREAK_STRATEGY_SIMPLE
                 && params.getHyphenationFrequency() != Layout.HYPHENATION_FREQUENCY_NONE;
+        final int hyphenationMode;
+        if (needHyphenation) {
+            hyphenationMode = isFastHyphenation(params.getHyphenationFrequency())
+                    ? MeasuredText.Builder.HYPHENATION_MODE_FAST :
+                    MeasuredText.Builder.HYPHENATION_MODE_NORMAL;
+        } else {
+            hyphenationMode = MeasuredText.Builder.HYPHENATION_MODE_NONE;
+        }
         ArrayList<ParagraphInfo> result = new ArrayList<>();
         for (int i = 0; i < pct.getParagraphCount(); ++i) {
             final int paraStart = pct.getParagraphStart(i);
             final int paraEnd = pct.getParagraphEnd(i);
             result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
                     params.getTextPaint(), pct, paraStart, paraEnd, params.getTextDirection(),
-                    needHyphenation, computeLayout, pct.getMeasuredParagraph(i),
+                    hyphenationMode, computeLayout, pct.getMeasuredParagraph(i),
                     null /* no recycle */)));
         }
         return result.toArray(new ParagraphInfo[result.size()]);
@@ -421,6 +435,14 @@ public class PrecomputedText implements Spannable {
         Preconditions.checkNotNull(params);
         final boolean needHyphenation = params.getBreakStrategy() != Layout.BREAK_STRATEGY_SIMPLE
                 && params.getHyphenationFrequency() != Layout.HYPHENATION_FREQUENCY_NONE;
+        final int hyphenationMode;
+        if (needHyphenation) {
+            hyphenationMode = isFastHyphenation(params.getHyphenationFrequency())
+                    ? MeasuredText.Builder.HYPHENATION_MODE_FAST :
+                    MeasuredText.Builder.HYPHENATION_MODE_NORMAL;
+        } else {
+            hyphenationMode = MeasuredText.Builder.HYPHENATION_MODE_NONE;
+        }
 
         int paraEnd = 0;
         for (int paraStart = start; paraStart < end; paraStart = paraEnd) {
@@ -435,8 +457,7 @@ public class PrecomputedText implements Spannable {
 
             result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
                     params.getTextPaint(), text, paraStart, paraEnd, params.getTextDirection(),
-                    needHyphenation, computeLayout, null /* no hint */,
-                    null /* no recycle */)));
+                    hyphenationMode, computeLayout, null /* no hint */, null /* no recycle */)));
         }
         return result.toArray(new ParagraphInfo[result.size()]);
     }

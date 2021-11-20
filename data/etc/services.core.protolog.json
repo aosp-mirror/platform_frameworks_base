@@ -961,6 +961,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "-1101551167": {
+      "message": "Auto-PIP allowed, entering PIP mode directly: %s, didAutoPip: %b",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/TaskFragment.java"
+    },
     "-1089874824": {
       "message": "SURFACE SHOW (performLayout): %s",
       "level": "INFO",
@@ -2628,12 +2634,6 @@
       "level": "ERROR",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "660908897": {
-      "message": "Auto-PIP allowed, entering PIP mode directly: %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/TaskFragment.java"
     },
     "662572728": {
       "message": "Attempted to add a toast window with bad token %s.  Aborting.",

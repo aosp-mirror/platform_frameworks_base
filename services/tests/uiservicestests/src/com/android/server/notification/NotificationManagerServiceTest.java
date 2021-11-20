@@ -8511,6 +8511,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
                 r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
 
+        // using the style, but incorrect type in session - blocked
+        nb.setStyle(new Notification.MediaStyle());
+        Bundle extras = new Bundle();
+        extras.putParcelable(Notification.EXTRA_MEDIA_SESSION, new Intent());
+        nb.addExtras(extras);
+        sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
+
         // style + media session - bypasses block
         nb.setStyle(new Notification.MediaStyle().setMediaSession(mock(MediaSession.Token.class)));
         sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,

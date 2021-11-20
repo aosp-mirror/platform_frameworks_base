@@ -267,6 +267,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.stats.StatsCompanion$Lifecycle";
     private static final String STATS_PULL_ATOM_SERVICE_CLASS =
             "com.android.server.stats.pull.StatsPullAtomService";
+    private static final String STATS_BOOTSTRAP_ATOM_SERVICE_LIFECYCLE_CLASS =
+            "com.android.server.stats.bootstrap.StatsBootstrapAtomService$Lifecycle";
     private static final String USB_SERVICE_CLASS =
             "com.android.server.usb.UsbService$Lifecycle";
     private static final String MIDI_SERVICE_CLASS =
@@ -2539,6 +2541,11 @@ public final class SystemServer implements Dumpable {
         // Statsd pulled atoms
         t.traceBegin("StartStatsPullAtomService");
         mSystemServiceManager.startService(STATS_PULL_ATOM_SERVICE_CLASS);
+        t.traceEnd();
+
+        // Log atoms to statsd from bootstrap processes.
+        t.traceBegin("StatsBootstrapAtomService");
+        mSystemServiceManager.startService(STATS_BOOTSTRAP_ATOM_SERVICE_LIFECYCLE_CLASS);
         t.traceEnd();
 
         // Incidentd and dumpstated helper

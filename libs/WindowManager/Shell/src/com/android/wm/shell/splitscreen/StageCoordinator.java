@@ -155,6 +155,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private boolean mShouldUpdateRecents;
     private boolean mExitSplitScreenOnHide;
     private boolean mKeyguardOccluded;
+    private boolean mDeviceSleep;
 
     @SplitScreen.StageType
     private int mDismissTop = NO_DISMISS;
@@ -273,18 +274,31 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return mSideStageListener.mVisible && mMainStageListener.mVisible;
     }
 
-    boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
-            @SplitPosition int sideStagePosition) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-        return moveToSideStage(task, sideStagePosition, wct);
-    }
+    boolean moveToStage(ActivityManager.RunningTaskInfo task, @SplitScreen.StageType int stageType,
+            @SplitPosition int stagePosition, WindowContainerTransaction wct) {
+        StageTaskListener targetStage;
+        int sideStagePosition;
+        if (stageType == STAGE_TYPE_MAIN) {
+            targetStage = mMainStage;
+            sideStagePosition = SplitLayout.reversePosition(stagePosition);
+        } else if (stageType == STAGE_TYPE_SIDE) {
+            targetStage = mSideStage;
+            sideStagePosition = stagePosition;
+        } else {
+            if (mMainStage.isActive()) {
+                // If the split screen is activated, retrieves target stage based on position.
+                targetStage = stagePosition == mSideStagePosition ? mSideStage : mMainStage;
+                sideStagePosition = mSideStagePosition;
+            } else {
+                targetStage = mSideStage;
+                sideStagePosition = stagePosition;
+            }
+        }
 
-    boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
-            @SplitPosition int sideStagePosition, WindowContainerTransaction wct) {
-        final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         setSideStagePosition(sideStagePosition, wct);
-        mSideStage.evictAllChildren(evictWct);
-        mSideStage.addTask(task, wct);
+        final WindowContainerTransaction evictWct = new WindowContainerTransaction();
+        targetStage.evictAllChildren(evictWct);
+        targetStage.addTask(task, wct);
         if (!evictWct.isEmpty()) {
             wct.merge(evictWct, true /* transfer */);
         }
@@ -463,9 +477,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             case STAGE_TYPE_MAIN: {
                 if (position != SPLIT_POSITION_UNDEFINED) {
                     // Set the side stage opposite of what we want to the main stage.
-                    final int sideStagePosition = position == SPLIT_POSITION_TOP_OR_LEFT
-                            ? SPLIT_POSITION_BOTTOM_OR_RIGHT : SPLIT_POSITION_TOP_OR_LEFT;
-                    setSideStagePosition(sideStagePosition, wct);
+                    setSideStagePosition(SplitLayout.reversePosition(position), wct);
                 } else {
                     position = getMainStagePosition();
                 }
@@ -489,8 +501,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     @SplitLayout.SplitPosition
     int getMainStagePosition() {
-        return mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT
-                ? SPLIT_POSITION_BOTTOM_OR_RIGHT : SPLIT_POSITION_TOP_OR_LEFT;
+        return SplitLayout.reversePosition(mSideStagePosition);
     }
 
     void setSideStagePosition(@SplitPosition int sideStagePosition,
@@ -537,6 +548,17 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
+    void onFinishedWakingUp() {
+        if (mMainStage.isActive()) {
+            exitSplitScreenIfKeyguardOccluded();
+        }
+        mDeviceSleep = false;
+    }
+
+    void onFinishedGoingToSleep() {
+        mDeviceSleep = true;
+    }
+
     void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
         mExitSplitScreenOnHide = exitSplitScreenOnHide;
     }
@@ -563,6 +585,19 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         applyExitSplitScreen(childrenToTop, wct, exitReason);
+    }
+
+    private void exitSplitScreenIfKeyguardOccluded() {
+        final boolean mainStageVisible = mMainStageListener.mVisible;
+        final boolean oneStageVisible = mainStageVisible ^ mSideStageListener.mVisible;
+        if (mDeviceSleep && mKeyguardOccluded && oneStageVisible) {
+            // Only the stages include show-when-locked activity is visible while keyguard occluded.
+            // Dismiss split because there's show-when-locked activity showing on top of keyguard.
+            // Also make sure the task contains show-when-locked activity remains on top after split
+            // dismissed.
+            final StageTaskListener toTop = mainStageVisible ? mMainStage : mSideStage;
+            exitSplitScreen(toTop, EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
+        }
     }
 
     private void applyExitSplitScreen(StageTaskListener childrenToTop,
@@ -780,14 +815,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // like the cases keyguard showing or screen off.
                 exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RETURN_HOME);
             }
-        } else if (mKeyguardOccluded) {
-            // At least one of the stages is visible while keyguard occluded. Dismiss split because
-            // there's show-when-locked activity showing on top of keyguard. Also make sure the
-            // task contains show-when-locked activity remains on top after split dismissed.
-            final StageTaskListener toTop =
-                    mainStageVisible ? mMainStage : (sideStageVisible ? mSideStage : null);
-            exitSplitScreen(toTop, EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
         }
+        exitSplitScreenIfKeyguardOccluded();
 
         mSyncQueue.runInSync(t -> {
             // Same above, we only set root tasks and divider leash visibility when both stage
@@ -870,8 +899,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     @Override
     public void onDoubleTappedDivider() {
-        setSideStagePosition(mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT
-                ? SPLIT_POSITION_BOTTOM_OR_RIGHT : SPLIT_POSITION_TOP_OR_LEFT, null /* wct */);
+        setSideStagePosition(SplitLayout.reversePosition(mSideStagePosition), null /* wct */);
         mLogger.logSwap(getMainStagePosition(), mMainStage.getTopChildTaskUid(),
                 getSideStagePosition(), mSideStage.getTopChildTaskUid(),
                 mSplitLayout.isLandscape());
@@ -1296,11 +1324,16 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         pw.println(prefix + TAG + " mDisplayId=" + mDisplayId);
         pw.println(innerPrefix + "mDividerVisible=" + mDividerVisible);
         pw.println(innerPrefix + "MainStage");
+        pw.println(childPrefix + "stagePosition=" + getMainStagePosition());
         pw.println(childPrefix + "isActive=" + mMainStage.isActive());
         mMainStageListener.dump(pw, childPrefix);
         pw.println(innerPrefix + "SideStage");
+        pw.println(childPrefix + "stagePosition=" + getSideStagePosition());
         mSideStageListener.dump(pw, childPrefix);
-        pw.println(innerPrefix + "mSplitLayout=" + mSplitLayout);
+        if (mMainStage.isActive()) {
+            pw.println(innerPrefix + "SplitLayout");
+            mSplitLayout.dump(pw, childPrefix);
+        }
     }
 
     /**

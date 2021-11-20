@@ -27,6 +27,8 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.ImageDecoder
@@ -85,15 +87,7 @@ internal val EMPTY_SMARTSPACE_MEDIA_DATA = SmartspaceMediaData("INVALID", false,
     "INVALID", null, emptyList(), null, 0)
 
 fun isMediaNotification(sbn: StatusBarNotification): Boolean {
-    if (!sbn.notification.hasMediaSession()) {
-        return false
-    }
-    val notificationStyle = sbn.notification.notificationStyle
-    if (Notification.DecoratedMediaCustomViewStyle::class.java.equals(notificationStyle) ||
-            Notification.MediaStyle::class.java.equals(notificationStyle)) {
-        return true
-    }
-    return false
+    return sbn.notification.isMediaNotification()
 }
 
 /**
@@ -152,6 +146,24 @@ class MediaDataManager(
     var smartspaceMediaData: SmartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
     private var smartspaceSession: SmartspaceSession? = null
     private var allowMediaRecommendations = Utils.allowMediaRecommendations(context)
+
+    /**
+     * Check whether this notification is an RCN
+     * TODO(b/204910409) implement new API for explicitly declaring this
+     */
+    private fun isRemoteCastNotification(sbn: StatusBarNotification): Boolean {
+        val pm = context.packageManager
+        try {
+            val info = pm.getApplicationInfo(sbn.packageName, PackageManager.MATCH_SYSTEM_ONLY)
+            if (info.privateFlags and ApplicationInfo.PRIVATE_FLAG_PRIVILEGED != 0) {
+                val extras = sbn.notification.extras
+                if (extras.containsKey(Notification.EXTRA_SUBSTITUTE_APP_NAME)) {
+                    return true
+                }
+            }
+        } catch (e: PackageManager.NameNotFoundException) { }
+        return false
+    }
 
     @Inject
     constructor(
@@ -442,7 +454,7 @@ class MediaDataManager(
         val existed = mediaEntries[key] != null
         backgroundExecutor.execute {
             mediaEntries[key]?.let { mediaData ->
-                if (mediaData.isLocalSession) {
+                if (mediaData.isLocalSession()) {
                     mediaData.token?.let {
                         val mediaController = mediaControllerFactory.create(it)
                         mediaController.transportControls.stop()
@@ -626,8 +638,11 @@ class MediaDataManager(
             }
         }
 
-        val isLocalSession = mediaController.playbackInfo?.playbackType ==
-            MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL
+        val playbackLocation =
+                if (isRemoteCastNotification(sbn)) MediaData.PLAYBACK_CAST_REMOTE
+                else if (mediaController.playbackInfo?.playbackType ==
+                    MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL) MediaData.PLAYBACK_LOCAL
+                else MediaData.PLAYBACK_CAST_LOCAL
         val isPlaying = mediaController.playbackState?.let { isPlayingState(it.state) } ?: null
         val lastActive = systemClock.elapsedRealtime()
         foregroundExecutor.execute {
@@ -637,7 +652,7 @@ class MediaDataManager(
             onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, bgColor, app,
                     smallIcon, artist, song, artWorkIcon, actionIcons,
                     actionsToShowCollapsed, sbn.packageName, token, notif.contentIntent, null,
-                    active, resumeAction = resumeAction, isLocalSession = isLocalSession,
+                    active, resumeAction = resumeAction, playbackLocation = playbackLocation,
                     notificationKey = key, hasCheckedForResume = hasCheckedForResume,
                     isPlaying = isPlaying, isClearable = sbn.isClearable(),
                     lastActive = lastActive))
@@ -762,7 +777,7 @@ class MediaDataManager(
     fun onNotificationRemoved(key: String) {
         Assert.isMainThread()
         val removed = mediaEntries.remove(key)
-        if (useMediaResumption && removed?.resumeAction != null && removed?.isLocalSession) {
+        if (useMediaResumption && removed?.resumeAction != null && removed?.isLocalSession()) {
             Log.d(TAG, "Not removing $key because resumable")
             // Move to resume key (aka package name) if that key doesn't already exist.
             val resumeAction = getResumeMediaAction(removed.resumeAction!!)

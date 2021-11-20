@@ -17,18 +17,23 @@
 package android.graphics.text;
 
 import android.annotation.FloatRange;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
 import dalvik.annotation.optimization.CriticalNative;
 
 import libcore.util.NativeAllocationRegistry;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Result of text shaping of the single paragraph string.
@@ -49,6 +54,8 @@ import libcore.util.NativeAllocationRegistry;
  * </p>
  */
 public class MeasuredText {
+    private static final String TAG = "MeasuredText";
+
     private long mNativePtr;
     private boolean mComputeHyphenation;
     private boolean mComputeLayout;
@@ -179,6 +186,7 @@ public class MeasuredText {
         private final @NonNull char[] mText;
         private boolean mComputeHyphenation = false;
         private boolean mComputeLayout = true;
+        private boolean mFastHyphenation = false;
         private int mCurrentOffset = 0;
         private @Nullable MeasuredText mHintMt = null;
 
@@ -275,10 +283,78 @@ public class MeasuredText {
          * Even if you pass false to this method, you can still enable automatic hyphenation of
          * LineBreaker but line break computation becomes slower.
          *
+         * @deprecated use setComputeHyphenation(int) instead.
+         *
          * @param computeHyphenation true if you want to use automatic hyphenations.
          */
         public @NonNull Builder setComputeHyphenation(boolean computeHyphenation) {
-            mComputeHyphenation = computeHyphenation;
+            setComputeHyphenation(
+                    computeHyphenation ? HYPHENATION_MODE_NORMAL : HYPHENATION_MODE_NONE);
+            return this;
+        }
+
+        /** @hide */
+        @IntDef(prefix = { "HYPHENATION_MODE_" }, value = {
+                HYPHENATION_MODE_NONE,
+                HYPHENATION_MODE_NORMAL,
+                HYPHENATION_MODE_FAST
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface HyphenationMode {}
+
+        /**
+         *　A value for hyphenation calculation mode.
+         *
+         * This value indicates that no hyphenation points are calculated.
+         */
+        public static final int HYPHENATION_MODE_NONE = 0;
+
+        /**
+         *　A value for hyphenation calculation mode.
+         *
+         * This value indicates that hyphenation points are calculated.
+         */
+        public static final int HYPHENATION_MODE_NORMAL = 1;
+
+        /**
+         *　A value for hyphenation calculation mode.
+         *
+         * This value indicates that hyphenation points are calculated with faster algorithm. This
+         * algorithm measures text width with ignoring the context of hyphen character shaping, e.g.
+         * kerning.
+         */
+        public static final int HYPHENATION_MODE_FAST = 2;
+
+        /**
+         * By passing true to this method, the build method will calculate hyphenation break
+         * points faster with ignoring some typographic features, e.g. kerning.
+         *
+         * {@link #HYPHENATION_MODE_NONE} is by default.
+         *
+         * @see #setComputeHyphenation(boolean)
+         *
+         * @param mode a hyphenation mode.
+         */
+        public @NonNull Builder setComputeHyphenation(@HyphenationMode int mode) {
+            switch (mode) {
+                case HYPHENATION_MODE_NONE:
+                    mComputeHyphenation = false;
+                    mFastHyphenation = false;
+                    break;
+                case HYPHENATION_MODE_NORMAL:
+                    mComputeHyphenation = true;
+                    mFastHyphenation = false;
+                    break;
+                case HYPHENATION_MODE_FAST:
+                    mComputeHyphenation = true;
+                    mFastHyphenation = true;
+                    break;
+                default:
+                    Log.e(TAG, "Unknown hyphenation mode: " + mode);
+                    mComputeHyphenation = false;
+                    mFastHyphenation = false;
+                    break;
+            }
             return this;
         }
 
@@ -319,7 +395,7 @@ public class MeasuredText {
             try {
                 long hintPtr = (mHintMt == null) ? 0 : mHintMt.getNativePtr();
                 long ptr = nBuildMeasuredText(mNativePtr, hintPtr, mText, mComputeHyphenation,
-                        mComputeLayout);
+                        mComputeLayout, mFastHyphenation);
                 final MeasuredText res = new MeasuredText(ptr, mText, mComputeHyphenation,
                         mComputeLayout);
                 sRegistry.registerNativeAllocation(res, ptr);
@@ -378,7 +454,8 @@ public class MeasuredText {
                 long hintMtPtr,
                 @NonNull char[] text,
                 boolean computeHyphenation,
-                boolean computeLayout);
+                boolean computeLayout,
+                boolean fastHyphenationMode);
 
         private static native void nFreeBuilder(/* Non Zero */ long nativeBuilderPtr);
     }

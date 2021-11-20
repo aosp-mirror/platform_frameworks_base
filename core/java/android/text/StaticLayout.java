@@ -591,6 +591,20 @@ public class StaticLayout extends Layout {
         generate(b, b.mIncludePad, b.mIncludePad);
     }
 
+    private static int getBaseHyphenationFrequency(int frequency) {
+        switch (frequency) {
+            case Layout.HYPHENATION_FREQUENCY_FULL:
+            case Layout.HYPHENATION_FREQUENCY_FULL_FAST:
+                return LineBreaker.HYPHENATION_FREQUENCY_FULL;
+            case Layout.HYPHENATION_FREQUENCY_NORMAL:
+            case Layout.HYPHENATION_FREQUENCY_NORMAL_FAST:
+                return LineBreaker.HYPHENATION_FREQUENCY_NORMAL;
+            case Layout.HYPHENATION_FREQUENCY_NONE:
+            default:
+                return LineBreaker.HYPHENATION_FREQUENCY_NONE;
+        }
+    }
+
     /* package */ void generate(Builder b, boolean includepad, boolean trackpad) {
         final CharSequence source = b.mText;
         final int bufStart = b.mStart;
@@ -641,7 +655,7 @@ public class StaticLayout extends Layout {
 
         final LineBreaker lineBreaker = new LineBreaker.Builder()
                 .setBreakStrategy(b.mBreakStrategy)
-                .setHyphenationFrequency(b.mHyphenationFrequency)
+                .setHyphenationFrequency(getBaseHyphenationFrequency(b.mHyphenationFrequency))
                 // TODO: Support more justification mode, e.g. letter spacing, stretching.
                 .setJustificationMode(b.mJustificationMode)
                 .setIndents(indents)

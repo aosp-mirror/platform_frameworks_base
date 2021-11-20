@@ -5383,6 +5383,16 @@
             <!-- Standard amount of hyphenation, useful for running text and for
             screens with limited space for text. -->
             <enum name="full" value="2" />
+
+            <!-- Same to hyphenationFrequency="normal" but using faster algorithm for measuring
+            hyphenation break points. To make text rendering faster with hyphenation, this algorithm
+             ignores some hyphen character related typographic features, e.g. kerning. -->
+            <enum name="normalFast" value="3" />
+
+            <!-- Same to hyphenationFrequency="full" but using faster algorithm for measuring
+            hyphenation break points. To make text rendering faster with hyphenation, this algorithm
+             ignores some hyphen character related typographic features, e.g. kerning. -->
+            <enum name="fullFast" value="4" />
         </attr>
         <!-- Specify the type of auto-size. Note that this feature is not supported by EditText,
         works only for TextView. -->
