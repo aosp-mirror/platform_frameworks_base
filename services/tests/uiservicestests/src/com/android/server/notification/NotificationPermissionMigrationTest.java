@@ -89,6 +89,7 @@ import android.media.AudioManager;
 import android.media.session.MediaSession;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
@@ -739,6 +740,18 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
 
         // just using the style - blocked
         nb.setStyle(new Notification.MediaStyle());
+        sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
+
+        // using the style, but incorrect type in session - blocked
+        nb.setStyle(new Notification.MediaStyle());
+        Bundle extras = new Bundle();
+        extras.putParcelable(Notification.EXTRA_MEDIA_SESSION, new Intent());
+        nb.addExtras(extras);
         sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
                 nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);

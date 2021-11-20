@@ -82,7 +82,9 @@ public abstract class Layout {
     /** @hide */
     @IntDef(prefix = { "HYPHENATION_FREQUENCY_" }, value = {
             HYPHENATION_FREQUENCY_NORMAL,
+            HYPHENATION_FREQUENCY_NORMAL_FAST,
             HYPHENATION_FREQUENCY_FULL,
+            HYPHENATION_FREQUENCY_FULL_FAST,
             HYPHENATION_FREQUENCY_NONE
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -95,21 +97,40 @@ public abstract class Layout {
      * layout and there is otherwise no valid break. Soft hyphens are ignored and will not be used
      * as suggestions for potential line breaks.
      */
-    public static final int HYPHENATION_FREQUENCY_NONE = LineBreaker.HYPHENATION_FREQUENCY_NONE;
+    public static final int HYPHENATION_FREQUENCY_NONE = 0;
 
     /**
      * Value for hyphenation frequency indicating a light amount of automatic hyphenation, which
      * is a conservative default. Useful for informal cases, such as short sentences or chat
      * messages.
      */
-    public static final int HYPHENATION_FREQUENCY_NORMAL = LineBreaker.HYPHENATION_FREQUENCY_NORMAL;
+    public static final int HYPHENATION_FREQUENCY_NORMAL = 1;
 
     /**
      * Value for hyphenation frequency indicating the full amount of automatic hyphenation, typical
      * in typography. Useful for running text and where it's important to put the maximum amount of
      * text in a screen with limited space.
      */
-    public static final int HYPHENATION_FREQUENCY_FULL = LineBreaker.HYPHENATION_FREQUENCY_FULL;
+    public static final int HYPHENATION_FREQUENCY_FULL = 2;
+
+    /**
+     * Value for hyphenation frequency indicating a light amount of automatic hyphenation with
+     * using faster algorithm.
+     *
+     * This option is useful for informal cases, such as short sentences or chat messages. To make
+     * text rendering faster with hyphenation, this algorithm ignores some hyphen character related
+     * typographic features, e.g. kerning.
+     */
+    public static final int HYPHENATION_FREQUENCY_NORMAL_FAST = 3;
+    /**
+     * Value for hyphenation frequency indicating the full amount of automatic hyphenation with
+     * using faster algorithm.
+     *
+     * This option is useful for running text and where it's important to put the maximum amount of
+     * text in a screen with limited space. To make text rendering faster with hyphenation, this
+     * algorithm ignores some hyphen character related typographic features, e.g. kerning.
+     */
+    public static final int HYPHENATION_FREQUENCY_FULL_FAST = 4;
 
     private static final ParagraphStyle[] NO_PARA_SPANS =
         ArrayUtils.emptyArray(ParagraphStyle.class);

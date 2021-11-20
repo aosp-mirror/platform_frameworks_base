@@ -1991,6 +1991,12 @@
 
         <!-- Whether attributions provided are meant to be user-visible. -->
         <attr name="attributionsAreUserVisible" format="boolean" />
+
+        <!-- Specifies whether enabled settings of components in the application should be
+             reset to {@link android.content.pm.PackageManager#COMPONENT_ENABLED_STATE_DEFAULT}
+             when the application's user data is cleared. The default value is false.
+        -->
+        <attr name="resetEnabledSettingsOnAppDataCleared" format="boolean" />
     </declare-styleable>
 
     <!-- An attribution is a logical part of an app and is identified by a tag.

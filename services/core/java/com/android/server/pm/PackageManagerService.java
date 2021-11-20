@@ -1500,16 +1500,19 @@ public class PackageManagerService extends IPackageManager.Stub
         final CompatChange.ChangeListener selinuxChangeListener = packageName -> {
             synchronized (m.mInstallLock) {
                 final AndroidPackage pkg;
+                final PackageSetting ps;
                 final SharedUserSetting sharedUser;
                 final String oldSeInfo;
-                final PackageStateInternal packageState = m.getPackageStateInternal(packageName);
-                if (packageState == null) {
-                    Slog.e(TAG, "Failed to find package setting " + packageName);
-                    return;
+                synchronized (m.mLock) {
+                    ps = m.mSettings.getPackageLPr(packageName);
+                    if (ps == null) {
+                        Slog.e(TAG, "Failed to find package setting " + packageName);
+                        return;
+                    }
+                    pkg = ps.getPkg();
+                    sharedUser = ps.getSharedUser();
+                    oldSeInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
                 }
-                pkg = packageState.getPkg();
-                sharedUser = packageState.getSharedUser();
-                oldSeInfo = AndroidPackageUtils.getSeInfo(pkg, packageState);
 
                 if (pkg == null) {
                     Slog.e(TAG, "Failed to find package " + packageName);
@@ -1521,7 +1524,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (!newSeInfo.equals(oldSeInfo)) {
                     Slog.i(TAG, "Updating seInfo for package " + packageName + " from: "
                             + oldSeInfo + " to: " + newSeInfo);
-                    packageState.getTransientState().setOverrideSeInfo(newSeInfo);
+                    ps.getPkgState().setOverrideSeInfo(newSeInfo);
                     m.mAppDataHelper.prepareAppDataAfterInstallLIF(pkg);
                 }
             }
@@ -5646,6 +5649,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         synchronized (mLock) {
                             mInstantAppRegistry.deleteInstantApplicationMetadataLPw(
                                     packageName, userId);
+                            if (succeeded) {
+                                resetComponentEnabledSettingsIfNeededLPw(packageName, userId);
+                            }
                         }
                     }
                     if (succeeded) {
@@ -5719,6 +5725,62 @@ public class PackageManagerService extends IPackageManager.Stub
         mAppDataHelper.prepareAppDataContentsLIF(pkg, ps, userId, flags);
 
         return true;
+    }
+
+    /**
+     * Update component enabled settings to {@link PackageManager#COMPONENT_ENABLED_STATE_DEFAULT}
+     * if the resetEnabledSettingsOnAppDataCleared is {@code true}.
+     */
+    private void resetComponentEnabledSettingsIfNeededLPw(String packageName, int userId) {
+        final AndroidPackage pkg = packageName != null ? mPackages.get(packageName) : null;
+        if (pkg == null || !pkg.isResetEnabledSettingsOnAppDataCleared()) {
+            return;
+        }
+        final PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);
+        if (pkgSetting == null) {
+            return;
+        }
+        final ArrayList<String> updatedComponents = new ArrayList<>();
+        final Consumer<? super ParsedMainComponent> resetSettings = (component) -> {
+            if (pkgSetting.restoreComponentLPw(component.getClassName(), userId)) {
+                updatedComponents.add(component.getClassName());
+            }
+        };
+        for (int i = 0; i < pkg.getActivities().size(); i++) {
+            resetSettings.accept(pkg.getActivities().get(i));
+        }
+        for (int i = 0; i < pkg.getReceivers().size(); i++) {
+            resetSettings.accept(pkg.getReceivers().get(i));
+        }
+        for (int i = 0; i < pkg.getServices().size(); i++) {
+            resetSettings.accept(pkg.getServices().get(i));
+        }
+        for (int i = 0; i < pkg.getProviders().size(); i++) {
+            resetSettings.accept(pkg.getProviders().get(i));
+        }
+        if (ArrayUtils.isEmpty(updatedComponents)) {
+            // nothing changed
+            return;
+        }
+
+        updateSequenceNumberLP(pkgSetting, new int[] { userId });
+        updateInstantAppInstallerLocked(packageName);
+        scheduleWritePackageRestrictionsLocked(userId);
+
+        final ArrayList<String> pendingComponents = mPendingBroadcasts.get(userId, packageName);
+        if (pendingComponents == null) {
+            mPendingBroadcasts.put(userId, packageName, updatedComponents);
+        } else {
+            for (int i = 0; i < updatedComponents.size(); i++) {
+                final String updatedComponent = updatedComponents.get(i);
+                if (!pendingComponents.contains(updatedComponent)) {
+                    pendingComponents.add(updatedComponent);
+                }
+            }
+        }
+        if (!mHandler.hasMessages(SEND_PENDING_BROADCAST)) {
+            mHandler.sendEmptyMessageDelayed(SEND_PENDING_BROADCAST, BROADCAST_DELAY);
+        }
     }
 
     /**
@@ -6789,24 +6851,24 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
                 true /* checkShell */, "stop package");
-        boolean shouldUnhibernate = false;
         // writer
         synchronized (mLock) {
             final PackageSetting ps = mSettings.getPackageLPr(packageName);
-            if (ps != null && ps.getStopped(userId) && !stopped) {
-                shouldUnhibernate = true;
-            }
             if (!shouldFilterApplication(ps, callingUid, userId)
                     && mSettings.setPackageStoppedStateLPw(this, packageName, stopped, userId)) {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
         }
-        if (shouldUnhibernate) {
+        // If this would cause the app to leave force-stop, then also make sure to unhibernate the
+        // app if needed.
+        if (!stopped) {
             mHandler.post(() -> {
                 AppHibernationManagerInternal ah =
                         mInjector.getLocalService(AppHibernationManagerInternal.class);
-                ah.setHibernatingForUser(packageName, userId, false);
-                ah.setHibernatingGlobally(packageName, false);
+                if (ah != null && ah.isHibernatingForUser(packageName, userId)) {
+                    ah.setHibernatingForUser(packageName, userId, false);
+                    ah.setHibernatingGlobally(packageName, false);
+                }
             });
         }
     }

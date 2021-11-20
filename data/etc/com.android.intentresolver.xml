@@ -18,5 +18,6 @@
     <privapp-permissions package="com.android.intentresolver">
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
+        <permission name="android.permission.PACKAGE_USAGE_STATS"/>
     </privapp-permissions>
 </permissions>

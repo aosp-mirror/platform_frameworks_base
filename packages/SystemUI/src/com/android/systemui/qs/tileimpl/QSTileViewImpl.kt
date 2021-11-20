@@ -247,7 +247,10 @@ open class QSTileViewImpl @JvmOverloads constructor(
         } else {
             measuredHeight
         }
-        bottom = top + (actualHeight * squishinessFraction).toInt()
+        // Limit how much we affect the height, so we don't have rounding artifacts when the tile
+        // is too short.
+        val constrainedSquishiness = 0.1f + squishinessFraction * 0.9f
+        bottom = top + (actualHeight * constrainedSquishiness).toInt()
         scrollY = (actualHeight - height) / 2
     }
 

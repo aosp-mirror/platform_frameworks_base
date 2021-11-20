@@ -19,12 +19,15 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.communal.CommunalStateController;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
+
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -34,14 +37,17 @@ import javax.inject.Inject;
  */
 @CoordinatorScope
 public class CommunalCoordinator implements Coordinator {
+    final Executor mExecutor;
     final CommunalStateController mCommunalStateController;
     final NotificationEntryManager mNotificationEntryManager;
     final NotificationLockscreenUserManager mNotificationLockscreenUserManager;
 
     @Inject
-    public CommunalCoordinator(NotificationEntryManager notificationEntryManager,
+    public CommunalCoordinator(@Main Executor executor,
+            NotificationEntryManager notificationEntryManager,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             CommunalStateController communalStateController) {
+        mExecutor = executor;
         mNotificationEntryManager = notificationEntryManager;
         mNotificationLockscreenUserManager = notificationLockscreenUserManager;
         mCommunalStateController = communalStateController;
@@ -57,8 +63,10 @@ public class CommunalCoordinator implements Coordinator {
     final CommunalStateController.Callback mStateCallback = new CommunalStateController.Callback() {
         @Override
         public void onCommunalViewShowingChanged() {
-            mFilter.invalidateList();
-            mNotificationEntryManager.updateNotifications("Communal mode state changed");
+            mExecutor.execute(() -> {
+                mFilter.invalidateList();
+                mNotificationEntryManager.updateNotifications("Communal mode state changed");
+            });
         }
     };
 

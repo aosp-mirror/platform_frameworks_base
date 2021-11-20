@@ -5207,16 +5207,6 @@ public class CarrierConfigManager {
             "call_composer_picture_server_url_string";
 
     /**
-     * For Android 11, provide a temporary solution for OEMs to use the lower of the two MTU values
-     * for IPv4 and IPv6 if both are sent.
-     * TODO: remove in later release
-     *
-     * @hide
-     */
-    public static final String KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED =
-            "use_lower_mtu_value_if_both_received";
-
-    /**
      * Determines the default RTT mode.
      *
      * Upon first boot, when the user has not yet set a value for their preferred RTT mode,
@@ -5970,7 +5960,6 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
         sDefaults.putString(KEY_CALL_COMPOSER_PICTURE_SERVER_URL_STRING, "");
-        sDefaults.putBoolean(KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED, false);
         sDefaults.putBoolean(KEY_USE_ACS_FOR_RCS_BOOL, false);
         sDefaults.putBoolean(KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL, true);
         sDefaults.putInt(KEY_DEFAULT_RTT_MODE_INT, 0);

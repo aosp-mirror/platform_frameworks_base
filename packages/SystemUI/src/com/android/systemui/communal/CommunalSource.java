@@ -23,12 +23,36 @@ import com.android.systemui.util.ViewController;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.util.Optional;
+
 /**
  * {@link CommunalSource} defines an interface for working with a source for communal data. Clients
  * may request a communal surface that can be shown within a {@link android.view.SurfaceView}.
  * Callbacks may also be registered to listen to state changes.
  */
 public interface CommunalSource {
+    /**
+     * {@link Connector} defines an interface for {@link CommunalSource} instances to be generated.
+     */
+    interface Connector {
+        ListenableFuture<Optional<CommunalSource>> connect();
+    }
+
+    /**
+     * The {@link Observer} interface specifies an entity which {@link CommunalSource} listeners
+     * can be informed of changes to the source, which will require updating. Note that this deals
+     * with changes to the source itself, not content which will be updated through the
+     * {@link CommunalSource} interface.
+     */
+    interface Observer {
+        interface Callback {
+            void onSourceChanged();
+        }
+
+        void addCallback(Callback callback);
+        void removeCallback(Callback callback);
+    }
+
     /**
      * {@link CommunalViewResult} is handed back from {@link #requestCommunalView(Context)} and
      * contains the view to be displayed and its associated controller.

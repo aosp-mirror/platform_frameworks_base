@@ -391,6 +391,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             fillVibrationFallbacks(vib, effect);
 
             synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Starting vibrate for vibration  " + vib.id);
+                }
                 Vibration.Status ignoreStatus = shouldIgnoreVibrationLocked(vib);
                 if (ignoreStatus != null) {
                     endVibrationLocked(vib, ignoreStatus);
@@ -498,6 +501,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     @VisibleForTesting
     void updateServiceState() {
         synchronized (mLock) {
+            if (DEBUG) {
+                Slog.d(TAG, "Updating device state...");
+            }
             boolean inputDevicesChanged = mInputDeviceDelegate.updateInputDeviceVibrators(
                     mVibrationSettings.shouldVibrateInputDevices());
 
@@ -611,6 +617,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         Trace.asyncTraceEnd(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
         try {
             Vibration vib = mCurrentVibration.getVibration();
+            if (DEBUG) {
+                Slog.d(TAG, "Reporting vibration " + vib.id + " finished with status " + status);
+            }
             endVibrationLocked(vib, status);
             finishAppOpModeLocked(vib.uid, vib.opPkg);
         } finally {
@@ -1062,11 +1071,17 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 Slog.d(TAG, "Vibrators released after finished vibration");
             }
             synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Processing vibrators released callback");
+                }
                 mCurrentVibration = null;
                 if (mNextVibration != null) {
                     VibrationThread vibThread = mNextVibration;
                     mNextVibration = null;
-                    startVibrationThreadLocked(vibThread);
+                    Vibration.Status status = startVibrationThreadLocked(vibThread);
+                    if (status != Vibration.Status.RUNNING) {
+                        endVibrationLocked(vibThread.getVibration(), status);
+                    }
                 }
             }
         }
@@ -1248,6 +1263,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         void dumpText(PrintWriter pw) {
             pw.println("Vibrator Manager Service:");
             synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Dumping vibrator manager service to text...");
+                }
                 pw.println("  mVibrationSettings:");
                 pw.println("    " + mVibrationSettings);
                 pw.println();
@@ -1290,6 +1308,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             final ProtoOutputStream proto = new ProtoOutputStream(fd);
 
             synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Dumping vibrator manager service to proto...");
+                }
                 mVibrationSettings.dumpProto(proto);
                 if (mCurrentVibration != null) {
                     mCurrentVibration.getVibration().getDebugInfo().dumpProto(proto,

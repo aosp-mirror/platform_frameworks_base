@@ -40,21 +40,22 @@ final class VibratorController {
     private static final int SUGGESTED_FREQUENCY_SAFE_RANGE = 200;
 
     private final Object mLock = new Object();
-    private final NativeWrapper mNativeWrapper;
 
     @GuardedBy("mLock")
-    private VibratorInfo mVibratorInfo;
-    @GuardedBy("mLock")
-    private boolean mVibratorInfoLoadSuccessful;
-    @GuardedBy("mLock")
+    private final NativeWrapper mNativeWrapper;
+
+    // Vibrator state listeners that support concurrent updates and broadcasts, but should lock
+    // while broadcasting to guarantee delivery order.
     private final RemoteCallbackList<IVibratorStateListener> mVibratorStateListeners =
             new RemoteCallbackList<>();
-    @GuardedBy("mLock")
-    private boolean mIsVibrating;
-    @GuardedBy("mLock")
-    private boolean mIsUnderExternalControl;
-    @GuardedBy("mLock")
-    private float mCurrentAmplitude;
+
+    // Vibrator state variables that are updated from synchronized blocks but can be read anytime
+    // for a snippet of the current known vibrator state/info.
+    private volatile VibratorInfo mVibratorInfo;
+    private volatile boolean mVibratorInfoLoadSuccessful;
+    private volatile boolean mIsVibrating;
+    private volatile boolean mIsUnderExternalControl;
+    private volatile float mCurrentAmplitude;
 
     /** Listener for vibration completion callbacks from native. */
     public interface OnVibrationCompleteListener {
@@ -86,35 +87,39 @@ final class VibratorController {
 
     /** Register state listener for this vibrator. */
     public boolean registerVibratorStateListener(IVibratorStateListener listener) {
-        synchronized (mLock) {
-            final long token = Binder.clearCallingIdentity();
-            try {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            // Register the listener and send the first state atomically, to avoid potentially
+            // out of order broadcasts in between.
+            synchronized (mLock) {
                 if (!mVibratorStateListeners.register(listener)) {
                     return false;
                 }
                 // Notify its callback after new client registered.
-                notifyStateListenerLocked(listener);
-                return true;
-            } finally {
-                Binder.restoreCallingIdentity(token);
+                notifyStateListener(listener, mIsVibrating);
             }
+            return true;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
     /** Remove registered state listener for this vibrator. */
     public boolean unregisterVibratorStateListener(IVibratorStateListener listener) {
-        synchronized (mLock) {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                return mVibratorStateListeners.unregister(listener);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return mVibratorStateListeners.unregister(listener);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
     /** Reruns the query to the vibrator to load the {@link VibratorInfo}, if not yet successful. */
     public void reloadVibratorInfoIfNeeded() {
+        // Early check outside lock, for quick return.
+        if (mVibratorInfoLoadSuccessful) {
+            return;
+        }
         synchronized (mLock) {
             if (mVibratorInfoLoadSuccessful) {
                 return;
@@ -132,16 +137,12 @@ final class VibratorController {
 
     /** Checks if the {@link VibratorInfo} was loaded from the vibrator hardware successfully. */
     boolean isVibratorInfoLoadSuccessful() {
-        synchronized (mLock) {
-            return mVibratorInfoLoadSuccessful;
-        }
+        return mVibratorInfoLoadSuccessful;
     }
 
     /** Return the {@link VibratorInfo} representing the vibrator controlled by this instance. */
     public VibratorInfo getVibratorInfo() {
-        synchronized (mLock) {
-            return mVibratorInfo;
-        }
+        return mVibratorInfo;
     }
 
     /**
@@ -151,9 +152,7 @@ final class VibratorController {
      * automatically notified to any registered {@link IVibratorStateListener} on change.
      */
     public boolean isVibrating() {
-        synchronized (mLock) {
-            return mIsVibrating;
-        }
+        return mIsVibrating;
     }
 
     /**
@@ -168,16 +167,12 @@ final class VibratorController {
      * <p>If {@link #isVibrating()} is false then this will be zero.
      */
     public float getCurrentAmplitude() {
-        synchronized (mLock) {
-            return mCurrentAmplitude;
-        }
+        return mCurrentAmplitude;
     }
 
     /** Return {@code true} if this vibrator is under external control, false otherwise. */
     public boolean isUnderExternalControl() {
-        synchronized (mLock) {
-            return mIsUnderExternalControl;
-        }
+        return mIsUnderExternalControl;
     }
 
     /**
@@ -187,14 +182,14 @@ final class VibratorController {
      * @return true if this vibrator has this capability, false otherwise
      */
     public boolean hasCapability(long capability) {
-        synchronized (mLock) {
-            return mVibratorInfo.hasCapability(capability);
-        }
+        return mVibratorInfo.hasCapability(capability);
     }
 
     /** Return {@code true} if the underlying vibrator is currently available, false otherwise. */
     public boolean isAvailable() {
-        return mNativeWrapper.isAvailable();
+        synchronized (mLock) {
+            return mNativeWrapper.isAvailable();
+        }
     }
 
     /**
@@ -203,10 +198,10 @@ final class VibratorController {
      * <p>This will affect the state of {@link #isUnderExternalControl()}.
      */
     public void setExternalControl(boolean externalControl) {
+        if (!mVibratorInfo.hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
+            return;
+        }
         synchronized (mLock) {
-            if (!mVibratorInfo.hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
-                return;
-            }
             mIsUnderExternalControl = externalControl;
             mNativeWrapper.setExternalControl(externalControl);
         }
@@ -217,10 +212,10 @@ final class VibratorController {
      * if given {@code effect} is {@code null}.
      */
     public void updateAlwaysOn(int id, @Nullable PrebakedSegment prebaked) {
+        if (!mVibratorInfo.hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
+            return;
+        }
         synchronized (mLock) {
-            if (!mVibratorInfo.hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
-                return;
-            }
             if (prebaked == null) {
                 mNativeWrapper.alwaysOnDisable(id);
             } else {
@@ -256,7 +251,7 @@ final class VibratorController {
             long duration = mNativeWrapper.on(milliseconds, vibrationId);
             if (duration > 0) {
                 mCurrentAmplitude = -1;
-                notifyVibratorOnLocked();
+                notifyListenerOnVibrating(true);
             }
             return duration;
         }
@@ -277,7 +272,7 @@ final class VibratorController {
                     prebaked.getEffectStrength(), vibrationId);
             if (duration > 0) {
                 mCurrentAmplitude = -1;
-                notifyVibratorOnLocked();
+                notifyListenerOnVibrating(true);
             }
             return duration;
         }
@@ -293,14 +288,14 @@ final class VibratorController {
      * do not support the input or a negative number if the operation failed.
      */
     public long on(PrimitiveSegment[] primitives, long vibrationId) {
+        if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
+            return 0;
+        }
         synchronized (mLock) {
-            if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
-                return 0;
-            }
             long duration = mNativeWrapper.compose(primitives, vibrationId);
             if (duration > 0) {
                 mCurrentAmplitude = -1;
-                notifyVibratorOnLocked();
+                notifyListenerOnVibrating(true);
             }
             return duration;
         }
@@ -315,15 +310,15 @@ final class VibratorController {
      * @return The duration of the effect playing, or 0 if unsupported.
      */
     public long on(RampSegment[] primitives, long vibrationId) {
+        if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)) {
+            return 0;
+        }
         synchronized (mLock) {
-            if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)) {
-                return 0;
-            }
             int braking = mVibratorInfo.getDefaultBraking();
             long duration = mNativeWrapper.composePwle(primitives, braking, vibrationId);
             if (duration > 0) {
                 mCurrentAmplitude = -1;
-                notifyVibratorOnLocked();
+                notifyListenerOnVibrating(true);
             }
             return duration;
         }
@@ -334,7 +329,7 @@ final class VibratorController {
         synchronized (mLock) {
             mNativeWrapper.off();
             mCurrentAmplitude = 0;
-            notifyVibratorOffLocked();
+            notifyListenerOnVibrating(false);
         }
     }
 
@@ -349,51 +344,31 @@ final class VibratorController {
 
     @Override
     public String toString() {
-        synchronized (mLock) {
-            return "VibratorController{"
-                    + "mVibratorInfo=" + mVibratorInfo
-                    + ", mVibratorInfoLoadSuccessful=" + mVibratorInfoLoadSuccessful
-                    + ", mIsVibrating=" + mIsVibrating
-                    + ", mCurrentAmplitude=" + mCurrentAmplitude
-                    + ", mIsUnderExternalControl=" + mIsUnderExternalControl
-                    + ", mVibratorStateListeners count="
-                    + mVibratorStateListeners.getRegisteredCallbackCount()
-                    + '}';
-        }
+        return "VibratorController{"
+                + "mVibratorInfo=" + mVibratorInfo
+                + ", mVibratorInfoLoadSuccessful=" + mVibratorInfoLoadSuccessful
+                + ", mIsVibrating=" + mIsVibrating
+                + ", mCurrentAmplitude=" + mCurrentAmplitude
+                + ", mIsUnderExternalControl=" + mIsUnderExternalControl
+                + ", mVibratorStateListeners count="
+                + mVibratorStateListeners.getRegisteredCallbackCount()
+                + '}';
     }
 
     @GuardedBy("mLock")
-    private void notifyVibratorOnLocked() {
-        if (!mIsVibrating) {
-            mIsVibrating = true;
-            notifyStateListenersLocked();
+    private void notifyListenerOnVibrating(boolean isVibrating) {
+        if (mIsVibrating != isVibrating) {
+            mIsVibrating = isVibrating;
+            // The broadcast method is safe w.r.t. register/unregister listener methods, but lock
+            // is required here to guarantee delivery order.
+            mVibratorStateListeners.broadcast(
+                    listener -> notifyStateListener(listener, isVibrating));
         }
     }
 
-    @GuardedBy("mLock")
-    private void notifyVibratorOffLocked() {
-        if (mIsVibrating) {
-            mIsVibrating = false;
-            notifyStateListenersLocked();
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void notifyStateListenersLocked() {
-        final int length = mVibratorStateListeners.beginBroadcast();
+    private void notifyStateListener(IVibratorStateListener listener, boolean isVibrating) {
         try {
-            for (int i = 0; i < length; i++) {
-                notifyStateListenerLocked(mVibratorStateListeners.getBroadcastItem(i));
-            }
-        } finally {
-            mVibratorStateListeners.finishBroadcast();
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void notifyStateListenerLocked(IVibratorStateListener listener) {
-        try {
-            listener.onVibrating(mIsVibrating);
+            listener.onVibrating(isVibrating);
         } catch (RemoteException | RuntimeException e) {
             Slog.e(TAG, "Vibrator state listener failed to call", e);
         }

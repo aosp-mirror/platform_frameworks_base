@@ -1204,6 +1204,7 @@ package android {
     field public static final int requiredSplitTypes;
     field public static final int requiresFadingEdge = 16843685; // 0x10103a5
     field public static final int requiresSmallestWidthDp = 16843620; // 0x1010364
+    field public static final int resetEnabledSettingsOnAppDataCleared;
     field public static final int resizeClip = 16843983; // 0x10104cf
     field public static final int resizeMode = 16843619; // 0x1010363
     field public static final int resizeable = 16843405; // 0x101028d
@@ -9625,6 +9626,7 @@ package android.bluetooth.le {
     method public java.util.Map<android.os.ParcelUuid,byte[]> getServiceData();
     method @NonNull public java.util.List<android.os.ParcelUuid> getServiceSolicitationUuids();
     method public java.util.List<android.os.ParcelUuid> getServiceUuids();
+    method @NonNull public java.util.List<android.bluetooth.le.TransportDiscoveryData> getTransportDiscoveryData();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.AdvertiseData> CREATOR;
   }
@@ -9635,6 +9637,7 @@ package android.bluetooth.le {
     method public android.bluetooth.le.AdvertiseData.Builder addServiceData(android.os.ParcelUuid, byte[]);
     method @NonNull public android.bluetooth.le.AdvertiseData.Builder addServiceSolicitationUuid(@NonNull android.os.ParcelUuid);
     method public android.bluetooth.le.AdvertiseData.Builder addServiceUuid(android.os.ParcelUuid);
+    method @NonNull public android.bluetooth.le.AdvertiseData.Builder addTransportDiscoveryData(@NonNull android.bluetooth.le.TransportDiscoveryData);
     method public android.bluetooth.le.AdvertiseData build();
     method public android.bluetooth.le.AdvertiseData.Builder setIncludeDeviceName(boolean);
     method public android.bluetooth.le.AdvertiseData.Builder setIncludeTxPowerLevel(boolean);
@@ -9892,6 +9895,31 @@ package android.bluetooth.le {
     method public android.bluetooth.le.ScanSettings.Builder setPhy(int);
     method public android.bluetooth.le.ScanSettings.Builder setReportDelay(long);
     method public android.bluetooth.le.ScanSettings.Builder setScanMode(int);
+  }
+
+  public final class TransportBlock implements android.os.Parcelable {
+    ctor public TransportBlock(int, int, int, @Nullable byte[]);
+    method public int describeContents();
+    method public int getOrgId();
+    method public int getTdsFlags();
+    method @Nullable public byte[] getTransportData();
+    method public int getTransportDataLength();
+    method @Nullable public byte[] toByteArray();
+    method public int totalBytes();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.TransportBlock> CREATOR;
+  }
+
+  public final class TransportDiscoveryData implements android.os.Parcelable {
+    ctor public TransportDiscoveryData(int, @NonNull java.util.List<android.bluetooth.le.TransportBlock>);
+    ctor public TransportDiscoveryData(@NonNull byte[]);
+    method public int describeContents();
+    method @NonNull public java.util.List<android.bluetooth.le.TransportBlock> getTransportBlocks();
+    method public int getTransportDataType();
+    method @Nullable public byte[] toByteArray();
+    method public int totalBytes();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.TransportDiscoveryData> CREATOR;
   }
 
 }
@@ -17273,8 +17301,12 @@ package android.graphics.text {
     method @NonNull public android.graphics.text.MeasuredText.Builder appendReplacementRun(@NonNull android.graphics.Paint, @IntRange(from=0) int, @FloatRange(from=0) @Px float);
     method @NonNull public android.graphics.text.MeasuredText.Builder appendStyleRun(@NonNull android.graphics.Paint, @IntRange(from=0) int, boolean);
     method @NonNull public android.graphics.text.MeasuredText build();
-    method @NonNull public android.graphics.text.MeasuredText.Builder setComputeHyphenation(boolean);
+    method @Deprecated @NonNull public android.graphics.text.MeasuredText.Builder setComputeHyphenation(boolean);
+    method @NonNull public android.graphics.text.MeasuredText.Builder setComputeHyphenation(int);
     method @NonNull public android.graphics.text.MeasuredText.Builder setComputeLayout(boolean);
+    field public static final int HYPHENATION_MODE_FAST = 2; // 0x2
+    field public static final int HYPHENATION_MODE_NONE = 0; // 0x0
+    field public static final int HYPHENATION_MODE_NORMAL = 1; // 0x1
   }
 
   public final class PositionedGlyphs {
@@ -40645,7 +40677,7 @@ package android.telecom {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts();
     method public String getDefaultDialerPackage();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.telecom.PhoneAccountHandle getDefaultOutgoingPhoneAccount(String);
-    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_SMS, android.Manifest.permission.READ_PHONE_NUMBERS}, conditional=true) public String getLine1Number(android.telecom.PhoneAccountHandle);
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_SMS, android.Manifest.permission.READ_PHONE_NUMBERS}, conditional=true) public String getLine1Number(android.telecom.PhoneAccountHandle);
     method public android.telecom.PhoneAccount getPhoneAccount(android.telecom.PhoneAccountHandle);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telecom.PhoneAccountHandle> getSelfManagedPhoneAccounts();
     method public android.telecom.PhoneAccountHandle getSimCallManager();
@@ -42713,7 +42745,7 @@ package android.telephony {
     method @Nullable public String getMccString();
     method @Deprecated public int getMnc();
     method @Nullable public String getMncString();
-    method public String getNumber();
+    method @Deprecated public String getNumber();
     method public int getPortIndex();
     method public int getSimSlotIndex();
     method public int getSubscriptionId();
@@ -42968,7 +43000,7 @@ package android.telephony {
     method public String getIccAuthentication(int, int, String);
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getImei();
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getImei(int);
-    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_SMS, android.Manifest.permission.READ_PHONE_NUMBERS}) public String getLine1Number();
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_SMS, android.Manifest.permission.READ_PHONE_NUMBERS}) public String getLine1Number();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public String getManualNetworkSelectionPlmn();
     method @Nullable public String getManufacturerCode();
     method @Nullable public String getManufacturerCode(int);
@@ -43053,7 +43085,7 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabledForReason(int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setForbiddenPlmns(@NonNull java.util.List<java.lang.String>);
-    method public boolean setLine1NumberForDisplay(String, String);
+    method @Deprecated public boolean setLine1NumberForDisplay(String, String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setNetworkSelectionModeAutomatic();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setNetworkSelectionModeManual(String, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setNetworkSelectionModeManual(@NonNull String, boolean, int);
@@ -44523,8 +44555,10 @@ package android.text {
     field public static final int DIR_LEFT_TO_RIGHT = 1; // 0x1
     field public static final int DIR_RIGHT_TO_LEFT = -1; // 0xffffffff
     field public static final int HYPHENATION_FREQUENCY_FULL = 2; // 0x2
+    field public static final int HYPHENATION_FREQUENCY_FULL_FAST = 4; // 0x4
     field public static final int HYPHENATION_FREQUENCY_NONE = 0; // 0x0
     field public static final int HYPHENATION_FREQUENCY_NORMAL = 1; // 0x1
+    field public static final int HYPHENATION_FREQUENCY_NORMAL_FAST = 3; // 0x3
     field public static final int JUSTIFICATION_MODE_INTER_WORD = 1; // 0x1
     field public static final int JUSTIFICATION_MODE_NONE = 0; // 0x0
   }
