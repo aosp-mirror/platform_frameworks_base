@@ -147,6 +147,10 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         return mMediaHost;
     }
 
+    public void setSquishinessFraction(float squishinessFraction) {
+        mView.setSquishinessFraction(squishinessFraction);
+    }
+
     @Override
     protected void onViewAttached() {
         mQsTileRevealController = createTileRevealController();
