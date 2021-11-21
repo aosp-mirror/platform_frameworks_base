@@ -40,7 +40,7 @@
                 android:padding="16dp"
                 android:text="@string/restart_button_description"
                 android:textAlignment="viewStart"
-                android:textColor="#E4E3DA"
+                android:textColor="@color/size_compat_text"
                 android:textSize="14sp"/>
 
             <ImageView

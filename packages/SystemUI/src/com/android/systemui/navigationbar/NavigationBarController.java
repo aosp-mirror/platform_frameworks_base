@@ -100,7 +100,7 @@ public class NavigationBarController implements
             CommandQueue commandQueue,
             @Main Handler mainHandler,
             ConfigurationController configurationController,
-            NavigationBarA11yHelper navigationBarA11yHelper,
+            NavBarHelper navBarHelper,
             TaskbarDelegate taskbarDelegate,
             NavigationBar.Factory navigationBarFactory,
             DumpManager dumpManager,
@@ -115,7 +115,7 @@ public class NavigationBarController implements
         mNavMode = navigationModeController.addListener(this);
         mTaskbarDelegate = taskbarDelegate;
         mTaskbarDelegate.setDependencies(commandQueue, overviewProxyService,
-                navigationBarA11yHelper, navigationModeController, sysUiFlagsContainer,
+                navBarHelper, navigationModeController, sysUiFlagsContainer,
                 dumpManager, autoHideController);
         mIsTablet = isTablet(mContext);
         dumpManager.registerDumpable(this);
