@@ -17,7 +17,6 @@
 package com.android.server;
 
 import android.os.StrictMode;
-import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Slog;
 
@@ -32,13 +31,6 @@ import java.net.SocketException;
 public final class NetworkManagementSocketTagger extends SocketTagger {
     private static final String TAG = "NetworkManagementSocketTagger";
     private static final boolean LOGD = false;
-
-    /**
-     * {@link SystemProperties} key that indicates if {@code qtaguid} bandwidth
-     * controls have been enabled.
-     */
-    // TODO: remove when always enabled, or once socket tagging silently fails.
-    public static final String PROP_QTAGUID_ENABLED = "net.qtaguid_enabled";
 
     private static ThreadLocal<SocketTags> threadSocketTags = new ThreadLocal<SocketTags>() {
         @Override
@@ -88,13 +80,11 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
     private void tagSocketFd(FileDescriptor fd, int tag, int uid) {
         if (tag == -1 && uid == -1) return;
 
-        if (SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) {
-            final int errno = native_tagSocketFd(fd, tag, uid);
-            if (errno < 0) {
-                Log.i(TAG, "tagSocketFd(" + fd.getInt$() + ", "
-                      + tag + ", " +
-                      + uid + ") failed with errno" + errno);
-            }
+        final int errno = native_tagSocketFd(fd, tag, uid);
+        if (errno < 0) {
+            Log.i(TAG, "tagSocketFd(" + fd.getInt$() + ", "
+                    + tag + ", "
+                    + uid + ") failed with errno" + errno);
         }
     }
 
@@ -110,11 +100,9 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
         final SocketTags options = threadSocketTags.get();
         if (options.statsTag == -1 && options.statsUid == -1) return;
 
-        if (SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) {
-            final int errno = native_untagSocketFd(fd);
-            if (errno < 0) {
-                Log.w(TAG, "untagSocket(" + fd.getInt$() + ") failed with errno " + errno);
-            }
+        final int errno = native_untagSocketFd(fd);
+        if (errno < 0) {
+            Log.w(TAG, "untagSocket(" + fd.getInt$() + ") failed with errno " + errno);
         }
     }
 
@@ -124,21 +112,17 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
     }
 
     public static void setKernelCounterSet(int uid, int counterSet) {
-        if (SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) {
-            final int errno = native_setCounterSet(counterSet, uid);
-            if (errno < 0) {
-                Log.w(TAG, "setKernelCountSet(" + uid + ", " + counterSet + ") failed with errno "
-                        + errno);
-            }
+        final int errno = native_setCounterSet(counterSet, uid);
+        if (errno < 0) {
+            Log.w(TAG, "setKernelCountSet(" + uid + ", " + counterSet + ") failed with errno "
+                    + errno);
         }
     }
 
     public static void resetKernelUidStats(int uid) {
-        if (SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) {
-            int errno = native_deleteTagData(0, uid);
-            if (errno < 0) {
-                Slog.w(TAG, "problem clearing counters for uid " + uid + " : errno " + errno);
-            }
+        int errno = native_deleteTagData(0, uid);
+        if (errno < 0) {
+            Slog.w(TAG, "problem clearing counters for uid " + uid + " : errno " + errno);
         }
     }
 

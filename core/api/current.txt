@@ -9546,6 +9546,7 @@ package android.bluetooth.le {
     method public java.util.Map<android.os.ParcelUuid,byte[]> getServiceData();
     method @NonNull public java.util.List<android.os.ParcelUuid> getServiceSolicitationUuids();
     method public java.util.List<android.os.ParcelUuid> getServiceUuids();
+    method @NonNull public java.util.List<android.bluetooth.le.TransportDiscoveryData> getTransportDiscoveryData();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.AdvertiseData> CREATOR;
   }
@@ -9556,6 +9557,7 @@ package android.bluetooth.le {
     method public android.bluetooth.le.AdvertiseData.Builder addServiceData(android.os.ParcelUuid, byte[]);
     method @NonNull public android.bluetooth.le.AdvertiseData.Builder addServiceSolicitationUuid(@NonNull android.os.ParcelUuid);
     method public android.bluetooth.le.AdvertiseData.Builder addServiceUuid(android.os.ParcelUuid);
+    method @NonNull public android.bluetooth.le.AdvertiseData.Builder addTransportDiscoveryData(@NonNull android.bluetooth.le.TransportDiscoveryData);
     method public android.bluetooth.le.AdvertiseData build();
     method public android.bluetooth.le.AdvertiseData.Builder setIncludeDeviceName(boolean);
     method public android.bluetooth.le.AdvertiseData.Builder setIncludeTxPowerLevel(boolean);
@@ -9813,6 +9815,31 @@ package android.bluetooth.le {
     method public android.bluetooth.le.ScanSettings.Builder setPhy(int);
     method public android.bluetooth.le.ScanSettings.Builder setReportDelay(long);
     method public android.bluetooth.le.ScanSettings.Builder setScanMode(int);
+  }
+
+  public final class TransportBlock implements android.os.Parcelable {
+    ctor public TransportBlock(int, int, int, @Nullable byte[]);
+    method public int describeContents();
+    method public int getOrgId();
+    method public int getTdsFlags();
+    method @Nullable public byte[] getTransportData();
+    method public int getTransportDataLength();
+    method @Nullable public byte[] toByteArray();
+    method public int totalBytes();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.TransportBlock> CREATOR;
+  }
+
+  public final class TransportDiscoveryData implements android.os.Parcelable {
+    ctor public TransportDiscoveryData(int, @NonNull java.util.List<android.bluetooth.le.TransportBlock>);
+    ctor public TransportDiscoveryData(@NonNull byte[]);
+    method public int describeContents();
+    method @NonNull public java.util.List<android.bluetooth.le.TransportBlock> getTransportBlocks();
+    method public int getTransportDataType();
+    method @Nullable public byte[] toByteArray();
+    method public int totalBytes();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.TransportDiscoveryData> CREATOR;
   }
 
 }
@@ -31446,9 +31473,9 @@ package android.os {
     method public byte[] marshall();
     method @NonNull public static android.os.Parcel obtain();
     method @NonNull public static android.os.Parcel obtain(@NonNull android.os.IBinder);
-    method @Nullable public Object[] readArray(@Nullable ClassLoader);
+    method @Deprecated @Nullable public Object[] readArray(@Nullable ClassLoader);
     method @Nullable public <T> T[] readArray(@Nullable ClassLoader, @NonNull Class<T>);
-    method @Nullable public java.util.ArrayList readArrayList(@Nullable ClassLoader);
+    method @Deprecated @Nullable public java.util.ArrayList readArrayList(@Nullable ClassLoader);
     method @Nullable public <T> java.util.ArrayList<T> readArrayList(@Nullable ClassLoader, @NonNull Class<? extends T>);
     method public void readBinderArray(@NonNull android.os.IBinder[]);
     method public void readBinderList(@NonNull java.util.List<android.os.IBinder>);
@@ -31466,32 +31493,32 @@ package android.os {
     method public android.os.ParcelFileDescriptor readFileDescriptor();
     method public float readFloat();
     method public void readFloatArray(@NonNull float[]);
-    method @Nullable public java.util.HashMap readHashMap(@Nullable ClassLoader);
+    method @Deprecated @Nullable public java.util.HashMap readHashMap(@Nullable ClassLoader);
     method @Nullable public <K, V> java.util.HashMap<K,V> readHashMap(@Nullable ClassLoader, @NonNull Class<? extends K>, @NonNull Class<? extends V>);
     method public int readInt();
     method public void readIntArray(@NonNull int[]);
     method public <T extends android.os.IInterface> void readInterfaceArray(@NonNull T[], @NonNull java.util.function.Function<android.os.IBinder,T>);
     method public <T extends android.os.IInterface> void readInterfaceList(@NonNull java.util.List<T>, @NonNull java.util.function.Function<android.os.IBinder,T>);
-    method public void readList(@NonNull java.util.List, @Nullable ClassLoader);
+    method @Deprecated public void readList(@NonNull java.util.List, @Nullable ClassLoader);
     method public <T> void readList(@NonNull java.util.List<? super T>, @Nullable ClassLoader, @NonNull Class<T>);
     method public long readLong();
     method public void readLongArray(@NonNull long[]);
-    method public void readMap(@NonNull java.util.Map, @Nullable ClassLoader);
+    method @Deprecated public void readMap(@NonNull java.util.Map, @Nullable ClassLoader);
     method public <K, V> void readMap(@NonNull java.util.Map<? super K,? super V>, @Nullable ClassLoader, @NonNull Class<K>, @NonNull Class<V>);
-    method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader);
+    method @Deprecated @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader);
     method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader, @NonNull Class<T>);
     method @Nullable public android.os.Parcelable[] readParcelableArray(@Nullable ClassLoader);
     method @Nullable public <T> T[] readParcelableArray(@Nullable ClassLoader, @NonNull Class<T>);
-    method @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
+    method @Deprecated @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
     method @Nullable public <T> android.os.Parcelable.Creator<T> readParcelableCreator(@Nullable ClassLoader, @NonNull Class<T>);
     method @NonNull public <T extends android.os.Parcelable> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader);
     method @Nullable public android.os.PersistableBundle readPersistableBundle();
     method @Nullable public android.os.PersistableBundle readPersistableBundle(@Nullable ClassLoader);
-    method @Nullable public java.io.Serializable readSerializable();
+    method @Deprecated @Nullable public java.io.Serializable readSerializable();
     method @Nullable public <T extends java.io.Serializable> T readSerializable(@Nullable ClassLoader, @NonNull Class<T>);
     method @NonNull public android.util.Size readSize();
     method @NonNull public android.util.SizeF readSizeF();
-    method @Nullable public <T> android.util.SparseArray<T> readSparseArray(@Nullable ClassLoader);
+    method @Deprecated @Nullable public <T> android.util.SparseArray<T> readSparseArray(@Nullable ClassLoader);
     method @Nullable public <T> android.util.SparseArray<T> readSparseArray(@Nullable ClassLoader, @NonNull Class<? extends T>);
     method @Nullable public android.util.SparseBooleanArray readSparseBooleanArray();
     method @Nullable public String readString();
@@ -43474,8 +43501,10 @@ package android.telephony.ims {
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public boolean isVoWiFiSettingEnabled();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public boolean isVtSettingEnabled();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RegistrationManager.RegistrationCallback) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public void registerImsStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsStateCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public void registerMmTelCapabilityCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsMmTelManager.CapabilityCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.RegistrationManager.RegistrationCallback);
+    method public void unregisterImsStateCallback(@NonNull android.telephony.ims.ImsStateCallback);
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public void unregisterMmTelCapabilityCallback(@NonNull android.telephony.ims.ImsMmTelManager.CapabilityCallback);
     field public static final int WIFI_MODE_CELLULAR_PREFERRED = 1; // 0x1
     field public static final int WIFI_MODE_WIFI_ONLY = 0; // 0x0
@@ -43492,7 +43521,9 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void getRegistrationTransportType(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @NonNull public android.telephony.ims.RcsUceAdapter getUceAdapter();
     method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RegistrationManager.RegistrationCallback) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE", "android.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE"}) public void registerImsStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsStateCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.RegistrationManager.RegistrationCallback);
+    method public void unregisterImsStateCallback(@NonNull android.telephony.ims.ImsStateCallback);
     field public static final String ACTION_SHOW_CAPABILITY_DISCOVERY_OPT_IN = "android.telephony.ims.action.SHOW_CAPABILITY_DISCOVERY_OPT_IN";
   }
 
@@ -43689,6 +43720,19 @@ package android.telephony.ims {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int ATTR_EPDG_OVER_CELL_INTERNET = 1; // 0x1
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsRegistrationAttributes> CREATOR;
+  }
+
+  public abstract class ImsStateCallback {
+    ctor public ImsStateCallback();
+    method public abstract void onAvailable();
+    method public abstract void onError();
+    method public abstract void onUnavailable(int);
+    field public static final int REASON_IMS_SERVICE_DISCONNECTED = 3; // 0x3
+    field public static final int REASON_IMS_SERVICE_NOT_READY = 6; // 0x6
+    field public static final int REASON_NO_IMS_SERVICE_CONFIGURED = 4; // 0x4
+    field public static final int REASON_SUBSCRIPTION_INACTIVE = 5; // 0x5
+    field public static final int REASON_UNKNOWN_PERMANENT_ERROR = 2; // 0x2
+    field public static final int REASON_UNKNOWN_TEMPORARY_ERROR = 1; // 0x1
   }
 
   public class RcsUceAdapter {

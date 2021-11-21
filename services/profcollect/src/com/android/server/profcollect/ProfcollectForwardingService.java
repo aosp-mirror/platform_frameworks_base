@@ -35,6 +35,7 @@ import android.provider.DeviceConfig;
 import android.util.Log;
 
 import com.android.internal.R;
+import com.android.internal.os.BackgroundThread;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -90,10 +91,12 @@ public final class ProfcollectForwardingService extends SystemService {
             if (mIProfcollect == null) {
                 return;
             }
-            if (serviceHasSupportedTraceProvider()) {
-                registerObservers();
-            }
-            ProfcollectBGJobService.schedule(getContext());
+            BackgroundThread.get().getThreadHandler().post(() -> {
+                if (serviceHasSupportedTraceProvider()) {
+                    registerObservers();
+                    ProfcollectBGJobService.schedule(getContext());
+                }
+            });
         }
     }
 
@@ -146,7 +149,7 @@ public final class ProfcollectForwardingService extends SystemService {
                     connectNativeService();
                     break;
                 default:
-                    throw new AssertionError("Unknown message: " + message.toString());
+                    throw new AssertionError("Unknown message: " + message);
             }
         }
     }
@@ -190,11 +193,14 @@ public final class ProfcollectForwardingService extends SystemService {
                 Log.d(LOG_TAG, "Starting background process job");
             }
 
-            try {
-                sSelfService.mIProfcollect.process(false);
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, e.getMessage());
-            }
+            BackgroundThread.get().getThreadHandler().post(
+                    () -> {
+                        try {
+                            sSelfService.mIProfcollect.process();
+                        } catch (RemoteException e) {
+                            Log.e(LOG_TAG, e.getMessage());
+                        }
+                    });
             return true;
         }
 
@@ -230,14 +236,16 @@ public final class ProfcollectForwardingService extends SystemService {
                 "applaunch_trace_freq", 2);
         int randomNum = ThreadLocalRandom.current().nextInt(100);
         if (randomNum < traceFrequency) {
-            try {
-                if (DEBUG) {
-                    Log.d(LOG_TAG, "Tracing on app launch event: " + packageName);
-                }
-                mIProfcollect.trace_once("applaunch");
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, e.getMessage());
+            if (DEBUG) {
+                Log.d(LOG_TAG, "Tracing on app launch event: " + packageName);
             }
+            BackgroundThread.get().getThreadHandler().post(() -> {
+                try {
+                    mIProfcollect.trace_once("applaunch");
+                } catch (RemoteException e) {
+                    Log.e(LOG_TAG, e.getMessage());
+                }
+            });
         }
     }
 
@@ -301,7 +309,7 @@ public final class ProfcollectForwardingService extends SystemService {
         }
 
         Context context = getContext();
-        new Thread(() -> {
+        BackgroundThread.get().getThreadHandler().post(() -> {
             try {
                 // Prepare profile report
                 String reportName = mIProfcollect.report() + ".zip";
@@ -321,6 +329,6 @@ public final class ProfcollectForwardingService extends SystemService {
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, e.getMessage());
             }
-        }).start();
+        });
     }
 }

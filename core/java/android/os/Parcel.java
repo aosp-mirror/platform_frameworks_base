@@ -2990,7 +2990,12 @@ public final class Parcel {
      * Please use {@link #readBundle(ClassLoader)} instead (whose data must have
      * been written with {@link #writeBundle}.  Read into an existing Map object
      * from the parcel at the current dataPosition().
+     *
+     * @deprecated Consider using {@link #readBundle(ClassLoader)} as stated above, in case this
+     *      method is still preferred use the type-safer version {@link #readMap(Map, ClassLoader,
+     *      Class, Class)} starting from Android {@link Build.VERSION_CODES#TIRAMISU}.
      */
+    @Deprecated
     public final void readMap(@NonNull Map outVal, @Nullable ClassLoader loader) {
         int n = readInt();
         readMapInternal(outVal, n, loader, /* clazzKey */ null, /* clazzValue */ null);
@@ -3016,7 +3021,14 @@ public final class Parcel {
      * Read into an existing List object from the parcel at the current
      * dataPosition(), using the given class loader to load any enclosed
      * Parcelables.  If it is null, the default class loader is used.
+     *
+     * @deprecated Use the type-safer version {@link #readList(List, ClassLoader, Class)} starting
+     *      from Android {@link Build.VERSION_CODES#TIRAMISU}. Also consider changing the format to
+     *      use {@link #readTypedList(List, Parcelable.Creator)} if possible (eg. if the items'
+     *      class is final) since this is also more performant. Note that changing to the latter
+     *      also requires changing the writes.
      */
+    @Deprecated
     public final void readList(@NonNull List outVal, @Nullable ClassLoader loader) {
         int N = readInt();
         readListInternal(outVal, N, loader, /* clazz */ null);
@@ -3043,10 +3055,14 @@ public final class Parcel {
      * object from the parcel at the current dataPosition(), using the given
      * class loader to load any enclosed Parcelables.  Returns null if
      * the previously written map object was null.
+     *
+     * @deprecated Consider using {@link #readBundle(ClassLoader)} as stated above, in case this
+     *      method is still preferred use the type-safer version {@link #readHashMap(ClassLoader,
+     *      Class, Class)} starting from Android {@link Build.VERSION_CODES#TIRAMISU}.
      */
+    @Deprecated
     @Nullable
-    public final HashMap readHashMap(@Nullable ClassLoader loader)
-    {
+    public HashMap readHashMap(@Nullable ClassLoader loader) {
         int n = readInt();
         if (n < 0) {
             return null;
@@ -3247,7 +3263,14 @@ public final class Parcel {
      * dataPosition().  Returns null if the previously written list object was
      * null.  The given class loader will be used to load any enclosed
      * Parcelables.
+     *
+     * @deprecated Use the type-safer version {@link #readArrayList(ClassLoader, Class)} starting
+     *      from Android {@link Build.VERSION_CODES#TIRAMISU}. Also consider changing the format to
+     *      use {@link #createTypedArrayList(Parcelable.Creator)} if possible (eg. if the items'
+     *      class is final) since this is also more performant. Note that changing to the latter
+     *      also requires changing the writes.
      */
+    @Deprecated
     @Nullable
     public ArrayList readArrayList(@Nullable ClassLoader loader) {
         return readArrayListInternal(loader, /* clazz */ null);
@@ -3274,7 +3297,14 @@ public final class Parcel {
      * dataPosition().  Returns null if the previously written array was
      * null.  The given class loader will be used to load any enclosed
      * Parcelables.
+     *
+     * @deprecated Use the type-safer version {@link #readArray(ClassLoader, Class)} starting from
+     *      Android {@link Build.VERSION_CODES#TIRAMISU}. Also consider changing the format to use
+     *      {@link #createTypedArray(Parcelable.Creator)} if possible (eg. if the items' class is
+     *      final) since this is also more performant. Note that changing to the latter also
+     *      requires changing the writes.
      */
+    @Deprecated
     @Nullable
     public Object[] readArray(@Nullable ClassLoader loader) {
         return readArrayInternal(loader, /* clazz */ null);
@@ -3300,7 +3330,14 @@ public final class Parcel {
      * dataPosition().  Returns null if the previously written list object was
      * null.  The given class loader will be used to load any enclosed
      * Parcelables.
+     *
+     * @deprecated Use the type-safer version {@link #readSparseArray(ClassLoader, Class)} starting
+     *      from Android {@link Build.VERSION_CODES#TIRAMISU}. Also consider changing the format to
+     *      use {@link #createTypedSparseArray(Parcelable.Creator)} if possible (eg. if the items'
+     *      class is final) since this is also more performant. Note that changing to the latter
+     *      also requires changing the writes.
      */
+    @Deprecated
     @Nullable
     public <T> SparseArray<T> readSparseArray(@Nullable ClassLoader loader) {
         return readSparseArrayInternal(loader, /* clazz */ null);
@@ -4107,7 +4144,13 @@ public final class Parcel {
      * object has been written.
      * @throws BadParcelableException Throws BadParcelableException if there
      * was an error trying to instantiate the Parcelable.
+     *
+     * @deprecated Use the type-safer version {@link #readParcelable(ClassLoader, Class)} starting
+     *      from Android {@link Build.VERSION_CODES#TIRAMISU}. Also consider changing the format to
+     *      use {@link Parcelable.Creator#createFromParcel(Parcel)} if possible since this is also
+     *      more performant. Note that changing to the latter also requires changing the writes.
      */
+    @Deprecated
     @Nullable
     public final <T extends Parcelable> T readParcelable(@Nullable ClassLoader loader) {
         return readParcelableInternal(loader, /* clazz */ null);
@@ -4176,7 +4219,11 @@ public final class Parcel {
      * read the {@link Parcelable.Creator}.
      *
      * @see #writeParcelableCreator
+     *
+     * @deprecated Use the type-safer version {@link #readParcelableCreator(ClassLoader, Class)}
+     *       starting from Android {@link Build.VERSION_CODES#TIRAMISU}.
      */
+    @Deprecated
     @Nullable
     public final Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader loader) {
         return readParcelableCreatorInternal(loader, /* clazz */ null);
@@ -4337,7 +4384,11 @@ public final class Parcel {
      * Read and return a new Serializable object from the parcel.
      * @return the Serializable object, or null if the Serializable name
      * wasn't found in the parcel.
+     *
+     * @deprecated Use the type-safer version {@link #readSerializable(ClassLoader, Class)} starting
+     *       from Android {@link Build.VERSION_CODES#TIRAMISU}.
      */
+    @Deprecated
     @Nullable
     public Serializable readSerializable() {
         return readSerializableInternal(/* loader */ null, /* clazz */ null);
