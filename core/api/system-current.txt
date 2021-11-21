@@ -971,8 +971,8 @@ package android.app.admin {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public String getDeviceOwnerNameOnAnyUser();
     method @Nullable public CharSequence getDeviceOwnerOrganizationName();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.UserHandle getDeviceOwnerUser();
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<java.lang.String> getPermittedAccessibilityServices(int);
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<java.lang.String> getPermittedInputMethodsForCurrentUser();
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_ADMIN_POLICY}) public java.util.List<java.lang.String> getPermittedAccessibilityServices(int);
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_ADMIN_POLICY}) public java.util.List<java.lang.String> getPermittedInputMethodsForCurrentUser();
     method @Nullable public android.content.ComponentName getProfileOwner() throws java.lang.IllegalArgumentException;
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public String getProfileOwnerNameAsUser(int) throws java.lang.IllegalArgumentException;
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public int getUserProvisioningState();

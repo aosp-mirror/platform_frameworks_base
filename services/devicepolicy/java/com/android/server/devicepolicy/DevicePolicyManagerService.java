@@ -10231,7 +10231,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return null;
         }
-        Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity()));
+        Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity())
+                        || hasCallingOrSelfPermission(permission.QUERY_ADMIN_POLICY));
 
         synchronized (getLockObject()) {
             List<String> result = null;
@@ -10402,7 +10403,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public @Nullable List<String> getPermittedInputMethodsAsUser(@UserIdInt int userId) {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userId));
-        Preconditions.checkCallAuthorization(canManageUsers(caller));
+        Preconditions.checkCallAuthorization(canManageUsers(caller)
+                || hasCallingOrSelfPermission(permission.QUERY_ADMIN_POLICY));
         final long callingIdentity = Binder.clearCallingIdentity();
         try {
             return getPermittedInputMethodsUnchecked(userId);
