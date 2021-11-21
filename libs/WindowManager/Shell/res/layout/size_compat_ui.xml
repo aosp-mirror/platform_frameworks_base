@@ -30,7 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:src="@drawable/size_compat_restart_button"
+            android:src="@drawable/size_compat_restart_button_ripple"
             android:background="@android:color/transparent"
             android:contentDescription="@string/restart_button_description"/>
 
