@@ -358,6 +358,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
     private List<View.OnAttachStateChangeListener> mOnAttachStateChangeListeners;
     private FalsingManagerFake mFalsingManager = new FalsingManagerFake();
+    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setup() {
@@ -511,7 +512,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mQuickAccessWalletController,
                 mQrCodeScannerController,
                 mRecordingController,
-                new FakeExecutor(new FakeSystemClock()),
+                mExecutor,
                 mSecureSettings,
                 mSplitShadeHeaderController,
                 mUnlockedScreenOffAnimationController,
@@ -936,6 +937,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(WeakReference.class);
 
         monitorCallback.getValue().onSourceAvailable(new WeakReference<>(mCommunalSource));
+        mExecutor.runAllReady();
         verify(mCommunalHostViewController).show(sourceCapture.capture());
         assertThat(sourceCapture.getValue().get()).isEqualTo(mCommunalSource);
 
