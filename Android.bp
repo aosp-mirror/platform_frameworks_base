@@ -328,6 +328,7 @@ java_defaults {
         "TeleService-platform-compat-config",
         "documents-ui-compat-config",
         "calendar-provider-compat-config",
+        "contacts-provider-platform-compat-config",
     ],
     libs: [
         "app-compat-annotations",
@@ -563,6 +564,7 @@ stubs_defaults {
         "android.hardware.vibrator-V1.3-java",
         "framework-protos",
         "art.module.public.api",
+        "sdk_module-lib_current_framework-tethering",
         // There are a few classes from modules used by the core that
         // need to be resolved by metalava. We use a prebuilt stub of the
         // full sdk to ensure we can resolve them. If a new class gets added,

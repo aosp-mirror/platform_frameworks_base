@@ -575,6 +575,9 @@
     <uses-permission android:name="android.permission.MANAGE_VIRTUAL_MACHINE" />
     <uses-permission android:name="android.permission.DEBUG_VIRTUAL_MACHINE" />
 
+    <!-- Permission required for CTS test - SettingsMultiPaneDeepLinkTest -->
+    <uses-permission android:name="android.permission.LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

@@ -15,7 +15,7 @@ per-file *Surface* = file:/services/core/java/com/android/server/wm/OWNERS
 
 # WindowManager
 per-file AppearanceRegion = file:/services/core/java/com/android/server/wm/OWNERS
-per-file BaseIWIndow.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file BaseIWindow.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file RotationPolicy.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file WindowManagerPolicyThread.java = file:/services/core/java/com/android/server/wm/OWNERS
 
