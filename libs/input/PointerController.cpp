@@ -17,23 +17,28 @@
 #define LOG_TAG "PointerController"
 //#define LOG_NDEBUG 0
 
-// Log debug messages about pointer updates
-#define DEBUG_POINTER_UPDATES 0
-
 #include "PointerController.h"
-#include "MouseCursorController.h"
 #include "PointerControllerContext.h"
-#include "TouchSpotController.h"
 
-#include <log/log.h>
-
-#include <SkBitmap.h>
 #include <SkBlendMode.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
-#include <SkPaint.h>
 
 namespace android {
+
+namespace {
+
+const ui::Transform kIdentityTransform;
+
+} // namespace
+
+// --- PointerController::DisplayInfoListener ---
+
+void PointerController::DisplayInfoListener::onWindowInfosChanged(
+        const std::vector<android::gui::WindowInfo>&,
+        const std::vector<android::gui::DisplayInfo>& displayInfo) {
+    mPointerController.onDisplayInfosChanged(displayInfo);
+}
 
 // --- PointerController ---
 
@@ -63,9 +68,16 @@ std::shared_ptr<PointerController> PointerController::create(
 PointerController::PointerController(const sp<PointerControllerPolicyInterface>& policy,
                                      const sp<Looper>& looper,
                                      const sp<SpriteController>& spriteController)
-      : mContext(policy, looper, spriteController, *this), mCursorController(mContext) {
+      : mContext(policy, looper, spriteController, *this),
+        mCursorController(mContext),
+        mDisplayInfoListener(new DisplayInfoListener(*this)) {
     std::scoped_lock lock(mLock);
     mLocked.presentation = Presentation::SPOT;
+    SurfaceComposerClient::getDefault()->addWindowInfosListener(mDisplayInfoListener);
+}
+
+PointerController::~PointerController() {
+    SurfaceComposerClient::getDefault()->removeWindowInfosListener(mDisplayInfoListener);
 }
 
 bool PointerController::getBounds(float* outMinX, float* outMinY, float* outMaxX,
@@ -74,7 +86,14 @@ bool PointerController::getBounds(float* outMinX, float* outMinY, float* outMaxX
 }
 
 void PointerController::move(float deltaX, float deltaY) {
-    mCursorController.move(deltaX, deltaY);
+    const int32_t displayId = mCursorController.getDisplayId();
+    vec2 transformed;
+    {
+        std::scoped_lock lock(mLock);
+        const auto& transform = getTransformForDisplayLocked(displayId);
+        transformed = transformWithoutTranslation(transform, {deltaX, deltaY});
+    }
+    mCursorController.move(transformed.x, transformed.y);
 }
 
 void PointerController::setButtonState(int32_t buttonState) {
@@ -86,12 +105,26 @@ int32_t PointerController::getButtonState() const {
 }
 
 void PointerController::setPosition(float x, float y) {
-    std::scoped_lock lock(mLock);
-    mCursorController.setPosition(x, y);
+    const int32_t displayId = mCursorController.getDisplayId();
+    vec2 transformed;
+    {
+        std::scoped_lock lock(mLock);
+        const auto& transform = getTransformForDisplayLocked(displayId);
+        transformed = transform.transform(x, y);
+    }
+    mCursorController.setPosition(transformed.x, transformed.y);
 }
 
 void PointerController::getPosition(float* outX, float* outY) const {
+    const int32_t displayId = mCursorController.getDisplayId();
     mCursorController.getPosition(outX, outY);
+    {
+        std::scoped_lock lock(mLock);
+        const auto& transform = getTransformForDisplayLocked(displayId);
+        const auto xy = transform.inverse().transform(*outX, *outY);
+        *outX = xy.x;
+        *outY = xy.y;
+    }
 }
 
 int32_t PointerController::getDisplayId() const {
@@ -130,11 +163,25 @@ void PointerController::setPresentation(Presentation presentation) {
 void PointerController::setSpots(const PointerCoords* spotCoords, const uint32_t* spotIdToIndex,
                                  BitSet32 spotIdBits, int32_t displayId) {
     std::scoped_lock lock(mLock);
+    std::array<PointerCoords, MAX_POINTERS> outSpotCoords{};
+    const ui::Transform& transform = getTransformForDisplayLocked(displayId);
+
+    for (BitSet32 idBits(spotIdBits); !idBits.isEmpty();) {
+        const uint32_t index = spotIdToIndex[idBits.clearFirstMarkedBit()];
+
+        const vec2 xy = transform.transform(spotCoords[index].getXYValue());
+        outSpotCoords[index].setAxisValue(AMOTION_EVENT_AXIS_X, xy.x);
+        outSpotCoords[index].setAxisValue(AMOTION_EVENT_AXIS_Y, xy.y);
+
+        float pressure = spotCoords[index].getAxisValue(AMOTION_EVENT_AXIS_PRESSURE);
+        outSpotCoords[index].setAxisValue(AMOTION_EVENT_AXIS_PRESSURE, pressure);
+    }
+
     auto it = mLocked.spotControllers.find(displayId);
     if (it == mLocked.spotControllers.end()) {
         mLocked.spotControllers.try_emplace(displayId, displayId, mContext);
     }
-    mLocked.spotControllers.at(displayId).setSpots(spotCoords, spotIdToIndex, spotIdBits);
+    mLocked.spotControllers.at(displayId).setSpots(outSpotCoords.data(), spotIdToIndex, spotIdBits);
 }
 
 void PointerController::clearSpots() {
@@ -194,7 +241,7 @@ void PointerController::doInactivityTimeout() {
 
 void PointerController::onDisplayViewportsUpdated(std::vector<DisplayViewport>& viewports) {
     std::unordered_set<int32_t> displayIdSet;
-    for (DisplayViewport viewport : viewports) {
+    for (const DisplayViewport& viewport : viewports) {
         displayIdSet.insert(viewport.displayId);
     }
 
@@ -212,6 +259,19 @@ void PointerController::onDisplayViewportsUpdated(std::vector<DisplayViewport>& 
             ++it;
         }
     }
+}
+
+void PointerController::onDisplayInfosChanged(const std::vector<gui::DisplayInfo>& displayInfo) {
+    std::scoped_lock lock(mLock);
+    mLocked.mDisplayInfos = displayInfo;
+}
+
+const ui::Transform& PointerController::getTransformForDisplayLocked(int displayId) const {
+    const auto& di = mLocked.mDisplayInfos;
+    auto it = std::find_if(di.begin(), di.end(), [displayId](const gui::DisplayInfo& info) {
+        return info.displayId == displayId;
+    });
+    return it != di.end() ? it->transform : kIdentityTransform;
 }
 
 } // namespace android
