@@ -58,9 +58,7 @@ public class InfoMediaDevice extends MediaDevice {
 
     @Override
     public Drawable getIcon() {
-        final Drawable drawable = getIconWithoutBackground();
-        setColorFilter(drawable);
-        return drawable;
+        return getIconWithoutBackground();
     }
 
     @Override
