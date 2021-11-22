@@ -137,6 +137,7 @@ java_library_static {
     ],
 
     required: [
+        "default_television.xml",
         "gps_debug.conf",
         "protolog.conf.json.gz",
     ],
