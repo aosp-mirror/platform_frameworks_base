@@ -1,6 +1,8 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.net.NetworkAgent;
+import android.net.NetworkCapabilities;
 import android.telecom.Connection;
 import android.telephony.data.ApnSetting;
 
@@ -664,4 +666,59 @@ public class Annotation {
         TelephonyManager.THERMAL_MITIGATION_RESULT_INVALID_STATE,
         TelephonyManager.THERMAL_MITIGATION_RESULT_UNKNOWN_ERROR})
     public @interface ThermalMitigationResult {}
+
+    /**
+     * Per Android API guideline 8.15, annotation can't be public APIs. So duplicate
+     * android.net.NetworkCapabilities.NetCapability here. Must update here when new capabilities
+     * are added in {@link NetworkCapabilities}.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "NET_CAPABILITY_" }, value = {
+            NetworkCapabilities.NET_CAPABILITY_MMS,
+            NetworkCapabilities.NET_CAPABILITY_SUPL,
+            NetworkCapabilities.NET_CAPABILITY_DUN,
+            NetworkCapabilities.NET_CAPABILITY_FOTA,
+            NetworkCapabilities.NET_CAPABILITY_IMS,
+            NetworkCapabilities.NET_CAPABILITY_CBS,
+            NetworkCapabilities.NET_CAPABILITY_WIFI_P2P,
+            NetworkCapabilities.NET_CAPABILITY_IA,
+            NetworkCapabilities.NET_CAPABILITY_RCS,
+            NetworkCapabilities.NET_CAPABILITY_XCAP,
+            NetworkCapabilities.NET_CAPABILITY_EIMS,
+            NetworkCapabilities.NET_CAPABILITY_NOT_METERED,
+            NetworkCapabilities.NET_CAPABILITY_INTERNET,
+            NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED,
+            NetworkCapabilities.NET_CAPABILITY_TRUSTED,
+            NetworkCapabilities.NET_CAPABILITY_NOT_VPN,
+            NetworkCapabilities.NET_CAPABILITY_VALIDATED,
+            NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL,
+            NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING,
+            NetworkCapabilities.NET_CAPABILITY_FOREGROUND,
+            NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED,
+            NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED,
+            NetworkCapabilities.NET_CAPABILITY_OEM_PAID,
+            NetworkCapabilities.NET_CAPABILITY_MCX,
+            NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY,
+            NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED,
+            NetworkCapabilities.NET_CAPABILITY_OEM_PRIVATE,
+            NetworkCapabilities.NET_CAPABILITY_VEHICLE_INTERNAL,
+            NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED,
+            NetworkCapabilities.NET_CAPABILITY_ENTERPRISE,
+            NetworkCapabilities.NET_CAPABILITY_VSIM,
+            NetworkCapabilities.NET_CAPABILITY_BIP,
+            NetworkCapabilities.NET_CAPABILITY_HEAD_UNIT,
+    })
+    public @interface NetCapability { }
+
+    /**
+     * Per Android API guideline 8.15, annotation can't be public APIs. So duplicate
+     * android.net.NetworkAgent.ValidationStatus here. Must update here when new validation status
+     * are added in {@link NetworkAgent}.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "VALIDATION_STATUS_" }, value = {
+            NetworkAgent.VALIDATION_STATUS_VALID,
+            NetworkAgent.VALIDATION_STATUS_NOT_VALID
+    })
+    public @interface ValidationStatus {}
 }
