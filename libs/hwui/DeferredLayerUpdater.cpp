@@ -20,9 +20,11 @@
 
 // TODO: Use public SurfaceTexture APIs once available and include public NDK header file instead.
 #include <surfacetexture/surface_texture_platform.h>
+
 #include "AutoBackendTextureRelease.h"
 #include "Matrix.h"
 #include "Properties.h"
+#include "android/hdr_metadata.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/RenderThread.h"
@@ -147,6 +149,9 @@ void DeferredLayerUpdater::apply() {
             mUpdateTexImage = false;
             float transformMatrix[16];
             android_dataspace dataspace;
+            AHdrMetadataType hdrMetadataType;
+            android_cta861_3_metadata cta861_3;
+            android_smpte2086_metadata smpte2086;
             int slot;
             bool newContent = false;
             ARect currentCrop;
@@ -155,8 +160,9 @@ void DeferredLayerUpdater::apply() {
             // is necessary if the SurfaceTexture queue is in synchronous mode, and we
             // cannot tell which mode it is in.
             AHardwareBuffer* hardwareBuffer = ASurfaceTexture_dequeueBuffer(
-                    mSurfaceTexture.get(), &slot, &dataspace, transformMatrix, &outTransform,
-                    &newContent, createReleaseFence, fenceWait, this, &currentCrop);
+                    mSurfaceTexture.get(), &slot, &dataspace, &hdrMetadataType, &cta861_3,
+                    &smpte2086, transformMatrix, &outTransform, &newContent, createReleaseFence,
+                    fenceWait, this, &currentCrop);
 
             if (hardwareBuffer) {
                 mCurrentSlot = slot;
@@ -173,7 +179,18 @@ void DeferredLayerUpdater::apply() {
                     SkRect currentCropRect =
                             SkRect::MakeLTRB(currentCrop.left, currentCrop.top, currentCrop.right,
                                              currentCrop.bottom);
-                    updateLayer(forceFilter, layerImage, outTransform, currentCropRect);
+
+                    float maxLuminanceNits = -1.f;
+                    if (hdrMetadataType & HDR10_SMPTE2086) {
+                        maxLuminanceNits = std::max(smpte2086.maxLuminance, maxLuminanceNits);
+                    }
+
+                    if (hdrMetadataType & HDR10_CTA861_3) {
+                        maxLuminanceNits =
+                                std::max(cta861_3.maxContentLightLevel, maxLuminanceNits);
+                    }
+                    updateLayer(forceFilter, layerImage, outTransform, currentCropRect,
+                                maxLuminanceNits);
                 }
             }
         }
@@ -186,13 +203,15 @@ void DeferredLayerUpdater::apply() {
 }
 
 void DeferredLayerUpdater::updateLayer(bool forceFilter, const sk_sp<SkImage>& layerImage,
-                                       const uint32_t transform, SkRect currentCrop) {
+                                       const uint32_t transform, SkRect currentCrop,
+                                       float maxLuminanceNits) {
     mLayer->setBlend(mBlend);
     mLayer->setForceFilter(forceFilter);
     mLayer->setSize(mWidth, mHeight);
     mLayer->setCurrentCropRect(currentCrop);
     mLayer->setWindowTransform(transform);
     mLayer->setImage(layerImage);
+    mLayer->setMaxLuminanceNits(maxLuminanceNits);
 }
 
 void DeferredLayerUpdater::detachSurfaceTexture() {

@@ -107,6 +107,8 @@ cc_defaults {
     target: {
         android: {
             shared_libs: [
+                "android.hardware.graphics.common-V3-ndk",
+                "android.hardware.graphics.common@1.2",
                 "liblog",
                 "libcutils",
                 "libutils",
@@ -126,9 +128,11 @@ cc_defaults {
             static_libs: [
                 "libEGL_blobCache",
                 "libprotoutil",
+                "libshaders",
                 "libstatslog_hwui",
                 "libstatspull_lazy",
                 "libstatssocket_lazy",
+                "libtonemap",
             ],
         },
         host: {

@@ -96,6 +96,12 @@ public:
 
     inline sk_sp<SkImage> getImage() const { return this->layerImage; }
 
+    inline void setMaxLuminanceNits(float maxLuminanceNits) {
+        mMaxLuminanceNits = maxLuminanceNits;
+    }
+
+    inline float getMaxLuminanceNits() { return mMaxLuminanceNits; }
+
     void draw(SkCanvas* canvas);
 
 protected:
@@ -157,6 +163,11 @@ private:
      * enable blending
      */
     bool mBlend = false;
+
+    /**
+     * Max input luminance if the layer is HDR
+     */
+    float mMaxLuminanceNits = -1;
 
 };  // struct Layer
 
