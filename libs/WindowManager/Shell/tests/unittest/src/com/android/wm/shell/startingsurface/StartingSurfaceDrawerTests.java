@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -117,16 +118,19 @@ public class StartingSurfaceDrawerTests {
                 WindowManager.LayoutParams params, int suggestType) {
             // listen for addView
             mAddWindowForTask = taskId;
+            saveSplashScreenRecord(appToken, taskId, view, suggestType);
             // Do not wait for background color
             return false;
         }
 
         @Override
-        protected void removeWindowSynced(StartingWindowRemovalInfo removalInfo) {
+        protected void removeWindowSynced(StartingWindowRemovalInfo removalInfo,
+                boolean immediately) {
             // listen for removeView
             if (mAddWindowForTask == removalInfo.taskId) {
                 mAddWindowForTask = 0;
             }
+            mStartingWindowRecords.remove(removalInfo.taskId);
         }
     }
 
@@ -179,7 +183,7 @@ public class StartingSurfaceDrawerTests {
         removalInfo.taskId = windowInfo.taskInfo.taskId;
         mStartingSurfaceDrawer.removeStartingWindow(removalInfo);
         waitHandlerIdle(mTestHandler);
-        verify(mStartingSurfaceDrawer).removeWindowSynced(any());
+        verify(mStartingSurfaceDrawer).removeWindowSynced(any(), eq(false));
         assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, 0);
     }
 
@@ -267,9 +271,30 @@ public class StartingSurfaceDrawerTests {
 
             // Verify the task snapshot with IME snapshot will be removed when received the real IME
             // drawn callback.
+            // makeTaskSnapshotWindow shall call removeWindowSynced before there add a new
+            // StartingWindowRecord for the task.
             mStartingSurfaceDrawer.onImeDrawnOnTask(1);
-            verify(mockSnapshotWindow).removeImmediately();
+            verify(mStartingSurfaceDrawer, times(2))
+                    .removeWindowSynced(any(), eq(true));
         }
+    }
+
+    @Test
+    public void testClearAllWindows() {
+        final int taskId = 1;
+        final StartingWindowInfo windowInfo =
+                createWindowInfo(taskId, android.R.style.Theme);
+        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder,
+                STARTING_WINDOW_TYPE_SPLASH_SCREEN);
+        waitHandlerIdle(mTestHandler);
+        verify(mStartingSurfaceDrawer).addWindow(eq(taskId), eq(mBinder), any(), any(), any(),
+                eq(STARTING_WINDOW_TYPE_SPLASH_SCREEN));
+        assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, taskId);
+
+        mStartingSurfaceDrawer.clearAllWindows();
+        waitHandlerIdle(mTestHandler);
+        verify(mStartingSurfaceDrawer).removeWindowSynced(any(), eq(true));
+        assertEquals(mStartingSurfaceDrawer.mStartingWindowRecords.size(), 0);
     }
 
     private StartingWindowInfo createWindowInfo(int taskId, int themeResId) {

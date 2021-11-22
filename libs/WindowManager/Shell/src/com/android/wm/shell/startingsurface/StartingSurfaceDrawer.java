@@ -134,7 +134,8 @@ public class StartingSurfaceDrawer {
         mDisplayManager.getDisplay(DEFAULT_DISPLAY);
     }
 
-    private final SparseArray<StartingWindowRecord> mStartingWindowRecords = new SparseArray<>();
+    @VisibleForTesting
+    final SparseArray<StartingWindowRecord> mStartingWindowRecords = new SparseArray<>();
 
     /**
      * Records of {@link SurfaceControlViewHost} where the splash screen icon animation is
@@ -464,8 +465,24 @@ public class StartingSurfaceDrawer {
             Slog.d(TAG, "Task start finish, remove starting surface for task "
                     + removalInfo.taskId);
         }
-        removeWindowSynced(removalInfo);
+        removeWindowSynced(removalInfo, false /* immediately */);
+    }
 
+    /**
+     * Clear all starting windows immediately.
+     */
+    public void clearAllWindows() {
+        if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
+            Slog.d(TAG, "Clear all starting windows immediately");
+        }
+        final int taskSize = mStartingWindowRecords.size();
+        final int[] taskIds = new int[taskSize];
+        for (int i = taskSize - 1; i >= 0; --i) {
+            taskIds[i] = mStartingWindowRecords.keyAt(i);
+        }
+        for (int i = taskSize - 1; i >= 0; --i) {
+            removeWindowNoAnimate(taskIds[i]);
+        }
     }
 
     /**
@@ -550,7 +567,8 @@ public class StartingSurfaceDrawer {
         return shouldSaveView;
     }
 
-    private void saveSplashScreenRecord(IBinder appToken, int taskId, View view,
+    @VisibleForTesting
+    void saveSplashScreenRecord(IBinder appToken, int taskId, View view,
             @StartingWindowType int suggestType) {
         final StartingWindowRecord tView = new StartingWindowRecord(appToken, view,
                 null/* TaskSnapshotWindow */, suggestType);
@@ -559,19 +577,18 @@ public class StartingSurfaceDrawer {
 
     private void removeWindowNoAnimate(int taskId) {
         mTmpRemovalInfo.taskId = taskId;
-        removeWindowSynced(mTmpRemovalInfo);
+        removeWindowSynced(mTmpRemovalInfo, true /* immediately */);
     }
 
     void onImeDrawnOnTask(int taskId) {
         final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
         if (record != null && record.mTaskSnapshotWindow != null
                 && record.mTaskSnapshotWindow.hasImeSurface()) {
-            record.mTaskSnapshotWindow.removeImmediately();
+            removeWindowNoAnimate(taskId);
         }
-        mStartingWindowRecords.remove(taskId);
     }
 
-    protected void removeWindowSynced(StartingWindowRemovalInfo removalInfo) {
+    protected void removeWindowSynced(StartingWindowRemovalInfo removalInfo, boolean immediately) {
         final int taskId = removalInfo.taskId;
         final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
         if (record != null) {
@@ -580,7 +597,8 @@ public class StartingSurfaceDrawer {
                     Slog.v(TAG, "Removing splash screen window for task: " + taskId);
                 }
                 if (record.mContentView != null) {
-                    if (record.mSuggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
+                    if (immediately
+                            || record.mSuggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
                         removeWindowInner(record.mDecorView, false);
                     } else {
                         if (removalInfo.playRevealAnimation) {
@@ -604,8 +622,12 @@ public class StartingSurfaceDrawer {
                 if (DEBUG_TASK_SNAPSHOT) {
                     Slog.v(TAG, "Removing task snapshot window for " + taskId);
                 }
-                record.mTaskSnapshotWindow.scheduleRemove(
-                        () -> mStartingWindowRecords.remove(taskId), removalInfo.deferRemoveForIme);
+                if (immediately) {
+                    record.mTaskSnapshotWindow.removeImmediately();
+                } else {
+                    record.mTaskSnapshotWindow.scheduleRemove(() ->
+                            mStartingWindowRecords.remove(taskId), removalInfo.deferRemoveForIme);
+                }
             }
         }
     }
