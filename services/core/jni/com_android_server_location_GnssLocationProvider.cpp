@@ -56,13 +56,13 @@
 #include "gnss/GnssBatching.h"
 #include "gnss/GnssConfiguration.h"
 #include "gnss/GnssMeasurement.h"
+#include "gnss/GnssNavigationMessage.h"
 #include "gnss/Utils.h"
 #include "hardware_legacy/power.h"
 #include "jni.h"
 #include "utils/Log.h"
 #include "utils/misc.h"
 
-static jclass class_gnssNavigationMessage;
 static jclass class_gnssPowerStats;
 
 static jmethodID method_reportLocation;
@@ -85,7 +85,6 @@ static jmethodID method_reportGeofenceAddStatus;
 static jmethodID method_reportGeofenceRemoveStatus;
 static jmethodID method_reportGeofencePauseStatus;
 static jmethodID method_reportGeofenceResumeStatus;
-static jmethodID method_reportNavigationMessages;
 static jmethodID method_reportGnssServiceDied;
 static jmethodID method_reportGnssPowerStats;
 static jmethodID method_setSubHalMeasurementCorrectionsCapabilities;
@@ -115,7 +114,6 @@ static jmethodID method_correctionPlaneAltDeg;
 static jmethodID method_correctionPlaneAzimDeg;
 static jmethodID method_reportNfwNotification;
 static jmethodID method_isInEmergencySession;
-static jmethodID method_gnssNavigationMessageCtor;
 static jmethodID method_gnssPowerStatsCtor;
 static jmethodID method_setSubHalPowerIndicationCapabilities;
 
@@ -233,7 +231,6 @@ sp<IAGnss_V2_0> agnssIface_V2_0 = nullptr;
 sp<IGnssDebug_V1_0> gnssDebugIface = nullptr;
 sp<IGnssDebug_V2_0> gnssDebugIface_V2_0 = nullptr;
 sp<IGnssNi> gnssNiIface = nullptr;
-sp<IGnssNavigationMessage> gnssNavigationMessageIface = nullptr;
 sp<IGnssPowerIndication> gnssPowerIndicationIface = nullptr;
 sp<IMeasurementCorrections_V1_0> gnssCorrectionsIface_V1_0 = nullptr;
 sp<IMeasurementCorrections_V1_1> gnssCorrectionsIface_V1_1 = nullptr;
@@ -242,6 +239,7 @@ sp<IGnssAntennaInfo> gnssAntennaInfoIface = nullptr;
 
 std::unique_ptr<GnssConfigurationInterface> gnssConfigurationIface = nullptr;
 std::unique_ptr<android::gnss::GnssMeasurementInterface> gnssMeasurementIface = nullptr;
+std::unique_ptr<android::gnss::GnssNavigationMessageInterface> gnssNavigationMessageIface = nullptr;
 std::unique_ptr<android::gnss::GnssBatchingInterface> gnssBatchingIface = nullptr;
 
 #define WAKE_LOCK_NAME  "GPS"
@@ -910,50 +908,6 @@ Return<void> GnssGeofenceCallback::gnssGeofenceResumeCb(int32_t geofenceId, Geof
 }
 
 /*
- * GnssNavigationMessageCallback interface implements the callback methods
- * required by the IGnssNavigationMessage interface.
- */
-struct GnssNavigationMessageCallback : public IGnssNavigationMessageCallback {
-  /*
-   * Methods from ::android::hardware::gps::V1_0::IGnssNavigationMessageCallback
-   * follow.
-   */
-  Return<void> gnssNavigationMessageCb(
-          const IGnssNavigationMessageCallback::GnssNavigationMessage& message) override;
-};
-
-Return<void> GnssNavigationMessageCallback::gnssNavigationMessageCb(
-        const IGnssNavigationMessageCallback::GnssNavigationMessage& message) {
-    JNIEnv* env = getJniEnv();
-
-    size_t dataLength = message.data.size();
-
-    std::vector<uint8_t> navigationData = message.data;
-    uint8_t* data = &(navigationData[0]);
-    if (dataLength == 0 || data == nullptr) {
-      ALOGE("Invalid Navigation Message found: data=%p, length=%zd", data,
-            dataLength);
-      return Void();
-    }
-
-    JavaObject object(env, class_gnssNavigationMessage, method_gnssNavigationMessageCtor);
-    SET(Type, static_cast<int32_t>(message.type));
-    SET(Svid, static_cast<int32_t>(message.svid));
-    SET(MessageId, static_cast<int32_t>(message.messageId));
-    SET(SubmessageId, static_cast<int32_t>(message.submessageId));
-    object.callSetter("setData", data, dataLength);
-    SET(Status, static_cast<int32_t>(message.status));
-
-    jobject navigationMessage = object.get();
-    env->CallVoidMethod(mCallbacksObj,
-                        method_reportNavigationMessages,
-                        navigationMessage);
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-    env->DeleteLocalRef(navigationMessage);
-    return Void();
-}
-
-/*
  * MeasurementCorrectionsCallback implements callback methods of interface
  * IMeasurementCorrectionsCallback.hal.
  */
@@ -1264,10 +1218,6 @@ static void android_location_gnss_hal_GnssNative_class_init_once(JNIEnv* env, jc
             "(II)V");
     method_reportGeofencePauseStatus = env->GetMethodID(clazz, "reportGeofencePauseStatus",
             "(II)V");
-    method_reportNavigationMessages = env->GetMethodID(
-            clazz,
-            "reportNavigationMessage",
-            "(Landroid/location/GnssNavigationMessage;)V");
     method_reportGnssServiceDied = env->GetMethodID(clazz, "reportGnssServiceDied", "()V");
     method_reportNfwNotification = env->GetMethodID(clazz, "reportNfwNotification",
             "(Ljava/lang/String;BLjava/lang/String;BLjava/lang/String;BZZ)V");
@@ -1337,14 +1287,11 @@ static void android_location_gnss_hal_GnssNative_class_init_once(JNIEnv* env, jc
     class_gnssPowerStats = (jclass)env->NewGlobalRef(gnssPowerStatsClass);
     method_gnssPowerStatsCtor = env->GetMethodID(class_gnssPowerStats, "<init>", "(IJDDDDDD[D)V");
 
-    jclass gnssNavigationMessageClass = env->FindClass("android/location/GnssNavigationMessage");
-    class_gnssNavigationMessage = (jclass) env->NewGlobalRef(gnssNavigationMessageClass);
-    method_gnssNavigationMessageCtor = env->GetMethodID(class_gnssNavigationMessage, "<init>", "()V");
-
     gnss::GnssAntennaInfo_class_init_once(env, clazz);
     gnss::GnssBatching_class_init_once(env, clazz);
     gnss::GnssConfiguration_class_init_once(env);
     gnss::GnssMeasurement_class_init_once(env, clazz);
+    gnss::GnssNavigationMessage_class_init_once(env, clazz);
     gnss::Utils_class_init_once(env);
 }
 
@@ -1431,12 +1378,20 @@ static void android_location_gnss_hal_GnssNative_init_once(JNIEnv* env, jobject 
         }
     }
 
-    if (gnssHal != nullptr) {
+    if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() >= 2) {
+        sp<hardware::gnss::IGnssNavigationMessageInterface> gnssNavigationMessage;
+        auto status = gnssHalAidl->getExtensionGnssNavigationMessage(&gnssNavigationMessage);
+        if (checkAidlStatus(status,
+                            "Unable to get a handle to GnssNavigationMessage AIDL interface.")) {
+            gnssNavigationMessageIface =
+                    std::make_unique<gnss::GnssNavigationMessageAidl>(gnssNavigationMessage);
+        }
+    } else if (gnssHal != nullptr) {
         auto gnssNavigationMessage = gnssHal->getExtensionGnssNavigationMessage();
-        if (!gnssNavigationMessage.isOk()) {
-            ALOGD("Unable to get a handle to GnssNavigationMessage");
-        } else {
-            gnssNavigationMessageIface = gnssNavigationMessage;
+        if (checkHidlReturn(gnssNavigationMessage,
+                            "Unable to get a handle to GnssNavigationMessage interface.")) {
+            gnssNavigationMessageIface =
+                    std::make_unique<gnss::GnssNavigationMessageHidl>(gnssNavigationMessage);
         }
     }
 
@@ -2624,20 +2579,8 @@ static jboolean android_location_gnss_hal_GnssNative_start_navigation_message_co
         return JNI_FALSE;
     }
 
-    sp<IGnssNavigationMessageCallback> gnssNavigationMessageCbIface =
-            new GnssNavigationMessageCallback();
-    auto result = gnssNavigationMessageIface->setCallback(gnssNavigationMessageCbIface);
-    if (!checkHidlReturn(result, "IGnssNavigationMessage setCallback() failed.")) {
-        return JNI_FALSE;
-    }
-
-    IGnssNavigationMessage::GnssNavigationMessageStatus initRet = result;
-    if (initRet != IGnssNavigationMessage::GnssNavigationMessageStatus::SUCCESS) {
-        ALOGE("An error has been found in %s: %d", __FUNCTION__, static_cast<int32_t>(initRet));
-        return JNI_FALSE;
-    }
-
-    return JNI_TRUE;
+    return gnssNavigationMessageIface->setCallback(
+            std::make_unique<gnss::GnssNavigationMessageCallback>());
 }
 
 static jboolean android_location_gnss_hal_GnssNative_stop_navigation_message_collection(JNIEnv* env,
@@ -2646,9 +2589,7 @@ static jboolean android_location_gnss_hal_GnssNative_stop_navigation_message_col
         ALOGE("%s: IGnssNavigationMessage interface not available.", __func__);
         return JNI_FALSE;
     }
-
-    auto result = gnssNavigationMessageIface->close();
-    return checkHidlReturn(result, "IGnssNavigationMessage close() failed.");
+    return gnssNavigationMessageIface->close();
 }
 
 static jboolean android_location_GnssConfiguration_set_emergency_supl_pdn(JNIEnv*,
