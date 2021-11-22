@@ -2050,6 +2050,7 @@ final class InstallPackageHelper {
             }
         }
 
+        final String packageName = pkg.getPackageName();
         for (Map.Entry<String, String> entry : fsverityCandidates.entrySet()) {
             final String filePath = entry.getKey();
             final String signaturePath = entry.getValue();
@@ -2077,10 +2078,13 @@ final class InstallPackageHelper {
                     try {
                         // A file may already have fs-verity, e.g. when reused during a split
                         // install. If the measurement succeeds, no need to attempt to set up.
-                        mPm.mInstaller.assertFsverityRootHashMatches(filePath, rootHash);
+                        mPm.mInstaller.assertFsverityRootHashMatches(packageName, filePath,
+                                rootHash);
                     } catch (Installer.InstallerException e) {
-                        mPm.mInstaller.installApkVerity(filePath, fd, result.getContentSize());
-                        mPm.mInstaller.assertFsverityRootHashMatches(filePath, rootHash);
+                        mPm.mInstaller.installApkVerity(packageName, filePath, fd,
+                                result.getContentSize());
+                        mPm.mInstaller.assertFsverityRootHashMatches(packageName, filePath,
+                                rootHash);
                     }
                 } finally {
                     IoUtils.closeQuietly(fd);

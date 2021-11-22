@@ -894,14 +894,15 @@ final class ScanPackageHelper {
      * Returns if forced apk verification can be skipped for the whole package, including splits.
      */
     private boolean canSkipForcedPackageVerification(AndroidPackage pkg) {
-        if (!canSkipForcedApkVerification(pkg.getBaseApkPath())) {
+        final String packageName = pkg.getPackageName();
+        if (!canSkipForcedApkVerification(packageName, pkg.getBaseApkPath())) {
             return false;
         }
         // TODO: Allow base and splits to be verified individually.
         String[] splitCodePaths = pkg.getSplitCodePaths();
         if (!ArrayUtils.isEmpty(splitCodePaths)) {
             for (int i = 0; i < splitCodePaths.length; i++) {
-                if (!canSkipForcedApkVerification(splitCodePaths[i])) {
+                if (!canSkipForcedApkVerification(packageName, splitCodePaths[i])) {
                     return false;
                 }
             }
@@ -914,7 +915,7 @@ final class ScanPackageHelper {
      * whether the apk contains signed root hash.  Note that the signer's certificate still needs to
      * match one in a trusted source, and should be done separately.
      */
-    private boolean canSkipForcedApkVerification(String apkPath) {
+    private boolean canSkipForcedApkVerification(String packageName, String apkPath) {
         if (!PackageManagerServiceUtils.isLegacyApkVerityEnabled()) {
             return VerityUtils.hasFsverity(apkPath);
         }
@@ -926,7 +927,8 @@ final class ScanPackageHelper {
             }
             synchronized (mPm.mInstallLock) {
                 // Returns whether the observed root hash matches what kernel has.
-                mPm.mInstaller.assertFsverityRootHashMatches(apkPath, rootHashObserved);
+                mPm.mInstaller.assertFsverityRootHashMatches(packageName, apkPath,
+                        rootHashObserved);
                 return true;
             }
         } catch (Installer.InstallerException | IOException | DigestException
