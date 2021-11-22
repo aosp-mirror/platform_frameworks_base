@@ -21,6 +21,7 @@ import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.hardware.biometrics.BiometricSourceType;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -80,6 +81,13 @@ public class KeyguardBouncer {
                 @Override
                 public void onStrongAuthStateChanged(int userId) {
                     mBouncerPromptReason = mCallback.getBouncerPromptReason();
+                }
+
+                @Override
+                public void onLockedOutStateChanged(BiometricSourceType type) {
+                    if (type == BiometricSourceType.FINGERPRINT) {
+                        mBouncerPromptReason = mCallback.getBouncerPromptReason();
+                    }
                 }
             };
     private final Runnable mRemoveViewRunnable = this::removeView;

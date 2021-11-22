@@ -45,6 +45,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -101,6 +102,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     private WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock
     private ScreenLifecycle mScreenLifecycle;
+    @Mock
+    private StatusBarStateController mStatusBarStateController;
     private BiometricUnlockController mBiometricUnlockController;
 
     @Before
@@ -123,7 +126,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mUpdateMonitor, res.getResources(), mKeyguardBypassController, mDozeParameters,
                 mMetricsLogger, mDumpManager, mPowerManager,
                 mNotificationMediaManager, mWakefulnessLifecycle, mScreenLifecycle,
-                mAuthController);
+                mAuthController, mStatusBarStateController);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setBiometricModeListener(mBiometricModeListener);
     }
@@ -375,6 +378,23 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 anyBoolean(), anyFloat());
         assertThat(mBiometricUnlockController.getMode())
                 .isEqualTo(BiometricUnlockController.MODE_ONLY_WAKE);
+    }
+
+    @Test
+    public void onUdfpsConsecutivelyFailedThreeTimes_showBouncer() {
+        // GIVEN UDFPS is supported
+        when(mUpdateMonitor.isUdfpsSupported()).thenReturn(true);
+
+        // WHEN udfps fails twice - then don't show the bouncer
+        mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
+        mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
+        verify(mStatusBarKeyguardViewManager, never()).showBouncer(anyBoolean());
+
+        // WHEN udfps fails the third time
+        mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
+
+        // THEN show the bouncer
+        verify(mStatusBarKeyguardViewManager).showBouncer(true);
     }
 
     @Test
