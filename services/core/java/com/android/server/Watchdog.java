@@ -685,6 +685,7 @@ public class Watchdog {
             final UUID errorId = mTraceErrorLogger.generateErrorId();
             if (mTraceErrorLogger.isAddErrorIdEnabled()) {
                 mTraceErrorLogger.addErrorIdToTrace("system_server", errorId);
+                mTraceErrorLogger.addSubjectToTrace(subject, errorId);
             }
 
             // Log the atom as early as possible since it is used as a mechanism to trigger
