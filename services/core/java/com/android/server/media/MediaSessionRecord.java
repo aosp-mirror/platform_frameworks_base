@@ -291,35 +291,39 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                     asSystemService, useSuggested, previousFlagPlaySound);
         } else {
             if (mVolumeControlType == VolumeProvider.VOLUME_CONTROL_FIXED) {
-                // Nothing to do, the volume cannot be changed
-                return;
-            }
-            if (direction == AudioManager.ADJUST_TOGGLE_MUTE
+                if (DEBUG) {
+                    Log.d(TAG, "Session does not support volume adjustment");
+                }
+            } else if (direction == AudioManager.ADJUST_TOGGLE_MUTE
                     || direction == AudioManager.ADJUST_MUTE
                     || direction == AudioManager.ADJUST_UNMUTE) {
                 Log.w(TAG, "Muting remote playback is not supported");
-                return;
-            }
-            if (DEBUG) {
-                Log.w(TAG, "adjusting volume, pkg=" + packageName + ", asSystemService="
-                        + asSystemService + ", dir=" + direction);
-            }
-            mSessionCb.adjustVolume(packageName, pid, uid, asSystemService, direction);
+            } else {
+                if (DEBUG) {
+                    Log.w(TAG, "adjusting volume, pkg=" + packageName + ", asSystemService="
+                            + asSystemService + ", dir=" + direction);
+                }
+                mSessionCb.adjustVolume(packageName, pid, uid, asSystemService, direction);
 
-            int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
-            mOptimisticVolume = volumeBefore + direction;
-            mOptimisticVolume = Math.max(0, Math.min(mOptimisticVolume, mMaxVolume));
-            mHandler.removeCallbacks(mClearOptimisticVolumeRunnable);
-            mHandler.postDelayed(mClearOptimisticVolumeRunnable, OPTIMISTIC_VOLUME_TIMEOUT);
-            if (volumeBefore != mOptimisticVolume) {
-                pushVolumeUpdate();
+                int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
+                mOptimisticVolume = volumeBefore + direction;
+                mOptimisticVolume = Math.max(0, Math.min(mOptimisticVolume, mMaxVolume));
+                mHandler.removeCallbacks(mClearOptimisticVolumeRunnable);
+                mHandler.postDelayed(mClearOptimisticVolumeRunnable, OPTIMISTIC_VOLUME_TIMEOUT);
+                if (volumeBefore != mOptimisticVolume) {
+                    pushVolumeUpdate();
+                }
+
+                if (DEBUG) {
+                    Log.d(TAG, "Adjusted optimistic volume to " + mOptimisticVolume + " max is "
+                            + mMaxVolume);
+                }
             }
+            // Always notify, even if the volume hasn't changed. This is important to ensure that
+            // System UI receives an event if a hardware volume key is pressed but the session that
+            // handles it does not allow volume adjustment. Without such an event, System UI would
+            // not show volume controls to the user.
             mService.notifyRemoteVolumeChanged(flags, this);
-
-            if (DEBUG) {
-                Log.d(TAG, "Adjusted optimistic volume to " + mOptimisticVolume + " max is "
-                        + mMaxVolume);
-            }
         }
     }
 
@@ -343,25 +347,28 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             });
         } else {
             if (mVolumeControlType != VolumeProvider.VOLUME_CONTROL_ABSOLUTE) {
-                // Nothing to do. The volume can't be set directly.
-                return;
-            }
-            value = Math.max(0, Math.min(value, mMaxVolume));
-            mSessionCb.setVolumeTo(packageName, pid, uid, value);
+                if (DEBUG) {
+                    Log.d(TAG, "Session does not support setting volume");
+                }
+            } else {
+                value = Math.max(0, Math.min(value, mMaxVolume));
+                mSessionCb.setVolumeTo(packageName, pid, uid, value);
 
-            int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
-            mOptimisticVolume = Math.max(0, Math.min(value, mMaxVolume));
-            mHandler.removeCallbacks(mClearOptimisticVolumeRunnable);
-            mHandler.postDelayed(mClearOptimisticVolumeRunnable, OPTIMISTIC_VOLUME_TIMEOUT);
-            if (volumeBefore != mOptimisticVolume) {
-                pushVolumeUpdate();
+                int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
+                mOptimisticVolume = Math.max(0, Math.min(value, mMaxVolume));
+                mHandler.removeCallbacks(mClearOptimisticVolumeRunnable);
+                mHandler.postDelayed(mClearOptimisticVolumeRunnable, OPTIMISTIC_VOLUME_TIMEOUT);
+                if (volumeBefore != mOptimisticVolume) {
+                    pushVolumeUpdate();
+                }
+
+                if (DEBUG) {
+                    Log.d(TAG, "Set optimistic volume to " + mOptimisticVolume + " max is "
+                            + mMaxVolume);
+                }
             }
+            // Always notify, even if the volume hasn't changed.
             mService.notifyRemoteVolumeChanged(flags, this);
-
-            if (DEBUG) {
-                Log.d(TAG, "Set optimistic volume to " + mOptimisticVolume + " max is "
-                        + mMaxVolume);
-            }
         }
     }
 
