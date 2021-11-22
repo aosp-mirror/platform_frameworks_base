@@ -19,6 +19,7 @@ package android.telephony;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -130,7 +131,10 @@ public final class SignalStrengthUpdateRequest implements Parcelable {
         /**
          * Set the builder object if require reporting on the system thresholds when device is idle.
          *
-         * <p>This can only used by the system caller. Requires permission
+         * <p>This is intended to be used by the system privileged caller only. When setting to
+         * {@code true}, signal strength update request through
+         * {@link TelephonyManager#setSignalStrengthUpdateRequest(SignalStrengthUpdateRequest)}
+         * will require permission
          * {@link android.Manifest.permission#LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH}.
          *
          * @param isSystemThresholdReportingRequestedWhileIdle true if request reporting on the
@@ -138,6 +142,7 @@ public final class SignalStrengthUpdateRequest implements Parcelable {
          * @return the builder to facilitate the chaining
          * @hide
          */
+        @SystemApi
         @RequiresPermission(android.Manifest.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH)
         public @NonNull Builder setSystemThresholdReportingRequestedWhileIdle(
                 boolean isSystemThresholdReportingRequestedWhileIdle) {
@@ -191,6 +196,7 @@ public final class SignalStrengthUpdateRequest implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
     public boolean isSystemThresholdReportingRequestedWhileIdle() {
         return mIsSystemThresholdReportingRequestedWhileIdle;
     }
