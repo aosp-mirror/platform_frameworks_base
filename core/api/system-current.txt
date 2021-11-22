@@ -853,7 +853,11 @@ package android.app {
 
   public class StatusBarManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.STATUS_BAR) public android.app.StatusBarManager.DisableInfo getDisableInfo();
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public int getNavBarModeOverride();
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setDisabledForSetup(boolean);
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setNavBarModeOverride(int);
+    field public static final int NAV_BAR_MODE_OVERRIDE_KIDS = 1; // 0x1
+    field public static final int NAV_BAR_MODE_OVERRIDE_NONE = 0; // 0x0
   }
 
   public static final class StatusBarManager.DisableInfo {
