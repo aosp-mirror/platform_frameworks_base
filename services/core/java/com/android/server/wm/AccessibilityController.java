@@ -1645,10 +1645,11 @@ final class AccessibilityController {
 
             // Ignore non-touchable windows, except the split-screen divider, which is
             // occasionally non-touchable but still useful for identifying split-screen
-            // mode.
+            // mode and the PIP menu.
             if (((a11yWindow.getFlags()
                     & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0)
-                    && (a11yWindow.getType() != TYPE_DOCK_DIVIDER)) {
+                    && (a11yWindow.getType() != TYPE_DOCK_DIVIDER
+                    && !a11yWindow.isPIPMenu())) {
                 return false;
             }
 
