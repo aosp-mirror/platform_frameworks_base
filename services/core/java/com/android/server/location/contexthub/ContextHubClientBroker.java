@@ -30,6 +30,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.contexthub.HostEndpointInfo;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubManager;
 import android.hardware.location.ContextHubTransaction;
@@ -42,6 +43,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
@@ -329,6 +331,15 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
 
         startMonitoringOpChanges();
+
+        HostEndpointInfo info = new HostEndpointInfo();
+        info.hostEndpointId = (char) mHostEndPointId;
+        info.packageName = mPackage;
+        info.attributionTag = mAttributionTag;
+        info.type = (mUid == Process.SYSTEM_UID)
+             ? HostEndpointInfo.Type.TYPE_FRAMEWORK
+             : HostEndpointInfo.Type.TYPE_APP;
+        mContextHubProxy.onHostEndpointConnected(info);
     }
 
     /* package */ ContextHubClientBroker(
@@ -862,6 +873,8 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             mRegistered = false;
         }
         mAppOpsManager.stopWatchingMode(this);
+
+        mContextHubProxy.onHostEndpointDisconnected(mHostEndPointId);
     }
 
     private String authStateToString(@ContextHubManager.AuthorizationState int state) {
