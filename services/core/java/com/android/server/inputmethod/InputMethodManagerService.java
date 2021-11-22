@@ -3489,10 +3489,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return mWindowManagerInternal.shouldRestoreImeVisibility(windowToken);
     }
 
-    private boolean isImeVisible() {
-        return (mImeWindowVis & InputMethodService.IME_VISIBLE) != 0;
-    }
-
     @GuardedBy("mMethodMap")
     private boolean canShowInputMethodPickerLocked(IInputMethodClient client) {
         // TODO(yukawa): multi-display support.
