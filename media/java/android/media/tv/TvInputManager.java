@@ -657,13 +657,6 @@ public final class TvInputManager {
          */
         void onError(Session session, @TvInputManager.RecordingError int error) {
         }
-
-        /**
-         * @param session
-         * @param response
-         */
-        public void onBroadcastInfoResponse(Session session, BroadcastInfoResponse response) {
-        }
     }
 
     private static final class SessionCallbackRecord {
@@ -848,7 +841,7 @@ public final class TvInputManager {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSessionCallback.onBroadcastInfoResponse(mSession, response);
+                    mSession.getIAppSession().notifyBroadcastInfoResponse(response);
                 }
             });
         }
