@@ -17,14 +17,19 @@
 package android.net.nsd;
 
 import android.net.nsd.INsdManagerCallback;
-import android.net.nsd.INsdServiceConnector;
+import android.net.nsd.NsdServiceInfo;
 import android.os.Messenger;
 
 /**
- * Interface that NsdService implements to connect NsdManager clients.
+ * Interface that NsdService implements for each NsdManager client.
  *
  * {@hide}
  */
-interface INsdManager {
-    INsdServiceConnector connect(INsdManagerCallback cb);
+interface INsdServiceConnector {
+    void registerService(int listenerKey, in NsdServiceInfo serviceInfo);
+    void unregisterService(int listenerKey);
+    void discoverServices(int listenerKey, in NsdServiceInfo serviceInfo);
+    void stopDiscovery(int listenerKey);
+    void resolveService(int listenerKey, in NsdServiceInfo serviceInfo);
+    void startDaemon();
 }
