@@ -113,12 +113,10 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
-import android.util.LruCache;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -252,8 +250,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     static final int MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE = 7000;
 
-    static final int SECURE_SUGGESTION_SPANS_MAX_SIZE = 20;
-
     private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
     private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
     private static final String HANDLER_THREAD_NAME = "android.imms";
@@ -301,8 +297,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     // lock for this class.
     final ArrayList<InputMethodInfo> mMethodList = new ArrayList<>();
     final ArrayMap<String, InputMethodInfo> mMethodMap = new ArrayMap<>();
-    private final LruCache<SuggestionSpan, InputMethodInfo> mSecureSuggestionSpans =
-            new LruCache<>(SECURE_SUGGESTION_SPANS_MAX_SIZE);
     final InputMethodSubtypeSwitchingController mSwitchingController;
 
     /**
