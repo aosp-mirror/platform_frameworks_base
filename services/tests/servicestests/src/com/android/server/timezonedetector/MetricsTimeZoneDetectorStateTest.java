@@ -143,14 +143,16 @@ public class MetricsTimeZoneDetectorStateTest {
                 metricsTimeZoneDetectorState.isTelephonyDetectionSupported());
         assertEquals(configurationInternal.isGeoDetectionSupported(),
                 metricsTimeZoneDetectorState.isGeoDetectionSupported());
+        assertEquals(configurationInternal.getGeoDetectionRunInBackgroundEnabled(),
+                metricsTimeZoneDetectorState.getGeoDetectionRunInBackgroundEnabled());
+        assertEquals(configurationInternal.isEnhancedMetricsCollectionEnabled(),
+                metricsTimeZoneDetectorState.isEnhancedMetricsCollectionEnabled());
         assertEquals(configurationInternal.getAutoDetectionEnabledSetting(),
                 metricsTimeZoneDetectorState.getAutoDetectionEnabledSetting());
         assertEquals(configurationInternal.getLocationEnabledSetting(),
                 metricsTimeZoneDetectorState.getUserLocationEnabledSetting());
         assertEquals(configurationInternal.getGeoDetectionEnabledSetting(),
                 metricsTimeZoneDetectorState.getGeoDetectionEnabledSetting());
-        assertEquals(configurationInternal.isEnhancedMetricsCollectionEnabled(),
-                metricsTimeZoneDetectorState.isEnhancedMetricsCollectionEnabled());
         assertEquals(0, metricsTimeZoneDetectorState.getDeviceTimeZoneIdOrdinal());
         assertEquals(DETECTION_MODE_GEO, metricsTimeZoneDetectorState.getDetectionMode());
     }
@@ -161,6 +163,7 @@ public class MetricsTimeZoneDetectorStateTest {
                 .setUserConfigAllowed(true)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
+                .setGeoDetectionRunInBackgroundEnabled(false)
                 .setEnhancedMetricsCollectionEnabled(enhancedMetricsCollectionEnabled)
                 .setAutoDetectionEnabledSetting(true)
                 .setLocationEnabledSetting(true)

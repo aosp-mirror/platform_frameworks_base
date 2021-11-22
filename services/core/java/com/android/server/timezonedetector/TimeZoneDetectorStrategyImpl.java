@@ -424,42 +424,47 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     @GuardedBy("this")
     private void doAutoTimeZoneDetection(
             @NonNull ConfigurationInternal currentUserConfig, @NonNull String detectionReason) {
-        if (!currentUserConfig.getAutoDetectionEnabledBehavior()) {
-            // Avoid doing unnecessary work.
-            return;
-        }
-
         // Use the correct algorithm based on the user's current configuration. If it changes, then
         // detection will be re-run.
-        if (currentUserConfig.getGeoDetectionEnabledBehavior()) {
-            boolean isGeoDetectionCertain = doGeolocationTimeZoneDetection(detectionReason);
+        switch (currentUserConfig.getDetectionMode()) {
+            case ConfigurationInternal.DETECTION_MODE_MANUAL:
+                // No work to do.
+                break;
+            case ConfigurationInternal.DETECTION_MODE_GEO: {
+                boolean isGeoDetectionCertain = doGeolocationTimeZoneDetection(detectionReason);
 
-            // When geolocation detection is uncertain of the time zone, telephony detection
-            // can be used if telephony fallback is enabled and supported.
-            if (!isGeoDetectionCertain
-                    && mTelephonyTimeZoneFallbackEnabled.getValue()
-                    && currentUserConfig.isTelephonyFallbackSupported()) {
+                // When geolocation detection is uncertain of the time zone, telephony detection
+                // can be used if telephony fallback is enabled and supported.
+                if (!isGeoDetectionCertain
+                        && mTelephonyTimeZoneFallbackEnabled.getValue()
+                        && currentUserConfig.isTelephonyFallbackSupported()) {
 
-                // This "only look at telephony if geolocation is uncertain" approach is
-                // deliberate to try to keep the logic simple and keep telephony and geolocation
-                // detection decoupled: when geolocation detection is in use, it is fully
-                // trusted and the most recent "certain" geolocation suggestion available will
-                // be used, even if the information it is based on is quite old.
-                // There could be newer telephony suggestions available, but telephony
-                // suggestions tend not to be withdrawn when they should be, and are based on
-                // combining information like MCC and NITZ signals, which could have been
-                // received at different times; thus it is hard to say what time the suggestion
-                // is actually "for" and reason clearly about ordering between telephony and
-                // geolocation suggestions.
-                //
-                // This approach is reliant on the location_time_zone_manager (and the location
-                // time zone providers it manages) correctly sending "uncertain" suggestions
-                // when the current location is unknown so that telephony fallback will actually be
-                // used.
-                doTelephonyTimeZoneDetection(detectionReason + ", telephony fallback mode");
+                    // This "only look at telephony if geolocation is uncertain" approach is
+                    // deliberate to try to keep the logic simple and keep telephony and geolocation
+                    // detection decoupled: when geolocation detection is in use, it is fully
+                    // trusted and the most recent "certain" geolocation suggestion available will
+                    // be used, even if the information it is based on is quite old.
+                    // There could be newer telephony suggestions available, but telephony
+                    // suggestions tend not to be withdrawn when they should be, and are based on
+                    // combining information like MCC and NITZ signals, which could have been
+                    // received at different times; thus it is hard to say what time the suggestion
+                    // is actually "for" and reason clearly about ordering between telephony and
+                    // geolocation suggestions.
+                    //
+                    // This approach is reliant on the location_time_zone_manager (and the location
+                    // time zone providers it manages) correctly sending "uncertain" suggestions
+                    // when the current location is unknown so that telephony fallback will actually
+                    // be used.
+                    doTelephonyTimeZoneDetection(detectionReason + ", telephony fallback mode");
+                }
+                break;
             }
-        } else  {
-            doTelephonyTimeZoneDetection(detectionReason);
+            case ConfigurationInternal.DETECTION_MODE_TELEPHONY:
+                doTelephonyTimeZoneDetection(detectionReason);
+                break;
+            default:
+                Slog.wtf(LOG_TAG, "Unknown detection mode: "
+                        + currentUserConfig.getDetectionMode());
         }
     }
 
