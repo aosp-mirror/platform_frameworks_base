@@ -147,16 +147,16 @@ public class LocationTimeZoneManagerService extends Binder {
     /** The shared lock from {@link #mThreadingDomain}. */
     @NonNull private final Object mSharedLock;
 
-    @NonNull
-    private final ServiceConfigAccessor mServiceConfigAccessor;
+    @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
 
     // Lazily initialized. Can be null if the service has been stopped.
     @GuardedBy("mSharedLock")
-    private ControllerImpl mLocationTimeZoneDetectorController;
+    private LocationTimeZoneProviderController mLocationTimeZoneProviderController;
 
     // Lazily initialized. Can be null if the service has been stopped.
     @GuardedBy("mSharedLock")
-    private ControllerEnvironmentImpl mEnvironment;
+    private LocationTimeZoneProviderControllerEnvironmentImpl
+            mLocationTimeZoneProviderControllerEnvironment;
 
     LocationTimeZoneManagerService(@NonNull Context context,
             @NonNull ServiceConfigAccessor serviceConfigAccessor) {
@@ -190,7 +190,7 @@ public class LocationTimeZoneManagerService extends Binder {
             // Avoid starting the service if it is currently stopped. This is required because
             // server flags are used by tests to set behavior with the service stopped, and we don't
             // want the service being restarted after each flag is set.
-            if (mLocationTimeZoneDetectorController != null) {
+            if (mLocationTimeZoneProviderController != null) {
                 // Stop and start the service, waiting until completion.
                 stopOnDomainThread();
                 startOnDomainThread();
@@ -278,19 +278,22 @@ public class LocationTimeZoneManagerService extends Binder {
                 return;
             }
 
-            if (mLocationTimeZoneDetectorController == null) {
+            if (mLocationTimeZoneProviderController == null) {
                 LocationTimeZoneProvider primary = mPrimaryProviderConfig.createProvider();
                 LocationTimeZoneProvider secondary = mSecondaryProviderConfig.createProvider();
 
-                ControllerImpl controller =
-                        new ControllerImpl(mThreadingDomain, primary, secondary);
-                ControllerEnvironmentImpl environment = new ControllerEnvironmentImpl(
-                        mThreadingDomain, mServiceConfigAccessor, controller);
-                ControllerCallbackImpl callback = new ControllerCallbackImpl(mThreadingDomain);
+                LocationTimeZoneProviderController controller =
+                        new LocationTimeZoneProviderController(
+                                mThreadingDomain, primary, secondary);
+                LocationTimeZoneProviderControllerEnvironmentImpl environment =
+                        new LocationTimeZoneProviderControllerEnvironmentImpl(
+                                mThreadingDomain, mServiceConfigAccessor, controller);
+                LocationTimeZoneProviderControllerCallbackImpl callback =
+                        new LocationTimeZoneProviderControllerCallbackImpl(mThreadingDomain);
                 controller.initialize(environment, callback);
 
-                mEnvironment = environment;
-                mLocationTimeZoneDetectorController = controller;
+                mLocationTimeZoneProviderControllerEnvironment = environment;
+                mLocationTimeZoneProviderController = controller;
             }
         }
     }
@@ -312,11 +315,11 @@ public class LocationTimeZoneManagerService extends Binder {
         mThreadingDomain.assertCurrentThread();
 
         synchronized (mSharedLock) {
-            if (mLocationTimeZoneDetectorController != null) {
-                mLocationTimeZoneDetectorController.destroy();
-                mLocationTimeZoneDetectorController = null;
-                mEnvironment.destroy();
-                mEnvironment = null;
+            if (mLocationTimeZoneProviderController != null) {
+                mLocationTimeZoneProviderController.destroy();
+                mLocationTimeZoneProviderController = null;
+                mLocationTimeZoneProviderControllerEnvironment.destroy();
+                mLocationTimeZoneProviderControllerEnvironment = null;
 
                 // Clear test state so it won't be used the next time the service is started.
                 mServiceConfigAccessor.resetVolatileTestConfig();
@@ -338,8 +341,8 @@ public class LocationTimeZoneManagerService extends Binder {
 
         mThreadingDomain.postAndWait(() -> {
             synchronized (mSharedLock) {
-                if (mLocationTimeZoneDetectorController != null) {
-                    mLocationTimeZoneDetectorController.clearRecordedProviderStates();
+                if (mLocationTimeZoneProviderController != null) {
+                    mLocationTimeZoneProviderController.clearRecordedProviderStates();
                 }
             }
         }, BLOCKING_OP_WAIT_DURATION_MILLIS);
@@ -357,10 +360,10 @@ public class LocationTimeZoneManagerService extends Binder {
             return mThreadingDomain.postAndWait(
                     () -> {
                         synchronized (mSharedLock) {
-                            if (mLocationTimeZoneDetectorController == null) {
+                            if (mLocationTimeZoneProviderController == null) {
                                 return null;
                             }
-                            return mLocationTimeZoneDetectorController.getStateForTests();
+                            return mLocationTimeZoneProviderController.getStateForTests();
                         }
                     },
                     BLOCKING_OP_WAIT_DURATION_MILLIS);
@@ -390,10 +393,10 @@ public class LocationTimeZoneManagerService extends Binder {
             mSecondaryProviderConfig.dump(ipw, args);
             ipw.decreaseIndent();
 
-            if (mLocationTimeZoneDetectorController == null) {
+            if (mLocationTimeZoneProviderController == null) {
                 ipw.println("{Stopped}");
             } else {
-                mLocationTimeZoneDetectorController.dump(ipw, args);
+                mLocationTimeZoneProviderController.dump(ipw, args);
             }
             ipw.decreaseIndent();
         }
@@ -450,7 +453,6 @@ public class LocationTimeZoneManagerService extends Binder {
                     mServiceConfigAccessor.getRecordProviderStateChanges());
         }
 
-        @GuardedBy("mSharedLock")
         @Override
         public void dump(IndentingPrintWriter ipw, String[] args) {
             ipw.printf("getMode()=%s\n", getMode());
