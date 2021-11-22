@@ -986,6 +986,18 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
+    public void onNavButtonsDarkIntensityChanged(float darkIntensity) {
+        try {
+            if (mOverviewProxy != null) {
+                mOverviewProxy.onNavButtonsDarkIntensityChanged(darkIntensity);
+            } else {
+                Log.e(TAG_OPS, "Failed to get overview proxy to update nav buttons dark intensity");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG_OPS, "Failed to call onNavButtonsDarkIntensityChanged()", e);
+        }
+    }
+
     private void updateEnabledState() {
         final int currentUser = ActivityManagerWrapper.getInstance().getCurrentUserId();
         mIsEnabled = mContext.getPackageManager().resolveServiceAsUser(mQuickStepIntent,

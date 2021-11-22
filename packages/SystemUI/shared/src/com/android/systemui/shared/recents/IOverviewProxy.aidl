@@ -95,4 +95,9 @@ oneway interface IOverviewProxy {
      * Sent when screen turned on and ready to use (blocker scrim is hidden)
      */
     void onScreenTurnedOn() = 21;
+
+    /**
+     * Sent when the desired dark intensity of the nav buttons has changed
+     */
+    void onNavButtonsDarkIntensityChanged(float darkIntensity) = 22;
 }
