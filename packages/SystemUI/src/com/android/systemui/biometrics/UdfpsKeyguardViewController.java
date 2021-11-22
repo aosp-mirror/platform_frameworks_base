@@ -255,7 +255,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     private void maybeShowInputBouncer() {
         if (mShowingUdfpsBouncer && hasUdfpsBouncerShownWithMinTime()) {
             mKeyguardViewManager.showBouncer(true);
-            mKeyguardViewManager.resetAlternateAuth(false);
         }
     }
 
