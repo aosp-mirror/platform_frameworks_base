@@ -80,6 +80,7 @@ import android.content.res.ObbInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
@@ -1648,7 +1649,8 @@ class StorageManagerService extends IStorageManager.Stub
                     // obb data to its new location. This may take time depending on the size of
                     // the data to be copied so it's done on the StorageManager worker thread.
                     // This needs to be finished before start mounting obb directories.
-                    if (userId == 0) {
+                    if (userId == 0
+                            && Build.VERSION.DEVICE_INITIAL_SDK_INT < Build.VERSION_CODES.Q) {
                         mPmInternal.migrateLegacyObbData();
                     }
 
