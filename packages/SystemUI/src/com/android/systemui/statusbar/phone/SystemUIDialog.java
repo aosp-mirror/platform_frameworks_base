@@ -36,6 +36,8 @@ import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.DialogListener;
@@ -303,13 +305,32 @@ public class SystemUIDialog extends AlertDialog implements ListenableDialog,
      * the screen off / close system dialogs broadcast.
      * <p>
      * <strong>Note:</strong> Don't call dialog.setOnDismissListener() after
-     * calling this because it causes a leak of BroadcastReceiver.
+     * calling this because it causes a leak of BroadcastReceiver. Instead, call the version that
+     * takes an extra Runnable as a parameter.
      *
      * @param dialog The dialog to be associated with the listener.
      */
     public static void registerDismissListener(Dialog dialog) {
+        registerDismissListener(dialog, null);
+    }
+
+
+    /**
+     * Registers a listener that dismisses the given dialog when it receives
+     * the screen off / close system dialogs broadcast.
+     * <p>
+     * <strong>Note:</strong> Don't call dialog.setOnDismissListener() after
+     * calling this because it causes a leak of BroadcastReceiver.
+     *
+     * @param dialog The dialog to be associated with the listener.
+     * @param dismissAction An action to run when the dialog is dismissed.
+     */
+    public static void registerDismissListener(Dialog dialog, @Nullable Runnable dismissAction) {
         DismissReceiver dismissReceiver = new DismissReceiver(dialog);
-        dialog.setOnDismissListener(d -> dismissReceiver.unregister());
+        dialog.setOnDismissListener(d -> {
+            dismissReceiver.unregister();
+            if (dismissAction != null) dismissAction.run();
+        });
         dismissReceiver.register();
     }
 
