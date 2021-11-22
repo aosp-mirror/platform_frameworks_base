@@ -311,14 +311,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("mMethodMap")
     private int mMethodMapUpdateCount = 0;
 
-    /**
-     * Indicates whether {@link InputMethodBindingController#getVisibleConnection} is currently
-     * in use.
-     */
-    private boolean isVisibleBound() {
-        return mBindingController.isVisibleBound();
-    }
-
     // Ongoing notification
     private NotificationManager mNotificationManager;
     KeyguardManager mKeyguardManager;
@@ -3143,9 +3135,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         } else {
             res = false;
         }
-        if (hasConnection() && isVisibleBound()) {
-            mBindingController.unbindVisibleConnectionLocked();
-        }
+        mBindingController.setCurrentMethodNotVisibleLocked();
         mInputShown = false;
         mShowRequested = false;
         mShowExplicitlyRequested = false;
@@ -5091,7 +5081,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + " client=" + mCurFocusedWindowClient);
             focusedWindowClient = mCurFocusedWindowClient;
             p.println("  mCurId=" + getCurId() + " mHaveConnection=" + hasConnection()
-                    + " mBoundToMethod=" + mBoundToMethod + " mVisibleBound=" + isVisibleBound());
+                    + " mBoundToMethod=" + mBoundToMethod + " mVisibleBound="
+                    + mBindingController.isVisibleBound());
             p.println("  mCurToken=" + getCurToken());
             p.println("  mCurTokenDisplayId=" + mCurTokenDisplayId);
             p.println("  mCurHostInputToken=" + mCurHostInputToken);

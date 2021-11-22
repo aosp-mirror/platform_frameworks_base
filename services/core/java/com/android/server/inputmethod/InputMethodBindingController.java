@@ -244,7 +244,7 @@ final class InputMethodBindingController {
     }
 
     /**
-     * Indicates whether {@link #getVisibleConnection} is currently in use.
+     * Indicates whether {@link #mVisibleConnection} is currently in use.
      */
     boolean isVisibleBound() {
         return mVisibleBound;
@@ -253,11 +253,6 @@ final class InputMethodBindingController {
     /**
      * Used to bring IME service up to visible adjustment while it is being shown.
      */
-    @NonNull
-    ServiceConnection getVisibleConnection() {
-        return mVisibleConnection;
-    }
-
     private final ServiceConnection mVisibleConnection = new ServiceConnection() {
         @Override public void onBindingDied(ComponentName name) {
             synchronized (mMethodMap) {
@@ -511,6 +506,16 @@ final class InputMethodBindingController {
                 Slog.d(TAG, "Can't show input: connection = " + mHasConnection + ", time = "
                         + (TIME_TO_RECONNECT - bindingDuration));
             }
+        }
+    }
+
+    /**
+     * Remove the binding needed for the IME to be shown.
+     */
+    @GuardedBy("mMethodMap")
+    void setCurrentMethodNotVisibleLocked() {
+        if (mVisibleBound) {
+            unbindVisibleConnectionLocked();
         }
     }
 }
