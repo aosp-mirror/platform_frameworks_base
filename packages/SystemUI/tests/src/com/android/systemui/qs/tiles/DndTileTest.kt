@@ -16,22 +16,28 @@
 
 package com.android.systemui.qs.tiles
 
+import android.app.Dialog
 import android.content.ContextWrapper
 import android.content.SharedPreferences
 import android.os.Handler
 import android.provider.Settings
+import android.provider.Settings.Global.ZEN_MODE_OFF
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.statusbar.policy.ZenModeController
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
@@ -40,9 +46,12 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito
+import org.mockito.Mockito.anyBoolean
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import java.io.File
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -70,6 +79,10 @@ class DndTileTest : SysuiTestCase() {
     private lateinit var zenModeController: ZenModeController
     @Mock
     private lateinit var sharedPreferences: SharedPreferences
+    @Mock
+    private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock
+    private lateinit var hostDialog: Dialog
 
     private lateinit var secureSettings: SecureSettings
     private lateinit var testableLooper: TestableLooper
@@ -81,15 +94,17 @@ class DndTileTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
         secureSettings = FakeSettings()
 
-        Mockito.`when`(qsHost.userId).thenReturn(DEFAULT_USER)
-        Mockito.`when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
+        whenever(qsHost.userId).thenReturn(DEFAULT_USER)
+        whenever(qsHost.uiEventLogger).thenReturn(uiEventLogger)
+        whenever(dialogLaunchAnimator.showFromView(any(), any(), anyBoolean()))
+            .thenReturn(hostDialog)
 
         val wrappedContext = object : ContextWrapper(context) {
             override fun getSharedPreferences(file: File?, mode: Int): SharedPreferences {
                 return sharedPreferences
             }
         }
-        Mockito.`when`(qsHost.context).thenReturn(wrappedContext)
+        whenever(qsHost.context).thenReturn(wrappedContext)
 
         tile = DndTile(
             qsHost,
@@ -102,7 +117,8 @@ class DndTileTest : SysuiTestCase() {
             qsLogger,
             zenModeController,
             sharedPreferences,
-            secureSettings
+            secureSettings,
+            dialogLaunchAnimator
         )
     }
 
@@ -146,5 +162,33 @@ class DndTileTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         assertThat(tile.state.forceExpandIcon).isTrue()
+    }
+
+    @Test
+    fun testLaunchDialogFromViewWhenPrompt() {
+        whenever(zenModeController.zen).thenReturn(ZEN_MODE_OFF)
+
+        secureSettings.putIntForUser(KEY, Settings.Secure.ZEN_DURATION_PROMPT, DEFAULT_USER)
+        testableLooper.processAllMessages()
+
+        val view = View(context)
+        tile.handleClick(view)
+        testableLooper.processAllMessages()
+
+        verify(dialogLaunchAnimator).showFromView(any(), eq(view), anyBoolean())
+    }
+
+    @Test
+    fun testNoLaunchDialogWhenNotPrompt() {
+        whenever(zenModeController.zen).thenReturn(ZEN_MODE_OFF)
+
+        secureSettings.putIntForUser(KEY, 60, DEFAULT_USER)
+        testableLooper.processAllMessages()
+
+        val view = View(context)
+        tile.handleClick(view)
+        testableLooper.processAllMessages()
+
+        verify(dialogLaunchAnimator, never()).showFromView(any(), any(), anyBoolean())
     }
 }
