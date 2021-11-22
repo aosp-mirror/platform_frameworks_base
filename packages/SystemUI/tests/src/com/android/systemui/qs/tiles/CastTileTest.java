@@ -38,6 +38,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -90,6 +91,8 @@ public class CastTileTest extends SysuiTestCase {
     private HotspotController.Callback mHotspotCallback;
     @Mock
     private QSLogger mQSLogger;
+    @Mock
+    private DialogLaunchAnimator mDialogLaunchAnimator;
 
     private TestableLooper mTestableLooper;
     private CastTile mCastTile;
@@ -113,7 +116,8 @@ public class CastTileTest extends SysuiTestCase {
                 mController,
                 mKeyguard,
                 mNetworkController,
-                mHotspotController
+                mHotspotController,
+                mDialogLaunchAnimator
         );
         mCastTile.initialize();
 
@@ -241,6 +245,7 @@ public class CastTileTest extends SysuiTestCase {
         List<CastDevice> devices = new ArrayList<>();
         devices.add(device);
         when(mController.getCastDevices()).thenReturn(devices);
+        when(mKeyguard.isShowing()).thenReturn(true);
 
         enableWifiAndProcessMessages();
         mCastTile.handleClick(null /* view */);
