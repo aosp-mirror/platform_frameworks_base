@@ -48886,6 +48886,7 @@ package android.view {
     field public static final int EDGE_LEFT = 4; // 0x4
     field public static final int EDGE_RIGHT = 8; // 0x8
     field public static final int EDGE_TOP = 1; // 0x1
+    field public static final int FLAG_CANCELED = 32; // 0x20
     field public static final int FLAG_WINDOW_IS_OBSCURED = 1; // 0x1
     field public static final int FLAG_WINDOW_IS_PARTIALLY_OBSCURED = 2; // 0x2
     field public static final int INVALID_POINTER_ID = -1; // 0xffffffff
