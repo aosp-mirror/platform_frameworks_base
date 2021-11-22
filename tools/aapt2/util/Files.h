@@ -41,6 +41,8 @@ constexpr const char sDirSep = '/';
 constexpr const char sPathSep = ':';
 #endif
 
+constexpr const char sInvariantDirSep = '/';
+
 enum class FileType {
   kUnknown = 0,
   kNonexistant,

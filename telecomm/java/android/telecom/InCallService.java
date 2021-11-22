@@ -69,7 +69,14 @@ import java.util.List;
  * them know that the app has crashed and that their call was continued using the pre-loaded dialer
  * app.
  * <p>
- * Further, the pre-loaded dialer will ALWAYS be used when the user places an emergency call.
+ * The pre-loaded dialer will ALWAYS be used when the user places an emergency call, even if your
+ * app fills the {@link android.app.role.RoleManager#ROLE_DIALER} role.  To ensure an optimal
+ * experience when placing an emergency call, the default dialer should ALWAYS use
+ * {@link android.telecom.TelecomManager#placeCall(Uri, Bundle)} to place calls (including
+ * emergency calls).  This ensures that the platform is able to verify that the request came from
+ * the default dialer.  If a non-preloaded dialer app uses {@link Intent#ACTION_CALL} to place an
+ * emergency call, it will be raised to the preloaded dialer app using {@link Intent#ACTION_DIAL}
+ * for confirmation; this is a suboptimal user experience.
  * <p>
  * Below is an example manifest registration for an {@code InCallService}. The meta-data
  * {@link TelecomManager#METADATA_IN_CALL_SERVICE_UI} indicates that this particular
