@@ -37,7 +37,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
-import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import java.io.FileDescriptor;
@@ -251,7 +250,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     private void updateNavigation() {
         if (mNavigationBarController != null
-                && !QuickStepContract.isGesturalMode(mNavigationMode)) {
+                && mNavigationBarController.supportsIconTintForNavMode(mNavigationMode)) {
             mNavigationBarController.setIconsDark(mNavigationLight, animateChange());
         }
     }
