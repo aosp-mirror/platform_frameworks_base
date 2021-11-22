@@ -49,6 +49,8 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 
+import static com.android.server.inputmethod.InputMethodBindingController.TIME_TO_RECONNECT;
+
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.Manifest;
@@ -249,8 +251,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_INLINE_SUGGESTIONS_REQUEST = 6000;
 
     static final int MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE = 7000;
-
-    static final long TIME_TO_RECONNECT = 3 * 1000;
 
     static final int SECURE_SUGGESTION_SPANS_MAX_SIZE = 20;
 

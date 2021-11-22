@@ -58,6 +58,9 @@ final class InputMethodBindingController {
     static final boolean DEBUG = false;
     private static final String TAG = InputMethodBindingController.class.getSimpleName();
 
+    /** Time in milliseconds that the IME service has to bind before it is reconnected. */
+    static final long TIME_TO_RECONNECT = 3 * 1000;
+
     @NonNull private final InputMethodManagerService mService;
     @NonNull private final Context mContext;
     @NonNull private final ArrayMap<String, InputMethodInfo> mMethodMap;
