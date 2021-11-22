@@ -154,10 +154,10 @@ public class LocaleManagerService extends SystemService {
         final ActivityTaskManagerInternal.PackageConfigurationUpdater updater =
                 mActivityTaskManagerInternal.createPackageConfigurationUpdater(appPackageName,
                         userId);
-        boolean isSuccess = updater.setLocales(locales).commit();
+        boolean isConfigChanged = updater.setLocales(locales).commit();
 
         //We want to send the broadcasts only if config was actually updated on commit.
-        if (isSuccess) {
+        if (isConfigChanged) {
             notifyAppWhoseLocaleChanged(appPackageName, userId, locales);
             notifyInstallerOfAppWhoseLocaleChanged(appPackageName, userId, locales);
             notifyRegisteredReceivers(appPackageName, userId, locales);
