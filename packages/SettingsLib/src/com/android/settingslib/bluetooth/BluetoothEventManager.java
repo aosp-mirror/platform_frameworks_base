@@ -160,10 +160,12 @@ public class BluetoothEventManager {
     private void registerIntentReceiver(BroadcastReceiver receiver, IntentFilter filter) {
         if (mUserHandle == null) {
             // If userHandle has not been provided, simply call registerReceiver.
-            mContext.registerReceiver(receiver, filter, null, mReceiverHandler);
+            mContext.registerReceiver(receiver, filter, null, mReceiverHandler,
+                    Context.RECEIVER_EXPORTED);
         } else {
             // userHandle was explicitly specified, so need to call multi-user aware API.
-            mContext.registerReceiverAsUser(receiver, mUserHandle, filter, null, mReceiverHandler);
+            mContext.registerReceiverAsUser(receiver, mUserHandle, filter, null, mReceiverHandler,
+                    Context.RECEIVER_EXPORTED);
         }
     }
 
