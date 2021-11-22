@@ -82,7 +82,7 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         mCommandQueue,
                         Dependency.get(Dependency.MAIN_HANDLER),
                         mock(ConfigurationController.class),
-                        mock(NavigationBarA11yHelper.class),
+                        mock(NavBarHelper.class),
                         mock(TaskbarDelegate.class),
                         mNavigationBarFactory,
                         mock(DumpManager.class),
