@@ -96,6 +96,7 @@ public class StatusBarStateControllerImpl implements
 
     private final ArrayList<RankedListener> mListeners = new ArrayList<>();
     private final UiEventLogger mUiEventLogger;
+    private final InteractionJankMonitor mInteractionJankMonitor;
     private int mState;
     private int mLastState;
     private int mUpcomingState;
@@ -149,8 +150,10 @@ public class StatusBarStateControllerImpl implements
     private Interpolator mDozeInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
     @Inject
-    public StatusBarStateControllerImpl(UiEventLogger uiEventLogger, DumpManager dumpManager) {
+    public StatusBarStateControllerImpl(UiEventLogger uiEventLogger, DumpManager dumpManager,
+            InteractionJankMonitor interactionJankMonitor) {
         mUiEventLogger = uiEventLogger;
+        mInteractionJankMonitor = interactionJankMonitor;
         for (int i = 0; i < HISTORY_SIZE; i++) {
             mHistoricalRecords[i] = new HistoricalState();
         }
@@ -344,17 +347,23 @@ public class StatusBarStateControllerImpl implements
     }
 
     private void beginInteractionJankMonitor() {
-        if (mView != null && mView.isAttachedToWindow()) {
-            InteractionJankMonitor.getInstance().begin(mView, getCujType());
+        if (mInteractionJankMonitor != null && mView != null && mView.isAttachedToWindow()) {
+            mInteractionJankMonitor.begin(mView, getCujType());
         }
     }
 
     private void endInteractionJankMonitor() {
-        InteractionJankMonitor.getInstance().end(getCujType());
+        if (mInteractionJankMonitor == null) {
+            return;
+        }
+        mInteractionJankMonitor.end(getCujType());
     }
 
     private void cancelInteractionJankMonitor() {
-        InteractionJankMonitor.getInstance().cancel(getCujType());
+        if (mInteractionJankMonitor == null) {
+            return;
+        }
+        mInteractionJankMonitor.cancel(getCujType());
     }
 
     private int getCujType() {

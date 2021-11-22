@@ -19,6 +19,7 @@ package com.android.systemui.statusbar
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -26,20 +27,35 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class StatusBarStateControllerImplTest : SysuiTestCase() {
 
+    @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
+
     private lateinit var controller: StatusBarStateControllerImpl
     private lateinit var uiEventLogger: UiEventLoggerFake
 
     @Before
     fun setUp() {
+        MockitoAnnotations.initMocks(this)
+        whenever(interactionJankMonitor.begin(any(), anyInt())).thenReturn(true)
+        whenever(interactionJankMonitor.end(anyInt())).thenReturn(true)
+
         uiEventLogger = UiEventLoggerFake()
-        controller = StatusBarStateControllerImpl(uiEventLogger, mock(DumpManager::class.java))
+        controller = StatusBarStateControllerImpl(
+            uiEventLogger,
+            mock(DumpManager::class.java),
+            interactionJankMonitor
+        )
     }
 
     @Test

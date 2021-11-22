@@ -288,6 +288,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private static final Rect M_DUMMY_DIRTY_RECT = new Rect(0, 0, 1, 1);
     private static final Rect EMPTY_RECT = new Rect();
 
+    private final InteractionJankMonitor mInteractionJankMonitor;
     private final LayoutInflater mLayoutInflater;
     private final FeatureFlags mFeatureFlags;
     private final PowerManager mPowerManager;
@@ -769,7 +770,8 @@ public class NotificationPanelViewController extends PanelViewController {
             PanelExpansionStateManager panelExpansionStateManager,
             NotificationRemoteInputManager remoteInputManager,
             Optional<SysUIUnfoldComponent> unfoldComponent,
-            ControlsComponent controlsComponent) {
+            ControlsComponent controlsComponent,
+            InteractionJankMonitor interactionJankMonitor) {
         super(view,
                 falsingManager,
                 dozeLog,
@@ -782,7 +784,8 @@ public class NotificationPanelViewController extends PanelViewController {
                 statusBarTouchableRegionManager,
                 lockscreenGestureLogger,
                 panelExpansionStateManager,
-                ambientState);
+                ambientState,
+                interactionJankMonitor);
         mView = view;
         mVibratorHelper = vibratorHelper;
         mKeyguardMediaController = keyguardMediaController;
@@ -838,6 +841,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mTapAgainViewController = tapAgainViewController;
         mUiExecutor = uiExecutor;
         mSecureSettings = secureSettings;
+        mInteractionJankMonitor = interactionJankMonitor;
         // TODO: inject via dagger instead of Dependency
         mSysUiState = Dependency.get(SysUiState.class);
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
@@ -1892,14 +1896,16 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private void traceQsJank(boolean startTracing, boolean wasCancelled) {
-        InteractionJankMonitor monitor = InteractionJankMonitor.getInstance();
+        if (mInteractionJankMonitor == null) {
+            return;
+        }
         if (startTracing) {
-            monitor.begin(mView, CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
+            mInteractionJankMonitor.begin(mView, CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
         } else {
             if (wasCancelled) {
-                monitor.cancel(CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
+                mInteractionJankMonitor.cancel(CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
             } else {
-                monitor.end(CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
+                mInteractionJankMonitor.end(CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
             }
         }
     }
