@@ -51,11 +51,17 @@ filegroup {
 filegroup {
     name: "non-updatable-module-lib-current.txt",
     srcs: ["module-lib-current.txt"],
-    visibility: ["//frameworks/base/api"],
+    visibility: [
+        "//frameworks/base/api",
+        "//cts/tests/signature/api",
+    ],
 }
 
 filegroup {
     name: "non-updatable-module-lib-removed.txt",
     srcs: ["module-lib-removed.txt"],
-    visibility: ["//frameworks/base/api"],
+    visibility: [
+        "//frameworks/base/api",
+        "//cts/tests/signature/api",
+    ],
 }

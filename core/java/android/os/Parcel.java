@@ -62,6 +62,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 /**
@@ -178,8 +180,12 @@ import java.util.function.Supplier;
  * {@link #writeStrongInterface(IInterface)}, {@link #readStrongBinder()},
  * {@link #writeBinderArray(IBinder[])}, {@link #readBinderArray(IBinder[])},
  * {@link #createBinderArray()},
+ * {@link #writeInterfaceArray(T[])}, {@link #readInterfaceArray(T[], Function)},
+ * {@link #createInterfaceArray(IntFunction, Function)},
  * {@link #writeBinderList(List)}, {@link #readBinderList(List)},
- * {@link #createBinderArrayList()}.</p>
+ * {@link #createBinderArrayList()},
+ * {@link #writeInterfaceList(List)}, {@link #readInterfaceList(List, Function)},
+ * {@link #createInterfaceArrayList(Function)}.</p>
  *
  * <p>FileDescriptor objects, representing raw Linux file descriptor identifiers,
  * can be written and {@link ParcelFileDescriptor} objects returned to operate
@@ -1730,6 +1736,30 @@ public final class Parcel {
     }
 
     /**
+     * Flatten a homogeneous array containing an IInterface type into the parcel,
+     * at the current dataPosition() and growing dataCapacity() if needed.  The
+     * type of the objects in the array must be one that implements IInterface.
+     *
+     * @param val The array of objects to be written.
+     *
+     * @see #createInterfaceArray
+     * @see #readInterfaceArray
+     * @see IInterface
+     */
+    public final <T extends IInterface> void writeInterfaceArray(
+            @SuppressLint("ArrayReturn") @Nullable T[] val) {
+        if (val != null) {
+            int N = val.length;
+            writeInt(N);
+            for (int i=0; i<N; i++) {
+                writeStrongInterface(val[i]);
+            }
+        } else {
+            writeInt(-1);
+        }
+    }
+
+    /**
      * @hide
      */
     public final void writeCharSequenceArray(@Nullable CharSequence[] val) {
@@ -1781,6 +1811,50 @@ public final class Parcel {
             }
         } else {
             throw new RuntimeException("bad array lengths");
+        }
+    }
+
+    /**
+     * Read and return a new array of T (IInterface) from the parcel.
+     *
+     * @return the IInterface array of type T
+     * @param newArray a function to create an array of T with a given length
+     * @param asInterface a function to convert IBinder object into T (IInterface)
+     */
+    @SuppressLint({"ArrayReturn", "NullableCollection", "SamShouldBeLast"})
+    @Nullable
+    public final <T extends IInterface> T[] createInterfaceArray(
+            @NonNull IntFunction<T[]> newArray, @NonNull Function<IBinder, T> asInterface) {
+        int N = readInt();
+        if (N >= 0) {
+            T[] val = newArray.apply(N);
+            for (int i=0; i<N; i++) {
+                val[i] = asInterface.apply(readStrongBinder());
+            }
+            return val;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Read an array of T (IInterface) from a parcel.
+     *
+     * @param asInterface a function to convert IBinder object into T (IInterface)
+     *
+     * @throws BadParcelableException Throws BadParcelableException if the length of `val`
+     *    mismatches the number of items in the parcel.
+     */
+    public final <T extends IInterface> void readInterfaceArray(
+            @SuppressLint("ArrayReturn") @NonNull T[] val,
+            @NonNull Function<IBinder, T> asInterface) {
+        int N = readInt();
+        if (N == val.length) {
+            for (int i=0; i<N; i++) {
+                val[i] = asInterface.apply(readStrongBinder());
+            }
+        } else {
+            throw new BadParcelableException("bad array lengths");
         }
     }
 
@@ -1893,6 +1967,28 @@ public final class Parcel {
         writeInt(N);
         while (i < N) {
             writeStrongBinder(val.get(i));
+            i++;
+        }
+    }
+
+    /**
+     * Flatten a {@code List} containing T (IInterface) objects into this parcel
+     * at the current position. They can later be retrieved with
+     * {@link #createInterfaceArrayList} or {@link #readInterfaceList}.
+     *
+     * @see #createInterfaceArrayList
+     * @see #readInterfaceList
+     */
+    public final <T extends IInterface> void writeInterfaceList(@Nullable List<T> val) {
+        if (val == null) {
+            writeInt(-1);
+            return;
+        }
+        int N = val.size();
+        int i=0;
+        writeInt(N);
+        while (i < N) {
+            writeStrongInterface(val.get(i));
             i++;
         }
     }
@@ -2894,17 +2990,45 @@ public final class Parcel {
      * Please use {@link #readBundle(ClassLoader)} instead (whose data must have
      * been written with {@link #writeBundle}.  Read into an existing Map object
      * from the parcel at the current dataPosition().
+     *
+     * @deprecated Consider using {@link #readBundle(ClassLoader)} as stated above, in case this
+     *      method is still preferred use the type-safer version {@link #readMap(Map, ClassLoader,
+     *      Class, Class)} starting from Android {@link Build.VERSION_CODES#TIRAMISU}.
      */
+    @Deprecated
     public final void readMap(@NonNull Map outVal, @Nullable ClassLoader loader) {
-        int N = readInt();
-        readMapInternal(outVal, N, loader);
+        int n = readInt();
+        readMapInternal(outVal, n, loader, /* clazzKey */ null, /* clazzValue */ null);
+    }
+
+    /**
+     * Same as {@link #readMap(Map, ClassLoader)} but accepts {@code clazzKey} and
+     * {@code clazzValue} parameter as the types required for each key and value pair.
+     *
+     * @throws BadParcelableException If the item to be deserialized is not an instance of that
+     * class or any of its children class
+     */
+    public <K, V> void readMap(@NonNull Map<? super K, ? super V> outVal,
+            @Nullable ClassLoader loader, @NonNull Class<K> clazzKey,
+            @NonNull Class<V> clazzValue) {
+        Objects.requireNonNull(clazzKey);
+        Objects.requireNonNull(clazzValue);
+        int n = readInt();
+        readMapInternal(outVal, n, loader, clazzKey, clazzValue);
     }
 
     /**
      * Read into an existing List object from the parcel at the current
      * dataPosition(), using the given class loader to load any enclosed
      * Parcelables.  If it is null, the default class loader is used.
+     *
+     * @deprecated Use the type-safer version {@link #readList(List, ClassLoader, Class)} starting
+     *      from Android {@link Build.VERSION_CODES#TIRAMISU}. Also consider changing the format to
+     *      use {@link #readTypedList(List, Parcelable.Creator)} if possible (eg. if the items'
+     *      class is final) since this is also more performant. Note that changing to the latter
+     *      also requires changing the writes.
      */
+    @Deprecated
     public final void readList(@NonNull List outVal, @Nullable ClassLoader loader) {
         int N = readInt();
         readListInternal(outVal, N, loader, /* clazz */ null);
@@ -2931,17 +3055,43 @@ public final class Parcel {
      * object from the parcel at the current dataPosition(), using the given
      * class loader to load any enclosed Parcelables.  Returns null if
      * the previously written map object was null.
+     *
+     * @deprecated Consider using {@link #readBundle(ClassLoader)} as stated above, in case this
+     *      method is still preferred use the type-safer version {@link #readHashMap(ClassLoader,
+     *      Class, Class)} starting from Android {@link Build.VERSION_CODES#TIRAMISU}.
      */
+    @Deprecated
     @Nullable
-    public final HashMap readHashMap(@Nullable ClassLoader loader)
-    {
-        int N = readInt();
-        if (N < 0) {
+    public HashMap readHashMap(@Nullable ClassLoader loader) {
+        int n = readInt();
+        if (n < 0) {
             return null;
         }
-        HashMap m = new HashMap(N);
-        readMapInternal(m, N, loader);
+        HashMap m = new HashMap(n);
+        readMapInternal(m, n, loader, /* clazzKey */ null, /* clazzValue */ null);
         return m;
+    }
+
+    /**
+     * Same as {@link #readHashMap(ClassLoader)} but accepts {@code clazzKey} and
+     * {@code clazzValue} parameter as the types required for each key and value pair.
+     *
+     * @throws BadParcelableException if the item to be deserialized is not an instance of that
+     * class or any of its children class
+     */
+    @SuppressLint({"ConcreteCollection", "NullableCollection"})
+    @Nullable
+    public <K, V> HashMap<K, V> readHashMap(@Nullable ClassLoader loader,
+            @NonNull Class<? extends K> clazzKey, @NonNull Class<? extends V> clazzValue) {
+        Objects.requireNonNull(clazzKey);
+        Objects.requireNonNull(clazzValue);
+        int n = readInt();
+        if (n < 0) {
+            return null;
+        }
+        HashMap<K, V> map = new HashMap<>(n);
+        readMapInternal(map, n, loader, clazzKey, clazzValue);
+        return map;
     }
 
     /**
@@ -3113,7 +3263,14 @@ public final class Parcel {
      * dataPosition().  Returns null if the previously written list object was
      * null.  The given class loader will be used to load any enclosed
      * Parcelables.
+     *
+     * @deprecated Use the type-safer version {@link #readArrayList(ClassLoader, Class)} starting
+     *      from Android {@link Build.VERSION_CODES#TIRAMISU}. Also consider changing the format to
+     *      use {@link #createTypedArrayList(Parcelable.Creator)} if possible (eg. if the items'
+     *      class is final) since this is also more performant. Note that changing to the latter
+     *      also requires changing the writes.
      */
+    @Deprecated
     @Nullable
     public ArrayList readArrayList(@Nullable ClassLoader loader) {
         return readArrayListInternal(loader, /* clazz */ null);
@@ -3140,7 +3297,14 @@ public final class Parcel {
      * dataPosition().  Returns null if the previously written array was
      * null.  The given class loader will be used to load any enclosed
      * Parcelables.
+     *
+     * @deprecated Use the type-safer version {@link #readArray(ClassLoader, Class)} starting from
+     *      Android {@link Build.VERSION_CODES#TIRAMISU}. Also consider changing the format to use
+     *      {@link #createTypedArray(Parcelable.Creator)} if possible (eg. if the items' class is
+     *      final) since this is also more performant. Note that changing to the latter also
+     *      requires changing the writes.
      */
+    @Deprecated
     @Nullable
     public Object[] readArray(@Nullable ClassLoader loader) {
         return readArrayInternal(loader, /* clazz */ null);
@@ -3166,7 +3330,14 @@ public final class Parcel {
      * dataPosition().  Returns null if the previously written list object was
      * null.  The given class loader will be used to load any enclosed
      * Parcelables.
+     *
+     * @deprecated Use the type-safer version {@link #readSparseArray(ClassLoader, Class)} starting
+     *      from Android {@link Build.VERSION_CODES#TIRAMISU}. Also consider changing the format to
+     *      use {@link #createTypedSparseArray(Parcelable.Creator)} if possible (eg. if the items'
+     *      class is final) since this is also more performant. Note that changing to the latter
+     *      also requires changing the writes.
      */
+    @Deprecated
     @Nullable
     public <T> SparseArray<T> readSparseArray(@Nullable ClassLoader loader) {
         return readSparseArrayInternal(loader, /* clazz */ null);
@@ -3380,6 +3551,32 @@ public final class Parcel {
     }
 
     /**
+     * Read and return a new ArrayList containing T (IInterface) objects from
+     * the parcel that was written with {@link #writeInterfaceList} at the
+     * current dataPosition().  Returns null if the
+     * previously written list object was null.
+     *
+     * @return A newly created ArrayList containing T (IInterface)
+     *
+     * @see #writeInterfaceList
+     */
+    @SuppressLint({"ConcreteCollection", "NullableCollection"})
+    @Nullable
+    public final <T extends IInterface> ArrayList<T> createInterfaceArrayList(
+            @NonNull Function<IBinder, T> asInterface) {
+        int N = readInt();
+        if (N < 0) {
+            return null;
+        }
+        ArrayList<T> l = new ArrayList<T>(N);
+        while (N > 0) {
+            l.add(asInterface.apply(readStrongBinder()));
+            N--;
+        }
+        return l;
+    }
+
+    /**
      * Read into the given List items String objects that were written with
      * {@link #writeStringList} at the current dataPosition().
      *
@@ -3415,6 +3612,28 @@ public final class Parcel {
         }
         for (; i<N; i++) {
             list.add(readStrongBinder());
+        }
+        for (; i<M; i++) {
+            list.remove(N);
+        }
+    }
+
+    /**
+     * Read into the given List items IInterface objects that were written with
+     * {@link #writeInterfaceList} at the current dataPosition().
+     *
+     * @see #writeInterfaceList
+     */
+    public final <T extends IInterface> void readInterfaceList(@NonNull List<T> list,
+            @NonNull Function<IBinder, T> asInterface) {
+        int M = list.size();
+        int N = readInt();
+        int i = 0;
+        for (; i < M && i < N; i++) {
+            list.set(i, asInterface.apply(readStrongBinder()));
+        }
+        for (; i<N; i++) {
+            list.add(asInterface.apply(readStrongBinder()));
         }
         for (; i<M; i++) {
             list.remove(N);
@@ -3925,7 +4144,13 @@ public final class Parcel {
      * object has been written.
      * @throws BadParcelableException Throws BadParcelableException if there
      * was an error trying to instantiate the Parcelable.
+     *
+     * @deprecated Use the type-safer version {@link #readParcelable(ClassLoader, Class)} starting
+     *      from Android {@link Build.VERSION_CODES#TIRAMISU}. Also consider changing the format to
+     *      use {@link Parcelable.Creator#createFromParcel(Parcel)} if possible since this is also
+     *      more performant. Note that changing to the latter also requires changing the writes.
      */
+    @Deprecated
     @Nullable
     public final <T extends Parcelable> T readParcelable(@Nullable ClassLoader loader) {
         return readParcelableInternal(loader, /* clazz */ null);
@@ -3994,7 +4219,11 @@ public final class Parcel {
      * read the {@link Parcelable.Creator}.
      *
      * @see #writeParcelableCreator
+     *
+     * @deprecated Use the type-safer version {@link #readParcelableCreator(ClassLoader, Class)}
+     *       starting from Android {@link Build.VERSION_CODES#TIRAMISU}.
      */
+    @Deprecated
     @Nullable
     public final Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader loader) {
         return readParcelableCreatorInternal(loader, /* clazz */ null);
@@ -4155,7 +4384,11 @@ public final class Parcel {
      * Read and return a new Serializable object from the parcel.
      * @return the Serializable object, or null if the Serializable name
      * wasn't found in the parcel.
+     *
+     * @deprecated Use the type-safer version {@link #readSerializable(ClassLoader, Class)} starting
+     *       from Android {@link Build.VERSION_CODES#TIRAMISU}.
      */
+    @Deprecated
     @Nullable
     public Serializable readSerializable() {
         return readSerializableInternal(/* loader */ null, /* clazz */ null);
@@ -4328,13 +4561,23 @@ public final class Parcel {
         destroy();
     }
 
-    /* package */ void readMapInternal(@NonNull Map outVal, int N,
+    /**
+     * To be replaced by {@link #readMapInternal(Map, int, ClassLoader, Class, Class)}, but keep
+     * the old API for compatibility usages.
+     */
+    /* package */ void readMapInternal(@NonNull Map outVal, int n,
             @Nullable ClassLoader loader) {
-        while (N > 0) {
-            Object key = readValue(loader);
-            Object value = readValue(loader);
+        readMapInternal(outVal, n, loader, /* clazzKey */null, /* clazzValue */null);
+    }
+
+    /* package */ <K, V> void readMapInternal(@NonNull Map<? super K, ? super V> outVal, int n,
+            @Nullable ClassLoader loader, @Nullable Class<K> clazzKey,
+            @Nullable Class<V> clazzValue) {
+        while (n > 0) {
+            K key = readValue(loader, clazzKey);
+            V value = readValue(loader, clazzValue);
             outVal.put(key, value);
-            N--;
+            n--;
         }
     }
 

@@ -2022,6 +2022,7 @@ public final class BluetoothAdapter {
      *                {@link BluetoothProfile#HEADSET},
      *                {@link BluetoothProfile#A2DP},
      *                {@link BluetoothProfile#HEARING_AID}
+     *                {@link BluetoothProfile#LE_AUDIO}
      * @return A list of active bluetooth devices
      * @throws IllegalArgumentException If profile is not one of {@link ActiveDeviceProfile}
      * @hide
@@ -2034,12 +2035,14 @@ public final class BluetoothAdapter {
     public @NonNull List<BluetoothDevice> getActiveDevices(@ActiveDeviceProfile int profile) {
         if (profile != BluetoothProfile.HEADSET
                 && profile != BluetoothProfile.A2DP
-                && profile != BluetoothProfile.HEARING_AID) {
+                && profile != BluetoothProfile.HEARING_AID
+                && profile != BluetoothProfile.LE_AUDIO) {
             Log.e(TAG, "Invalid profile param value in getActiveDevices");
             throw new IllegalArgumentException("Profiles must be one of "
                     + "BluetoothProfile.A2DP, "
                     + "BluetoothProfile.HEARING_AID, or"
-                    + "BluetoothProfile.HEARING_AID");
+                    + "BluetoothProfile.HEARING_AID"
+                    + "BluetoothProfile.LE_AUDIO");
         }
         try {
             mServiceLock.readLock().lock();

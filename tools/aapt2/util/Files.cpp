@@ -154,7 +154,7 @@ StringPiece GetFilename(const StringPiece& path) {
   const char* end = path.end();
   const char* last_dir_sep = path.begin();
   for (const char* c = path.begin(); c != end; ++c) {
-    if (*c == sDirSep) {
+    if (*c == sDirSep || *c == sInvariantDirSep) {
       last_dir_sep = c + 1;
     }
   }

@@ -325,8 +325,8 @@ public:
         }
 
         uint8_t readBuffer[AMIDI_PACKET_SIZE];
-        ssize_t readCount = read(mPort->ufd, readBuffer, sizeof(readBuffer));
-        if (readCount == EINTR || readCount < 1) {
+        ssize_t readCount = TEMP_FAILURE_RETRY(read(mPort->ufd, readBuffer, sizeof(readBuffer)));
+        if (readCount < 1) {
             return  AMEDIA_ERROR_UNKNOWN;
         }
 
@@ -407,7 +407,8 @@ ssize_t AMIDI_API AMidiInputPort_sendWithTimestamp(const AMidiInputPort *inputPo
 
         ssize_t numTransferBytes =
                 AMIDI_makeSendBuffer(writeBuffer, data + numSent, blockSize, timestamp);
-        ssize_t numWritten = write(((AMIDI_Port*)inputPort)->ufd, writeBuffer, numTransferBytes);
+        ssize_t numWritten = TEMP_FAILURE_RETRY(write(((AMIDI_Port*)inputPort)->ufd, writeBuffer,
+                                                      numTransferBytes));
         if (numWritten < 0) {
             break;  // error so bail out.
         }
@@ -430,7 +431,8 @@ media_status_t AMIDI_API AMidiInputPort_sendFlush(const AMidiInputPort *inputPor
 
     uint8_t opCode = AMIDI_OPCODE_FLUSH;
     ssize_t numTransferBytes = 1;
-    ssize_t numWritten = write(((AMIDI_Port*)inputPort)->ufd, &opCode, numTransferBytes);
+    ssize_t numWritten = TEMP_FAILURE_RETRY(write(((AMIDI_Port*)inputPort)->ufd, &opCode,
+                                                  numTransferBytes));
 
     if (numWritten < numTransferBytes) {
         ALOGE("AMidiInputPort_flush Couldn't write MIDI flush. requested:%zd, written:%zd",
