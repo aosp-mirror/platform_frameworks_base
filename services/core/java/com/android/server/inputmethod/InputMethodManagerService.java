@@ -3046,42 +3046,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
 
-        boolean res = false;
-        IInputMethod curMethod = getCurMethod();
-        if (curMethod != null) {
-            if (DEBUG) Slog.d(TAG, "showCurrentInputLocked: mCurToken=" + getCurToken());
+        mBindingController.setCurrentMethodVisibleLocked();
+        if (getCurMethod() != null) {
             // create a placeholder token for IMS so that IMS cannot inject windows into client app.
             Binder showInputToken = new Binder();
             mShowRequestWindowMap.put(showInputToken, windowToken);
+            IInputMethod curMethod = getCurMethod();
             executeOrSendMessage(curMethod, mCaller.obtainMessageIIOOO(MSG_SHOW_SOFT_INPUT,
                     getImeShowFlagsLocked(), reason, curMethod, resultReceiver,
                     showInputToken));
             mInputShown = true;
-            if (hasConnection() && !isVisibleBound()) {
-                mBindingController.bindCurrentInputMethodServiceVisibleConnectionLocked();
-            }
-            res = true;
-        } else {
-            long bindingDuration = SystemClock.uptimeMillis() - getLastBindTime();
-            if (hasConnection() && bindingDuration >= TIME_TO_RECONNECT) {
-                // The client has asked to have the input method shown, but
-                // we have been sitting here too long with a connection to the
-                // service and no interface received, so let's disconnect/connect
-                // to try to prod things along.
-                EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME, getSelectedMethodId(),
-                        bindingDuration, 1);
-                Slog.w(TAG, "Force disconnect/connect to the IME in showCurrentInputLocked()");
-                mBindingController.unbindMainConnectionLocked();
-                mBindingController.bindCurrentInputMethodServiceMainConnectionLocked();
-            } else {
-                if (DEBUG) {
-                    Slog.d(TAG, "Can't show input: connection = " + hasConnection() + ", time = "
-                            + (TIME_TO_RECONNECT - bindingDuration));
-                }
-            }
+            return true;
         }
 
-        return res;
+        return false;
     }
 
     @Override
