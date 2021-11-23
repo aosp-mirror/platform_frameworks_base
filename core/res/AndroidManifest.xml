@@ -6566,6 +6566,16 @@
             </intent-filter>
         </service>
 
+        <!-- TODO: Move to ExtServices or relevant component. -->
+        <service android:name="com.android.server.selectiontoolbar.DefaultSelectionToolbarRenderService"
+                 android:permission="android.permission.BIND_SELECTION_TOOLBAR_RENDER_SERVICE"
+                 android:process=":ui"
+                 android:exported="false">
+            <intent-filter>
+                <action android:name="android.service.selectiontoolbar.SelectionToolbarRenderService"/>
+            </intent-filter>
+        </service>
+
         <provider
             android:name="com.android.server.textclassifier.IconsContentProvider"
             android:authorities="com.android.textclassifier.icons"

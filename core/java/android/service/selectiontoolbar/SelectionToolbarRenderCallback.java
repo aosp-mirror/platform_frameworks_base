@@ -14,20 +14,40 @@
  * limitations under the License.
  */
 
-package android.view.selectiontoolbar;
+package android.service.selectiontoolbar;
 
 import android.view.selectiontoolbar.ToolbarMenuItem;
 import android.view.selectiontoolbar.WidgetInfo;
 
 /**
- * Binder interface to notify the selection toolbar events from one process to the other.
+ * The callback that the render service uses to communicate with the host of the selection toolbar
+ * container.
+ *
  * @hide
  */
-oneway interface ISelectionToolbarCallback {
-    void onShown(in WidgetInfo info);
+public interface SelectionToolbarRenderCallback {
+    /**
+     * The selection toolbar is shown.
+     */
+    void onShown(WidgetInfo widgetInfo);
+    /**
+     * The selection toolbar is hidden.
+     */
     void onHidden(long widgetToken);
+    /**
+     * The selection toolbar is dismissed.
+     */
     void onDismissed(long widgetToken);
-    void onWidgetUpdated(in WidgetInfo info);
-    void onMenuItemClicked(in ToolbarMenuItem item);
+    /**
+     * The selection toolbar has changed.
+     */
+    void onWidgetUpdated(WidgetInfo info);
+    /**
+     * The menu item on the selection toolbar has been clicked.
+     */
+    void onMenuItemClicked(ToolbarMenuItem item);
+    /**
+     * The error occurred when operating on the selection toolbar.
+     */
     void onError(int errorCode);
 }
