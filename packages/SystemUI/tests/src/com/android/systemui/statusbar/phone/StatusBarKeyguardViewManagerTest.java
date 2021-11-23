@@ -374,6 +374,21 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testHideAltAuth_onShowBouncer() {
+        // GIVEN alt auth is showing
+        mStatusBarKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
+        when(mBouncer.isShowing()).thenReturn(false);
+        when(mAlternateAuthInterceptor.isShowingAlternateAuthBouncer()).thenReturn(true);
+        reset(mAlternateAuthInterceptor);
+
+        // WHEN showBouncer is called
+        mStatusBarKeyguardViewManager.showBouncer(true);
+
+        // THEN alt bouncer should be hidden
+        verify(mAlternateAuthInterceptor).hideAlternateAuthBouncer();
+    }
+
+    @Test
     public void testUpdateResources_delegatesToBouncer() {
         mStatusBarKeyguardViewManager.updateResources();
 

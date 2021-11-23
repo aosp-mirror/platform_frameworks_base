@@ -21,6 +21,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.testing.Assert.assertThrows;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -352,28 +353,66 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testApplyTransaction_enforceHierarchyChange_createTaskFragment() {
+    public void testApplyTransaction_enforceHierarchyChange_createTaskFragment()
+            throws RemoteException {
+        mController.registerOrganizer(mIOrganizer);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
+        final int uid = Binder.getCallingUid();
+        activity.info.applicationInfo.uid = uid;
+        activity.getTask().effectiveUid = uid;
+        final IBinder fragmentToken = new Binder();
+        final TaskFragmentCreationParams params = new TaskFragmentCreationParams.Builder(
+                mOrganizerToken, fragmentToken, activity.token).build();
         mOrganizer.applyTransaction(mTransaction);
 
         // Allow organizer to create TaskFragment and start/reparent activity to TaskFragment.
-        final TaskFragmentCreationParams mockParams = mock(TaskFragmentCreationParams.class);
-        doReturn(mOrganizerToken).when(mockParams).getOrganizer();
-        mTransaction.createTaskFragment(mockParams);
+        mTransaction.createTaskFragment(params);
         mTransaction.startActivityInTaskFragment(
                 mFragmentToken, null /* callerToken */, new Intent(), null /* activityOptions */);
         mTransaction.reparentActivityToTaskFragment(mFragmentToken, mock(IBinder.class));
         mTransaction.setAdjacentTaskFragments(mFragmentToken, mock(IBinder.class),
                 null /* options */);
+        mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
 
-        // It is expected to fail for the mock TaskFragmentCreationParams. It is ok as we are
-        // testing the security check here.
-        assertThrows(IllegalArgumentException.class, () -> {
-            try {
-                mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
-            } catch (RemoteException e) {
-                fail();
-            }
-        });
+        // Successfully created a TaskFragment.
+        final TaskFragment taskFragment = mAtm.mWindowOrganizerController
+                .getTaskFragment(fragmentToken);
+        assertNotNull(taskFragment);
+        assertEquals(activity.getTask(), taskFragment.getTask());
+    }
+
+    @Test
+    public void testApplyTransaction_createTaskFragment_failForDifferentUid()
+            throws RemoteException {
+        mController.registerOrganizer(mIOrganizer);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
+        final int uid = Binder.getCallingUid();
+        final IBinder fragmentToken = new Binder();
+        final TaskFragmentCreationParams params = new TaskFragmentCreationParams.Builder(
+                mOrganizerToken, fragmentToken, activity.token).build();
+        mOrganizer.applyTransaction(mTransaction);
+        mTransaction.createTaskFragment(params);
+
+        // Fail to create TaskFragment when the task uid is different from caller.
+        activity.info.applicationInfo.uid = uid;
+        activity.getTask().effectiveUid = uid + 1;
+        mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+
+        assertNull(mAtm.mWindowOrganizerController.getTaskFragment(fragmentToken));
+
+        // Fail to create TaskFragment when the task uid is different from owner activity.
+        activity.info.applicationInfo.uid = uid + 1;
+        activity.getTask().effectiveUid = uid;
+        mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+
+        assertNull(mAtm.mWindowOrganizerController.getTaskFragment(fragmentToken));
+
+        // Successfully created a TaskFragment for same uid.
+        activity.info.applicationInfo.uid = uid;
+        activity.getTask().effectiveUid = uid;
+        mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+
+        assertNotNull(mAtm.mWindowOrganizerController.getTaskFragment(fragmentToken));
     }
 
     @Test
