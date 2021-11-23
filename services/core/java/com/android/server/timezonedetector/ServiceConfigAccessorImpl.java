@@ -281,8 +281,8 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
             // later releases that start to support geo detection on the same hardware.
             if (!getGeoDetectionSettingEnabledOverride().isPresent()
                     && isGeoTimeZoneDetectionFeatureSupported()) {
-                final boolean geoTzDetectionEnabled = configuration.isGeoDetectionEnabled();
-                setGeoDetectionEnabledIfRequired(userId, geoTzDetectionEnabled);
+                final boolean geoDetectionEnabledSetting = configuration.isGeoDetectionEnabled();
+                setGeoDetectionEnabledSettingIfRequired(userId, geoDetectionEnabledSetting);
             }
         }
     }
@@ -294,10 +294,10 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
                 .setTelephonyDetectionFeatureSupported(
                         isTelephonyTimeZoneDetectionFeatureSupported())
                 .setGeoDetectionFeatureSupported(isGeoTimeZoneDetectionFeatureSupported())
-                .setAutoDetectionEnabled(isAutoDetectionEnabled())
+                .setAutoDetectionEnabledSetting(getAutoDetectionEnabledSetting())
                 .setUserConfigAllowed(isUserConfigAllowed(userId))
-                .setLocationEnabled(isLocationEnabled(userId))
-                .setGeoDetectionEnabled(isGeoDetectionEnabled(userId))
+                .setLocationEnabledSetting(getLocationEnabledSetting(userId))
+                .setGeoDetectionEnabledSetting(getGeoDetectionEnabledSetting(userId))
                 .build();
     }
 
@@ -306,12 +306,12 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         // a ConfigurationChangeListener callback triggering due to ContentObserver's still
         // triggering *sometimes* for no-op updates. Because callbacks are async this is necessary
         // for stable behavior during tests.
-        if (isAutoDetectionEnabled() != enabled) {
+        if (getAutoDetectionEnabledSetting() != enabled) {
             Settings.Global.putInt(mCr, Settings.Global.AUTO_TIME_ZONE, enabled ? 1 : 0);
         }
     }
 
-    private boolean isLocationEnabled(@UserIdInt int userId) {
+    private boolean getLocationEnabledSetting(@UserIdInt int userId) {
         return mLocationManager.isLocationEnabledForUser(UserHandle.of(userId));
     }
 
@@ -320,11 +320,11 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_DATE_TIME, userHandle);
     }
 
-    private boolean isAutoDetectionEnabled() {
+    private boolean getAutoDetectionEnabledSetting() {
         return Settings.Global.getInt(mCr, Settings.Global.AUTO_TIME_ZONE, 1 /* default */) > 0;
     }
 
-    private boolean isGeoDetectionEnabled(@UserIdInt int userId) {
+    private boolean getGeoDetectionEnabledSetting(@UserIdInt int userId) {
         // We may never use this, but it gives us a way to force location-based time zone detection
         // on/off for testers (but only where their other settings would allow them to turn it on
         // for themselves).
@@ -339,9 +339,9 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
                 (geoDetectionEnabledByDefault ? 1 : 0) /* defaultValue */, userId) != 0;
     }
 
-    private void setGeoDetectionEnabledIfRequired(@UserIdInt int userId, boolean enabled) {
+    private void setGeoDetectionEnabledSettingIfRequired(@UserIdInt int userId, boolean enabled) {
         // See comment in setAutoDetectionEnabledIfRequired. http://b/171953500
-        if (isGeoDetectionEnabled(userId) != enabled) {
+        if (getGeoDetectionEnabledSetting(userId) != enabled) {
             Settings.Secure.putIntForUser(mCr, Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
                     enabled ? 1 : 0, userId);
         }

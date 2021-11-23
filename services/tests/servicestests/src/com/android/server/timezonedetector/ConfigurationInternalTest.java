@@ -48,13 +48,13 @@ public class ConfigurationInternalTest {
                 .setUserConfigAllowed(true)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
-                .setAutoDetectionEnabled(true)
-                .setLocationEnabled(true)
-                .setGeoDetectionEnabled(true)
+                .setAutoDetectionEnabledSetting(true)
+                .setLocationEnabledSetting(true)
+                .setGeoDetectionEnabledSetting(true)
                 .build();
         {
             ConfigurationInternal autoOnConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(true)
+                    .setAutoDetectionEnabledSetting(true)
                     .build();
             assertTrue(autoOnConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOnConfig.getGeoDetectionEnabledSetting());
@@ -79,7 +79,7 @@ public class ConfigurationInternalTest {
 
         {
             ConfigurationInternal autoOffConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(false)
+                    .setAutoDetectionEnabledSetting(false)
                     .build();
             assertFalse(autoOffConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOffConfig.getGeoDetectionEnabledSetting());
@@ -110,13 +110,13 @@ public class ConfigurationInternalTest {
                 .setUserConfigAllowed(false)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
-                .setAutoDetectionEnabled(true)
-                .setLocationEnabled(true)
-                .setGeoDetectionEnabled(true)
+                .setAutoDetectionEnabledSetting(true)
+                .setLocationEnabledSetting(true)
+                .setGeoDetectionEnabledSetting(true)
                 .build();
         {
             ConfigurationInternal autoOnConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(true)
+                    .setAutoDetectionEnabledSetting(true)
                     .build();
             assertTrue(autoOnConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOnConfig.getGeoDetectionEnabledSetting());
@@ -142,7 +142,7 @@ public class ConfigurationInternalTest {
 
         {
             ConfigurationInternal autoOffConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(false)
+                    .setAutoDetectionEnabledSetting(false)
                     .build();
             assertFalse(autoOffConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOffConfig.getGeoDetectionEnabledSetting());
@@ -174,13 +174,13 @@ public class ConfigurationInternalTest {
                 .setUserConfigAllowed(true)
                 .setTelephonyDetectionFeatureSupported(false)
                 .setGeoDetectionFeatureSupported(false)
-                .setAutoDetectionEnabled(true)
-                .setLocationEnabled(true)
-                .setGeoDetectionEnabled(true)
+                .setAutoDetectionEnabledSetting(true)
+                .setLocationEnabledSetting(true)
+                .setGeoDetectionEnabledSetting(true)
                 .build();
         {
             ConfigurationInternal autoOnConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(true)
+                    .setAutoDetectionEnabledSetting(true)
                     .build();
             assertTrue(autoOnConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOnConfig.getGeoDetectionEnabledSetting());
@@ -203,7 +203,7 @@ public class ConfigurationInternalTest {
         }
         {
             ConfigurationInternal autoOffConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(false)
+                    .setAutoDetectionEnabledSetting(false)
                     .build();
             assertFalse(autoOffConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOffConfig.getGeoDetectionEnabledSetting());
@@ -236,13 +236,13 @@ public class ConfigurationInternalTest {
                 .setUserConfigAllowed(true)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(false)
-                .setAutoDetectionEnabled(true)
-                .setLocationEnabled(true)
-                .setGeoDetectionEnabled(true)
+                .setAutoDetectionEnabledSetting(true)
+                .setLocationEnabledSetting(true)
+                .setGeoDetectionEnabledSetting(true)
                 .build();
         {
             ConfigurationInternal autoOnConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(true)
+                    .setAutoDetectionEnabledSetting(true)
                     .build();
             assertTrue(autoOnConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOnConfig.getGeoDetectionEnabledSetting());
@@ -266,7 +266,7 @@ public class ConfigurationInternalTest {
         }
         {
             ConfigurationInternal autoOffConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(false)
+                    .setAutoDetectionEnabledSetting(false)
                     .build();
             assertFalse(autoOffConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOffConfig.getGeoDetectionEnabledSetting());
