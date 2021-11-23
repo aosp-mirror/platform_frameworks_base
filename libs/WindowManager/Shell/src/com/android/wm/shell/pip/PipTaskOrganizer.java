@@ -1282,6 +1282,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     private boolean isPipTopLeft() {
+        if (!mSplitScreenOptional.isPresent()) {
+            return false;
+        }
         final Rect topLeft = new Rect();
         final Rect bottomRight = new Rect();
         mSplitScreenOptional.get().getStageBounds(topLeft, bottomRight);
