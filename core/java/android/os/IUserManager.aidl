@@ -59,6 +59,7 @@ interface IUserManager {
     List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying, boolean excludePreCreated);
     List<UserInfo> getProfiles(int userId, boolean enabledOnly);
     int[] getProfileIds(int userId, boolean enabledOnly);
+    boolean isUserTypeEnabled(in String userType);
     boolean canAddMoreUsersOfType(in String userType);
     boolean canAddMoreProfilesToUser(in String userType, int userId, boolean allowedToRemoveOne);
     boolean canAddMoreManagedProfiles(int userId, boolean allowedToRemoveOne);
