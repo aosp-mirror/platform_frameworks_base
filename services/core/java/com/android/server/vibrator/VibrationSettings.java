@@ -16,6 +16,14 @@
 
 package com.android.server.vibrator;
 
+import static android.os.VibrationAttributes.USAGE_ALARM;
+import static android.os.VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
+import static android.os.VibrationAttributes.USAGE_HARDWARE_FEEDBACK;
+import static android.os.VibrationAttributes.USAGE_NOTIFICATION;
+import static android.os.VibrationAttributes.USAGE_PHYSICAL_EMULATION;
+import static android.os.VibrationAttributes.USAGE_RINGTONE;
+import static android.os.VibrationAttributes.USAGE_TOUCH;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.IUidObserver;
@@ -89,6 +97,8 @@ final class VibrationSettings {
     private int mZenMode;
     @GuardedBy("mLock")
     private int mHapticFeedbackIntensity;
+    @GuardedBy("mLock")
+    private int mHardwareFeedbackIntensity;
     @GuardedBy("mLock")
     private int mNotificationIntensity;
     @GuardedBy("mLock")
@@ -232,17 +242,20 @@ final class VibrationSettings {
      * @return The vibration intensity, one of Vibrator.VIBRATION_INTENSITY_*
      */
     public int getDefaultIntensity(int usageHint) {
-        if (isAlarm(usageHint)) {
+        if (usageHint == USAGE_ALARM) {
             return Vibrator.VIBRATION_INTENSITY_HIGH;
         }
         synchronized (mLock) {
             if (mVibrator != null) {
-                if (isRingtone(usageHint)) {
-                    return mVibrator.getDefaultRingVibrationIntensity();
-                } else if (isNotification(usageHint)) {
-                    return mVibrator.getDefaultNotificationVibrationIntensity();
-                } else if (isHapticFeedback(usageHint)) {
-                    return mVibrator.getDefaultHapticFeedbackIntensity();
+                switch (usageHint) {
+                    case USAGE_RINGTONE:
+                        return mVibrator.getDefaultRingVibrationIntensity();
+                    case USAGE_NOTIFICATION:
+                        return mVibrator.getDefaultNotificationVibrationIntensity();
+                    case USAGE_TOUCH:
+                    case USAGE_HARDWARE_FEEDBACK:
+                    case USAGE_PHYSICAL_EMULATION:
+                        return mVibrator.getDefaultHapticFeedbackIntensity();
                 }
             }
         }
@@ -257,16 +270,20 @@ final class VibrationSettings {
      */
     public int getCurrentIntensity(int usageHint) {
         synchronized (mLock) {
-            if (isRingtone(usageHint)) {
-                return mRingIntensity;
-            } else if (isNotification(usageHint)) {
-                return mNotificationIntensity;
-            } else if (isHapticFeedback(usageHint)) {
-                return mHapticFeedbackIntensity;
-            } else if (isAlarm(usageHint)) {
-                return Vibrator.VIBRATION_INTENSITY_HIGH;
-            } else {
-                return Vibrator.VIBRATION_INTENSITY_MEDIUM;
+            switch (usageHint) {
+                case USAGE_RINGTONE:
+                    return mRingIntensity;
+                case USAGE_NOTIFICATION:
+                    return mNotificationIntensity;
+                case USAGE_TOUCH:
+                    return mHapticFeedbackIntensity;
+                case USAGE_HARDWARE_FEEDBACK:
+                case USAGE_PHYSICAL_EMULATION:
+                    return mHardwareFeedbackIntensity;
+                case USAGE_ALARM:
+                    return Vibrator.VIBRATION_INTENSITY_HIGH;
+                default:
+                    return Vibrator.VIBRATION_INTENSITY_MEDIUM;
             }
         }
     }
@@ -289,7 +306,7 @@ final class VibrationSettings {
      * for ringtone usage only. All other usages are allowed independently of ringer mode.
      */
     public boolean shouldVibrateForRingerMode(int usageHint) {
-        if (!isRingtone(usageHint)) {
+        if (usageHint != USAGE_RINGTONE) {
             return true;
         }
         synchronized (mLock) {
@@ -324,8 +341,10 @@ final class VibrationSettings {
      * {@link VibrationAttributes#USAGE_COMMUNICATION_REQUEST} usages are allowed to vibrate.
      */
     public boolean shouldVibrateForPowerMode(int usageHint) {
-        return !mLowPowerMode || isRingtone(usageHint) || isAlarm(usageHint)
-                || usageHint == VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
+        synchronized (mLock) {
+            return !mLowPowerMode || usageHint == USAGE_RINGTONE || usageHint == USAGE_ALARM
+                    || usageHint == USAGE_COMMUNICATION_REQUEST;
+        }
     }
 
     /** Return {@code true} if input devices should vibrate instead of this device. */
@@ -336,22 +355,6 @@ final class VibrationSettings {
     /** Return {@code true} if setting for {@link Settings.Global#ZEN_MODE} is not OFF. */
     public boolean isInZenMode() {
         return mZenMode != Settings.Global.ZEN_MODE_OFF;
-    }
-
-    private static boolean isNotification(int usageHint) {
-        return usageHint == VibrationAttributes.USAGE_NOTIFICATION;
-    }
-
-    private static boolean isRingtone(int usageHint) {
-        return usageHint == VibrationAttributes.USAGE_RINGTONE;
-    }
-
-    private static boolean isHapticFeedback(int usageHint) {
-        return usageHint == VibrationAttributes.USAGE_TOUCH;
-    }
-
-    private static boolean isAlarm(int usageHint) {
-        return usageHint == VibrationAttributes.USAGE_ALARM;
     }
 
     private static boolean isClassAlarm(int usageHint) {
@@ -365,16 +368,33 @@ final class VibrationSettings {
             mVibrateWhenRinging = getSystemSetting(Settings.System.VIBRATE_WHEN_RINGING, 0) != 0;
             mApplyRampingRinger = getGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 0) != 0;
             mHapticFeedbackIntensity = getSystemSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY,
-                    getDefaultIntensity(VibrationAttributes.USAGE_TOUCH));
+                    getDefaultIntensity(USAGE_TOUCH));
+            mHardwareFeedbackIntensity = getSystemSetting(
+                    Settings.System.HARDWARE_HAPTIC_FEEDBACK_INTENSITY,
+                    getHardwareFeedbackIntensityWhenSettingIsMissing(mHapticFeedbackIntensity));
             mNotificationIntensity = getSystemSetting(
                     Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
-                    getDefaultIntensity(VibrationAttributes.USAGE_NOTIFICATION));
+                    getDefaultIntensity(USAGE_NOTIFICATION));
             mRingIntensity = getSystemSetting(Settings.System.RING_VIBRATION_INTENSITY,
-                    getDefaultIntensity(VibrationAttributes.USAGE_RINGTONE));
+                    getDefaultIntensity(USAGE_RINGTONE));
             mVibrateInputDevices = getSystemSetting(Settings.System.VIBRATE_INPUT_DEVICES, 0) > 0;
             mZenMode = getGlobalSetting(Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
         }
         notifyListeners();
+    }
+
+    /**
+     * Return the value to be used for {@link Settings.System#HARDWARE_HAPTIC_FEEDBACK_INTENSITY}
+     * when the value was not set by the user.
+     *
+     * <p>This should adapt the behavior preceding the introduction of this new setting key, which
+     * is to apply {@link Settings.System#HAPTIC_FEEDBACK_INTENSITY} unless it's disabled.
+     */
+    private int getHardwareFeedbackIntensityWhenSettingIsMissing(int hapticFeedbackIntensity) {
+        if (hapticFeedbackIntensity == Vibrator.VIBRATION_INTENSITY_OFF) {
+            return getDefaultIntensity(USAGE_HARDWARE_FEEDBACK);
+        }
+        return hapticFeedbackIntensity;
     }
 
     @Override
@@ -389,18 +409,20 @@ final class VibrationSettings {
                 + ", mHapticChannelMaxVibrationAmplitude=" + getHapticChannelMaxVibrationAmplitude()
                 + ", mRampStepDuration=" + mRampStepDuration
                 + ", mRampDownDuration=" + mRampDownDuration
+                + ", mHardwareHapticFeedbackIntensity="
+                + intensityToString(getCurrentIntensity(USAGE_HARDWARE_FEEDBACK))
                 + ", mHapticFeedbackIntensity="
-                + intensityToString(getCurrentIntensity(VibrationAttributes.USAGE_TOUCH))
+                + intensityToString(getCurrentIntensity(USAGE_TOUCH))
                 + ", mHapticFeedbackDefaultIntensity="
-                + intensityToString(getDefaultIntensity(VibrationAttributes.USAGE_TOUCH))
+                + intensityToString(getDefaultIntensity(USAGE_TOUCH))
                 + ", mNotificationIntensity="
-                + intensityToString(getCurrentIntensity(VibrationAttributes.USAGE_NOTIFICATION))
+                + intensityToString(getCurrentIntensity(USAGE_NOTIFICATION))
                 + ", mNotificationDefaultIntensity="
-                + intensityToString(getDefaultIntensity(VibrationAttributes.USAGE_NOTIFICATION))
+                + intensityToString(getDefaultIntensity(USAGE_NOTIFICATION))
                 + ", mRingIntensity="
-                + intensityToString(getCurrentIntensity(VibrationAttributes.USAGE_RINGTONE))
+                + intensityToString(getCurrentIntensity(USAGE_RINGTONE))
                 + ", mRingDefaultIntensity="
-                + intensityToString(getDefaultIntensity(VibrationAttributes.USAGE_RINGTONE))
+                + intensityToString(getDefaultIntensity(USAGE_RINGTONE))
                 + '}';
     }
 
@@ -410,15 +432,15 @@ final class VibrationSettings {
             proto.write(VibratorManagerServiceDumpProto.HAPTIC_FEEDBACK_INTENSITY,
                     mHapticFeedbackIntensity);
             proto.write(VibratorManagerServiceDumpProto.HAPTIC_FEEDBACK_DEFAULT_INTENSITY,
-                    getDefaultIntensity(VibrationAttributes.USAGE_TOUCH));
+                    getDefaultIntensity(USAGE_TOUCH));
             proto.write(VibratorManagerServiceDumpProto.NOTIFICATION_INTENSITY,
                     mNotificationIntensity);
             proto.write(VibratorManagerServiceDumpProto.NOTIFICATION_DEFAULT_INTENSITY,
-                    getDefaultIntensity(VibrationAttributes.USAGE_NOTIFICATION));
+                    getDefaultIntensity(USAGE_NOTIFICATION));
             proto.write(VibratorManagerServiceDumpProto.RING_INTENSITY,
                     mRingIntensity);
             proto.write(VibratorManagerServiceDumpProto.RING_DEFAULT_INTENSITY,
-                    getDefaultIntensity(VibrationAttributes.USAGE_RINGTONE));
+                    getDefaultIntensity(USAGE_RINGTONE));
         }
     }
 

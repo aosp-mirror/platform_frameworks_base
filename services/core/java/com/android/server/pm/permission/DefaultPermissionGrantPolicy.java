@@ -702,6 +702,14 @@ final class DefaultPermissionGrantPolicy {
                         DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE, userId),
                 userId, CONTACTS_PERMISSIONS);
 
+        // Maps
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0)) {
+            grantPermissionsToSystemPackage(pm,
+                getDefaultSystemHandlerActivityPackageForCategory(pm,
+                        Intent.CATEGORY_APP_MAPS, userId),
+                userId, FOREGROUND_LOCATION_PERMISSIONS);
+        }
+
         // Email
         grantPermissionsToSystemPackage(pm,
                 getDefaultSystemHandlerActivityPackageForCategory(pm,

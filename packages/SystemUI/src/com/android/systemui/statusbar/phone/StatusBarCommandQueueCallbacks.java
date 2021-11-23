@@ -30,11 +30,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.media.AudioAttributes;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
@@ -106,10 +106,8 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
     private final VibrationEffect mCameraLaunchGestureVibrationEffect;
 
 
-    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-            .build();
+    private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
 
     @Inject
     StatusBarCommandQueueCallbacks(
@@ -611,9 +609,9 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
     }
 
     private void vibrateForCameraGesture() {
-        // Make sure to pass -1 for repeat so VibratorService doesn't stop us when going to sleep.
         mVibratorOptional.ifPresent(
-                v -> v.vibrate(mCameraLaunchGestureVibrationEffect, VIBRATION_ATTRIBUTES));
+                v -> v.vibrate(mCameraLaunchGestureVibrationEffect,
+                        HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES));
     }
 
     private static VibrationEffect getCameraGestureVibrationEffect(
@@ -627,6 +625,8 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
                     .compose();
         }
         if (vibratorOptional.isPresent() && vibratorOptional.get().hasAmplitudeControl()) {
+            // Make sure to pass -1 for repeat so VibratorManagerService doesn't stop us when going
+            // to sleep.
             return VibrationEffect.createWaveform(
                     StatusBar.CAMERA_LAUNCH_GESTURE_VIBRATION_TIMINGS,
                     StatusBar.CAMERA_LAUNCH_GESTURE_VIBRATION_AMPLITUDES,

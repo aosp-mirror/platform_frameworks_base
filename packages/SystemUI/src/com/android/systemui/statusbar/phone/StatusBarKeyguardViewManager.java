@@ -441,6 +441,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * dragging it and translation should be deferred {@see KeyguardBouncer#show(boolean, boolean)}
      */
     public void showBouncer(boolean scrimmed) {
+        resetAlternateAuth(false);
+
         if (mShowing && !mBouncer.isShowing()) {
             mBouncer.show(false /* resetSecuritySelection */, scrimmed);
         }

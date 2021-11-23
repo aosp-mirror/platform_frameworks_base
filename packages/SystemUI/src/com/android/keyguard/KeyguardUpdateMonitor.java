@@ -801,13 +801,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             mHandler.postDelayed(mRetryFingerprintAuthentication, HAL_ERROR_RETRY_TIMEOUT);
         }
 
+        boolean lockedOutStateChanged = false;
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
+            lockedOutStateChanged |= !mFingerprintLockedOutPermanent;
             mFingerprintLockedOutPermanent = true;
             requireStrongAuthIfAllLockedOut();
         }
 
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT
                 || msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
+            lockedOutStateChanged |= !mFingerprintLockedOut;
             mFingerprintLockedOut = true;
             if (isUdfpsEnrolled()) {
                 updateFingerprintListeningState();
@@ -820,9 +823,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 cb.onBiometricError(msgId, errString, BiometricSourceType.FINGERPRINT);
             }
         }
+
+        if (lockedOutStateChanged) {
+            notifyLockedOutStateChanged(BiometricSourceType.FINGERPRINT);
+        }
     }
 
     private void handleFingerprintLockoutReset() {
+        boolean changed = mFingerprintLockedOut || mFingerprintLockedOutPermanent;
         mFingerprintLockedOut = false;
         mFingerprintLockedOutPermanent = false;
 
@@ -836,6 +844,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     FINGERPRINT_LOCKOUT_RESET_DELAY_MS);
         } else {
             updateFingerprintListeningState();
+        }
+
+        if (changed) {
+            notifyLockedOutStateChanged(BiometricSourceType.FINGERPRINT);
         }
     }
 
@@ -999,7 +1011,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
         }
 
+        boolean lockedOutStateChanged = false;
         if (msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT) {
+            lockedOutStateChanged = !mFaceLockedOutPermanent;
             mFaceLockedOutPermanent = true;
             requireStrongAuthIfAllLockedOut();
         }
@@ -1011,11 +1025,21 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         BiometricSourceType.FACE);
             }
         }
+
+        if (lockedOutStateChanged) {
+            notifyLockedOutStateChanged(BiometricSourceType.FACE);
+        }
     }
 
     private void handleFaceLockoutReset() {
+        boolean changed = mFaceLockedOutPermanent;
         mFaceLockedOutPermanent = false;
+
         updateFaceListeningState();
+
+        if (changed) {
+            notifyLockedOutStateChanged(BiometricSourceType.FACE);
+        }
     }
 
     private void setFaceRunningState(int faceRunningState) {
@@ -1233,6 +1257,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onStrongAuthStateChanged(userId);
+            }
+        }
+    }
+
+    private void notifyLockedOutStateChanged(BiometricSourceType type) {
+        Assert.isMainThread();
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onLockedOutStateChanged(type);
             }
         }
     }
@@ -2452,6 +2486,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
             setFaceRunningState(BIOMETRIC_STATE_RUNNING);
         }
+    }
+
+    public boolean isFingerprintLockedOut() {
+        return mFingerprintLockedOut || mFingerprintLockedOutPermanent;
     }
 
     /**

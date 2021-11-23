@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles;
 import static android.provider.Settings.Global.ZEN_MODE_ALARMS;
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -41,7 +42,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -53,6 +53,7 @@ import com.android.settingslib.notification.EnableZenModeDialog;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysUIToast;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -84,6 +85,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
     private final DndDetailAdapter mDetailAdapter;
     private final SharedPreferences mSharedPreferences;
     private final SettingObserver mSettingZenDuration;
+    private final DialogLaunchAnimator mDialogLaunchAnimator;
 
     private boolean mListening;
     private boolean mShowingDetail;
@@ -100,7 +102,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
             QSLogger qsLogger,
             ZenModeController zenModeController,
             @Main SharedPreferences sharedPreferences,
-            SecureSettings secureSettings
+            SecureSettings secureSettings,
+            DialogLaunchAnimator dialogLaunchAnimator
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
@@ -108,6 +111,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
         mSharedPreferences = sharedPreferences;
         mDetailAdapter = new DndDetailAdapter();
         mController.observe(getLifecycle(), mZenCallback);
+        mDialogLaunchAnimator = dialogLaunchAnimator;
         mSettingZenDuration = new SettingObserver(secureSettings, mUiHandler,
                 Settings.Secure.ZEN_DURATION, getHost().getUserId()) {
             @Override
@@ -116,8 +120,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
             }
         };
     }
-
-
 
     public static void setVisible(Context context, boolean visible) {
         Prefs.putBoolean(context, Prefs.Key.DND_TILE_VISIBLE, visible);
@@ -187,14 +189,17 @@ public class DndTile extends QSTileImpl<BooleanState> {
             switch (zenDuration) {
                 case Settings.Secure.ZEN_DURATION_PROMPT:
                     mUiHandler.post(() -> {
-                        Dialog mDialog = new EnableZenModeDialog(mContext).createDialog();
-                        mDialog.getWindow().setType(
-                                WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-                        SystemUIDialog.setShowForAllUsers(mDialog, true);
-                        SystemUIDialog.registerDismissListener(mDialog);
-                        SystemUIDialog.setWindowOnTop(mDialog);
-                        mUiHandler.post(() -> mDialog.show());
-                        mHost.collapsePanels();
+                        Dialog dialog = makeZenModeDialog();
+                        if (view != null) {
+                            final Dialog hostDialog =
+                                    mDialogLaunchAnimator.showFromView(dialog, view, false);
+                            setDialogListeners(dialog, hostDialog);
+                        } else {
+                            // If we are not launching with animator, register default
+                            // dismiss listener
+                            SystemUIDialog.registerDismissListener(dialog);
+                            dialog.show();
+                        }
                     });
                     break;
                 case Settings.Secure.ZEN_DURATION_FOREVER:
@@ -207,6 +212,20 @@ public class DndTile extends QSTileImpl<BooleanState> {
                             conditionId, TAG);
             }
         }
+    }
+
+    private Dialog makeZenModeDialog() {
+        AlertDialog dialog = new EnableZenModeDialog(mContext, R.style.Theme_SystemUI_Dialog)
+                .createDialog();
+        SystemUIDialog.applyFlags(dialog);
+        SystemUIDialog.setShowForAllUsers(dialog, true);
+        return dialog;
+    }
+
+    private void setDialogListeners(Dialog zenModeDialog, Dialog hostDialog) {
+        // Zen mode dialog is never hidden.
+        SystemUIDialog.registerDismissListener(zenModeDialog, hostDialog::dismiss);
+        zenModeDialog.setOnCancelListener(dialog -> hostDialog.cancel());
     }
 
     @Override

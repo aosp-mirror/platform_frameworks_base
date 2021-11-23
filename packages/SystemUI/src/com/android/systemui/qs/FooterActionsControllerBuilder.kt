@@ -16,18 +16,22 @@
 
 package com.android.systemui.qs
 
+import android.os.Handler
 import android.os.UserManager
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.FooterActionsController.ExpansionState
 import com.android.systemui.qs.dagger.QSFlagsModule
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.MultiUserSwitchController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.UserInfoController
 import com.android.systemui.tuner.TunerService
+import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -35,6 +39,7 @@ class FooterActionsControllerBuilder @Inject constructor(
     private val qsPanelController: QSPanelController,
     private val activityStarter: ActivityStarter,
     private val userManager: UserManager,
+    private val userTracker: UserTracker,
     private val userInfoController: UserInfoController,
     private val multiUserSwitchControllerFactory: MultiUserSwitchController.Factory,
     private val deviceProvisionedController: DeviceProvisionedController,
@@ -43,7 +48,9 @@ class FooterActionsControllerBuilder @Inject constructor(
     private val tunerService: TunerService,
     private val globalActionsDialog: GlobalActionsDialogLite,
     private val uiEventLogger: UiEventLogger,
-    @Named(QSFlagsModule.PM_LITE_ENABLED) private val showPMLiteButton: Boolean
+    @Named(QSFlagsModule.PM_LITE_ENABLED) private val showPMLiteButton: Boolean,
+    private val globalSettings: GlobalSettings,
+    @Main private val handler: Handler
 ) {
     private lateinit var view: FooterActionsView
     private lateinit var buttonsVisibleState: ExpansionState
@@ -60,8 +67,9 @@ class FooterActionsControllerBuilder @Inject constructor(
 
     fun build(): FooterActionsController {
         return FooterActionsController(view, qsPanelController, activityStarter, userManager,
-                userInfoController, multiUserSwitchControllerFactory.create(view),
+                userTracker, userInfoController, multiUserSwitchControllerFactory.create(view),
                 deviceProvisionedController, falsingManager, metricsLogger, tunerService,
-                globalActionsDialog, uiEventLogger, showPMLiteButton, buttonsVisibleState)
+                globalActionsDialog, uiEventLogger, showPMLiteButton, buttonsVisibleState,
+                globalSettings, handler)
     }
 }

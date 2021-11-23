@@ -244,15 +244,24 @@ public abstract class WMShellBaseModule {
     // Fullscreen
     //
 
+    // Workaround for dynamic overriding with a default implementation, see {@link DynamicOverride}
+    @BindsOptionalOf
+    @DynamicOverride
+    abstract FullscreenTaskListener optionalFullscreenTaskListener();
+
     @WMSingleton
     @Provides
     static FullscreenTaskListener provideFullscreenTaskListener(
+            @DynamicOverride Optional<FullscreenTaskListener> fullscreenTaskListener,
             SyncTransactionQueue syncQueue,
             Optional<FullscreenUnfoldController> optionalFullscreenUnfoldController,
-            Optional<RecentTasksController> recentTasksOptional
-    ) {
-        return new FullscreenTaskListener(syncQueue, optionalFullscreenUnfoldController,
-                recentTasksOptional);
+            Optional<RecentTasksController> recentTasksOptional) {
+        if (fullscreenTaskListener.isPresent()) {
+            return fullscreenTaskListener.get();
+        } else {
+            return new FullscreenTaskListener(syncQueue, optionalFullscreenUnfoldController,
+                    recentTasksOptional);
+        }
     }
 
     //

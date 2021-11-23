@@ -5522,8 +5522,8 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * A boolean extra, when used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD},
-     * that specifies whether the system displayed attribution information in the
-     * permission usage system UI for the chosen entry.
+     * that specifies whether the permission usage system UI is showing attribution information
+     * for the chosen entry.
      *
      * <p> The extra can only be true if application has specified attributionsAreUserVisible
      * in its manifest. </p>

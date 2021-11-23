@@ -2050,6 +2050,7 @@ final class InstallPackageHelper {
             }
         }
 
+        final String packageName = pkg.getPackageName();
         for (Map.Entry<String, String> entry : fsverityCandidates.entrySet()) {
             final String filePath = entry.getKey();
             final String signaturePath = entry.getValue();
@@ -2077,10 +2078,13 @@ final class InstallPackageHelper {
                     try {
                         // A file may already have fs-verity, e.g. when reused during a split
                         // install. If the measurement succeeds, no need to attempt to set up.
-                        mPm.mInstaller.assertFsverityRootHashMatches(filePath, rootHash);
+                        mPm.mInstaller.assertFsverityRootHashMatches(packageName, filePath,
+                                rootHash);
                     } catch (Installer.InstallerException e) {
-                        mPm.mInstaller.installApkVerity(filePath, fd, result.getContentSize());
-                        mPm.mInstaller.assertFsverityRootHashMatches(filePath, rootHash);
+                        mPm.mInstaller.installApkVerity(packageName, filePath, fd,
+                                result.getContentSize());
+                        mPm.mInstaller.assertFsverityRootHashMatches(packageName, filePath,
+                                rootHash);
                     }
                 } finally {
                     IoUtils.closeQuietly(fd);
@@ -2349,10 +2353,9 @@ final class InstallPackageHelper {
                 // Set install reason for users that are having the package newly installed.
                 final int[] allUsersList = mPm.mUserManager.getUserIds();
                 if (userId == UserHandle.USER_ALL) {
-                    // TODO(b/152629990): It appears that the package doesn't actually get newly
-                    //  installed in this case, so the installReason shouldn't get modified?
                     for (int currentUserId : allUsersList) {
-                        if (!previousUserIds.contains(currentUserId)) {
+                        if (!previousUserIds.contains(currentUserId)
+                                && ps.getInstalled(currentUserId)) {
                             ps.setInstallReason(installReason, currentUserId);
                         }
                     }

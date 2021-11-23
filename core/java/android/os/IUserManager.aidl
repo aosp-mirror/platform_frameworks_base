@@ -20,6 +20,7 @@ package android.os;
 import android.os.Bundle;
 import android.os.IUserRestrictionsListener;
 import android.os.PersistableBundle;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.content.pm.UserInfo;
 import android.content.IntentSender;
@@ -91,6 +92,9 @@ interface IUserManager {
     boolean markGuestForDeletion(int userId);
     UserInfo findCurrentGuestUser();
     boolean isQuietModeEnabled(int userId);
+    UserHandle createUserWithAttributes(in String userName, in String userType, int flags,
+            in Bitmap userIcon,
+            in String accountName, in String accountType, in PersistableBundle accountOptions);
     void setSeedAccountData(int userId, in String accountName,
             in String accountType, in PersistableBundle accountOptions, boolean persist);
     String getSeedAccountName(int userId);
@@ -98,6 +102,7 @@ interface IUserManager {
     PersistableBundle getSeedAccountOptions(int userId);
     void clearSeedAccountData(int userId);
     boolean someUserHasSeedAccount(in String accountName, in String accountType);
+    boolean someUserHasAccount(in String accountName, in String accountType);
     boolean isProfile(int userId);
     boolean isManagedProfile(int userId);
     boolean isCloneProfile(int userId);
