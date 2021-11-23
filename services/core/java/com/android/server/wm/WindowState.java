@@ -51,7 +51,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
@@ -2882,10 +2881,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    int getSurfaceTouchableRegion(Region region, int flags) {
-        final boolean modal = (flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
+    void getSurfaceTouchableRegion(Region region, WindowManager.LayoutParams attrs) {
+        final boolean modal = attrs.isModal();
         if (modal) {
-            flags |= FLAG_NOT_TOUCH_MODAL;
             if (mActivityRecord != null) {
                 // Limit the outer touch to the activity root task region.
                 updateRegionForModalActivityWindow(region);
@@ -2917,8 +2915,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mInvGlobalScale != 1.f) {
             region.scale(mInvGlobalScale);
         }
-
-        return flags;
     }
 
     /**
@@ -3766,10 +3762,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * {@link WindowManager.LayoutParams#FLAG_NOT_TOUCH_MODAL touch modality.}
      */
     void getEffectiveTouchableRegion(Region outRegion) {
-        final boolean modal = (mAttrs.flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
         final DisplayContent dc = getDisplayContent();
 
-        if (modal && dc != null) {
+        if (mAttrs.isModal() && dc != null) {
             outRegion.set(dc.getBounds());
             cropRegionToRootTaskBoundsIfNeeded(outRegion);
             subtractTouchExcludeRegionIfNeeded(outRegion);
