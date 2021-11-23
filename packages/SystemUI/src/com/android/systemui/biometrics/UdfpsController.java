@@ -163,7 +163,10 @@ public class UdfpsController implements DozeReceiver {
     private boolean mOnFingerDown;
     private boolean mAttemptedToDismissKeyguard;
     private Set<Callback> mCallbacks = new HashSet<>();
-    private final VibrationEffect mLowTick;
+
+    // by default, use low tick
+    private int mPrimitiveTick = VibrationEffect.Composition.PRIMITIVE_LOW_TICK;
+    private final VibrationEffect mTick;
 
     @VisibleForTesting
     public static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
@@ -572,7 +575,7 @@ public class UdfpsController implements DozeReceiver {
         mConfigurationController = configurationController;
         mSystemClock = systemClock;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
-        mLowTick = lowTick();
+        mTick = lowTick();
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -608,22 +611,31 @@ public class UdfpsController implements DozeReceiver {
     }
 
     private VibrationEffect lowTick() {
+        boolean useLowTickDefault = mContext.getResources()
+                .getBoolean(R.bool.config_udfpsUseLowTick);
+        if (Settings.Global.getFloat(
+                mContext.getContentResolver(),
+                "tick-low", useLowTickDefault ? 1 : 0) == 0) {
+            mPrimitiveTick = VibrationEffect.Composition.PRIMITIVE_TICK;
+        }
         float tickIntensity = Settings.Global.getFloat(
-                mContext.getContentResolver(), "low-tick-intensity", .5f);
-        VibrationEffect.Composition composition = VibrationEffect.startComposition();
-        composition.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK,
-                tickIntensity, 0);
+                mContext.getContentResolver(),
+                "tick-intensity",
+                mContext.getResources().getFloat(R.dimen.config_udfpsTickIntensity));
         int tickDelay = Settings.Global.getInt(
-                mContext.getContentResolver(), "low-tick-delay", 25);
+                mContext.getContentResolver(),
+                "tick-delay",
+                mContext.getResources().getInteger(R.integer.config_udfpsTickDelay));
+
+        VibrationEffect.Composition composition = VibrationEffect.startComposition();
+        composition.addPrimitive(mPrimitiveTick, tickIntensity, 0);
         int primitives = 1000 / tickDelay;
         float[] rampUp = new float[]{.48f, .58f, .69f, .83f};
         for (int i = 0; i < rampUp.length; i++) {
-            composition.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK,
-                    tickIntensity * rampUp[i], tickDelay);
+            composition.addPrimitive(mPrimitiveTick, tickIntensity * rampUp[i], tickDelay);
         }
         for (int i = rampUp.length; i < primitives; i++) {
-            composition.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK,
-                    tickIntensity, tickDelay);
+            composition.addPrimitive(mPrimitiveTick, tickIntensity, tickDelay);
         }
         return composition.compose();
     }
@@ -637,7 +649,7 @@ public class UdfpsController implements DozeReceiver {
             mVibrator.vibrate(
                     Process.myUid(),
                     mContext.getOpPackageName(),
-                    mLowTick,
+                    mTick,
                     "udfps-onStart-tick",
                     VIBRATION_SONIFICATION_ATTRIBUTES);
         }
