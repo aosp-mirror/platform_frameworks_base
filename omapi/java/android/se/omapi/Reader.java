@@ -170,7 +170,9 @@ public final class Reader {
             try {
                 closeSessions();
                 return mReader.reset();
-            } catch (RemoteException ignore) {return false;}
+            } catch (RemoteException ignore) {
+                return false;
+            }
         }
     }
 }
