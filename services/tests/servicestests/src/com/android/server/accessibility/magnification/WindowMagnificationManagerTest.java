@@ -143,8 +143,7 @@ public class WindowMagnificationManagerTest {
      * new connection.
      */
     @Test
-    public void
-            setSecondConnectionAndFormerConnectionBinderDead_hasWrapperAndNotCallUnlinkToDeath()
+    public void setSecondConnectionAndFormerConnectionBinderDead_hasWrapperAndNotCallUnlinkToDeath()
             throws RemoteException {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         MockWindowMagnificationConnection secondConnection =
@@ -177,7 +176,7 @@ public class WindowMagnificationManagerTest {
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 2f, 200f, 300f);
 
         verify(mMockConnection.getConnection()).enableWindowMagnification(eq(TEST_DISPLAY), eq(2f),
-                eq(200f), eq(300f), notNull());
+                eq(200f), eq(300f), eq(0f), eq(0f), notNull());
     }
 
     @Test
@@ -189,7 +188,8 @@ public class WindowMagnificationManagerTest {
                 mAnimationCallback);
 
         verify(mMockConnection.getConnection()).enableWindowMagnification(eq(TEST_DISPLAY), eq(2f),
-                eq(200f), eq(300f), any(IRemoteMagnificationAnimationCallback.class));
+                eq(200f), eq(300f), eq(0f), eq(0f),
+                any(IRemoteMagnificationAnimationCallback.class));
         verify(mAnimationCallback).onResult(true);
     }
 
@@ -408,6 +408,34 @@ public class WindowMagnificationManagerTest {
 
         assertEquals(mWindowMagnificationManager.getCenterX(TEST_DISPLAY), 100f);
         assertEquals(mWindowMagnificationManager.getCenterY(TEST_DISPLAY), 200f);
+    }
+
+    @Test
+    public void centerGetter_enabledOnTestDisplayWindowAtCenter_expectedValues()
+            throws RemoteException {
+        mWindowMagnificationManager.requestConnection(true);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f,
+                100f, 200f, WindowMagnificationManager.WINDOW_POSITION_AT_CENTER);
+
+        assertEquals(mWindowMagnificationManager.getCenterX(TEST_DISPLAY), 100f);
+        assertEquals(mWindowMagnificationManager.getCenterY(TEST_DISPLAY), 200f);
+
+        verify(mMockConnection.getConnection()).enableWindowMagnification(eq(TEST_DISPLAY), eq(3f),
+                eq(100f), eq(200f), eq(0f), eq(0f), notNull());
+    }
+
+    @Test
+    public void centerGetter_enabledOnTestDisplayWindowAtLeftTop_expectedValues()
+            throws RemoteException {
+        mWindowMagnificationManager.requestConnection(true);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f,
+                100f, 200f, WindowMagnificationManager.WINDOW_POSITION_AT_TOP_LEFT);
+
+        assertEquals(mWindowMagnificationManager.getCenterX(TEST_DISPLAY), 100f);
+        assertEquals(mWindowMagnificationManager.getCenterY(TEST_DISPLAY), 200f);
+
+        verify(mMockConnection.getConnection()).enableWindowMagnification(eq(TEST_DISPLAY), eq(3f),
+                eq(100f), eq(200f), eq(-1f), eq(-1f), notNull());
     }
 
     @Test

@@ -49,11 +49,13 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
     }
 
     @Override
-    public void enableWindowMagnification(int displayId, float scale, float centerX,
-            float centerY, IRemoteMagnificationAnimationCallback callback) {
+    public void enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
+            float magnificationFrameOffsetRatioX, float magnificationFrameOffsetRatioY,
+            IRemoteMagnificationAnimationCallback callback) {
         mHandler.post(
                 () -> mWindowMagnification.enableWindowMagnification(displayId, scale, centerX,
-                        centerY, callback));
+                        centerY, magnificationFrameOffsetRatioX,
+                        magnificationFrameOffsetRatioY, callback));
     }
 
     @Override

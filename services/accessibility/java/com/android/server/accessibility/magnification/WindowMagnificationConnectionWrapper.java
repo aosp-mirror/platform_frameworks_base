@@ -59,15 +59,19 @@ class WindowMagnificationConnectionWrapper {
     }
 
     boolean enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
+            float magnificationFrameOffsetRatioX, float magnificationFrameOffsetRatioY,
             @Nullable MagnificationAnimationCallback callback) {
         if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
             mTrace.logTrace(TAG + ".enableWindowMagnification",
                     FLAGS_WINDOW_MAGNIFICATION_CONNECTION,
                     "displayId=" + displayId + ";scale=" + scale + ";centerX=" + centerX
-                    + ";centerY=" + centerY + ";callback=" + callback);
+                            + ";centerY=" + centerY + ";magnificationFrameOffsetRatioX="
+                            + magnificationFrameOffsetRatioX + ";magnificationFrameOffsetRatioY="
+                            + magnificationFrameOffsetRatioY + ";callback=" + callback);
         }
         try {
             mConnection.enableWindowMagnification(displayId, scale, centerX, centerY,
+                    magnificationFrameOffsetRatioX, magnificationFrameOffsetRatioY,
                     transformToRemoteCallback(callback, mTrace));
         } catch (RemoteException e) {
             if (DBG) {

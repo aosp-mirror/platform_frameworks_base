@@ -38,9 +38,14 @@ oneway interface IWindowMagnificationConnection {
      *                or {@link Float#NaN} to leave unchanged.
      * @param centerY the screen-relative Y coordinate around which to center,
      *                or {@link Float#NaN} to leave unchanged.
+     * @param magnificationFrameOffsetRatioX Indicate the X coordinate offset between
+     *                                       frame position X and centerX
+     * @param magnificationFrameOffsetRatioY Indicate the Y coordinate offset between
+     *                                       frame position Y and centerY
      * @param callback The callback called when the animation is completed or interrupted.
      */
     void enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
+        float magnificationFrameOffsetRatioX, float magnificationFrameOffsetRatioY,
         in IRemoteMagnificationAnimationCallback callback);
 
     /**

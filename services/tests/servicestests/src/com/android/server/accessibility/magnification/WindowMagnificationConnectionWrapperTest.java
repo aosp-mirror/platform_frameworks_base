@@ -67,7 +67,7 @@ public class WindowMagnificationConnectionWrapperTest {
     @Test
     public void enableWindowMagnification() throws RemoteException {
         mConnectionWrapper.enableWindowMagnification(TEST_DISPLAY, 2, 100f, 200f,
-                mAnimationCallback);
+                0f, 0f, mAnimationCallback);
 
         verify(mAnimationCallback).onResult(true);
     }

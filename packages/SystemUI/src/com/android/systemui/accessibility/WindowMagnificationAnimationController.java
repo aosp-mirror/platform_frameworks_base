@@ -62,6 +62,8 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     private final ValueAnimator mValueAnimator;
     private final AnimationSpec mStartSpec = new AnimationSpec();
     private final AnimationSpec mEndSpec = new AnimationSpec();
+    private float mMagnificationFrameOffsetRatioX = 0f;
+    private float mMagnificationFrameOffsetRatioY = 0f;
     private final Context mContext;
     // Called when the animation is ended successfully without cancelling or mStartSpec and
     // mEndSpec are equal.
@@ -88,7 +90,8 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     }
 
     /**
-     * Wraps {@link WindowMagnificationController#enableWindowMagnification(float, float, float)}
+     * Wraps {@link WindowMagnificationController#enableWindowMagnification(float, float, float,
+     * float, float, IRemoteMagnificationAnimationCallback)}
      * with transition animation. If the window magnification is not enabled, the scale will start
      * from 1.0 and the center won't be changed during the animation. If {@link #mState} is
      * {@code STATE_DISABLING}, the animation runs in reverse.
@@ -106,16 +109,48 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
      */
     void enableWindowMagnification(float scale, float centerX, float centerY,
             @Nullable IRemoteMagnificationAnimationCallback animationCallback) {
+        enableWindowMagnification(scale, centerX, centerY, 0f, 0f, animationCallback);
+    }
+
+    /**
+     * Wraps {@link WindowMagnificationController#enableWindowMagnification(float, float, float,
+     * float, float, IRemoteMagnificationAnimationCallback)}
+     * with transition animation. If the window magnification is not enabled, the scale will start
+     * from 1.0 and the center won't be changed during the animation. If {@link #mState} is
+     * {@code STATE_DISABLING}, the animation runs in reverse.
+     *
+     * @param scale   The target scale, or {@link Float#NaN} to leave unchanged.
+     * @param centerX The screen-relative X coordinate around which to center for magnification,
+     *                or {@link Float#NaN} to leave unchanged.
+     * @param centerY The screen-relative Y coordinate around which to center for magnification,
+     *                or {@link Float#NaN} to leave unchanged.
+     * @param magnificationFrameOffsetRatioX Indicate the X coordinate offset between
+     *                                       frame position X and centerX
+     * @param magnificationFrameOffsetRatioY Indicate the Y coordinate offset between
+     *                                       frame position Y and centerY
+     * @param animationCallback Called when the transition is complete, the given arguments
+     *                          are as same as current values, or the transition is interrupted
+     *                          due to the new transition request.
+     *
+     * @see #onAnimationUpdate(ValueAnimator)
+     */
+    void enableWindowMagnification(float scale, float centerX, float centerY,
+            float magnificationFrameOffsetRatioX, float magnificationFrameOffsetRatioY,
+            @Nullable IRemoteMagnificationAnimationCallback animationCallback) {
         if (mController == null) {
             return;
         }
         sendAnimationCallback(false);
+        mMagnificationFrameOffsetRatioX = magnificationFrameOffsetRatioX;
+        mMagnificationFrameOffsetRatioY = magnificationFrameOffsetRatioY;
+
         // Enable window magnification without animation immediately.
         if (animationCallback == null) {
             if (mState == STATE_ENABLING || mState == STATE_DISABLING) {
                 mValueAnimator.cancel();
             }
-            mController.enableWindowMagnification(scale, centerX, centerY);
+            mController.enableWindowMagnificationInternal(scale, centerX, centerY,
+                    mMagnificationFrameOffsetRatioX, mMagnificationFrameOffsetRatioY);
             setState(STATE_ENABLED);
             return;
         }
@@ -123,7 +158,8 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
         setupEnableAnimationSpecs(scale, centerX, centerY);
         if (mEndSpec.equals(mStartSpec)) {
             if (mState == STATE_DISABLED) {
-                mController.enableWindowMagnification(scale, centerX, centerY);
+                mController.enableWindowMagnificationInternal(scale, centerX, centerY,
+                        mMagnificationFrameOffsetRatioX, mMagnificationFrameOffsetRatioY);
             } else if (mState == STATE_ENABLING || mState == STATE_DISABLING) {
                 mValueAnimator.cancel();
             }
@@ -273,7 +309,8 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
                 mStartSpec.mCenterX + (mEndSpec.mCenterX - mStartSpec.mCenterX) * fract;
         final float centerY =
                 mStartSpec.mCenterY + (mEndSpec.mCenterY - mStartSpec.mCenterY) * fract;
-        mController.enableWindowMagnification(sentScale, centerX, centerY);
+        mController.enableWindowMagnificationInternal(sentScale, centerX, centerY,
+                mMagnificationFrameOffsetRatioX, mMagnificationFrameOffsetRatioY);
     }
 
     private static ValueAnimator newValueAnimator(Resources resources) {
