@@ -281,6 +281,10 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         return mGlobalSettings.getInt(Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
     }
 
+    void setAirplaneModeDisabled() {
+        mConnectivityManager.setAirplaneMode(false);
+    }
+
     @VisibleForTesting
     protected int getDefaultDataSubscriptionId() {
         return mSubscriptionManager.getDefaultDataSubscriptionId();
@@ -352,7 +356,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         if (DEBUG) {
             Log.d(TAG, "No Wi-Fi item.");
         }
-        if (!hasCarrier() || (!isVoiceStateInService() && !isDataStateInService())) {
+        if (!hasActiveSubId() || (!isVoiceStateInService() && !isDataStateInService())) {
             if (DEBUG) {
                 Log.d(TAG, "No carrier or service is out of service.");
             }
@@ -403,15 +407,16 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                 return drawable;
             }
 
-            if (isDataStateInService() || isVoiceStateInService()) {
+            boolean isCarrierNetworkActive = isCarrierNetworkActive();
+            if (isDataStateInService() || isVoiceStateInService() || isCarrierNetworkActive) {
                 AtomicReference<Drawable> shared = new AtomicReference<>();
-                shared.set(getSignalStrengthDrawableWithLevel());
+                shared.set(getSignalStrengthDrawableWithLevel(isCarrierNetworkActive));
                 drawable = shared.get();
             }
 
             int tintColor = Utils.getColorAttrDefaultColor(mContext,
                     android.R.attr.textColorTertiary);
-            if (activeNetworkIsCellular() || isCarrierNetworkActive()) {
+            if (activeNetworkIsCellular() || isCarrierNetworkActive) {
                 tintColor = mContext.getColor(R.color.connected_network_primary_color);
             }
             drawable.setTint(tintColor);
@@ -426,12 +431,15 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
      *
      * @return The Drawable which is a signal bar icon with level.
      */
-    Drawable getSignalStrengthDrawableWithLevel() {
+    Drawable getSignalStrengthDrawableWithLevel(boolean isCarrierNetworkActive) {
         final SignalStrength strength = mTelephonyManager.getSignalStrength();
         int level = (strength == null) ? 0 : strength.getLevel();
         int numLevels = SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
-        if (mSubscriptionManager != null && shouldInflateSignalStrength(mDefaultDataSubId)) {
-            level += 1;
+        if ((mSubscriptionManager != null && shouldInflateSignalStrength(mDefaultDataSubId))
+                || isCarrierNetworkActive) {
+            level = isCarrierNetworkActive
+                    ? SignalStrength.NUM_SIGNAL_STRENGTH_BINS
+                    : (level + 1);
             numLevels += 1;
         }
         return getSignalStrengthIcon(mContext, level, numLevels, NO_CELL_DATA_TYPE_ICON,
@@ -586,15 +594,18 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         if (!isMobileDataEnabled()) {
             return context.getString(R.string.mobile_data_off_summary);
         }
-        if (!isDataStateInService()) {
-            return context.getString(R.string.mobile_data_no_connection);
-        }
+
         String summary = networkTypeDescription;
+        // Set network description for the carrier network when connecting to the carrier network
+        // under the airplane mode ON.
         if (activeNetworkIsCellular() || isCarrierNetworkActive()) {
             summary = context.getString(R.string.preference_summary_default_combination,
                     context.getString(R.string.mobile_data_connection_active),
                     networkTypeDescription);
+        } else if (!isDataStateInService()) {
+            summary = context.getString(R.string.mobile_data_no_connection);
         }
+
         return summary;
     }
 
@@ -678,7 +689,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     /**
      * @return whether there is the carrier item in the slice.
      */
-    boolean hasCarrier() {
+    boolean hasActiveSubId() {
         if (mSubscriptionManager == null) {
             if (DEBUG) {
                 Log.d(TAG, "SubscriptionManager is null, can not check carrier.");
@@ -888,7 +899,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         if (mHasEthernet) {
             count -= 1;
         }
-        if (hasCarrier()) {
+        if (hasActiveSubId()) {
             count -= 1;
         }
         if (hasConnectedWifi) {
