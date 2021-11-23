@@ -1987,7 +1987,7 @@ public class StatusBar extends SystemUI implements
         }
     }
 
-    public void maybeEscalateHeadsUp() {
+    private void maybeEscalateHeadsUp() {
         mHeadsUpManager.getAllEntries().forEach(entry -> {
             final StatusBarNotification sbn = entry.getSbn();
             final Notification notification = sbn.getNotification();
@@ -1998,6 +1998,7 @@ public class StatusBar extends SystemUI implements
                 try {
                     EventLog.writeEvent(EventLogTags.SYSUI_HEADS_UP_ESCALATION,
                             sbn.getKey());
+                    wakeUpForFullScreenIntent();
                     notification.fullScreenIntent.send();
                     entry.notifyFullScreenIntentLaunched();
                 } catch (PendingIntent.CanceledException e) {
@@ -2005,6 +2006,17 @@ public class StatusBar extends SystemUI implements
             }
         });
         mHeadsUpManager.releaseAllImmediately();
+    }
+
+    void wakeUpForFullScreenIntent() {
+        if (isGoingToSleep() || mDozing) {
+            mPowerManager.wakeUp(
+                    SystemClock.uptimeMillis(),
+                    PowerManager.WAKE_REASON_APPLICATION,
+                    "com.android.systemui:full_screen_intent");
+            mWakeUpComingFromTouch = false;
+            mWakeUpTouchLocation = null;
+        }
     }
 
     void makeExpandedVisible(boolean force) {
@@ -3536,7 +3548,7 @@ public class StatusBar extends SystemUI implements
             DejankUtils.startDetectingBlockingIpcs(tag);
             updateRevealEffect(false /* wakingUp */);
             updateNotificationPanelTouchState();
-            notifyHeadsUpGoingToSleep();
+            maybeEscalateHeadsUp();
             dismissVolumeDialog();
             mWakeUpCoordinator.setFullyAwake(false);
             mBypassHeadsUpNotifier.setFullyAwake(false);
@@ -4079,10 +4091,6 @@ public class StatusBar extends SystemUI implements
         } catch (RemoteException e) {
             // Won't fail unless the world has ended.
         }
-    }
-
-    protected void notifyHeadsUpGoingToSleep() {
-        maybeEscalateHeadsUp();
     }
 
     /**
