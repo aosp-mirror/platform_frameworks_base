@@ -3012,32 +3012,47 @@ public final class TvInputManagerService extends SystemService {
         public void addHardwareInput(int deviceId, TvInputInfo inputInfo) {
             ensureHardwarePermission();
             ensureValidInput(inputInfo);
-            synchronized (mLock) {
-                mTvInputHardwareManager.addHardwareInput(deviceId, inputInfo);
-                addHardwareInputLocked(inputInfo);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    mTvInputHardwareManager.addHardwareInput(deviceId, inputInfo);
+                    addHardwareInputLocked(inputInfo);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
 
         public void addHdmiInput(int id, TvInputInfo inputInfo) {
             ensureHardwarePermission();
             ensureValidInput(inputInfo);
-            synchronized (mLock) {
-                mTvInputHardwareManager.addHdmiInput(id, inputInfo);
-                addHardwareInputLocked(inputInfo);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    mTvInputHardwareManager.addHdmiInput(id, inputInfo);
+                    addHardwareInputLocked(inputInfo);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
 
         public void removeHardwareInput(String inputId) {
             ensureHardwarePermission();
-            synchronized (mLock) {
-                ServiceState serviceState = getServiceStateLocked(mComponent, mUserId);
-                boolean removed = serviceState.hardwareInputMap.remove(inputId) != null;
-                if (removed) {
-                    buildTvInputListLocked(mUserId, null);
-                    mTvInputHardwareManager.removeHardwareInput(inputId);
-                } else {
-                    Slog.e(TAG, "failed to remove input " + inputId);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    ServiceState serviceState = getServiceStateLocked(mComponent, mUserId);
+                    boolean removed = serviceState.hardwareInputMap.remove(inputId) != null;
+                    if (removed) {
+                        buildTvInputListLocked(mUserId, null);
+                        mTvInputHardwareManager.removeHardwareInput(inputId);
+                    } else {
+                        Slog.e(TAG, "failed to remove input " + inputId);
+                    }
                 }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }
