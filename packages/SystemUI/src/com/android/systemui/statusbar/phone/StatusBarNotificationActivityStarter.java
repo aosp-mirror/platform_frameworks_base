@@ -41,6 +41,8 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.view.View;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -588,7 +590,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         }
     }
 
-    private void handleFullScreenIntent(NotificationEntry entry) {
+    @VisibleForTesting
+    void handleFullScreenIntent(NotificationEntry entry) {
         if (mNotificationInterruptStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry)) {
             if (shouldSuppressFullScreenIntent(entry)) {
                 mLogger.logFullScreenIntentSuppressedByDnD(entry.getKey());
@@ -612,6 +615,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 try {
                     EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
                             entry.getKey());
+                    mStatusBar.wakeUpForFullScreenIntent();
                     fullscreenIntent.send();
                     entry.notifyFullScreenIntentLaunched();
                     mMetricsLogger.count("note_fullscreen", 1);
