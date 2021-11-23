@@ -377,6 +377,17 @@ public class WindowMagnificationManagerTest {
     }
 
     @Test
+    public void resetMagnification_enabled_windowMagnifierDisabled() {
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f, NaN, NaN);
+        assertTrue(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
+
+        mWindowMagnificationManager.reset(TEST_DISPLAY);
+
+        assertFalse(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
+    }
+
+    @Test
     public void onScreenOff_windowMagnifierIsEnabled_removeButtonAndDisableWindowMagnification()
             throws RemoteException {
         mWindowMagnificationManager.requestConnection(true);
