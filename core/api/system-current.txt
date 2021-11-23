@@ -13182,8 +13182,10 @@ package android.telephony.ims {
     field public static final int DEREGISTERED_REASON_UNKNOWN = 0; // 0x0
     field public static final int DEREGISTERING_REASON_DESTROY_PENDING = 6; // 0x6
     field public static final int DEREGISTERING_REASON_FEATURE_TAGS_CHANGING = 5; // 0x5
+    field public static final int DEREGISTERING_REASON_LOSING_PDN = 7; // 0x7
     field public static final int DEREGISTERING_REASON_PDN_CHANGE = 3; // 0x3
     field public static final int DEREGISTERING_REASON_PROVISIONING_CHANGE = 4; // 0x4
+    field public static final int DEREGISTERING_REASON_UNSPECIFIED = 8; // 0x8
   }
 
   public static final class DelegateRegistrationState.Builder {
