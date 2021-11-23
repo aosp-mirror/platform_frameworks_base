@@ -803,6 +803,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
         final ActivityRecord openingActivity = taskFragment.getTopMostActivity();
         openingActivity.allDrawn = true;
+        task.effectiveUid = openingActivity.getUid();
         spyOn(mDisplayContent.mAppTransition);
 
         // Prepare a transition.
@@ -879,6 +880,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final ActivityRecord closingActivity = taskFragment.getTopMostActivity();
         closingActivity.allDrawn = true;
         closingActivity.info.applicationInfo.uid = 12345;
+        task.effectiveUid = closingActivity.getUid();
         // Opening non-embedded activity with different UID.
         final ActivityRecord openingActivity = createActivityRecord(task);
         openingActivity.info.applicationInfo.uid = 54321;

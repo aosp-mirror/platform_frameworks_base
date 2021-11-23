@@ -292,6 +292,11 @@ public class KeyguardUpdateMonitorCallback {
     public void onStrongAuthStateChanged(int userId) { }
 
     /**
+     * When the current user's locked out state changed.
+     */
+    public void onLockedOutStateChanged(BiometricSourceType biometricSourceType) { }
+
+    /**
      * Called when the dream's window state is changed.
      * @param dreaming true if the dream's window has been created and is visible
      */
