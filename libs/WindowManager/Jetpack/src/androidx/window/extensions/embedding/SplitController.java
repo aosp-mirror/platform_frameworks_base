@@ -37,7 +37,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.window.TaskFragmentAppearedInfo;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
 
@@ -110,14 +109,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     @Override
-    public void onTaskFragmentAppeared(@NonNull TaskFragmentAppearedInfo taskFragmentAppearedInfo) {
-        TaskFragmentContainer container = getContainer(
-                taskFragmentAppearedInfo.getTaskFragmentInfo().getFragmentToken());
+    public void onTaskFragmentAppeared(@NonNull TaskFragmentInfo taskFragmentInfo) {
+        TaskFragmentContainer container = getContainer(taskFragmentInfo.getFragmentToken());
         if (container == null) {
             return;
         }
 
-        container.setInfo(taskFragmentAppearedInfo.getTaskFragmentInfo());
+        container.setInfo(taskFragmentInfo);
         if (container.isFinished()) {
             mPresenter.cleanupContainer(container, false /* shouldFinishDependent */);
         }
