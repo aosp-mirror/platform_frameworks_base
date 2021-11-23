@@ -30,7 +30,6 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
@@ -88,19 +87,6 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     RectF mTmpDestinationRectF = new RectF();
     Matrix mMoveTransform = new Matrix();
 
-    private final float[] mTmpValues = new float[9];
-    private final Runnable mUpdateEmbeddedMatrix = () -> {
-        if (mPipMenuView == null || mPipMenuView.getViewRootImpl() == null) {
-            return;
-        }
-        mMoveTransform.getValues(mTmpValues);
-        try {
-            mPipMenuView.getViewRootImpl().getAccessibilityEmbeddedConnection()
-                    .setWindowMatrix(mTmpValues);
-        } catch (RemoteException e) {
-            if (DEBUG) e.printStackTrace();
-        }
-    };
     private final Runnable mCloseEduTextRunnable = this::closeEduText;
 
     public TvPipMenuController(Context context, TvPipBoundsState tvPipBoundsState,
@@ -523,11 +509,6 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             mApplier.scheduleApply(frontParams, pipParams);
         } else {
             mApplier.scheduleApply(frontParams);
-        }
-
-        if (mPipMenuView.getViewRootImpl() != null) {
-            mPipMenuView.getHandler().removeCallbacks(mUpdateEmbeddedMatrix);
-            mPipMenuView.getHandler().post(mUpdateEmbeddedMatrix);
         }
 
         updateMenuBounds(pipDestBounds);
