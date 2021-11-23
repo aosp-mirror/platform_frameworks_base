@@ -2638,14 +2638,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         List<PackageInstallerSession> childSessions = getChildSessionsNotLocked();
         synchronized (mLock) {
-            if (params.isStaged && mDestroyed) {
-                // If a user abandons staged session in an unsafe state, then system will try to
-                // abandon the destroyed staged session when it is safe on behalf of the user.
-                assertCallerIsOwnerOrRootOrSystemLocked();
-            } else {
-                assertCallerIsOwnerOrRootLocked();
-            }
 
+            assertCallerIsOwnerOrRootOrSystemLocked();
             if (isStagedAndInTerminalState()) {
                 // We keep the session in the database if it's in a finalized state. It will be
                 // removed by PackageInstallerService when the last update time is old enough.
