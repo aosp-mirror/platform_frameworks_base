@@ -20,6 +20,7 @@ import android.annotation.RequiresPermission;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHearingAid;
+import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothProfile.ServiceListener;
 import android.content.Context;
@@ -37,6 +38,7 @@ import com.android.internal.annotations.VisibleForTesting;
 public class BluetoothModeChangeHelper {
     private volatile BluetoothA2dp mA2dp;
     private volatile BluetoothHearingAid mHearingAid;
+    private volatile BluetoothLeAudio mLeAudio;
     private final BluetoothAdapter mAdapter;
     private final Context mContext;
 
@@ -47,6 +49,7 @@ public class BluetoothModeChangeHelper {
         mAdapter.getProfileProxy(mContext, mProfileServiceListener, BluetoothProfile.A2DP);
         mAdapter.getProfileProxy(mContext, mProfileServiceListener,
                 BluetoothProfile.HEARING_AID);
+        mAdapter.getProfileProxy(mContext, mProfileServiceListener, BluetoothProfile.LE_AUDIO);
     }
 
     private final ServiceListener mProfileServiceListener = new ServiceListener() {
@@ -59,6 +62,9 @@ public class BluetoothModeChangeHelper {
                     break;
                 case BluetoothProfile.HEARING_AID:
                     mHearingAid = (BluetoothHearingAid) proxy;
+                    break;
+                case BluetoothProfile.LE_AUDIO:
+                    mLeAudio = (BluetoothLeAudio) proxy;
                     break;
                 default:
                     break;
@@ -75,6 +81,9 @@ public class BluetoothModeChangeHelper {
                 case BluetoothProfile.HEARING_AID:
                     mHearingAid = null;
                     break;
+                case BluetoothProfile.LE_AUDIO:
+                    mLeAudio = null;
+                    break;
                 default:
                     break;
             }
@@ -82,8 +91,8 @@ public class BluetoothModeChangeHelper {
     };
 
     @VisibleForTesting
-    public boolean isA2dpOrHearingAidConnected() {
-        return isA2dpConnected() || isHearingAidConnected();
+    public boolean isMediaProfileConnected() {
+        return isA2dpConnected() || isHearingAidConnected() || isLeAudioConnected();
     }
 
     @VisibleForTesting
@@ -141,5 +150,13 @@ public class BluetoothModeChangeHelper {
             return false;
         }
         return hearingAid.getConnectedDevices().size() > 0;
+    }
+
+    private boolean isLeAudioConnected() {
+        final BluetoothLeAudio leAudio = mLeAudio;
+        if (leAudio == null) {
+            return false;
+        }
+        return leAudio.getConnectedDevices().size() > 0;
     }
 }
