@@ -46,6 +46,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
+import static android.app.admin.DevicePolicyResources.Drawables.Source.PROFILE_SWITCH_ANIMATION;
+import static android.app.admin.DevicePolicyResources.Drawables.Style.OUTLINE;
+import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.CATEGORY_HOME;
 import static android.content.Intent.CATEGORY_LAUNCHER;
@@ -241,6 +244,7 @@ import android.app.TaskInfo;
 import android.app.TaskInfo.CameraCompatControlState;
 import android.app.WaitResult;
 import android.app.WindowConfiguration;
+import android.app.admin.DevicePolicyManager;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -272,6 +276,7 @@ import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.hardware.HardwareBuffer;
 import android.net.Uri;
 import android.os.Binder;
@@ -537,6 +542,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     // Tracking splash screen status from previous activity
     boolean mSplashScreenStyleEmpty = false;
+
+    Drawable mEnterpriseThumbnailDrawable;
+
+    private void updateEnterpriseThumbnailDrawable(Context context) {
+        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        mEnterpriseThumbnailDrawable = dpm.getDrawable(
+                WORK_PROFILE_ICON, OUTLINE, PROFILE_SWITCH_ANIMATION,
+                () -> context.getDrawable(R.drawable.ic_corp_badge));
+    }
 
     static final int LAUNCH_SOURCE_TYPE_SYSTEM = 1;
     static final int LAUNCH_SOURCE_TYPE_HOME = 2;
@@ -1930,6 +1944,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mAtmService.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, packageName);
 
         mActivityRecordInputSink = new ActivityRecordInputSink(this);
+
+        updateEnterpriseThumbnailDrawable(mAtmService.mUiContext);
     }
 
     /**
@@ -6993,12 +7009,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         final Rect frame = win.getRelativeFrame();
-        final int thumbnailDrawableRes = task.mUserId == mWmService.mCurrentUserId
-                ? R.drawable.ic_account_circle
-                : R.drawable.ic_corp_badge;
-        final HardwareBuffer thumbnail =
-                getDisplayContent().mAppTransition
-                        .createCrossProfileAppsThumbnail(thumbnailDrawableRes, frame);
+        final Drawable thumbnailDrawable = task.mUserId == mWmService.mCurrentUserId
+                ? mAtmService.mUiContext.getDrawable(R.drawable.ic_account_circle)
+                : mEnterpriseThumbnailDrawable;
+        final HardwareBuffer thumbnail = getDisplayContent().mAppTransition
+                .createCrossProfileAppsThumbnail(thumbnailDrawable, frame);
         if (thumbnail == null) {
             return;
         }

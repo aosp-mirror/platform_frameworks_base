@@ -33,6 +33,7 @@ import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -123,7 +124,8 @@ public class Transitions implements RemoteCallable<Transitions> {
 
     public Transitions(@NonNull WindowOrganizer organizer, @NonNull TransactionPool pool,
             @NonNull DisplayController displayController, @NonNull Context context,
-            @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor) {
+            @NonNull ShellExecutor mainExecutor, @NonNull Handler mainHandler,
+            @NonNull ShellExecutor animExecutor) {
         mOrganizer = organizer;
         mContext = context;
         mMainExecutor = mainExecutor;
@@ -132,7 +134,7 @@ public class Transitions implements RemoteCallable<Transitions> {
         mPlayerImpl = new TransitionPlayerImpl();
         // The very last handler (0 in the list) should be the default one.
         mHandlers.add(new DefaultTransitionHandler(displayController, pool, context, mainExecutor,
-                animExecutor));
+                mainHandler, animExecutor));
         // Next lowest priority is remote transitions.
         mRemoteTransitionHandler = new RemoteTransitionHandler(mainExecutor);
         mHandlers.add(mRemoteTransitionHandler);

@@ -471,9 +471,10 @@ public abstract class WMShellBaseModule {
     static Transitions provideTransitions(ShellTaskOrganizer organizer, TransactionPool pool,
             DisplayController displayController, Context context,
             @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler,
             @ShellAnimationThread ShellExecutor animExecutor) {
         return new Transitions(organizer, pool, displayController, context, mainExecutor,
-                animExecutor);
+                mainHandler, animExecutor);
     }
 
     @WMSingleton
