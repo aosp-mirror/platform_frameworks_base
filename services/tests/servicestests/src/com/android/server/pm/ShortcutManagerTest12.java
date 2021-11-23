@@ -49,8 +49,11 @@ public class ShortcutManagerTest12 extends BaseShortcutManagerTest {
 
     @Override
     protected void tearDown() throws Exception {
-        setCaller(CALLING_PACKAGE_1, USER_0);
-        mService.getPackageShortcutForTest(CALLING_PACKAGE_1, USER_0).removeAllShortcutsAsync();
+        if (mService.isAppSearchEnabled()) {
+            setCaller(CALLING_PACKAGE_1, USER_0);
+            mService.getPackageShortcutForTest(CALLING_PACKAGE_1, USER_0)
+                    .removeAllShortcutsAsync();
+        }
         super.tearDown();
     }
 
