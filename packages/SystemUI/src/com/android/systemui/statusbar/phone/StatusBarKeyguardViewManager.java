@@ -60,6 +60,7 @@ import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.RemoteInputController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
@@ -337,6 +338,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         // • Full-screen user switcher is displayed.
         if (mNotificationPanelViewController.isUnlockHintRunning()) {
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
+        } else if (mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED
+                && mKeyguardUpdateManager.isUdfpsEnrolled()) {
+            // Don't expand to the bouncer. Instead transition back to the lock screen (see
+            // StatusBar#showBouncerOrLockScreenIfKeyguard) where the user can use the UDFPS
+            // affordance to enter the device (or swipe up to the input bouncer)
+            return;
         } else if (bouncerNeedsScrimming()) {
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
         } else if (mShowing) {
