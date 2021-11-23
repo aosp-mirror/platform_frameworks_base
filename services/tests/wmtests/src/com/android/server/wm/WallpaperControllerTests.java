@@ -54,7 +54,6 @@ import android.view.RoundedCorners;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
-import android.window.ITransitionPlayer;
 
 import androidx.test.filters.SmallTest;
 
@@ -313,11 +312,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         wallpaperWindow.setHasSurface(true);
 
         // Set-up mock shell transitions
-        final IBinder mockBinder = mock(IBinder.class);
-        final ITransitionPlayer mockPlayer = mock(ITransitionPlayer.class);
-        doReturn(mockBinder).when(mockPlayer).asBinder();
-        mWm.mAtmService.getTransitionController().registerTransitionPlayer(mockPlayer,
-                null /* appThread */);
+        registerTestTransitionPlayer();
 
         Transition transit =
                 mWm.mAtmService.getTransitionController().createTransition(TRANSIT_OPEN);
@@ -338,10 +333,21 @@ public class WallpaperControllerTests extends WindowTestsBase {
         assertFalse(token.isVisibleRequested());
         assertTrue(token.isVisible());
 
-        transit.onTransactionReady(transit.getSyncId(), mock(SurfaceControl.Transaction.class));
-        transit.finishTransition();
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        token.finishSync(t, false /* cancel */);
+        transit.onTransactionReady(transit.getSyncId(), t);
+        dc.mTransitionController.finishTransition(transit);
         assertFalse(wallpaperWindow.isVisible());
         assertFalse(token.isVisible());
+
+        // Assume wallpaper was visible. When transaction is ready without wallpaper target,
+        // wallpaper should be requested to be invisible.
+        token.setVisibility(true);
+        transit = dc.mTransitionController.createTransition(TRANSIT_CLOSE);
+        dc.mTransitionController.collect(token);
+        transit.onTransactionReady(transit.getSyncId(), t);
+        assertFalse(token.isVisibleRequested());
+        assertTrue(token.isVisible());
     }
 
     private WindowState createWallpaperTargetWindow(DisplayContent dc) {

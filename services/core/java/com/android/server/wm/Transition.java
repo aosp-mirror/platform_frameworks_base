@@ -244,11 +244,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
         mParticipants.add(wc);
         if (info.mShowWallpaper) {
-            // Collect the wallpaper so it is part of the sync set.
-            final WindowContainer wallpaper =
+            // Collect the wallpaper token (for isWallpaper(wc)) so it is part of the sync set.
+            final WindowState wallpaper =
                     wc.getDisplayContent().mWallpaperController.getTopVisibleWallpaper();
             if (wallpaper != null) {
-                collect(wallpaper);
+                collect(wallpaper.mToken);
             }
         }
     }
@@ -495,25 +495,35 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             Slog.e(TAG, "Unexpected Sync ID " + syncId + ". Expected " + mSyncId);
             return;
         }
-        int displayId = DEFAULT_DISPLAY;
-        for (WindowContainer container : mParticipants) {
-            if (container.mDisplayContent == null) continue;
-            displayId = container.mDisplayContent.getDisplayId();
+        boolean hasWallpaper = false;
+        DisplayContent dc = null;
+        for (int i = mParticipants.size() - 1; i >= 0; --i) {
+            final WindowContainer<?> wc = mParticipants.valueAt(i);
+            if (dc == null && wc.mDisplayContent != null) {
+                dc = wc.mDisplayContent;
+            }
+            if (!hasWallpaper && isWallpaper(wc)) {
+                hasWallpaper = true;
+            }
         }
+        if (dc == null) dc = mController.mAtm.mRootWindowContainer.getDefaultDisplay();
 
         if (mState == STATE_ABORT) {
             mController.abort(this);
-            mController.mAtm.mRootWindowContainer.getDisplayContent(displayId)
-                    .getPendingTransaction().merge(transaction);
+            dc.getPendingTransaction().merge(transaction);
             mSyncId = -1;
             mOverrideOptions = null;
             return;
+        }
+        // Ensure that wallpaper visibility is updated with the latest wallpaper target.
+        if (hasWallpaper) {
+            dc.mWallpaperController.adjustWallpaperWindows();
         }
 
         mState = STATE_PLAYING;
         mController.moveToPlaying(this);
 
-        if (mController.mAtm.mTaskSupervisor.getKeyguardController().isKeyguardLocked(displayId)) {
+        if (dc.isKeyguardLocked()) {
             mFlags |= TRANSIT_FLAG_KEYGUARD_LOCKED;
         }
 
@@ -523,9 +533,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         info.setAnimationOptions(mOverrideOptions);
 
         // TODO(b/188669821): Move to animation impl in shell.
-        handleLegacyRecentsStartBehavior(displayId, info);
+        handleLegacyRecentsStartBehavior(dc, info);
 
-        handleNonAppWindowsInTransition(displayId, mType, mFlags);
+        handleNonAppWindowsInTransition(dc, mType, mFlags);
 
         reportStartReasonsToLogger();
 
@@ -627,14 +637,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     }
 
     /** @see RecentsAnimationController#attachNavigationBarToApp */
-    private void handleLegacyRecentsStartBehavior(int displayId, TransitionInfo info) {
+    private void handleLegacyRecentsStartBehavior(DisplayContent dc, TransitionInfo info) {
         if ((mFlags & TRANSIT_FLAG_IS_RECENTS) == 0) {
             return;
         }
-        final DisplayContent dc =
-                mController.mAtm.mRootWindowContainer.getDisplayContent(displayId);
-        if (dc == null) return;
-        mRecentsDisplayId = displayId;
+        mRecentsDisplayId = dc.mDisplayId;
 
         // Recents has an input-consumer to grab input from the "live tile" app. Set that up here
         final InputConsumerImpl recentsAnimationInputConsumer =
@@ -679,7 +686,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         // Find the top-most non-home, closing app.
         for (int i = 0; i < info.getChanges().size(); ++i) {
             final TransitionInfo.Change c = info.getChanges().get(i);
-            if (c.getTaskInfo() == null || c.getTaskInfo().displayId != displayId
+            if (c.getTaskInfo() == null || c.getTaskInfo().displayId != mRecentsDisplayId
                     || c.getTaskInfo().getActivityType() != ACTIVITY_TYPE_STANDARD
                     || !(c.getMode() == TRANSIT_CLOSE || c.getMode() == TRANSIT_TO_BACK)) {
                 continue;
@@ -710,7 +717,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             t.setLayer(navSurfaceControl, Integer.MAX_VALUE);
         }
         if (mController.mStatusBar != null) {
-            mController.mStatusBar.setNavigationBarLumaSamplingEnabled(displayId, false);
+            mController.mStatusBar.setNavigationBarLumaSamplingEnabled(mRecentsDisplayId, false);
         }
     }
 
@@ -760,13 +767,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
     }
 
-    private void handleNonAppWindowsInTransition(int displayId,
+    private void handleNonAppWindowsInTransition(@NonNull DisplayContent dc,
             @TransitionType int transit, @TransitionFlags int flags) {
-        final DisplayContent dc =
-                mController.mAtm.mRootWindowContainer.getDisplayContent(displayId);
-        if (dc == null) {
-            return;
-        }
         if ((transit == TRANSIT_KEYGUARD_GOING_AWAY
                 || (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0)
                 && !WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation) {

@@ -104,18 +104,21 @@ class WallpaperWindowToken extends WindowToken {
         }
     }
 
-    void updateWallpaperWindows(boolean visible) {
+    /** Returns {@code true} if visibility is changed. */
+    boolean updateWallpaperWindows(boolean visible) {
+        boolean changed = false;
         if (isVisible() != visible) {
             ProtoLog.d(WM_DEBUG_WALLPAPER, "Wallpaper token %s visible=%b",
                     token, visible);
             setVisibility(visible);
+            changed = true;
         }
-        final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
         if (mTransitionController.isShellTransitionsEnabled()) {
-            return;
+            return changed;
         }
 
-        final WindowState wallpaperTarget = wallpaperController.getWallpaperTarget();
+        final WindowState wallpaperTarget =
+                mDisplayContent.mWallpaperController.getWallpaperTarget();
 
         if (visible && wallpaperTarget != null) {
             final RecentsAnimationController recentsAnimationController =
@@ -137,6 +140,7 @@ class WallpaperWindowToken extends WindowToken {
         }
 
         setVisible(visible);
+        return changed;
     }
 
     private void setVisible(boolean visible) {
@@ -155,10 +159,12 @@ class WallpaperWindowToken extends WindowToken {
      * transition. In that situation, make sure to call {@link #commitVisibility} when done.
      */
     void setVisibility(boolean visible) {
-        // Before setting mVisibleRequested so we can track changes.
-        mTransitionController.collect(this);
+        if (mVisibleRequested != visible) {
+            // Before setting mVisibleRequested so we can track changes.
+            mTransitionController.collect(this);
 
-        setVisibleRequested(visible);
+            setVisibleRequested(visible);
+        }
 
         // If in a transition, defer commits for activities that are going invisible
         if (!visible && (mTransitionController.inTransition()
