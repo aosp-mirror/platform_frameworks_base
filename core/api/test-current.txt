@@ -3210,12 +3210,6 @@ package android.window {
     field @NonNull public static final android.os.Parcelable.Creator<android.window.TaskAppearedInfo> CREATOR;
   }
 
-  public final class TaskFragmentAppearedInfo implements android.os.Parcelable {
-    method @NonNull public android.view.SurfaceControl getLeash();
-    method @NonNull public android.window.TaskFragmentInfo getTaskFragmentInfo();
-    field @NonNull public static final android.os.Parcelable.Creator<android.window.TaskFragmentAppearedInfo> CREATOR;
-  }
-
   public final class TaskFragmentCreationParams implements android.os.Parcelable {
     method @NonNull public android.os.IBinder getFragmentToken();
     method @NonNull public android.graphics.Rect getInitialBounds();
@@ -3252,7 +3246,7 @@ package android.window {
     ctor public TaskFragmentOrganizer(@NonNull java.util.concurrent.Executor);
     method @NonNull public java.util.concurrent.Executor getExecutor();
     method @NonNull public android.window.TaskFragmentOrganizerToken getOrganizerToken();
-    method public void onTaskFragmentAppeared(@NonNull android.window.TaskFragmentAppearedInfo);
+    method public void onTaskFragmentAppeared(@NonNull android.window.TaskFragmentInfo);
     method public void onTaskFragmentError(@NonNull android.os.IBinder, @NonNull Throwable);
     method public void onTaskFragmentInfoChanged(@NonNull android.window.TaskFragmentInfo);
     method public void onTaskFragmentParentInfoChanged(@NonNull android.os.IBinder, @NonNull android.content.res.Configuration);
