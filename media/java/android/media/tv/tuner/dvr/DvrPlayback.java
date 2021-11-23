@@ -98,6 +98,7 @@ public class DvrPlayback implements AutoCloseable {
     private native void nativeSetFileDescriptor(int fd);
     private native long nativeRead(long size);
     private native long nativeRead(byte[] bytes, long offset, long size);
+    private native long nativeSeek(long pos);
 
     private DvrPlayback() {
         mUserId = Process.myUid();
@@ -243,7 +244,7 @@ public class DvrPlayback implements AutoCloseable {
      *
      * @param fd the file descriptor to read data.
      * @see #read(long)
-     * @see #read(byte[], long, long)
+     * @see #seek(long)
      */
     public void setFileDescriptor(@NonNull ParcelFileDescriptor fd) {
         nativeSetFileDescriptor(fd.getFd());
@@ -261,19 +262,30 @@ public class DvrPlayback implements AutoCloseable {
     }
 
     /**
-     * Reads data from the buffer for DVR playback and copies to the given byte array.
+     * Reads data from the buffer for DVR playback.
      *
-     * @param bytes the byte array to store the data.
-     * @param offset the index of the first byte in {@code bytes} to copy to.
+     * @param buffer the byte array where DVR reads data from.
+     * @param offset the index of the first byte in {@code buffer} to read.
      * @param size the maximum number of bytes to read.
      * @return the number of bytes read.
      */
     @BytesLong
-    public long read(@NonNull byte[] bytes, @BytesLong long offset, @BytesLong long size) {
-        if (size + offset > bytes.length) {
+    public long read(@NonNull byte[] buffer, @BytesLong long offset, @BytesLong long size) {
+        if (size + offset > buffer.length) {
             throw new ArrayIndexOutOfBoundsException(
-                    "Array length=" + bytes.length + ", offset=" + offset + ", size=" + size);
+                    "Array length=" + buffer.length + ", offset=" + offset + ", size=" + size);
         }
-        return nativeRead(bytes, offset, size);
+        return nativeRead(buffer, offset, size);
+    }
+
+    /**
+     * Sets the file pointer offset of the file descriptor.
+     *
+     * @param pos the offset position, measured in bytes from the beginning of the file.
+     * @return the new offset position.
+     */
+    @BytesLong
+    public long seek(@BytesLong long pos) {
+        return nativeSeek(pos);
     }
 }
