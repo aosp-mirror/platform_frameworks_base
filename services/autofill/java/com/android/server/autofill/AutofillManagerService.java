@@ -210,7 +210,7 @@ public final class AutofillManagerService
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         context.registerReceiver(mBroadcastReceiver, filter, null, FgThread.getHandler(),
-                Context.RECEIVER_NOT_EXPORTED);
+                Context.RECEIVER_EXPORTED);
 
         mAugmentedAutofillResolver = new FrameworkResourcesServiceNameResolver(getContext(),
                 com.android.internal.R.string.config_defaultAugmentedAutofillService);
