@@ -322,7 +322,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     /** Starts 2 tasks in one transition. */
     void startTasks(int mainTaskId, @Nullable Bundle mainOptions, int sideTaskId,
-            @Nullable Bundle sideOptions, @SplitPosition int sidePosition,
+            @Nullable Bundle sideOptions, @SplitPosition int sidePosition, float splitRatio,
             @Nullable RemoteTransition remoteTransition) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         mainOptions = mainOptions != null ? mainOptions : new Bundle();
@@ -334,6 +334,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mMainStage.activate(getMainStageBounds(), wct, false /* reparent */);
         mSideStage.setBounds(getSideStageBounds(), wct);
 
+        mSplitLayout.setDivideRatio(splitRatio);
         // Make sure the launch options will put tasks in the corresponding split roots
         addActivityOptions(mainOptions, mMainStage);
         addActivityOptions(sideOptions, mSideStage);
@@ -349,7 +350,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /** Starts 2 tasks in one legacy transition. */
     void startTasksWithLegacyTransition(int mainTaskId, @Nullable Bundle mainOptions,
             int sideTaskId, @Nullable Bundle sideOptions, @SplitPosition int sidePosition,
-            RemoteAnimationAdapter adapter) {
+            float splitRatio, RemoteAnimationAdapter adapter) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         // Need to add another wrapper here in shell so that we can inject the divider bar
         // and also manage the process elevation via setRunningRemote
@@ -404,6 +405,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         sideOptions = sideOptions != null ? sideOptions : new Bundle();
         setSideStagePosition(sidePosition, wct);
 
+        mSplitLayout.setDivideRatio(splitRatio);
         // Build a request WCT that will launch both apps such that task 0 is on the main stage
         // while task 1 is on the side stage.
         mMainStage.activate(getMainStageBounds(), wct, false /* reparent */);
