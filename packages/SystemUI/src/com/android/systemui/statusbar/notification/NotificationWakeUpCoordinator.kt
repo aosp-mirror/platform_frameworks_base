@@ -27,7 +27,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
@@ -40,7 +40,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private val statusBarStateController: StatusBarStateController,
     private val bypassController: KeyguardBypassController,
     private val dozeParameters: DozeParameters,
-    private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController
+    private val screenOffAnimationController: ScreenOffAnimationController
 ) : OnHeadsUpChangedListener, StatusBarStateController.StateListener, PanelExpansionListener {
 
     private val mNotificationVisibility = object : FloatProperty<NotificationWakeUpCoordinator>(
@@ -264,15 +264,13 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     override fun onStateChanged(newState: Int) {
-        if (dozeParameters.shouldControlUnlockedScreenOff()) {
-            if (unlockedScreenOffAnimationController.isScreenOffAnimationPlaying() &&
-                    state == StatusBarState.KEYGUARD &&
-                    newState == StatusBarState.SHADE) {
-                // If we're animating the screen off and going from KEYGUARD back to SHADE, the
-                // animation was cancelled and we are unlocking. Override the doze amount to 0f (not
-                // dozing) so that the notifications are no longer hidden.
-                setDozeAmount(0f, 0f)
-            }
+        if (screenOffAnimationController.overrideNotificationsFullyDozingOnKeyguard() &&
+            state == StatusBarState.KEYGUARD &&
+            newState == StatusBarState.SHADE) {
+            // If we're animating the screen off and going from KEYGUARD back to SHADE, the
+            // animation was cancelled and we are unlocking. Override the doze amount to 0f (not
+            // dozing) so that the notifications are no longer hidden.
+            setDozeAmount(0f, 0f)
         }
 
         if (overrideDozeAmountIfAnimatingScreenOff(mLinearDozeAmount)) {
@@ -332,7 +330,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
      * animation. If true, the original doze amount should be ignored.
      */
     private fun overrideDozeAmountIfAnimatingScreenOff(linearDozeAmount: Float): Boolean {
-        if (unlockedScreenOffAnimationController.isScreenOffAnimationPlaying()) {
+        if (screenOffAnimationController.overrideNotificationsFullyDozingOnKeyguard()) {
             setDozeAmount(1f, 1f)
             return true
         }

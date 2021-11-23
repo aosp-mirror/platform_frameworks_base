@@ -90,6 +90,8 @@ import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
+import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -100,7 +102,6 @@ import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
@@ -225,6 +226,7 @@ public interface StatusBarPhoneModule {
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             NotificationIconAreaController notificationIconAreaController,
             BrightnessSliderController.Factory brightnessSliderFactory,
+            ScreenOffAnimationController screenOffAnimationController,
             WallpaperController wallpaperController,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
@@ -238,7 +240,6 @@ public interface StatusBarPhoneModule {
             @Main DelayableExecutor delayableExecutor,
             @Main MessageRouter messageRouter,
             WallpaperManager wallpaperManager,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             Optional<StartingSurface> startingSurfaceOptional,
             TunerService tunerService,
             DumpManager dumpManager,
@@ -327,6 +328,7 @@ public interface StatusBarPhoneModule {
                 statusBarTouchableRegionManager,
                 notificationIconAreaController,
                 brightnessSliderFactory,
+                screenOffAnimationController,
                 wallpaperController,
                 ongoingCallController,
                 animationScheduler,
@@ -340,7 +342,6 @@ public interface StatusBarPhoneModule {
                 delayableExecutor,
                 messageRouter,
                 wallpaperManager,
-                unlockedScreenOffAnimationController,
                 startingSurfaceOptional,
                 tunerService,
                 dumpManager,

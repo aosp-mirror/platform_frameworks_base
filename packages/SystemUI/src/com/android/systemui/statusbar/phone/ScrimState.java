@@ -191,7 +191,7 @@ public enum ScrimState {
             // by animating the screen off via the LightRevelScrim. In either case we just need to
             // set our state.
             mAnimateChange = mDozeParameters.shouldControlScreenOff()
-                    && !mDozeParameters.shouldControlUnlockedScreenOff();
+                    && !mDozeParameters.shouldShowLightRevealScrim();
         }
 
         @Override

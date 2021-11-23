@@ -198,7 +198,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock
     private DozeParameters mDozeParameters;
     @Mock
-    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock
     private NotificationPanelView mView;
     @Mock
@@ -437,7 +437,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                                 mInteractionJankMonitor),
                         mKeyguardBypassController,
                         mDozeParameters,
-                        mUnlockedScreenOffAnimationController);
+                        mScreenOffAnimationController);
         mConfigurationController = new ConfigurationControllerImpl(mContext);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(
                 mContext,
@@ -527,7 +527,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mExecutor,
                 mSecureSettings,
                 mSplitShadeHeaderController,
-                mUnlockedScreenOffAnimationController,
+                mScreenOffAnimationController,
                 mLockscreenGestureLogger,
                 new PanelExpansionStateManager(),
                 mNotificationRemoteInputManager,

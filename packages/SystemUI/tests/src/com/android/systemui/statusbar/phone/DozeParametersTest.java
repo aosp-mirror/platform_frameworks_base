@@ -17,9 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
@@ -64,7 +62,7 @@ public class DozeParametersTest extends SysuiTestCase {
     @Mock private BatteryController mBatteryController;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private DumpManager mDumpManager;
-    @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    @Mock private ScreenOffAnimationController mScreenOffAnimationController;
 
     @Before
     public void setup() {
@@ -78,7 +76,7 @@ public class DozeParametersTest extends SysuiTestCase {
             mTunerService,
             mDumpManager,
             mFeatureFlags,
-            mUnlockedScreenOffAnimationController
+            mScreenOffAnimationController
         );
     }
     @Test
@@ -128,9 +126,7 @@ public class DozeParametersTest extends SysuiTestCase {
         when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
         mDozeParameters.onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, "1");
         when(mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)).thenReturn(true);
-        when(mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation())
-                .thenReturn(true);
-        assertTrue(mDozeParameters.shouldControlUnlockedScreenOff());
+        when(mDozeParameters.shouldControlUnlockedScreenOff()).thenReturn(true);
 
         // Trigger the setter for the current value.
         mDozeParameters.setControlScreenOffAnimation(mDozeParameters.shouldControlScreenOff());

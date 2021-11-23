@@ -92,7 +92,7 @@ public class DozeUiTest extends SysuiTestCase {
 
         mDozeUi = new DozeUi(mContext, mAlarmManager, mWakeLock, mHost, mHandler,
                 mDozeParameters, mKeyguardUpdateMonitor, mDozeLog, mTunerService,
-                () -> mStatusBarStateController, mConfigurationController);
+                mStatusBarStateController, mConfigurationController);
         mDozeUi.setDozeMachine(mMachine);
     }
 
@@ -149,7 +149,7 @@ public class DozeUiTest extends SysuiTestCase {
         when(mDozeParameters.getDisplayNeedsBlanking()).thenReturn(true);
         mDozeUi = new DozeUi(mContext, mAlarmManager, mWakeLock, mHost, mHandler,
                 mDozeParameters, mKeyguardUpdateMonitor, mDozeLog, mTunerService,
-                () -> mStatusBarStateController, mConfigurationController);
+                mStatusBarStateController, mConfigurationController);
         mDozeUi.setDozeMachine(mMachine);
 
         // Never animate if display doesn't support it.

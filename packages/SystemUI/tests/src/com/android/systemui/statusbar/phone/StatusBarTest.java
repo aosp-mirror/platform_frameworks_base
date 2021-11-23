@@ -18,11 +18,9 @@ package com.android.systemui.statusbar.phone;
 
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
-
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.fail;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -276,7 +274,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private WallpaperManager mWallpaperManager;
     @Mock private IWallpaperManager mIWallpaperManager;
     @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
-    @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    @Mock private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock private TunerService mTunerService;
     @Mock private StartingSurface mStartingSurface;
     @Mock private OperatorNameViewController mOperatorNameViewController;
@@ -455,6 +453,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mStatusBarTouchableRegionManager,
                 mNotificationIconAreaController,
                 mBrightnessSliderFactory,
+                mScreenOffAnimationController,
                 mWallpaperController,
                 mOngoingCallController,
                 mAnimationScheduler,
@@ -468,7 +467,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mMainExecutor,
                 new MessageRouterImpl(mMainExecutor),
                 mWallpaperManager,
-                mUnlockedScreenOffAnimationController,
                 Optional.of(mStartingSurface),
                 mTunerService,
                 mDumpManager,
