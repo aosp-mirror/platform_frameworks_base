@@ -218,8 +218,8 @@ class NotifPipeline @Inject constructor(
 
     /**
      * Returns a read-only view in to the current shade list, i.e. the list of notifications that
-     * are currently present in the shade. If this method is called during pipeline execution it
-     * will return the current state of the list, which will likely be only partially-generated.
+     * are currently present in the shade.
+     * @throws IllegalStateException if called during pipeline execution.
      */
     val shadeList: List<ListEntry>
         get() = mShadeListBuilder.shadeList
@@ -227,21 +227,20 @@ class NotifPipeline @Inject constructor(
     /**
      * Constructs a flattened representation of the notification tree, where each group will have
      * the summary (if present) followed by the children.
+     * @throws IllegalStateException if called during pipeline execution.
      */
     fun getFlatShadeList(): List<NotificationEntry> = shadeList.flatMap { entry ->
         when (entry) {
             is NotificationEntry -> sequenceOf(entry)
-            is GroupEntry -> (entry.summary?.let { sequenceOf(it) }.orEmpty() +
-                    entry.children)
+            is GroupEntry -> sequenceOf(entry.summary).filterNotNull() + entry.children
             else -> throw RuntimeException("Unexpected entry $entry")
         }
     }
 
     /**
      * Returns the number of notifications currently shown in the shade. This includes all
-     * children and summary notifications. If this method is called during pipeline execution it
-     * will return the number of notifications in its current state, which will likely be only
-     * partially-generated.
+     * children and summary notifications.
+     * @throws IllegalStateException if called during pipeline execution.
      */
     fun getShadeListCount(): Int = shadeList.sumOf { entry ->
         // include the summary in the count
