@@ -115,6 +115,7 @@ aidl_interface {
 aidl_interface {
     name: "android.media.soundtrigger.types",
     vendor_available: true,
+    host_supported: true,
     flags: [
         "-Werror",
         "-Weverything",
