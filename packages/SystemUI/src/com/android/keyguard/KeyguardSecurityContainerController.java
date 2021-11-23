@@ -496,17 +496,20 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     private boolean canUseOneHandedBouncer() {
-        // Is it enabled?
-        if (!getResources().getBoolean(
-                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning)) {
-            return false;
-        }
-
-        if (!KeyguardSecurityModel.isSecurityViewOneHanded(mCurrentSecurityMode)) {
+        if (!isSecurityViewOneHanded(mCurrentSecurityMode)) {
             return false;
         }
 
         return getResources().getBoolean(R.bool.can_use_one_handed_bouncer);
+    }
+
+    /**
+     * Returns whether the given security view should be used in a "one handed" way. This can be
+     * used to change how the security view is drawn (e.g. take up less of the screen, and align to
+     * one side).
+     */
+    private boolean isSecurityViewOneHanded(SecurityMode securityMode) {
+        return securityMode == SecurityMode.Pattern || securityMode == SecurityMode.PIN;
     }
 
     private void configureOneHandedMode() {

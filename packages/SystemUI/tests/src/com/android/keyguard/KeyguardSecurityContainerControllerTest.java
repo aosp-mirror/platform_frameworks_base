@@ -251,11 +251,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void showSecurityScreen_oneHandedMode_bothFlagsDisabled_noOneHandedMode() {
-        setUpKeyguardFlags(
-                /* deviceConfigCanUseOneHandedKeyguard= */false,
-                /* sysuiResourceCanUseOneHandedKeyguard= */false);
-
+    public void showSecurityScreen_oneHandedMode_flagDisabled_noOneHandedMode() {
+        when(mResources.getBoolean(R.bool.can_use_one_handed_bouncer)).thenReturn(false);
         when(mKeyguardSecurityViewFlipperController.getSecurityView(
                 eq(SecurityMode.Pattern), any(KeyguardSecurityCallback.class)))
                 .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
@@ -265,39 +262,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void showSecurityScreen_oneHandedMode_deviceFlagDisabled_noOneHandedMode() {
-        setUpKeyguardFlags(
-                /* deviceConfigCanUseOneHandedKeyguard= */false,
-                /* sysuiResourceCanUseOneHandedKeyguard= */true);
-
-        when(mKeyguardSecurityViewFlipperController.getSecurityView(
-                eq(SecurityMode.Pattern), any(KeyguardSecurityCallback.class)))
-                .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
-
-        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Pattern);
-        verify(mView).setOneHandedMode(false);
-    }
-
-    @Test
-    public void showSecurityScreen_oneHandedMode_sysUiFlagDisabled_noOneHandedMode() {
-        setUpKeyguardFlags(
-                /* deviceConfigCanUseOneHandedKeyguard= */true,
-                /* sysuiResourceCanUseOneHandedKeyguard= */false);
-
-        when(mKeyguardSecurityViewFlipperController.getSecurityView(
-                eq(SecurityMode.Pattern), any(KeyguardSecurityCallback.class)))
-                .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
-
-        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Pattern);
-        verify(mView).setOneHandedMode(false);
-    }
-
-    @Test
-    public void showSecurityScreen_oneHandedMode_bothFlagsEnabled_oneHandedMode() {
-        setUpKeyguardFlags(
-                /* deviceConfigCanUseOneHandedKeyguard= */true,
-                /* sysuiResourceCanUseOneHandedKeyguard= */true);
-
+    public void showSecurityScreen_oneHandedMode_flagEnabled_oneHandedMode() {
+        when(mResources.getBoolean(R.bool.can_use_one_handed_bouncer)).thenReturn(true);
         when(mKeyguardSecurityViewFlipperController.getSecurityView(
                 eq(SecurityMode.Pattern), any(KeyguardSecurityCallback.class)))
                 .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
@@ -307,27 +273,13 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void showSecurityScreen_twoHandedMode_bothFlagsEnabled_noOneHandedMode() {
-        setUpKeyguardFlags(
-                /* deviceConfigCanUseOneHandedKeyguard= */true,
-                /* sysuiResourceCanUseOneHandedKeyguard= */true);
-
+    public void showSecurityScreen_twoHandedMode_flagEnabled_noOneHandedMode() {
+        when(mResources.getBoolean(R.bool.can_use_one_handed_bouncer)).thenReturn(true);
         when(mKeyguardSecurityViewFlipperController.getSecurityView(
                 eq(SecurityMode.Password), any(KeyguardSecurityCallback.class)))
                 .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
 
         mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Password);
         verify(mView).setOneHandedMode(false);
-    }
-
-    private void setUpKeyguardFlags(
-            boolean deviceConfigCanUseOneHandedKeyguard,
-            boolean sysuiResourceCanUseOneHandedKeyguard) {
-        when(mResources.getBoolean(
-                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning))
-                .thenReturn(deviceConfigCanUseOneHandedKeyguard);
-        when(mResources.getBoolean(
-                R.bool.can_use_one_handed_bouncer))
-                .thenReturn(sysuiResourceCanUseOneHandedKeyguard);
     }
 }

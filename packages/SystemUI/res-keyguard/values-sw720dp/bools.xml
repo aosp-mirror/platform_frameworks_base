@@ -16,5 +16,11 @@
   -->
 
 <resources>
+    <!-- Allows PIN/Pattern to be drawn on one side of a display, and for the user to
+         switch sides -->
     <bool name="can_use_one_handed_bouncer">true</bool>
+
+    <!-- Will display the bouncer on one side of the display, and the current user icon and
+         user switcher on the other side -->
+    <bool name="bouncer_display_user_switcher">true</bool>
 </resources>
