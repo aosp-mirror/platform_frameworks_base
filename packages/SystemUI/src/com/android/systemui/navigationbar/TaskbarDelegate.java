@@ -41,6 +41,7 @@ import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
+import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -265,6 +266,10 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher) {
         boolean imeShown = mNavBarHelper.isImeShown(vis);
+        if (!imeShown) {
+            // Count imperceptible changes as visible so we transition taskbar out quickly.
+            imeShown = (vis & InputMethodService.IME_VISIBLE_IMPERCEPTIBLE) != 0;
+        }
         showImeSwitcher = imeShown && showImeSwitcher;
         int hints = Utilities.calculateBackDispositionHints(mNavigationIconHints, backDisposition,
                 imeShown, showImeSwitcher);

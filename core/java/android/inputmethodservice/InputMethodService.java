@@ -395,7 +395,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     /**
      * @hide
-     * The IME is visible.
+     * The IME is perceptibly visible to the user.
      */
     public static final int IME_VISIBLE = 0x2;
 
@@ -405,6 +405,15 @@ public class InputMethodService extends AbstractInputMethodService {
      * This flag cannot be combined with {@link #IME_VISIBLE}.
      */
     public static final int IME_INVISIBLE = 0x4;
+
+    /**
+     * @hide
+     * The IME is visible, but not yet perceptible to the user (e.g. fading in)
+     * by {@link android.view.WindowInsetsController}.
+     *
+     * @see InputMethodManager#reportPerceptible
+     */
+    public static final int IME_VISIBLE_IMPERCEPTIBLE = 0x8;
 
     // Min and max values for back disposition.
     private static final int BACK_DISPOSITION_MIN = BACK_DISPOSITION_DEFAULT;
