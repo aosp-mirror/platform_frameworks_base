@@ -94,9 +94,10 @@ final class RemovePackageHelper {
                     }
                 }
 
-                mInstaller.rmPackageDir(codePath.getAbsolutePath());
+                final String packageName = codePath.getName();
+                mInstaller.rmPackageDir(packageName, codePath.getAbsolutePath());
                 if (needRemoveParent) {
-                    mInstaller.rmPackageDir(codePathParent.getAbsolutePath());
+                    mInstaller.rmPackageDir(packageName, codePathParent.getAbsolutePath());
                     removeCachedResult(codePathParent);
                 }
             } catch (Installer.InstallerException e) {

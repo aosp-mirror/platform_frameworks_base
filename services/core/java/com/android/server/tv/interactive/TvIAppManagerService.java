@@ -27,6 +27,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.UserInfo;
 import android.media.tv.interactive.ITvIAppClient;
 import android.media.tv.interactive.ITvIAppManager;
 import android.media.tv.interactive.ITvIAppManagerCallback;
@@ -42,6 +43,7 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -58,9 +60,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 
 /**
  * This class provides a system service that manages interactive TV applications.
@@ -81,6 +85,8 @@ public class TvIAppManagerService extends SystemService {
     @GuardedBy("mLock")
     private final SparseArray<UserState> mUserStates = new SparseArray<>();
 
+    private final UserManager mUserManager;
+
     /**
      * Initializes the system service.
      * <p>
@@ -93,6 +99,7 @@ public class TvIAppManagerService extends SystemService {
     public TvIAppManagerService(Context context) {
         super(context);
         mContext = context;
+        mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
     }
 
     @GuardedBy("mLock")
@@ -330,9 +337,186 @@ public class TvIAppManagerService extends SystemService {
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                // TODO: handle switch / start / stop user
+                String action = intent.getAction();
+                if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                    switchUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+                } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
+                    removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+                } else if (Intent.ACTION_USER_STARTED.equals(action)) {
+                    int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
+                    startUser(userId);
+                } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
+                    int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
+                    stopUser(userId);
+                }
             }
         }, UserHandle.ALL, intentFilter, null, null);
+    }
+
+    private void switchUser(int userId) {
+        synchronized (mLock) {
+            if (mCurrentUserId == userId) {
+                return;
+            }
+            UserInfo userInfo = mUserManager.getUserInfo(userId);
+            if (userInfo.isProfile()) {
+                Slog.w(TAG, "cannot switch to a profile!");
+                return;
+            }
+
+            for (int runningId : mRunningProfiles) {
+                releaseSessionOfUserLocked(runningId);
+                unbindServiceOfUserLocked(runningId);
+            }
+            mRunningProfiles.clear();
+            releaseSessionOfUserLocked(mCurrentUserId);
+            unbindServiceOfUserLocked(mCurrentUserId);
+
+            mCurrentUserId = userId;
+            buildTvIAppServiceListLocked(userId, null);
+        }
+    }
+
+    private void removeUser(int userId) {
+        synchronized (mLock) {
+            UserState userState = getUserStateLocked(userId);
+            if (userState == null) {
+                return;
+            }
+            // Release all created sessions.
+            for (SessionState state : userState.mSessionStateMap.values()) {
+                if (state.mSession != null) {
+                    try {
+                        state.mSession.release();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in release", e);
+                    }
+                }
+            }
+            userState.mSessionStateMap.clear();
+
+            // Unregister all callbacks and unbind all services.
+            for (ServiceState serviceState : userState.mServiceStateMap.values()) {
+                if (serviceState.mService != null) {
+                    if (serviceState.mCallback != null) {
+                        try {
+                            serviceState.mService.unregisterCallback(serviceState.mCallback);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "error in unregisterCallback", e);
+                        }
+                    }
+                    mContext.unbindService(serviceState.mConnection);
+                }
+            }
+            userState.mServiceStateMap.clear();
+
+            // Clear everything else.
+            userState.mIAppMap.clear();
+            userState.mPackageSet.clear();
+            userState.mClientStateMap.clear();
+            userState.mCallbacks.kill();
+
+            mRunningProfiles.remove(userId);
+            mUserStates.remove(userId);
+
+            if (userId == mCurrentUserId) {
+                switchUser(UserHandle.USER_SYSTEM);
+            }
+        }
+    }
+
+    private void startUser(int userId) {
+        synchronized (mLock) {
+            if (userId == mCurrentUserId || mRunningProfiles.contains(userId)) {
+                // user already started
+                return;
+            }
+            UserInfo userInfo = mUserManager.getUserInfo(userId);
+            UserInfo parentInfo = mUserManager.getProfileParent(userId);
+            if (userInfo.isProfile()
+                    && parentInfo != null
+                    && parentInfo.id == mCurrentUserId) {
+                // only the children of the current user can be started in background
+                startProfileLocked(userId);
+            }
+        }
+    }
+
+    private void stopUser(int userId) {
+        synchronized (mLock) {
+            if (userId == mCurrentUserId) {
+                switchUser(ActivityManager.getCurrentUser());
+                return;
+            }
+
+            releaseSessionOfUserLocked(userId);
+            unbindServiceOfUserLocked(userId);
+            mRunningProfiles.remove(userId);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void startProfileLocked(int userId) {
+        mRunningProfiles.add(userId);
+        buildTvIAppServiceListLocked(userId, null);
+    }
+
+    @GuardedBy("mLock")
+    private void releaseSessionOfUserLocked(int userId) {
+        UserState userState = getUserStateLocked(userId);
+        if (userState == null) {
+            return;
+        }
+        List<SessionState> sessionStatesToRelease = new ArrayList<>();
+        for (SessionState sessionState : userState.mSessionStateMap.values()) {
+            if (sessionState.mSession != null) {
+                sessionStatesToRelease.add(sessionState);
+            }
+        }
+        for (SessionState sessionState : sessionStatesToRelease) {
+            try {
+                sessionState.mSession.release();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "error in release", e);
+            }
+            clearSessionAndNotifyClientLocked(sessionState);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void unbindServiceOfUserLocked(int userId) {
+        UserState userState = getUserStateLocked(userId);
+        if (userState == null) {
+            return;
+        }
+        for (Iterator<ComponentName> it = userState.mServiceStateMap.keySet().iterator();
+                it.hasNext(); ) {
+            ComponentName component = it.next();
+            ServiceState serviceState = userState.mServiceStateMap.get(component);
+            if (serviceState != null && serviceState.mSessionTokens.isEmpty()) {
+                if (serviceState.mCallback != null) {
+                    try {
+                        serviceState.mService.unregisterCallback(serviceState.mCallback);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in unregisterCallback", e);
+                    }
+                }
+                mContext.unbindService(serviceState.mConnection);
+                it.remove();
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void clearSessionAndNotifyClientLocked(SessionState state) {
+        if (state.mClient != null) {
+            try {
+                state.mClient.onSessionReleased(state.mSeq);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "error in onSessionReleased", e);
+            }
+        }
+        removeSessionStateLocked(state.mSessionToken, state.mUserId);
     }
 
     private SessionState getSessionState(IBinder sessionToken) {

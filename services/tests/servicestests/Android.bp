@@ -108,6 +108,7 @@ android_test {
 
     data: [
         ":JobTestApp",
+        ":StubTestApp",
     ],
 
     java_resources: [

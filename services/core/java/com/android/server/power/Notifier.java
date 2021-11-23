@@ -110,8 +110,8 @@ public class Notifier {
     private static final VibrationEffect CHARGING_VIBRATION_EFFECT =
             VibrationEffect.createWaveform(CHARGING_VIBRATION_TIME, CHARGING_VIBRATION_AMPLITUDE,
                     -1);
-    private static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
-            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH);
+    private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
 
     private final Object mLock = new Object();
 
@@ -807,7 +807,7 @@ public class Notifier {
         final boolean vibrate = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.CHARGING_VIBRATION_ENABLED, 1, userId) != 0;
         if (vibrate) {
-            mVibrator.vibrate(CHARGING_VIBRATION_EFFECT, TOUCH_VIBRATION_ATTRIBUTES);
+            mVibrator.vibrate(CHARGING_VIBRATION_EFFECT, HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
         }
 
         // play sound

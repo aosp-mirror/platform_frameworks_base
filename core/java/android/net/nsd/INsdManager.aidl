@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, The Android Open Source Project
+ * Copyright (c) 2021, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,15 @@
 
 package android.net.nsd;
 
+import android.net.nsd.INsdManagerCallback;
+import android.net.nsd.INsdServiceConnector;
 import android.os.Messenger;
 
 /**
- * Interface that NsdService implements
+ * Interface that NsdService implements to connect NsdManager clients.
  *
  * {@hide}
  */
-interface INsdManager
-{
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
-    Messenger getMessenger();
-    void setEnabled(boolean enable);
+interface INsdManager {
+    INsdServiceConnector connect(INsdManagerCallback cb);
 }

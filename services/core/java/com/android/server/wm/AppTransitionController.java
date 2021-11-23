@@ -590,7 +590,7 @@ public class AppTransitionController {
             }
             // We don't want the organizer to handle transition of non-embedded activity of other
             // app.
-            if (r.getUid() != rootActivity.getUid() && !r.isEmbedded()) {
+            if (r.getUid() != task.effectiveUid && !r.isEmbedded()) {
                 leafTask = null;
                 break;
             }

@@ -19,7 +19,6 @@ package com.android.settingslib.notification;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -85,6 +84,7 @@ public class EnableZenModeDialog {
 
     @VisibleForTesting
     protected Context mContext;
+    private final int mThemeResId;
     @VisibleForTesting
     protected TextView mZenAlarmWarning;
     @VisibleForTesting
@@ -97,10 +97,15 @@ public class EnableZenModeDialog {
     protected LayoutInflater mLayoutInflater;
 
     public EnableZenModeDialog(Context context) {
-        mContext = context;
+        this(context, 0);
     }
 
-    public Dialog createDialog() {
+    public EnableZenModeDialog(Context context, int themeResId) {
+        mContext = context;
+        mThemeResId = themeResId;
+    }
+
+    public AlertDialog createDialog() {
         mNotificationManager = (NotificationManager) mContext.
                 getSystemService(Context.NOTIFICATION_SERVICE);
         mForeverId =  Condition.newId(mContext).appendPath("forever").build();
@@ -108,7 +113,7 @@ public class EnableZenModeDialog {
         mUserId = mContext.getUserId();
         mAttached = false;
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext)
+        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext, mThemeResId)
                 .setTitle(R.string.zen_mode_settings_turn_on_dialog_title)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.zen_mode_enable_dialog_turn_on,

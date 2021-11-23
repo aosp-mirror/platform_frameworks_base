@@ -470,14 +470,16 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private void stopUser(int userId) {
-        if (userId == mCurrentUserId) {
-            switchUser(ActivityManager.getCurrentUser());
-            return;
-        }
+        synchronized (mLock) {
+            if (userId == mCurrentUserId) {
+                switchUser(ActivityManager.getCurrentUser());
+                return;
+            }
 
-        releaseSessionOfUserLocked(userId);
-        unbindServiceOfUserLocked(userId);
-        mRunningProfiles.remove(userId);
+            releaseSessionOfUserLocked(userId);
+            unbindServiceOfUserLocked(userId);
+            mRunningProfiles.remove(userId);
+        }
     }
 
     private void startProfileLocked(int userId) {

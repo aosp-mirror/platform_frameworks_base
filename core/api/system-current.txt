@@ -961,20 +961,20 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public boolean getBluetoothContactSharingDisabled(@NonNull android.os.UserHandle);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getDeviceOwner();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public android.content.ComponentName getDeviceOwnerComponentOnAnyUser();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getDeviceOwnerNameOnAnyUser();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public String getDeviceOwnerNameOnAnyUser();
     method @Nullable public CharSequence getDeviceOwnerOrganizationName();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.UserHandle getDeviceOwnerUser();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<java.lang.String> getPermittedAccessibilityServices(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<java.lang.String> getPermittedInputMethodsForCurrentUser();
     method @Nullable public android.content.ComponentName getProfileOwner() throws java.lang.IllegalArgumentException;
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getProfileOwnerNameAsUser(int) throws java.lang.IllegalArgumentException;
-    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public int getUserProvisioningState();
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public String getProfileOwnerNameAsUser(int) throws java.lang.IllegalArgumentException;
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public int getUserProvisioningState();
     method public boolean isDeviceManaged();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isDeviceProvisioned();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isDeviceProvisioningConfigApplied();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isManagedKiosk();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public boolean isManagedKiosk();
     method public boolean isSecondaryLockscreenEnabled(@NonNull android.os.UserHandle);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isUnattendedManagedKiosk();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public boolean isUnattendedManagedKiosk();
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long);
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long, boolean);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean packageHasActiveAdmins(String);
@@ -8681,7 +8681,11 @@ package android.os {
   }
 
   public final class NewUserRequest {
+    method @Nullable public String getAccountName();
+    method @Nullable public android.os.PersistableBundle getAccountOptions();
+    method @Nullable public String getAccountType();
     method @Nullable public String getName();
+    method @Nullable public android.graphics.Bitmap getUserIcon();
     method @NonNull public String getUserType();
     method public boolean isAdmin();
     method public boolean isEphemeral();
@@ -8690,9 +8694,13 @@ package android.os {
   public static final class NewUserRequest.Builder {
     ctor public NewUserRequest.Builder();
     method @NonNull public android.os.NewUserRequest build();
+    method @NonNull public android.os.NewUserRequest.Builder setAccountName(@Nullable String);
+    method @NonNull public android.os.NewUserRequest.Builder setAccountOptions(@Nullable android.os.PersistableBundle);
+    method @NonNull public android.os.NewUserRequest.Builder setAccountType(@Nullable String);
     method @NonNull public android.os.NewUserRequest.Builder setAdmin();
     method @NonNull public android.os.NewUserRequest.Builder setEphemeral();
     method @NonNull public android.os.NewUserRequest.Builder setName(@Nullable String);
+    method @NonNull public android.os.NewUserRequest.Builder setUserIcon(@Nullable android.graphics.Bitmap);
     method @NonNull public android.os.NewUserRequest.Builder setUserType(@NonNull String);
   }
 
@@ -8970,6 +8978,7 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean removeUser(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setUserIcon(@NonNull android.graphics.Bitmap) throws android.os.UserManager.UserOperationException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setUserName(@Nullable String);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean someUserHasAccount(@NonNull String, @NonNull String);
     field public static final String ACTION_USER_RESTRICTIONS_CHANGED = "android.os.action.USER_RESTRICTIONS_CHANGED";
     field @Deprecated public static final String DISALLOW_OEM_UNLOCK = "no_oem_unlock";
     field public static final String DISALLOW_RUN_IN_BACKGROUND = "no_run_in_background";
@@ -8981,6 +8990,7 @@ package android.os {
     field public static final int SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED = 4; // 0x4
     field public static final int SWITCHABILITY_STATUS_USER_IN_CALL = 1; // 0x1
     field public static final int SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED = 2; // 0x2
+    field public static final int USER_OPERATION_ERROR_USER_ACCOUNT_ALREADY_EXISTS = 7; // 0x7
     field public static final String USER_TYPE_FULL_GUEST = "android.os.usertype.full.GUEST";
     field public static final String USER_TYPE_FULL_SECONDARY = "android.os.usertype.full.SECONDARY";
     field public static final String USER_TYPE_FULL_SYSTEM = "android.os.usertype.full.SYSTEM";

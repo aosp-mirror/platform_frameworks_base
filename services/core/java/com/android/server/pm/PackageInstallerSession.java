@@ -2402,6 +2402,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             try {
                 final List<File> fromFiles = mResolvedInheritedFiles;
                 final File toDir = stageDir;
+                final String tempPackageName = toDir.getName();
 
                 if (LOGD) Slog.d(TAG, "Inherited files: " + mResolvedInheritedFiles);
                 if (!mResolvedInheritedFiles.isEmpty() && mInheritedFilesBase == null) {
@@ -2411,7 +2412,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 if (isLinkPossible(fromFiles, toDir)) {
                     if (!mResolvedInstructionSets.isEmpty()) {
                         final File oatDir = new File(toDir, "oat");
-                        createOatDirs(mResolvedInstructionSets, oatDir);
+                        createOatDirs(tempPackageName, mResolvedInstructionSets, oatDir);
                     }
                     // pre-create lib dirs for linking if necessary
                     if (!mResolvedNativeLibPaths.isEmpty()) {
@@ -2434,7 +2435,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                                     new File(libDir, archDirPath));
                         }
                     }
-                    linkFiles(fromFiles, toDir, mInheritedFilesBase);
+                    linkFiles(tempPackageName, fromFiles, toDir, mInheritedFilesBase);
                 } else {
                     // TODO: this should delegate to DCS so the system process
                     // avoids holding open FDs into containers.
@@ -3529,18 +3530,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         throw new IOException("File: " + pathStr + " outside base: " + baseStr);
     }
 
-    private void createOatDirs(List<String> instructionSets, File fromDir)
+    private void createOatDirs(String packageName, List<String> instructionSets, File fromDir)
             throws PackageManagerException {
         for (String instructionSet : instructionSets) {
             try {
-                mInstaller.createOatDir(fromDir.getAbsolutePath(), instructionSet);
+                mInstaller.createOatDir(packageName, fromDir.getAbsolutePath(), instructionSet);
             } catch (InstallerException e) {
                 throw PackageManagerException.from(e);
             }
         }
     }
 
-    private void linkFile(String relativePath, String fromBase, String toBase) throws IOException {
+    private void linkFile(String packageName, String relativePath, String fromBase, String toBase)
+            throws IOException {
         try {
             // Try
             final IncrementalFileStorages incrementalFileStorages = getIncrementalFileStorages();
@@ -3548,21 +3550,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     fromBase, toBase)) {
                 return;
             }
-            mInstaller.linkFile(relativePath, fromBase, toBase);
+            mInstaller.linkFile(packageName, relativePath, fromBase, toBase);
         } catch (InstallerException | IOException e) {
             throw new IOException("failed linkOrCreateDir(" + relativePath + ", "
                     + fromBase + ", " + toBase + ")", e);
         }
     }
 
-    private void linkFiles(List<File> fromFiles, File toDir, File fromDir)
+    private void linkFiles(String packageName, List<File> fromFiles, File toDir, File fromDir)
             throws IOException {
         for (File fromFile : fromFiles) {
             final String relativePath = getRelativePath(fromFile, fromDir);
             final String fromBase = fromDir.getAbsolutePath();
             final String toBase = toDir.getAbsolutePath();
 
-            linkFile(relativePath, fromBase, toBase);
+            linkFile(packageName, relativePath, fromBase, toBase);
         }
 
         Slog.d(TAG, "Linked " + fromFiles.size() + " files into " + toDir);
@@ -4299,7 +4301,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 incrementalFileStorages.cleanUpAndMarkComplete();
             }
             if (stageDir != null) {
-                mInstaller.rmPackageDir(stageDir.getAbsolutePath());
+                final String tempPackageName = stageDir.getName();
+                mInstaller.rmPackageDir(tempPackageName, stageDir.getAbsolutePath());
             }
         } catch (InstallerException ignored) {
         }

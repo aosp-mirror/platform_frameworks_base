@@ -411,6 +411,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             final List<String> paths =
                     AndroidPackageUtils.getAllCodePathsExcludingResourceOnly(pkg);
             final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
+            final String packageName = pkg.getPackageName();
             for (String dexCodeInstructionSet : dexCodeInstructionSets) {
                 for (String path : paths) {
                     String oatDir = PackageDexOptimizer.getOatDir(
@@ -420,7 +421,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
 
                     packagePaths++;
                     try {
-                        installer.moveAb(path, dexCodeInstructionSet, oatDir);
+                        installer.moveAb(packageName, path, dexCodeInstructionSet, oatDir);
                         pathsSuccessful++;
                     } catch (InstallerException e) {
                     }

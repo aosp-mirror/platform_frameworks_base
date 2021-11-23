@@ -854,12 +854,19 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
                 mAtm.mInternal.createPackageConfigurationUpdater(DEFAULT_PACKAGE_NAME,
                         DEFAULT_USER_ID);
+
+        // committing empty locales, when no config is set should return false.
+        assertFalse(packageConfigUpdater.setLocales(LocaleList.getEmptyLocaleList()).commit());
+
         // committing new configuration returns true;
         assertTrue(packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB"))
                 .commit());
         // applying the same configuration returns false.
         assertFalse(packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB"))
                 .commit());
+
+        // committing empty locales and undefined nightMode should return true (deletes the
+        // pre-existing record) if some config was previously set.
         assertTrue(packageConfigUpdater.setLocales(LocaleList.getEmptyLocaleList())
                 .setNightMode(Configuration.UI_MODE_NIGHT_UNDEFINED).commit());
     }
