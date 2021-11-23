@@ -17,6 +17,7 @@ package com.android.server.location.contexthub;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.contexthub.HostEndpointInfo;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.TransactionResult;
@@ -239,6 +240,20 @@ public abstract class IContextHubWrapper {
     public abstract void onMicrophoneSettingChanged(boolean enabled);
 
     /**
+     * Invoked whenever a host client connects with the framework.
+     *
+     * @param info The host endpoint info.
+     */
+    public void onHostEndpointConnected(HostEndpointInfo info) {}
+
+    /**
+     * Invoked whenever a host client disconnects from the framework.
+     *
+     * @param hostEndpointId The ID of the host endpoint that disconnected.
+     */
+    public void onHostEndpointDisconnected(short hostEndpointId) {}
+
+    /**
      * Sends a message to the Context Hub.
      *
      * @param hostEndpointId The host endpoint ID of the sender.
@@ -405,6 +420,24 @@ public abstract class IContextHubWrapper {
 
         public void onWifiScanningSettingChanged(boolean enabled) {
             onSettingChanged(android.hardware.contexthub.Setting.WIFI_SCANNING, enabled);
+        }
+
+        @Override
+        public void onHostEndpointConnected(HostEndpointInfo info) {
+            try {
+                mHub.onHostEndpointConnected(info);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException in onHostEndpointConnected");
+            }
+        }
+
+        @Override
+        public void onHostEndpointDisconnected(short hostEndpointId) {
+            try {
+                mHub.onHostEndpointDisconnected((char) hostEndpointId);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException in onHostEndpointDisconnected");
+            }
         }
 
         @ContextHubTransaction.Result
