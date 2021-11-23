@@ -66,7 +66,7 @@ public class BluetoothAirplaneModeListenerTest {
         when(mHelper.isBluetoothOn()).thenReturn(true);
         Assert.assertFalse(mBluetoothAirplaneModeListener.shouldSkipAirplaneModeChange());
 
-        when(mHelper.isA2dpOrHearingAidConnected()).thenReturn(true);
+        when(mHelper.isMediaProfileConnected()).thenReturn(true);
         Assert.assertFalse(mBluetoothAirplaneModeListener.shouldSkipAirplaneModeChange());
 
         when(mHelper.isAirplaneModeOn()).thenReturn(true);
@@ -83,7 +83,7 @@ public class BluetoothAirplaneModeListenerTest {
     public void testHandleAirplaneModeChange_NotInvokeAirplaneModeChanged_NotPopToast() {
         mBluetoothAirplaneModeListener.mToastCount = BluetoothAirplaneModeListener.MAX_TOAST_COUNT;
         when(mHelper.isBluetoothOn()).thenReturn(true);
-        when(mHelper.isA2dpOrHearingAidConnected()).thenReturn(true);
+        when(mHelper.isMediaProfileConnected()).thenReturn(true);
         when(mHelper.isAirplaneModeOn()).thenReturn(true);
         mBluetoothAirplaneModeListener.handleAirplaneModeChange();
 
@@ -97,7 +97,7 @@ public class BluetoothAirplaneModeListenerTest {
     public void testHandleAirplaneModeChange_NotInvokeAirplaneModeChanged_PopToast() {
         mBluetoothAirplaneModeListener.mToastCount = 0;
         when(mHelper.isBluetoothOn()).thenReturn(true);
-        when(mHelper.isA2dpOrHearingAidConnected()).thenReturn(true);
+        when(mHelper.isMediaProfileConnected()).thenReturn(true);
         when(mHelper.isAirplaneModeOn()).thenReturn(true);
         mBluetoothAirplaneModeListener.handleAirplaneModeChange();
 
