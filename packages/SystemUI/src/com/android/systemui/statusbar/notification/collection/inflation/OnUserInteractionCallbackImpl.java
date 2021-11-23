@@ -108,11 +108,10 @@ public class OnUserInteractionCallbackImpl implements OnUserInteractionCallback 
     @Override
     @Nullable
     public NotificationEntry getGroupSummaryToDismiss(NotificationEntry entry) {
-        if (entry.getParent() != null
-                && entry.getParent().getSummary() != null
-                && mGroupMembershipManager.isOnlyChildInGroup(entry)) {
-            NotificationEntry groupSummary = entry.getParent().getSummary();
-            return groupSummary.isClearable() ? groupSummary : null;
+        String group = entry.getSbn().getGroup();
+        if (mNotifCollection.isOnlyChildInGroup(entry)) {
+            NotificationEntry summary = mNotifCollection.getGroupSummary(group);
+            if (summary != null && summary.isClearable()) return summary;
         }
         return null;
     }
