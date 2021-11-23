@@ -9469,23 +9469,23 @@ public class AppOpsManager {
                     e.rethrowFromSystemServer();
                 }
 
-                if (missedAsyncOps != null) {
+                // Copy pointer so callback can be dispatched out of lock
+                OnOpNotedCallback onOpNotedCallback = sOnOpNotedCallback;
+                if (onOpNotedCallback != null && missedAsyncOps != null) {
                     int numMissedAsyncOps = missedAsyncOps.size();
                     for (int i = 0; i < numMissedAsyncOps; i++) {
                         final AsyncNotedAppOp asyncNotedAppOp = missedAsyncOps.get(i);
-                        if (sOnOpNotedCallback != null) {
-                            sOnOpNotedCallback.getAsyncNotedExecutor().execute(
-                                    () -> sOnOpNotedCallback.onAsyncNoted(asyncNotedAppOp));
-                        }
+                        onOpNotedCallback.getAsyncNotedExecutor().execute(
+                                () -> onOpNotedCallback.onAsyncNoted(asyncNotedAppOp));
                     }
                 }
                 synchronized (this) {
                     int numMissedSyncOps = sUnforwardedOps.size();
-                    for (int i = 0; i < numMissedSyncOps; i++) {
-                        final AsyncNotedAppOp syncNotedAppOp = sUnforwardedOps.get(i);
-                        if (sOnOpNotedCallback != null) {
-                            sOnOpNotedCallback.getAsyncNotedExecutor().execute(
-                                    () -> sOnOpNotedCallback.onAsyncNoted(syncNotedAppOp));
+                    if (onOpNotedCallback != null) {
+                        for (int i = 0; i < numMissedSyncOps; i++) {
+                            final AsyncNotedAppOp syncNotedAppOp = sUnforwardedOps.get(i);
+                            onOpNotedCallback.getAsyncNotedExecutor().execute(
+                                    () -> onOpNotedCallback.onAsyncNoted(syncNotedAppOp));
                         }
                     }
                     sUnforwardedOps.clear();
