@@ -725,8 +725,8 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @NonNull
-    private InputChannel createSpyWindowGestureMonitor(String name, int displayId, int pid,
-            int uid) {
+    private InputChannel createSpyWindowGestureMonitor(IBinder monitorToken, String name,
+            int displayId, int pid, int uid) {
         final SurfaceControl sc = mWindowManagerCallbacks.createSurfaceForGestureMonitor(name,
                 displayId);
         if (sc == null) {
@@ -735,9 +735,16 @@ public class InputManagerService extends IInputManager.Stub
         }
         final InputChannel channel = createInputChannel(name);
 
+        try {
+            monitorToken.linkToDeath(() -> removeSpyWindowGestureMonitor(channel.getToken()), 0);
+        } catch (RemoteException e) {
+            Slog.i(TAG, "Client died before '" + name + "' could be created.");
+            return null;
+        }
         synchronized (mInputMonitors) {
             mInputMonitors.put(channel.getToken(),
-                    new GestureMonitorSpyWindow(name, displayId, pid, uid, sc, channel));
+                    new GestureMonitorSpyWindow(monitorToken, name, displayId, pid, uid, sc,
+                            channel));
         }
 
         final InputChannel outInputChannel = new InputChannel();
@@ -764,12 +771,14 @@ public class InputManagerService extends IInputManager.Stub
      * @return The input channel.
      */
     @Override // Binder call
-    public InputMonitor monitorGestureInput(@NonNull String requestedName, int displayId) {
+    public InputMonitor monitorGestureInput(IBinder monitorToken, @NonNull String requestedName,
+            int displayId) {
         if (!checkCallingPermission(android.Manifest.permission.MONITOR_INPUT,
                 "monitorGestureInput()")) {
             throw new SecurityException("Requires MONITOR_INPUT permission");
         }
         Objects.requireNonNull(requestedName, "name must not be null.");
+        Objects.requireNonNull(monitorToken, "token must not be null.");
 
         if (displayId < Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("displayId must >= 0.");
@@ -782,7 +791,7 @@ public class InputManagerService extends IInputManager.Stub
         try {
             final InputChannel inputChannel =
                     USE_SPY_WINDOW_GESTURE_MONITORS
-                            ? createSpyWindowGestureMonitor(name, displayId, pid, uid)
+                            ? createSpyWindowGestureMonitor(monitorToken, name, displayId, pid, uid)
                             : nativeCreateInputMonitor(mPtr, displayId, true /*isGestureMonitor*/,
                                     requestedName, pid);
             return new InputMonitor(inputChannel, new InputMonitorHost(inputChannel.getToken()));

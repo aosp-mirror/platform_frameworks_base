@@ -18,6 +18,7 @@ package com.android.server.input;
 
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 
+import android.os.IBinder;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputMonitor;
@@ -37,12 +38,14 @@ class GestureMonitorSpyWindow {
     final InputApplicationHandle mApplicationHandle;
     final InputWindowHandle mWindowHandle;
 
-    // The InputChannel and SurfaceControl are owned by this object.
+    // The token, InputChannel, and SurfaceControl are owned by this object.
+    final IBinder mMonitorToken;
     final InputChannel mClientChannel;
     final SurfaceControl mInputSurface;
 
-    GestureMonitorSpyWindow(String name, int displayId, int pid, int uid, SurfaceControl sc,
-            InputChannel inputChannel) {
+    GestureMonitorSpyWindow(IBinder token, String name, int displayId, int pid, int uid,
+            SurfaceControl sc, InputChannel inputChannel) {
+        mMonitorToken = token;
         mClientChannel = inputChannel;
         mInputSurface = sc;
 
