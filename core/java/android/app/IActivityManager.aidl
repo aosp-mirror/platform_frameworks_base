@@ -345,6 +345,8 @@ interface IActivityManager {
     void setPackageScreenCompatMode(in String packageName, int mode);
     @UnsupportedAppUsage
     boolean switchUser(int userid);
+    String getSwitchingFromUserMessage();
+    String getSwitchingToUserMessage();
     @UnsupportedAppUsage
     void setStopUserOnSwitch(int value);
     boolean removeTask(int taskId);
