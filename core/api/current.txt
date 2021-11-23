@@ -51445,14 +51445,18 @@ package android.view.accessibility {
   public static final class AccessibilityNodeInfo.CollectionItemInfo {
     ctor public AccessibilityNodeInfo.CollectionItemInfo(int, int, int, int, boolean);
     ctor public AccessibilityNodeInfo.CollectionItemInfo(int, int, int, int, boolean, boolean);
+    ctor public AccessibilityNodeInfo.CollectionItemInfo(@Nullable String, int, int, @Nullable String, int, int, boolean, boolean);
     method public int getColumnIndex();
     method public int getColumnSpan();
+    method @Nullable public String getColumnTitle();
     method public int getRowIndex();
     method public int getRowSpan();
+    method @Nullable public String getRowTitle();
     method @Deprecated public boolean isHeading();
     method public boolean isSelected();
     method public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(int, int, int, int, boolean);
     method public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(int, int, int, int, boolean, boolean);
+    method @NonNull public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(@Nullable String, int, int, @Nullable String, int, int, boolean, boolean);
   }
 
   public static final class AccessibilityNodeInfo.ExtraRenderingInfo {
