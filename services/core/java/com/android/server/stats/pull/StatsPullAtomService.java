@@ -4584,7 +4584,8 @@ public class StatsPullAtomService extends SystemService {
         int matchContentFrameRateUserPreference =
                 displayManager.getMatchContentFrameRateUserPreference();
         byte[] userDisabledHdrTypes = toBytes(displayManager.getUserDisabledHdrTypes());
-        Display.Mode userPreferredDisplayMode = displayManager.getUserPreferredDisplayMode();
+        Display.Mode userPreferredDisplayMode =
+                displayManager.getGlobalUserPreferredDisplayMode();
         int userPreferredWidth = userPreferredDisplayMode != null
                 ? userPreferredDisplayMode.getPhysicalWidth() : -1;
         int userPreferredHeight = userPreferredDisplayMode != null

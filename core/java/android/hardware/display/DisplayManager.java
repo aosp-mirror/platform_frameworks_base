@@ -1132,41 +1132,48 @@ public final class DisplayManager {
     }
 
     /**
-     * Sets the default display mode, according to the refresh rate and the resolution chosen by the
-     * user.
+     * Sets the global default {@link Display.Mode}.  The display mode includes preference for
+     * resolution and refresh rate. The mode change is applied globally, i.e. to all the connected
+     * displays. If the mode specified is not supported by a connected display, then no mode change
+     * occurs for that display.
      *
+     * @param mode The {@link Display.Mode} to set, which can include resolution and/or
+     * refresh-rate. It is created using {@link Display.Mode.Builder}.
+     *`
      * @hide
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE)
-    public void setUserPreferredDisplayMode(@NonNull Display.Mode mode) {
+    public void setGlobalUserPreferredDisplayMode(@NonNull Display.Mode mode) {
         // Create a new object containing default values for the unused fields like mode ID and
         // alternative refresh rates.
         Display.Mode preferredMode = new Display.Mode(mode.getPhysicalWidth(),
                 mode.getPhysicalHeight(), mode.getRefreshRate());
-        mGlobal.setUserPreferredDisplayMode(preferredMode);
+        mGlobal.setUserPreferredDisplayMode(Display.INVALID_DISPLAY, preferredMode);
     }
 
     /**
-     * Removes the user preferred display mode.
+     * Removes the global user preferred display mode.
+     * User preferred display mode is cleared for all the connected displays.
      *
      * @hide
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE)
-    public void clearUserPreferredDisplayMode() {
-        mGlobal.setUserPreferredDisplayMode(null);
+    public void clearGlobalUserPreferredDisplayMode() {
+        mGlobal.setUserPreferredDisplayMode(Display.INVALID_DISPLAY, null);
     }
 
     /**
-     * Returns the user preferred display mode.
+     * Returns the global user preferred display mode.
+     * If no user preferred mode has been set, or it has been cleared, this method returns null.
      *
      * @hide
      */
     @TestApi
     @Nullable
-    public Display.Mode getUserPreferredDisplayMode() {
-        return mGlobal.getUserPreferredDisplayMode();
+    public Display.Mode getGlobalUserPreferredDisplayMode() {
+        return mGlobal.getUserPreferredDisplayMode(Display.INVALID_DISPLAY);
     }
 
     /**

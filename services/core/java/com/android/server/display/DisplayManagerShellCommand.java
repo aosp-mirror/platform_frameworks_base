@@ -113,13 +113,18 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("  constrain-launcher-metrics [true|false]");
         pw.println("    Sets if Display#getRealSize and getRealMetrics should be constrained for ");
         pw.println("    Launcher.");
-        pw.println("  set-user-preferred-display-mode WIDTH HEIGHT REFRESH-RATE");
+        pw.println("  set-user-preferred-display-mode WIDTH HEIGHT REFRESH-RATE "
+                + "DISPLAY_ID (optional)");
         pw.println("    Sets the user preferred display mode which has fields WIDTH, HEIGHT and "
-                + "REFRESH-RATE");
-        pw.println("  clear-user-preferred-display-mode");
-        pw.println("    Clears the user preferred display mode");
-        pw.println("  get-user-preferred-display-mode");
-        pw.println("    Returns the user preferred display mode or null id no mode is set by user");
+                + "REFRESH-RATE. If DISPLAY_ID is passed, the mode change is applied to display"
+                + "with id = DISPLAY_ID, else mode change is applied globally.");
+        pw.println("  clear-user-preferred-display-mode DISPLAY_ID (optional)");
+        pw.println("    Clears the user preferred display mode. If DISPLAY_ID is passed, the mode"
+                + " is cleared for  display with id = DISPLAY_ID, else mode is cleared globally.");
+        pw.println("  get-user-preferred-display-mode DISPLAY_ID (optional)");
+        pw.println("    Returns the user preferred display mode or null if no mode is set by user."
+                + "If DISPLAY_ID is passed, the mode for display with id = DISPLAY_ID is "
+                + "returned, else global display mode is returned.");
         pw.println("  set-match-content-frame-rate-pref PREFERENCE");
         pw.println("    Sets the match content frame rate preference as PREFERENCE ");
         pw.println("  get-match-content-frame-rate-pref");
@@ -235,28 +240,54 @@ class DisplayManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: invalid format of width, height or refresh rate");
             return 1;
         }
-        if (width < 0 || height < 0 || refreshRate <= 0.0f) {
-            getErrPrintWriter().println("Error: invalid value of width, height or refresh rate");
+        if ((width < 0 || height < 0) && refreshRate <= 0.0f) {
+            getErrPrintWriter().println("Error: invalid value of resolution (width, height)"
+                    + " and refresh rate");
             return 1;
         }
 
-        final Context context = mService.getContext();
-        final DisplayManager dm = context.getSystemService(DisplayManager.class);
-        dm.setUserPreferredDisplayMode(new Display.Mode(width, height, refreshRate));
+        final String displayIdText = getNextArg();
+        int displayId = Display.INVALID_DISPLAY;
+        if (displayIdText != null) {
+            try {
+                displayId = Integer.parseInt(displayIdText);
+            } catch (NumberFormatException e) {
+                getErrPrintWriter().println("Error: invalid format of display ID");
+                return 1;
+            }
+        }
+        mService.setUserPreferredDisplayModeInternal(
+                displayId, new Display.Mode(width, height, refreshRate));
         return 0;
     }
 
     private int clearUserPreferredDisplayMode() {
-        final Context context = mService.getContext();
-        final DisplayManager dm = context.getSystemService(DisplayManager.class);
-        dm.clearUserPreferredDisplayMode();
+        final String displayIdText = getNextArg();
+        int displayId = Display.INVALID_DISPLAY;
+        if (displayIdText != null) {
+            try {
+                displayId = Integer.parseInt(displayIdText);
+            } catch (NumberFormatException e) {
+                getErrPrintWriter().println("Error: invalid format of display ID");
+                return 1;
+            }
+        }
+        mService.setUserPreferredDisplayModeInternal(displayId, null);
         return 0;
     }
 
     private int getUserPreferredDisplayMode() {
-        final Context context = mService.getContext();
-        final DisplayManager dm = context.getSystemService(DisplayManager.class);
-        final Display.Mode mode =  dm.getUserPreferredDisplayMode();
+        final String displayIdText = getNextArg();
+        int displayId = Display.INVALID_DISPLAY;
+        if (displayIdText != null) {
+            try {
+                displayId = Integer.parseInt(displayIdText);
+            } catch (NumberFormatException e) {
+                getErrPrintWriter().println("Error: invalid format of display ID");
+                return 1;
+            }
+        }
+        final Display.Mode mode =  mService.getUserPreferredDisplayModeInternal(displayId);
         if (mode == null) {
             getOutPrintWriter().println("User preferred display mode: null");
             return 0;
