@@ -150,6 +150,7 @@ import com.android.systemui.emergency.EmergencyGesture;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -489,7 +490,6 @@ public class StatusBar extends SystemUI implements
     private final DozeParameters mDozeParameters;
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final StatusBarComponent.Factory mStatusBarComponentFactory;
-    private final StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
     private final PluginManager mPluginManager;
     private final Optional<LegacySplitScreen> mSplitScreenOptional;
     private final StatusBarNotificationActivityStarter.Builder
@@ -538,13 +538,15 @@ public class StatusBar extends SystemUI implements
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final BrightnessSliderController.Factory mBrightnessSliderFactory;
     private final FeatureFlags mFeatureFlags;
-
+    private final FragmentService mFragmentService;
     private final WallpaperController mWallpaperController;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final MessageRouter mMessageRouter;
     private final WallpaperManager mWallpaperManager;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private final TunerService mTunerService;
+
+    private StatusBarComponent mStatusBarComponent;
 
     // Flags for disabling the status bar
     // Two variables becaseu the first one evidently ran out of room for new flags.
@@ -690,6 +692,7 @@ public class StatusBar extends SystemUI implements
     public StatusBar(
             Context context,
             NotificationsController notificationsController,
+            FragmentService fragmentService,
             LightBarController lightBarController,
             AutoHideController autoHideController,
             StatusBarWindowController statusBarWindowController,
@@ -747,7 +750,6 @@ public class StatusBar extends SystemUI implements
             CommandQueue commandQueue,
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             StatusBarComponent.Factory statusBarComponentFactory,
-            StatusBarFragmentComponent.Factory statusBarFragmentComponentFactory,
             PluginManager pluginManager,
             Optional<LegacySplitScreen> splitScreenOptional,
             LightsOutNotifController lightsOutNotifController,
@@ -791,6 +793,7 @@ public class StatusBar extends SystemUI implements
             ActivityLaunchAnimator activityLaunchAnimator) {
         super(context);
         mNotificationsController = notificationsController;
+        mFragmentService = fragmentService;
         mLightBarController = lightBarController;
         mAutoHideController = autoHideController;
         mStatusBarWindowController = statusBarWindowController;
@@ -852,7 +855,6 @@ public class StatusBar extends SystemUI implements
         mCommandQueue = commandQueue;
         mCollapsedStatusBarFragmentLogger = collapsedStatusBarFragmentLogger;
         mStatusBarComponentFactory = statusBarComponentFactory;
-        mStatusBarFragmentComponentFactory = statusBarFragmentComponentFactory;
         mPluginManager = pluginManager;
         mSplitScreenOptional = splitScreenOptional;
         mStatusBarNotificationActivityStarterBuilder = statusBarNotificationActivityStarterBuilder;
@@ -1184,24 +1186,7 @@ public class StatusBar extends SystemUI implements
                 }).getFragmentManager()
                 .beginTransaction()
                 .replace(R.id.status_bar_container,
-                        new CollapsedStatusBarFragment(
-                                mStatusBarFragmentComponentFactory,
-                                mOngoingCallController,
-                                mAnimationScheduler,
-                                mStatusBarLocationPublisher,
-                                mNotificationIconAreaController,
-                                mPanelExpansionStateManager,
-                                mFeatureFlags,
-                                () -> Optional.of(this),
-                                mStatusBarIconController,
-                                mStatusBarHideIconsForBouncerManager,
-                                mKeyguardStateController,
-                                mNetworkController,
-                                mStatusBarStateController,
-                                mCommandQueue,
-                                mCollapsedStatusBarFragmentLogger,
-                                mOperatorNameViewControllerFactory
-                        ),
+                        mStatusBarComponent.createCollapsedStatusBarFragment(),
                         CollapsedStatusBarFragment.TAG)
                 .commit();
 
@@ -1557,32 +1542,34 @@ public class StatusBar extends SystemUI implements
     }
 
     private void inflateStatusBarWindow() {
-        StatusBarComponent statusBarComponent = mStatusBarComponentFactory.create();
-        mNotificationShadeWindowView = statusBarComponent.getNotificationShadeWindowView();
-        mNotificationShadeWindowViewController = statusBarComponent
+        mStatusBarComponent = mStatusBarComponentFactory.create();
+        mFragmentService.addFragmentInstantiationProvider(mStatusBarComponent);
+
+        mNotificationShadeWindowView = mStatusBarComponent.getNotificationShadeWindowView();
+        mNotificationShadeWindowViewController = mStatusBarComponent
                 .getNotificationShadeWindowViewController();
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
         mNotificationShadeWindowViewController.setupExpandedStatusBar();
-        mNotificationPanelViewController = statusBarComponent.getNotificationPanelViewController();
-        statusBarComponent.getLockIconViewController().init();
-        mStackScrollerController = statusBarComponent.getNotificationStackScrollLayoutController();
+        mNotificationPanelViewController = mStatusBarComponent.getNotificationPanelViewController();
+        mStatusBarComponent.getLockIconViewController().init();
+        mStackScrollerController = mStatusBarComponent.getNotificationStackScrollLayoutController();
         mStackScroller = mStackScrollerController.getView();
 
-        mNotificationShelfController = statusBarComponent.getNotificationShelfController();
-        mAuthRippleController = statusBarComponent.getAuthRippleController();
+        mNotificationShelfController = mStatusBarComponent.getNotificationShelfController();
+        mAuthRippleController = mStatusBarComponent.getAuthRippleController();
         mAuthRippleController.init();
 
-        mHeadsUpManager.addListener(statusBarComponent.getStatusBarHeadsUpChangeListener());
+        mHeadsUpManager.addListener(mStatusBarComponent.getStatusBarHeadsUpChangeListener());
 
-        mHeadsUpManager.addListener(statusBarComponent.getStatusBarHeadsUpChangeListener());
+        mHeadsUpManager.addListener(mStatusBarComponent.getStatusBarHeadsUpChangeListener());
 
         // Listen for demo mode changes
-        mDemoModeController.addCallback(statusBarComponent.getStatusBarDemoMode());
+        mDemoModeController.addCallback(mStatusBarComponent.getStatusBarDemoMode());
 
         if (mCommandQueueCallbacks != null) {
             mCommandQueue.removeCallback(mCommandQueueCallbacks);
         }
-        mCommandQueueCallbacks = statusBarComponent.getStatusBarCommandQueueCallbacks();
+        mCommandQueueCallbacks = mStatusBarComponent.getStatusBarCommandQueueCallbacks();
         // Connect in to the status bar manager service
         mCommandQueue.addCallback(mCommandQueueCallbacks);
     }
@@ -2000,7 +1987,7 @@ public class StatusBar extends SystemUI implements
         }
     }
 
-    public void maybeEscalateHeadsUp() {
+    private void maybeEscalateHeadsUp() {
         mHeadsUpManager.getAllEntries().forEach(entry -> {
             final StatusBarNotification sbn = entry.getSbn();
             final Notification notification = sbn.getNotification();
@@ -2011,6 +1998,7 @@ public class StatusBar extends SystemUI implements
                 try {
                     EventLog.writeEvent(EventLogTags.SYSUI_HEADS_UP_ESCALATION,
                             sbn.getKey());
+                    wakeUpForFullScreenIntent();
                     notification.fullScreenIntent.send();
                     entry.notifyFullScreenIntentLaunched();
                 } catch (PendingIntent.CanceledException e) {
@@ -2018,6 +2006,17 @@ public class StatusBar extends SystemUI implements
             }
         });
         mHeadsUpManager.releaseAllImmediately();
+    }
+
+    void wakeUpForFullScreenIntent() {
+        if (isGoingToSleep() || mDozing) {
+            mPowerManager.wakeUp(
+                    SystemClock.uptimeMillis(),
+                    PowerManager.WAKE_REASON_APPLICATION,
+                    "com.android.systemui:full_screen_intent");
+            mWakeUpComingFromTouch = false;
+            mWakeUpTouchLocation = null;
+        }
     }
 
     void makeExpandedVisible(boolean force) {
@@ -3549,7 +3548,7 @@ public class StatusBar extends SystemUI implements
             DejankUtils.startDetectingBlockingIpcs(tag);
             updateRevealEffect(false /* wakingUp */);
             updateNotificationPanelTouchState();
-            notifyHeadsUpGoingToSleep();
+            maybeEscalateHeadsUp();
             dismissVolumeDialog();
             mWakeUpCoordinator.setFullyAwake(false);
             mBypassHeadsUpNotifier.setFullyAwake(false);
@@ -4092,10 +4091,6 @@ public class StatusBar extends SystemUI implements
         } catch (RemoteException e) {
             // Won't fail unless the world has ended.
         }
-    }
-
-    protected void notifyHeadsUpGoingToSleep() {
-        maybeEscalateHeadsUp();
     }
 
     /**

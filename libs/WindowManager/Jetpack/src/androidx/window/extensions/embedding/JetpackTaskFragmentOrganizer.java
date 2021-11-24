@@ -27,8 +27,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.ArrayMap;
-import android.view.SurfaceControl;
-import android.window.TaskFragmentAppearedInfo;
 import android.window.TaskFragmentCreationParams;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOrganizer;
@@ -51,9 +49,6 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     /** Mapping from the client assigned unique token to the {@link TaskFragmentInfo}. */
     private final Map<IBinder, TaskFragmentInfo> mFragmentInfos = new ArrayMap<>();
 
-    /** Mapping from the client assigned unique token to the TaskFragment {@link SurfaceControl}. */
-    private final Map<IBinder, SurfaceControl> mFragmentLeashes = new ArrayMap<>();
-
     /**
      * Mapping from the client assigned unique token to the TaskFragment parent
      * {@link Configuration}.
@@ -67,7 +62,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      * Callback that notifies the controller about changes to task fragments.
      */
     interface TaskFragmentCallback {
-        void onTaskFragmentAppeared(@NonNull TaskFragmentAppearedInfo taskFragmentAppearedInfo);
+        void onTaskFragmentAppeared(@NonNull TaskFragmentInfo taskFragmentInfo);
         void onTaskFragmentInfoChanged(@NonNull TaskFragmentInfo taskFragmentInfo);
         void onTaskFragmentVanished(@NonNull TaskFragmentInfo taskFragmentInfo);
         void onTaskFragmentParentInfoChanged(@NonNull IBinder fragmentToken,
@@ -259,15 +254,12 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     }
 
     @Override
-    public void onTaskFragmentAppeared(@NonNull TaskFragmentAppearedInfo taskFragmentAppearedInfo) {
-        final TaskFragmentInfo info = taskFragmentAppearedInfo.getTaskFragmentInfo();
-        final IBinder fragmentToken = info.getFragmentToken();
-        final SurfaceControl leash = taskFragmentAppearedInfo.getLeash();
-        mFragmentInfos.put(fragmentToken, info);
-        mFragmentLeashes.put(fragmentToken, leash);
+    public void onTaskFragmentAppeared(@NonNull TaskFragmentInfo taskFragmentInfo) {
+        final IBinder fragmentToken = taskFragmentInfo.getFragmentToken();
+        mFragmentInfos.put(fragmentToken, taskFragmentInfo);
 
         if (mCallback != null) {
-            mCallback.onTaskFragmentAppeared(taskFragmentAppearedInfo);
+            mCallback.onTaskFragmentAppeared(taskFragmentInfo);
         }
     }
 
@@ -284,7 +276,6 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     @Override
     public void onTaskFragmentVanished(@NonNull TaskFragmentInfo taskFragmentInfo) {
         mFragmentInfos.remove(taskFragmentInfo.getFragmentToken());
-        mFragmentLeashes.remove(taskFragmentInfo.getFragmentToken());
         mFragmentParentConfigs.remove(taskFragmentInfo.getFragmentToken());
 
         if (mCallback != null) {

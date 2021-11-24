@@ -64,6 +64,9 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
+import com.android.systemui.statusbar.phone.BarTransitions;
+import com.android.systemui.statusbar.phone.LightBarController;
+import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -85,6 +88,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private NavigationModeController mNavigationModeController;
     private SysUiState mSysUiState;
     private AutoHideController mAutoHideController;
+    private LightBarController mLightBarController;
+    private LightBarTransitionsController mLightBarTransitionsController;
     private int mDisplayId;
     private int mNavigationIconHints;
     private final NavBarHelper.NavbarTaskbarStateUpdater mNavbarTaskbarStateUpdater =
@@ -141,7 +146,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             NavBarHelper navBarHelper,
             NavigationModeController navigationModeController,
             SysUiState sysUiState, DumpManager dumpManager,
-            AutoHideController autoHideController) {
+            AutoHideController autoHideController,
+            LightBarController lightBarController) {
         // TODO: adding this in the ctor results in a dagger dependency cycle :(
         mCommandQueue = commandQueue;
         mOverviewProxyService = overviewProxyService;
@@ -150,6 +156,30 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mSysUiState = sysUiState;
         dumpManager.registerDumpable(this);
         mAutoHideController = autoHideController;
+        mLightBarController = lightBarController;
+        mLightBarTransitionsController = createLightBarTransitionsController();
+    }
+
+    // Separated into a method to keep setDependencies() clean/readable.
+    private LightBarTransitionsController createLightBarTransitionsController() {
+        return new LightBarTransitionsController(mContext,
+                new LightBarTransitionsController.DarkIntensityApplier() {
+                    @Override
+                    public void applyDarkIntensity(float darkIntensity) {
+                        mOverviewProxyService.onNavButtonsDarkIntensityChanged(darkIntensity);
+                    }
+
+                    @Override
+                    public int getTintAnimationDuration() {
+                        return LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION;
+                    }
+                }, mCommandQueue) {
+            @Override
+            public boolean supportsIconTintForNavMode(int navigationMode) {
+                // Always tint taskbar nav buttons (region sampling handles gesture bar separately).
+                return true;
+            }
+        };
     }
 
     public void init(int displayId) {
@@ -171,6 +201,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         // Set initial state for any listeners
         updateSysuiFlags();
         mAutoHideController.setNavigationBar(mAutoHideUiElement);
+        mLightBarController.setNavigationBar(mLightBarTransitionsController);
         mInitialized = true;
     }
 
@@ -189,6 +220,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             mWindowContext = null;
         }
         mAutoHideController.setNavigationBar(null);
+        mLightBarTransitionsController.destroy(mContext);
+        mLightBarController.setNavigationBar(null);
         mInitialized = false;
     }
 
@@ -268,6 +301,10 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme, int behavior,
             InsetsVisibilities requestedVisibilities, String packageName) {
         mOverviewProxyService.onSystemBarAttributesChanged(displayId, behavior);
+        if (mLightBarController != null && displayId == mDisplayId) {
+            mLightBarController.onNavigationBarAppearanceChanged(appearance, false/*nbModeChanged*/,
+                    BarTransitions.MODE_TRANSPARENT /*navigationBarMode*/, navbarColorManagedByIme);
+        }
         if (mBehavior != behavior) {
             mBehavior = behavior;
             updateSysuiFlags();
