@@ -3438,7 +3438,8 @@ public class StatsPullAtomService extends SystemService {
                             metricsState.getLatestGeolocationSuggestion()),
                     metricsState.isTelephonyTimeZoneFallbackSupported(),
                     metricsState.getDeviceTimeZoneId(),
-                    metricsState.isEnhancedMetricsCollectionEnabled()
+                    metricsState.isEnhancedMetricsCollectionEnabled(),
+                    metricsState.getGeoDetectionRunInBackgroundEnabled()
             ));
         } catch (RuntimeException e) {
             Slog.e(TAG, "Getting time zone detection state failed: ", e);
