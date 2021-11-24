@@ -150,7 +150,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
      * See also {@link #resetVolatileTestConfig()}.
      */
     @GuardedBy("this")
-    private boolean mRecordProviderStateChanges;
+    private boolean mRecordStateChangesForTests;
 
     private ServiceConfigAccessorImpl(@NonNull Context context) {
         mContext = Objects.requireNonNull(context);
@@ -453,13 +453,13 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     }
 
     @Override
-    public synchronized void setRecordProviderStateChanges(boolean enabled) {
-        mRecordProviderStateChanges = enabled;
+    public synchronized void setRecordStateChangesForTests(boolean enabled) {
+        mRecordStateChangesForTests = enabled;
     }
 
     @Override
-    public synchronized boolean getRecordProviderStateChanges() {
-        return mRecordProviderStateChanges;
+    public synchronized boolean getRecordStateChangesForTests() {
+        return mRecordStateChangesForTests;
     }
 
     @Override
@@ -548,7 +548,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         mTestPrimaryLocationTimeZoneProviderMode = null;
         mTestSecondaryLocationTimeZoneProviderPackageName = null;
         mTestSecondaryLocationTimeZoneProviderMode = null;
-        mRecordProviderStateChanges = false;
+        mRecordStateChangesForTests = false;
     }
 
     private boolean isTelephonyFallbackSupported() {
