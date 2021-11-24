@@ -30,7 +30,8 @@ public class VcnWifiUnderlyingNetworkPriorityTest {
     private static final String SSID = "TestWifi";
     private static final int INVALID_NETWORK_QUALITY = -1;
 
-    private static VcnWifiUnderlyingNetworkPriority getTestNetworkPriority() {
+    // Package private for use in VcnGatewayConnectionConfigTest
+    static VcnWifiUnderlyingNetworkPriority getTestNetworkPriority() {
         return new VcnWifiUnderlyingNetworkPriority.Builder()
                 .setNetworkQuality(NETWORK_QUALITY_OK)
                 .setAllowMetered(true /* allowMetered */)
