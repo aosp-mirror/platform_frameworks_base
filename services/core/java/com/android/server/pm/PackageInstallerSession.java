@@ -2901,7 +2901,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         final PackageInfo pkgInfo = mPm.getPackageInfo(
                 params.appPackageName, PackageManager.GET_SIGNATURES
-                        | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
+                        | PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES /*flags*/, userId);
 
         // Partial installs must be consistent with existing install
         if (params.mode == SessionParams.MODE_INHERIT_EXISTING
