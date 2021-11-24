@@ -241,7 +241,7 @@ public class ExpandableNotificationRowController implements NodeController {
     public void addChildAt(NodeController child, int index) {
         ExpandableNotificationRow childView = (ExpandableNotificationRow) child.getView();
 
-        mView.addChildNotification((ExpandableNotificationRow) child.getView());
+        mView.addChildNotification((ExpandableNotificationRow) child.getView(), index);
         mListContainer.notifyGroupChildAdded(childView);
     }
 
