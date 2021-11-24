@@ -6924,7 +6924,6 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final int FLAG_RECEIVER_OFFLOAD = 0x80000000;
     /**
-    /**
      * If set, when sending a broadcast the recipient will run on the system dedicated queue.
      *
      * @hide
