@@ -3842,6 +3842,7 @@ public abstract class Context {
             UWB_SERVICE,
             MEDIA_METRICS_SERVICE,
             SUPPLEMENTAL_PROCESS_SERVICE,
+            //@hide: SAFETY_CENTER_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -5869,6 +5870,17 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String SUPPLEMENTAL_PROCESS_SERVICE = "supplemental_process";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.safetycenter.SafetyCenterManager} instance for interacting with the safety center.
+     *
+     * @see #getSystemService(String)
+     * @see android.safetycenter.SafetyCenterManager
+     * @hide
+     */
+    @SystemApi
+    public static final String SAFETY_CENTER_SERVICE = "safety_center";
 
     /**
      * Determine whether the given permission is allowed for a particular
