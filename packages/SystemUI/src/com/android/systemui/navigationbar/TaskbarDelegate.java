@@ -43,6 +43,8 @@ import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.util.Log;
 import android.view.Display;
 import android.view.InsetsVisibilities;
 import android.view.View;
@@ -76,12 +78,13 @@ import javax.inject.Singleton;
 public class TaskbarDelegate implements CommandQueue.Callbacks,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
         ComponentCallbacks, Dumpable {
+    private static final String TAG = TaskbarDelegate.class.getSimpleName();
 
     private final EdgeBackGestureHandler mEdgeBackGestureHandler;
-
+    private boolean mInitialized;
     private CommandQueue mCommandQueue;
     private OverviewProxyService mOverviewProxyService;
-    private NavigationBarA11yHelper mNavigationBarA11yHelper;
+    private NavBarHelper mNavBarHelper;
     private NavigationModeController mNavigationModeController;
     private SysUiState mSysUiState;
     private AutoHideController mAutoHideController;
@@ -89,8 +92,18 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private LightBarTransitionsController mLightBarTransitionsController;
     private int mDisplayId;
     private int mNavigationIconHints;
-    private final NavigationBarA11yHelper.NavA11yEventListener mNavA11yEventListener =
-            this::updateSysuiFlags;
+    private final NavBarHelper.NavbarTaskbarStateUpdater mNavbarTaskbarStateUpdater =
+            new NavBarHelper.NavbarTaskbarStateUpdater() {
+                @Override
+                public void updateAccessibilityServicesState() {
+                    updateSysuiFlags();
+                }
+
+                @Override
+                public void updateAssistantAvailable(boolean available) {
+                    updateAssistantAvailability(available);
+                }
+            };
     private int mDisabledFlags;
     private @WindowVisibleState int mTaskBarWindowState = WINDOW_STATE_SHOWING;
     private @Behavior int mBehavior;
@@ -130,7 +143,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     public void setDependencies(CommandQueue commandQueue,
             OverviewProxyService overviewProxyService,
-            NavigationBarA11yHelper navigationBarA11yHelper,
+            NavBarHelper navBarHelper,
             NavigationModeController navigationModeController,
             SysUiState sysUiState, DumpManager dumpManager,
             AutoHideController autoHideController,
@@ -138,7 +151,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         // TODO: adding this in the ctor results in a dagger dependency cycle :(
         mCommandQueue = commandQueue;
         mOverviewProxyService = overviewProxyService;
-        mNavigationBarA11yHelper = navigationBarA11yHelper;
+        mNavBarHelper = navBarHelper;
         mNavigationModeController = navigationModeController;
         mSysUiState = sysUiState;
         dumpManager.registerDumpable(this);
@@ -170,12 +183,16 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     public void init(int displayId) {
+        if (mInitialized) {
+            return;
+        }
         mDisplayId = displayId;
         mCommandQueue.addCallback(this);
         mOverviewProxyService.addCallback(this);
         mEdgeBackGestureHandler.onNavigationModeChanged(
                 mNavigationModeController.addListener(this));
-        mNavigationBarA11yHelper.registerA11yEventListener(mNavA11yEventListener);
+        mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
+        mNavBarHelper.init();
         mEdgeBackGestureHandler.onNavBarAttached();
         // Initialize component callback
         Display display = mDisplayManager.getDisplay(displayId);
@@ -185,29 +202,31 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         updateSysuiFlags();
         mAutoHideController.setNavigationBar(mAutoHideUiElement);
         mLightBarController.setNavigationBar(mLightBarTransitionsController);
+        mInitialized = true;
     }
 
     public void destroy() {
+        if (!mInitialized) {
+            return;
+        }
         mCommandQueue.removeCallback(this);
         mOverviewProxyService.removeCallback(this);
         mNavigationModeController.removeListener(this);
-        mNavigationBarA11yHelper.removeA11yEventListener(mNavA11yEventListener);
+        mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
+        mNavBarHelper.destroy();
         mEdgeBackGestureHandler.onNavBarDetached();
         if (mWindowContext != null) {
             mWindowContext.unregisterComponentCallbacks(this);
             mWindowContext = null;
         }
         mAutoHideController.setNavigationBar(null);
-//<<<<<<< HEAD
         mLightBarTransitionsController.destroy(mContext);
         mLightBarController.setNavigationBar(null);
-//        mInitialized = false;
-//=======
-//>>>>>>> 2d145412fc44 (Revert "Extract assistant logic from NavigationBar to share with Taskbar")
+        mInitialized = false;
     }
 
     private void updateSysuiFlags() {
-        int a11yFlags = mNavigationBarA11yHelper.getA11yButtonState();
+        int a11yFlags = mNavBarHelper.getA11yButtonState();
         boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
         boolean longClickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
 
@@ -229,6 +248,18 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                 .setFlag(SYSUI_STATE_SCREEN_PINNING,
                         ActivityManagerWrapper.getInstance().isScreenPinningActive())
                 .commitUpdate(mDisplayId);
+    }
+
+    private void updateAssistantAvailability(boolean assistantAvailable) {
+        if (mOverviewProxyService.getProxy() == null) {
+            return;
+        }
+
+        try {
+            mOverviewProxyService.getProxy().onAssistantAvailable(assistantAvailable);
+        } catch (RemoteException e) {
+            Log.e(TAG, "onAssistantAvailable() failed, available: " + assistantAvailable, e);
+        }
     }
 
     @Override
