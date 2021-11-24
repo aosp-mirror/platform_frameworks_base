@@ -67,22 +67,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
-import android.database.ContentObserver;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.inputmethodservice.InputMethodService;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -200,8 +196,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final Handler mHandler;
     private final NavigationBarOverlayController mNavbarOverlayController;
     private final UiEventLogger mUiEventLogger;
-    private final NavigationBarA11yHelper mNavigationBarA11yHelper;
-    private final UserTracker mUserTracker;
+    private final NavBarHelper mNavBarHelper;
     private final NotificationShadeDepthController mNotificationShadeDepthController;
 
     private Bundle mSavedState;
@@ -213,9 +208,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private int mNavigationIconHints = 0;
     private @TransitionMode int mNavigationBarMode;
     private ContentResolver mContentResolver;
-    private boolean mAssistantAvailable;
     private boolean mLongPressHomeEnabled;
-    private boolean mAssistantTouchGestureEnabled;
 
     private int mDisabledFlags1;
     private int mDisabledFlags2;
@@ -309,16 +302,31 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
     };
 
+    private final NavBarHelper.NavbarTaskbarStateUpdater mNavbarTaskbarStateUpdater =
+            new NavBarHelper.NavbarTaskbarStateUpdater() {
+                @Override
+                public void updateAccessibilityServicesState() {
+                    updateAcessibilityStateFlags();
+                }
+
+                @Override
+                public void updateAssistantAvailable(boolean available) {
+                    // TODO(b/198002034): Content observers currently can still be called back after
+                    //  being unregistered, and in this case we can ignore the change if the nav bar
+                    //  has been destroyed already
+                    if (mNavigationBarView == null) {
+                        return;
+                    }
+                    mLongPressHomeEnabled = mNavBarHelper.getLongPressHomeEnabled();
+                    updateAssistantEntrypoints(available);
+                }
+            };
+
     private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
         @Override
         public void onConnectionChanged(boolean isConnected) {
             mNavigationBarView.updateStates();
             updateScreenPinningGestures();
-
-            // Send the assistant availability upon connection
-            if (isConnected) {
-                updateAssistantEntrypoints();
-            }
         }
 
         @Override
@@ -421,20 +429,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
     };
 
-    private final ContentObserver mAssistContentObserver = new ContentObserver(
-            new Handler(Looper.getMainLooper())) {
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            // TODO(b/198002034): Content observers currently can still be called back after being
-            // unregistered, and in this case we can ignore the change if the nav bar has been
-            // destroyed already
-            if (mNavigationBarView == null) {
-                return;
-            }
-            updateAssistantEntrypoints();
-        }
-    };
-
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
             new DeviceConfig.OnPropertiesChangedListener() {
                 @Override
@@ -504,7 +498,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             @Main Handler mainHandler,
             NavigationBarOverlayController navbarOverlayController,
             UiEventLogger uiEventLogger,
-            NavigationBarA11yHelper navigationBarA11yHelper,
+            NavBarHelper navBarHelper,
             UserTracker userTracker,
             LightBarController mainLightBarController,
             LightBarController.Factory lightBarControllerFactory,
@@ -535,8 +529,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mHandler = mainHandler;
         mNavbarOverlayController = navbarOverlayController;
         mUiEventLogger = uiEventLogger;
-        mNavigationBarA11yHelper = navigationBarA11yHelper;
-        mUserTracker = userTracker;
+        mNavBarHelper = navBarHelper;
         mNotificationShadeDepthController = notificationShadeDepthController;
         mMainLightBarController = mainLightBarController;
         mLightBarControllerFactory = lightBarControllerFactory;
@@ -568,18 +561,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mIsOnDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
 
         mCommandQueue.addCallback(this);
-        mAssistantAvailable = mAssistManagerLazy.get()
-                .getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
+        mLongPressHomeEnabled = mNavBarHelper.getLongPressHomeEnabled();
         mContentResolver = mContext.getContentResolver();
-        mContentResolver.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.ASSISTANT),
-                false /* notifyForDescendants */, mAssistContentObserver, UserHandle.USER_ALL);
-        mContentResolver.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED),
-                false, mAssistContentObserver, UserHandle.USER_ALL);
-        mContentResolver.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED),
-                false, mAssistContentObserver, UserHandle.USER_ALL);
+        mNavBarHelper.init();
         mAllowForceNavBarHandleOpaque = mContext.getResources().getBoolean(
                 R.bool.allow_force_nav_bar_handle_opaque);
         mForceNavBarHandleOpaque = DeviceConfig.getBoolean(
@@ -593,7 +577,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         )).filter(duration -> duration != 0);
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI, mHandler::post, mOnPropertiesChangedListener);
-        updateAssistantEntrypoints();
 
         if (savedState != null) {
             mDisabledFlags1 = savedState.getInt(EXTRA_DISABLE_STATE, 0);
@@ -620,8 +603,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mWindowManager.removeViewImmediate(mNavigationBarView.getRootView());
         mNavigationModeController.removeListener(this);
 
-        mNavigationBarA11yHelper.removeA11yEventListener(mAccessibilityListener);
-        mContentResolver.unregisterContentObserver(mAssistContentObserver);
+        mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
+        mNavBarHelper.destroy();
         mDeviceProvisionedController.removeCallback(mUserSetupListener);
         mNotificationShadeDepthController.removeListener(mDepthListener);
 
@@ -643,7 +626,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mNavigationBarView.setWindowVisible(isNavBarWindowVisible());
         mNavigationBarView.setBehavior(mBehavior);
 
-        mNavigationBarA11yHelper.registerA11yEventListener(mAccessibilityListener);
+        mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
         mSplitScreenOptional.ifPresent(mNavigationBarView::registerDockedListener);
         mPipOptional.ifPresent(mNavigationBarView::registerPipExclusionBoundsChangeListener);
@@ -716,7 +699,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mHandler.removeCallbacks(mAutoDim);
         mHandler.removeCallbacks(mOnVariableDurationHomeLongClick);
         mHandler.removeCallbacks(mEnableLayoutTransitions);
-        mNavigationBarA11yHelper.removeA11yEventListener(mAccessibilityListener);
+        mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mFrame = null;
         mNavigationBarView = null;
         mOrientationHandle = null;
@@ -885,7 +868,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         pw.println("  mCurrentRotation=" + mCurrentRotation);
         pw.println("  mHomeButtonLongPressDurationMs=" + mHomeButtonLongPressDurationMs);
         pw.println("  mLongPressHomeEnabled=" + mLongPressHomeEnabled);
-        pw.println("  mAssistantTouchGestureEnabled=" + mAssistantTouchGestureEnabled);
         pw.println("  mNavigationBarWindowState="
                 + windowStateToString(mNavigationBarWindowState));
         pw.println("  mNavigationBarMode="
@@ -1175,7 +1157,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         ButtonDispatcher accessibilityButton = mNavigationBarView.getAccessibilityButton();
         accessibilityButton.setOnClickListener(this::onAccessibilityClick);
         accessibilityButton.setOnLongClickListener(this::onAccessibilityLongClick);
-        updateAccessibilityServicesState();
+        updateAcessibilityStateFlags();
 
         ButtonDispatcher imeSwitcherButton = mNavigationBarView.getImeSwitchButton();
         imeSwitcherButton.setOnClickListener(this::onImeSwitcherClick);
@@ -1400,8 +1382,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         return true;
     }
 
-    void updateAccessibilityServicesState() {
-        int a11yFlags = mNavigationBarA11yHelper.getA11yButtonState();
+    void updateAcessibilityStateFlags() {
+        int a11yFlags = mNavBarHelper.getA11yButtonState();
 
         if (mNavigationBarView != null) {
             boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
@@ -1413,7 +1395,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     public void updateSystemUiStateFlags(int a11yFlags) {
         if (a11yFlags < 0) {
-            a11yFlags = mNavigationBarA11yHelper.getA11yButtonState();
+            a11yFlags = mNavBarHelper.getA11yButtonState();
         }
         boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
         boolean longClickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
@@ -1440,24 +1422,10 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
     }
 
-    private void updateAssistantEntrypoints() {
-        mAssistantAvailable = mAssistManagerLazy.get()
-                .getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
-        boolean longPressDefault = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
-        mLongPressHomeEnabled = Settings.Secure.getIntForUser(mContentResolver,
-                Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, longPressDefault ? 1 : 0,
-                mUserTracker.getUserId()) != 0;
-        boolean gestureDefault = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_assistTouchGestureEnabledDefault);
-        mAssistantTouchGestureEnabled = Settings.Secure.getIntForUser(mContentResolver,
-                Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED, gestureDefault ? 1 : 0,
-                mUserTracker.getUserId()) != 0;
+    private void updateAssistantEntrypoints(boolean assistantAvailable) {
         if (mOverviewProxyService.getProxy() != null) {
             try {
-                mOverviewProxyService.getProxy().onAssistantAvailable(mAssistantAvailable
-                        && mAssistantTouchGestureEnabled
-                        && QuickStepContract.isGesturalMode(mNavBarMode));
+                mOverviewProxyService.getProxy().onAssistantAvailable(assistantAvailable);
             } catch (RemoteException e) {
                 Log.w(TAG, "Unable to send assistant availability data to launcher");
             }
@@ -1528,8 +1496,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     @Override
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
-        // update assistant entry points on system navigation radio button click
-        updateAssistantEntrypoints();
 
         if (!QuickStepContract.isGesturalMode(mode)) {
             // Reset the override alpha
@@ -1567,9 +1533,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     public void finishBarAnimations() {
         mNavigationBarView.getBarTransitions().finishAnimations();
     }
-
-    private final NavigationBarA11yHelper.NavA11yEventListener mAccessibilityListener =
-            this::updateAccessibilityServicesState;
 
     private WindowManager.LayoutParams getBarLayoutParams(int rotation) {
         WindowManager.LayoutParams lp = getBarLayoutParamsForRotation(rotation);
@@ -1674,7 +1637,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             }
             if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 // The accessibility settings may be different for the new user
-                updateAccessibilityServicesState();
+                updateAcessibilityStateFlags();
             }
         }
     };
@@ -1710,7 +1673,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         private final Handler mMainHandler;
         private final NavigationBarOverlayController mNavbarOverlayController;
         private final UiEventLogger mUiEventLogger;
-        private final NavigationBarA11yHelper mNavigationBarA11yHelper;
+        private final NavBarHelper mNavBarHelper;
         private final UserTracker mUserTracker;
         private final LightBarController mMainLightBarController;
         private final LightBarController.Factory mLightBarControllerFactory;
@@ -1743,7 +1706,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 @Main Handler mainHandler,
                 NavigationBarOverlayController navbarOverlayController,
                 UiEventLogger uiEventLogger,
-                NavigationBarA11yHelper navigationBarA11yHelper,
+                NavBarHelper navBarHelper,
                 UserTracker userTracker,
                 LightBarController mainLightBarController,
                 LightBarController.Factory lightBarControllerFactory,
@@ -1773,7 +1736,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             mMainHandler = mainHandler;
             mNavbarOverlayController = navbarOverlayController;
             mUiEventLogger = uiEventLogger;
-            mNavigationBarA11yHelper = navigationBarA11yHelper;
+            mNavBarHelper = navBarHelper;
             mUserTracker = userTracker;
             mMainLightBarController = mainLightBarController;
             mLightBarControllerFactory = lightBarControllerFactory;
@@ -1794,7 +1757,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                     mSplitScreenOptional, mRecentsOptional, mStatusBarOptionalLazy,
                     mShadeController, mNotificationRemoteInputManager,
                     mNotificationShadeDepthController, mSystemActions, mMainHandler,
-                    mNavbarOverlayController, mUiEventLogger, mNavigationBarA11yHelper,
+                    mNavbarOverlayController, mUiEventLogger, mNavBarHelper,
                     mUserTracker, mMainLightBarController, mLightBarControllerFactory,
                     mMainAutoHideController, mAutoHideControllerFactory, mTelecomManagerOptional,
                     mInputMethodManager);

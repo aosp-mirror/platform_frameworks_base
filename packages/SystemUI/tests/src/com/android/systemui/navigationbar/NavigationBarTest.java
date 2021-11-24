@@ -136,7 +136,7 @@ public class NavigationBarTest extends SysuiTestCase {
     @Mock
     EdgeBackGestureHandler mEdgeBackGestureHandler;
     @Mock
-    NavigationBarA11yHelper mNavigationBarA11yHelper;
+    NavBarHelper mNavBarHelper;
     @Mock
     private LightBarController mLightBarController;
     @Mock
@@ -227,6 +227,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_SYSTEMUI)
                     .setLong(HOME_BUTTON_LONG_PRESS_DURATION_MS, 100)
                     .build());
+        when(mNavBarHelper.getLongPressHomeEnabled()).thenReturn(true);
         mNavigationBar.onViewAttachedToWindow(mNavigationBar.createView(null));
 
         mNavigationBar.onHomeTouch(mNavigationBar.getView(), MotionEvent.obtain(
@@ -330,14 +331,14 @@ public class NavigationBarTest extends SysuiTestCase {
     public void testA11yEventAfterDetach() {
         View v = mNavigationBar.createView(null);
         mNavigationBar.onViewAttachedToWindow(v);
-        verify(mNavigationBarA11yHelper).registerA11yEventListener(any(
-                NavigationBarA11yHelper.NavA11yEventListener.class));
+        verify(mNavBarHelper).registerNavTaskStateUpdater(any(
+                NavBarHelper.NavbarTaskbarStateUpdater.class));
         mNavigationBar.onViewDetachedFromWindow(v);
-        verify(mNavigationBarA11yHelper).removeA11yEventListener(any(
-                NavigationBarA11yHelper.NavA11yEventListener.class));
+        verify(mNavBarHelper).removeNavTaskStateUpdater(any(
+                NavBarHelper.NavbarTaskbarStateUpdater.class));
 
         // Should be safe even though the internal view is now null.
-        mNavigationBar.updateAccessibilityServicesState();
+        mNavigationBar.updateAcessibilityStateFlags();
     }
 
     private NavigationBar createNavBar(Context context) {
@@ -367,7 +368,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 mHandler,
                 mock(NavigationBarOverlayController.class),
                 mUiEventLogger,
-                mNavigationBarA11yHelper,
+                mNavBarHelper,
                 mock(UserTracker.class),
                 mLightBarController,
                 mLightBarcontrollerFactory,
