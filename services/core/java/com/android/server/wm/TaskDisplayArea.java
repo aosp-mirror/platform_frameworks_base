@@ -1030,18 +1030,23 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         Color color = Color.valueOf(colorInt);
         mColorLayerCounter++;
 
-        getPendingTransaction()
-                .setColor(mSurfaceControl, new float[]{color.red(), color.green(), color.blue()});
-
-        scheduleAnimation();
+        // Only apply the background color if the TDA is actually attached and has a valid surface
+        // to set the background color on. We still want to keep track of the background color state
+        // even if we are not showing it for when/if the TDA is reattached and gets a valid surface
+        if (mSurfaceControl != null) {
+            getPendingTransaction()
+                    .setColor(mSurfaceControl,
+                            new float[]{color.red(), color.green(), color.blue()});
+            scheduleAnimation();
+        }
     }
 
     void clearBackgroundColor() {
         mColorLayerCounter--;
 
         // Only clear the color layer if we have received the same amounts of clear as set
-        // requests.
-        if (mColorLayerCounter == 0) {
+        // requests and TDA has a non null surface control (i.e. is attached)
+        if (mColorLayerCounter == 0 && mSurfaceControl != null) {
             getPendingTransaction().unsetColor(mSurfaceControl);
             scheduleAnimation();
         }
