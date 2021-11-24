@@ -110,6 +110,11 @@ public class CameraDeviceImpl extends CameraDevice
     private int mRepeatingRequestId = REQUEST_ID_NONE;
     // Latest repeating request list's types
     private int[] mRepeatingRequestTypes;
+
+    // Cache failed requests to process later in case of a repeating error callback
+    private int mFailedRepeatingRequestId = REQUEST_ID_NONE;
+    private int[] mFailedRepeatingRequestTypes;
+
     // Map stream IDs to input/output configurations
     private SimpleEntry<Integer, InputConfiguration> mConfiguredInput =
             new SimpleEntry<>(REQUEST_ID_NONE, null);
@@ -1326,16 +1331,25 @@ public class CameraDeviceImpl extends CameraDevice
 
                 int requestId = mRepeatingRequestId;
                 mRepeatingRequestId = REQUEST_ID_NONE;
+                mFailedRepeatingRequestId = REQUEST_ID_NONE;
                 int[] requestTypes = mRepeatingRequestTypes;
                 mRepeatingRequestTypes = null;
+                mFailedRepeatingRequestTypes = null;
 
                 long lastFrameNumber;
                 try {
                     lastFrameNumber = mRemoteDevice.cancelRequest(requestId);
                 } catch (IllegalArgumentException e) {
                     if (DEBUG) {
-                        Log.v(TAG, "Repeating request was already stopped for request " + requestId);
+                        Log.v(TAG, "Repeating request was already stopped for request " +
+                                requestId);
                     }
+                    // Cache request id and request types in case of a race with
+                    // "onRepeatingRequestError" which may no yet be scheduled on another thread
+                    // or blocked by us.
+                    mFailedRepeatingRequestId = requestId;
+                    mFailedRepeatingRequestTypes = requestTypes;
+
                     // Repeating request was already stopped. Nothing more to do.
                     return;
                 }
@@ -1965,7 +1979,17 @@ public class CameraDeviceImpl extends CameraDevice
             synchronized(mInterfaceLock) {
                 // Camera is already closed or no repeating request is present.
                 if (mRemoteDevice == null || mRepeatingRequestId == REQUEST_ID_NONE) {
-                    return; // Camera already closed
+                    if ((mFailedRepeatingRequestId == repeatingRequestId) &&
+                            (mFailedRepeatingRequestTypes != null) && (mRemoteDevice != null)) {
+                        Log.v(TAG, "Resuming stop of failed repeating request with id: " +
+                                mFailedRepeatingRequestId);
+
+                        checkEarlyTriggerSequenceCompleteLocked(mFailedRepeatingRequestId,
+                                lastFrameNumber, mFailedRepeatingRequestTypes);
+                        mFailedRepeatingRequestId = REQUEST_ID_NONE;
+                        mFailedRepeatingRequestTypes = null;
+                    }
+                    return;
                 }
 
                 // Redirect device callback to the offline session in case we are in the middle
