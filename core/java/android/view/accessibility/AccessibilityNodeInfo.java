@@ -3957,8 +3957,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            parcel.writeString(mCollectionItemInfo.getRowTitle());
             parcel.writeInt(mCollectionItemInfo.getRowIndex());
             parcel.writeInt(mCollectionItemInfo.getRowSpan());
+            parcel.writeString(mCollectionItemInfo.getColumnTitle());
             parcel.writeInt(mCollectionItemInfo.getColumnIndex());
             parcel.writeInt(mCollectionItemInfo.getColumnSpan());
             parcel.writeInt(mCollectionItemInfo.isHeading() ? 1 : 0);
@@ -4100,8 +4102,9 @@ public class AccessibilityNodeInfo implements Parcelable {
                                      ci.mHierarchical, ci.mSelectionMode);
         CollectionItemInfo cii = other.mCollectionItemInfo;
         mCollectionItemInfo = (cii == null)  ? null
-                : new CollectionItemInfo(cii.mRowIndex, cii.mRowSpan, cii.mColumnIndex,
-                                         cii.mColumnSpan, cii.mHeading, cii.mSelected);
+                : new CollectionItemInfo(cii.mRowTitle, cii.mRowIndex, cii.mRowSpan,
+                        cii.mColumnTitle, cii.mColumnIndex, cii.mColumnSpan,
+                        cii.mHeading, cii.mSelected);
         ExtraRenderingInfo ti = other.mExtraRenderingInfo;
         mExtraRenderingInfo = (ti == null) ? null
                 : new ExtraRenderingInfo(ti);
@@ -4221,8 +4224,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (mCollectionItemInfo != null) mCollectionItemInfo.recycle();
         mCollectionItemInfo = isBitSet(nonDefaultFields, fieldIndex++)
                 ? CollectionItemInfo.obtain(
+                        parcel.readString(),
                         parcel.readInt(),
                         parcel.readInt(),
+                        parcel.readString(),
                         parcel.readInt(),
                         parcel.readInt(),
                         parcel.readInt() == 1,
@@ -5570,8 +5575,9 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @hide
          */
         public static CollectionItemInfo obtain(CollectionItemInfo other) {
-            return CollectionItemInfo.obtain(other.mRowIndex, other.mRowSpan, other.mColumnIndex,
-                    other.mColumnSpan, other.mHeading, other.mSelected);
+            return CollectionItemInfo.obtain(other.mRowTitle, other.mRowIndex, other.mRowSpan,
+                    other.mColumnTitle, other.mColumnIndex, other.mColumnSpan, other.mHeading,
+                    other.mSelected);
         }
 
         /**
@@ -5612,10 +5618,36 @@ public class AccessibilityNodeInfo implements Parcelable {
          */
         public static CollectionItemInfo obtain(int rowIndex, int rowSpan,
                 int columnIndex, int columnSpan, boolean heading, boolean selected) {
+            return obtain(null, rowIndex, rowSpan, null, columnIndex,
+                    columnSpan, heading, selected);
+        }
+
+        /**
+         * Obtains a pooled instance.
+         *
+         * <p>In most situations object pooling is not beneficial. Creates a new instance using the
+         * constructor {@link
+         * AccessibilityNodeInfo.CollectionItemInfo#CollectionItemInfo(int,
+         * int, int, int, boolean, boolean)} instead.
+         *
+         * @param rowTitle The row title at which the item is located.
+         * @param rowIndex The row index at which the item is located.
+         * @param rowSpan The number of rows the item spans.
+         * @param columnTitle The column title at which the item is located.
+         * @param columnIndex The column index at which the item is located.
+         * @param columnSpan The number of columns the item spans.
+         * @param heading Whether the item is a heading. (Prefer
+         *                {@link AccessibilityNodeInfo#setHeading(boolean)})
+         * @param selected Whether the item is selected.
+         */
+        @NonNull
+        public static CollectionItemInfo obtain(@Nullable String rowTitle, int rowIndex,
+                int rowSpan, @Nullable String columnTitle, int columnIndex, int columnSpan,
+                boolean heading, boolean selected) {
             final CollectionItemInfo info = sPool.acquire();
             if (info == null) {
-                return new CollectionItemInfo(
-                        rowIndex, rowSpan, columnIndex, columnSpan, heading, selected);
+                return new CollectionItemInfo(rowTitle, rowIndex, rowSpan, columnTitle,
+                        columnIndex, columnSpan, heading, selected);
             }
 
             info.mRowIndex = rowIndex;
@@ -5624,6 +5656,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             info.mColumnSpan = columnSpan;
             info.mHeading = heading;
             info.mSelected = selected;
+            info.mRowTitle = rowTitle;
+            info.mColumnTitle = columnTitle;
             return info;
         }
 
@@ -5633,6 +5667,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         private int mColumnSpan;
         private int mRowSpan;
         private boolean mSelected;
+        private String mRowTitle;
+        private String mColumnTitle;
 
         /**
          * Creates a new instance.
@@ -5660,12 +5696,33 @@ public class AccessibilityNodeInfo implements Parcelable {
          */
         public CollectionItemInfo(int rowIndex, int rowSpan, int columnIndex, int columnSpan,
                 boolean heading, boolean selected) {
+            this(null, rowIndex, rowSpan, null, columnIndex, columnSpan,
+                    heading, selected);
+        }
+
+        /**
+         * Creates a new instance.
+         *
+         * @param rowTitle The row title at which the item is located.
+         * @param rowIndex The row index at which the item is located.
+         * @param rowSpan The number of rows the item spans.
+         * @param columnTitle The column title at which the item is located.
+         * @param columnIndex The column index at which the item is located.
+         * @param columnSpan The number of columns the item spans.
+         * @param heading Whether the item is a heading.
+         * @param selected Whether the item is selected.
+         */
+        public CollectionItemInfo(@Nullable String rowTitle, int rowIndex, int rowSpan,
+                @Nullable String columnTitle, int columnIndex, int columnSpan, boolean heading,
+                boolean selected) {
             mRowIndex = rowIndex;
             mRowSpan = rowSpan;
             mColumnIndex = columnIndex;
             mColumnSpan = columnSpan;
             mHeading = heading;
             mSelected = selected;
+            mRowTitle = rowTitle;
+            mColumnTitle = columnTitle;
         }
 
         /**
@@ -5725,6 +5782,26 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         /**
+         * Gets the row title at which the item is located.
+         *
+         * @return The row title.
+         */
+        @Nullable
+        public String getRowTitle() {
+            return mRowTitle;
+        }
+
+        /**
+         * Gets the column title at which the item is located.
+         *
+         * @return The column title.
+         */
+        @Nullable
+        public String getColumnTitle() {
+            return mColumnTitle;
+        }
+
+        /**
          * Recycles this instance.
          *
          * <p>In most situations object pooling is not beneficial, and recycling is not necessary.
@@ -5741,6 +5818,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             mRowSpan = 0;
             mHeading = false;
             mSelected = false;
+            mRowTitle = null;
+            mColumnTitle = null;
         }
     }
 

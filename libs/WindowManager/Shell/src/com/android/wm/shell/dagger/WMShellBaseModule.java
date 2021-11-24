@@ -346,7 +346,7 @@ public abstract class WMShellBaseModule {
     @Provides
     static Optional<OneHandedController> providesOneHandedController(
             @DynamicOverride Optional<OneHandedController> oneHandedController) {
-        if (!SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false)) {
+        if (SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false)) {
             return oneHandedController;
         }
         return Optional.empty();

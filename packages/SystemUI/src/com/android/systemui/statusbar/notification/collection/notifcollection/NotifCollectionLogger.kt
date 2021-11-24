@@ -109,6 +109,14 @@ class NotifCollectionLogger @Inject constructor(
         })
     }
 
+    fun logNonExistentNotifDismissed(key: String) {
+        buffer.log(TAG, INFO, {
+            str1 = key
+        }, {
+            "DISMISSED Non Existent $str1"
+        })
+    }
+
     fun logChildDismissed(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
             str1 = entry.key

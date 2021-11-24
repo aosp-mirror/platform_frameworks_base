@@ -4082,6 +4082,34 @@ public class ActivityManager {
     }
 
     /**
+     * Gets the message that is shown when a user is switched from.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USERS)
+    public @Nullable String getSwitchingFromUserMessage() {
+        try {
+            return getService().getSwitchingFromUserMessage();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the message that is shown when a user is switched to.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USERS)
+    public @Nullable String getSwitchingToUserMessage() {
+        try {
+            return getService().getSwitchingToUserMessage();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Uses the value defined by the platform.
      *
      * @hide

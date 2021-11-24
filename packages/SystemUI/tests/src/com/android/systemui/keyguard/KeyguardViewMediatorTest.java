@@ -41,6 +41,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardDisplayManager;
@@ -64,9 +65,6 @@ import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
-import java.util.Optional;
-import java.util.function.Function;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,6 +72,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -103,6 +104,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private @Mock UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private @Mock IKeyguardDrawnCallback mKeyguardDrawnCallback;
+    private @Mock InteractionJankMonitor mInteractionJankMonitor;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -121,6 +123,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
             .thenReturn(mUnfoldAnimationOptional);
         when(mUnfoldAnimationOptional.isPresent()).thenReturn(true);
         when(mUnfoldAnimationOptional.get()).thenReturn(mUnfoldAnimation);
+        when(mInteractionJankMonitor.begin(any(), anyInt())).thenReturn(true);
+        when(mInteractionJankMonitor.end(anyInt())).thenReturn(true);
 
         mViewMediator = new KeyguardViewMediator(
                 mContext,
@@ -144,7 +148,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mKeyguardStateController,
                 () -> mKeyguardUnlockAnimationController,
                 mUnlockedScreenOffAnimationController,
-                () -> mNotificationShadeDepthController);
+                () -> mNotificationShadeDepthController,
+                mInteractionJankMonitor);
         mViewMediator.start();
     }
 

@@ -47,7 +47,7 @@ import com.android.wm.shell.bubbles.Bubbles
 import dagger.Lazy
 import java.io.FileDescriptor
 import java.io.PrintWriter
-import java.util.*
+import java.util.Optional
 import javax.inject.Inject
 
 /**
@@ -152,8 +152,14 @@ class NotificationsControllerImpl @Inject constructor(
     }
 
     override fun resetUserExpandedStates() {
-        for (entry in entryManager.visibleNotifications) {
-            entry.resetUserExpansion()
+        if (notifPipelineFlags.isNewPipelineEnabled()) {
+            for (entry in notifPipeline.get().allNotifs) {
+                entry.resetUserExpansion()
+            }
+        } else {
+            for (entry in entryManager.visibleNotifications) {
+                entry.resetUserExpansion()
+            }
         }
     }
 
@@ -167,9 +173,12 @@ class NotificationsControllerImpl @Inject constructor(
         }
     }
 
-    override fun getActiveNotificationsCount(): Int {
-        return entryManager.activeNotificationsCount
-    }
+    override fun getActiveNotificationsCount(): Int =
+        if (notifPipelineFlags.isNewPipelineEnabled()) {
+            notifPipeline.get().getShadeListCount()
+        } else {
+            entryManager.activeNotificationsCount
+        }
 
     companion object {
         // NOTE: The new pipeline is always active, even if the old pipeline is *rendering*.

@@ -16,25 +16,32 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.MagnificationConfig.FULLSCREEN_MODE;
+import static android.accessibilityservice.MagnificationConfig.WINDOW_MODE;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.accessibilityservice.MagnificationConfig;
 import android.graphics.Region;
 
 import com.android.server.accessibility.magnification.FullScreenMagnificationController;
 import com.android.server.accessibility.magnification.MagnificationController;
 import com.android.server.accessibility.magnification.MagnificationProcessor;
+import com.android.server.accessibility.magnification.WindowMagnificationManager;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
+import org.mockito.stubbing.Answer;
 
 /**
  * Tests for the {@link MagnificationProcessor}
@@ -42,57 +49,115 @@ import org.mockito.MockitoAnnotations;
 public class MagnificationProcessorTest {
 
     private static final int TEST_DISPLAY = 0;
-
+    private static final int SERVICE_ID = 42;
+    private static final float TEST_SCALE = 1.8f;
+    private static final float TEST_CENTER_X = 50.5f;
+    private static final float TEST_CENTER_Y = 100.5f;
     private MagnificationProcessor mMagnificationProcessor;
     @Mock
     private MagnificationController mMockMagnificationController;
     @Mock
     private FullScreenMagnificationController mMockFullScreenMagnificationController;
+    @Mock
+    private WindowMagnificationManager mMockWindowMagnificationManager;
+    FullScreenMagnificationControllerStub mFullScreenMagnificationControllerStub;
+    WindowMagnificationManagerStub mWindowMagnificationManagerStub;
 
     @Before
+
     public void setup() {
         MockitoAnnotations.initMocks(this);
-
+        mFullScreenMagnificationControllerStub = new FullScreenMagnificationControllerStub(
+                mMockFullScreenMagnificationController);
+        mWindowMagnificationManagerStub = new WindowMagnificationManagerStub(
+                mMockWindowMagnificationManager);
         when(mMockMagnificationController.getFullScreenMagnificationController()).thenReturn(
                 mMockFullScreenMagnificationController);
+        when(mMockMagnificationController.getWindowMagnificationMgr()).thenReturn(
+                mMockWindowMagnificationManager);
         mMagnificationProcessor = new MagnificationProcessor(mMockMagnificationController);
     }
 
     @Test
-    public void getScale() {
-        final float result = 2;
-        when(mMockFullScreenMagnificationController.getScale(TEST_DISPLAY)).thenReturn(result);
+    public void getScale_fullscreenMode_expectedValue() {
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setMode(FULLSCREEN_MODE)
+                .setScale(TEST_SCALE).build();
+        setMagnificationActivated(TEST_DISPLAY, config);
 
         float scale = mMagnificationProcessor.getScale(TEST_DISPLAY);
 
-        assertEquals(scale, result, 0);
+        assertEquals(scale, TEST_SCALE, 0);
     }
 
     @Test
-    public void getCenterX_canControlMagnification_returnCenterX() {
-        final float result = 200;
-        when(mMockFullScreenMagnificationController.getCenterX(TEST_DISPLAY)).thenReturn(result);
+    public void getScale_windowMode_expectedValue() {
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setMode(WINDOW_MODE)
+                .setScale(TEST_SCALE).build();
+        setMagnificationActivated(TEST_DISPLAY, config);
+
+        float scale = mMagnificationProcessor.getScale(TEST_DISPLAY);
+
+        assertEquals(scale, TEST_SCALE, 0);
+    }
+
+    @Test
+    public void getCenterX_canControlFullscreenMagnification_returnCenterX() {
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setMode(FULLSCREEN_MODE)
+                .setCenterX(TEST_CENTER_X).build();
+        setMagnificationActivated(TEST_DISPLAY, config);
 
         float centerX = mMagnificationProcessor.getCenterX(
                 TEST_DISPLAY,  /* canControlMagnification= */true);
 
-        assertEquals(centerX, result, 0);
+        assertEquals(centerX, TEST_CENTER_X, 0);
     }
 
     @Test
-    public void getCenterY_canControlMagnification_returnCenterY() {
-        final float result = 300;
-        when(mMockFullScreenMagnificationController.getCenterY(TEST_DISPLAY)).thenReturn(result);
+    public void getCenterX_canControlWindowMagnification_returnCenterX() {
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setMode(WINDOW_MODE)
+                .setCenterX(TEST_CENTER_X).build();
+        setMagnificationActivated(TEST_DISPLAY, config);
+
+        float centerX = mMagnificationProcessor.getCenterX(
+                TEST_DISPLAY,  /* canControlMagnification= */true);
+
+        assertEquals(centerX, TEST_CENTER_X, 0);
+    }
+
+    @Test
+    public void getCenterY_canControlFullscreenMagnification_returnCenterY() {
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setMode(FULLSCREEN_MODE)
+                .setCenterY(TEST_CENTER_Y).build();
+        setMagnificationActivated(TEST_DISPLAY, config);
 
         float centerY = mMagnificationProcessor.getCenterY(
                 TEST_DISPLAY,  /* canControlMagnification= */false);
 
-        assertEquals(centerY, result, 0);
+        assertEquals(centerY, TEST_CENTER_Y, 0);
     }
 
     @Test
-    public void getMagnificationRegion_canControlMagnification_returnRegion() {
+    public void getCenterY_canControlWindowMagnification_returnCenterY() {
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setMode(WINDOW_MODE)
+                .setCenterY(TEST_CENTER_Y).build();
+        setMagnificationActivated(TEST_DISPLAY, config);
+
+        float centerY = mMagnificationProcessor.getCenterY(
+                TEST_DISPLAY,  /* canControlMagnification= */false);
+
+        assertEquals(centerY, TEST_CENTER_Y, 0);
+    }
+
+    @Test
+    public void getMagnificationRegion_canControlFullscreenMagnification_returnRegion() {
         final Region region = new Region(10, 20, 100, 200);
+        setMagnificationActivated(TEST_DISPLAY, FULLSCREEN_MODE);
         mMagnificationProcessor.getMagnificationRegion(TEST_DISPLAY,
                 region,  /* canControlMagnification= */true);
 
@@ -101,14 +166,25 @@ public class MagnificationProcessorTest {
     }
 
     @Test
-    public void getMagnificationRegion_notRegistered_shouldRegisterThenUnregister() {
+    public void getMagnificationRegion_canControlWindowMagnification_returnRegion() {
         final Region region = new Region(10, 20, 100, 200);
+        setMagnificationActivated(TEST_DISPLAY, WINDOW_MODE);
+        mMagnificationProcessor.getMagnificationRegion(TEST_DISPLAY,
+                region,  /* canControlMagnification= */true);
+
+        verify(mMockWindowMagnificationManager).getMagnificationSourceBounds(eq(TEST_DISPLAY),
+                eq(region));
+    }
+
+    @Test
+    public void getMagnificationRegion_fullscreenModeNotRegistered_shouldRegisterThenUnregister() {
+        final Region region = new Region(10, 20, 100, 200);
+        setMagnificationActivated(TEST_DISPLAY, FULLSCREEN_MODE);
         doAnswer((invocation) -> {
             ((Region) invocation.getArguments()[1]).set(region);
             return null;
         }).when(mMockFullScreenMagnificationController).getMagnificationRegion(eq(TEST_DISPLAY),
                 any());
-        when(mMockFullScreenMagnificationController.isRegistered(TEST_DISPLAY)).thenReturn(false);
 
         final Region result = new Region();
         mMagnificationProcessor.getMagnificationRegion(TEST_DISPLAY,
@@ -119,44 +195,242 @@ public class MagnificationProcessorTest {
     }
 
     @Test
-    public void getMagnificationCenterX_notRegistered_shouldRegisterThenUnregister() {
-        final float centerX = 480.0f;
-        when(mMockFullScreenMagnificationController.getCenterX(TEST_DISPLAY)).thenReturn(centerX);
-        when(mMockFullScreenMagnificationController.isRegistered(TEST_DISPLAY)).thenReturn(false);
+    public void getMagnificationCenterX_fullscreenModeNotRegistered_shouldRegisterThenUnregister() {
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setMode(FULLSCREEN_MODE)
+                .setCenterX(TEST_CENTER_X).build();
+        setMagnificationActivated(TEST_DISPLAY, config);
 
         final float result = mMagnificationProcessor.getCenterX(
                 TEST_DISPLAY,  /* canControlMagnification= */ true);
-        assertEquals(centerX, result, 0);
+        assertEquals(TEST_CENTER_X, result, 0);
         verify(mMockFullScreenMagnificationController).register(TEST_DISPLAY);
         verify(mMockFullScreenMagnificationController).unregister(TEST_DISPLAY);
     }
 
     @Test
-    public void getMagnificationCenterY_notRegistered_shouldRegisterThenUnregister() {
-        final float centerY = 640.0f;
-        when(mMockFullScreenMagnificationController.getCenterY(TEST_DISPLAY)).thenReturn(centerY);
-        when(mMockFullScreenMagnificationController.isRegistered(TEST_DISPLAY)).thenReturn(false);
+    public void getMagnificationCenterY_fullscreenModeNotRegistered_shouldRegisterThenUnregister() {
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setMode(FULLSCREEN_MODE)
+                .setCenterY(TEST_CENTER_Y).build();
+        setMagnificationActivated(TEST_DISPLAY, config);
 
         final float result = mMagnificationProcessor.getCenterY(
                 TEST_DISPLAY,  /* canControlMagnification= */ true);
-        assertEquals(centerY, result, 0);
+        assertEquals(TEST_CENTER_Y, result, 0);
         verify(mMockFullScreenMagnificationController).register(TEST_DISPLAY);
         verify(mMockFullScreenMagnificationController).unregister(TEST_DISPLAY);
     }
 
     @Test
-    public void setMagnificationScaleAndCenter_notRegistered_shouldRegister() {
-        final int serviceId = 42;
-        final float scale = 1.8f;
-        final float centerX = 50.5f;
-        final float centerY = 100.5f;
-        when(mMockFullScreenMagnificationController.setScaleAndCenter(TEST_DISPLAY,
-                scale, centerX, centerY, true, serviceId)).thenReturn(true);
-        when(mMockFullScreenMagnificationController.isRegistered(TEST_DISPLAY)).thenReturn(false);
+    public void getCurrentMode_configDefaultMode_returnActivatedMode() {
+        final int targetMode = WINDOW_MODE;
+        setMagnificationActivated(TEST_DISPLAY, targetMode);
 
-        final boolean result = mMagnificationProcessor.setScaleAndCenter(
-                TEST_DISPLAY, scale, centerX, centerY, true, serviceId);
+        int currentMode = mMagnificationProcessor.getControllingMode(TEST_DISPLAY);
+
+        assertEquals(WINDOW_MODE, currentMode);
+    }
+
+    @Test
+    public void reset_fullscreenMagnificationActivated() {
+        setMagnificationActivated(TEST_DISPLAY, FULLSCREEN_MODE);
+
+        mMagnificationProcessor.reset(TEST_DISPLAY, /* animate= */false);
+
+        verify(mMockFullScreenMagnificationController).reset(TEST_DISPLAY, false);
+    }
+
+    @Test
+    public void reset_windowMagnificationActivated() {
+        setMagnificationActivated(TEST_DISPLAY, WINDOW_MODE);
+
+        mMagnificationProcessor.reset(TEST_DISPLAY, /* animate= */false);
+
+        verify(mMockWindowMagnificationManager).reset(TEST_DISPLAY);
+    }
+
+    @Test
+    public void setMagnificationConfig_fullscreenModeNotRegistered_shouldRegister() {
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setMode(FULLSCREEN_MODE)
+                .setScale(TEST_SCALE)
+                .setCenterX(TEST_CENTER_X)
+                .setCenterY(TEST_CENTER_Y).build();
+        setMagnificationActivated(TEST_DISPLAY, config);
+
+        final boolean result = mMagnificationProcessor.setMagnificationConfig(
+                TEST_DISPLAY, config, true, SERVICE_ID);
         assertTrue(result);
         verify(mMockFullScreenMagnificationController).register(TEST_DISPLAY);
+    }
+
+    @Test
+    public void setMagnificationConfig_windowMode_enableMagnification() {
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setMode(WINDOW_MODE)
+                .setScale(TEST_SCALE)
+                .setCenterX(TEST_CENTER_X)
+                .setCenterY(TEST_CENTER_Y).build();
+        setMagnificationActivated(TEST_DISPLAY, config);
+
+        final boolean result = mMagnificationProcessor.setMagnificationConfig(
+                TEST_DISPLAY, config, true, SERVICE_ID);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void setMagnificationConfig_fullscreenEnabled_expectedConfigValues() {
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setMode(FULLSCREEN_MODE)
+                .setScale(TEST_SCALE)
+                .setCenterX(TEST_CENTER_X)
+                .setCenterY(TEST_CENTER_Y).build();
+        setMagnificationActivated(TEST_DISPLAY, config);
+     //   mMockFullScreenMagnificationController.unregister(TEST_DISPLAY);
+        mMagnificationProcessor.setMagnificationConfig(
+                TEST_DISPLAY, config, true, SERVICE_ID);
+
+        final MagnificationConfig result = mMagnificationProcessor.getMagnificationConfig(
+                TEST_DISPLAY);
+
+        assertConfigEquals(config, result);
+    }
+
+    @Test
+    public void setMagnificationConfig_windowEnabled_expectedConfigValues() {
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setMode(WINDOW_MODE)
+                .setScale(TEST_SCALE)
+                .setCenterX(TEST_CENTER_X)
+                .setCenterY(TEST_CENTER_Y).build();
+        setMagnificationActivated(TEST_DISPLAY, config);
+
+        mMagnificationProcessor.setMagnificationConfig(
+                TEST_DISPLAY, config, true, SERVICE_ID);
+
+        final MagnificationConfig result = mMagnificationProcessor.getMagnificationConfig(
+                TEST_DISPLAY);
+
+        assertConfigEquals(config, result);
+    }
+
+    private void setMagnificationActivated(int displayId, int configMode) {
+        setMagnificationActivated(displayId,
+                new MagnificationConfig.Builder().setMode(configMode).build());
+    }
+
+    private void setMagnificationActivated(int displayId, MagnificationConfig config) {
+        when(mMockMagnificationController.isActivated(displayId, config.getMode())).thenReturn(
+                true);
+        mMagnificationProcessor.setMagnificationConfig(displayId, config, false, SERVICE_ID);
+        if (config.getMode() == FULLSCREEN_MODE) {
+            when(mMockMagnificationController.isActivated(displayId, WINDOW_MODE)).thenReturn(
+                    false);
+            mFullScreenMagnificationControllerStub.resetAndStubMethods();
+            mMockFullScreenMagnificationController.setScaleAndCenter(displayId, config.getScale(),
+                    config.getCenterX(), config.getCenterY(), true, SERVICE_ID);
+        } else if (config.getMode() == WINDOW_MODE) {
+            when(mMockMagnificationController.isActivated(displayId, FULLSCREEN_MODE)).thenReturn(
+                    false);
+            mWindowMagnificationManagerStub.resetAndStubMethods();
+            mMockWindowMagnificationManager.enableWindowMagnification(displayId, config.getScale(),
+                    config.getCenterX(), config.getCenterY());
+        }
+    }
+
+    private void assertConfigEquals(MagnificationConfig expected, MagnificationConfig actual) {
+        assertEquals(expected.getMode(), actual.getMode());
+        assertEquals(expected.getScale(), actual.getScale(), 0);
+        assertEquals(expected.getCenterX(), actual.getCenterX(), 0);
+        assertEquals(expected.getCenterY(), actual.getCenterY(), 0);
+    }
+
+    private static class FullScreenMagnificationControllerStub {
+        private final FullScreenMagnificationController mScreenMagnificationController;
+        private float mScale = 1.0f;
+        private float mCenterX = 0;
+        private float mCenterY = 0;
+        private boolean mIsRegistered = false;
+
+        FullScreenMagnificationControllerStub(
+                FullScreenMagnificationController screenMagnificationController) {
+            mScreenMagnificationController = screenMagnificationController;
+        }
+
+        private void stubMethods() {
+            doAnswer(invocation -> mScale).when(mScreenMagnificationController).getScale(
+                    TEST_DISPLAY);
+            doAnswer(invocation -> mCenterX).when(mScreenMagnificationController).getCenterX(
+                    TEST_DISPLAY);
+            doAnswer(invocation -> mCenterY).when(mScreenMagnificationController).getCenterY(
+                    TEST_DISPLAY);
+            doAnswer(invocation -> mIsRegistered).when(mScreenMagnificationController).isRegistered(
+                    TEST_DISPLAY);
+            Answer enableMagnificationStubAnswer = invocation -> {
+                mScale = invocation.getArgument(1);
+                mCenterX = invocation.getArgument(2);
+                mCenterY = invocation.getArgument(3);
+                return true;
+            };
+            doAnswer(enableMagnificationStubAnswer).when(
+                    mScreenMagnificationController).setScaleAndCenter(eq(TEST_DISPLAY), anyFloat(),
+                    anyFloat(), anyFloat(), eq(true), eq(SERVICE_ID));
+
+            Answer registerStubAnswer = invocation -> {
+                mIsRegistered = true;
+                return true;
+            };
+            doAnswer(registerStubAnswer).when(
+                    mScreenMagnificationController).register(eq(TEST_DISPLAY));
+
+            Answer unregisterStubAnswer = invocation -> {
+                mIsRegistered = false;
+                return true;
+            };
+            doAnswer(unregisterStubAnswer).when(
+                    mScreenMagnificationController).unregister(eq(TEST_DISPLAY));
+        }
+
+        public void resetAndStubMethods() {
+            Mockito.reset(mScreenMagnificationController);
+            stubMethods();
+        }
+    }
+
+    private static class WindowMagnificationManagerStub {
+        private final WindowMagnificationManager mWindowMagnificationManager;
+        private float mScale = 1.0f;
+        private float mCenterX = 0;
+        private float mCenterY = 0;
+
+        WindowMagnificationManagerStub(
+                WindowMagnificationManager windowMagnificationManager) {
+            mWindowMagnificationManager = windowMagnificationManager;
+        }
+
+        private void stubMethods() {
+            doAnswer(invocation -> mScale).when(mWindowMagnificationManager).getScale(
+                    TEST_DISPLAY);
+            doAnswer(invocation -> mCenterX).when(mWindowMagnificationManager).getCenterX(
+                    TEST_DISPLAY);
+            doAnswer(invocation -> mCenterY).when(mWindowMagnificationManager).getCenterY(
+                    TEST_DISPLAY);
+            Answer enableWindowMagnificationStubAnswer = invocation -> {
+                mScale = invocation.getArgument(1);
+                mCenterX = invocation.getArgument(2);
+                mCenterY = invocation.getArgument(3);
+                return true;
+            };
+            doAnswer(enableWindowMagnificationStubAnswer).when(
+                    mWindowMagnificationManager).enableWindowMagnification(eq(TEST_DISPLAY),
+                    anyFloat(), anyFloat(), anyFloat());
+        }
+
+        public void resetAndStubMethods() {
+            Mockito.reset(mWindowMagnificationManager);
+            stubMethods();
+        }
     }
 }

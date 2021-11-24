@@ -139,9 +139,6 @@ class EnsureActivitiesVisibleHelper {
                 setActivityVisibilityState(child.asActivityRecord(), starting, resumeTopActivity);
             }
         }
-        if (mTaskFragment.mTransitionController.isShellTransitionsEnabled()) {
-            mTaskFragment.getDisplayContent().mWallpaperController.adjustWallpaperWindows();
-        }
     }
 
     private void setActivityVisibilityState(ActivityRecord r, ActivityRecord starting,

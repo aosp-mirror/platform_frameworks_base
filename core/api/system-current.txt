@@ -6365,14 +6365,14 @@ package android.media.tv.tuner.filter {
   }
 
   public class Filter implements java.lang.AutoCloseable {
+    method @Nullable public String acquireSharedFilterToken();
     method public void close();
     method public int configure(@NonNull android.media.tv.tuner.filter.FilterConfiguration);
-    method @Nullable public String createSharedFilter();
     method public int flush();
+    method public void freeSharedFilterToken(@NonNull String);
     method @Deprecated public int getId();
     method public long getIdLong();
     method public int read(@NonNull byte[], long, long);
-    method public void releaseSharedFilter(@NonNull String);
     method public int setDataSource(@Nullable android.media.tv.tuner.filter.Filter);
     method public int setMonitorEventMask(int);
     method public int start();

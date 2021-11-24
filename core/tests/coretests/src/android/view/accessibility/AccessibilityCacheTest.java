@@ -45,7 +45,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.google.common.base.Throwables;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,13 +79,6 @@ public class AccessibilityCacheTest {
         mAccessibilityNodeRefresher = mock(AccessibilityCache.AccessibilityNodeRefresher.class);
         when(mAccessibilityNodeRefresher.refreshNode(anyObject(), anyBoolean())).thenReturn(true);
         mAccessibilityCache = new AccessibilityCache(mAccessibilityNodeRefresher);
-    }
-
-    @After
-    public void tearDown() {
-        // Make sure we're recycling all of our window and node infos.
-        mAccessibilityCache.clear();
-        AccessibilityInteractionClient.getInstance().clearCache();
     }
 
     @Test

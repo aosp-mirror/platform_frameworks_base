@@ -14,8 +14,8 @@
      limitations under the License.
 -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- NOTE: Adding the androidprv: namespace to this file will break the studio build. -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+           xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
 
     <!-- HybridNotification themes and styles -->
 
@@ -351,11 +351,19 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
-    <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog">
+    <style name="Theme.SystemUI.DayNightDialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog"/>
+
+    <style name="Theme.SystemUI.Dialog" parent="@style/Theme.SystemUI.DayNightDialog">
         <item name="android:buttonCornerRadius">28dp</item>
-        <item name="android:buttonBarPositiveButtonStyle">@style/Widget.QSDialog.Button</item>
-        <item name="android:buttonBarNegativeButtonStyle">@style/Widget.QSDialog.Button.BorderButton</item>
-        <item name="android:buttonBarNeutralButtonStyle">@style/Widget.QSDialog.Button.BorderButton</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/Widget.Dialog.Button</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/Widget.Dialog.Button.BorderButton</item>
+        <item name="android:buttonBarNeutralButtonStyle">@style/Widget.Dialog.Button.BorderButton</item>
+        <item name="android:colorBackground">?androidprv:attr/colorSurface</item>
+        <item name="android:alertDialogStyle">@style/AlertDialogStyle</item>
+    </style>
+
+    <style name="AlertDialogStyle" parent="@androidprv:style/AlertDialog.DeviceDefault">
+        <item name="android:layout">@layout/alert_dialog_systemui</item>
     </style>
 
     <style name="Theme.SystemUI.Dialog.Alert" parent="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert" />
@@ -863,24 +871,37 @@
         <item name="actionDividerHeight">32dp</item>
     </style>
 
-    <style name="TextAppearance.QSDialog.Title" parent="Theme.SystemUI.Dialog">
+    <style name="TextAppearance.Dialog.Title" parent="@android:style/TextAppearance.DeviceDefault.Large">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">24sp</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:lineHeight">32sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAlignment">center</item>
     </style>
 
-    <style name="Widget.QSDialog.Button" parent = "Theme.SystemUI.Dialog">
+    <style name="TextAppearance.Dialog.Body" parent="@android:style/TextAppearance.DeviceDefault.Medium">
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:lineHeight">20sp</item>
+    </style>
+
+    <style name="TextAppearance.Dialog.Body.Message">
+        <item name="android:gravity">center</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="Widget.Dialog.Button" parent = "Theme.SystemUI.Dialog">
         <item name="android:background">@drawable/qs_dialog_btn_filled</item>
-        <item name="android:textColor">@color/prv_text_color_on_accent</item>
+        <item name="android:textColor">?androidprv:attr/textColorOnAccent</item>
         <item name="android:textSize">14sp</item>
         <item name="android:lineHeight">20sp</item>
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
         <item name="android:stateListAnimator">@null</item>
-        <item name="android:layout_marginHorizontal">4dp</item>
     </style>
 
-    <style name="Widget.QSDialog.Button.BorderButton">
+    <style name="Widget.Dialog.Button.BorderButton">
         <item name="android:background">@drawable/qs_dialog_btn_outline</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
@@ -956,5 +977,11 @@
     <style name="TextAppearance.InternetDialog.Active"/>
 
     <style name="TextAppearance.InternetDialog.Secondary.Active"/>
+
+    <style name="InternetDialog.Divider">
+        <item name="android:background">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="InternetDialog.Divider.Active"/>
 
 </resources>

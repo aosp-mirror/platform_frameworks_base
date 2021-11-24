@@ -2071,7 +2071,7 @@ public abstract class AccessibilityService extends Service {
             try {
                 connection.setServiceInfo(mInfo);
                 mInfo = null;
-                AccessibilityInteractionClient.getInstance(this).clearCache();
+                AccessibilityInteractionClient.getInstance(this).clearCache(mConnectionId);
             } catch (RemoteException re) {
                 Log.w(LOG_TAG, "Error while setting AccessibilityServiceInfo", re);
                 re.rethrowFromSystemServer();
@@ -2421,7 +2421,7 @@ public abstract class AccessibilityService extends Service {
                     if (event != null) {
                         // Send the event to AccessibilityCache via AccessibilityInteractionClient
                         AccessibilityInteractionClient.getInstance(mContext).onAccessibilityEvent(
-                                event);
+                                event, mConnectionId);
                         if (serviceWantsEvent
                                 && (mConnectionId != AccessibilityInteractionClient.NO_ID)) {
                             // Send the event to AccessibilityService
@@ -2451,7 +2451,7 @@ public abstract class AccessibilityService extends Service {
                     args.recycle();
                     if (connection != null) {
                         AccessibilityInteractionClient.getInstance(mContext).addConnection(
-                                mConnectionId, connection);
+                                mConnectionId, connection, /*initializeCache=*/true);
                         if (mContext != null) {
                             try {
                                 connection.setAttributionTag(mContext.getAttributionTag());
@@ -2466,7 +2466,8 @@ public abstract class AccessibilityService extends Service {
                         AccessibilityInteractionClient.getInstance(mContext).removeConnection(
                                 mConnectionId);
                         mConnectionId = AccessibilityInteractionClient.NO_ID;
-                        AccessibilityInteractionClient.getInstance(mContext).clearCache();
+                        AccessibilityInteractionClient.getInstance(mContext)
+                                .clearCache(mConnectionId);
                         mCallback.init(AccessibilityInteractionClient.NO_ID, null);
                     }
                     return;
@@ -2478,7 +2479,7 @@ public abstract class AccessibilityService extends Service {
                     return;
                 }
                 case DO_CLEAR_ACCESSIBILITY_CACHE: {
-                    AccessibilityInteractionClient.getInstance(mContext).clearCache();
+                    AccessibilityInteractionClient.getInstance(mContext).clearCache(mConnectionId);
                     return;
                 }
                 case DO_ON_KEY_EVENT: {
