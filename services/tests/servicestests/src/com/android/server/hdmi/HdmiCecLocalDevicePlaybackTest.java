@@ -76,6 +76,8 @@ public class HdmiCecLocalDevicePlaybackTest {
     private int mPlaybackLogicalAddress;
     private boolean mWokenUp;
     private boolean mActiveMediaSessionsPaused;
+    private FakePowerManagerInternalWrapper mPowerManagerInternal =
+            new FakePowerManagerInternalWrapper();
 
     @Before
     public void setUp() {
@@ -146,6 +148,7 @@ public class HdmiCecLocalDevicePlaybackTest {
         mHdmiControlService.initService();
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
+        mHdmiControlService.setPowerManagerInternal(mPowerManagerInternal);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mPlaybackPhysicalAddress = 0x2000;
         mNativeWrapper.setPhysicalAddress(mPlaybackPhysicalAddress);
@@ -1968,5 +1971,42 @@ public class HdmiCecLocalDevicePlaybackTest {
                 ABORT_UNRECOGNIZED_OPCODE);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(featureAbortPressed);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(featureAbortReleased);
+    }
+
+    @Test
+    public void onHotplugInAfterHotplugOut_noStandbyAfterDelay() {
+        mPowerManager.setInteractive(true);
+        mNativeWrapper.onHotplugEvent(1, false);
+        mTestLooper.dispatchAll();
+
+        mTestLooper.moveTimeForward(
+                HdmiCecLocalDevicePlayback.STANDBY_AFTER_HOTPLUG_OUT_DELAY_MS / 2);
+        mNativeWrapper.onHotplugEvent(1, true);
+        mTestLooper.dispatchAll();
+
+        mPowerManagerInternal.setIdleDuration(
+                HdmiCecLocalDevicePlayback.STANDBY_AFTER_HOTPLUG_OUT_DELAY_MS);
+        mTestLooper.moveTimeForward(HdmiCecLocalDevicePlayback.STANDBY_AFTER_HOTPLUG_OUT_DELAY_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mPowerManager.isInteractive()).isTrue();
+    }
+
+    @Test
+    public void onHotplugOut_standbyAfterDelay_onlyAfterDeviceIdle() {
+        mPowerManager.setInteractive(true);
+        mNativeWrapper.onHotplugEvent(1, false);
+        mTestLooper.dispatchAll();
+
+        mPowerManagerInternal.setIdleDuration(0);
+        mTestLooper.moveTimeForward(HdmiCecLocalDevicePlayback.STANDBY_AFTER_HOTPLUG_OUT_DELAY_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mPowerManager.isInteractive()).isTrue();
+
+        mPowerManagerInternal.setIdleDuration(
+                HdmiCecLocalDevicePlayback.STANDBY_AFTER_HOTPLUG_OUT_DELAY_MS);
+        mTestLooper.moveTimeForward(HdmiCecLocalDevicePlayback.STANDBY_AFTER_HOTPLUG_OUT_DELAY_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mPowerManager.isInteractive()).isFalse();
     }
 }

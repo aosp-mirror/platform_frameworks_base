@@ -21,6 +21,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemProperties;
@@ -47,6 +48,10 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private static final boolean SET_MENU_LANGUAGE =
             HdmiProperties.set_menu_language_enabled().orElse(false);
 
+    // How long to wait after hotplug out before possibly going to Standby.
+    @VisibleForTesting
+    static final long STANDBY_AFTER_HOTPLUG_OUT_DELAY_MS = 30_000;
+
     // Used to keep the device awake while it is the active source. For devices that
     // cannot wake up via CEC commands, this address the inconvenience of having to
     // turn them on. True by default, and can be disabled (i.e. device can go to sleep
@@ -54,6 +59,9 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     // persist.sys.hdmi.keep_awake to false.
     // Lazily initialized - should call getWakeLock() to get the instance.
     private ActiveWakeLock mWakeLock;
+
+    // Handler for queueing a delayed Standby runnable after hotplug out.
+    private Handler mDelayedStandbyHandler;
 
     // Determines what action should be taken upon receiving Routing Control messages.
     @VisibleForTesting
@@ -64,6 +72,8 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
 
     HdmiCecLocalDevicePlayback(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
+
+        mDelayedStandbyHandler = new Handler(service.getServiceLooper());
     }
 
     @Override
@@ -195,9 +205,33 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
         mCecMessageCache.flushAll();
-        // We'll not invalidate the active source on the hotplug event to pass CETC 11.2.2-2 ~ 3.
-        if (!connected) {
+
+        if (connected) {
+            mDelayedStandbyHandler.removeCallbacksAndMessages(null);
+        } else {
+            // We'll not invalidate the active source on the hotplug event to pass CETC 11.2.2-2 ~ 3
             getWakeLock().release();
+
+            mDelayedStandbyHandler.removeCallbacksAndMessages(null);
+            mDelayedStandbyHandler.postDelayed(new DelayedStandbyRunnable(),
+                    STANDBY_AFTER_HOTPLUG_OUT_DELAY_MS);
+        }
+    }
+
+    /**
+     * Runnable for going to Standby if the device has been inactive for a certain amount of time.
+     * Posts a new instance of itself as a delayed message if the device was active.
+     */
+    private class DelayedStandbyRunnable implements Runnable {
+        @Override
+        public void run() {
+            if (mService.getPowerManagerInternal().wasDeviceIdleFor(
+                    STANDBY_AFTER_HOTPLUG_OUT_DELAY_MS)) {
+                mService.standby();
+            } else {
+                mDelayedStandbyHandler.postDelayed(new DelayedStandbyRunnable(),
+                        STANDBY_AFTER_HOTPLUG_OUT_DELAY_MS);
+            }
         }
     }
 

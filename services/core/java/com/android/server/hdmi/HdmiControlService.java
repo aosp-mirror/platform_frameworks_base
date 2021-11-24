@@ -408,6 +408,9 @@ public class HdmiControlService extends SystemService {
     private PowerManagerWrapper mPowerManager;
 
     @Nullable
+    private PowerManagerInternalWrapper mPowerManagerInternal;
+
+    @Nullable
     private Looper mIoLooper;
 
     @HdmiControlManager.HdmiCecVersion
@@ -734,6 +737,7 @@ public class HdmiControlService extends SystemService {
             mTvInputManager = (TvInputManager) getContext().getSystemService(
                     Context.TV_INPUT_SERVICE);
             mPowerManager = new PowerManagerWrapper(getContext());
+            mPowerManagerInternal = new PowerManagerInternalWrapper();
         } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
             runOnServiceThread(this::bootCompleted);
         }
@@ -758,8 +762,17 @@ public class HdmiControlService extends SystemService {
         mPowerManager = powerManager;
     }
 
+    @VisibleForTesting
+    void setPowerManagerInternal(PowerManagerInternalWrapper powerManagerInternal) {
+        mPowerManagerInternal = powerManagerInternal;
+    }
+
     PowerManagerWrapper getPowerManager() {
         return mPowerManager;
+    }
+
+    PowerManagerInternalWrapper getPowerManagerInternal() {
+        return mPowerManagerInternal;
     }
 
     /**
@@ -3239,18 +3252,19 @@ public class HdmiControlService extends SystemService {
         assertRunOnServiceThread();
         Slog.v(TAG, "onPendingActionsCleared");
 
-        if (!mPowerStatusController.isPowerStatusTransientToStandby()) {
-            return;
+        if (mPowerStatusController.isPowerStatusTransientToStandby()) {
+            mPowerStatusController.setPowerStatus(HdmiControlManager.POWER_STATUS_STANDBY);
+            for (HdmiCecLocalDevice device : mHdmiCecNetwork.getLocalDeviceList()) {
+                device.onStandby(mStandbyMessageReceived, standbyAction);
+            }
+            if (!isAudioSystemDevice()) {
+                mCecController.setOption(OptionKey.SYSTEM_CEC_CONTROL, false);
+                mMhlController.setOption(OPTION_MHL_SERVICE_CONTROL, DISABLED);
+            }
         }
-        mPowerStatusController.setPowerStatus(HdmiControlManager.POWER_STATUS_STANDBY);
-        for (HdmiCecLocalDevice device : mHdmiCecNetwork.getLocalDeviceList()) {
-            device.onStandby(mStandbyMessageReceived, standbyAction);
-        }
+
+        // Always reset this flag to set up for the next standby
         mStandbyMessageReceived = false;
-        if (!isAudioSystemDevice()) {
-            mCecController.setOption(OptionKey.SYSTEM_CEC_CONTROL, false);
-            mMhlController.setOption(OPTION_MHL_SERVICE_CONTROL, DISABLED);
-        }
     }
 
     private void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType) {
