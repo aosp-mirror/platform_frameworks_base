@@ -15,7 +15,7 @@ The bouncer contains a hierarchy of controllers/views to render the user's secur
 
 1. [KeyguardBouncer][1] - Entrypoint for managing the bouncer visibility.
     1. [KeyguardHostViewController][2] - Intercepts media keys. Can most likely be merged with the next item.
-        1. [KeyguardSecurityContainerController][3] - Manages unlock attempt responses, one-handed use
+        1. [KeyguardSecurityContainerController][3] - Manages unlock attempt responses, determines the correct security view layout, which may include a user switcher or enable one-handed use.
             1. [KeyguardSecurityViewFlipperController][4] - Based upon the [KeyguardSecurityModel#SecurityMode][5], will instantiate the required view and controller. PIN, Pattern, etc.
 
 Fun fact: Naming comes from the concept of a bouncer at a bar or nightclub, who prevent troublemakers from entering or eject them from the premises.
