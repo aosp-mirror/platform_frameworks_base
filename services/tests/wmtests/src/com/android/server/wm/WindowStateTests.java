@@ -963,8 +963,7 @@ public class WindowStateTests extends WindowTestsBase {
                 .setSourceVisible(ITYPE_IME, true);
 
         // Verify notificationShade can still get IME insets even windowing mode is multi-window.
-        InsetsState state = mDisplayContent.getInsetsStateController().getInsetsForWindow(
-                mNotificationShadeWindow);
+        InsetsState state = mNotificationShadeWindow.getInsetsState();
         assertNotNull(state.peekSource(ITYPE_IME));
         assertTrue(state.getSource(ITYPE_IME).isVisible());
     }
