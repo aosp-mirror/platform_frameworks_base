@@ -1056,6 +1056,13 @@ public final class DisplayManagerService extends SystemService {
                         + "setUserDisabledHdrTypesInternal");
                 return;
             }
+
+            // Verify if userDisabledHdrTypes contains expected HDR types
+            if (!isSubsetOf(Display.HdrCapabilities.HDR_TYPES, userDisabledHdrTypes)) {
+                Slog.e(TAG, "userDisabledHdrTypes contains unexpected types");
+                return;
+            }
+
             Arrays.sort(userDisabledHdrTypes);
             if (Arrays.equals(mUserDisabledHdrTypes, userDisabledHdrTypes)) {
                 return;
@@ -1076,6 +1083,15 @@ public final class DisplayManagerService extends SystemService {
                         });
             }
         }
+    }
+
+    private boolean isSubsetOf(int[] sortedSuperset, int[] subset) {
+        for (int i : subset) {
+            if (Arrays.binarySearch(sortedSuperset, i) < 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void setAreUserDisabledHdrTypesAllowedInternal(
