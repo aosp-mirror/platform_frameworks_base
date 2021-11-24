@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
+import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.internal.util.Preconditions.checkState;
 import static com.android.systemui.statusbar.notification.collection.GroupEntry.ROOT_ENTRY;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_BUILD_STARTED;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_FINALIZE_FILTERING;
@@ -34,6 +36,7 @@ import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.os.Trace;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -50,6 +53,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState;
 import com.android.systemui.statusbar.notification.collection.listbuilder.ShadeListBuilderLogger;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.DefaultNotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
@@ -72,6 +76,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -103,7 +108,7 @@ public class ShadeListBuilder implements Dumpable {
     private final List<NotifFilter> mNotifFinalizeFilters = new ArrayList<>();
     private final List<NotifComparator> mNotifComparators = new ArrayList<>();
     private final List<NotifSection> mNotifSections = new ArrayList<>();
-    @Nullable private NotifStabilityManager mNotifStabilityManager;
+    private NotifStabilityManager mNotifStabilityManager;
 
     private final List<OnBeforeTransformGroupsListener> mOnBeforeTransformGroupsListeners =
             new ArrayList<>();
@@ -228,7 +233,7 @@ public class ShadeListBuilder implements Dumpable {
         mNotifSections.add(new NotifSection(DEFAULT_SECTIONER, mNotifSections.size()));
     }
 
-    void setNotifStabilityManager(NotifStabilityManager notifStabilityManager) {
+    void setNotifStabilityManager(@NonNull NotifStabilityManager notifStabilityManager) {
         Assert.isMainThread();
         mPipelineState.requireState(STATE_IDLE);
 
@@ -242,6 +247,14 @@ public class ShadeListBuilder implements Dumpable {
 
         mNotifStabilityManager = notifStabilityManager;
         mNotifStabilityManager.setInvalidationListener(this::onReorderingAllowedInvalidated);
+    }
+
+    @NonNull
+    private NotifStabilityManager getStabilityManager() {
+        if (mNotifStabilityManager == null) {
+            return DefaultNotifStabilityManager.INSTANCE;
+        }
+        return mNotifStabilityManager;
     }
 
     void setComparators(List<NotifComparator> comparators) {
@@ -460,10 +473,6 @@ public class ShadeListBuilder implements Dumpable {
 
         for (NotificationEntry entry : mAllEntries) {
             entry.beginNewAttachState();
-
-            if (entry.mFirstAddedIteration == -1) {
-                entry.mFirstAddedIteration = mIterationCount;
-            }
         }
 
         mNotifList.clear();
@@ -519,7 +528,6 @@ public class ShadeListBuilder implements Dumpable {
                 GroupEntry group = mGroups.get(topLevelKey);
                 if (group == null) {
                     group = new GroupEntry(topLevelKey, mSystemClock.uptimeMillis());
-                    group.mFirstAddedIteration = mIterationCount;
                     mGroups.put(topLevelKey, group);
                 }
                 if (group.getParent() == null) {
@@ -569,7 +577,7 @@ public class ShadeListBuilder implements Dumpable {
     }
 
     private void stabilizeGroupingNotifs(List<ListEntry> topLevelList) {
-        if (mNotifStabilityManager == null) {
+        if (getStabilityManager().isEveryChangeAllowed()) {
             return;
         }
         Trace.beginSection("ShadeListBuilder.stabilizeGroupingNotifs");
@@ -612,7 +620,7 @@ public class ShadeListBuilder implements Dumpable {
         final GroupEntry prevParent = entry.getPreviousAttachState().getParent();
         final GroupEntry assignedParent = entry.getParent();
         if (prevParent != assignedParent
-                && !mNotifStabilityManager.isGroupChangeAllowed(entry.getRepresentativeEntry())) {
+                && !getStabilityManager().isGroupChangeAllowed(entry.getRepresentativeEntry())) {
             entry.getAttachState().getSuppressedChanges().setParent(assignedParent);
             entry.setParent(prevParent);
             if (prevParent == ROOT_ENTRY) {
@@ -655,62 +663,159 @@ public class ShadeListBuilder implements Dumpable {
 
     private void pruneIncompleteGroups(List<ListEntry> shadeList) {
         Trace.beginSection("ShadeListBuilder.pruneIncompleteGroups");
+        // Any group which lost a child on this run to stability is exempt from being pruned or
+        //  having its summary promoted, regardless of how many children it has
+        Set<String> groupsWithChildrenLostToStability =
+                getGroupsWithChildrenLostToStability(shadeList);
         for (int i = 0; i < shadeList.size(); i++) {
             final ListEntry tle = shadeList.get(i);
 
             if (tle instanceof GroupEntry) {
                 final GroupEntry group = (GroupEntry) tle;
                 final List<NotificationEntry> children = group.getRawChildren();
+                final boolean hasSummary = group.getSummary() != null;
 
-                if (group.getSummary() != null && children.size() == 0) {
-                    NotificationEntry summary = group.getSummary();
-                    summary.setParent(ROOT_ENTRY);
-                    // The list may be sorted; replace the group with the summary, in its place
-                    shadeList.set(i, summary);
-
-                    group.setSummary(null);
-                    annulAddition(group, shadeList);
+                if (hasSummary && children.size() == 0) {
+                    if (groupsWithChildrenLostToStability.contains(group.getKey())) {
+                        // This group lost a child on this run to stability, so it is exempt from
+                        //  having its summary promoted to the top level, so prune it.
+                        //  It has no children, so it will just vanish.
+                        pruneGroupAtIndexAndPromoteAnyChildren(shadeList, group, i);
+                    } else {
+                        // For any other summary with no children, promote the summary.
+                        pruneGroupAtIndexAndPromoteSummary(shadeList, group, i);
+                    }
 
                     i--;  // The node we visited is gone, so be sure to visit this index again.
-                } else if (group.getSummary() == null
-                        || children.size() < MIN_CHILDREN_FOR_GROUP) {
+                } else if (!hasSummary) {
+                    // If the group doesn't provide a summary, ignore it and add
+                    //  any children it may have directly to top-level.
+                    pruneGroupAtIndexAndPromoteAnyChildren(shadeList, group, i);
 
-                    if (group.getSummary() != null
-                            && group.wasAttachedInPreviousPass()
-                            && mNotifStabilityManager != null
-                            && !mNotifStabilityManager.isGroupChangeAllowed(group.getSummary())) {
-                        // if this group was previously attached and group changes aren't
-                        // allowed, keep it around until group changes are allowed again
+                    i--;  // The node we visited is gone, so be sure to visit this index again.
+                } else if (children.size() < MIN_CHILDREN_FOR_GROUP) {
+                    // This group has a summary and insufficient, but nonzero children.
+                    checkState(hasSummary, "group must have summary at this point");
+                    checkState(!children.isEmpty(), "empty group should have been promoted");
+
+                    if (groupsWithChildrenLostToStability.contains(group.getKey())) {
+                        // This group lost a child on this run to stability, so it is exempt from
+                        //  the "min children" requirement; keep it around in case more children are
+                        //  added before changes are allowed again.
+                        group.getAttachState().getSuppressedChanges().setWasPruneSuppressed(true);
+                        continue;
+                    }
+                    if (group.wasAttachedInPreviousPass()
+                            && !getStabilityManager().isGroupChangeAllowed(group.getSummary())) {
+                        checkState(!children.isEmpty(), "empty group should have been pruned");
+                        // This group was previously attached and group changes aren't
+                        //  allowed; keep it around until group changes are allowed again.
                         group.getAttachState().getSuppressedChanges().setWasPruneSuppressed(true);
                         continue;
                     }
 
-                    // If the group doesn't provide a summary or is too small, ignore it and add
+                    // The group is too small, ignore it and add
                     // its children (if any) directly to top-level.
-
-                    shadeList.remove(i);
-
-                    if (group.getSummary() != null) {
-                        final NotificationEntry summary = group.getSummary();
-                        group.setSummary(null);
-                        annulAddition(summary, shadeList);
-                    }
-
-                    for (int j = 0; j < children.size(); j++) {
-                        final NotificationEntry child = children.get(j);
-                        child.setParent(ROOT_ENTRY);
-                        // The list may be sorted, so add the children in order where the group was.
-                        shadeList.add(i + j, child);
-                    }
-                    children.clear();
-
-                    annulAddition(group, shadeList);
+                    pruneGroupAtIndexAndPromoteAnyChildren(shadeList, group, i);
 
                     i--;  // The node we visited is gone, so be sure to visit this index again.
                 }
             }
         }
         Trace.endSection();
+    }
+
+    private void pruneGroupAtIndexAndPromoteSummary(List<ListEntry> shadeList,
+            GroupEntry group, int index) {
+        // Validate that the group has no children
+        checkArgument(group.getChildren().isEmpty(), "group should have no children");
+
+        NotificationEntry summary = group.getSummary();
+        summary.setParent(ROOT_ENTRY);
+        // The list may be sorted; replace the group with the summary, in its place
+        ListEntry oldEntry = shadeList.set(index, summary);
+
+        // Validate that the replaced entry was the group entry
+        checkState(oldEntry == group);
+
+        group.setSummary(null);
+        annulAddition(group, shadeList);
+        summary.getAttachState().setGroupPruneReason(
+                "SUMMARY with no children @ " + mPipelineState.getStateName());
+    }
+
+    private void pruneGroupAtIndexAndPromoteAnyChildren(List<ListEntry> shadeList,
+            GroupEntry group, int index) {
+        // REMOVE the GroupEntry at this index
+        ListEntry oldEntry = shadeList.remove(index);
+
+        // Validate that the replaced entry was the group entry
+        checkState(oldEntry == group);
+
+        List<NotificationEntry> children = group.getRawChildren();
+        boolean hasSummary = group.getSummary() != null;
+
+        // Remove the group summary, if present, and leave detached.
+        if (hasSummary) {
+            final NotificationEntry summary = group.getSummary();
+            group.setSummary(null);
+            annulAddition(summary, shadeList);
+            summary.getAttachState().setGroupPruneReason(
+                    "SUMMARY with too few children @ " + mPipelineState.getStateName());
+        }
+
+        // Promote any children
+        if (!children.isEmpty()) {
+            // create the reason we will report on the child for why its group was pruned.
+            String childReason = hasSummary
+                    ? ("CHILD with " + (children.size() - 1) + " siblings @ "
+                        + mPipelineState.getStateName())
+                    : ("CHILD with no summary @ " + mPipelineState.getStateName());
+
+            // Remove children from the group and add them to the shadeList.
+            for (int j = 0; j < children.size(); j++) {
+                final NotificationEntry child = children.get(j);
+                child.setParent(ROOT_ENTRY);
+                child.getAttachState().setGroupPruneReason(requireNonNull(childReason));
+            }
+            // The list may be sorted, so add the children in order where the group was.
+            shadeList.addAll(index, children);
+            children.clear();
+        }
+
+        annulAddition(group, shadeList);
+    }
+
+    /**
+     * Collect the keys of any groups which have already lost a child to stability this run.
+     *
+     * If stability is being enforced, then {@link #stabilizeGroupingNotifs(List)} might have
+     * detached some children from their groups and left them at the top level because the child was
+     * previously attached at the top level.  Doing so would set the
+     * {@link SuppressedAttachState#getParent() suppressed parent} for the current attach state.
+     *
+     * If we've already removed a child from this group, we don't want to remove any more children
+     * from the group (even if that would leave only a single notification in the group) because
+     * that could cascade over multiple runs and allow a large group of notifications all show up as
+     * top level (ungrouped) notifications.
+     */
+    @NonNull
+    private Set<String> getGroupsWithChildrenLostToStability(List<ListEntry> shadeList) {
+        if (getStabilityManager().isEveryChangeAllowed()) {
+            return Collections.emptySet();
+        }
+        ArraySet<String> groupsWithChildrenLostToStability = new ArraySet<>();
+        for (int i = 0; i < shadeList.size(); i++) {
+            final ListEntry tle = shadeList.get(i);
+            final GroupEntry suppressedParent =
+                    tle.getAttachState().getSuppressedChanges().getParent();
+            if (suppressedParent != null) {
+                // This top-level-entry was supposed to be attached to this group,
+                //  so mark the group as having lost a child to stability.
+                groupsWithChildrenLostToStability.add(suppressedParent.getKey());
+            }
+        }
+        return groupsWithChildrenLostToStability;
     }
 
     /**
@@ -727,10 +832,9 @@ public class ShadeListBuilder implements Dumpable {
         // lot of them), it will put the system into an inconsistent state. So we check all of them
         // here.
 
-        if (entry.getParent() == null || entry.mFirstAddedIteration == -1) {
+        if (entry.getParent() == null) {
             throw new IllegalStateException(
-                    "Cannot nullify addition of " + entry.getKey() + ": no such addition. ("
-                            + entry.getParent() + " " + entry.mFirstAddedIteration + ")");
+                    "Cannot nullify addition of " + entry.getKey() + ": no parent.");
         }
 
         if (entry.getParent() == ROOT_ENTRY) {
@@ -771,9 +875,6 @@ public class ShadeListBuilder implements Dumpable {
         entry.setParent(null);
         entry.getAttachState().setSection(null);
         entry.getAttachState().setPromoter(null);
-        if (entry.mFirstAddedIteration == mIterationCount) {
-            entry.mFirstAddedIteration = -1;
-        }
     }
 
     private void assignSections() {
@@ -804,12 +905,12 @@ public class ShadeListBuilder implements Dumpable {
         assignIndexes(mNotifList);
 
         // Check for suppressed order changes
-        if (!mNotifStabilityManager.isEveryChangeAllowed()) {
+        if (!getStabilityManager().isEveryChangeAllowed()) {
             mForceReorderable = true;
             boolean isSorted = isSorted(mNotifList, mTopLevelComparator);
             mForceReorderable = false;
             if (!isSorted) {
-                mNotifStabilityManager.onEntryReorderSuppressed();
+                getStabilityManager().onEntryReorderSuppressed();
             }
         }
         Trace.endSection();
@@ -897,10 +998,24 @@ public class ShadeListBuilder implements Dumpable {
                         curr.getParent());
             }
 
+            if (curr.getSuppressedChanges().getSection() != null) {
+                mLogger.logSectionChangeSuppressed(
+                        mIterationCount,
+                        curr.getSuppressedChanges().getSection(),
+                        curr.getSection());
+            }
+
             if (curr.getSuppressedChanges().getWasPruneSuppressed()) {
                 mLogger.logGroupPruningSuppressed(
                         mIterationCount,
                         curr.getParent());
+            }
+
+            if (!Objects.equals(curr.getGroupPruneReason(), prev.getGroupPruneReason())) {
+                mLogger.logPrunedReasonChanged(
+                        mIterationCount,
+                        prev.getGroupPruneReason(),
+                        curr.getGroupPruneReason());
             }
 
             if (curr.getExcludingFilter() != prev.getExcludingFilter()) {
@@ -927,20 +1042,11 @@ public class ShadeListBuilder implements Dumpable {
                         prev.getSection(),
                         curr.getSection());
             }
-
-            if (curr.getSuppressedChanges().getSection() != null) {
-                mLogger.logSectionChangeSuppressed(
-                        mIterationCount,
-                        curr.getSuppressedChanges().getSection(),
-                        curr.getSection());
-            }
         }
     }
 
     private void onBeginRun() {
-        if (mNotifStabilityManager != null) {
-            mNotifStabilityManager.onBeginRun();
-        }
+        getStabilityManager().onBeginRun();
     }
 
     private void cleanupPluggables() {
@@ -953,9 +1059,7 @@ public class ShadeListBuilder implements Dumpable {
             mNotifSections.get(i).getSectioner().onCleanup();
         }
 
-        if (mNotifStabilityManager != null) {
-            callOnCleanup(List.of(mNotifStabilityManager));
-        }
+        callOnCleanup(List.of(getStabilityManager()));
     }
 
     private void callOnCleanup(List<? extends Pluggable<?>> pluggables) {
@@ -1015,7 +1119,7 @@ public class ShadeListBuilder implements Dumpable {
     private boolean mForceReorderable = false;
 
     private boolean canReorder(ListEntry entry) {
-        return mForceReorderable || mNotifStabilityManager.isEntryReorderingAllowed(entry);
+        return mForceReorderable || getStabilityManager().isEntryReorderingAllowed(entry);
     }
 
     private boolean applyFilters(NotificationEntry entry, long now, List<NotifFilter> filters) {
@@ -1064,12 +1168,10 @@ public class ShadeListBuilder implements Dumpable {
         NotifSection finalSection = newSection;
 
         // have we seen this entry before and are we changing its section?
-        if (mNotifStabilityManager != null
-                && entry.wasAttachedInPreviousPass()
-                && newSection != prevAttachState.getSection()) {
+        if (entry.wasAttachedInPreviousPass() && newSection != prevAttachState.getSection()) {
 
             // are section changes allowed?
-            if (!mNotifStabilityManager.isSectionChangeAllowed(entry.getRepresentativeEntry())) {
+            if (!getStabilityManager().isSectionChangeAllowed(entry.getRepresentativeEntry())) {
                 // record the section that we wanted to change to
                 entry.getAttachState().getSuppressedChanges().setSection(newSection);
 

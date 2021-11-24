@@ -118,7 +118,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
                 }
 
                 @Override
-                public boolean isGroupChangeAllowed(NotificationEntry entry) {
+                public boolean isGroupChangeAllowed(@NonNull NotificationEntry entry) {
                     final boolean isGroupChangeAllowedForEntry =
                             mReorderingAllowed || mHeadsUpManager.isAlerting(entry.getKey());
                     mIsSuppressingGroupChange |= !isGroupChangeAllowedForEntry;
@@ -126,7 +126,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
                 }
 
                 @Override
-                public boolean isSectionChangeAllowed(NotificationEntry entry) {
+                public boolean isSectionChangeAllowed(@NonNull NotificationEntry entry) {
                     final boolean isSectionChangeAllowedForEntry =
                             mReorderingAllowed
                                     || mHeadsUpManager.isAlerting(entry.getKey())
@@ -138,7 +138,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
                 }
 
                 @Override
-                public boolean isEntryReorderingAllowed(ListEntry section) {
+                public boolean isEntryReorderingAllowed(@NonNull ListEntry section) {
                     return mReorderingAllowed;
                 }
 
