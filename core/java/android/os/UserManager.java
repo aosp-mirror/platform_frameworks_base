@@ -3854,13 +3854,19 @@ public class UserManager {
     }
 
     /**
-     * Checks whether it's possible to add more users. Caller must hold the MANAGE_USERS
-     * permission.
+     * Checks whether it's possible to add more users.
      *
      * @return true if more users can be added, false if limit has been reached.
+     *
+     * @deprecated use {@link #canAddMoreUsers(String)} instead.
+     *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @Deprecated
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS
+    })
     public boolean canAddMoreUsers() {
         // TODO(b/142482943): UMS has different logic, excluding Demo and Profile from counting. Why
         //                    not here? The logic is inconsistent. See UMS.canAddMoreManagedProfiles
@@ -3874,6 +3880,25 @@ public class UserManager {
             }
         }
         return aliveUserCount < getMaxSupportedUsers();
+    }
+
+    /**
+     * Checks whether it is possible to add more users of the given user type.
+     *
+     * @param userType the type of user, such as {@link UserManager#USER_TYPE_FULL_SECONDARY}.
+     * @return true if more users of the given type can be added, otherwise false.
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS
+    })
+    public boolean canAddMoreUsers(@NonNull String userType) {
+        try {
+            return canAddMoreUsers() && mService.canAddMoreUsersOfType(userType);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**

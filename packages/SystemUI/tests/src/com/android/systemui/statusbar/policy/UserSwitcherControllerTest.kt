@@ -124,7 +124,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         mContext.addMockSystemService(Context.FINGERPRINT_SERVICE,
                 mock(FingerprintManager::class.java))
 
-        `when`(userManager.canAddMoreUsers()).thenReturn(true)
+        `when`(userManager.canAddMoreUsers(eq(UserManager.USER_TYPE_FULL_SECONDARY)))
+                .thenReturn(true)
         `when`(notificationShadeWindowView.context).thenReturn(context)
 
         userSwitcherController = UserSwitcherController(

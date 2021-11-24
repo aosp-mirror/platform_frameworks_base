@@ -2397,6 +2397,17 @@ public class UserManagerService extends IUserManager.Stub {
         return count;
     }
 
+    /**
+     * Returns whether more users of the given type can be added (based on how many users of that
+     * type already exist).
+     */
+    @Override
+    public boolean canAddMoreUsersOfType(String userType) {
+        checkManageOrCreateUsersPermission("check if more users can be added.");
+        final UserTypeDetails userTypeDetails = mUserTypes.get(userType);
+        return userTypeDetails != null && canAddMoreUsersOfType(userTypeDetails);
+    }
+
     @Override
     public boolean canAddMoreManagedProfiles(@UserIdInt int userId, boolean allowedToRemoveOne) {
         return canAddMoreProfilesToUser(UserManager.USER_TYPE_PROFILE_MANAGED, userId,
