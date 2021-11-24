@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.STATE_ON;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
@@ -70,7 +71,7 @@ public class InputMethodMenuControllerTest extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        // Let the Display to be created with the DualDisplay policy.
+        // Let the Display be created with the DualDisplay policy.
         final DisplayAreaPolicy.Provider policyProvider =
                 new DualDisplayAreaGroupPolicyTest.DualDisplayTestPolicyProvider();
         Mockito.doReturn(policyProvider).when(mWm).getDisplayAreaPolicyProvider();
@@ -78,6 +79,7 @@ public class InputMethodMenuControllerTest extends WindowTestsBase {
         mController = new InputMethodMenuController(mock(InputMethodManagerService.class));
         mSecondaryDisplay = new DualDisplayAreaGroupPolicyTest.DualDisplayContent
                 .Builder(mAtm, 1000, 1000).build();
+        mSecondaryDisplay.getDisplayInfo().state = STATE_ON;
 
         // Mock addWindowTokenWithOptions to create a test window token.
         mIWindowManager = WindowManagerGlobal.getWindowManagerService();
