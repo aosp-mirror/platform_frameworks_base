@@ -20,7 +20,9 @@ import android.os.Handler
 import android.util.Log
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 private const val TAG = "InternetDialogFactory"
@@ -32,6 +34,7 @@ private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
 @SysUISingleton
 class InternetDialogFactory @Inject constructor(
     @Main private val handler: Handler,
+    @Background private val executor: Executor,
     private val internetDialogController: InternetDialogController,
     private val context: Context,
     private val uiEventLogger: UiEventLogger
@@ -49,7 +52,8 @@ class InternetDialogFactory @Inject constructor(
             return
         } else {
             internetDialog = InternetDialog(context, this, internetDialogController,
-                    canConfigMobileData, canConfigWifi, aboveStatusBar, uiEventLogger, handler)
+                    canConfigMobileData, canConfigWifi, aboveStatusBar, uiEventLogger, handler,
+                    executor)
             internetDialog?.show()
         }
     }

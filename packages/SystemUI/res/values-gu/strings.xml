@@ -1179,4 +1179,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"હમણાં પૂરતું વાઇ-ફાઇ ઑટોમૅટિક રીતે કનેક્ટ થશે નહીં"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"બધા જુઓ"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"બીજા નેટવર્ક પર જવા માટે, ઇથરનેટ ડિસ્કનેક્ટ કરો"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ડિવાઇસના અનુભવને બહેતર બનાવવા માટે, વાઇ-ફાઇ બંધ હોય ત્યારે પણ ઍપ અને સેવાઓ કોઈપણ સમયે વાઇ-ફાઇ નેટવર્ક સ્કૅન કરી શકે છે. તમે વાઇ-ફાઇ સ્કૅનિંગના સેટિંગમાં જઈને આને બદલી શકો છો. "<annotation id="link">"બદલો"</annotation></string>
 </resources>
