@@ -70,6 +70,7 @@ import android.content.pm.DataLoaderParamsParcel;
 import android.content.pm.FileSystemControlParcel;
 import android.content.pm.IDataLoader;
 import android.content.pm.IDataLoaderStatusListener;
+import android.content.pm.IOnChecksumsReadyListener;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.IPackageInstallerSessionFileSystemConnector;
@@ -166,6 +167,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -1393,6 +1395,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             mChecksums.put(name, new PerFileChecksum(checksums, signature));
+        }
+    }
+
+    @Override
+    public void requestChecksums(@NonNull String name, @Checksum.TypeMask int optional,
+            @Checksum.TypeMask int required, @Nullable List trustedInstallers,
+            @NonNull IOnChecksumsReadyListener onChecksumsReadyListener) {
+        final File file = new File(stageDir, name);
+        final String installerPackageName = getInstallSource().initiatingPackageName;
+        try {
+            mPm.requestFileChecksums(file, installerPackageName, optional, required,
+                    trustedInstallers, onChecksumsReadyListener);
+        } catch (FileNotFoundException e) {
+            throw new ParcelableException(e);
         }
     }
 

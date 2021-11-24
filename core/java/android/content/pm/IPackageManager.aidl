@@ -750,7 +750,7 @@ interface IPackageManager {
 
     void notifyPackagesReplacedReceived(in String[] packages);
 
-    void requestChecksums(in String packageName, boolean includeSplits, int optional, int required, in List trustedInstallers, in IOnChecksumsReadyListener onChecksumsReadyListener, int userId);
+    void requestPackageChecksums(in String packageName, boolean includeSplits, int optional, int required, in List trustedInstallers, in IOnChecksumsReadyListener onChecksumsReadyListener, int userId);
 
     IntentSender getLaunchIntentSenderForPackage(String packageName, String callingPackage,
                 String featureId, int userId);

@@ -399,6 +399,8 @@ final class VerificationParams extends HandlerParams {
 
             verification.putExtra(PackageInstaller.EXTRA_DATA_LOADER_TYPE, mDataLoaderType);
 
+            verification.putExtra(PackageInstaller.EXTRA_SESSION_ID, mSessionId);
+
             populateInstallerExtras(verification);
 
             final List<ComponentName> sufficientVerifiers = matchVerifiers(pkgLite,
