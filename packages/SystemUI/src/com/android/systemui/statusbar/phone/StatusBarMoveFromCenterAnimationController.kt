@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.phone
 import android.view.View
 import android.view.WindowManager
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
-import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator.ViewCenterProvider
+import com.android.systemui.statusbar.phone.PhoneStatusBarViewController.StatusBarViewsCenterProvider
 import com.android.systemui.unfold.SysUIUnfoldScope
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
@@ -27,20 +27,18 @@ import javax.inject.Inject
 @SysUIUnfoldScope
 class StatusBarMoveFromCenterAnimationController @Inject constructor(
     private val progressProvider: ScopedUnfoldTransitionProgressProvider,
-    private val windowManager: WindowManager
+    windowManager: WindowManager
 ) {
 
     private val transitionListener = TransitionListener()
-    private var moveFromCenterAnimator: UnfoldMoveFromCenterAnimator? = null
+    private val moveFromCenterAnimator = UnfoldMoveFromCenterAnimator(windowManager,
+        viewCenterProvider = StatusBarViewsCenterProvider())
 
-    fun onViewsReady(viewsToAnimate: Array<View>, viewCenterProvider: ViewCenterProvider) {
-        moveFromCenterAnimator = UnfoldMoveFromCenterAnimator(windowManager,
-            viewCenterProvider = viewCenterProvider)
-
-        moveFromCenterAnimator?.updateDisplayProperties()
+    fun onViewsReady(viewsToAnimate: Array<View>) {
+        moveFromCenterAnimator.updateDisplayProperties()
 
         viewsToAnimate.forEach {
-            moveFromCenterAnimator?.registerViewForAnimation(it)
+            moveFromCenterAnimator.registerViewForAnimation(it)
         }
 
         progressProvider.addCallback(transitionListener)
@@ -48,24 +46,23 @@ class StatusBarMoveFromCenterAnimationController @Inject constructor(
 
     fun onViewDetached() {
         progressProvider.removeCallback(transitionListener)
-        moveFromCenterAnimator?.clearRegisteredViews()
-        moveFromCenterAnimator = null
+        moveFromCenterAnimator.clearRegisteredViews()
     }
 
     fun onStatusBarWidthChanged() {
-        moveFromCenterAnimator?.updateDisplayProperties()
-        moveFromCenterAnimator?.updateViewPositions()
+        moveFromCenterAnimator.updateDisplayProperties()
+        moveFromCenterAnimator.updateViewPositions()
     }
 
     private inner class TransitionListener : TransitionProgressListener {
         override fun onTransitionProgress(progress: Float) {
-            moveFromCenterAnimator?.onTransitionProgress(progress)
+            moveFromCenterAnimator.onTransitionProgress(progress)
         }
 
         override fun onTransitionFinished() {
             // Reset translations when transition is stopped/cancelled
             // (e.g. the transition could be cancelled mid-way when rotating the screen)
-            moveFromCenterAnimator?.onTransitionProgress(1f)
+            moveFromCenterAnimator.onTransitionProgress(1f)
         }
     }
 }
