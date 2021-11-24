@@ -3436,7 +3436,9 @@ public class StatsPullAtomService extends SystemService {
                             metricsState.getLatestTelephonySuggestion()),
                     convertTimeZoneSuggestionToProtoBytes(
                             metricsState.getLatestGeolocationSuggestion()),
-                    metricsState.isTelephonyTimeZoneFallbackSupported()
+                    metricsState.isTelephonyTimeZoneFallbackSupported(),
+                    metricsState.getDeviceTimeZoneId(),
+                    metricsState.isEnhancedMetricsCollectionEnabled()
             ));
         } catch (RuntimeException e) {
             Slog.e(TAG, "Getting time zone detection state failed: ", e);
@@ -3482,6 +3484,14 @@ public class StatsPullAtomService extends SystemService {
                 protoOutputStream.write(
                         android.app.time.MetricsTimeZoneSuggestion.TIME_ZONE_ORDINALS,
                         zoneIdOrdinal);
+            }
+            String[] zoneIds = suggestion.getZoneIds();
+            if (zoneIds != null) {
+                for (String zoneId : zoneIds) {
+                    protoOutputStream.write(
+                            android.app.time.MetricsTimeZoneSuggestion.TIME_ZONE_IDS,
+                            zoneId);
+                }
             }
         }
         protoOutputStream.flush();
