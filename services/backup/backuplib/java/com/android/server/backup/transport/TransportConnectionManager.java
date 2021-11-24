@@ -36,18 +36,18 @@ import java.util.WeakHashMap;
 import java.util.function.Function;
 
 /**
- * Manages the creation and disposal of {@link TransportClient}s. The only class that should use
+ * Manages the creation and disposal of {@link TransportConnection}s. The only class that should use
  * this is {@link TransportManager}, all the other usages should go to {@link TransportManager}.
  */
-public class TransportClientManager {
-    private static final String TAG = "TransportClientManager";
+public class TransportConnectionManager {
+    private static final String TAG = "TransportConnectionManager";
 
     private final @UserIdInt int mUserId;
     private final Context mContext;
     private final TransportStats mTransportStats;
     private final Object mTransportClientsLock = new Object();
     private int mTransportClientsCreated = 0;
-    private Map<TransportClient, String> mTransportClientsCallerMap = new WeakHashMap<>();
+    private Map<TransportConnection, String> mTransportClientsCallerMap = new WeakHashMap<>();
     private final Function<ComponentName, Intent> mIntentFunction;
 
     /**
@@ -58,12 +58,12 @@ public class TransportClientManager {
         return new Intent(SERVICE_ACTION_TRANSPORT_HOST).setComponent(transportComponent);
     }
 
-    public TransportClientManager(@UserIdInt int userId, Context context,
+    public TransportConnectionManager(@UserIdInt int userId, Context context,
             TransportStats transportStats) {
-        this(userId, context, transportStats, TransportClientManager::getRealTransportIntent);
+        this(userId, context, transportStats, TransportConnectionManager::getRealTransportIntent);
     }
 
-    private TransportClientManager(@UserIdInt int userId, Context context,
+    private TransportConnectionManager(@UserIdInt int userId, Context context,
             TransportStats transportStats, Function<ComponentName, Intent> intentFunction) {
         mUserId = userId;
         mContext = context;
@@ -72,31 +72,31 @@ public class TransportClientManager {
     }
 
     /**
-     * Retrieves a {@link TransportClient} for the transport identified by {@param
+     * Retrieves a {@link TransportConnection} for the transport identified by {@param
      * transportComponent}.
      *
      * @param transportComponent The {@link ComponentName} of the transport.
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
-     *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
+     *     {@link TransportConnection#connectAsync(TransportConnectionListener, String)} for more
      *     details.
-     * @return A {@link TransportClient}.
+     * @return A {@link TransportConnection}.
      */
-    public TransportClient getTransportClient(ComponentName transportComponent, String caller) {
+    public TransportConnection getTransportClient(ComponentName transportComponent, String caller) {
         return getTransportClient(transportComponent, null, caller);
     }
 
     /**
-     * Retrieves a {@link TransportClient} for the transport identified by {@param
+     * Retrieves a {@link TransportConnection} for the transport identified by {@param
      * transportComponent} whose binding intent will have the {@param extras} extras.
      *
      * @param transportComponent The {@link ComponentName} of the transport.
      * @param extras A {@link Bundle} of extras to pass to the binding intent.
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
-     *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
+     *     {@link TransportConnection#connectAsync(TransportConnectionListener, String)} for more
      *     details.
-     * @return A {@link TransportClient}.
+     * @return A {@link TransportConnection}.
      */
-    public TransportClient getTransportClient(
+    public TransportConnection getTransportClient(
             ComponentName transportComponent, @Nullable Bundle extras, String caller) {
         Intent bindIntent = mIntentFunction.apply(transportComponent);
         if (extras != null) {
@@ -105,11 +105,11 @@ public class TransportClientManager {
         return getTransportClient(transportComponent, caller, bindIntent);
     }
 
-    private TransportClient getTransportClient(
+    private TransportConnection getTransportClient(
             ComponentName transportComponent, String caller, Intent bindIntent) {
         synchronized (mTransportClientsLock) {
-            TransportClient transportClient =
-                    new TransportClient(
+            TransportConnection transportConnection =
+                    new TransportConnection(
                             mUserId,
                             mContext,
                             mTransportStats,
@@ -117,33 +117,33 @@ public class TransportClientManager {
                             transportComponent,
                             Integer.toString(mTransportClientsCreated),
                             caller);
-            mTransportClientsCallerMap.put(transportClient, caller);
+            mTransportClientsCallerMap.put(transportConnection, caller);
             mTransportClientsCreated++;
             TransportUtils.log(
                     Priority.DEBUG,
                     TAG,
-                    formatMessage(null, caller, "Retrieving " + transportClient));
-            return transportClient;
+                    formatMessage(null, caller, "Retrieving " + transportConnection));
+            return transportConnection;
         }
     }
 
     /**
-     * Disposes of the {@link TransportClient}.
+     * Disposes of the {@link TransportConnection}.
      *
-     * @param transportClient The {@link TransportClient} to be disposed of.
+     * @param transportConnection The {@link TransportConnection} to be disposed of.
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
-     *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
+     *     {@link TransportConnection#connectAsync(TransportConnectionListener, String)} for more
      *     details.
      */
-    public void disposeOfTransportClient(TransportClient transportClient, String caller) {
-        transportClient.unbind(caller);
-        transportClient.markAsDisposed();
+    public void disposeOfTransportClient(TransportConnection transportConnection, String caller) {
+        transportConnection.unbind(caller);
+        transportConnection.markAsDisposed();
         synchronized (mTransportClientsLock) {
             TransportUtils.log(
                     Priority.DEBUG,
                     TAG,
-                    formatMessage(null, caller, "Disposing of " + transportClient));
-            mTransportClientsCallerMap.remove(transportClient);
+                    formatMessage(null, caller, "Disposing of " + transportConnection));
+            mTransportClientsCallerMap.remove(transportConnection);
         }
     }
 
@@ -151,10 +151,10 @@ public class TransportClientManager {
         pw.println("Transport clients created: " + mTransportClientsCreated);
         synchronized (mTransportClientsLock) {
             pw.println("Current transport clients: " + mTransportClientsCallerMap.size());
-            for (TransportClient transportClient : mTransportClientsCallerMap.keySet()) {
-                String caller = mTransportClientsCallerMap.get(transportClient);
-                pw.println("    " + transportClient + " [" + caller + "]");
-                for (String logEntry : transportClient.getLogBuffer()) {
+            for (TransportConnection transportConnection : mTransportClientsCallerMap.keySet()) {
+                String caller = mTransportClientsCallerMap.get(transportConnection);
+                pw.println("    " + transportConnection + " [" + caller + "]");
+                for (String logEntry : transportConnection.getLogBuffer()) {
                     pw.println("        " + logEntry);
                 }
             }

@@ -24,14 +24,11 @@ import android.content.pm.PackageInfo;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.utils.BackupEligibilityRules;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-
-import java.util.Map;
-import java.util.Set;
 
 @Implements(PerformUnifiedRestoreTask.class)
 public class ShadowPerformUnifiedRestoreTask {
@@ -60,7 +57,7 @@ public class ShadowPerformUnifiedRestoreTask {
     @Implementation
     protected void __constructor__(
             UserBackupManagerService backupManagerService,
-            TransportClient transportClient,
+            TransportConnection transportConnection,
             IRestoreObserver observer,
             IBackupManagerMonitor monitor,
             long restoreSetToken,

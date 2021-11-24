@@ -38,7 +38,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.params.BackupParams;
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.utils.BackupEligibilityRules;
 
 import org.junit.Before;
@@ -57,7 +57,8 @@ public class UserBackupManagerServiceTest {
     @Mock IBackupManagerMonitor mBackupManagerMonitor;
     @Mock IBackupObserver mBackupObserver;
     @Mock PackageManager mPackageManager;
-    @Mock TransportClient mTransportClient;
+    @Mock
+    TransportConnection mTransportConnection;
     @Mock IBackupTransport mBackupTransport;
     @Mock BackupEligibilityRules mBackupEligibilityRules;
 
@@ -96,7 +97,7 @@ public class UserBackupManagerServiceTest {
 
         BackupParams params = mService.getRequestBackupParams(TEST_PACKAGES, mBackupObserver,
                 mBackupManagerMonitor, /* flags */ 0, mBackupEligibilityRules,
-                mTransportClient, /* transportDirName */ "", OnTaskFinishedListener.NOP);
+                mTransportConnection, /* transportDirName */ "", OnTaskFinishedListener.NOP);
 
         assertThat(params.kvPackages).isEmpty();
         assertThat(params.fullPackages).contains(TEST_PACKAGE);
@@ -112,7 +113,7 @@ public class UserBackupManagerServiceTest {
 
         BackupParams params = mService.getRequestBackupParams(TEST_PACKAGES, mBackupObserver,
                 mBackupManagerMonitor, /* flags */ 0, mBackupEligibilityRules,
-                mTransportClient, /* transportDirName */ "", OnTaskFinishedListener.NOP);
+                mTransportConnection, /* transportDirName */ "", OnTaskFinishedListener.NOP);
 
         assertThat(params.kvPackages).contains(TEST_PACKAGE);
         assertThat(params.fullPackages).isEmpty();
@@ -128,7 +129,7 @@ public class UserBackupManagerServiceTest {
 
         BackupParams params = mService.getRequestBackupParams(TEST_PACKAGES, mBackupObserver,
                 mBackupManagerMonitor, /* flags */ 0, mBackupEligibilityRules,
-                mTransportClient, /* transportDirName */ "", OnTaskFinishedListener.NOP);
+                mTransportConnection, /* transportDirName */ "", OnTaskFinishedListener.NOP);
 
         assertThat(params.kvPackages).isEmpty();
         assertThat(params.fullPackages).isEmpty();
@@ -138,10 +139,10 @@ public class UserBackupManagerServiceTest {
     @Test
     public void testGetOperationTypeFromTransport_returnsBackupByDefault()
             throws Exception {
-        when(mTransportClient.connectOrThrow(any())).thenReturn(mBackupTransport);
+        when(mTransportConnection.connectOrThrow(any())).thenReturn(mBackupTransport);
         when(mBackupTransport.getTransportFlags()).thenReturn(0);
 
-        int operationType = mService.getOperationTypeFromTransport(mTransportClient);
+        int operationType = mService.getOperationTypeFromTransport(mTransportConnection);
 
         assertThat(operationType).isEqualTo(OperationType.BACKUP);
     }
@@ -153,11 +154,11 @@ public class UserBackupManagerServiceTest {
         // rolled out.
         mService.shouldUseNewBackupEligibilityRules = true;
 
-        when(mTransportClient.connectOrThrow(any())).thenReturn(mBackupTransport);
+        when(mTransportConnection.connectOrThrow(any())).thenReturn(mBackupTransport);
         when(mBackupTransport.getTransportFlags()).thenReturn(
                 BackupAgent.FLAG_DEVICE_TO_DEVICE_TRANSFER);
 
-        int operationType = mService.getOperationTypeFromTransport(mTransportClient);
+        int operationType = mService.getOperationTypeFromTransport(mTransportConnection);
 
         assertThat(operationType).isEqualTo(OperationType.MIGRATION);
     }
