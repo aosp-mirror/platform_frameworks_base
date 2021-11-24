@@ -186,9 +186,10 @@ public class AvSettings extends Settings {
     private final boolean mIsPassthrough;
     private int mAudioStreamType = AUDIO_STREAM_TYPE_UNDEFINED;
     private int mVideoStreamType = VIDEO_STREAM_TYPE_UNDEFINED;
+    private final boolean mUseSecureMemory;
 
-    private AvSettings(int mainType, boolean isAudio, boolean isPassthrough,
-            int audioStreamType, int videoStreamType) {
+    private AvSettings(int mainType, boolean isAudio, boolean isPassthrough, int audioStreamType,
+            int videoStreamType, boolean useSecureMemory) {
         super(TunerUtils.getFilterSubtype(
                 mainType,
                 isAudio
@@ -197,6 +198,7 @@ public class AvSettings extends Settings {
         mIsPassthrough = isPassthrough;
         mAudioStreamType = audioStreamType;
         mVideoStreamType = videoStreamType;
+        mUseSecureMemory = useSecureMemory;
     }
 
     /**
@@ -223,6 +225,16 @@ public class AvSettings extends Settings {
     }
 
     /**
+     * Checks whether secure memory is used.
+     *
+     * <p>This query is only supported by Tuner HAL 2.0 or higher. The return value on HAL 1.1 and
+     * lower is undefined. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    public boolean useSecureMemory() {
+        return mUseSecureMemory;
+    }
+
+    /**
      * Creates a builder for {@link AvSettings}.
      *
      * @param mainType the filter main type.
@@ -239,9 +251,10 @@ public class AvSettings extends Settings {
     public static class Builder {
         private final int mMainType;
         private final boolean mIsAudio;
-        private boolean mIsPassthrough;
+        private boolean mIsPassthrough = false;
         private int mAudioStreamType = AUDIO_STREAM_TYPE_UNDEFINED;
         private int mVideoStreamType = VIDEO_STREAM_TYPE_UNDEFINED;
+        boolean mUseSecureMemory = false;
 
         private Builder(int mainType, boolean isAudio) {
             mMainType = mainType;
@@ -250,6 +263,8 @@ public class AvSettings extends Settings {
 
         /**
          * Sets whether it's passthrough.
+         *
+         * <p>Default value is {@code false}.
          */
         @NonNull
         public Builder setPassthrough(boolean isPassthrough) {
@@ -262,6 +277,8 @@ public class AvSettings extends Settings {
          *
          * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
          * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
+         *
+         * <p>Default is {@link #AUDIO_STREAM_TYPE_UNDEFINED}.
          *
          * @param audioStreamType the audio stream type to set.
          */
@@ -281,6 +298,8 @@ public class AvSettings extends Settings {
          * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
          * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
          *
+         * <p>Default value is {@link #VIDEO_STREAM_TYPE_UNDEFINED}.
+         *
          * @param videoStreamType the video stream type to set.
          */
         @NonNull
@@ -294,12 +313,29 @@ public class AvSettings extends Settings {
         }
 
         /**
+         * Sets whether secure memory should be used.
+         *
+         * <p>This API is only supported by Tuner HAL 2.0 or higher. Unsupported version would cause
+         * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
+         *
+         * <p>Default value is {@code false}.
+         */
+        @NonNull
+        public Builder setUseSecureMemory(boolean useSecureMemory) {
+            if (TunerVersionChecker.checkHigherOrEqualVersionTo(
+                        TunerVersionChecker.TUNER_VERSION_2_0, "setSecureMemory")) {
+                mUseSecureMemory = useSecureMemory;
+            }
+            return this;
+        }
+
+        /**
          * Builds a {@link AvSettings} object.
          */
         @NonNull
         public AvSettings build() {
-            return new AvSettings(mMainType, mIsAudio, mIsPassthrough,
-                    mAudioStreamType, mVideoStreamType);
+            return new AvSettings(mMainType, mIsAudio, mIsPassthrough, mAudioStreamType,
+                    mVideoStreamType, mUseSecureMemory);
         }
     }
 }
