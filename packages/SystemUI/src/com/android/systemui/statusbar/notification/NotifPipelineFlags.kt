@@ -24,8 +24,8 @@ import com.android.systemui.flags.Flags
 import javax.inject.Inject
 
 class NotifPipelineFlags @Inject constructor(
-        val context: Context,
-        val featureFlags: FeatureFlags
+    val context: Context,
+    val featureFlags: FeatureFlags
 ) {
     fun checkLegacyPipelineEnabled(): Boolean {
         if (!featureFlags.isEnabled(Flags.NEW_NOTIFICATION_PIPELINE_RENDERING)) {
@@ -39,7 +39,10 @@ class NotifPipelineFlags @Inject constructor(
     fun isNewPipelineEnabled(): Boolean = featureFlags.isEnabled(
             Flags.NEW_NOTIFICATION_PIPELINE_RENDERING)
 
+    fun isDevLoggingEnabled(): Boolean =
+        featureFlags.isEnabled(Flags.NOTIFICATION_PIPELINE_DEVELOPER_LOGGING)
+
     fun isSmartspaceDedupingEnabled(): Boolean =
-            featureFlags.isEnabled(Flags.SMARTSPACE)
-                    && featureFlags.isEnabled(Flags.SMARTSPACE_DEDUPING)
+            featureFlags.isEnabled(Flags.SMARTSPACE) &&
+                    featureFlags.isEnabled(Flags.SMARTSPACE_DEDUPING)
 }
