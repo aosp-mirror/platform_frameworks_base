@@ -18,11 +18,8 @@ package com.android.systemui.qs.external
 
 import android.content.Context
 import android.graphics.drawable.Icon
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.view.WindowInsets
 import android.widget.TextView
 import com.android.systemui.R
 import com.android.systemui.plugins.qs.QSTile
@@ -38,23 +35,10 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
  */
 class TileRequestDialog(
     context: Context
-) : SystemUIDialog(context, R.style.TileRequestDialog) {
+) : SystemUIDialog(context) {
 
     companion object {
         internal val CONTENT_ID = R.id.content
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        window?.apply {
-            attributes.fitInsetsTypes = attributes.fitInsetsTypes or WindowInsets.Type.statusBars()
-            attributes.receiveInsetsIgnoringZOrder = true
-            setLayout(
-                    context.resources
-                            .getDimensionPixelSize(R.dimen.qs_tile_service_request_dialog_width),
-                    WRAP_CONTENT
-            )
-        }
     }
 
     /**
@@ -76,9 +60,7 @@ class TileRequestDialog(
                             context.resources.getDimensionPixelSize(R.dimen.qs_quick_tile_size)
                     )
         }
-        val spacing = context.resources.getDimensionPixelSize(
-                R.dimen.qs_tile_service_request_content_space
-        )
+        val spacing = 0
         setView(ll, spacing, spacing, spacing, spacing / 2)
     }
 
