@@ -16,14 +16,25 @@
 
 package com.android.systemui.communal.conditions;
 
+import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.wifi.WifiInfo;
+import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.util.settings.SecureSettings;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 import javax.inject.Inject;
 
@@ -34,10 +45,32 @@ import javax.inject.Inject;
 public class CommunalTrustedNetworkCondition extends CommunalCondition {
     private final String mTag = getClass().getSimpleName();
     private final ConnectivityManager mConnectivityManager;
+    private final ContentObserver mTrustedNetworksObserver;
+    private final SecureSettings mSecureSettings;
+
+    // The SSID of the connected Wi-Fi network. Null if not connected to Wi-Fi.
+    private String mWifiSSID;
+
+    // Set of SSIDs of trusted networks.
+    private final HashSet<String> mTrustedNetworks = new HashSet<>();
+
+    /**
+     * The deliminator used to separate trusted network keys saved as a string in secure settings.
+     */
+    public static final String SETTINGS_STRING_DELIMINATOR = ",/";
 
     @Inject
-    public CommunalTrustedNetworkCondition(ConnectivityManager connectivityManager) {
+    public CommunalTrustedNetworkCondition(@Main Handler handler,
+            ConnectivityManager connectivityManager, SecureSettings secureSettings) {
         mConnectivityManager = connectivityManager;
+        mSecureSettings = secureSettings;
+
+        mTrustedNetworksObserver = new ContentObserver(handler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                fetchTrustedNetworks();
+            }
+        };
     }
 
     /**
@@ -47,9 +80,14 @@ public class CommunalTrustedNetworkCondition extends CommunalCondition {
     protected void start() {
         if (shouldLog()) Log.d(mTag, "start listening for wifi connections");
 
+        fetchTrustedNetworks();
+
         final NetworkRequest wifiNetworkRequest = new NetworkRequest.Builder().addTransportType(
                 NetworkCapabilities.TRANSPORT_WIFI).build();
         mConnectivityManager.registerNetworkCallback(wifiNetworkRequest, mNetworkCallback);
+        mSecureSettings.registerContentObserverForUser(
+                Settings.Secure.COMMUNAL_MODE_TRUSTED_NETWORKS, false, mTrustedNetworksObserver,
+                UserHandle.USER_SYSTEM);
     }
 
     /**
@@ -60,11 +98,40 @@ public class CommunalTrustedNetworkCondition extends CommunalCondition {
         if (shouldLog()) Log.d(mTag, "stop listening for wifi connections");
 
         mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
+        mSecureSettings.unregisterContentObserver(mTrustedNetworksObserver);
     }
 
     private void updateWifiInfo(WifiInfo wifiInfo) {
-        // TODO(b/202778351): check whether wifi is trusted.
-        final boolean connectedToTrustedNetwork = wifiInfo != null;
+        if (wifiInfo == null) {
+            mWifiSSID = null;
+        } else {
+            // Remove the wrapping quotes around the SSID.
+            mWifiSSID = wifiInfo.getSSID().replace("\"", "");
+        }
+
+        checkIfConnectedToTrustedNetwork();
+    }
+
+    private void fetchTrustedNetworks() {
+        final String trustedNetworksString = mSecureSettings.getStringForUser(
+                Settings.Secure.COMMUNAL_MODE_TRUSTED_NETWORKS, UserHandle.USER_SYSTEM);
+        mTrustedNetworks.clear();
+
+        if (shouldLog()) Log.d(mTag, "fetched trusted networks: " + trustedNetworksString);
+
+        if (TextUtils.isEmpty(trustedNetworksString)) {
+            return;
+        }
+
+        mTrustedNetworks.addAll(
+                Arrays.asList(trustedNetworksString.split(SETTINGS_STRING_DELIMINATOR)));
+
+        checkIfConnectedToTrustedNetwork();
+    }
+
+    private void checkIfConnectedToTrustedNetwork() {
+        final boolean connectedToTrustedNetwork = mWifiSSID != null && mTrustedNetworks.contains(
+                mWifiSSID);
 
         if (shouldLog()) {
             Log.d(mTag, (connectedToTrustedNetwork ? "connected to" : "disconnected from")
