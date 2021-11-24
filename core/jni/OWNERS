@@ -73,6 +73,9 @@ per-file AndroidRuntime.cpp = calin@google.com, ngeoffray@google.com, oth@google
 # Although marked "view" this is mostly graphics stuff
 per-file android_view_* = file:/graphics/java/android/graphics/OWNERS
 
+# Verity
+per-file com_android_internal_security_Verity* = ebiggers@google.com, victorhsieh@google.com
+
 # VINTF
 per-file android_os_VintfObject* = file:platform/system/libvintf:/OWNERS
 per-file android_os_VintfRuntimeInfo* = file:platform/system/libvintf:/OWNERS
