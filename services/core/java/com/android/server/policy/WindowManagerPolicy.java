@@ -27,7 +27,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVE
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -188,14 +187,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * Return the package name of the app that owns this window.
          */
         String getOwningPackage();
-
-        /**
-         * Retrieve the current LayoutParams of the window.
-         *
-         * @return WindowManager.LayoutParams The window's internal LayoutParams
-         *         instance.
-         */
-        public WindowManager.LayoutParams getAttrs();
 
         /**
          * Retrieve the type of the top-level window.
@@ -656,26 +647,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * the StatusBar.
      */
     public boolean isKeyguardHostWindow(WindowManager.LayoutParams attrs);
-
-    /**
-     * @return whether {@param win} can be hidden by Keyguard
-     */
-    default boolean canBeHiddenByKeyguardLw(WindowState win) {
-        // Keyguard visibility of window from activities are determined over activity visibility.
-        if (win.getBaseType() == TYPE_BASE_APPLICATION) {
-            return false;
-        }
-        switch (win.getAttrs().type) {
-            case TYPE_NOTIFICATION_SHADE:
-            case TYPE_STATUS_BAR:
-            case TYPE_NAVIGATION_BAR:
-            case TYPE_WALLPAPER:
-                return false;
-            default:
-                // Hide only windows below the keyguard host window.
-                return getWindowLayerLw(win) < getWindowLayerFromTypeLw(TYPE_NOTIFICATION_SHADE);
-        }
-    }
 
     /**
      * Create and return an animation to re-display a window that was force hidden by Keyguard.
