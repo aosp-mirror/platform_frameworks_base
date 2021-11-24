@@ -1636,7 +1636,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mBindingController = new InputMethodBindingController(this);
         mPreventImeStartupUnlessTextEditor = mRes.getBoolean(
                 com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
-        mHwController = new HandwritingModeController(thread.getLooper());
+        mHwController = new HandwritingModeController(thread.getLooper(),
+                new InkWindowInitializer());
+    }
+
+    private final class InkWindowInitializer implements Runnable {
+        public void run() {
+            synchronized (ImfLock.class) {
+                IInputMethodInvoker curMethod = getCurMethodLocked();
+                if (curMethod != null) {
+                    curMethod.initInkWindow();
+                }
+            }
+        }
     }
 
     @GuardedBy("ImfLock.class")

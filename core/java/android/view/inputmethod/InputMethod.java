@@ -409,4 +409,12 @@ public interface InputMethod {
         // intentionally empty
     }
 
+    /**
+     * Initialize Ink window early-on.
+     * @hide
+     */
+    default void initInkWindow() {
+        // intentionally empty
+    }
+
 }

@@ -78,6 +78,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_CREATE_INLINE_SUGGESTIONS_REQUEST = 90;
     private static final int DO_CAN_START_STYLUS_HANDWRITING = 100;
     private static final int DO_START_STYLUS_HANDWRITING = 110;
+    private static final int DO_INIT_INK_WINDOW = 120;
 
     final WeakReference<InputMethodServiceInternal> mTarget;
     final Context mContext;
@@ -250,6 +251,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 args.recycle();
                 return;
             }
+            case DO_INIT_INK_WINDOW: {
+                inputMethod.initInkWindow();
+                return;
+            }
 
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
@@ -399,5 +404,11 @@ class IInputMethodWrapper extends IInputMethod.Stub
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageIOO(DO_START_STYLUS_HANDWRITING, requestId, channel,
                         stylusEvents));
+    }
+
+    @BinderThread
+    @Override
+    public void initInkWindow() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_INIT_INK_WINDOW));
     }
 }

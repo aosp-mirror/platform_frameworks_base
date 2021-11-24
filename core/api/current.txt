@@ -18659,6 +18659,7 @@ package android.inputmethodservice {
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
     method public boolean onKeyUp(int, android.view.KeyEvent);
+    method public void onPrepareStylusHandwriting();
     method public boolean onShowInputRequested(int, boolean);
     method public void onStartCandidatesView(android.view.inputmethod.EditorInfo, boolean);
     method public void onStartInput(android.view.inputmethod.EditorInfo, boolean);
