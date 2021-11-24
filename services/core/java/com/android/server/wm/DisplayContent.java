@@ -1658,11 +1658,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // to cover the activity configuration change.
             return false;
         }
-        if (r.attachedToProcess() && mayImeShowOnLaunchingActivity(r)) {
-            // Currently it is unknown that when will IME window be ready. Reject the case to
-            // avoid flickering by showing IME in inconsistent orientation.
-            return false;
-        }
         if (checkOpening) {
             if (!mAppTransition.isTransitionSet() || !mOpeningApps.contains(r)) {
                 // Apply normal rotation animation in case of the activity set different requested
@@ -4884,7 +4879,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // WindowState#applyImeWindowsIfNeeded} in case of any state mismatch.
             return dc.mImeLayeringTarget != null
                     && (!dc.getDefaultTaskDisplayArea().isSplitScreenModeActivated()
-                             || dc.mImeLayeringTarget.getTask() == null);
+                             || dc.mImeLayeringTarget.getTask() == null)
+                    // Make sure that the IME window won't be skipped to report that it has
+                    // completed the orientation change.
+                    && !dc.mWmService.mDisplayFrozen;
         }
 
         /** Like {@link #forAllWindows}, but ignores {@link #skipImeWindowsDuringTraversal} */
