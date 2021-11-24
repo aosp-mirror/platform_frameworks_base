@@ -4581,14 +4581,15 @@ class Task extends TaskFragment {
             }
             super.setWindowingMode(windowingMode);
 
-            // Try reparent pinned activity back to its original task after onConfigurationChanged
-            // cascade finishes. This is done on Task level instead of
-            // {@link ActivityRecord#onConfigurationChanged(Configuration)} since when we exit PiP,
-            // we set final windowing mode on the ActivityRecord first and then on its Task when
-            // the exit PiP transition finishes. Meanwhile, the exit transition is always
-            // performed on its original task, reparent immediately in ActivityRecord breaks it.
-            if (currentMode == WINDOWING_MODE_PINNED) {
-                if (topActivity != null && topActivity.getLastParentBeforePip() != null) {
+            if (currentMode == WINDOWING_MODE_PINNED && topActivity != null) {
+                // Try reparent pinned activity back to its original task after
+                // onConfigurationChanged cascade finishes. This is done on Task level instead of
+                // {@link ActivityRecord#onConfigurationChanged(Configuration)} since when we exit
+                // PiP, we set final windowing mode on the ActivityRecord first and then on its
+                // Task when the exit PiP transition finishes. Meanwhile, the exit transition is
+                // always performed on its original task, reparent immediately in ActivityRecord
+                // breaks it.
+                if (topActivity.getLastParentBeforePip() != null) {
                     // Do not reparent if the pinned task is in removal, indicated by the
                     // force hidden flag.
                     if (!isForceHidden()) {
@@ -4600,6 +4601,11 @@ class Task extends TaskFragment {
                             lastParentBeforePip.moveToFront("movePinnedActivityToOriginalTask");
                         }
                     }
+                }
+                // Resume app-switches-allowed flag when exiting from pinned mode since
+                // it does not follow the ActivityStarter path.
+                if (topActivity.shouldBeVisible()) {
+                    mAtmService.resumeAppSwitches();
                 }
             }
 
