@@ -24,11 +24,11 @@ import com.android.systemui.flags.Flags
 import javax.inject.Inject
 
 class NotifPipelineFlags @Inject constructor(
-        val context: Context,
-        val featureFlags: FeatureFlags
+    val context: Context,
+    val featureFlags: FeatureFlags
 ) {
     fun checkLegacyPipelineEnabled(): Boolean {
-        if (!featureFlags.isEnabled(Flags.NEW_NOTIFICATION_PIPELINE_RENDERING)) {
+        if (!isNewPipelineEnabled()) {
             return true
         }
         Log.d("NotifPipeline", "Old pipeline code running w/ new pipeline enabled", Exception())
@@ -36,10 +36,13 @@ class NotifPipelineFlags @Inject constructor(
         return false
     }
 
-    fun isNewPipelineEnabled(): Boolean = featureFlags.isEnabled(
-            Flags.NEW_NOTIFICATION_PIPELINE_RENDERING)
+    fun assertLegacyPipelineEnabled(): Nothing =
+        error("Old pipeline code running w/ new pipeline enabled")
+
+    fun isNewPipelineEnabled(): Boolean =
+        featureFlags.isEnabled(Flags.NEW_NOTIFICATION_PIPELINE_RENDERING)
 
     fun isSmartspaceDedupingEnabled(): Boolean =
-            featureFlags.isEnabled(Flags.SMARTSPACE)
-                    && featureFlags.isEnabled(Flags.SMARTSPACE_DEDUPING)
+            featureFlags.isEnabled(Flags.SMARTSPACE) &&
+                    featureFlags.isEnabled(Flags.SMARTSPACE_DEDUPING)
 }

@@ -30,7 +30,6 @@ import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
@@ -296,14 +295,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         setBarStateForTest(StatusBarState.SHADE);
         mStackScroller.setCurrentUserSetup(true);
 
-        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
-        when(row.canViewBeDismissed()).thenReturn(true);
-        when(mStackScroller.getChildCount()).thenReturn(1);
-        when(mStackScroller.getChildAt(anyInt())).thenReturn(row);
         mStackScroller.setIsRemoteInputActive(true);
-        when(mStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL))
+        when(mStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        when(mStackScrollLayoutController.hasActiveClearableNotifications(eq(ROWS_ALL)))
                 .thenReturn(true);
-        when(mStackScrollLayoutController.hasActiveNotifications()).thenReturn(true);
 
         FooterView view = mock(FooterView.class);
         mStackScroller.setFooterView(view);
@@ -312,14 +307,28 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    public void testUpdateFooter_withoutNotifications() {
+        setBarStateForTest(StatusBarState.SHADE);
+        mStackScroller.setCurrentUserSetup(true);
+
+        when(mStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mStackScrollLayoutController.hasActiveClearableNotifications(eq(ROWS_ALL)))
+                .thenReturn(false);
+
+        FooterView view = mock(FooterView.class);
+        mStackScroller.setFooterView(view);
+        mStackScroller.updateFooter();
+        verify(mStackScroller).updateFooterView(false, false, true);
+    }
+
+    @Test
     public void testUpdateFooter_oneClearableNotification() {
         setBarStateForTest(StatusBarState.SHADE);
         mStackScroller.setCurrentUserSetup(true);
 
-        when(mEmptyShadeView.getVisibility()).thenReturn(GONE);
-        when(mStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL))
+        when(mStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        when(mStackScrollLayoutController.hasActiveClearableNotifications(eq(ROWS_ALL)))
                 .thenReturn(true);
-        when(mStackScrollLayoutController.hasActiveNotifications()).thenReturn(true);
 
         FooterView view = mock(FooterView.class);
         mStackScroller.setFooterView(view);
@@ -332,10 +341,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         setBarStateForTest(StatusBarState.SHADE);
         mStackScroller.setCurrentUserSetup(false);
 
-        when(mEmptyShadeView.getVisibility()).thenReturn(GONE);
-        when(mStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL))
+        when(mStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        when(mStackScrollLayoutController.hasActiveClearableNotifications(eq(ROWS_ALL)))
                 .thenReturn(true);
-        when(mStackScrollLayoutController.hasActiveNotifications()).thenReturn(true);
 
         FooterView view = mock(FooterView.class);
         mStackScroller.setFooterView(view);
@@ -348,12 +356,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         setBarStateForTest(StatusBarState.SHADE);
         mStackScroller.setCurrentUserSetup(true);
 
-        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
-        when(row.canViewBeDismissed()).thenReturn(false);
-        when(mStackScroller.getChildCount()).thenReturn(1);
-        when(mStackScroller.getChildAt(anyInt())).thenReturn(row);
-        when(mStackScrollLayoutController.hasActiveNotifications()).thenReturn(true);
-        when(mStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL))
+        when(mStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        when(mStackScrollLayoutController.hasActiveClearableNotifications(eq(ROWS_ALL)))
                 .thenReturn(false);
         when(mEmptyShadeView.getVisibility()).thenReturn(GONE);
 

@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.notification.collection.TargetSdkResolver
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl
 import com.android.systemui.statusbar.notification.collection.init.NotifPipelineInitializer
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy
+import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.interruption.HeadsUpController
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.row.NotifBindPipelineInitializer
@@ -85,6 +86,7 @@ class NotificationsControllerImpl @Inject constructor(
         bubblesOptional: Optional<Bubbles>,
         presenter: NotificationPresenter,
         listContainer: NotificationListContainer,
+        stackController: NotifStackController,
         notificationActivityStarter: NotificationActivityStarter,
         bindRowCallback: NotificationRowBinderImpl.BindRowCallback
     ) {
@@ -112,7 +114,8 @@ class NotificationsControllerImpl @Inject constructor(
             newNotifPipeline.get().initialize(
                     notificationListener,
                     notificationRowBinder,
-                    listContainer)
+                    listContainer,
+                    stackController)
         }
 
         if (notifPipelineFlags.isNewPipelineEnabled()) {

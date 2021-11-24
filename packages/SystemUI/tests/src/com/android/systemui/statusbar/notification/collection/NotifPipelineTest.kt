@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.notification.collection.render.RenderStageManager
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -33,12 +34,13 @@ class NotifPipelineTest : SysuiTestCase() {
 
     @Mock private lateinit var notifCollection: NotifCollection
     @Mock private lateinit var shadeListBuilder: ShadeListBuilder
+    @Mock private lateinit var renderStageManager: RenderStageManager
     private lateinit var notifPipeline: NotifPipeline
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        notifPipeline = NotifPipeline(notifCollection, shadeListBuilder)
+        notifPipeline = NotifPipeline(notifCollection, shadeListBuilder, renderStageManager)
         whenever(shadeListBuilder.shadeList).thenReturn(listOf(
                 NotificationEntryBuilder().setPkg("foo").setId(1).build(),
                 NotificationEntryBuilder().setPkg("foo").setId(2).build(),

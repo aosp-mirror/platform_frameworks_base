@@ -48,6 +48,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -98,6 +99,8 @@ import com.android.systemui.statusbar.notification.collection.legacy.VisualStabi
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
+import com.android.systemui.statusbar.notification.collection.render.NotifStackController;
+import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
@@ -192,6 +195,8 @@ public class NotificationStackScrollLayoutController {
 
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
+    private final NotifStackController mNotifStackController =
+            new NotifStackControllerImpl();
 
     @Nullable
     private NotificationActivityStarter mNotificationActivityStarter;
@@ -293,6 +298,8 @@ public class NotificationStackScrollLayoutController {
             updateResources();
         }
     };
+
+    private NotifStats mNotifStats = NotifStats.getEmpty();
 
     private void updateResources() {
         mNotificationDragDownMovement = mResources.getDimensionPixelSize(
@@ -988,7 +995,7 @@ public class NotificationStackScrollLayoutController {
     }
 
     public int getVisibleNotificationCount() {
-        return mView.getVisibleNotificationCount();
+        return mNotifStats.getNumActiveNotifs();
     }
 
     public int getIntrinsicContentHeight() {
@@ -1183,7 +1190,7 @@ public class NotificationStackScrollLayoutController {
     public void updateShowEmptyShadeView() {
         mShowEmptyShadeView = mBarState != KEYGUARD
                 && (!mView.isQsExpanded() || mView.isUsingSplitNotificationShade())
-                && mView.getVisibleNotificationCount() == 0;
+                && getVisibleNotificationCount() == 0;
 
         mView.updateEmptyShadeView(
                 mShowEmptyShadeView,
@@ -1246,29 +1253,22 @@ public class NotificationStackScrollLayoutController {
     }
 
     public boolean hasNotifications(@SelectedRows int selection, boolean isClearable) {
-        if (mDynamicPrivacyController.isInLockedDownShade()) {
-            return false;
+        boolean hasAlertingMatchingClearable = isClearable
+                ? mNotifStats.getHasClearableAlertingNotifs()
+                : mNotifStats.getHasNonClearableAlertingNotifs();
+        boolean hasSilentMatchingClearable = isClearable
+                ? mNotifStats.getHasClearableSilentNotifs()
+                : mNotifStats.getHasNonClearableSilentNotifs();
+        switch (selection) {
+            case ROWS_GENTLE:
+                return hasSilentMatchingClearable;
+            case ROWS_HIGH_PRIORITY:
+                return hasAlertingMatchingClearable;
+            case ROWS_ALL:
+                return hasSilentMatchingClearable || hasAlertingMatchingClearable;
+            default:
+                throw new IllegalStateException("Bad selection: " + selection);
         }
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (!(child instanceof ExpandableNotificationRow)) {
-                continue;
-            }
-            final ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            final boolean matchClearable =
-                    isClearable ? row.canViewBeDismissed() : !row.canViewBeDismissed();
-            final boolean inSection =
-                    NotificationStackScrollLayout.matchesSelection(row, selection);
-            if (matchClearable && inSection) {
-                if (mLegacyGroupManager == null
-                        || !mLegacyGroupManager.isSummaryOfSuppressedGroup(
-                        row.getEntry().getSbn())) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     /**
@@ -1383,6 +1383,10 @@ public class NotificationStackScrollLayoutController {
         return mNotificationListContainer;
     }
 
+    public NotifStackController getNotifStackController() {
+        return mNotifStackController;
+    }
+
     public void resetCheckSnoozeLeavebehind() {
         mView.resetCheckSnoozeLeavebehind();
     }
@@ -1392,17 +1396,6 @@ public class NotificationStackScrollLayoutController {
                 DISMISSAL_SHADE,
                 DISMISS_SENTIMENT_NEUTRAL,
                 mVisibilityProvider.obtain(entry, true));
-    }
-
-    /**
-     * @return if the shade has currently any active notifications.
-     */
-    public boolean hasActiveNotifications() {
-        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
-            return !mNotifPipeline.getShadeList().isEmpty();
-        } else {
-            return mNotificationEntryManager.hasActiveNotifications();
-        }
     }
 
     public void closeControlsIfOutsideTouch(MotionEvent ev) {
@@ -1874,6 +1867,15 @@ public class NotificationStackScrollLayoutController {
                     }
                     break;
             }
+        }
+    }
+
+    private class NotifStackControllerImpl implements NotifStackController {
+        @Override
+        public void setNotifStats(@NonNull NotifStats notifStats) {
+            mNotifStats = notifStats;
+            updateFooter();
+            updateShowEmptyShadeView();
         }
     }
 }

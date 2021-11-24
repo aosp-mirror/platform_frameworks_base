@@ -20,10 +20,8 @@ import android.content.Context
 import android.view.View
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
-import com.android.systemui.statusbar.notification.collection.ShadeListBuilder
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
-import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.util.traceSection
 import javax.inject.Inject
 
@@ -34,9 +32,9 @@ import javax.inject.Inject
 class ShadeViewManager constructor(
     context: Context,
     listContainer: NotificationListContainer,
+    private val stackController: NotifStackController,
     logger: ShadeViewDifferLogger,
-    private val viewBarn: NotifViewBarn,
-    private val notificationIconAreaController: NotificationIconAreaController
+    private val viewBarn: NotifViewBarn
 ) {
     // We pass a shim view here because the listContainer may not actually have a view associated
     // with it and the differ never actually cares about the root node's view.
@@ -44,39 +42,39 @@ class ShadeViewManager constructor(
     private val specBuilder = NodeSpecBuilder(viewBarn)
     private val viewDiffer = ShadeViewDiffer(rootController, logger)
 
-    fun attach(listBuilder: ShadeListBuilder) =
-            listBuilder.setOnRenderListListener(::onNewNotifTree)
-
-    private fun onNewNotifTree(notifList: List<ListEntry>) {
-        traceSection("ShadeViewManager.onNewNotifTree") {
-            viewDiffer.applySpec(specBuilder.buildNodeSpec(rootController, notifList))
-            updateGroupCounts(notifList)
-            notificationIconAreaController.updateNotificationIcons(notifList)
-        }
+    /** Method for attaching this manager to the pipeline. */
+    fun attach(renderStageManager: RenderStageManager) {
+        renderStageManager.setViewRenderer(viewRenderer)
     }
 
-    private fun updateGroupCounts(notifList: List<ListEntry>) {
-        traceSection("ShadeViewManager.updateGroupCounts") {
-            notifList.asSequence().filterIsInstance<GroupEntry>().forEach { groupEntry ->
-                val controller = viewBarn.requireView(checkNotNull(groupEntry.summary))
-                val row = controller.view as ExpandableNotificationRow
-                row.setUntruncatedChildCount(groupEntry.untruncatedChildCount)
+    private val viewRenderer = object : NotifViewRenderer {
+
+        override fun onRenderList(notifList: List<ListEntry>) {
+            traceSection("ShadeViewManager.onRenderList") {
+                viewDiffer.applySpec(specBuilder.buildNodeSpec(rootController, notifList))
             }
         }
+
+        override fun getStackController(): NotifStackController = stackController
+
+        override fun getGroupController(group: GroupEntry): NotifGroupController =
+            viewBarn.requireGroupController(group.requireSummary)
+
+        override fun getRowController(entry: NotificationEntry): NotifRowController =
+            viewBarn.requireRowController(entry)
     }
 }
 
 class ShadeViewManagerFactory @Inject constructor(
     private val context: Context,
     private val logger: ShadeViewDifferLogger,
-    private val viewBarn: NotifViewBarn,
-    private val notificationIconAreaController: NotificationIconAreaController
+    private val viewBarn: NotifViewBarn
 ) {
-    fun create(listContainer: NotificationListContainer) =
-            ShadeViewManager(
-                    context,
-                    listContainer,
-                    logger,
-                    viewBarn,
-                    notificationIconAreaController)
+    fun create(listContainer: NotificationListContainer, stackController: NotifStackController) =
+        ShadeViewManager(
+            context,
+            listContainer,
+            stackController,
+            logger,
+            viewBarn)
 }
