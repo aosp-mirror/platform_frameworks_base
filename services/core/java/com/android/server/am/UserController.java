@@ -1792,7 +1792,8 @@ class UserController implements Handler.Callback {
     private void showUserSwitchDialog(Pair<UserInfo, UserInfo> fromToUserPair) {
         // The dialog will show and then initiate the user switch by calling startUserInForeground
         mInjector.showUserSwitchingDialog(fromToUserPair.first, fromToUserPair.second,
-                getSwitchingFromSystemUserMessage(), getSwitchingToSystemUserMessage());
+                getSwitchingFromSystemUserMessageUnchecked(),
+                getSwitchingToSystemUserMessageUnchecked());
     }
 
     private void dispatchForegroundProfileChanged(@UserIdInt int userId) {
@@ -2564,15 +2565,37 @@ class UserController implements Handler.Callback {
         }
     }
 
-    private String getSwitchingFromSystemUserMessage() {
+    // Called by AMS, must check permission
+    String getSwitchingFromSystemUserMessage() {
+        checkHasManageUsersPermission("getSwitchingFromSystemUserMessage()");
+
+        return getSwitchingFromSystemUserMessageUnchecked();
+    }
+
+    // Called by AMS, must check permission
+    String getSwitchingToSystemUserMessage() {
+        checkHasManageUsersPermission("getSwitchingToSystemUserMessage()");
+
+        return getSwitchingToSystemUserMessageUnchecked();
+    }
+
+    private String getSwitchingFromSystemUserMessageUnchecked() {
         synchronized (mLock) {
             return mSwitchingFromSystemUserMessage;
         }
     }
 
-    private String getSwitchingToSystemUserMessage() {
+    private String getSwitchingToSystemUserMessageUnchecked() {
         synchronized (mLock) {
             return mSwitchingToSystemUserMessage;
+        }
+    }
+
+    private void checkHasManageUsersPermission(String operation) {
+        if (mInjector.checkCallingPermission(
+                android.Manifest.permission.MANAGE_USERS) == PackageManager.PERMISSION_DENIED) {
+            throw new SecurityException(
+                    "You need MANAGE_USERS permission to call " + operation);
         }
     }
 
@@ -2648,6 +2671,12 @@ class UserController implements Handler.Callback {
             pw.println("  mMaxRunningUsers:" + mMaxRunningUsers);
             pw.println("  mUserSwitchUiEnabled:" + mUserSwitchUiEnabled);
             pw.println("  mInitialized:" + mInitialized);
+            if (mSwitchingFromSystemUserMessage != null) {
+                pw.println("  mSwitchingFromSystemUserMessage: " + mSwitchingFromSystemUserMessage);
+            }
+            if (mSwitchingToSystemUserMessage != null) {
+                pw.println("  mSwitchingToSystemUserMessage: " + mSwitchingToSystemUserMessage);
+            }
         }
     }
 

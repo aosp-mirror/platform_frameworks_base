@@ -25,6 +25,7 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent.StatusBarScope
+import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.SPLIT_SHADE_BATTERY_CONTROLLER
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.SPLIT_SHADE_HEADER
 import javax.inject.Inject
 import javax.inject.Named
@@ -35,7 +36,7 @@ class SplitShadeHeaderController @Inject constructor(
     private val statusBarIconController: StatusBarIconController,
     qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder,
     featureFlags: FeatureFlags,
-    batteryMeterViewController: BatteryMeterViewController
+    @Named(SPLIT_SHADE_BATTERY_CONTROLLER) batteryMeterViewController: BatteryMeterViewController
 ) {
 
     companion object {

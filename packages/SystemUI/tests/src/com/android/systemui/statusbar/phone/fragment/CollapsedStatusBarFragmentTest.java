@@ -295,6 +295,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 new StatusBarHideIconsForBouncerManager(
                         mCommandQueue, new FakeExecutor(new FakeSystemClock()), new DumpManager()),
                 mKeyguardStateController,
+                mock(NotificationPanelViewController.class),
                 mNetworkController,
                 mStatusBarStateController,
                 mCommandQueue,
