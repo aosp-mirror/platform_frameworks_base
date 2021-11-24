@@ -16,12 +16,35 @@
 
 package com.android.server.accessibility.magnification;
 
+import static android.accessibilityservice.MagnificationConfig.DEFAULT_MODE;
+import static android.accessibilityservice.MagnificationConfig.FULLSCREEN_MODE;
+import static android.accessibilityservice.MagnificationConfig.WINDOW_MODE;
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
+
+import android.accessibilityservice.MagnificationConfig;
 import android.annotation.NonNull;
 import android.graphics.Region;
 
 /**
  * Processor class for AccessibilityService connection to control magnification on the specified
  * display. This wraps the function of magnification controller.
+ *
+ * <p>
+ * If the magnification config uses {@link DEFAULT_MODE}. This processor will control the current
+ * activated magnifier on the display. If there is no magnifier activated, it controls
+ * full-screen magnifier by default.
+ * </p>
+ *
+ * <p>
+ * If the magnification config uses {@link FULLSCREEN_MODE}. This processor will control
+ * full-screen magnifier on the display.
+ * </p>
+ *
+ * <p>
+ * If the magnification config uses {@link WINDOW_MODE}. This processor will control
+ * the activated window magnifier on the display.
+ * </p>
  *
  * @see MagnificationController
  * @see FullScreenMagnificationController
@@ -35,53 +58,166 @@ public class MagnificationProcessor {
     }
 
     /**
-     * {@link FullScreenMagnificationController#getScale(int)}
+     * Gets the magnification config of the display.
+     *
+     * @param displayId The logical display id
+     * @return the magnification config
+     */
+    public @NonNull MagnificationConfig getMagnificationConfig(int displayId) {
+        final int mode = getControllingMode(displayId);
+        MagnificationConfig.Builder builder = new MagnificationConfig.Builder();
+        if (mode == FULLSCREEN_MODE) {
+            final FullScreenMagnificationController fullScreenMagnificationController =
+                    mController.getFullScreenMagnificationController();
+            builder.setMode(mode)
+                    .setScale(fullScreenMagnificationController.getScale(displayId))
+                    .setCenterX(fullScreenMagnificationController.getCenterX(displayId))
+                    .setCenterY(fullScreenMagnificationController.getCenterY(displayId));
+        } else if (mode == WINDOW_MODE) {
+            final WindowMagnificationManager windowMagnificationManager =
+                    mController.getWindowMagnificationMgr();
+            builder.setMode(mode)
+                    .setScale(windowMagnificationManager.getScale(displayId))
+                    .setCenterX(windowMagnificationManager.getCenterX(displayId))
+                    .setCenterY(windowMagnificationManager.getCenterY(displayId));
+        }
+        return builder.build();
+    }
+
+    /**
+     * Sets the magnification config of the display. If animation is disabled, the transition
+     * is immediate.
+     *
+     * @param displayId The logical display id
+     * @param config    The magnification config
+     * @param animate   {@code true} to animate from the current config or
+     *                  {@code false} to set the config immediately
+     * @param id        The ID of the service requesting the change
+     * @return {@code true} if the magnification spec changed, {@code false} if the spec did not
+     * change
+     */
+    public boolean setMagnificationConfig(int displayId, @NonNull MagnificationConfig config,
+            boolean animate, int id) {
+        int configMode = config.getMode();
+        if (configMode == DEFAULT_MODE) {
+            configMode = getControllingMode(displayId);
+        }
+        if (configMode == FULLSCREEN_MODE) {
+            return setScaleAndCenterForFullScreenMagnification(displayId, config.getScale(),
+                    config.getCenterX(), config.getCenterY(),
+                    animate, id);
+        } else if (configMode == WINDOW_MODE) {
+            return mController.getWindowMagnificationMgr().enableWindowMagnification(displayId,
+                    config.getScale(), config.getCenterX(), config.getCenterY());
+        }
+        return false;
+    }
+
+    /**
+     * Returns the magnification scale. If an animation is in progress,
+     * this reflects the end state of the animation.
+     *
+     * @param displayId The logical display id.
+     * @return the scale
      */
     public float getScale(int displayId) {
-        return mController.getFullScreenMagnificationController().getScale(displayId);
+        int mode = getControllingMode(displayId);
+        if (mode == FULLSCREEN_MODE) {
+            return mController.getFullScreenMagnificationController().getScale(displayId);
+        } else if (mode == WINDOW_MODE) {
+            return mController.getWindowMagnificationMgr().getScale(displayId);
+        }
+        return 0;
     }
 
     /**
-     * {@link FullScreenMagnificationController#getCenterX(int)}
+     * Returns the magnification center in X coordinate of the controlling magnification mode.
+     * If the service can control magnification but fullscreen magnifier is not registered, it will
+     * register the magnifier for this call then unregister the magnifier finally to make the
+     * magnification center correct.
+     *
+     * @param displayId The logical display id
+     * @param canControlMagnification Whether the service can control magnification
+     * @return the X coordinate
      */
     public float getCenterX(int displayId, boolean canControlMagnification) {
-        boolean registeredJustForThisCall = registerMagnificationIfNeeded(displayId,
-                canControlMagnification);
-        try {
-            return mController.getFullScreenMagnificationController().getCenterX(displayId);
-        } finally {
-            if (registeredJustForThisCall) {
-                unregister(displayId);
+        int mode = getControllingMode(displayId);
+        if (mode == FULLSCREEN_MODE) {
+            boolean registeredJustForThisCall = registerDisplayMagnificationIfNeeded(displayId,
+                    canControlMagnification);
+            try {
+                return mController.getFullScreenMagnificationController().getCenterX(displayId);
+            } finally {
+                if (registeredJustForThisCall) {
+                    unregister(displayId);
+                }
             }
+        } else if (mode == WINDOW_MODE) {
+            return mController.getWindowMagnificationMgr().getCenterX(displayId);
         }
+        return 0;
     }
 
     /**
-     * {@link FullScreenMagnificationController#getCenterY(int)}
+     * Returns the magnification center in Y coordinate of the controlling magnification mode.
+     * If the service can control magnification but fullscreen magnifier is not registered, it will
+     * register the magnifier for this call then unregister the magnifier finally to make the
+     * magnification center correct.
+     *
+     * @param displayId The logical display id
+     * @param canControlMagnification Whether the service can control magnification
+     * @return the Y coordinate
      */
     public float getCenterY(int displayId, boolean canControlMagnification) {
-        boolean registeredJustForThisCall = registerMagnificationIfNeeded(displayId,
-                canControlMagnification);
-        try {
-            return mController.getFullScreenMagnificationController().getCenterY(displayId);
-        } finally {
-            if (registeredJustForThisCall) {
-                unregister(displayId);
+        int mode = getControllingMode(displayId);
+        if (mode == FULLSCREEN_MODE) {
+            boolean registeredJustForThisCall = registerDisplayMagnificationIfNeeded(displayId,
+                    canControlMagnification);
+            try {
+                return mController.getFullScreenMagnificationController().getCenterY(displayId);
+            } finally {
+                if (registeredJustForThisCall) {
+                    unregister(displayId);
+                }
             }
+        } else if (mode == WINDOW_MODE) {
+            return mController.getWindowMagnificationMgr().getCenterY(displayId);
         }
+        return 0;
     }
 
     /**
-     * {@link FullScreenMagnificationController#getMagnificationRegion(int, Region)}
+     * Return the magnification bounds of the current controlling magnification on the given
+     * display. If the magnifier is not enabled, it returns an empty region.
+     * If the service can control magnification but fullscreen magnifier is not registered, it will
+     * register the magnifier for this call then unregister the magnifier finally to make
+     * the magnification region correct.
+     *
+     * @param displayId The logical display id
+     * @param outRegion the region to populate
+     * @param canControlMagnification Whether the service can control magnification
+     * @return outRegion the magnification bounds of full-screen magnifier or the magnification
+     * source bounds of window magnifier
      */
     public Region getMagnificationRegion(int displayId, @NonNull Region outRegion,
             boolean canControlMagnification) {
-        boolean registeredJustForThisCall = registerMagnificationIfNeeded(displayId,
+        int mode = getControllingMode(displayId);
+        if (mode == FULLSCREEN_MODE) {
+            getFullscreenMagnificationRegion(displayId, outRegion, canControlMagnification);
+        } else if (mode == WINDOW_MODE) {
+            mController.getWindowMagnificationMgr().getMagnificationSourceBounds(displayId,
+                    outRegion);
+        }
+        return outRegion;
+    }
+
+    private void getFullscreenMagnificationRegion(int displayId, @NonNull Region outRegion,
+            boolean canControlMagnification) {
+        boolean registeredJustForThisCall = registerDisplayMagnificationIfNeeded(displayId,
                 canControlMagnification);
         try {
             mController.getFullScreenMagnificationController().getMagnificationRegion(displayId,
                     outRegion);
-            return outRegion;
         } finally {
             if (registeredJustForThisCall) {
                 unregister(displayId);
@@ -89,67 +225,105 @@ public class MagnificationProcessor {
         }
     }
 
-    /**
-     * {@link FullScreenMagnificationController#setScaleAndCenter(int, float, float, float, boolean,
-     * int)}
-     */
-    public boolean setScaleAndCenter(int displayId, float scale, float centerX, float centerY,
+    private boolean setScaleAndCenterForFullScreenMagnification(int displayId, float scale,
+            float centerX, float centerY,
             boolean animate, int id) {
         if (!isRegistered(displayId)) {
             register(displayId);
         }
-        return mController.getFullScreenMagnificationController().setScaleAndCenter(displayId,
+        return mController.getFullScreenMagnificationController().setScaleAndCenter(
+                displayId,
                 scale,
                 centerX, centerY, animate, id);
     }
 
     /**
-     * {@link FullScreenMagnificationController#reset(int, boolean)}
+     * Resets the magnification on the given display. The reset mode could be full-screen or
+     * window if it is activated.
+     *
+     * @param displayId The logical display id.
+     * @param animate   {@code true} to animate the transition, {@code false}
+     *                  to transition immediately
+     * @return {@code true} if the magnification spec changed, {@code false} if
+     * the spec did not change
      */
     public boolean reset(int displayId, boolean animate) {
-        return mController.getFullScreenMagnificationController().reset(displayId, animate);
+        int mode = getControllingMode(displayId);
+        if (mode == FULLSCREEN_MODE) {
+            return mController.getFullScreenMagnificationController().reset(displayId, animate);
+        } else if (mode == WINDOW_MODE) {
+            return mController.getWindowMagnificationMgr().reset(displayId);
+        }
+        return false;
     }
 
     /**
      * {@link FullScreenMagnificationController#resetIfNeeded(int, boolean)}
      */
+    // TODO: support window magnification
     public void resetAllIfNeeded(int connectionId) {
         mController.getFullScreenMagnificationController().resetAllIfNeeded(connectionId);
     }
 
     /**
+     * {@link FullScreenMagnificationController#isMagnifying(int)}
+     * {@link WindowMagnificationManager#isWindowMagnifierEnabled(int)}
+     */
+    public boolean isMagnifying(int displayId) {
+        int mode = getControllingMode(displayId);
+        if (mode == FULLSCREEN_MODE) {
+            return mController.getFullScreenMagnificationController().isMagnifying(displayId);
+        } else if (mode == WINDOW_MODE) {
+            return mController.getWindowMagnificationMgr().isWindowMagnifierEnabled(displayId);
+        }
+        return false;
+    }
+
+    /**
+     * Returns the current controlling magnification mode on the given display.
+     * If there is no magnifier activated, it fallbacks to the last activated mode.
+     * And the last activated mode is {@link FULLSCREEN_MODE} by default.
+     *
+     * @param displayId The logical display id
+     */
+    public int getControllingMode(int displayId) {
+        if (mController.isActivated(displayId,
+                ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW)) {
+            return WINDOW_MODE;
+        } else if (mController.isActivated(displayId,
+                ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN)) {
+            return FULLSCREEN_MODE;
+        } else {
+            return (mController.getLastActivatedMode() == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW)
+                    ? WINDOW_MODE
+                    : FULLSCREEN_MODE;
+        }
+    }
+
+    private boolean registerDisplayMagnificationIfNeeded(int displayId,
+            boolean canControlMagnification) {
+        if (!isRegistered(displayId) && canControlMagnification) {
+            register(displayId);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isRegistered(int displayId) {
+        return mController.getFullScreenMagnificationController().isRegistered(displayId);
+    }
+
+    /**
      * {@link FullScreenMagnificationController#register(int)}
      */
-    public void register(int displayId) {
+    private void register(int displayId) {
         mController.getFullScreenMagnificationController().register(displayId);
     }
 
     /**
      * {@link FullScreenMagnificationController#unregister(int)} (int)}
      */
-    public void unregister(int displayId) {
+    private void unregister(int displayId) {
         mController.getFullScreenMagnificationController().unregister(displayId);
-    }
-
-    /**
-     * {@link FullScreenMagnificationController#isMagnifying(int)}
-     */
-    public boolean isMagnifying(int displayId) {
-        return mController.getFullScreenMagnificationController().isMagnifying(displayId);
-    }
-
-    /**
-     * {@link FullScreenMagnificationController#isRegistered(int)}
-     */
-    public boolean isRegistered(int displayId) {
-        return mController.getFullScreenMagnificationController().isRegistered(displayId);
-    }
-
-    private boolean registerMagnificationIfNeeded(int displayId, boolean canControlMagnification) {
-        if (!isRegistered(displayId) && canControlMagnification) {
-            register(displayId);
-            return true;
-        }
-        return false;
     }
 }

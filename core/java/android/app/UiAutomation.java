@@ -638,7 +638,7 @@ public final class UiAutomation {
         final IAccessibilityServiceConnection connection;
         synchronized (mLock) {
             throwIfNotConnectedLocked();
-            AccessibilityInteractionClient.getInstance().clearCache();
+            AccessibilityInteractionClient.getInstance().clearCache(mConnectionId);
             connection = AccessibilityInteractionClient.getInstance()
                     .getConnection(mConnectionId);
         }

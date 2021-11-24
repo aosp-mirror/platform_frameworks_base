@@ -84,6 +84,8 @@ public class MagnificationController implements WindowMagnificationManager.Callb
 
     @GuardedBy("mLock")
     private int mActivatedMode = ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
+    @GuardedBy("mLock")
+    private int mLastActivatedMode = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
     // Track the active user to reset the magnification and get the associated user settings.
     private @UserIdInt int mUserId = UserHandle.USER_SYSTEM;
     @GuardedBy("mLock")
@@ -239,6 +241,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
 
             synchronized (mLock) {
                 mActivatedMode = ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
+                mLastActivatedMode = mActivatedMode;
             }
             logMagnificationModeWithImeOnIfNeeded();
             disableFullScreenMagnificationIfNeeded(displayId);
@@ -276,6 +279,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
 
             synchronized (mLock) {
                 mActivatedMode = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+                mLastActivatedMode = mActivatedMode;
             }
             logMagnificationModeWithImeOnIfNeeded();
         } else {
@@ -295,6 +299,16 @@ public class MagnificationController implements WindowMagnificationManager.Callb
             mImeWindowVisible = shown;
         }
         logMagnificationModeWithImeOnIfNeeded();
+    }
+
+    /**
+     * Returns the last activated magnification mode. If there is no activated magnifier before, it
+     * returns fullscreen mode by default.
+     */
+    public int getLastActivatedMode() {
+        synchronized (mLock) {
+            return mLastActivatedMode;
+        }
     }
 
     /**
@@ -336,6 +350,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         synchronized (mLock) {
             fullMagnificationController = mFullScreenMagnificationController;
             windowMagnificationManager = mWindowMagnificationMgr;
+            mLastActivatedMode = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
         }
 
         mScaleProvider.onUserChanged(userId);
@@ -462,7 +477,15 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         return mTempPoint;
     }
 
-    private boolean isActivated(int displayId, int mode) {
+    /**
+     * Return {@code true} if the specified magnification mode on the given display is activated
+     * or not.
+     *
+     * @param displayId The logical displayId.
+     * @param mode It's either ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN or
+     * ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW.
+     */
+    public boolean isActivated(int displayId, int mode) {
         boolean isActivated = false;
         if (mode == ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN) {
             synchronized (mLock) {

@@ -12690,30 +12690,38 @@ public class ActivityManagerService extends IActivityManager.Stub
                         "Receiver can't specify both RECEIVER_EXPORTED and RECEIVER_NOT_EXPORTED"
                                 + "flag");
             }
-            if (CompatChanges.isChangeEnabled(DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED,
-                    callingUid)
-                    && !explicitExportStateDefined) {
-                if (ENFORCE_DYNAMIC_RECEIVER_EXPLICIT_EXPORT) {
-                    throw new SecurityException(
-                            callerPackage + ": Targeting T+ (version "
-                                    + Build.VERSION_CODES.TIRAMISU
-                                    + " and above) requires that one of RECEIVER_EXPORTED or "
-                                    + "RECEIVER_NOT_EXPORTED be specified when registering a "
-                                    + "receiver");
-                } else {
-                    Slog.wtf(TAG,
-                            callerPackage + ": Targeting T+ (version "
-                                    + Build.VERSION_CODES.TIRAMISU
-                                    + " and above) requires that one of RECEIVER_EXPORTED or "
-                                    + "RECEIVER_NOT_EXPORTED be specified when registering a "
-                                    + "receiver");
-                    // Assume default behavior-- flag check is not enforced
+
+            // Don't enforce the flag check if we're EITHER registering for only protected
+            // broadcasts, or the receiver is null (a sticky broadcast). Sticky broadcasts should
+            // not be used generally, so we will be marking them as exported by default
+            final boolean requireExplicitFlagForDynamicReceivers = CompatChanges.isChangeEnabled(
+                    DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid);
+            if (!onlyProtectedBroadcasts) {
+                if (receiver == null && !explicitExportStateDefined) {
+                    // sticky broadcast, no flag specified (flag isn't required)
+                    flags |= Context.RECEIVER_EXPORTED;
+                } else if (requireExplicitFlagForDynamicReceivers && !explicitExportStateDefined) {
+                    if (ENFORCE_DYNAMIC_RECEIVER_EXPLICIT_EXPORT) {
+                        throw new SecurityException(
+                                callerPackage + ": Targeting T+ (version "
+                                        + Build.VERSION_CODES.TIRAMISU
+                                        + " and above) requires that one of RECEIVER_EXPORTED or "
+                                        + "RECEIVER_NOT_EXPORTED be specified when registering a "
+                                        + "receiver");
+                    } else {
+                        Slog.wtf(TAG,
+                                callerPackage + ": Targeting T+ (version "
+                                        + Build.VERSION_CODES.TIRAMISU
+                                        + " and above) requires that one of RECEIVER_EXPORTED or "
+                                        + "RECEIVER_NOT_EXPORTED be specified when registering a "
+                                        + "receiver");
+                        // Assume default behavior-- flag check is not enforced
+                        flags |= Context.RECEIVER_EXPORTED;
+                    }
+                } else if (!requireExplicitFlagForDynamicReceivers) {
+                    // Change is not enabled, thus not targeting T+. Assume exported.
                     flags |= Context.RECEIVER_EXPORTED;
                 }
-            } else if (!CompatChanges.isChangeEnabled(DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED,
-                    callingUid)) {
-                // Change is not enabled, thus not targeting T+. Assume exported.
-                flags |= Context.RECEIVER_EXPORTED;
             }
         }
 
@@ -12731,7 +12739,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         (intent.getFlags() & Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS) == 0) {
                     continue;
                 }
-                // If intent has scheme "content", it will need to acccess
+                // If intent has scheme "content", it will need to access
                 // provider that needs to lock mProviderMap in ActivityThread
                 // and also it may need to wait application response, so we
                 // cannot lock ActivityManagerService here.
@@ -15406,6 +15414,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public boolean switchUser(final int targetUserId) {
         return mUserController.switchUser(targetUserId);
+    }
+
+    @Override
+    public String getSwitchingFromUserMessage() {
+        return mUserController.getSwitchingFromSystemUserMessage();
+    }
+
+    @Override
+    public String getSwitchingToUserMessage() {
+        return mUserController.getSwitchingToSystemUserMessage();
     }
 
     @Override

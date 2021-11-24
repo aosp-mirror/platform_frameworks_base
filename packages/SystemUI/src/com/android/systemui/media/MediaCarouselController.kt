@@ -400,7 +400,7 @@ class MediaCarouselController @Inject constructor(
         }
         updatePageIndicator()
         mediaCarouselScrollHandler.onPlayersChanged()
-        mediaCarousel.requiresRemeasuring = true
+        mediaFrame.requiresRemeasuring = true
         // Check postcondition: mediaContent should have the same number of children as there are
         // elements in mediaPlayers.
         if (MediaPlayerData.players().size != mediaContent.childCount) {
@@ -439,7 +439,7 @@ class MediaCarouselController @Inject constructor(
         updatePlayerToState(newRecs, noAnimation = true)
         reorderAllPlayers(curVisibleMediaKey)
         updatePageIndicator()
-        mediaCarousel.requiresRemeasuring = true
+        mediaFrame.requiresRemeasuring = true
         // Check postcondition: mediaContent should have the same number of children as there are
         // elements in mediaPlayers.
         if (MediaPlayerData.players().size != mediaContent.childCount) {

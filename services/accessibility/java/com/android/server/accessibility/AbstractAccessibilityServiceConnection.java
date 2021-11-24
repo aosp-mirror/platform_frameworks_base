@@ -39,6 +39,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.accessibilityservice.MagnificationConfig;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -1101,8 +1102,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             try {
                 MagnificationProcessor magnificationProcessor =
                         mSystemSupport.getMagnificationProcessor();
-                return magnificationProcessor
-                        .setScaleAndCenter(displayId, scale, centerX, centerY, animate, mId);
+                final MagnificationConfig config = new MagnificationConfig.Builder()
+                        .setScale(scale)
+                        .setCenterX(centerX)
+                        .setCenterY(centerY).build();
+                return magnificationProcessor.setMagnificationConfig(displayId, config, animate,
+                        mId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

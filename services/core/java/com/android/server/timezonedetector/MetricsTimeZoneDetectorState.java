@@ -56,16 +56,11 @@ public final class MetricsTimeZoneDetectorState {
     public static final @DetectionMode int DETECTION_MODE_GEO = 1;
     public static final @DetectionMode int DETECTION_MODE_TELEPHONY = 2;
 
-    @NonNull
-    private final ConfigurationInternal mConfigurationInternal;
-    @NonNull
+    @NonNull private final ConfigurationInternal mConfigurationInternal;
     private final int mDeviceTimeZoneIdOrdinal;
-    @Nullable
-    private final MetricsTimeZoneSuggestion mLatestManualSuggestion;
-    @Nullable
-    private final MetricsTimeZoneSuggestion mLatestTelephonySuggestion;
-    @Nullable
-    private final MetricsTimeZoneSuggestion mLatestGeolocationSuggestion;
+    @Nullable private final MetricsTimeZoneSuggestion mLatestManualSuggestion;
+    @Nullable private final MetricsTimeZoneSuggestion mLatestTelephonySuggestion;
+    @Nullable private final MetricsTimeZoneSuggestion mLatestGeolocationSuggestion;
 
     private MetricsTimeZoneDetectorState(
             @NonNull ConfigurationInternal configurationInternal,
@@ -117,8 +112,8 @@ public final class MetricsTimeZoneDetectorState {
     }
 
     /** Returns true if user's location can be used generally. */
-    public boolean isUserLocationEnabled() {
-        return mConfigurationInternal.isLocationEnabled();
+    public boolean getUserLocationEnabledSetting() {
+        return mConfigurationInternal.getLocationEnabledSetting();
     }
 
     /** Returns the value of the geolocation time zone detection enabled setting. */
@@ -149,7 +144,6 @@ public final class MetricsTimeZoneDetectorState {
      * Returns the ordinal for the device's currently set time zone ID.
      * See {@link MetricsTimeZoneDetectorState} for information about ordinals.
      */
-    @NonNull
     public int getDeviceTimeZoneIdOrdinal() {
         return mDeviceTimeZoneIdOrdinal;
     }
@@ -281,6 +275,7 @@ public final class MetricsTimeZoneDetectorState {
             return new MetricsTimeZoneSuggestion(null);
         }
 
+        @NonNull
         public static MetricsTimeZoneSuggestion createCertain(
                 @NonNull int[] zoneIdOrdinals) {
             return new MetricsTimeZoneSuggestion(zoneIdOrdinals);

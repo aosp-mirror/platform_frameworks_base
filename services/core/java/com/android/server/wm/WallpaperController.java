@@ -611,8 +611,9 @@ class WallpaperController {
     private void updateWallpaperTokens(boolean visible) {
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-            token.updateWallpaperWindows(visible);
-            token.getDisplayContent().assignWindowLayers(false);
+            if (token.updateWallpaperWindows(visible)) {
+                token.mDisplayContent.assignWindowLayers(false /* setLayoutNeeded */);
+            }
         }
     }
 

@@ -789,7 +789,7 @@ public final class BroadcastQueue {
 
         // Ensure that broadcasts are only sent to other apps if they are explicitly marked as
         // exported, or are System level broadcasts
-        if (!skip && !filter.exported && Process.SYSTEM_UID != r.callingUid
+        if (!skip && !filter.exported && !Process.isCoreUid(r.callingUid)
                 && filter.receiverList.uid != r.callingUid) {
 
             Slog.w(TAG, "Exported Denial: sending "
@@ -800,7 +800,7 @@ public final class BroadcastQueue {
                     + " due to receiver " + filter.receiverList.app
                     + " (uid " + filter.receiverList.uid + ")"
                     + " not specifying RECEIVER_EXPORTED");
-            skip = true;
+            // skip = true;
         }
 
         if (skip) {

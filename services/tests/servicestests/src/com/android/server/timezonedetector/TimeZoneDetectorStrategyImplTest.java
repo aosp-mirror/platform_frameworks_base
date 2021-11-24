@@ -89,9 +89,9 @@ public class TimeZoneDetectorStrategyImplTest {
                     .setUserConfigAllowed(false)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
-                    .setAutoDetectionEnabled(false)
-                    .setLocationEnabled(true)
-                    .setGeoDetectionEnabled(false)
+                    .setAutoDetectionEnabledSetting(false)
+                    .setLocationEnabledSetting(true)
+                    .setGeoDetectionEnabledSetting(false)
                     .build();
 
     private static final ConfigurationInternal CONFIG_USER_RESTRICTED_AUTO_ENABLED =
@@ -99,9 +99,9 @@ public class TimeZoneDetectorStrategyImplTest {
                     .setUserConfigAllowed(false)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
-                    .setAutoDetectionEnabled(true)
-                    .setLocationEnabled(true)
-                    .setGeoDetectionEnabled(true)
+                    .setAutoDetectionEnabledSetting(true)
+                    .setLocationEnabledSetting(true)
+                    .setGeoDetectionEnabledSetting(true)
                     .build();
 
     private static final ConfigurationInternal CONFIG_AUTO_DETECT_NOT_SUPPORTED =
@@ -109,9 +109,9 @@ public class TimeZoneDetectorStrategyImplTest {
                     .setUserConfigAllowed(true)
                     .setTelephonyDetectionFeatureSupported(false)
                     .setGeoDetectionFeatureSupported(false)
-                    .setAutoDetectionEnabled(false)
-                    .setLocationEnabled(true)
-                    .setGeoDetectionEnabled(false)
+                    .setAutoDetectionEnabledSetting(false)
+                    .setLocationEnabledSetting(true)
+                    .setGeoDetectionEnabledSetting(false)
                     .build();
 
     private static final ConfigurationInternal CONFIG_AUTO_DISABLED_GEO_DISABLED =
@@ -119,9 +119,9 @@ public class TimeZoneDetectorStrategyImplTest {
                     .setUserConfigAllowed(true)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
-                    .setAutoDetectionEnabled(false)
-                    .setLocationEnabled(true)
-                    .setGeoDetectionEnabled(false)
+                    .setAutoDetectionEnabledSetting(false)
+                    .setLocationEnabledSetting(true)
+                    .setGeoDetectionEnabledSetting(false)
                     .build();
 
     private static final ConfigurationInternal CONFIG_AUTO_ENABLED_GEO_DISABLED =
@@ -129,9 +129,9 @@ public class TimeZoneDetectorStrategyImplTest {
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setUserConfigAllowed(true)
-                    .setAutoDetectionEnabled(true)
-                    .setLocationEnabled(true)
-                    .setGeoDetectionEnabled(false)
+                    .setAutoDetectionEnabledSetting(true)
+                    .setLocationEnabledSetting(true)
+                    .setGeoDetectionEnabledSetting(false)
                     .build();
 
     private static final ConfigurationInternal CONFIG_AUTO_ENABLED_GEO_ENABLED =
@@ -139,9 +139,9 @@ public class TimeZoneDetectorStrategyImplTest {
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setUserConfigAllowed(true)
-                    .setAutoDetectionEnabled(true)
-                    .setLocationEnabled(true)
-                    .setGeoDetectionEnabled(true)
+                    .setAutoDetectionEnabledSetting(true)
+                    .setLocationEnabledSetting(true)
+                    .setGeoDetectionEnabledSetting(true)
                     .build();
 
     private TimeZoneDetectorStrategyImpl mTimeZoneDetectorStrategy;
@@ -531,7 +531,7 @@ public class TimeZoneDetectorStrategyImplTest {
             boolean geoDetectionEnabled) {
         ConfigurationInternal geoTzEnabledConfig =
                 new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED_GEO_DISABLED)
-                        .setGeoDetectionEnabled(geoDetectionEnabled)
+                        .setGeoDetectionEnabledSetting(geoDetectionEnabled)
                         .build();
         Script script = new Script()
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
@@ -792,8 +792,8 @@ public class TimeZoneDetectorStrategyImplTest {
 
         // Update the config and confirm that the config metrics state updates also.
         expectedInternalConfig = new ConfigurationInternal.Builder(expectedInternalConfig)
-                .setAutoDetectionEnabled(true)
-                .setGeoDetectionEnabled(true)
+                .setAutoDetectionEnabledSetting(true)
+                .setGeoDetectionEnabledSetting(true)
                 .build();
 
         expectedDeviceTimeZoneId = geolocationTimeZoneSuggestion.getZoneIds().get(0);
@@ -963,7 +963,7 @@ public class TimeZoneDetectorStrategyImplTest {
         Script simulateSetAutoMode(boolean autoDetectionEnabled) {
             ConfigurationInternal newConfig = new ConfigurationInternal.Builder(
                     mFakeEnvironment.getCurrentUserConfigurationInternal())
-                    .setAutoDetectionEnabled(autoDetectionEnabled)
+                    .setAutoDetectionEnabledSetting(autoDetectionEnabled)
                     .build();
             simulateConfigurationInternalChange(newConfig);
             return this;
@@ -975,7 +975,7 @@ public class TimeZoneDetectorStrategyImplTest {
         Script simulateSetGeoDetectionEnabled(boolean geoDetectionEnabled) {
             ConfigurationInternal newConfig = new ConfigurationInternal.Builder(
                     mFakeEnvironment.getCurrentUserConfigurationInternal())
-                    .setGeoDetectionEnabled(geoDetectionEnabled)
+                    .setGeoDetectionEnabledSetting(geoDetectionEnabled)
                     .build();
             simulateConfigurationInternalChange(newConfig);
             return this;

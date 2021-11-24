@@ -3255,6 +3255,28 @@ package android.accessibilityservice {
     method public boolean willContinue();
   }
 
+  public final class MagnificationConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method public float getCenterX();
+    method public float getCenterY();
+    method public int getMode();
+    method public float getScale();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.accessibilityservice.MagnificationConfig> CREATOR;
+    field public static final int DEFAULT_MODE = 0; // 0x0
+    field public static final int FULLSCREEN_MODE = 1; // 0x1
+    field public static final int WINDOW_MODE = 2; // 0x2
+  }
+
+  public static final class MagnificationConfig.Builder {
+    ctor public MagnificationConfig.Builder();
+    method @NonNull public android.accessibilityservice.MagnificationConfig build();
+    method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setCenterX(float);
+    method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setCenterY(float);
+    method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setMode(int);
+    method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setScale(float);
+  }
+
   public final class TouchInteractionController {
     method public int getDisplayId();
     method public int getMaxPointerCount();
@@ -51423,14 +51445,18 @@ package android.view.accessibility {
   public static final class AccessibilityNodeInfo.CollectionItemInfo {
     ctor public AccessibilityNodeInfo.CollectionItemInfo(int, int, int, int, boolean);
     ctor public AccessibilityNodeInfo.CollectionItemInfo(int, int, int, int, boolean, boolean);
+    ctor public AccessibilityNodeInfo.CollectionItemInfo(@Nullable String, int, int, @Nullable String, int, int, boolean, boolean);
     method public int getColumnIndex();
     method public int getColumnSpan();
+    method @Nullable public String getColumnTitle();
     method public int getRowIndex();
     method public int getRowSpan();
+    method @Nullable public String getRowTitle();
     method @Deprecated public boolean isHeading();
     method public boolean isSelected();
     method public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(int, int, int, int, boolean);
     method public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(int, int, int, int, boolean, boolean);
+    method @NonNull public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(@Nullable String, int, int, @Nullable String, int, int, boolean, boolean);
   }
 
   public static final class AccessibilityNodeInfo.ExtraRenderingInfo {

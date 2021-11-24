@@ -143,14 +143,14 @@ public:
     Result close();
 
     /**
-     * Create a new SharedFiler.
+     * Accquire a new SharedFiler token.
      */
-    string createSharedFilter();
+    string acquireSharedFilterToken();
 
     /**
-     * Release SharedFiler.
+     * Release SharedFiler token.
      */
-    Result releaseSharedFilter(const string& filterToken);
+    Result freeSharedFilterToken(const string& filterToken);
 
 private:
     Result getFilterMq();

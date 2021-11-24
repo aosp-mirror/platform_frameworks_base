@@ -68,6 +68,7 @@ import static org.mockito.Mockito.when;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.accessibilityservice.MagnificationConfig;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -650,8 +651,12 @@ public class AbstractAccessibilityServiceConnectionTest {
         final float scale = 1.8f;
         final float centerX = 50.5f;
         final float centerY = 100.5f;
-        when(mMockMagnificationProcessor.setScaleAndCenter(displayId,
-                scale, centerX, centerY, true, SERVICE_ID)).thenReturn(true);
+        MagnificationConfig config = new MagnificationConfig.Builder()
+                .setScale(scale)
+                .setCenterX(centerX)
+                .setCenterY(centerY).build();
+        when(mMockMagnificationProcessor.setMagnificationConfig(displayId, config, true,
+                SERVICE_ID)).thenReturn(true);
         when(mMockSecurityPolicy.canControlMagnification(mServiceConnection)).thenReturn(false);
 
         final boolean result = mServiceConnection.setMagnificationScaleAndCenter(
@@ -665,8 +670,12 @@ public class AbstractAccessibilityServiceConnectionTest {
         final float scale = 1.8f;
         final float centerX = 50.5f;
         final float centerY = 100.5f;
-        when(mMockMagnificationProcessor.setScaleAndCenter(displayId,
-                scale, centerX, centerY, true, SERVICE_ID)).thenReturn(true);
+        MagnificationConfig config = new MagnificationConfig.Builder()
+                .setScale(scale)
+                .setCenterX(centerX)
+                .setCenterY(centerY).build();
+        when(mMockMagnificationProcessor.setMagnificationConfig(displayId, config, true,
+                SERVICE_ID)).thenReturn(true);
         when(mMockSystemSupport.getCurrentUserIdLocked()).thenReturn(USER_ID2);
 
         final boolean result = mServiceConnection.setMagnificationScaleAndCenter(
