@@ -214,11 +214,13 @@ final class IInputMethodInvoker {
     }
 
     @AnyThread
-    void startStylusHandwriting(InputChannel channel, List<MotionEvent> events) {
+    boolean startStylusHandwriting(int requestId, InputChannel channel, List<MotionEvent> events) {
         try {
-            mTarget.startStylusHandwriting(channel, events);
+            mTarget.startStylusHandwriting(requestId, channel, events);
         } catch (RemoteException e) {
             logRemoteException(e);
+            return false;
         }
+        return true;
     }
 }

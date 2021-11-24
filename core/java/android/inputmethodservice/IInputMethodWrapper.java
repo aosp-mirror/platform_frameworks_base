@@ -245,7 +245,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
             }
             case DO_START_STYLUS_HANDWRITING: {
                 final SomeArgs args = (SomeArgs) msg.obj;
-                inputMethod.startStylusHandwriting((InputChannel) args.arg1,
+                inputMethod.startStylusHandwriting(msg.arg1, (InputChannel) args.arg1,
                         (List<MotionEvent>) args.arg2);
                 args.recycle();
                 return;
@@ -393,10 +393,11 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void startStylusHandwriting(@NonNull InputChannel channel,
+    public void startStylusHandwriting(int requestId, @NonNull InputChannel channel,
             @Nullable List<MotionEvent> stylusEvents)
             throws RemoteException {
         mCaller.executeOrSendMessage(
-                mCaller.obtainMessageOO(DO_START_STYLUS_HANDWRITING, channel, stylusEvents));
+                mCaller.obtainMessageIOO(DO_START_STYLUS_HANDWRITING, requestId, channel,
+                        stylusEvents));
     }
 }

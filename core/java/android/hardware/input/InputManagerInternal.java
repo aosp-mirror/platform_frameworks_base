@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.graphics.PointF;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
+import android.view.InputChannel;
 import android.view.InputEvent;
 
 import java.util.List;
@@ -123,4 +124,13 @@ public abstract class InputManagerInternal {
          */
         void notifyLidSwitchChanged(long whenNanos, boolean lidOpen);
     }
+
+    /** Create an {@link InputChannel} that is registered to InputDispatcher. */
+    public abstract InputChannel createInputChannel(String inputChannelName);
+
+    /**
+     * Pilfer pointers from the input channel with the given token so that ongoing gestures are
+     * canceled for all other channels.
+     */
+    public abstract void pilferPointers(IBinder token);
 }
