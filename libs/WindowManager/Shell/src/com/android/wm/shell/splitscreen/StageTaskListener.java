@@ -43,6 +43,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SurfaceUtils;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.SplitDecorManager;
+import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 
 import java.io.PrintWriter;
 
@@ -321,7 +322,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     void onSplitScreenListenerRegistered(SplitScreen.SplitScreenListener listener,
-            @SplitScreen.StageType int stage) {
+            @StageType int stage) {
         for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
             int taskId = mChildrenTaskInfo.keyAt(i);
             listener.onTaskStageChanged(taskId, stage,

@@ -26,8 +26,8 @@ import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED_
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__SCREEN_LOCKED;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__SCREEN_LOCKED_SHOW_ON_TOP;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__UNKNOWN_EXIT;
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_FINISHED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DEVICE_FOLDED;
@@ -43,7 +43,7 @@ import android.util.Slog;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
+import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.splitscreen.SplitScreenController.ExitReason;
 
 /**

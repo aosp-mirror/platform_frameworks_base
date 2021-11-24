@@ -22,8 +22,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 
@@ -66,9 +66,10 @@ import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
-import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
+import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.transition.LegacyTransitions;
 import com.android.wm.shell.transition.Transitions;
 
@@ -197,7 +198,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 new WindowContainerTransaction());
     }
 
-    private boolean moveToStage(int taskId, @SplitScreen.StageType int stageType,
+    private boolean moveToStage(int taskId, @StageType int stageType,
             @SplitPosition int stagePosition, WindowContainerTransaction wct) {
         final ActivityManager.RunningTaskInfo task = mTaskOrganizer.getRunningTaskInfo(taskId);
         if (task == null) {

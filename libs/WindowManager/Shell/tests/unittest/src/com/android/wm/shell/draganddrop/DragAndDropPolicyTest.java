@@ -24,9 +24,9 @@ import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
 
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_FULLSCREEN;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_BOTTOM;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_LEFT;
