@@ -67,7 +67,6 @@ import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfC
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -129,7 +128,6 @@ import dagger.Provides;
         },
         subcomponents = {
             StatusBarComponent.class,
-            StatusBarFragmentComponent.class,
             NotificationRowComponent.class,
             DozeComponent.class,
             ExpandableNotificationRowComponent.class,

@@ -24,6 +24,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -35,15 +36,19 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentScope;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import javax.inject.Inject;
+
 /**
  * Controls the appearance of heads up notifications in the icon area and the header itself.
  */
+@StatusBarFragmentScope
 public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         DarkIconDispatcher.DarkReceiver, NotificationWakeUpCoordinator.WakeUpListener {
     public static final int CONTENT_FADE_DURATION = 110;
@@ -83,7 +88,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     Point mPoint;
     private KeyguardStateController mKeyguardStateController;
 
-
+    @Inject
     public HeadsUpAppearanceController(
             NotificationIconAreaController notificationIconAreaController,
             HeadsUpManagerPhone headsUpManager,
@@ -92,11 +97,15 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
             KeyguardBypassController keyguardBypassController,
             KeyguardStateController keyguardStateController,
             NotificationWakeUpCoordinator wakeUpCoordinator, CommandQueue commandQueue,
-            NotificationPanelViewController notificationPanelViewController, View statusBarView) {
+            NotificationPanelViewController notificationPanelViewController,
+            @RootView PhoneStatusBarView statusBarView) {
         this(notificationIconAreaController, headsUpManager, statusBarStateController,
                 keyguardBypassController, wakeUpCoordinator, keyguardStateController,
                 commandQueue, notificationStackScrollLayoutController,
                 notificationPanelViewController,
+                // TODO(b/205609837): We should have the StatusBarFragmentComponent provide these
+                //  four views, and then we can delete this constructor and just use the one below
+                //  (which also removes the undesirable @VisibleForTesting).
                 statusBarView.findViewById(R.id.heads_up_status_bar_view),
                 statusBarView.findViewById(R.id.clock),
                 statusBarView.findViewById(R.id.operator_name_frame),
