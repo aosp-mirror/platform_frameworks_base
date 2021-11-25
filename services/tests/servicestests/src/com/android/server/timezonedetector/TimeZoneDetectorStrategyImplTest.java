@@ -87,10 +87,11 @@ public class TimeZoneDetectorStrategyImplTest {
 
     private static final ConfigurationInternal CONFIG_USER_RESTRICTED_AUTO_DISABLED =
             new ConfigurationInternal.Builder(USER_ID)
-                    .setUserConfigAllowed(false)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setTelephonyFallbackSupported(false)
+                    .setEnhancedMetricsCollectionEnabled(false)
+                    .setUserConfigAllowed(false)
                     .setAutoDetectionEnabledSetting(false)
                     .setLocationEnabledSetting(true)
                     .setGeoDetectionEnabledSetting(false)
@@ -98,10 +99,11 @@ public class TimeZoneDetectorStrategyImplTest {
 
     private static final ConfigurationInternal CONFIG_USER_RESTRICTED_AUTO_ENABLED =
             new ConfigurationInternal.Builder(USER_ID)
-                    .setUserConfigAllowed(false)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setTelephonyFallbackSupported(false)
+                    .setEnhancedMetricsCollectionEnabled(false)
+                    .setUserConfigAllowed(false)
                     .setAutoDetectionEnabledSetting(true)
                     .setLocationEnabledSetting(true)
                     .setGeoDetectionEnabledSetting(true)
@@ -109,10 +111,11 @@ public class TimeZoneDetectorStrategyImplTest {
 
     private static final ConfigurationInternal CONFIG_AUTO_DETECT_NOT_SUPPORTED =
             new ConfigurationInternal.Builder(USER_ID)
-                    .setUserConfigAllowed(true)
                     .setTelephonyDetectionFeatureSupported(false)
                     .setGeoDetectionFeatureSupported(false)
                     .setTelephonyFallbackSupported(false)
+                    .setEnhancedMetricsCollectionEnabled(false)
+                    .setUserConfigAllowed(true)
                     .setAutoDetectionEnabledSetting(false)
                     .setLocationEnabledSetting(true)
                     .setGeoDetectionEnabledSetting(false)
@@ -120,10 +123,11 @@ public class TimeZoneDetectorStrategyImplTest {
 
     private static final ConfigurationInternal CONFIG_AUTO_DISABLED_GEO_DISABLED =
             new ConfigurationInternal.Builder(USER_ID)
-                    .setUserConfigAllowed(true)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setTelephonyFallbackSupported(false)
+                    .setEnhancedMetricsCollectionEnabled(false)
+                    .setUserConfigAllowed(true)
                     .setAutoDetectionEnabledSetting(false)
                     .setLocationEnabledSetting(true)
                     .setGeoDetectionEnabledSetting(false)
@@ -134,6 +138,7 @@ public class TimeZoneDetectorStrategyImplTest {
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setTelephonyFallbackSupported(false)
+                    .setEnhancedMetricsCollectionEnabled(false)
                     .setUserConfigAllowed(true)
                     .setAutoDetectionEnabledSetting(true)
                     .setLocationEnabledSetting(true)
@@ -145,6 +150,7 @@ public class TimeZoneDetectorStrategyImplTest {
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setTelephonyFallbackSupported(false)
+                    .setEnhancedMetricsCollectionEnabled(false)
                     .setUserConfigAllowed(true)
                     .setAutoDetectionEnabledSetting(true)
                     .setLocationEnabledSetting(true)
@@ -955,8 +961,20 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     @Test
-    public void testGenerateMetricsState() {
-        ConfigurationInternal expectedInternalConfig = CONFIG_AUTO_DISABLED_GEO_DISABLED;
+    public void testGenerateMetricsState_enhancedMetricsCollection() {
+        testGenerateMetricsState(true);
+    }
+
+    @Test
+    public void testGenerateMetricsState_notEnhancedMetricsCollection() {
+        testGenerateMetricsState(false);
+    }
+
+    private void testGenerateMetricsState(boolean enhancedMetricsCollection) {
+        ConfigurationInternal expectedInternalConfig =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED_GEO_DISABLED)
+                        .setEnhancedMetricsCollectionEnabled(enhancedMetricsCollection)
+                        .build();
         String expectedDeviceTimeZoneId = "InitialZoneId";
 
         Script script = new Script()
@@ -1028,7 +1046,7 @@ public class TimeZoneDetectorStrategyImplTest {
                         tzIdOrdinalGenerator, expectedInternalConfig, expectedDeviceTimeZoneId,
                         expectedManualSuggestion, expectedTelephonySuggestion,
                         expectedGeolocationTimeZoneSuggestion);
-        // Rely on MetricsTimeZoneDetectorState.equals() for time zone ID ordinal comparisons.
+        // Rely on MetricsTimeZoneDetectorState.equals() for time zone ID / ID ordinal comparisons.
         assertEquals(expectedState, actualState);
     }
 
