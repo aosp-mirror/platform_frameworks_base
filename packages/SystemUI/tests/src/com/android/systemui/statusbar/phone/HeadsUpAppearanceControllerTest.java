@@ -193,7 +193,9 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         reset(mDarkIconDispatcher);
         reset(mPanelView);
         reset(mStackScrollerController);
-        mHeadsUpAppearanceController.destroy();
+
+        mHeadsUpAppearanceController.onViewDetached();
+
         verify(mHeadsUpManager).removeListener(any());
         verify(mDarkIconDispatcher).removeDarkReceiver((DarkIconDispatcher.DarkReceiver) any());
         verify(mPanelView).removeTrackingHeadsUpListener(any());
