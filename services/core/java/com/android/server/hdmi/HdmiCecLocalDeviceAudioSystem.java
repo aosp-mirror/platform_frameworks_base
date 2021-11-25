@@ -265,13 +265,20 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         // to request Short Audio Descriptor. Since ARC and SAM are independent,
         // we can turn on ARC anyways when audio system device just boots up.
         initArcOnFromAvr();
-        int systemAudioControlOnPowerOnProp =
-                SystemProperties.getInt(
-                        PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON,
-                        ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON);
-        boolean lastSystemAudioControlStatus =
-                SystemProperties.getBoolean(Constants.PROPERTY_LAST_SYSTEM_AUDIO_CONTROL, true);
-        systemAudioControlOnPowerOn(systemAudioControlOnPowerOnProp, lastSystemAudioControlStatus);
+
+        // This prevents turning on of System Audio Mode during a quiescent boot. If the quiescent
+        // boot is exited just after this check, this code will be executed only at the next
+        // wake-up.
+        if (!mService.isScreenOff()) {
+            int systemAudioControlOnPowerOnProp =
+                    SystemProperties.getInt(
+                            PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON,
+                            ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON);
+            boolean lastSystemAudioControlStatus =
+                    SystemProperties.getBoolean(Constants.PROPERTY_LAST_SYSTEM_AUDIO_CONTROL, true);
+            systemAudioControlOnPowerOn(
+                    systemAudioControlOnPowerOnProp, lastSystemAudioControlStatus);
+        }
         mService.getHdmiCecNetwork().clearDeviceList();
         launchDeviceDiscovery();
         startQueuedActions();
