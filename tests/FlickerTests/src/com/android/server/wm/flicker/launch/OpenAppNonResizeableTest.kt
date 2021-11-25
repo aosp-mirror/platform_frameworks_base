@@ -110,7 +110,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
      * Checks that the app layer doesn't exist at the start of the transition, that it is
      * created (invisible) and becomes visible during the transition
      */
-    @FlakyTest
+    @Postsubmit
     @Test
     fun appLayerBecomesVisible() {
         testSpec.assertLayers {
@@ -169,7 +169,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     }
 
     /** {@inheritDoc} */
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
 
@@ -211,7 +211,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     }
 
     /** {@inheritDoc} */
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
             super.visibleWindowsShownMoreThanOneConsecutiveEntry()
@@ -227,7 +227,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
             super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest
     @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
 

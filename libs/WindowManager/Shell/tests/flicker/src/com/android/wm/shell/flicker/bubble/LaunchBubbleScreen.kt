@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.bubble
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -49,7 +49,7 @@ class LaunchBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(test
             }
         }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun testAppIsAlwaysVisible() {
         testSpec.assertLayers {
