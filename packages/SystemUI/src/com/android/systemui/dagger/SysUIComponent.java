@@ -23,6 +23,7 @@ import com.android.systemui.InitController;
 import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
+import com.android.systemui.media.taptotransfer.MediaTttChipController;
 import com.android.systemui.people.PeopleProvider;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
@@ -126,6 +127,8 @@ public interface SysUIComponent {
             c.getUnfoldTransitionWallpaperController().init();
         });
         getNaturalRotationUnfoldProgressProvider().ifPresent(o -> o.init());
+        // No init method needed, just needs to be gotten so that it's created.
+        getMediaTttChipController();
     }
 
     /**
@@ -171,6 +174,9 @@ public interface SysUIComponent {
      * For devices with a hinge: the rotation animation
      */
     Optional<NaturalRotationUnfoldProgressProvider> getNaturalRotationUnfoldProgressProvider();
+
+    /** */
+    Optional<MediaTttChipController> getMediaTttChipController();
 
     /**
      * Member injection into the supplied argument.

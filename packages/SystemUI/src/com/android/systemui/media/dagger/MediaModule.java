@@ -16,11 +16,19 @@
 
 package com.android.systemui.media.dagger;
 
+import android.content.Context;
+import android.view.WindowManager;
+
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.media.MediaHostStatesManager;
+import com.android.systemui.media.taptotransfer.MediaTttChipController;
+import com.android.systemui.media.taptotransfer.MediaTttFlags;
+import com.android.systemui.statusbar.commandline.CommandRegistry;
+
+import java.util.Optional;
 
 import javax.inject.Named;
 
@@ -62,5 +70,19 @@ public interface MediaModule {
             MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
             MediaHostStatesManager statesManager) {
         return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    static Optional<MediaTttChipController> providesMediaTttChipController(
+            MediaTttFlags mediaTttFlags,
+            Context context,
+            CommandRegistry commandRegistry,
+            WindowManager windowManager) {
+        if (!mediaTttFlags.isMediaTttEnabled()) {
+            return Optional.empty();
+        }
+        return Optional.of(new MediaTttChipController(context, commandRegistry, windowManager));
     }
 }
