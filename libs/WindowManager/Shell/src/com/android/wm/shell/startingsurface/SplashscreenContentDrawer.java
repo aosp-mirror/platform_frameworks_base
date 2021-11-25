@@ -390,8 +390,7 @@ public class SplashscreenContentDrawer {
                     final ShapeIconFactory factory = new ShapeIconFactory(
                             SplashscreenContentDrawer.this.mContext,
                             scaledIconDpi, mFinalIconSize);
-                    final Bitmap bitmap = factory.createScaledBitmapWithoutShadow(
-                            iconDrawable, true /* shrinkNonAdaptiveIcons */);
+                    final Bitmap bitmap = factory.createScaledBitmapWithoutShadow(iconDrawable);
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                     createIconDrawable(new BitmapDrawable(bitmap), true);
                 }

@@ -30,8 +30,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.UserHandle;
@@ -42,6 +40,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.R;
+import com.android.launcher3.icons.BaseIconFactory.IconOptions;
 import com.android.launcher3.icons.IconFactory;
 import com.android.settingslib.applications.ApplicationsState;
 import com.android.settingslib.applications.ApplicationsState.AppEntry;
@@ -280,9 +279,14 @@ public class SystemUIToast implements ToastPlugin.Toast {
         final ApplicationInfo appInfo = appEntry.info;
         UserHandle user = UserHandle.getUserHandleForUid(appInfo.uid);
         IconFactory iconFactory = IconFactory.obtain(context);
-        Bitmap iconBmp = iconFactory.createBadgedIconBitmap(
-                appInfo.loadUnbadgedIcon(packageManager), user, true).icon;
-        return new BitmapDrawable(context.getResources(), iconBmp);
+        try {
+            return iconFactory.createBadgedIconBitmap(
+                        appInfo.loadUnbadgedIcon(packageManager),
+                        new IconOptions().setUser(user))
+                    .newIcon(context);
+        } finally {
+            iconFactory.recycle();
+        }
     }
 
     private static boolean showApplicationIcon(ApplicationInfo appInfo,
