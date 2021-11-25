@@ -168,9 +168,10 @@ public interface StatusBarDependenciesModule {
     static NotificationListener provideNotificationListener(
             Context context,
             NotificationManager notificationManager,
-            @Main Handler mainHandler) {
+            SystemClock systemClock,
+            @Main Executor mainExecutor) {
         return new NotificationListener(
-                context, notificationManager, mainHandler);
+                context, notificationManager, systemClock, mainExecutor);
     }
 
     /** */
