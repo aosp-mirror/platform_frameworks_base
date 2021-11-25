@@ -176,6 +176,9 @@ public class AppTransitionController {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "AppTransitionReady");
 
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "**** GOOD TO GO");
+        // TODO(b/205335975): Remove window which stuck in animatingExit status. Find actual cause.
+        mDisplayContent.forAllWindows(WindowState::cleanupAnimatingExitWindow,
+                true /* traverseTopToBottom */);
         // TODO(new-app-transition): Remove code using appTransition.getAppTransition()
         final AppTransition appTransition = mDisplayContent.mAppTransition;
 

@@ -334,6 +334,18 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testExitAnimationDone_beforeAppTransition() {
+        final Task task = createTask(mDisplayContent);
+        final WindowState win = createAppWindow(task, ACTIVITY_TYPE_STANDARD, "Win");
+        spyOn(win);
+        win.mAnimatingExit = true;
+        mDisplayContent.mAppTransition.setTimeout();
+        mDisplayContent.mAppTransitionController.handleAppTransitionReady();
+
+        verify(win).onExitAnimationDone();
+    }
+
+    @Test
     public void testGetAnimationTargets_windowsAreBeingReplaced() {
         // [DisplayContent] -+- [Task1] - [ActivityRecord1] (opening, visible)
         //                                       +- [AppWindow1] (being-replaced)
