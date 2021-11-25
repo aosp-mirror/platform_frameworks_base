@@ -21,9 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.media.AudioAttributes;
-import android.os.vibrator.PrebakedSegment;
-import android.os.vibrator.VibrationEffectSegment;
-import android.util.Slog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -155,9 +152,6 @@ public final class VibrationAttributes implements Parcelable {
      * @hide
      */
     public static final int FLAG_ALL_SUPPORTED = FLAG_BYPASS_INTERRUPTION_POLICY;
-
-    // If a vibration is playing for longer than 5s, it's probably not haptic feedback
-    private static final long MAX_HAPTIC_FEEDBACK_DURATION = 5000;
 
     /** Creates a new {@link VibrationAttributes} instance with given usage. */
     public static @NonNull VibrationAttributes createForUsage(int usage) {
@@ -357,67 +351,6 @@ public final class VibrationAttributes implements Parcelable {
         public Builder(@NonNull AudioAttributes audio) {
             setUsage(audio);
             setFlags(audio);
-        }
-
-        /**
-         * Constructs a new Builder from AudioAttributes and a VibrationEffect to infer usage.
-         * @hide
-         */
-        @TestApi
-        public Builder(@NonNull AudioAttributes audio, @NonNull VibrationEffect effect) {
-            this(audio);
-            applyHapticFeedbackHeuristics(effect);
-        }
-
-        /**
-         * Constructs a new Builder from VibrationAttributes and a VibrationEffect to infer usage.
-         * @hide
-         */
-        @TestApi
-        public Builder(@NonNull VibrationAttributes vib, @NonNull VibrationEffect effect) {
-            this(vib);
-            applyHapticFeedbackHeuristics(effect);
-        }
-
-        private void applyHapticFeedbackHeuristics(@Nullable VibrationEffect effect) {
-            if (effect != null) {
-                PrebakedSegment prebaked = extractPrebakedSegment(effect);
-                if (mUsage == USAGE_UNKNOWN && prebaked != null) {
-                    switch (prebaked.getEffectId()) {
-                        case VibrationEffect.EFFECT_CLICK:
-                        case VibrationEffect.EFFECT_DOUBLE_CLICK:
-                        case VibrationEffect.EFFECT_HEAVY_CLICK:
-                        case VibrationEffect.EFFECT_TEXTURE_TICK:
-                        case VibrationEffect.EFFECT_TICK:
-                        case VibrationEffect.EFFECT_POP:
-                        case VibrationEffect.EFFECT_THUD:
-                            mUsage = USAGE_TOUCH;
-                            break;
-                        default:
-                            Slog.w(TAG, "Unknown prebaked vibration effect, assuming it isn't "
-                                    + "haptic feedback");
-                    }
-                }
-                final long duration = effect.getDuration();
-                if (mUsage == USAGE_UNKNOWN && duration >= 0
-                        && duration < MAX_HAPTIC_FEEDBACK_DURATION) {
-                    mUsage = USAGE_TOUCH;
-                }
-            }
-        }
-
-        @Nullable
-        private PrebakedSegment extractPrebakedSegment(VibrationEffect effect) {
-            if (effect instanceof VibrationEffect.Composed) {
-                VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
-                if (composed.getSegments().size() == 1) {
-                    VibrationEffectSegment segment = composed.getSegments().get(0);
-                    if (segment instanceof PrebakedSegment) {
-                        return (PrebakedSegment) segment;
-                    }
-                }
-            }
-            return null;
         }
 
         private void setUsage(@NonNull AudioAttributes audio) {

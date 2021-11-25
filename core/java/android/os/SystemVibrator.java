@@ -196,9 +196,6 @@ public class SystemVibrator extends Vibrator {
             return;
         }
         CombinedVibration combinedEffect = CombinedVibration.createParallel(effect);
-        // TODO(b/185351540): move this into VibratorManagerService once the touch vibration
-        // heuristics is fixed and works for CombinedVibration. Make sure it's always applied.
-        attributes = new VibrationAttributes.Builder(attributes, effect).build();
         mVibratorManager.vibrate(uid, opPkg, combinedEffect, reason, attributes);
     }
 

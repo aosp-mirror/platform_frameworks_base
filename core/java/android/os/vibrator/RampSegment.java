@@ -87,11 +87,19 @@ public final class RampSegment extends VibrationEffectSegment {
         return mDuration;
     }
 
+    /** @hide */
+    @Override
+    public boolean isHapticFeedbackCandidate() {
+        return true;
+    }
+
+    /** @hide */
     @Override
     public boolean hasNonZeroAmplitude() {
         return mStartAmplitude > 0 || mEndAmplitude > 0;
     }
 
+    /** @hide */
     @Override
     public void validate() {
         Preconditions.checkArgumentNonnegative(mDuration,
@@ -100,7 +108,7 @@ public final class RampSegment extends VibrationEffectSegment {
         Preconditions.checkArgumentInRange(mEndAmplitude, 0f, 1f, "endAmplitude");
     }
 
-
+    /** @hide */
     @NonNull
     @Override
     public RampSegment resolve(int defaultAmplitude) {
@@ -108,6 +116,7 @@ public final class RampSegment extends VibrationEffectSegment {
         return this;
     }
 
+    /** @hide */
     @NonNull
     @Override
     public RampSegment scale(float scaleFactor) {
@@ -121,6 +130,7 @@ public final class RampSegment extends VibrationEffectSegment {
                 mDuration);
     }
 
+    /** @hide */
     @NonNull
     @Override
     public RampSegment applyEffectStrength(int effectStrength) {

@@ -341,7 +341,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             if (!isEffectValid(effect)) {
                 return false;
             }
-            attrs = fixupVibrationAttributes(attrs);
+            attrs = fixupVibrationAttributes(attrs, effect);
             synchronized (mLock) {
                 SparseArray<PrebakedSegment> effects = fixupAlwaysOnEffectsLocked(effect);
                 if (effects == null) {
@@ -385,7 +385,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             if (!isEffectValid(effect)) {
                 return null;
             }
-            attrs = fixupVibrationAttributes(attrs);
+            attrs = fixupVibrationAttributes(attrs, effect);
             Vibration vib = new Vibration(token, mNextVibrationId.getAndIncrement(), effect, attrs,
                     uid, opPkg, reason);
             fillVibrationFallbacks(vib, effect);
@@ -895,21 +895,32 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      * Return new {@link VibrationAttributes} that only applies flags that this user has permissions
      * to use.
      */
-    private VibrationAttributes fixupVibrationAttributes(@Nullable VibrationAttributes attrs) {
+    @NonNull
+    private VibrationAttributes fixupVibrationAttributes(@Nullable VibrationAttributes attrs,
+            CombinedVibration effect) {
         if (attrs == null) {
             attrs = DEFAULT_ATTRIBUTES;
         }
+        int usage = attrs.getUsage();
+        if ((usage == VibrationAttributes.USAGE_UNKNOWN) && effect.isHapticFeedbackCandidate()) {
+            usage = VibrationAttributes.USAGE_TOUCH;
+        }
+        int flags = attrs.getFlags();
         if (attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY)) {
             if (!(hasPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
                     || hasPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
                     || hasPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING))) {
-                final int flags = attrs.getFlags()
-                        & ~VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
-                attrs = new VibrationAttributes.Builder(attrs)
-                        .setFlags(flags, attrs.getFlags()).build();
+                // Remove bypass policy flag from attributes if the app does not have permissions.
+                flags &= ~VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
             }
         }
-        return attrs;
+        if ((usage == attrs.getUsage()) && (flags == attrs.getFlags())) {
+            return attrs;
+        }
+        return new VibrationAttributes.Builder(attrs)
+                .setUsage(usage)
+                .setFlags(flags, attrs.getFlags())
+                .build();
     }
 
     @GuardedBy("mLock")

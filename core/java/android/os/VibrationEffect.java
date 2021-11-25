@@ -53,7 +53,10 @@ import java.util.Objects;
 public abstract class VibrationEffect implements Parcelable {
     // Stevens' coefficient to scale the perceived vibration intensity.
     private static final float SCALE_GAMMA = 0.65f;
-
+    // If a vibration is playing for longer than 1s, it's probably not haptic feedback
+    private static final long MAX_HAPTIC_FEEDBACK_DURATION = 1000;
+    // If a vibration is playing more than 3 constants, it's probably not haptic feedback
+    private static final long MAX_HAPTIC_FEEDBACK_COMPOSITION_SIZE = 3;
 
     /**
      * The default vibration strength of the device.
@@ -439,6 +442,20 @@ public abstract class VibrationEffect implements Parcelable {
     public abstract long getDuration();
 
     /**
+     * Returns true if this effect could represent a touch haptic feedback.
+     *
+     * <p>It is strongly recommended that an instance of {@link VibrationAttributes} is specified
+     * for each vibration, with the correct usage. When a vibration is played with usage UNKNOWN,
+     * then this method will be used to classify the most common use case and make sure they are
+     * covered by the user settings for "Touch feedback".
+     *
+     * @hide
+     */
+    public boolean isHapticFeedbackCandidate() {
+        return false;
+    }
+
+    /**
      * Resolve default values into integer amplitude numbers.
      *
      * @param defaultAmplitude the default amplitude to apply, must be between 0 and
@@ -582,6 +599,7 @@ public abstract class VibrationEffect implements Parcelable {
             return mRepeatIndex;
         }
 
+        /** @hide */
         @Override
         public void validate() {
             int segmentCount = mSegments.size();
@@ -620,6 +638,37 @@ public abstract class VibrationEffect implements Parcelable {
             return totalDuration;
         }
 
+        /** @hide */
+        @Override
+        public boolean isHapticFeedbackCandidate() {
+            long totalDuration = getDuration();
+            if (totalDuration > MAX_HAPTIC_FEEDBACK_DURATION) {
+                // Vibration duration is known and is longer than the max duration used to classify
+                // haptic feedbacks (or repeating indefinitely with duration == Long.MAX_VALUE).
+                return false;
+            }
+            int segmentCount = mSegments.size();
+            if (segmentCount > MAX_HAPTIC_FEEDBACK_COMPOSITION_SIZE) {
+                // Vibration has some prebaked or primitive constants, it should be limited to the
+                // max composition size used to classify haptic feedbacks.
+                return false;
+            }
+            totalDuration = 0;
+            for (int i = 0; i < segmentCount; i++) {
+                if (!mSegments.get(i).isHapticFeedbackCandidate()) {
+                    // There is at least one segment that is not a candidate for a haptic feedback.
+                    return false;
+                }
+                long segmentDuration = mSegments.get(i).getDuration();
+                if (segmentDuration > 0) {
+                    totalDuration += segmentDuration;
+                }
+            }
+            // Vibration might still have some ramp or step segments, check the known duration.
+            return totalDuration <= MAX_HAPTIC_FEEDBACK_DURATION;
+        }
+
+        /** @hide */
         @NonNull
         @Override
         public Composed resolve(int defaultAmplitude) {
@@ -636,6 +685,7 @@ public abstract class VibrationEffect implements Parcelable {
             return resolved;
         }
 
+        /** @hide */
         @NonNull
         @Override
         public Composed scale(float scaleFactor) {
@@ -652,6 +702,7 @@ public abstract class VibrationEffect implements Parcelable {
             return scaled;
         }
 
+        /** @hide */
         @NonNull
         @Override
         public Composed applyEffectStrength(int effectStrength) {

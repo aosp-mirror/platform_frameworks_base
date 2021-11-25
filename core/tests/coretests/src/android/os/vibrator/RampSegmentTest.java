@@ -125,4 +125,16 @@ public class RampSegmentTest {
         assertEquals(0.35f, initial.scale(0.8f).getStartAmplitude(), TOLERANCE);
         assertEquals(0.5f, initial.scale(0.8f).scale(1.25f).getStartAmplitude(), TOLERANCE);
     }
+
+    @Test
+    public void testDuration() {
+        assertEquals(10, new RampSegment(0.5f, 1, 0, 0, 10).getDuration());
+    }
+
+    @Test
+    public void testIsHapticFeedbackCandidate_returnsTrue() {
+        // A single ramp segment duration is not checked here, but contributes to the effect known
+        // duration checked in VibrationEffect implementations.
+        assertTrue(new RampSegment(0.5f, 1, 0, 0, 5_000).isHapticFeedbackCandidate());
+    }
 }
