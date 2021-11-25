@@ -59,7 +59,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
-import com.android.server.vcn.routeselection.UnderlyingNetworkController.UnderlyingNetworkRecord;
+import com.android.server.vcn.routeselection.UnderlyingNetworkRecord;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -17,6 +17,8 @@
 package com.android.server.vcn.routeselection;
 
 import static com.android.server.vcn.VcnTestUtils.setupSystemService;
+import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.WIFI_ENTRY_RSSI_THRESHOLD_DEFAULT;
+import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.WIFI_EXIT_RSSI_THRESHOLD_DEFAULT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -53,7 +55,6 @@ import com.android.server.vcn.VcnNetworkProvider;
 import com.android.server.vcn.routeselection.UnderlyingNetworkController.NetworkBringupCallback;
 import com.android.server.vcn.routeselection.UnderlyingNetworkController.UnderlyingNetworkControllerCallback;
 import com.android.server.vcn.routeselection.UnderlyingNetworkController.UnderlyingNetworkListener;
-import com.android.server.vcn.routeselection.UnderlyingNetworkController.UnderlyingNetworkRecord;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -251,7 +252,7 @@ public class UnderlyingNetworkControllerTest {
         return getExpectedRequestBase()
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                 .setSubscriptionIds(netCapsSubIds)
-                .setSignalStrength(UnderlyingNetworkController.WIFI_ENTRY_RSSI_THRESHOLD_DEFAULT)
+                .setSignalStrength(WIFI_ENTRY_RSSI_THRESHOLD_DEFAULT)
                 .build();
     }
 
@@ -260,7 +261,7 @@ public class UnderlyingNetworkControllerTest {
         return getExpectedRequestBase()
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                 .setSubscriptionIds(netCapsSubIds)
-                .setSignalStrength(UnderlyingNetworkController.WIFI_EXIT_RSSI_THRESHOLD_DEFAULT)
+                .setSignalStrength(WIFI_EXIT_RSSI_THRESHOLD_DEFAULT)
                 .build();
     }
 
