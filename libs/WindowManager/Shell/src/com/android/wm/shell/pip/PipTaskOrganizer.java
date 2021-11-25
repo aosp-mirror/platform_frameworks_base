@@ -98,7 +98,7 @@ import java.util.function.IntConsumer;
  * see also {@link PipMotionHelper}.
  */
 public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
-        DisplayController.OnDisplaysChangedListener {
+        DisplayController.OnDisplaysChangedListener, ShellTaskOrganizer.FocusListener {
     private static final String TAG = PipTaskOrganizer.class.getSimpleName();
     private static final boolean DEBUG = false;
     /**
@@ -286,6 +286,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mMainExecutor.execute(() -> {
             mTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_PIP);
         });
+        mTaskOrganizer.addFocusListener(this);
         mPipTransitionController.setPipOrganizer(this);
         displayController.addDisplayWindowListener(this);
     }
@@ -769,6 +770,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         scheduleAnimateResizePip(destinationBounds, mEnterAnimationDuration,
                 null /* updateBoundsCallback */);
+    }
+
+    @Override
+    public void onFocusTaskChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        mPipMenuController.onFocusTaskChanged(taskInfo);
     }
 
     @Override
