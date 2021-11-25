@@ -198,6 +198,13 @@ class WindowTestsBase extends SystemServiceTestsBase {
         SystemServicesTestRule.checkHoldsLock(mWm.mGlobalLock);
 
         mDefaultDisplay = mWm.mRoot.getDefaultDisplay();
+        // Update the display policy to make the screen fully turned on so animation is allowed
+        final DisplayPolicy displayPolicy = mDefaultDisplay.getDisplayPolicy();
+        displayPolicy.screenTurnedOn(null /* screenOnListener */);
+        displayPolicy.finishKeyguardDrawn();
+        displayPolicy.finishWindowsDrawn();
+        displayPolicy.finishScreenTurningOn();
+
         mTransaction = mSystemServicesTestRule.mTransaction;
         mMockSession = mock(Session.class);
 
