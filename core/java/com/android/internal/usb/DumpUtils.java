@@ -244,7 +244,8 @@ public class DumpUtils {
         writeContaminantPresenceStatus(dump, "contaminant_presence_status",
                 UsbPortStatusProto.CONTAMINANT_PRESENCE_STATUS,
                 status.getContaminantDetectionStatus());
-
+        dump.write("usb_data_enabled", UsbPortStatusProto.USB_DATA_ENABLED,
+                status.getUsbDataStatus());
         dump.end(token);
     }
 }
