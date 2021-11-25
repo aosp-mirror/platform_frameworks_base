@@ -2600,6 +2600,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mSurfaceFreezer.unfreeze(getPendingTransaction());
     }
 
+    /** Whether we can start change transition with this window and current display status. */
+    boolean canStartChangeTransition() {
+        return !mWmService.mDisableTransitionAnimation && mDisplayContent != null
+                && getSurfaceControl() != null && !mDisplayContent.inTransition()
+                && isVisible() && isVisibleRequested() && okToAnimate();
+    }
+
     /**
      * Initializes a change transition. See {@link SurfaceFreezer} for more information.
      *
@@ -2948,12 +2955,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     boolean okToAnimate() {
-        return okToAnimate(false /* ignoreFrozen */);
-    }
-
-    boolean okToAnimate(boolean ignoreFrozen) {
-        final DisplayContent dc = getDisplayContent();
-        return dc != null && dc.okToAnimate(ignoreFrozen);
+        return okToAnimate(false /* ignoreFrozen */, false /* ignoreScreenOn */);
     }
 
     boolean okToAnimate(boolean ignoreFrozen, boolean ignoreScreenOn) {
