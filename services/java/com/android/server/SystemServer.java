@@ -264,6 +264,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.stats.StatsCompanion$Lifecycle";
     private static final String STATS_PULL_ATOM_SERVICE_CLASS =
             "com.android.server.stats.pull.StatsPullAtomService";
+    private static final String STATS_BOOTSTRAP_ATOM_SERVICE_LIFECYCLE_CLASS =
+            "com.android.server.stats.bootstrap.StatsBootstrapAtomService$Lifecycle";
     private static final String USB_SERVICE_CLASS =
             "com.android.server.usb.UsbService$Lifecycle";
     private static final String MIDI_SERVICE_CLASS =
@@ -364,6 +366,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.blob.BlobStoreManagerService";
     private static final String APP_SEARCH_MANAGER_SERVICE_CLASS =
             "com.android.server.appsearch.AppSearchManagerService";
+    private static final String ISOLATED_COMPILATION_SERVICE_CLASS =
+            "com.android.server.compos.IsolatedCompilationService";
     private static final String ROLLBACK_MANAGER_SERVICE_CLASS =
             "com.android.server.rollback.RollbackManagerService";
     private static final String ALARM_MANAGER_SERVICE_CLASS =
@@ -2487,6 +2491,11 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(STATS_PULL_ATOM_SERVICE_CLASS);
         t.traceEnd();
 
+        // Log atoms to statsd from bootstrap processes.
+        t.traceBegin("StatsBootstrapAtomService");
+        mSystemServiceManager.startService(STATS_BOOTSTRAP_ATOM_SERVICE_LIFECYCLE_CLASS);
+        t.traceEnd();
+
         // Incidentd and dumpstated helper
         t.traceBegin("StartIncidentCompanionService");
         mSystemServiceManager.startService(IncidentCompanionService.class);
@@ -2650,6 +2659,12 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("AppSearchManagerService");
         mSystemServiceManager.startService(APP_SEARCH_MANAGER_SERVICE_CLASS);
         t.traceEnd();
+
+        if (SystemProperties.getBoolean("ro.config.isolated_compilation_enabled", false)) {
+            t.traceBegin("IsolatedCompilationService");
+            mSystemServiceManager.startService(ISOLATED_COMPILATION_SERVICE_CLASS);
+            t.traceEnd();
+        }
 
         t.traceBegin("StartMediaCommunicationService");
         mSystemServiceManager.startService(MEDIA_COMMUNICATION_SERVICE_CLASS);

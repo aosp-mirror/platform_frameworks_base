@@ -82,6 +82,7 @@ filegroup {
         ":framework-mca-filterpacks-sources",
         ":framework-media-sources",
         ":framework-mms-sources",
+        ":framework-omapi-sources",
         ":framework-opengl-sources",
         ":framework-rs-sources",
         ":framework-sax-sources",
@@ -268,6 +269,7 @@ java_library {
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.vibrator-V1.3-java",
         "android.hardware.vibrator-V2-java",
+        "android.se.omapi-V1-java",
         "android.system.suspend.control.internal-java",
         "devicepolicyprotosnano",
 

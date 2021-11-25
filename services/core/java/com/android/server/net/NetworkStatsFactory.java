@@ -159,7 +159,7 @@ public class NetworkStatsFactory {
     }
 
     public NetworkStatsFactory() {
-        this(new File("/proc/"), new File("/sys/fs/bpf/map_netd_app_uid_stats_map").exists());
+        this(new File("/proc/"), true);
     }
 
     @VisibleForTesting

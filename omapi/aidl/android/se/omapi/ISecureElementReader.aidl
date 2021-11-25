@@ -22,6 +22,7 @@ package android.se.omapi;
 import android.se.omapi.ISecureElementSession;
 
 /** @hide */
+@VintfStability
 interface ISecureElementReader {
 
     /**
@@ -34,7 +35,7 @@ interface ISecureElementReader {
      * Connects to a secure element in this reader. <br>
      * This method prepares (initialises) the Secure Element for communication
      * before the Session object is returned (e.g. powers the Secure Element by
-     * ICC ON if its not already on). There might be multiple sessions opened at
+     * ICC ON if it is not already on). There might be multiple sessions opened at
      * the same time on the same reader. The system ensures the interleaving of
      * APDUs between the respective sessions.
      *
