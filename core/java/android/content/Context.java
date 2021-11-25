@@ -5883,6 +5883,16 @@ public abstract class Context {
     public static final String SAFETY_CENTER_SERVICE = "safety_center";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.nearby.NearbyManager} to discover nearby devices.
+     *
+     * @see #getSystemService(String)
+     * @see android.nearby.NearbyManager
+     * @hide
+     */
+    public static final String NEARBY_SERVICE = "nearby";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
