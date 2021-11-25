@@ -29,6 +29,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.LocusId;
 import android.content.pm.ActivityInfo;
@@ -122,6 +123,16 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     /**
+     * Callbacks for events in which the focus has changed.
+     */
+    public interface FocusListener {
+        /**
+         * Notifies when the task which is focused has changed.
+         */
+        void onFocusTaskChanged(RunningTaskInfo taskInfo);
+    }
+
+    /**
      * Keys map from either a task id or {@link TaskListenerType}.
      * @see #addListenerForTaskId
      * @see #addListenerForType
@@ -142,6 +153,8 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     /** @see #addLocusIdListener */
     private final ArraySet<LocusIdListener> mLocusIdListeners = new ArraySet<>();
 
+    private final ArraySet<FocusListener> mFocusListeners = new ArraySet<>();
+
     private final Object mLock = new Object();
     private StartingWindowController mStartingWindow;
 
@@ -154,6 +167,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
 
     @Nullable
     private final Optional<RecentTasksController> mRecentTasks;
+
+    @Nullable
+    private RunningTaskInfo mLastFocusedTaskInfo;
 
     public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context) {
         this(null /* taskOrganizerController */, mainExecutor, context, null /* sizeCompatUI */,
@@ -331,6 +347,27 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         }
     }
 
+    /**
+     * Adds a listener to be notified for task focus changes.
+     */
+    public void addFocusListener(FocusListener listener) {
+        synchronized (mLock) {
+            mFocusListeners.add(listener);
+            if (mLastFocusedTaskInfo != null) {
+                listener.onFocusTaskChanged(mLastFocusedTaskInfo);
+            }
+        }
+    }
+
+    /**
+     * Removes listener.
+     */
+    public void removeLocusIdListener(FocusListener listener) {
+        synchronized (mLock) {
+            mFocusListeners.remove(listener);
+        }
+    }
+
     @Override
     public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
         if (mStartingWindow != null) {
@@ -421,6 +458,18 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 // Notify the recent tasks when a task changes windowing modes
                 mRecentTasks.ifPresent(recentTasks ->
                         recentTasks.onTaskWindowingModeChanged(taskInfo));
+            }
+            // TODO (b/207687679): Remove check for HOME once bug is fixed
+            final boolean isFocusedOrHome = taskInfo.isFocused
+                    || (taskInfo.topActivityType == WindowConfiguration.ACTIVITY_TYPE_HOME
+                    && taskInfo.isVisible);
+            final boolean focusTaskChanged = (mLastFocusedTaskInfo == null
+                    || mLastFocusedTaskInfo.taskId != taskInfo.taskId) && isFocusedOrHome;
+            if (focusTaskChanged) {
+                for (int i = 0; i < mFocusListeners.size(); i++) {
+                    mFocusListeners.valueAt(i).onFocusTaskChanged(taskInfo);
+                }
+                mLastFocusedTaskInfo = taskInfo;
             }
         }
     }
