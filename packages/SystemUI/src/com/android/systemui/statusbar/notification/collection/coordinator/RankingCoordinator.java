@@ -20,11 +20,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.SectionClassifier;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
-import com.android.systemui.statusbar.notification.collection.inflation.NotifUiAdjustmentProvider;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
@@ -51,7 +51,7 @@ public class RankingCoordinator implements Coordinator {
     public static final boolean SHOW_ALL_SECTIONS = false;
     private final StatusBarStateController mStatusBarStateController;
     private final HighPriorityProvider mHighPriorityProvider;
-    private final NotifUiAdjustmentProvider mAdjustmentProvider;
+    private final SectionClassifier mSectionClassifier;
     private final NodeController mSilentNodeController;
     private final SectionHeaderController mSilentHeaderController;
     private final NodeController mAlertingHeaderController;
@@ -62,13 +62,13 @@ public class RankingCoordinator implements Coordinator {
     public RankingCoordinator(
             StatusBarStateController statusBarStateController,
             HighPriorityProvider highPriorityProvider,
-            NotifUiAdjustmentProvider adjustmentProvider,
+            SectionClassifier sectionClassifier,
             @AlertingHeader NodeController alertingHeaderController,
             @SilentHeader SectionHeaderController silentHeaderController,
             @SilentHeader NodeController silentNodeController) {
         mStatusBarStateController = statusBarStateController;
         mHighPriorityProvider = highPriorityProvider;
-        mAdjustmentProvider = adjustmentProvider;
+        mSectionClassifier = sectionClassifier;
         mAlertingHeaderController = alertingHeaderController;
         mSilentNodeController = silentNodeController;
         mSilentHeaderController = silentHeaderController;
@@ -77,7 +77,7 @@ public class RankingCoordinator implements Coordinator {
     @Override
     public void attach(NotifPipeline pipeline) {
         mStatusBarStateController.addCallback(mStatusBarStateCallback);
-        mAdjustmentProvider.setLowPrioritySections(Collections.singleton(mMinimizedNotifSectioner));
+        mSectionClassifier.setMinimizedSections(Collections.singleton(mMinimizedNotifSectioner));
 
         pipeline.addPreGroupFilter(mSuspendedFilter);
         pipeline.addPreGroupFilter(mDndVisualEffectsFilter);

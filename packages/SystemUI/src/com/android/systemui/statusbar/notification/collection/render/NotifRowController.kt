@@ -16,5 +16,27 @@
 
 package com.android.systemui.statusbar.notification.collection.render
 
+import android.util.Pair
+
 /** A view controller for a notification row */
-interface NotifRowController
+interface NotifRowController {
+    /**
+     * This tells the row what the 'default expanded' state should be.  Once a user expands or
+     * contracts a row, that will set the user expanded state, which takes precedence, but
+     * collapsing the shade and re-opening it will clear the user expanded state.  This allows for
+     * nice auto expansion of the next notification as users dismiss the top notification.
+     */
+    fun setSystemExpanded(systemExpanded: Boolean)
+
+    /**
+     * Sets the timestamp that the notification was last audibly alerted, which the row uses to
+     * show a bell icon in the header which indicates to the user which notification made a noise.
+     */
+    fun setLastAudiblyAlertedMs(lastAudiblyAlertedMs: Long)
+
+    /**
+     * Sets both whether to show a feedback indicator and which resources to use for the drawable
+     * and content description.
+     */
+    fun showFeedbackIcon(showFeedbackIndicator: Boolean, feedbackResources: Pair<Int, Int>?)
+}

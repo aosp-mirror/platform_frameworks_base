@@ -21,6 +21,7 @@ import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENAB
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -278,5 +279,20 @@ public class ExpandableNotificationRowController implements NotifViewController 
         } else {
             Log.w(TAG, "Called setUntruncatedChildCount(" + childCount + ") on a leaf row");
         }
+    }
+
+    @Override
+    public void setSystemExpanded(boolean systemExpanded) {
+        mView.setSystemExpanded(systemExpanded);
+    }
+
+    @Override
+    public void setLastAudiblyAlertedMs(long lastAudiblyAlertedMs) {
+        mView.setLastAudiblyAlertedMs(lastAudiblyAlertedMs);
+    }
+
+    @Override
+    public void showFeedbackIcon(boolean show, Pair<Integer, Integer> feedbackResources) {
+        mView.showFeedbackIcon(show, feedbackResources);
     }
 }
