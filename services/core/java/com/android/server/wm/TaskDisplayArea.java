@@ -867,6 +867,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // Place root home tasks to the bottom.
         layer = adjustRootTaskLayer(t, mTmpHomeChildren, layer);
         layer = adjustRootTaskLayer(t, mTmpNormalChildren, layer);
+        // TODO(b/207185041): Remove this divider workaround after we full remove leagacy split and
+        //                    make app pair split only have single root then we can just attach the
+        //                    divider to the single root task in shell.
+        layer = Math.max(layer, SPLIT_DIVIDER_LAYER + 1);
         adjustRootTaskLayer(t, mTmpAlwaysOnTopChildren, layer);
         t.setLayer(mSplitScreenDividerAnchor, SPLIT_DIVIDER_LAYER);
     }
