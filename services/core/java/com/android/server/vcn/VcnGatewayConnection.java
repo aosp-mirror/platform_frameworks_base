@@ -90,7 +90,7 @@ import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscription
 import com.android.server.vcn.Vcn.VcnGatewayStatusCallback;
 import com.android.server.vcn.routeselection.UnderlyingNetworkController;
 import com.android.server.vcn.routeselection.UnderlyingNetworkController.UnderlyingNetworkControllerCallback;
-import com.android.server.vcn.routeselection.UnderlyingNetworkController.UnderlyingNetworkRecord;
+import com.android.server.vcn.routeselection.UnderlyingNetworkRecord;
 import com.android.server.vcn.util.LogUtils;
 import com.android.server.vcn.util.MtuUtils;
 import com.android.server.vcn.util.OneWayBoolean;

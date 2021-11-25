@@ -19,7 +19,6 @@ package com.android.server.vcn;
 import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
 import static com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
 import static com.android.server.vcn.VcnTestUtils.setupIpSecManager;
-import static com.android.server.vcn.routeselection.UnderlyingNetworkController.UnderlyingNetworkRecord;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -63,6 +62,7 @@ import com.android.server.vcn.Vcn.VcnGatewayStatusCallback;
 import com.android.server.vcn.VcnGatewayConnection.VcnChildSessionCallback;
 import com.android.server.vcn.VcnGatewayConnection.VcnWakeLock;
 import com.android.server.vcn.routeselection.UnderlyingNetworkController;
+import com.android.server.vcn.routeselection.UnderlyingNetworkRecord;
 
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
