@@ -241,10 +241,11 @@ public class WMShellModule {
     static PhonePipMenuController providesPipPhoneMenuController(Context context,
             PipBoundsState pipBoundsState, PipMediaController pipMediaController,
             SystemWindows systemWindows,
+            Optional<SplitScreenController> splitScreenOptional,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
         return new PhonePipMenuController(context, pipBoundsState, pipMediaController,
-                systemWindows, mainExecutor, mainHandler);
+                systemWindows, splitScreenOptional, mainExecutor, mainHandler);
     }
 
     @WMSingleton
