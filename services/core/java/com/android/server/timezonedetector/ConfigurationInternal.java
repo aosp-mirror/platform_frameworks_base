@@ -39,6 +39,7 @@ public final class ConfigurationInternal {
 
     private final boolean mTelephonyDetectionSupported;
     private final boolean mGeoDetectionSupported;
+    private final boolean mTelephonyFallbackSupported;
     private final boolean mAutoDetectionEnabledSetting;
     private final @UserIdInt int mUserId;
     private final boolean mUserConfigAllowed;
@@ -48,6 +49,7 @@ public final class ConfigurationInternal {
     private ConfigurationInternal(Builder builder) {
         mTelephonyDetectionSupported = builder.mTelephonyDetectionSupported;
         mGeoDetectionSupported = builder.mGeoDetectionSupported;
+        mTelephonyFallbackSupported = builder.mTelephonyFallbackSupported;
         mAutoDetectionEnabledSetting = builder.mAutoDetectionEnabledSetting;
 
         mUserId = builder.mUserId;
@@ -69,6 +71,14 @@ public final class ConfigurationInternal {
     /** Returns true if the device supports geolocation time zone detection. */
     public boolean isGeoDetectionSupported() {
         return mGeoDetectionSupported;
+    }
+
+    /**
+     * Returns true if the device supports time zone detection falling back to telephony detection
+     * under certain circumstances.
+     */
+    public boolean isTelephonyFallbackSupported() {
+        return mTelephonyFallbackSupported;
     }
 
     /** Returns the value of the auto time zone detection enabled setting. */
@@ -216,6 +226,7 @@ public final class ConfigurationInternal {
                 && mUserConfigAllowed == that.mUserConfigAllowed
                 && mTelephonyDetectionSupported == that.mTelephonyDetectionSupported
                 && mGeoDetectionSupported == that.mGeoDetectionSupported
+                && mTelephonyFallbackSupported == that.mTelephonyFallbackSupported
                 && mAutoDetectionEnabledSetting == that.mAutoDetectionEnabledSetting
                 && mLocationEnabledSetting == that.mLocationEnabledSetting
                 && mGeoDetectionEnabledSetting == that.mGeoDetectionEnabledSetting;
@@ -224,8 +235,8 @@ public final class ConfigurationInternal {
     @Override
     public int hashCode() {
         return Objects.hash(mUserId, mUserConfigAllowed, mTelephonyDetectionSupported,
-                mGeoDetectionSupported, mAutoDetectionEnabledSetting, mLocationEnabledSetting,
-                mGeoDetectionEnabledSetting);
+                mGeoDetectionSupported, mTelephonyFallbackSupported, mAutoDetectionEnabledSetting,
+                mLocationEnabledSetting, mGeoDetectionEnabledSetting);
     }
 
     @Override
@@ -235,6 +246,7 @@ public final class ConfigurationInternal {
                 + ", mUserConfigAllowed=" + mUserConfigAllowed
                 + ", mTelephonyDetectionSupported=" + mTelephonyDetectionSupported
                 + ", mGeoDetectionSupported=" + mGeoDetectionSupported
+                + ", mTelephonyFallbackSupported=" + mTelephonyFallbackSupported
                 + ", mAutoDetectionEnabledSetting=" + mAutoDetectionEnabledSetting
                 + ", mLocationEnabledSetting=" + mLocationEnabledSetting
                 + ", mGeoDetectionEnabledSetting=" + mGeoDetectionEnabledSetting
@@ -251,6 +263,7 @@ public final class ConfigurationInternal {
         private boolean mUserConfigAllowed;
         private boolean mTelephonyDetectionSupported;
         private boolean mGeoDetectionSupported;
+        private boolean mTelephonyFallbackSupported;
         private boolean mAutoDetectionEnabledSetting;
         private boolean mLocationEnabledSetting;
         private boolean mGeoDetectionEnabledSetting;
@@ -269,6 +282,7 @@ public final class ConfigurationInternal {
             this.mUserId = toCopy.mUserId;
             this.mUserConfigAllowed = toCopy.mUserConfigAllowed;
             this.mTelephonyDetectionSupported = toCopy.mTelephonyDetectionSupported;
+            this.mTelephonyFallbackSupported = toCopy.mTelephonyFallbackSupported;
             this.mGeoDetectionSupported = toCopy.mGeoDetectionSupported;
             this.mAutoDetectionEnabledSetting = toCopy.mAutoDetectionEnabledSetting;
             this.mLocationEnabledSetting = toCopy.mLocationEnabledSetting;
@@ -296,6 +310,15 @@ public final class ConfigurationInternal {
          */
         public Builder setGeoDetectionFeatureSupported(boolean supported) {
             mGeoDetectionSupported = supported;
+            return this;
+        }
+
+        /**
+         * Sets whether time zone detection supports falling back to telephony detection under
+         * certain circumstances.
+         */
+        public Builder setTelephonyFallbackSupported(boolean supported) {
+            mTelephonyFallbackSupported = supported;
             return this;
         }
 

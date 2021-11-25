@@ -83,6 +83,16 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
                     ServiceConfigAccessorImpl.getInstance(context);
             TimeZoneDetectorStrategy timeZoneDetectorStrategy =
                     TimeZoneDetectorStrategyImpl.create(context, handler, serviceConfigAccessor);
+            DeviceActivityMonitor deviceActivityMonitor =
+                    DeviceActivityMonitorImpl.create(context, handler);
+
+            // Wire up the telephony fallback behavior to activity detection.
+            deviceActivityMonitor.addListener(new DeviceActivityMonitor.Listener() {
+                @Override
+                public void onFlightComplete() {
+                    timeZoneDetectorStrategy.enableTelephonyTimeZoneFallback();
+                }
+            });
 
             // Create and publish the local service for use by internal callers.
             TimeZoneDetectorInternal internal =
@@ -93,6 +103,10 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             // permissioned) processes.
             TimeZoneDetectorService service = TimeZoneDetectorService.create(
                     context, handler, serviceConfigAccessor, timeZoneDetectorStrategy);
+
+            // Dump the device activity monitor when the service is dumped.
+            service.addDumpable(deviceActivityMonitor);
+
             publishBinderService(Context.TIME_ZONE_DETECTOR_SERVICE, service);
         }
     }
@@ -329,6 +343,15 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         enforceManageTimeZoneDetectorPermission();
 
         return mServiceConfigAccessor.isGeoTimeZoneDetectionFeatureSupported();
+    }
+
+    /**
+     * Sends a signal to enable telephony fallback. Provided for command-line access for use
+     * during tests. This is not exposed as a binder API.
+     */
+    void enableTelephonyFallback() {
+        enforceManageTimeZoneDetectorPermission();
+        mTimeZoneDetectorStrategy.enableTelephonyTimeZoneFallback();
     }
 
     /**

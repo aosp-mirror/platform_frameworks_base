@@ -16,11 +16,13 @@
 
 package com.android.server.timezonedetector;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 
 import java.util.Objects;
@@ -78,5 +80,10 @@ final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Environment 
     public void setDeviceTimeZone(String zoneId) {
         AlarmManager alarmManager = mContext.getSystemService(AlarmManager.class);
         alarmManager.setTimeZone(zoneId);
+    }
+
+    @Override
+    public @ElapsedRealtimeLong long elapsedRealtimeMillis() {
+        return SystemClock.elapsedRealtime();
     }
 }

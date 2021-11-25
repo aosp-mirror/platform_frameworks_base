@@ -15,6 +15,7 @@
  */
 package com.android.server.timezonedetector;
 
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED;
@@ -30,6 +31,7 @@ import static android.provider.DeviceConfig.NAMESPACE_SYSTEM_TIME;
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED;
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT;
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE;
+import static com.android.server.timedetector.ServerFlags.KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED;
 
 import android.app.time.LocationTimeZoneManager;
 import android.app.time.TimeZoneConfiguration;
@@ -76,6 +78,8 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
                 return runSuggestManualTimeZone();
             case SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE:
                 return runSuggestTelephonyTimeZone();
+            case SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK:
+                return runEnableTelephonyFallback();
             default: {
                 return handleDefaultCommands(cmd);
             }
@@ -169,6 +173,11 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         }
     }
 
+    private int runEnableTelephonyFallback() {
+        mInterface.enableTelephonyFallback();
+        return 1;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -190,6 +199,13 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
                 + "\n");
         pw.printf("  %s true|false\n", SHELL_COMMAND_SET_GEO_DETECTION_ENABLED);
         pw.printf("    Sets the geolocation time zone detection enabled setting.\n");
+        pw.printf("  %s\n", SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK);
+        pw.printf("    Signals that telephony time zone detection fall back can be used if"
+                + " geolocation detection is supported and enabled. This is a temporary state until"
+                + " geolocation detection becomes \"certain\". To have an effect this requires that"
+                + " the telephony fallback feature is supported on the device, see below for"
+                + " for device_config flags.\n");
+        pw.println();
         pw.printf("  %s <geolocation suggestion opts>\n",
                 SHELL_COMMAND_SUGGEST_GEO_LOCATION_TIME_ZONE);
         pw.printf("  %s <manual suggestion opts>\n",
@@ -216,6 +232,9 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE);
         pw.printf("    Used to override the device's 'geolocation time zone detection enabled'"
                 + " setting [*].\n");
+        pw.printf("  %s\n", KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED);
+        pw.printf("    Used to enable / disable support for telephony detection fallback. Also see"
+                + " the %s command.\n", SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK);
         pw.println();
         pw.printf("[*] To be enabled, the user must still have location = on / auto time zone"
                 + " detection = on.\n");
