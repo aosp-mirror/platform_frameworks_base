@@ -2378,6 +2378,14 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_VIEW_APP_FEATURES =
             "android.intent.action.VIEW_APP_FEATURES";
 
+    /**
+     * Activity action: Launch UI to open the Safety Center, which highlights the user's security
+     * and privacy status.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SAFETY_CENTER =
+            "android.intent.action.SAFETY_CENTER";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent broadcast actions (see action variable).
@@ -6915,7 +6923,6 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final int FLAG_RECEIVER_OFFLOAD = 0x80000000;
-    /**
     /**
      * If set, when sending a broadcast the recipient will run on the system dedicated queue.
      *

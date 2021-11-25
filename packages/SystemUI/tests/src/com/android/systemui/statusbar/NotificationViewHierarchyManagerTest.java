@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.LowPriorityInflationHelper;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.render.NotifStackController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -74,6 +75,7 @@ import java.util.Optional;
 @TestableLooper.RunWithLooper
 public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
+    @Mock private NotifStackController mStackController;
     @Spy private FakeListContainer mListContainer = new FakeListContainer();
 
     // Dependency mocks:
@@ -122,7 +124,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 mock(LowPriorityInflationHelper.class),
                 mock(AssistantFeedbackController.class),
                 mNotifPipelineFlags);
-        mViewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
+        mViewHierarchyManager.setUpWithPresenter(mPresenter, mStackController, mListContainer);
     }
 
     private NotificationEntry createEntry() throws Exception {

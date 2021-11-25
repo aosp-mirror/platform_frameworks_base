@@ -64,12 +64,13 @@ class NodeSpecBuilder(
             root.children.add(buildNotifNode(root, entry))
         }
 
-        return root
+        return@traceSection root
     }
 
     private fun buildNotifNode(parent: NodeSpec, entry: ListEntry): NodeSpec = when (entry) {
-        is NotificationEntry -> NodeSpecImpl(parent, viewBarn.requireView(entry))
-        is GroupEntry -> NodeSpecImpl(parent, viewBarn.requireView(checkNotNull(entry.summary)))
+        is NotificationEntry -> NodeSpecImpl(parent, viewBarn.requireNodeController(entry))
+        is GroupEntry ->
+            NodeSpecImpl(parent, viewBarn.requireNodeController(checkNotNull(entry.summary)))
                 .apply { entry.children.forEach { children.add(buildNotifNode(this, it)) } }
         else -> throw RuntimeException("Unexpected entry: $entry")
     }

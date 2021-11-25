@@ -105,8 +105,7 @@ public class OneHandedModeTile extends QSTileImpl<BooleanState> {
 
     @Override
     public Intent getLongClickIntent() {
-        // TODO(b/201743873) define new intent action ACTION_ONE_HANDED_SETTINGS in Settings.
-        return null;
+        return new Intent(Settings.ACTION_ONE_HANDED_SETTINGS);
     }
 
     @Override

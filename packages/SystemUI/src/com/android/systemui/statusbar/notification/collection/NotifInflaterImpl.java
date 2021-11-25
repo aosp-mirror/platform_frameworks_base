@@ -93,7 +93,7 @@ public class NotifInflaterImpl implements NotifInflater {
             public void onAsyncInflationFinished(NotificationEntry entry) {
                 mNotifErrorManager.clearInflationError(entry);
                 if (callback != null) {
-                    callback.onInflationFinished(entry);
+                    callback.onInflationFinished(entry, entry.getRowController());
                 }
             }
         };

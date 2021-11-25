@@ -67,10 +67,10 @@ import android.content.Intent;
 import android.content.PermissionChecker;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackagePartitions;
 import android.content.pm.UserInfo;
 import android.os.BatteryStats;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -719,7 +719,7 @@ class UserController implements Handler.Callback {
         // purposefully block sending BOOT_COMPLETED until after all
         // PRE_BOOT receivers are finished to avoid ANR'ing apps
         final UserInfo info = getUserInfo(userId);
-        if (!Objects.equals(info.lastLoggedInFingerprint, Build.FINGERPRINT)
+        if (!Objects.equals(info.lastLoggedInFingerprint, PackagePartitions.FINGERPRINT)
                 || SystemProperties.getBoolean("persist.pm.mock-upgrade", false)) {
             // Suppress double notifications for managed profiles that
             // were unlocked automatically as part of their parent user

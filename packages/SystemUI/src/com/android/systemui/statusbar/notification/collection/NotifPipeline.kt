@@ -16,6 +16,9 @@
 package com.android.systemui.statusbar.notification.collection
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderEntryListener
+import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderGroupListener
+import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener
@@ -31,6 +34,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.In
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender
+import com.android.systemui.statusbar.notification.collection.render.RenderStageManager
 import javax.inject.Inject
 
 /**
@@ -65,11 +69,15 @@ import javax.inject.Inject
  *  9. Finalize filters are fired on each notification ([.addFinalizeFilter])
  *  10. OnBeforeRenderListListeners are fired ([.addOnBeforeRenderListListener])
  *  11. The list is handed off to the view layer to be rendered
+ *  12. OnAfterRenderListListeners are fired ([.addOnAfterRenderListListener])
+ *  13. OnAfterRenderGroupListeners are fired ([.addOnAfterRenderGroupListener])
+ *  13. OnAfterRenderEntryListeners are fired ([.addOnAfterRenderEntryListener])
  */
 @SysUISingleton
 class NotifPipeline @Inject constructor(
     private val mNotifCollection: NotifCollection,
-    private val mShadeListBuilder: ShadeListBuilder
+    private val mShadeListBuilder: ShadeListBuilder,
+    private val mRenderStageManager: RenderStageManager
 ) : CommonNotifCollection {
     /**
      * Returns the list of all known notifications, i.e. the notifications that are currently posted
@@ -206,6 +214,28 @@ class NotifPipeline @Inject constructor(
     }
 
     /**
+     * Called at the end of the pipeline after the notif list has been handed off to the view layer.
+     */
+    fun addOnAfterRenderListListener(listener: OnAfterRenderListListener) {
+        mRenderStageManager.addOnAfterRenderListListener(listener)
+    }
+
+    /**
+     * Called at the end of the pipeline after a group has been handed off to the view layer.
+     */
+    fun addOnAfterRenderGroupListener(listener: OnAfterRenderGroupListener) {
+        mRenderStageManager.addOnAfterRenderGroupListener(listener)
+    }
+
+    /**
+     * Called at the end of the pipeline after an entry has been handed off to the view layer.
+     * This will be called for every top level entry, every group summary, and every group child.
+     */
+    fun addOnAfterRenderEntryListener(listener: OnAfterRenderEntryListener) {
+        mRenderStageManager.addOnAfterRenderEntryListener(listener)
+    }
+
+    /**
      * Get an object which can be used to update a notification (internally to the pipeline)
      * in response to a user action.
      *
@@ -218,8 +248,8 @@ class NotifPipeline @Inject constructor(
 
     /**
      * Returns a read-only view in to the current shade list, i.e. the list of notifications that
-     * are currently present in the shade. If this method is called during pipeline execution it
-     * will return the current state of the list, which will likely be only partially-generated.
+     * are currently present in the shade.
+     * @throws IllegalStateException if called during pipeline execution.
      */
     val shadeList: List<ListEntry>
         get() = mShadeListBuilder.shadeList
@@ -227,21 +257,20 @@ class NotifPipeline @Inject constructor(
     /**
      * Constructs a flattened representation of the notification tree, where each group will have
      * the summary (if present) followed by the children.
+     * @throws IllegalStateException if called during pipeline execution.
      */
     fun getFlatShadeList(): List<NotificationEntry> = shadeList.flatMap { entry ->
         when (entry) {
             is NotificationEntry -> sequenceOf(entry)
-            is GroupEntry -> (entry.summary?.let { sequenceOf(it) }.orEmpty() +
-                    entry.children)
+            is GroupEntry -> sequenceOf(entry.summary).filterNotNull() + entry.children
             else -> throw RuntimeException("Unexpected entry $entry")
         }
     }
 
     /**
      * Returns the number of notifications currently shown in the shade. This includes all
-     * children and summary notifications. If this method is called during pipeline execution it
-     * will return the number of notifications in its current state, which will likely be only
-     * partially-generated.
+     * children and summary notifications.
+     * @throws IllegalStateException if called during pipeline execution.
      */
     fun getShadeListCount(): Int = shadeList.sumOf { entry ->
         // include the summary in the count

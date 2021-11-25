@@ -351,7 +351,7 @@ public class UserSwitcherController implements Dumpable {
                 boolean canCreateGuest = (currentUserCanCreateUsers || anyoneCanCreateUsers)
                         && guestRecord == null;
                 boolean canCreateUser = (currentUserCanCreateUsers || anyoneCanCreateUsers)
-                        && mUserManager.canAddMoreUsers();
+                        && mUserManager.canAddMoreUsers(UserManager.USER_TYPE_FULL_SECONDARY);
                 boolean createIsRestricted = !addUsersWhenLocked;
 
                 if (guestRecord == null) {

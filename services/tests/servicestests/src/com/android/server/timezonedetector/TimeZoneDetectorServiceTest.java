@@ -190,6 +190,9 @@ public class TimeZoneDetectorServiceTest {
                     createTimeZoneConfiguration(true /* autoDetectionEnabled */);
             mTimeZoneDetectorService.updateConfiguration(autoDetectEnabledConfiguration);
 
+            // The configuration update notification is asynchronous.
+            mTestHandler.waitForMessagesToBeProcessed();
+
             verify(mMockContext).enforceCallingPermission(
                     eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
                     anyString());

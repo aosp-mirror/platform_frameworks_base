@@ -1738,7 +1738,7 @@ public class DisplayPolicy {
      * @param imeTarget The current IME target window.
      */
     private void applyKeyguardPolicy(WindowState win, WindowState imeTarget) {
-        if (mService.mPolicy.canBeHiddenByKeyguardLw(win)) {
+        if (win.canBeHiddenByKeyguard()) {
             if (shouldBeHiddenByKeyguard(win, imeTarget)) {
                 win.hide(false /* doAnimation */, true /* requestAnim */);
             } else {
@@ -1767,7 +1767,7 @@ public class DisplayPolicy {
         // Show IME over the keyguard if the target allows it.
         final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisible()
                 && win.mIsImWindow && (imeTarget.canShowWhenLocked()
-                        || !mService.mPolicy.canBeHiddenByKeyguardLw(imeTarget));
+                        || !imeTarget.canBeHiddenByKeyguard());
         if (showImeOverKeyguard) {
             return false;
         }

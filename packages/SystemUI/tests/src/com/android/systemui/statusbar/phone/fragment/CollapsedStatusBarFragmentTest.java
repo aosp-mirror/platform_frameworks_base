@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.DisableFlagsLogger;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
+import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -65,7 +66,9 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
 
@@ -90,8 +93,12 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
     private OperatorNameViewController mOperatorNameViewController;
 
+    @Mock
     private StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
+    @Mock
     private StatusBarFragmentComponent mStatusBarFragmentComponent;
+    @Mock
+    private HeadsUpAppearanceController mHeadsUpAppearanceController;
 
     public CollapsedStatusBarFragmentTest() {
         super(CollapsedStatusBarFragment.class);
@@ -254,6 +261,32 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    public void disable_headsUpShouldBeVisibleTrue_clockDisabled() {
+        mFragments.dispatchResume();
+        processAllMessages();
+        CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
+
+        when(mHeadsUpAppearanceController.shouldBeVisible()).thenReturn(true);
+
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        assertEquals(View.GONE, mFragment.getView().findViewById(R.id.clock).getVisibility());
+    }
+
+    @Test
+    public void disable_headsUpShouldBeVisibleFalse_clockNotDisabled() {
+        mFragments.dispatchResume();
+        processAllMessages();
+        CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
+
+        when(mHeadsUpAppearanceController.shouldBeVisible()).thenReturn(false);
+
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        assertEquals(View.VISIBLE, mFragment.getView().findViewById(R.id.clock).getVisibility());
+    }
+
+    @Test
     public void setUp_fragmentCreatesDaggerComponent() {
         mFragments.dispatchResume();
         processAllMessages();
@@ -264,11 +297,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
-        mStatusBarFragmentComponentFactory =
-                mock(StatusBarFragmentComponent.Factory.class);
-        mStatusBarFragmentComponent = mock(StatusBarFragmentComponent.class);
-        when(mStatusBarFragmentComponentFactory.create(any()))
-                .thenReturn(mStatusBarFragmentComponent);
+        MockitoAnnotations.initMocks(this);
+        setUpDaggerComponent();
         mOngoingCallController = mock(OngoingCallController.class);
         mAnimationScheduler = mock(SystemStatusAnimationScheduler.class);
         mLocationPublisher = mock(StatusBarLocationPublisher.class);
@@ -304,6 +334,13 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                         new DisableFlagsLogger()
                         ),
                 mOperatorNameViewControllerFactory);
+    }
+
+    private void setUpDaggerComponent() {
+        when(mStatusBarFragmentComponentFactory.create(any()))
+                .thenReturn(mStatusBarFragmentComponent);
+        when(mStatusBarFragmentComponent.getHeadsUpAppearanceController())
+                .thenReturn(mHeadsUpAppearanceController);
     }
 
     private void setUpNotificationIconAreaController() {

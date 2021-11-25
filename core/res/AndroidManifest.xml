@@ -5963,6 +5963,14 @@
     <permission android:name="android.permission.CREATE_VIRTUAL_DEVICE"
                 android:protectionLevel="internal|role" />
 
+    <!-- @SystemApi Must be required by a safety source to send an update using the
+             {@link android.safetycenter.SafetyCenterManager}.
+             <p>Protection level: signature|privileged
+             @hide
+        -->
+    <permission android:name="android.permission.SEND_SAFETY_CENTER_UPDATE"
+                android:protectionLevel="signature|privileged" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->

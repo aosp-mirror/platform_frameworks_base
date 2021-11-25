@@ -253,6 +253,9 @@ public class ShadeListBuilder implements Dumpable {
 
     List<ListEntry> getShadeList() {
         Assert.isMainThread();
+        // NOTE: Accessing this method when the pipeline is running is generally going to provide
+        //  incorrect results, and indicates a poorly behaved component of the pipeline.
+        mPipelineState.requireState(STATE_IDLE);
         return mReadOnlyNotifList;
     }
 

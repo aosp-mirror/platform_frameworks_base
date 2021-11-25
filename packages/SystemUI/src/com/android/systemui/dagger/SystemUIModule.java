@@ -30,6 +30,7 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.biometrics.UdfpsHbmProvider;
+import com.android.systemui.biometrics.dagger.BiometricsModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.communal.dagger.CommunalModule;
 import com.android.systemui.controls.dagger.ControlsModule;
@@ -66,7 +67,6 @@ import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfC
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -101,6 +101,7 @@ import dagger.Provides;
 @Module(includes = {
             AppOpsModule.class,
             AssistModule.class,
+            BiometricsModule.class,
             ClockModule.class,
             CommunalModule.class,
             DreamModule.class,
@@ -127,7 +128,6 @@ import dagger.Provides;
         },
         subcomponents = {
             StatusBarComponent.class,
-            StatusBarFragmentComponent.class,
             NotificationRowComponent.class,
             DozeComponent.class,
             ExpandableNotificationRowComponent.class,

@@ -693,6 +693,10 @@ void FilterClientCallbackImpl::getTsRecordEvent(jobjectArray &arr, const int siz
         sc = tsRecordEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scIndex>();
     } else if (tsRecordEvent.scIndexMask.getTag() == DemuxFilterScIndexMask::Tag::scHevc) {
         sc = tsRecordEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scHevc>();
+    } else if (tsRecordEvent.scIndexMask.getTag() == DemuxFilterScIndexMask::Tag::scAvc) {
+        sc = tsRecordEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scAvc>();
+        // Java uses the values defined by HIDL HAL. Left shift 4 bits.
+        sc = sc << 4;
     }
 
     jint ts = tsRecordEvent.tsIndexMask;
@@ -3391,8 +3395,11 @@ static DemuxFilterAvSettings getFilterAvSettings(JNIEnv *env, const jobject& set
     jclass clazz = env->FindClass("android/media/tv/tuner/filter/AvSettings");
     bool isPassthrough =
             env->GetBooleanField(settings, env->GetFieldID(clazz, "mIsPassthrough", "Z"));
-    DemuxFilterAvSettings filterAvSettings {
-        .isPassthrough = isPassthrough,
+    bool isSecureMemory =
+            env->GetBooleanField(settings, env->GetFieldID(clazz, "mUseSecureMemory", "Z"));
+    DemuxFilterAvSettings filterAvSettings{
+            .isPassthrough = isPassthrough,
+            .isSecureMemory = isSecureMemory,
     };
     return filterAvSettings;
 }
@@ -3440,6 +3447,11 @@ static DemuxFilterRecordSettings getFilterRecordSettings(JNIEnv *env, const jobj
             env->GetIntField(settings, env->GetFieldID(clazz, "mScIndexType", "I")));
     jint scIndexMask = env->GetIntField(settings, env->GetFieldID(clazz, "mScIndexMask", "I"));
 
+    // Backward compatibility for S- apps.
+    if (scIndexType == DemuxRecordScIndexType::SC &&
+        scIndexMask > static_cast<int32_t>(DemuxScIndex::SEQUENCE)) {
+        scIndexType = DemuxRecordScIndexType::SC_AVC;
+    }
     DemuxFilterRecordSettings filterRecordSettings {
         .tsIndexMask = tsIndexMask,
         .scIndexType = scIndexType,
@@ -3448,6 +3460,9 @@ static DemuxFilterRecordSettings getFilterRecordSettings(JNIEnv *env, const jobj
         filterRecordSettings.scIndexMask.set<DemuxFilterScIndexMask::Tag::scIndex>(scIndexMask);
     } else if (scIndexType == DemuxRecordScIndexType::SC_HEVC) {
         filterRecordSettings.scIndexMask.set<DemuxFilterScIndexMask::Tag::scHevc>(scIndexMask);
+    } else if (scIndexType == DemuxRecordScIndexType::SC_AVC) {
+        // Java uses the values defined by HIDL HAL. Right shift 4 bits.
+        filterRecordSettings.scIndexMask.set<DemuxFilterScIndexMask::Tag::scAvc>(scIndexMask >> 4);
     }
     return filterRecordSettings;
 }

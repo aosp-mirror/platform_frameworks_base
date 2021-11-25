@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.vcn;
+package com.android.server.vcn.routeselection;
 
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
@@ -48,6 +48,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
+import com.android.server.vcn.VcnContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,14 +62,14 @@ import java.util.TreeSet;
 /**
  * Tracks a set of Networks underpinning a VcnGatewayConnection.
  *
- * <p>A single UnderlyingNetworkTracker is built to serve a SINGLE VCN Gateway Connection, and MUST
- * be torn down with the VcnGatewayConnection in order to ensure underlying networks are allowed to
- * be reaped.
+ * <p>A single UnderlyingNetworkController is built to serve a SINGLE VCN Gateway Connection, and
+ * MUST be torn down with the VcnGatewayConnection in order to ensure underlying networks are
+ * allowed to be reaped.
  *
  * @hide
  */
-public class UnderlyingNetworkTracker {
-    @NonNull private static final String TAG = UnderlyingNetworkTracker.class.getSimpleName();
+public class UnderlyingNetworkController {
+    @NonNull private static final String TAG = UnderlyingNetworkController.class.getSimpleName();
 
     /**
      * Minimum signal strength for a WiFi network to be eligible for switching to
@@ -122,7 +123,7 @@ public class UnderlyingNetworkTracker {
 
     @NonNull private final VcnContext mVcnContext;
     @NonNull private final ParcelUuid mSubscriptionGroup;
-    @NonNull private final UnderlyingNetworkTrackerCallback mCb;
+    @NonNull private final UnderlyingNetworkControllerCallback mCb;
     @NonNull private final Dependencies mDeps;
     @NonNull private final Handler mHandler;
     @NonNull private final ConnectivityManager mConnectivityManager;
@@ -142,11 +143,11 @@ public class UnderlyingNetworkTracker {
     @Nullable private UnderlyingNetworkRecord mCurrentRecord;
     @Nullable private UnderlyingNetworkRecord.Builder mRecordInProgress;
 
-    public UnderlyingNetworkTracker(
+    public UnderlyingNetworkController(
             @NonNull VcnContext vcnContext,
             @NonNull ParcelUuid subscriptionGroup,
             @NonNull TelephonySubscriptionSnapshot snapshot,
-            @NonNull UnderlyingNetworkTrackerCallback cb) {
+            @NonNull UnderlyingNetworkControllerCallback cb) {
         this(
                 vcnContext,
                 subscriptionGroup,
@@ -155,11 +156,11 @@ public class UnderlyingNetworkTracker {
                 new Dependencies());
     }
 
-    private UnderlyingNetworkTracker(
+    private UnderlyingNetworkController(
             @NonNull VcnContext vcnContext,
             @NonNull ParcelUuid subscriptionGroup,
             @NonNull TelephonySubscriptionSnapshot snapshot,
-            @NonNull UnderlyingNetworkTrackerCallback cb,
+            @NonNull UnderlyingNetworkControllerCallback cb,
             @NonNull Dependencies deps) {
         mVcnContext = Objects.requireNonNull(vcnContext, "Missing vcnContext");
         mSubscriptionGroup = Objects.requireNonNull(subscriptionGroup, "Missing subscriptionGroup");
@@ -271,8 +272,8 @@ public class UnderlyingNetworkTracker {
      * subscription group, while the VCN networks are excluded by virtue of not having subIds set on
      * the VCN-exposed networks.
      *
-     * <p>If the VCN that this UnderlyingNetworkTracker belongs to is in test-mode, this will return
-     * a NetworkRequest that only matches Test Networks.
+     * <p>If the VCN that this UnderlyingNetworkController belongs to is in test-mode, this will
+     * return a NetworkRequest that only matches Test Networks.
      */
     private NetworkRequest getRouteSelectionRequest() {
         if (mVcnContext.isInTestMode()) {
@@ -373,9 +374,9 @@ public class UnderlyingNetworkTracker {
     }
 
     /**
-     * Update this UnderlyingNetworkTracker's TelephonySubscriptionSnapshot.
+     * Update this UnderlyingNetworkController's TelephonySubscriptionSnapshot.
      *
-     * <p>Updating the TelephonySubscriptionSnapshot will cause this UnderlyingNetworkTracker to
+     * <p>Updating the TelephonySubscriptionSnapshot will cause this UnderlyingNetworkController to
      * reevaluate its NetworkBringupCallbacks. This may result in NetworkRequests being registered
      * or unregistered if the subIds mapped to the this Tracker's SubscriptionGroup change.
      */
@@ -410,7 +411,7 @@ public class UnderlyingNetworkTracker {
 
     private void reevaluateNetworks() {
         if (mIsQuitting || mRouteSelectionCallback == null) {
-            return; // UnderlyingNetworkTracker has quit.
+            return; // UnderlyingNetworkController has quit.
         }
 
         TreeSet<UnderlyingNetworkRecord> sorted =
@@ -572,7 +573,7 @@ public class UnderlyingNetworkTracker {
         public final boolean isBlocked;
 
         @VisibleForTesting(visibility = Visibility.PRIVATE)
-        UnderlyingNetworkRecord(
+        public UnderlyingNetworkRecord(
                 @NonNull Network network,
                 @NonNull NetworkCapabilities networkCapabilities,
                 @NonNull LinkProperties linkProperties,
@@ -780,7 +781,7 @@ public class UnderlyingNetworkTracker {
 
     /** Dumps the state of this record for logging and debugging purposes. */
     public void dump(IndentingPrintWriter pw) {
-        pw.println("UnderlyingNetworkTracker:");
+        pw.println("UnderlyingNetworkController:");
         pw.increaseIndent();
 
         pw.println("Carrier WiFi Entry Threshold: " + getWifiEntryRssiThreshold(mCarrierConfig));
@@ -811,7 +812,7 @@ public class UnderlyingNetworkTracker {
     }
 
     /** Callbacks for being notified of the changes in, or to the selected underlying network. */
-    public interface UnderlyingNetworkTrackerCallback {
+    public interface UnderlyingNetworkControllerCallback {
         /**
          * Fired when a new underlying network is selected, or properties have changed.
          *

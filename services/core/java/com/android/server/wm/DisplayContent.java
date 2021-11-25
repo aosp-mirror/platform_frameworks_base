@@ -1640,11 +1640,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // to cover the activity configuration change.
             return false;
         }
-        if (r.attachedToProcess() && mayImeShowOnLaunchingActivity(r)) {
-            // Currently it is unknown that when will IME window be ready. Reject the case to
-            // avoid flickering by showing IME in inconsistent orientation.
-            return false;
-        }
         if (checkOpening) {
             if (!mAppTransition.isTransitionSet() || !mOpeningApps.contains(r)) {
                 // Apply normal rotation animation in case of the activity set different requested
@@ -2833,8 +2828,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mBaseDisplayDensity = baseDensity;
 
         if (mMaxUiWidth > 0 && mBaseDisplayWidth > mMaxUiWidth) {
-            mBaseDisplayHeight = (mMaxUiWidth * mBaseDisplayHeight) / mBaseDisplayWidth;
+            final float ratio = mMaxUiWidth / (float) mBaseDisplayWidth;
+            mBaseDisplayHeight = (int) (mBaseDisplayHeight * ratio);
             mBaseDisplayWidth = mMaxUiWidth;
+            if (!mIsDensityForced) {
+                // Update the density proportionally so the size of the UI elements won't change
+                // from the user's perspective.
+                mBaseDisplayDensity = (int) (mBaseDisplayDensity * ratio);
+            }
 
             if (DEBUG_DISPLAY) {
                 Slog.v(TAG_WM, "Applying config restraints:" + mBaseDisplayWidth + "x"
@@ -2891,6 +2892,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** If the given width and height equal to initial size, the setting will be cleared. */
     void setForcedSize(int width, int height) {
+        // Can't force size higher than the maximal allowed
+        if (mMaxUiWidth > 0 && width > mMaxUiWidth) {
+            final float ratio = mMaxUiWidth / (float) width;
+            height = (int) (height * ratio);
+            width = mMaxUiWidth;
+        }
+
         mIsSizeForced = mInitialDisplayWidth != width || mInitialDisplayHeight != height;
         if (mIsSizeForced) {
             // Set some sort of reasonable bounds on the size of the display that we will try
@@ -4288,7 +4296,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             boolean subtle) {
         final WindowManagerPolicy policy = mWmService.mPolicy;
         forAllWindows(w -> {
-            if (w.mActivityRecord == null && policy.canBeHiddenByKeyguardLw(w)
+            if (w.mActivityRecord == null && w.canBeHiddenByKeyguard()
                     && w.wouldBeVisibleIfPolicyIgnored() && !w.isVisible()) {
                 w.startAnimation(policy.createHiddenByKeyguardExit(
                         onWallpaper, goingToShade, subtle));
@@ -4817,7 +4825,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // WindowState#applyImeWindowsIfNeeded} in case of any state mismatch.
             return dc.mImeLayeringTarget != null
                     && (!dc.getDefaultTaskDisplayArea().isSplitScreenModeActivated()
-                             || dc.mImeLayeringTarget.getTask() == null);
+                             || dc.mImeLayeringTarget.getTask() == null)
+                    // Make sure that the IME window won't be skipped to report that it has
+                    // completed the orientation change.
+                    && !dc.mWmService.mDisplayFrozen;
         }
 
         /** Like {@link #forAllWindows}, but ignores {@link #skipImeWindowsDuringTraversal} */

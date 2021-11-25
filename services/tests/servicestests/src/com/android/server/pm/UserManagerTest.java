@@ -207,6 +207,65 @@ public final class UserManagerTest {
         assertThat(hasUser(user2.id)).isTrue();
     }
 
+    /**
+     * Tests that UserManager knows how many users can be created.
+     *
+     * We can only test this with regular secondary users, since some other user types have weird
+     * rules about when or if they count towards the max.
+     */
+    @MediumTest
+    @Test
+    public void testAddTooManyUsers() throws Exception {
+        final String userType = UserManager.USER_TYPE_FULL_SECONDARY;
+        final UserTypeDetails userTypeDetails = UserTypeFactory.getUserTypes().get(userType);
+
+        final int maxUsersForType = userTypeDetails.getMaxAllowed();
+        final int maxUsersOverall = UserManager.getMaxSupportedUsers();
+
+        int currentUsersOfType = 0;
+        int currentUsersOverall = 0;
+        final List<UserInfo> userList = mUserManager.getAliveUsers();
+        for (UserInfo user : userList) {
+            currentUsersOverall++;
+            if (userType.equals(user.userType)) {
+                currentUsersOfType++;
+            }
+        }
+
+        final int remainingUserType = maxUsersForType == UserTypeDetails.UNLIMITED_NUMBER_OF_USERS ?
+                Integer.MAX_VALUE : maxUsersForType - currentUsersOfType;
+        final int remainingOverall = maxUsersOverall - currentUsersOverall;
+        final int remaining = Math.min(remainingUserType, remainingOverall);
+
+        Slog.v(TAG, "maxUsersForType=" + maxUsersForType
+                + ", maxUsersOverall=" + maxUsersOverall
+                + ", currentUsersOfType=" + currentUsersOfType
+                + ", currentUsersOverall=" + currentUsersOverall
+                + ", remaining=" + remaining);
+
+        assumeTrue("Device supports too many users for this test to be practical", remaining < 20);
+
+        int usersAdded;
+        for (usersAdded = 0; usersAdded < remaining; usersAdded++) {
+            Slog.v(TAG, "Adding user " + usersAdded);
+            assertThat(mUserManager.canAddMoreUsers()).isTrue();
+            assertThat(mUserManager.canAddMoreUsers(userType)).isTrue();
+
+            final UserInfo user = createUser("User " + usersAdded, userType, 0);
+            assertThat(user).isNotNull();
+            assertThat(hasUser(user.id)).isTrue();
+        }
+        Slog.v(TAG, "Added " + usersAdded + " users.");
+
+        assertWithMessage("Still thinks more users of that type can be added")
+                .that(mUserManager.canAddMoreUsers(userType)).isFalse();
+        if (currentUsersOverall + usersAdded >= maxUsersOverall) {
+            assertThat(mUserManager.canAddMoreUsers()).isFalse();
+        }
+
+        assertThat(createUser("User beyond", userType, 0)).isNull();
+    }
+
     @MediumTest
     @Test
     public void testRemoveUser() throws Exception {

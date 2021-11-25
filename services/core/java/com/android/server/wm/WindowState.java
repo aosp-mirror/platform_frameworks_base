@@ -48,7 +48,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
@@ -1338,8 +1337,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         outFrame.set(0, 0, mWindowFrames.mCompatFrame.width(), mWindowFrames.mCompatFrame.height());
     }
 
-    @Override
-    public WindowManager.LayoutParams getAttrs() {
+    WindowManager.LayoutParams getAttrs() {
         return mAttrs;
     }
 
@@ -2687,10 +2685,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    int getSurfaceTouchableRegion(Region region, int flags) {
-        final boolean modal = (flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
+    void getSurfaceTouchableRegion(Region region, WindowManager.LayoutParams attrs) {
+        final boolean modal = attrs.isModal();
         if (modal) {
-            flags |= FLAG_NOT_TOUCH_MODAL;
             if (mActivityRecord != null) {
                 // Limit the outer touch to the activity root task region.
                 updateRegionForModalActivityWindow(region);
@@ -2722,8 +2719,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mInvGlobalScale != 1.f) {
             region.scale(mInvGlobalScale);
         }
-
-        return flags;
     }
 
     /**
@@ -3559,10 +3554,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * {@link WindowManager.LayoutParams#FLAG_NOT_TOUCH_MODAL touch modality.}
      */
     void getEffectiveTouchableRegion(Region outRegion) {
-        final boolean modal = (mAttrs.flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
         final DisplayContent dc = getDisplayContent();
 
-        if (modal && dc != null) {
+        if (mAttrs.isModal() && dc != null) {
             outRegion.set(dc.getBounds());
             cropRegionToRootTaskBoundsIfNeeded(outRegion);
             subtractTouchExcludeRegionIfNeeded(outRegion);
@@ -3833,6 +3827,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public boolean canShowTransient() {
         return (mAttrs.insetsFlags.behavior & BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE) != 0;
+    }
+
+    boolean canBeHiddenByKeyguard() {
+        // Keyguard visibility of window from activities are determined over activity visibility.
+        if (mActivityRecord != null) {
+            return false;
+        }
+        switch (mAttrs.type) {
+            case TYPE_NOTIFICATION_SHADE:
+            case TYPE_STATUS_BAR:
+            case TYPE_NAVIGATION_BAR:
+            case TYPE_WALLPAPER:
+                return false;
+            default:
+                // Hide only windows below the keyguard host window.
+                return mPolicy.getWindowLayerLw(this)
+                        < mPolicy.getWindowLayerFromTypeLw(TYPE_NOTIFICATION_SHADE);
+        }
     }
 
     private int getRootTaskId() {
@@ -4708,6 +4720,48 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             window = window.getParentWindow();
         } while (window != null);
         return false;
+    }
+
+    private boolean shouldFinishAnimatingExit() {
+        // Exit animation might be applied soon.
+        if (inTransition()) {
+            ProtoLog.d(WM_DEBUG_APP_TRANSITIONS, "shouldWaitAnimatingExit: isTransition: %s",
+                    this);
+            return false;
+        }
+        if (!mDisplayContent.okToAnimate()) {
+            return true;
+        }
+        // Exit animation is running.
+        if (isAnimating(TRANSITION | PARENTS, EXIT_ANIMATING_TYPES)) {
+            ProtoLog.d(WM_DEBUG_APP_TRANSITIONS, "shouldWaitAnimatingExit: isAnimating: %s",
+                    this);
+            return false;
+        }
+        // If the wallpaper is currently behind this app window, we need to change both of
+        // them inside of a transaction to avoid artifacts.
+        if (mDisplayContent.mWallpaperController.isWallpaperTarget(this)) {
+            ProtoLog.d(WM_DEBUG_APP_TRANSITIONS,
+                    "shouldWaitAnimatingExit: isWallpaperTarget: %s", this);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * If this is window is stuck in the animatingExit status, resume clean up procedure blocked
+     * by the exit animation.
+     */
+    void cleanupAnimatingExitWindow() {
+        // TODO(b/205335975): WindowManagerService#tryStartExitingAnimation starts an exit animation
+        // and set #mAnimationExit. After the exit animation finishes, #onExitAnimationDone shall
+        // be called, but there seems to be a case that #onExitAnimationDone is not triggered, so
+        // a windows stuck in the animatingExit status.
+        if (mAnimatingExit && shouldFinishAnimatingExit()) {
+            ProtoLog.w(WM_DEBUG_APP_TRANSITIONS, "Clear window stuck on animatingExit status: %s",
+                    this);
+            onExitAnimationDone();
+        }
     }
 
     void onExitAnimationDone() {

@@ -1172,16 +1172,16 @@ public class StatusBar extends CoreStartable implements
                     HeadsUpAppearanceController oldController = mHeadsUpAppearanceController;
                     if (mHeadsUpAppearanceController != null) {
                         // This view is being recreated, let's destroy the old one
+                        // TODO(b/205609837): Automatically destroy the old controller so that this
+                        //  class doesn't need to hold a reference to the old one.
                         mHeadsUpAppearanceController.destroy();
                     }
                     // TODO (b/136993073) Separate notification shade and status bar
                     // TODO(b/205609837): Migrate this to StatusBarFragmentComponent.
-                    mHeadsUpAppearanceController = new HeadsUpAppearanceController(
-                            mNotificationIconAreaController, mHeadsUpManager,
-                            mStackScrollerController,
-                            mStatusBarStateController, mKeyguardBypassController,
-                            mKeyguardStateController, mWakeUpCoordinator, mCommandQueue,
-                            mNotificationPanelViewController, mStatusBarView);
+                    mHeadsUpAppearanceController =
+                            statusBarFragmentComponent.getHeadsUpAppearanceController();
+                    // TODO(b/205609837): Delete this readFrom method so that this class doesn't
+                    //  need to hold a reference to the old controller.
                     mHeadsUpAppearanceController.readFrom(oldController);
 
                     mLightsOutNotifController.setLightsOutNotifView(
@@ -1488,6 +1488,7 @@ public class StatusBar extends CoreStartable implements
                 mBubblesOptional,
                 mPresenter,
                 mStackScrollerController.getNotificationListContainer(),
+                mStackScrollerController.getNotifStackController(),
                 mNotificationActivityStarter,
                 mPresenter);
     }
@@ -1907,10 +1908,6 @@ public class StatusBar extends CoreStartable implements
         mIsOccluded = occluded;
         mStatusBarHideIconsForBouncerManager.setIsOccludedAndTriggerUpdate(occluded);
         mScrimController.setKeyguardOccluded(occluded);
-    }
-
-    public boolean headsUpShouldBeVisible() {
-        return mHeadsUpAppearanceController.shouldBeVisible();
     }
 
     /** A launch animation was cancelled. */

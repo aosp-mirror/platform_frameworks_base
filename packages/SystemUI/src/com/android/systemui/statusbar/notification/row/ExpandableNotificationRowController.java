@@ -20,6 +20,7 @@ import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -36,6 +37,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
+import com.android.systemui.statusbar.notification.collection.render.NotifViewController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.dagger.AppName;
@@ -58,7 +60,8 @@ import javax.inject.Named;
  * Controller for {@link ExpandableNotificationRow}.
  */
 @NotificationRowScope
-public class ExpandableNotificationRowController implements NodeController {
+public class ExpandableNotificationRowController implements NotifViewController {
+    private static final String TAG = "NotifRowController";
     private final ExpandableNotificationRow mView;
     private final NotificationListContainer mListContainer;
     private final RemoteInputViewSubcomponent.Factory mRemoteInputViewSubcomponentFactory;
@@ -266,5 +269,14 @@ public class ExpandableNotificationRowController implements NodeController {
     public int getChildCount() {
         final List<ExpandableNotificationRow> mChildren = mView.getAttachedChildren();
         return mChildren != null ? mChildren.size() : 0;
+    }
+
+    @Override
+    public void setUntruncatedChildCount(int childCount) {
+        if (mView.isSummaryWithChildren()) {
+            mView.setUntruncatedChildCount(childCount);
+        } else {
+            Log.w(TAG, "Called setUntruncatedChildCount(" + childCount + ") on a leaf row");
+        }
     }
 }
