@@ -43,6 +43,11 @@ import java.util.ArrayList;
  */
 public interface SplashScreen {
     /**
+     * The splash screen style is not defined.
+     * @hide
+     */
+    int SPLASH_SCREEN_STYLE_UNDEFINED = -1;
+    /**
      * Force splash screen to be empty.
      * @hide
      */
@@ -55,6 +60,7 @@ public interface SplashScreen {
 
     /** @hide */
     @IntDef(prefix = { "SPLASH_SCREEN_STYLE_" }, value = {
+            SPLASH_SCREEN_STYLE_UNDEFINED,
             SPLASH_SCREEN_STYLE_EMPTY,
             SPLASH_SCREEN_STYLE_ICON
     })
