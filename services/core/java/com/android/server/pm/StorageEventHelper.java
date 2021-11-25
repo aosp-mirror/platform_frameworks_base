@@ -29,10 +29,10 @@ import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 import android.app.ResourcesManager;
 import android.content.IIntentReceiver;
 import android.content.pm.PackageManager;
+import android.content.pm.PackagePartitions;
 import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
-import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.UserHandle;
@@ -157,7 +157,7 @@ public final class StorageEventHelper extends StorageEventListener {
                     Slog.w(TAG, "Failed to scan " + ps.getPath() + ": " + e.getMessage());
                 }
 
-                if (!Build.FINGERPRINT.equals(ver.fingerprint)) {
+                if (!PackagePartitions.FINGERPRINT.equals(ver.fingerprint)) {
                     appDataHelper.clearAppDataLIF(
                             ps.getPkg(), UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
                             | FLAG_STORAGE_EXTERNAL | Installer.FLAG_CLEAR_CODE_CACHE_ONLY
@@ -195,10 +195,10 @@ public final class StorageEventHelper extends StorageEventListener {
         }
 
         synchronized (mPm.mLock) {
-            final boolean isUpgrade = !Build.FINGERPRINT.equals(ver.fingerprint);
+            final boolean isUpgrade = !PackagePartitions.FINGERPRINT.equals(ver.fingerprint);
             if (isUpgrade) {
                 logCriticalInfo(Log.INFO, "Build fingerprint changed from " + ver.fingerprint
-                        + " to " + Build.FINGERPRINT + "; regranting permissions for "
+                        + " to " + PackagePartitions.FINGERPRINT + "; regranting permissions for "
                         + volumeUuid);
             }
             mPm.mPermissionManager.onStorageVolumeMounted(volumeUuid, isUpgrade);

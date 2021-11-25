@@ -22,12 +22,21 @@ import android.os.Parcelable;
 import android.annotation.NonNull;
 
 /** @hide */
-public final class BroadcastInfoRequest implements Parcelable {
+public abstract class BroadcastInfoRequest implements Parcelable {
+    protected static final int PARCEL_TOKEN_TS_REQUEST = 1;
+
     public static final @NonNull Parcelable.Creator<BroadcastInfoRequest> CREATOR =
             new Parcelable.Creator<BroadcastInfoRequest>() {
                 @Override
                 public BroadcastInfoRequest createFromParcel(Parcel source) {
-                    return new BroadcastInfoRequest(source);
+                    int token = source.readInt();
+                    switch (token) {
+                        case PARCEL_TOKEN_TS_REQUEST:
+                            return TsRequest.createFromParcelBody(source);
+                        default:
+                            throw new IllegalStateException(
+                                    "Unexpected broadcast info request type token in parcel.");
+                    }
                 }
 
                 @Override
@@ -42,8 +51,12 @@ public final class BroadcastInfoRequest implements Parcelable {
         this.requestId = requestId;
     }
 
-    private BroadcastInfoRequest(Parcel source) {
+    protected BroadcastInfoRequest(Parcel source) {
         requestId = source.readInt();
+    }
+
+    public int getRequestId() {
+        return requestId;
     }
 
     @Override

@@ -678,7 +678,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         // TODO: move this logic to controller, which will invoke updateFooterView directly
         boolean showDismissView = mClearAllEnabled &&
                 mController.hasActiveClearableNotifications(ROWS_ALL);
-        boolean showFooterView = (showDismissView || getVisibleNotificationCount() > 0)
+        boolean showFooterView = (showDismissView || mController.getVisibleNotificationCount() > 0)
                 && mIsCurrentUserSetup  // see: b/193149550
                 && mStatusBarState != StatusBarState.KEYGUARD
                 && !mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
@@ -1173,20 +1173,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    /**
-     * Returns best effort count of visible notifications.
-     */
-    public int getVisibleNotificationCount() {
-        int count = 0;
-        for (int i = 0; i < getChildCount(); i++) {
-            final View child = getChildAt(i);
-            if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
-                count++;
-            }
-        }
-        return count;
-    }
-
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private boolean isCurrentlyAnimating() {
         return mStateAnimator.isRunning();
@@ -1458,7 +1444,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private float getAppearEndPosition() {
         int appearPosition = 0;
-        int visibleNotifCount = getVisibleNotificationCount();
+        int visibleNotifCount = mController.getVisibleNotificationCount();
         if (mEmptyShadeView.getVisibility() == GONE && visibleNotifCount > 0) {
             if (isHeadsUpTransition()
                     || (mInHeadsUpPinnedMode && !mAmbientState.isDozing())) {

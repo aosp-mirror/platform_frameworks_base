@@ -262,6 +262,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -554,6 +555,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final int REASON_LAST = REASON_SHARED;
 
     static final String RANDOM_DIR_PREFIX = "~~";
+    static final char RANDOM_CODEPATH_PREFIX = '-';
 
     final Handler mHandler;
 
@@ -1261,13 +1263,48 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public void requestChecksums(@NonNull String packageName, boolean includeSplits,
-            @Checksum.TypeMask int optional,
-            @Checksum.TypeMask int required, @Nullable List trustedInstallers,
+    public void requestPackageChecksums(@NonNull String packageName, boolean includeSplits,
+            @Checksum.TypeMask int optional, @Checksum.TypeMask int required,
+            @Nullable List trustedInstallers,
             @NonNull IOnChecksumsReadyListener onChecksumsReadyListener, int userId) {
         requestChecksumsInternal(packageName, includeSplits, optional, required, trustedInstallers,
                 onChecksumsReadyListener, userId, mInjector.getBackgroundExecutor(),
                 mInjector.getBackgroundHandler());
+    }
+
+    /**
+     * Requests checksums for the APK file.
+     * See {@link PackageInstaller.Session#requestChecksums} for details.
+     */
+    public void requestFileChecksums(@NonNull File file,
+            @NonNull String installerPackageName, @Checksum.TypeMask int optional,
+            @Checksum.TypeMask int required, @Nullable List trustedInstallers,
+            @NonNull IOnChecksumsReadyListener onChecksumsReadyListener)
+            throws FileNotFoundException {
+        if (!file.exists()) {
+            throw new FileNotFoundException(file.getAbsolutePath());
+        }
+        if (TextUtils.isEmpty(installerPackageName)) {
+            throw new FileNotFoundException(file.getAbsolutePath());
+        }
+
+        final Executor executor = mInjector.getBackgroundExecutor();
+        final Handler handler = mInjector.getBackgroundHandler();
+        final Certificate[] trustedCerts = (trustedInstallers != null) ? decodeCertificates(
+                trustedInstallers) : null;
+
+        final List<Pair<String, File>> filesToChecksum = new ArrayList<>(1);
+        filesToChecksum.add(Pair.create(null, file));
+
+        executor.execute(() -> {
+            ApkChecksums.Injector injector = new ApkChecksums.Injector(
+                    () -> mContext,
+                    () -> handler,
+                    () -> mInjector.getIncrementalManager(),
+                    () -> mPmInternal);
+            ApkChecksums.getChecksums(filesToChecksum, optional, required, installerPackageName,
+                    trustedCerts, onChecksumsReadyListener, injector);
+        });
     }
 
     private void requestChecksumsInternal(@NonNull String packageName, boolean includeSplits,
@@ -1493,8 +1530,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         PackageManagerService m = new PackageManagerService(injector, onlyCore, factoryTest,
-                Build.FINGERPRINT, Build.IS_ENG, Build.IS_USERDEBUG, Build.VERSION.SDK_INT,
-                Build.VERSION.INCREMENTAL, SNAPSHOT_ENABLED);
+                PackagePartitions.FINGERPRINT, Build.IS_ENG, Build.IS_USERDEBUG,
+                Build.VERSION.SDK_INT, Build.VERSION.INCREMENTAL, SNAPSHOT_ENABLED);
         t.traceEnd(); // "create package manager"
 
         final CompatChange.ChangeListener selinuxChangeListener = packageName -> {
@@ -1907,8 +1944,8 @@ public class PackageManagerService extends IPackageManager.Stub
             mIsUpgrade =
                     !buildFingerprint.equals(ver.fingerprint);
             if (mIsUpgrade) {
-                PackageManagerServiceUtils.logCriticalInfo(Log.INFO,
-                        "Upgrading from " + ver.fingerprint + " to " + Build.FINGERPRINT);
+                PackageManagerServiceUtils.logCriticalInfo(Log.INFO, "Upgrading from "
+                        + ver.fingerprint + " to " + PackagePartitions.FINGERPRINT);
             }
 
             // when upgrading from pre-M, promote system app permissions from install to runtime
@@ -2006,7 +2043,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // this situation.
             if (mIsUpgrade) {
                 Slog.i(TAG, "Build fingerprint changed from " + ver.fingerprint + " to "
-                        + Build.FINGERPRINT + "; regranting permissions for internal storage");
+                        + PackagePartitions.FINGERPRINT
+                        + "; regranting permissions for internal storage");
             }
             mPermissionManager.onStorageVolumeMounted(
                     StorageManager.UUID_PRIVATE_INTERNAL, mIsUpgrade);
@@ -2040,7 +2078,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                         | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES);
                     }
                 }
-                ver.fingerprint = Build.FINGERPRINT;
+                ver.fingerprint = PackagePartitions.FINGERPRINT;
             }
 
             // Legacy existing (installed before Q) non-system apps to hide
@@ -9376,7 +9414,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 mResolveActivity.processName = "system:ui";
                 mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
                 mResolveActivity.documentLaunchMode = ActivityInfo.DOCUMENT_LAUNCH_NEVER;
-                mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
+                mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
+                        | ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
                 mResolveActivity.theme = R.style.Theme_Material_Dialog_Alert;
                 mResolveActivity.exported = true;
                 mResolveActivity.enabled = true;

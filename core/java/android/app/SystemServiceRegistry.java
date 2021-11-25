@@ -196,6 +196,7 @@ import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
+import android.safetycenter.SafetyCenterFrameworkInitializer;
 import android.scheduling.SchedulingFrameworkInitializer;
 import android.security.FileIntegrityManager;
 import android.security.IFileIntegrityService;
@@ -1530,6 +1531,7 @@ public final class SystemServiceRegistry {
             SchedulingFrameworkInitializer.registerServiceWrappers();
             SupplementalProcessFrameworkInitializer.registerServiceWrappers();
             UwbFrameworkInitializer.registerServiceWrappers();
+            SafetyCenterFrameworkInitializer.registerServiceWrappers();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...

@@ -25,6 +25,7 @@ import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
 import static com.android.server.pm.PackageManagerService.DEBUG_PREFERRED;
+import static com.android.server.pm.PackageManagerService.RANDOM_CODEPATH_PREFIX;
 import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
 import static com.android.server.pm.PackageManagerService.STUB_SUFFIX;
 import static com.android.server.pm.PackageManagerService.TAG;
@@ -41,6 +42,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
+import android.content.pm.PackagePartitions;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
@@ -122,6 +124,8 @@ import java.util.zip.GZIPInputStream;
  */
 public class PackageManagerServiceUtils {
     private static final long MAX_CRITICAL_INFO_DUMP_SIZE = 3 * 1000 * 1000; // 3MB
+
+    private static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
     public final static Predicate<PackageStateInternal> REMOVE_IF_NULL_PKG =
             pkgSetting -> pkgSetting.getPkg() == null;
@@ -1122,13 +1126,28 @@ public class PackageManagerServiceUtils {
         File firstLevelDir;
         do {
             random.nextBytes(bytes);
-            String dirName = RANDOM_DIR_PREFIX
+            String firstLevelDirName = RANDOM_DIR_PREFIX
                     + Base64.encodeToString(bytes, Base64.URL_SAFE | Base64.NO_WRAP);
-            firstLevelDir = new File(targetDir, dirName);
+            firstLevelDir = new File(targetDir, firstLevelDirName);
         } while (firstLevelDir.exists());
+
         random.nextBytes(bytes);
-        String suffix = Base64.encodeToString(bytes, Base64.URL_SAFE | Base64.NO_WRAP);
-        return new File(firstLevelDir, packageName + "-" + suffix);
+        String dirName = packageName + RANDOM_CODEPATH_PREFIX + Base64.encodeToString(bytes,
+                Base64.URL_SAFE | Base64.NO_WRAP);
+        final File result = new File(firstLevelDir, dirName);
+        if (DEBUG && !Objects.equals(tryParsePackageName(result.getName()), packageName)) {
+            throw new RuntimeException(
+                    "codepath is off: " + result.getName() + " (" + packageName + ")");
+        }
+        return result;
+    }
+
+    static String tryParsePackageName(@NonNull String codePath) throws IllegalArgumentException {
+        int packageNameEnds = codePath.indexOf(RANDOM_CODEPATH_PREFIX);
+        if (packageNameEnds == -1) {
+            throw new IllegalArgumentException("Not a valid package folder name");
+        }
+        return codePath.substring(0, packageNameEnds);
     }
 
     /**
@@ -1215,7 +1234,7 @@ public class PackageManagerServiceUtils {
         // identify cached items. In particular, changing the value of certain
         // feature flags should cause us to invalidate any caches.
         final String cacheName = FORCE_PACKAGE_PARSED_CACHE_ENABLED ? "debug"
-                : SystemProperties.digestOf("ro.build.fingerprint");
+                : PackagePartitions.FINGERPRINT;
 
         // Reconcile cache directories, keeping only what we'd actually use.
         for (File cacheDir : FileUtils.listFilesOrEmpty(cacheBaseDir)) {

@@ -46,6 +46,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.TransformableView;
+import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
@@ -73,7 +74,7 @@ import java.util.List;
  * expanded and heads up layout. This class is responsible for clipping the content and and
  * switching between the expanded, contracted and the heads up view depending on its clipped size.
  */
-public class NotificationContentView extends FrameLayout {
+public class NotificationContentView extends FrameLayout implements NotificationFadeAware {
 
     private static final String TAG = "NotificationContentView";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -2043,6 +2044,41 @@ public class NotificationContentView extends FrameLayout {
             return visibleWrapper.getOriginalIconColor();
         }
         return Notification.COLOR_INVALID;
+    }
+
+    /**
+     * Delegate the faded state to the notification content views which actually
+     * need to have overlapping contents render precisely.
+     */
+    @Override
+    public void setNotificationFaded(boolean faded) {
+        if (mContractedWrapper != null) {
+            mContractedWrapper.setNotificationFaded(faded);
+        }
+        if (mHeadsUpWrapper != null) {
+            mHeadsUpWrapper.setNotificationFaded(faded);
+        }
+        if (mExpandedWrapper != null) {
+            mExpandedWrapper.setNotificationFaded(faded);
+        }
+        if (mSingleLineView != null) {
+            mSingleLineView.setNotificationFaded(faded);
+        }
+    }
+
+    /**
+     * @return true if a visible view has a remote input active, as this requires that the entire
+     * row report that it has overlapping rendering.
+     */
+    public boolean requireRowToHaveOverlappingRendering() {
+        // This inexpensive check is done on both states to avoid state invalidating the result.
+        if (mHeadsUpRemoteInput != null && mHeadsUpRemoteInput.isActive()) {
+            return true;
+        }
+        if (mExpandedRemoteInput != null && mExpandedRemoteInput.isActive()) {
+            return true;
+        }
+        return false;
     }
 
     public void setRemoteInputViewSubcomponentFactory(RemoteInputViewSubcomponent.Factory factory) {

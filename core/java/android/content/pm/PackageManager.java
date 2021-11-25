@@ -9044,7 +9044,7 @@ public abstract class PackageManager {
     }
 
     /**
-     * Requesting the checksums for APKs within a package.
+     * Requests the checksums for APKs within a package.
      * The checksums will be returned asynchronously via onChecksumsReadyListener.
      *
      * By default returns all readily available checksums:

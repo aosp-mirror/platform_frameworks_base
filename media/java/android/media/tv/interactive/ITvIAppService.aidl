@@ -18,6 +18,7 @@ package android.media.tv.interactive;
 
 import android.media.tv.interactive.ITvIAppServiceCallback;
 import android.media.tv.interactive.ITvIAppSessionCallback;
+import android.view.InputChannel;
 
 /**
  * Top-level interface to a TV IApp component (implemented in a Service). It's used for
@@ -27,5 +28,6 @@ import android.media.tv.interactive.ITvIAppSessionCallback;
 oneway interface ITvIAppService {
     void registerCallback(in ITvIAppServiceCallback callback);
     void unregisterCallback(in ITvIAppServiceCallback callback);
-    void createSession(in ITvIAppSessionCallback callback, in String iAppServiceId, int type);
+    void createSession(in InputChannel channel, in ITvIAppSessionCallback callback,
+            in String iAppServiceId, int type);
 }

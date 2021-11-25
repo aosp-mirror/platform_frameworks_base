@@ -31,19 +31,19 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder;
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifUiAdjustment;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifUiAdjustmentProvider;
-import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.NotifViewBarn;
+import com.android.systemui.statusbar.notification.collection.render.NotifViewController;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager.NotifInflationErrorListener;
 
@@ -61,8 +61,7 @@ import javax.inject.Inject;
  * If a notification was uninflated, this coordinator will filter the notification out from the
  * {@link ShadeListBuilder} until it is inflated.
  */
-// TODO(b/204468557): Move to @CoordinatorScope
-@SysUISingleton
+@CoordinatorScope
 public class PreparationCoordinator implements Coordinator {
     private static final String TAG = "PreparationCoordinator";
 
@@ -145,7 +144,7 @@ public class PreparationCoordinator implements Coordinator {
 
         pipeline.addCollectionListener(mNotifCollectionListener);
         // Inflate after grouping/sorting since that affects what views to inflate.
-        pipeline.addOnBeforeFinalizeFilterListener(mOnBeforeFinalizeFilterListener);
+        pipeline.addOnBeforeFinalizeFilterListener(this::inflateAllRequiredViews);
         pipeline.addFinalizeFilter(mNotifInflationErrorFilter);
         pipeline.addFinalizeFilter(mNotifInflatingFilter);
     }
@@ -181,9 +180,6 @@ public class PreparationCoordinator implements Coordinator {
             mInflationAdjustments.remove(entry);
         }
     };
-
-    private final OnBeforeFinalizeFilterListener mOnBeforeFinalizeFilterListener =
-            entries -> inflateAllRequiredViews(entries);
 
     private final NotifFilter mNotifInflationErrorFilter = new NotifFilter(
             TAG + "InflationError") {
@@ -256,7 +252,6 @@ public class PreparationCoordinator implements Coordinator {
             ListEntry entry = entries.get(i);
             if (entry instanceof GroupEntry) {
                 GroupEntry groupEntry = (GroupEntry) entry;
-                groupEntry.setUntruncatedChildCount(groupEntry.getChildren().size());
                 inflateRequiredGroupViews(groupEntry);
             } else {
                 NotificationEntry notifEntry = (NotificationEntry) entry;
@@ -363,10 +358,10 @@ public class PreparationCoordinator implements Coordinator {
         mInflatingNotifs.remove(entry);
     }
 
-    private void onInflationFinished(NotificationEntry entry) {
+    private void onInflationFinished(NotificationEntry entry, NotifViewController controller) {
         mLogger.logNotifInflated(entry.getKey());
         mInflatingNotifs.remove(entry);
-        mViewBarn.registerViewForEntry(entry, entry.getRowController());
+        mViewBarn.registerViewForEntry(entry, controller);
         mInflationStates.put(entry, STATE_INFLATED);
         mNotifInflatingFilter.invalidateList();
     }

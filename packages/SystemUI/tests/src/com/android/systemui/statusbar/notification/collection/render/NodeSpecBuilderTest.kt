@@ -68,7 +68,7 @@ class NodeSpecBuilderTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(viewBarn.requireView(any())).thenAnswer {
+        `when`(viewBarn.requireNodeController(any())).thenAnswer {
             fakeViewBarn.getViewByEntry(it.getArgument(0))
         }
 

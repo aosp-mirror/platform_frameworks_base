@@ -920,16 +920,16 @@ public class ApplicationPackageManager extends PackageManager {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(onChecksumsReadyListener);
         Objects.requireNonNull(trustedInstallers);
+        if (trustedInstallers == TRUST_ALL) {
+            trustedInstallers = null;
+        } else if (trustedInstallers == TRUST_NONE) {
+            trustedInstallers = Collections.emptyList();
+        } else if (trustedInstallers.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "trustedInstallers has to be one of TRUST_ALL/TRUST_NONE or a non-empty "
+                            + "list of certificates.");
+        }
         try {
-            if (trustedInstallers == TRUST_ALL) {
-                trustedInstallers = null;
-            } else if (trustedInstallers == TRUST_NONE) {
-                trustedInstallers = Collections.emptyList();
-            } else if (trustedInstallers.isEmpty()) {
-                throw new IllegalArgumentException(
-                        "trustedInstallers has to be one of TRUST_ALL/TRUST_NONE or a non-empty "
-                                + "list of certificates.");
-            }
             IOnChecksumsReadyListener onChecksumsReadyListenerDelegate =
                     new IOnChecksumsReadyListener.Stub() {
                         @Override
@@ -938,7 +938,7 @@ public class ApplicationPackageManager extends PackageManager {
                             onChecksumsReadyListener.onChecksumsReady(checksums);
                         }
                     };
-            mPM.requestChecksums(packageName, includeSplits, DEFAULT_CHECKSUMS, required,
+            mPM.requestPackageChecksums(packageName, includeSplits, DEFAULT_CHECKSUMS, required,
                     encodeCertificates(trustedInstallers), onChecksumsReadyListenerDelegate,
                     getUserId());
         } catch (ParcelableException e) {

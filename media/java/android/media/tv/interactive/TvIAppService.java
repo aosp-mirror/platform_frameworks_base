@@ -25,11 +25,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.InputChannel;
+import android.view.InputDevice;
+import android.view.InputEvent;
+import android.view.InputEventReceiver;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.Surface;
 
 import com.android.internal.os.SomeArgs;
@@ -85,14 +91,16 @@ public abstract class TvIAppService extends Service {
             }
 
             @Override
-            public void createSession(ITvIAppSessionCallback cb, String iAppServiceId, int type) {
+            public void createSession(InputChannel channel, ITvIAppSessionCallback cb,
+                    String iAppServiceId, int type) {
                 if (cb == null) {
                     return;
                 }
                 SomeArgs args = SomeArgs.obtain();
-                args.arg1 = cb;
-                args.arg2 = iAppServiceId;
-                args.arg3 = type;
+                args.arg1 = channel;
+                args.arg2 = cb;
+                args.arg3 = iAppServiceId;
+                args.arg4 = type;
                 mServiceHandler.obtainMessage(ServiceHandler.DO_CREATE_SESSION, args)
                         .sendToTarget();
             }
@@ -122,6 +130,8 @@ public abstract class TvIAppService extends Service {
      * @hide
      */
     public abstract static class Session implements KeyEvent.Callback {
+        private final KeyEvent.DispatcherState mDispatcherState = new KeyEvent.DispatcherState();
+
         private final Object mLock = new Object();
         // @GuardedBy("mLock")
         private ITvIAppSessionCallback mSessionCallback;
@@ -182,6 +192,60 @@ public abstract class TvIAppService extends Service {
         }
 
         /**
+         * TODO: JavaDoc of APIs related to input events.
+         * @hide
+         */
+        @Override
+        public boolean onKeyDown(int keyCode, KeyEvent event) {
+            return false;
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+            return false;
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean onKeyMultiple(int keyCode, int count, KeyEvent event) {
+            return false;
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean onKeyUp(int keyCode, KeyEvent event) {
+            return false;
+        }
+
+        /**
+         * @hide
+         */
+        public boolean onTouchEvent(MotionEvent event) {
+            return false;
+        }
+
+        /**
+         * @hide
+         */
+        public boolean onTrackballEvent(MotionEvent event) {
+            return false;
+        }
+
+        /**
+         * @hide
+         */
+        public boolean onGenericMotionEvent(MotionEvent event) {
+            return false;
+        }
+
+        /**
          * Assigns a size and position to the surface passed in {@link #onSetSurface}. The position
          * is relative to the overlay view that sits on top of this surface.
          *
@@ -224,6 +288,39 @@ public abstract class TvIAppService extends Service {
                 mSurface.release();
                 mSurface = null;
             }
+        }
+
+        /**
+         * Takes care of dispatching incoming input events and tells whether the event was handled.
+         */
+        int dispatchInputEvent(InputEvent event, InputEventReceiver receiver) {
+            if (DEBUG) Log.d(TAG, "dispatchInputEvent(" + event + ")");
+            if (event instanceof KeyEvent) {
+                KeyEvent keyEvent = (KeyEvent) event;
+                if (keyEvent.dispatch(this, mDispatcherState, this)) {
+                    return TvIAppManager.Session.DISPATCH_HANDLED;
+                }
+
+                // TODO: special handlings of navigation keys and media keys
+            } else if (event instanceof MotionEvent) {
+                MotionEvent motionEvent = (MotionEvent) event;
+                final int source = motionEvent.getSource();
+                if (motionEvent.isTouchEvent()) {
+                    if (onTouchEvent(motionEvent)) {
+                        return TvIAppManager.Session.DISPATCH_HANDLED;
+                    }
+                } else if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
+                    if (onTrackballEvent(motionEvent)) {
+                        return TvIAppManager.Session.DISPATCH_HANDLED;
+                    }
+                } else {
+                    if (onGenericMotionEvent(motionEvent)) {
+                        return TvIAppManager.Session.DISPATCH_HANDLED;
+                    }
+                }
+            }
+            // TODO: handle overlay view
+            return TvIAppManager.Session.DISPATCH_NOT_HANDLED;
         }
 
         private void initialize(ITvIAppSessionCallback callback) {
@@ -281,10 +378,17 @@ public abstract class TvIAppService extends Service {
      * @hide
      */
     public static class ITvIAppSessionWrapper extends ITvIAppSession.Stub {
+        // TODO: put ITvIAppSessionWrapper in a separate Java file
         private final Session mSessionImpl;
+        private InputChannel mChannel;
+        private TvIAppEventReceiver mReceiver;
 
-        public ITvIAppSessionWrapper(Session mSessionImpl) {
+        public ITvIAppSessionWrapper(Context context, Session mSessionImpl, InputChannel channel) {
             this.mSessionImpl = mSessionImpl;
+            mChannel = channel;
+            if (channel != null) {
+                mReceiver = new TvIAppEventReceiver(channel, context.getMainLooper());
+            }
         }
 
         @Override
@@ -306,6 +410,26 @@ public abstract class TvIAppService extends Service {
         public void dispatchSurfaceChanged(int format, int width, int height) {
             mSessionImpl.dispatchSurfaceChanged(format, width, height);
         }
+
+        private final class TvIAppEventReceiver extends InputEventReceiver {
+            TvIAppEventReceiver(InputChannel inputChannel, Looper looper) {
+                super(inputChannel, looper);
+            }
+
+            @Override
+            public void onInputEvent(InputEvent event) {
+                if (mSessionImpl == null) {
+                    // The session has been finished.
+                    finishInputEvent(event, false);
+                    return;
+                }
+
+                int handled = mSessionImpl.dispatchInputEvent(event, this);
+                if (handled != TvIAppManager.Session.DISPATCH_IN_PROGRESS) {
+                    finishInputEvent(event, handled == TvIAppManager.Session.DISPATCH_HANDLED);
+                }
+            }
+        }
     }
 
     @SuppressLint("HandlerLeak")
@@ -318,9 +442,10 @@ public abstract class TvIAppService extends Service {
             switch (msg.what) {
                 case DO_CREATE_SESSION: {
                     SomeArgs args = (SomeArgs) msg.obj;
-                    ITvIAppSessionCallback cb = (ITvIAppSessionCallback) args.arg1;
-                    String iAppServiceId = (String) args.arg2;
-                    int type = (int) args.arg3;
+                    InputChannel channel = (InputChannel) args.arg1;
+                    ITvIAppSessionCallback cb = (ITvIAppSessionCallback) args.arg2;
+                    String iAppServiceId = (String) args.arg3;
+                    int type = (int) args.arg4;
                     args.recycle();
                     Session sessionImpl = onCreateSession(iAppServiceId, type);
                     if (sessionImpl == null) {
@@ -332,7 +457,8 @@ public abstract class TvIAppService extends Service {
                         }
                         return;
                     }
-                    ITvIAppSession stub = new ITvIAppSessionWrapper(sessionImpl);
+                    ITvIAppSession stub = new ITvIAppSessionWrapper(
+                            TvIAppService.this, sessionImpl, channel);
 
                     SomeArgs someArgs = SomeArgs.obtain();
                     someArgs.arg1 = sessionImpl;

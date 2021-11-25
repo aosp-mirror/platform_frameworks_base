@@ -398,6 +398,8 @@ public final class SystemServer implements Dumpable {
     private static final String UWB_APEX_SERVICE_JAR_PATH =
             "/apex/com.android.uwb/javalib/service-uwb.jar";
     private static final String UWB_SERVICE_CLASS = "com.android.server.uwb.UwbService";
+    private static final String SAFETY_CENTER_SERVICE_CLASS =
+            "com.android.safetycenter.SafetyCenterService";
 
     private static final String SUPPLEMENTALPROCESS_APEX_PATH =
             "/apex/com.android.supplementalprocess/javalib/service-supplementalprocess.jar";
@@ -2714,6 +2716,10 @@ public final class SystemServer implements Dumpable {
 
         t.traceBegin("StartBootPhaseDeviceSpecificServicesReady");
         mSystemServiceManager.startBootPhase(t, SystemService.PHASE_DEVICE_SPECIFIC_SERVICES_READY);
+        t.traceEnd();
+
+        t.traceBegin("StartSafetyCenterService");
+        mSystemServiceManager.startService(SAFETY_CENTER_SERVICE_CLASS);
         t.traceEnd();
 
         t.traceBegin("AppSearchManagerService");

@@ -18,6 +18,7 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.hardware.tv.tuner.Constant;
 
 /**
  * Table information for Section Filter.
@@ -26,6 +27,12 @@ import android.annotation.SystemApi;
  */
 @SystemApi
 public class SectionSettingsWithTableInfo extends SectionSettings {
+    /**
+     * The invalid version number of {@link SectionSettingsWithTableInfo}. Tuner HAL will ignore the
+     * {@link SectionSettingsWithTableInfo} version number if this invalid version is set.
+     */
+    public static final int INVALID_TABLE_INFO_VERSION = Constant.INVALID_TABINFO_VERSION;
+
     private final int mTableId;
     private final int mVersion;
 
@@ -64,7 +71,7 @@ public class SectionSettingsWithTableInfo extends SectionSettings {
      */
     public static class Builder extends SectionSettings.Builder<Builder> {
         private int mTableId;
-        private int mVersion;
+        private int mVersion = INVALID_TABLE_INFO_VERSION;
 
         private Builder(int mainType) {
             super(mainType);

@@ -18,6 +18,7 @@ package android.telephony.data;
 
 import static android.telephony.data.ApnSetting.ProtocolType;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -70,6 +71,12 @@ public final class DataProfile implements Parcelable {
 
     private boolean mPreferred;
 
+    /**
+     * The last timestamp of this data profile being used for data network setup. Never add this
+     * to {@link #equals(Object)} and {@link #hashCode()}.
+     */
+    private @ElapsedRealtimeLong long mSetupTimestamp;
+
     private DataProfile(@NonNull Builder builder) {
         mApnSetting = builder.mApnSetting;
         mTrafficDescriptor = builder.mTrafficDescriptor;
@@ -101,6 +108,7 @@ public final class DataProfile implements Parcelable {
         mApnSetting = source.readParcelable(ApnSetting.class.getClassLoader());
         mTrafficDescriptor = source.readParcelable(TrafficDescriptor.class.getClassLoader());
         mPreferred = source.readBoolean();
+        mSetupTimestamp = source.readLong();
     }
 
     /**
@@ -397,6 +405,24 @@ public final class DataProfile implements Parcelable {
         }
     }
 
+    /**
+     * Set the timestamp of this data profile being used for data network setup.
+     *
+     * @hide
+     */
+    public void setLastSetupTimestamp(@ElapsedRealtimeLong long timestamp) {
+        mSetupTimestamp = timestamp;
+    }
+
+    /**
+     * @return the timestamp of this data profile being used for data network setup.
+     *
+     * @hide
+     */
+    public @ElapsedRealtimeLong long getLastSetupTimestamp() {
+        return mSetupTimestamp;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -405,8 +431,8 @@ public final class DataProfile implements Parcelable {
     @NonNull
     @Override
     public String toString() {
-        return "DataProfile=" + mApnSetting + ", " + mTrafficDescriptor + ", preferred="
-                + mPreferred;
+        return "[DataProfile=" + mApnSetting + ", " + mTrafficDescriptor + ", preferred="
+                + mPreferred + "]";
     }
 
     @Override
@@ -415,6 +441,7 @@ public final class DataProfile implements Parcelable {
         dest.writeParcelable(mApnSetting, flags);
         dest.writeParcelable(mTrafficDescriptor, flags);
         dest.writeBoolean(mPreferred);
+        dest.writeLong(mSetupTimestamp);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<DataProfile> CREATOR =

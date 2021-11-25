@@ -1223,7 +1223,7 @@ class StorageManagerService extends IStorageManager.Stub
             }
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
-                if (vol.isVisibleForRead(userId) && vol.isMountedReadable()) {
+                if (vol.isVisibleForUser(userId) && vol.isMountedReadable()) {
                     final StorageVolume userVol = vol.buildStorageVolume(mContext, userId, false);
                     mHandler.obtainMessage(H_VOLUME_BROADCAST, userVol).sendToTarget();
 
@@ -1570,7 +1570,7 @@ class StorageManagerService extends IStorageManager.Stub
                     || Objects.equals(privateVol.fsUuid, mPrimaryStorageUuid)) {
                 Slog.v(TAG, "Found primary storage at " + vol);
                 vol.mountFlags |= VolumeInfo.MOUNT_FLAG_PRIMARY;
-                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
+                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE_FOR_WRITE;
                 mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
             }
 
@@ -1580,13 +1580,13 @@ class StorageManagerService extends IStorageManager.Stub
                     && vol.disk.isDefaultPrimary()) {
                 Slog.v(TAG, "Found primary storage at " + vol);
                 vol.mountFlags |= VolumeInfo.MOUNT_FLAG_PRIMARY;
-                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
+                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE_FOR_WRITE;
             }
 
             // Adoptable public disks are visible to apps, since they meet
             // public API requirement of being in a stable location.
             if (vol.disk.isAdoptable()) {
-                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
+                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE_FOR_WRITE;
             }
 
             vol.mountUserId = mCurrentUserId;
@@ -1597,7 +1597,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         } else if (vol.type == VolumeInfo.TYPE_STUB) {
             if (vol.disk.isStubVisible()) {
-                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
+                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE_FOR_WRITE;
             }
             vol.mountUserId = mCurrentUserId;
             mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
@@ -1744,7 +1744,7 @@ class StorageManagerService extends IStorageManager.Stub
                 // started after this point will trigger additional
                 // user-specific broadcasts.
                 for (int userId : mSystemUnlockedUsers) {
-                    if (vol.isVisibleForRead(userId)) {
+                    if (vol.isVisibleForUser(userId)) {
                         final StorageVolume userVol = vol.buildStorageVolume(mContext, userId,
                                 false);
                         mHandler.obtainMessage(H_VOLUME_BROADCAST, userVol).sendToTarget();
@@ -3565,24 +3565,24 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         @Override
-        public ParcelFileDescriptor open() throws NativeDaemonConnectorException {
+        public ParcelFileDescriptor open() throws AppFuseMountException {
             try {
                 final FileDescriptor fd = mVold.mountAppFuse(uid, mountId);
                 mMounted = true;
                 return new ParcelFileDescriptor(fd);
             } catch (Exception e) {
-                throw new NativeDaemonConnectorException("Failed to mount", e);
+                throw new AppFuseMountException("Failed to mount", e);
             }
         }
 
         @Override
         public ParcelFileDescriptor openFile(int mountId, int fileId, int flags)
-                throws NativeDaemonConnectorException {
+                throws AppFuseMountException {
             try {
                 return new ParcelFileDescriptor(
                         mVold.openAppFuseFile(uid, mountId, fileId, flags));
             } catch (Exception e) {
-                throw new NativeDaemonConnectorException("Failed to open", e);
+                throw new AppFuseMountException("Failed to open", e);
             }
         }
 
@@ -3622,7 +3622,7 @@ class StorageManagerService extends IStorageManager.Stub
                         // It seems the thread of mAppFuseBridge has already been terminated.
                         mAppFuseBridge = null;
                     }
-                } catch (NativeDaemonConnectorException e) {
+                } catch (AppFuseMountException e) {
                     throw e.rethrowAsParcelableException();
                 }
             }
@@ -3783,7 +3783,7 @@ class StorageManagerService extends IStorageManager.Stub
                 if (forWrite) {
                     match = vol.isVisibleForWrite(userId);
                 } else {
-                    match = vol.isVisibleForRead(userId)
+                    match = vol.isVisibleForUser(userId)
                             || (includeInvisible && vol.getPath() != null);
                 }
                 if (!match) continue;

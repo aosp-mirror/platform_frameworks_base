@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.inflation
 
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.render.NotifViewController
 
 /**
  * Used by the [PreparationCoordinator].  When notifications are added or updated, the
@@ -49,7 +50,7 @@ interface NotifInflater {
      * Callback once all the views are inflated and bound for a given NotificationEntry.
      */
     interface InflationCallback {
-        fun onInflationFinished(entry: NotificationEntry)
+        fun onInflationFinished(entry: NotificationEntry, controller: NotifViewController)
     }
 
     /**

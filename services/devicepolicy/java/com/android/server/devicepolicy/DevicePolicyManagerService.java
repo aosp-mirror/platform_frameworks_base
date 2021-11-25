@@ -10587,7 +10587,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         return null;
                     }
                 }
-                if (!mUserManager.canAddMoreUsers()) {
+
+                String userType = demo ? UserManager.USER_TYPE_FULL_DEMO
+                        : UserManager.USER_TYPE_FULL_SECONDARY;
+                int userInfoFlags = ephemeral ? UserInfo.FLAG_EPHEMERAL : 0;
+
+                if (!mUserManager.canAddMoreUsers(userType)) {
                     if (targetSdkVersion >= Build.VERSION_CODES.P) {
                         throw new ServiceSpecificException(
                                 UserManager.USER_OPERATION_ERROR_MAX_USERS, "user limit reached");
@@ -10596,9 +10601,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     }
                 }
 
-                int userInfoFlags = ephemeral ? UserInfo.FLAG_EPHEMERAL : 0;
-                String userType = demo ? UserManager.USER_TYPE_FULL_DEMO
-                        : UserManager.USER_TYPE_FULL_SECONDARY;
                 String[] disallowedPackages = null;
                 if (!leaveAllSystemAppsEnabled) {
                     disallowedPackages = mOverlayPackagesProvider.getNonRequiredApps(admin,

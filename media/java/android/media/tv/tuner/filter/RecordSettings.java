@@ -20,11 +20,11 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.DemuxRecordScIndexType;
+import android.hardware.tv.tuner.DemuxScAvcIndex;
 import android.hardware.tv.tuner.DemuxScHevcIndex;
 import android.hardware.tv.tuner.DemuxScIndex;
 import android.hardware.tv.tuner.DemuxTsIndex;
 import android.media.tv.tuner.TunerUtils;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -139,7 +139,7 @@ public class RecordSettings extends Settings {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "INDEX_TYPE_", value =
-            {INDEX_TYPE_NONE, INDEX_TYPE_SC, INDEX_TYPE_SC_HEVC})
+            {INDEX_TYPE_NONE, INDEX_TYPE_SC, INDEX_TYPE_SC_HEVC, INDEX_TYPE_SC_AVC})
     public @interface ScIndexType {}
 
     /**
@@ -154,6 +154,10 @@ public class RecordSettings extends Settings {
      * Start Code index for HEVC.
      */
     public static final int INDEX_TYPE_SC_HEVC = DemuxRecordScIndexType.SC_HEVC;
+    /**
+     * Start Code index for AVC.
+     */
+    public static final int INDEX_TYPE_SC_AVC = DemuxRecordScIndexType.SC_AVC;
 
     /**
      * Indexes can be tagged by Start Code in PES (Packetized Elementary Stream)
@@ -187,23 +191,23 @@ public class RecordSettings extends Settings {
     /**
      * All blocks are coded as I blocks.
      */
-    public static final int SC_INDEX_I_SLICE = DemuxScIndex.I_SLICE;
+    public static final int SC_INDEX_I_SLICE = DemuxScAvcIndex.I_SLICE << 4;
     /**
      * Blocks are coded as I or P blocks.
      */
-    public static final int SC_INDEX_P_SLICE = DemuxScIndex.P_SLICE;
+    public static final int SC_INDEX_P_SLICE = DemuxScAvcIndex.P_SLICE << 4;
     /**
      * Blocks are coded as I, P or B blocks.
      */
-    public static final int SC_INDEX_B_SLICE = DemuxScIndex.B_SLICE;
+    public static final int SC_INDEX_B_SLICE = DemuxScAvcIndex.B_SLICE << 4;
     /**
      * A so-called switching I slice that is coded.
      */
-    public static final int SC_INDEX_SI_SLICE = DemuxScIndex.SI_SLICE;
+    public static final int SC_INDEX_SI_SLICE = DemuxScAvcIndex.SI_SLICE << 4;
     /**
      * A so-called switching P slice that is coded.
      */
-    public static final int SC_INDEX_SP_SLICE = DemuxScIndex.SP_SLICE;
+    public static final int SC_INDEX_SP_SLICE = DemuxScAvcIndex.SP_SLICE << 4;
 
     /**
      * Indexes can be tagged by NAL unit group in HEVC according to ISO/IEC 23008-2.

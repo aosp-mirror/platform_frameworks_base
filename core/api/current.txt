@@ -11301,6 +11301,7 @@ package android.content {
     field public static final String ACTION_QUICK_VIEW = "android.intent.action.QUICK_VIEW";
     field public static final String ACTION_REBOOT = "android.intent.action.REBOOT";
     field public static final String ACTION_RUN = "android.intent.action.RUN";
+    field public static final String ACTION_SAFETY_CENTER = "android.intent.action.SAFETY_CENTER";
     field public static final String ACTION_SCREEN_OFF = "android.intent.action.SCREEN_OFF";
     field public static final String ACTION_SCREEN_ON = "android.intent.action.SCREEN_ON";
     field public static final String ACTION_SEARCH = "android.intent.action.SEARCH";
@@ -12554,6 +12555,7 @@ package android.content.pm {
     method @NonNull public java.io.OutputStream openWrite(@NonNull String, long, long) throws java.io.IOException;
     method public void removeChildSessionId(int);
     method public void removeSplit(@NonNull String) throws java.io.IOException;
+    method public void requestChecksums(@NonNull String, int, @NonNull java.util.List<java.security.cert.Certificate>, @NonNull android.content.pm.PackageManager.OnChecksumsReadyListener) throws java.security.cert.CertificateEncodingException, java.io.FileNotFoundException;
     method @Deprecated public void setChecksums(@NonNull String, @NonNull java.util.List<android.content.pm.Checksum>, @Nullable byte[]) throws java.io.IOException;
     method public void setStagingProgress(float);
     method public void transfer(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;

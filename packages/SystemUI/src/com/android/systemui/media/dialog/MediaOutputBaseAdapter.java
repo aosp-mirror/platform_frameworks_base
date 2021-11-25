@@ -289,6 +289,9 @@ public abstract class MediaOutputBaseAdapter extends
                         public void onAnimationEnd(Animator animation) {
                             to.requireViewById(R.id.volume_indeterminate_progress).setVisibility(
                                     View.VISIBLE);
+                            // Unset the listener, otherwise this may persist for another view
+                            // property animation
+                            toTitleText.animate().setListener(null);
                         }
                     });
             // Animation for seek bar
@@ -312,8 +315,14 @@ public abstract class MediaOutputBaseAdapter extends
                                         public void onAnimationEnd(Animator animation) {
                                             mIsAnimating = false;
                                             notifyDataSetChanged();
+                                            // Unset the listener, otherwise this may persist for
+                                            // another view property animation
+                                            fromTitleText.animate().setListener(null);
                                         }
                                     });
+                            // Unset the listener, otherwise this may persist for another view
+                            // property animation
+                            fromSeekBar.animate().setListener(null);
                         }
                     });
         }
