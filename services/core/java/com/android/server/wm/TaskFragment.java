@@ -2125,13 +2125,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     /** Whether we should prepare a transition for this {@link TaskFragment} bounds change. */
     private boolean shouldStartChangeTransition(Rect startBounds) {
-        if (mWmService.mDisableTransitionAnimation
-                || mDisplayContent == null
-                || mTaskFragmentOrganizer == null
-                || getSurfaceControl() == null
-                // The change transition will be covered by display.
-                || mDisplayContent.inTransition()
-                || !isVisible()) {
+        if (mTaskFragmentOrganizer == null || !canStartChangeTransition()) {
             return false;
         }
 

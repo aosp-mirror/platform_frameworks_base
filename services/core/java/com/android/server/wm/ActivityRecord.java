@@ -1387,9 +1387,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /** Whether we should prepare a transition for this {@link ActivityRecord} parent change. */
     private boolean shouldStartChangeTransition(
             @Nullable TaskFragment newParent, @Nullable TaskFragment oldParent) {
-        if (mWmService.mDisableTransitionAnimation
-                || mDisplayContent == null || newParent == null || oldParent == null
-                || getSurfaceControl() == null || !isVisible() || !isVisibleRequested()) {
+        if (newParent == null || oldParent == null || !canStartChangeTransition()) {
             return false;
         }
 
