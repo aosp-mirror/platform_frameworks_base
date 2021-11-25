@@ -72,12 +72,17 @@ import java.util.regex.Pattern;
 @RunWith(AndroidJUnit4.class)
 public class PackageManagerServiceTest {
 
+    private static final String PACKAGE_NAME = "com.android.frameworks.servicestests";
+
     private static final String TEST_DATA_PATH = "/data/local/tmp/servicestests/";
     private static final String TEST_APP_APK = "StubTestApp.apk";
     private static final String TEST_PKG_NAME = "com.android.servicestests.apps.stubapp";
 
+    private IPackageManager mIPackageManager;
+
     @Before
     public void setUp() throws Exception {
+        mIPackageManager = AppGlobals.getPackageManager();
     }
 
     @After
@@ -620,20 +625,19 @@ public class PackageManagerServiceTest {
 
     @Test
     public void testInstallReason_afterUpdate_keepUnchanged() throws Exception {
-        final IPackageManager pm = AppGlobals.getPackageManager();
         final File testApk = new File(TEST_DATA_PATH, TEST_APP_APK);
         try {
             // Try to install test APK with reason INSTALL_REASON_POLICY
             runShellCommand("pm install --install-reason 1 " + testApk);
             assertWithMessage("The install reason of test APK is incorrect.").that(
-                    pm.getInstallReason(TEST_PKG_NAME, UserHandle.myUserId())).isEqualTo(
-                    PackageManager.INSTALL_REASON_POLICY);
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME,
+                            UserHandle.myUserId())).isEqualTo(PackageManager.INSTALL_REASON_POLICY);
 
             // Try to update test APK with different reason INSTALL_REASON_USER
             runShellCommand("pm install --install-reason 4 " + testApk);
             assertWithMessage("The install reason should keep unchanged after update.").that(
-                    pm.getInstallReason(TEST_PKG_NAME, UserHandle.myUserId())).isEqualTo(
-                    PackageManager.INSTALL_REASON_POLICY);
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME,
+                            UserHandle.myUserId())).isEqualTo(PackageManager.INSTALL_REASON_POLICY);
         } finally {
             runShellCommand("pm uninstall " + TEST_PKG_NAME);
         }
@@ -642,7 +646,6 @@ public class PackageManagerServiceTest {
     @Test
     public void testInstallReason_userRemainsUninstalled_keepUnknown() throws Exception {
         Assume.assumeTrue(UserManager.supportsMultipleUsers());
-        final IPackageManager pm = AppGlobals.getPackageManager();
         final UserManager um = UserManager.get(
                 InstrumentationRegistry.getInstrumentation().getContext());
         final File testApk = new File(TEST_DATA_PATH, TEST_APP_APK);
@@ -651,21 +654,21 @@ public class PackageManagerServiceTest {
             // Try to install test APK with reason INSTALL_REASON_POLICY
             runShellCommand("pm install --install-reason 1 " + testApk);
             assertWithMessage("The install reason of test APK is incorrect.").that(
-                    pm.getInstallReason(TEST_PKG_NAME, UserHandle.myUserId())).isEqualTo(
-                    PackageManager.INSTALL_REASON_POLICY);
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME,
+                            UserHandle.myUserId())).isEqualTo(PackageManager.INSTALL_REASON_POLICY);
 
             // Create and start the 2nd user.
             userId = um.createUser("Test User", 0 /* flags */).getUserHandle().getIdentifier();
             runShellCommand("am start-user -w " + userId);
             // Since the test APK isn't installed on the 2nd user, the reason should be unknown.
             assertWithMessage("The install reason in 2nd user should be unknown.").that(
-                    pm.getInstallReason(TEST_PKG_NAME, userId)).isEqualTo(
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME, userId)).isEqualTo(
                     PackageManager.INSTALL_REASON_UNKNOWN);
 
             // Try to update test APK with different reason INSTALL_REASON_USER
             runShellCommand("pm install --install-reason 4 " + testApk);
             assertWithMessage("The install reason in 2nd user should keep unknown.").that(
-                    pm.getInstallReason(TEST_PKG_NAME, userId)).isEqualTo(
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME, userId)).isEqualTo(
                     PackageManager.INSTALL_REASON_UNKNOWN);
         } finally {
             runShellCommand("pm uninstall " + TEST_PKG_NAME);
@@ -678,7 +681,6 @@ public class PackageManagerServiceTest {
     @Test
     public void testInstallReason_installForAllUsers_sameReason() throws Exception {
         Assume.assumeTrue(UserManager.supportsMultipleUsers());
-        final IPackageManager pm = AppGlobals.getPackageManager();
         final UserManager um = UserManager.get(
                 InstrumentationRegistry.getInstrumentation().getContext());
         final File testApk = new File(TEST_DATA_PATH, TEST_APP_APK);
@@ -691,8 +693,9 @@ public class PackageManagerServiceTest {
             // Try to install test APK to all users with reason INSTALL_REASON_POLICY
             runShellCommand("pm install --install-reason 1 " + testApk);
             assertWithMessage("The install reason is inconsistent across users.").that(
-                    pm.getInstallReason(TEST_PKG_NAME, UserHandle.myUserId())).isEqualTo(
-                    pm.getInstallReason(TEST_PKG_NAME, userId));
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME,
+                            UserHandle.myUserId())).isEqualTo(
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME, userId));
         } finally {
             runShellCommand("pm uninstall " + TEST_PKG_NAME);
             if (userId != UserHandle.USER_NULL) {
@@ -704,7 +707,6 @@ public class PackageManagerServiceTest {
     @Test
     public void testInstallReason_installSeparately_withSeparatedReason() throws Exception {
         Assume.assumeTrue(UserManager.supportsMultipleUsers());
-        final IPackageManager pm = AppGlobals.getPackageManager();
         final UserManager um = UserManager.get(
                 InstrumentationRegistry.getInstrumentation().getContext());
         final File testApk = new File(TEST_DATA_PATH, TEST_APP_APK);
@@ -717,19 +719,41 @@ public class PackageManagerServiceTest {
             // Try to install test APK on the current user with reason INSTALL_REASON_POLICY
             runShellCommand("pm install --user cur --install-reason 1 " + testApk);
             assertWithMessage("The install reason on the current user is incorrect.").that(
-                    pm.getInstallReason(TEST_PKG_NAME, UserHandle.myUserId())).isEqualTo(
-                    PackageManager.INSTALL_REASON_POLICY);
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME,
+                            UserHandle.myUserId())).isEqualTo(PackageManager.INSTALL_REASON_POLICY);
 
             // Try to install test APK on the 2nd user with reason INSTALL_REASON_USER
             runShellCommand("pm install --user " + userId + " --install-reason 4 " + testApk);
             assertWithMessage("The install reason on the 2nd user is incorrect.").that(
-                    pm.getInstallReason(TEST_PKG_NAME, userId)).isEqualTo(
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME, userId)).isEqualTo(
                     PackageManager.INSTALL_REASON_USER);
         } finally {
             runShellCommand("pm uninstall " + TEST_PKG_NAME);
             if (userId != UserHandle.USER_NULL) {
                 um.removeUser(userId);
             }
+        }
+    }
+
+    @Test
+    public void testSetSplashScreenTheme_samePackage_succeeds() throws Exception {
+        mIPackageManager.setSplashScreenTheme(PACKAGE_NAME, null /* themeName */,
+                UserHandle.myUserId());
+        // Invoking setSplashScreenTheme on the same package shouldn't get any exception.
+    }
+
+    @Test
+    public void testSetSplashScreenTheme_differentPackage_fails() throws Exception {
+        final File testApk = new File(TEST_DATA_PATH, TEST_APP_APK);
+        try {
+            runShellCommand("pm install " + testApk);
+            mIPackageManager.setSplashScreenTheme(TEST_PKG_NAME, null /* themeName */,
+                    UserHandle.myUserId());
+            fail("setSplashScreenTheme did not throw SecurityException as expected");
+        } catch (SecurityException e) {
+            // expected
+        } finally {
+            runShellCommand("pm uninstall " + TEST_PKG_NAME);
         }
     }
 }
