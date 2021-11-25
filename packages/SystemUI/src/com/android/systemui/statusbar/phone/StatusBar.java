@@ -666,7 +666,6 @@ public class StatusBar extends CoreStartable implements
     private boolean mNoAnimationOnNextBarModeChange;
     private final SysuiStatusBarStateController mStatusBarStateController;
 
-    private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
     private NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
     protected StatusBarNotificationPresenter mPresenter;
@@ -1168,17 +1167,6 @@ public class StatusBar extends CoreStartable implements
                     // displayed).
                     mNotificationPanelViewController.updatePanelExpansionAndVisibility();
                     setBouncerShowingForStatusBarComponents(mBouncerShowing);
-
-                    if (mHeadsUpAppearanceController != null) {
-                        // This view is being recreated, let's destroy the old one
-                        // TODO(b/205609837): Automatically destroy the old controller so that this
-                        //  class doesn't need to hold a reference to the old one.
-                        mHeadsUpAppearanceController.destroy();
-                    }
-                    // TODO (b/136993073) Separate notification shade and status bar
-                    // TODO(b/205609837): Migrate this to StatusBarFragmentComponent.
-                    mHeadsUpAppearanceController =
-                            statusBarFragmentComponent.getHeadsUpAppearanceController();
 
                     mLightsOutNotifController.setLightsOutNotifView(
                             mStatusBarView.findViewById(R.id.notification_lights_out));
