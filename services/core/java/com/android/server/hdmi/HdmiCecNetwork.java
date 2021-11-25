@@ -360,10 +360,12 @@ public class HdmiCecNetwork {
     // This only applies to TV devices.
     // Returns true if the policy is set to true, and the device to check does not have
     // a parent CEC device (which should be the CEC-enabled switch) in the list.
+    // Devices with an invalid physical address are assumed to NOT be connected to a legacy switch.
     private boolean hideDevicesBehindLegacySwitch(HdmiDeviceInfo info) {
         return isLocalDeviceAddress(Constants.ADDR_TV)
                 && HdmiConfig.HIDE_DEVICES_BEHIND_LEGACY_SWITCH
-                && !isConnectedToCecSwitch(info.getPhysicalAddress(), getCecSwitches());
+                && !isConnectedToCecSwitch(info.getPhysicalAddress(), getCecSwitches())
+                && info.getPhysicalAddress() != HdmiDeviceInfo.PATH_INVALID;
     }
 
     /**
@@ -489,6 +491,34 @@ public class HdmiCecNetwork {
     }
 
     /**
+     * Attempts to deduce the device type of a device given its logical address.
+     * If multiple types are possible, returns {@link HdmiDeviceInfo#DEVICE_RESERVED}.
+     */
+    private static int logicalAddressToDeviceType(int logicalAddress) {
+        switch (logicalAddress) {
+            case Constants.ADDR_TV:
+                return HdmiDeviceInfo.DEVICE_TV;
+            case Constants.ADDR_RECORDER_1:
+            case Constants.ADDR_RECORDER_2:
+            case Constants.ADDR_RECORDER_3:
+                return HdmiDeviceInfo.DEVICE_RECORDER;
+            case Constants.ADDR_TUNER_1:
+            case Constants.ADDR_TUNER_2:
+            case Constants.ADDR_TUNER_3:
+            case Constants.ADDR_TUNER_4:
+                return HdmiDeviceInfo.DEVICE_TUNER;
+            case Constants.ADDR_PLAYBACK_1:
+            case Constants.ADDR_PLAYBACK_2:
+            case Constants.ADDR_PLAYBACK_3:
+                return HdmiDeviceInfo.DEVICE_PLAYBACK;
+            case Constants.ADDR_AUDIO_SYSTEM:
+                return HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM;
+            default:
+                return HdmiDeviceInfo.DEVICE_RESERVED;
+        }
+    }
+
+    /**
      * Passively listen to incoming CEC messages.
      *
      * This shall not result in any CEC messages being sent.
@@ -502,6 +532,7 @@ public class HdmiCecNetwork {
             HdmiDeviceInfo newDevice = HdmiDeviceInfo.cecDeviceBuilder()
                     .setLogicalAddress(sourceAddress)
                     .setDisplayName(HdmiUtils.getDefaultDeviceName(sourceAddress))
+                    .setDeviceType(logicalAddressToDeviceType(sourceAddress))
                     .build();
             addCecDevice(newDevice);
         }
