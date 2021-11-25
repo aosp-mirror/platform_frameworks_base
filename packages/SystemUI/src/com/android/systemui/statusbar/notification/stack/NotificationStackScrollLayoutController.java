@@ -858,6 +858,14 @@ public class NotificationStackScrollLayoutController {
         mView.setHeadsUpAppearanceController(controller);
     }
 
+    public float getAppearFraction() {
+        return mView.getAppearFraction();
+    }
+
+    public float getExpandedHeight() {
+        return mView.getExpandedHeight();
+    }
+
     public void requestLayout() {
         mView.requestLayout();
     }
