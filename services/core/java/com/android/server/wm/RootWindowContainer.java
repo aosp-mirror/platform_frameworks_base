@@ -2496,7 +2496,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // starts. Instead, we expect home activities to be launched when the system is ready
             // (ActivityManagerService#systemReady).
             if (mService.isBooted() || mService.isBooting()) {
-                startSystemDecorations(display.mDisplayContent);
+                startSystemDecorations(display);
             }
             // Drop any cached DisplayInfos associated with this display id - the values are now
             // out of date given this display added event.
