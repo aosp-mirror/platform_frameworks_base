@@ -1169,7 +1169,6 @@ public class StatusBar extends CoreStartable implements
                     mNotificationPanelViewController.updatePanelExpansionAndVisibility();
                     setBouncerShowingForStatusBarComponents(mBouncerShowing);
 
-                    HeadsUpAppearanceController oldController = mHeadsUpAppearanceController;
                     if (mHeadsUpAppearanceController != null) {
                         // This view is being recreated, let's destroy the old one
                         // TODO(b/205609837): Automatically destroy the old controller so that this
@@ -1180,9 +1179,6 @@ public class StatusBar extends CoreStartable implements
                     // TODO(b/205609837): Migrate this to StatusBarFragmentComponent.
                     mHeadsUpAppearanceController =
                             statusBarFragmentComponent.getHeadsUpAppearanceController();
-                    // TODO(b/205609837): Delete this readFrom method so that this class doesn't
-                    //  need to hold a reference to the old controller.
-                    mHeadsUpAppearanceController.readFrom(oldController);
 
                     mLightsOutNotifController.setLightsOutNotifView(
                             mStatusBarView.findViewById(R.id.notification_lights_out));
