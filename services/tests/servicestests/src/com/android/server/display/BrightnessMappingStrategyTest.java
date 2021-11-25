@@ -59,6 +59,20 @@ public class BrightnessMappingStrategyTest {
         5000
     };
 
+    private static final int[] LUX_LEVELS_IDLE = {
+        0,
+        10,
+        40,
+        80,
+        200,
+        655,
+        1200,
+        2500,
+        4400,
+        8000,
+        10000
+    };
+
     private static final float[] DISPLAY_LEVELS_NITS = {
         13.25f,
         54.0f,
@@ -71,6 +85,20 @@ public class BrightnessMappingStrategyTest {
         335.8f,
         415.2f,
         478.5f,
+    };
+
+    private static final float[] DISPLAY_LEVELS_NITS_IDLE = {
+        23.25f,
+        64.0f,
+        88.85f,
+        115.02f,
+        142.7f,
+        180.12f,
+        222.1f,
+        275.2f,
+        345.8f,
+        425.2f,
+        468.5f,
     };
 
     private static final int[] DISPLAY_LEVELS_BACKLIGHT = {
@@ -88,7 +116,6 @@ public class BrightnessMappingStrategyTest {
     };
 
     private static final float[] DISPLAY_RANGE_NITS = { 2.685f, 478.5f };
-    private static final float[] DISPLAY_LEVELS_RANGE_NITS = { 13.25f, 478.5f };
     private static final float[] BACKLIGHT_RANGE_ZERO_TO_ONE = { 0.0f, 1.0f };
     private static final float[] DISPLAY_LEVELS_RANGE_BACKLIGHT_FLOAT = { 0.03149606299f, 1.0f };
 
@@ -117,6 +144,8 @@ public class BrightnessMappingStrategyTest {
     private static final Spline GAMMA_CORRECTION_SPLINE = Spline.createSpline(
             new float[] { 0.0f, 100.0f, 1000.0f, 2500.0f, 4000.0f, 4900.0f, 5000.0f },
             new float[] { 0.0475f, 0.0475f, 0.2225f, 0.5140f, 0.8056f, 0.9805f, 1.0f });
+
+    private static final float TOLERANCE = 0.0001f;
 
     @Test
     public void testSimpleStrategyMappingAtControlPoints() {
@@ -357,6 +386,27 @@ public class BrightnessMappingStrategyTest {
         assertStrategyAdaptsToUserDataPoints(BrightnessMappingStrategy.create(res, ddc));
     }
 
+    @Test
+    public void testIdleModeConfigLoadsCorrectly() {
+        Resources res = createResourcesIdle(LUX_LEVELS_IDLE, DISPLAY_LEVELS_NITS_IDLE);
+        DisplayDeviceConfig ddc = createDdc(DISPLAY_RANGE_NITS, BACKLIGHT_RANGE_ZERO_TO_ONE);
+
+        // Create an idle mode bms
+        // This will fail if it tries to fetch the wrong configuration.
+        BrightnessMappingStrategy bms = BrightnessMappingStrategy.createForIdleMode(res, ddc);
+        assertNotNull("BrightnessMappingStrategy should not be null", bms);
+
+        // Ensure that the config is the one we set
+        // Ensure that the lux -> brightness -> nits path works. ()
+        for (int i = 0; i < DISPLAY_LEVELS_NITS_IDLE.length; i++) {
+            assertEquals(LUX_LEVELS_IDLE[i], bms.getDefaultConfig().getCurve().first[i], TOLERANCE);
+            assertEquals(DISPLAY_LEVELS_NITS_IDLE[i], bms.getDefaultConfig().getCurve().second[i],
+                    TOLERANCE);
+            assertEquals(bms.convertToNits(bms.getBrightness(LUX_LEVELS_IDLE[i])),
+                    DISPLAY_LEVELS_NITS_IDLE[i], TOLERANCE);
+        }
+    }
+
     private static void assertStrategyAdaptsToUserDataPoints(BrightnessMappingStrategy strategy) {
         // Save out all of the initial brightness data for comparison after reset.
         float[] initialBrightnessLevels = new float[LUX_LEVELS.length];
@@ -421,14 +471,39 @@ public class BrightnessMappingStrategyTest {
                 brightnessLevelsNits);
     }
 
+    private Resources createResourcesIdle(int[] luxLevels, float[] brightnessLevelsNits) {
+        return createResources(EMPTY_INT_ARRAY, EMPTY_INT_ARRAY, EMPTY_FLOAT_ARRAY,
+                luxLevels, brightnessLevelsNits);
+    }
+
     private Resources createResources(int[] luxLevels, int[] brightnessLevelsBacklight,
             float[] brightnessLevelsNits) {
+        return createResources(luxLevels, brightnessLevelsBacklight, brightnessLevelsNits,
+                EMPTY_INT_ARRAY, EMPTY_FLOAT_ARRAY);
+
+    }
+
+    private Resources createResources(int[] luxLevels, int[] brightnessLevelsBacklight,
+            float[] brightnessLevelsNits, int[] luxLevelsIdle, float[] brightnessLevelsNitsIdle) {
+
         Resources mockResources = mock(Resources.class);
+
         // For historical reasons, the lux levels resource implicitly defines the first point as 0,
         // so we need to chop it off of the array the mock resource object returns.
-        int[] luxLevelsResource = Arrays.copyOfRange(luxLevels, 1, luxLevels.length);
-        when(mockResources.getIntArray(com.android.internal.R.array.config_autoBrightnessLevels))
-                .thenReturn(luxLevelsResource);
+        // Don't mock if these values are not set. If we try to use them, we will fail.
+        if (luxLevels.length > 0) {
+            int[] luxLevelsResource = Arrays.copyOfRange(luxLevels, 1, luxLevels.length);
+            when(mockResources.getIntArray(
+                    com.android.internal.R.array.config_autoBrightnessLevels))
+                    .thenReturn(luxLevelsResource);
+        }
+        if (luxLevelsIdle.length > 0) {
+            int[] luxLevelsIdleResource = Arrays.copyOfRange(luxLevelsIdle, 1,
+                    luxLevelsIdle.length);
+            when(mockResources.getIntArray(
+                    com.android.internal.R.array.config_autoBrightnessLevelsIdle))
+                    .thenReturn(luxLevelsIdleResource);
+        }
 
         when(mockResources.getIntArray(
                 com.android.internal.R.array.config_autoBrightnessLcdBacklightValues))
@@ -438,6 +513,10 @@ public class BrightnessMappingStrategyTest {
         when(mockResources.obtainTypedArray(
                 com.android.internal.R.array.config_autoBrightnessDisplayValuesNits))
                 .thenReturn(mockBrightnessLevelNits);
+        TypedArray mockBrightnessLevelNitsIdle = createFloatTypedArray(brightnessLevelsNitsIdle);
+        when(mockResources.obtainTypedArray(
+                com.android.internal.R.array.config_autoBrightnessDisplayValuesNitsIdle))
+                .thenReturn(mockBrightnessLevelNitsIdle);
 
         when(mockResources.getInteger(
                 com.android.internal.R.integer.config_screenBrightnessSettingMinimum))
