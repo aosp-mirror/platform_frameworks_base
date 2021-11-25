@@ -4355,6 +4355,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    void reportKeepClearAreasChanged(Session session, IWindow window, List<Rect> keepClearAreas) {
+        synchronized (mGlobalLock) {
+            final WindowState win = windowForClientLocked(session, window, true);
+            if (win.setKeepClearAreas(keepClearAreas)) {
+                win.getDisplayContent().updateKeepClearAreas();
+            }
+        }
+    }
+
     @Override
     public void registerDisplayFoldListener(IDisplayFoldListener listener) {
         mPolicy.registerDisplayFoldListener(listener);

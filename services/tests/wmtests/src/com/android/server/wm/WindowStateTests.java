@@ -83,6 +83,7 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArraySet;
 import android.view.Gravity;
 import android.view.InputWindowHandle;
 import android.view.InsetsSource;
@@ -985,5 +986,41 @@ public class WindowStateTests extends WindowTestsBase {
 
         assertFalse(app.isVisible());
         assertTrue(app.isVisibleRequested());
+    }
+
+    @Test
+    public void testKeepClearAreas() {
+        final WindowState window = createWindow(null, TYPE_APPLICATION, "window");
+        makeWindowVisible(window);
+
+        final Rect keepClearArea1 = new Rect(0, 0, 10, 10);
+        final Rect keepClearArea2 = new Rect(5, 10, 15, 20);
+        final List<Rect> keepClearAreas = Arrays.asList(keepClearArea1, keepClearArea2);
+        window.setKeepClearAreas(keepClearAreas);
+
+        // Test that the keep-clear rects are stored and returned
+        assertEquals(new ArraySet(keepClearAreas), new ArraySet(window.getKeepClearAreas()));
+
+        // Test that keep-clear rects are overwritten
+        window.setKeepClearAreas(Arrays.asList());
+        assertEquals(0, window.getKeepClearAreas().size());
+
+        // Move the window position
+        final SurfaceControl.Transaction t = spy(StubTransaction.class);
+        window.mSurfaceControl = mock(SurfaceControl.class);
+        final Rect frame = window.getFrame();
+        frame.set(10, 20, 60, 80);
+        window.updateSurfacePosition(t);
+        assertEquals(new Point(frame.left, frame.top), window.mLastSurfacePosition);
+
+        // Test that the returned keep-clear rects are translated to display space
+        window.setKeepClearAreas(keepClearAreas);
+        Rect expectedArea1 = new Rect(keepClearArea1);
+        expectedArea1.offset(frame.left, frame.top);
+        Rect expectedArea2 = new Rect(keepClearArea2);
+        expectedArea2.offset(frame.left, frame.top);
+
+        assertEquals(new ArraySet(Arrays.asList(expectedArea1, expectedArea2)),
+                     new ArraySet(window.getKeepClearAreas()));
     }
 }

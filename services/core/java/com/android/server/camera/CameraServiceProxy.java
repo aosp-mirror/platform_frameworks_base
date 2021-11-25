@@ -36,6 +36,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.hardware.CameraSessionStats;
 import android.hardware.CameraStreamStats;
 import android.hardware.ICameraService;
@@ -305,6 +306,9 @@ public class CameraServiceProxy extends SystemService
 
         @Override
         public void onFixedRotationFinished(int displayId) { }
+
+        @Override
+        public void onKeepClearAreasChanged(int displayId, List<Rect> keepClearArea) { }
     }
 
 

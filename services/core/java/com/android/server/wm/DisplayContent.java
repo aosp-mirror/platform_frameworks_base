@@ -122,6 +122,7 @@ import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_INPUT_TARGE
 import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_TARGET;
 import static com.android.server.wm.DisplayContentProto.INSETS_SOURCE_PROVIDERS;
 import static com.android.server.wm.DisplayContentProto.IS_SLEEPING;
+import static com.android.server.wm.DisplayContentProto.KEEP_CLEAR_AREAS;
 import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
 import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
@@ -169,6 +170,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
 import android.graphics.Insets;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -2718,6 +2720,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void onDisplayChanged(DisplayContent dc) {
         super.onDisplayChanged(dc);
         updateSystemGestureExclusionLimit();
+        updateKeepClearAreas();
     }
 
     void updateSystemGestureExclusionLimit() {
@@ -3327,6 +3330,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
         }
         proto.write(IME_POLICY, getImePolicy());
+        for (Rect r : getKeepClearAreas()) {
+            r.dumpDebug(proto, KEEP_CLEAR_AREAS);
+        }
         proto.end(token);
     }
 
@@ -3384,6 +3390,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             pw.println();
             pw.print("  mSystemGestureExclusion=");
             pw.println(mSystemGestureExclusion);
+        }
+
+        final List<Rect> keepClearAreas = getKeepClearAreas();
+        if (!keepClearAreas.isEmpty()) {
+            pw.println();
+            pw.print("  keepClearAreas=");
+            pw.println(keepClearAreas);
         }
 
         pw.println();
@@ -3613,6 +3626,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         adjustForImeIfNeeded();
+        updateKeepClearAreas();
 
         // We may need to schedule some toast windows to be removed. The toasts for an app that
         // does not have input focus are removed within a timeout to prevent apps to redress
@@ -5476,6 +5490,30 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     void unregisterSystemGestureExclusionListener(ISystemGestureExclusionListener listener) {
         mSystemGestureExclusionListeners.unregister(listener);
+    }
+
+    void updateKeepClearAreas() {
+        mWmService.mDisplayNotificationController.dispatchKeepClearAreasChanged(
+                this, getKeepClearAreas());
+    }
+
+    /**
+     * Returns all keep-clear areas from visible windows on this display.
+     */
+    ArrayList<Rect> getKeepClearAreas() {
+        final ArrayList<Rect> keepClearAreas = new ArrayList<Rect>();
+        final Matrix tmpMatrix = new Matrix();
+        final float[] tmpFloat9 = new float[9];
+        forAllWindows(w -> {
+            if (w.isVisible() && !w.inPinnedWindowingMode()) {
+                keepClearAreas.addAll(w.getKeepClearAreas(tmpMatrix, tmpFloat9));
+            }
+
+            // We stop traversing when we reach the base of a fullscreen app.
+            return w.getWindowType() == TYPE_BASE_APPLICATION
+                    && w.getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
+        }, true);
+        return keepClearAreas;
     }
 
     /**
