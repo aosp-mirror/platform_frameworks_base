@@ -242,7 +242,9 @@ message SystemSettingsProto {
 
     optional SettingProto when_to_make_wifi_calls = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
+    optional SettingProto apply_ramping_ringer = 35 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 35;
+    // Next tag = 36;
 }

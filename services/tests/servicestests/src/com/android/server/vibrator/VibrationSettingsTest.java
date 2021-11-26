@@ -126,7 +126,7 @@ public class VibrationSettingsTest {
 
         setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 0);
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
-        setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 0);
+        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
         setGlobalSetting(Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
     }
 
@@ -141,7 +141,7 @@ public class VibrationSettingsTest {
 
         setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 1);
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
-        setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 0);
+        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
         setGlobalSetting(Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_ALARMS);
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_OFF);
         setUserSetting(Settings.System.RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_OFF);
@@ -220,7 +220,7 @@ public class VibrationSettingsTest {
     @Test
     public void shouldVibrateForRingerMode_withApplyRampingRinger_ignoreSettingsForSilentMode() {
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
-        setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 1);
+        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 1);
 
         setRingerMode(AudioManager.RINGER_MODE_SILENT);
         assertFalse(mVibrationSettings.shouldVibrateForRingerMode(USAGE_RINGTONE));
@@ -238,7 +238,7 @@ public class VibrationSettingsTest {
     @Test
     public void shouldVibrateForRingerMode_withAllSettingsOff_onlyVibratesForVibrateMode() {
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
-        setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 0);
+        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
 
         setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
         assertTrue(mVibrationSettings.shouldVibrateForRingerMode(USAGE_RINGTONE));
