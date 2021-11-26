@@ -49,6 +49,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.SensorManager;
 import android.hardware.SystemSensorManager;
+import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
@@ -60,6 +61,7 @@ import android.os.BatteryManagerInternal;
 import android.os.BatterySaverPolicyConfig;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.Looper;
@@ -1151,6 +1153,9 @@ public final class PowerManagerService extends SystemService
                             PowerManager.GO_TO_SLEEP_REASON_QUIESCENT,
                             PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE, Process.SYSTEM_UID);
                 }
+
+                mContext.getSystemService(DeviceStateManager.class).registerCallback(
+                        new HandlerExecutor(mHandler), new DeviceStateListener());
             }
         }
     }
@@ -6349,4 +6354,25 @@ public final class PowerManagerService extends SystemService
             return interceptPowerKeyDownInternal(event);
         }
     }
+
+    /**
+     * Listens to changes in device state and updates the interactivity time.
+     * Any changes to the device state are treated as user interactions.
+     */
+    class DeviceStateListener implements DeviceStateManager.DeviceStateCallback {
+        private int mDeviceState = DeviceStateManager.INVALID_DEVICE_STATE;
+
+        @Override
+        public void onStateChanged(int deviceState) {
+            if (mDeviceState != deviceState) {
+                mDeviceState = deviceState;
+                // Device-state interactions are applied to the default display so that they
+                // are reflected only with the default power group.
+                userActivityInternal(Display.DEFAULT_DISPLAY, mClock.uptimeMillis(),
+                        PowerManager.USER_ACTIVITY_EVENT_DEVICE_STATE, /* flags= */0,
+                        Process.SYSTEM_UID);
+            }
+        }
+    };
+
 }

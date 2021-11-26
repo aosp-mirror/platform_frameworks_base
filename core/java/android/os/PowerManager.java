@@ -335,6 +335,12 @@ public final class PowerManager {
     public static final int USER_ACTIVITY_EVENT_FACE_DOWN = 5;
 
     /**
+     * User activity event type: There is a change in the device state.
+     * @hide
+     */
+    public static final int USER_ACTIVITY_EVENT_DEVICE_STATE = 6;
+
+    /**
      * User activity flag: If already dimmed, extend the dim timeout
      * but do not brighten.  This flag is useful for keeping the screen on
      * a little longer without causing a visible change such as when
