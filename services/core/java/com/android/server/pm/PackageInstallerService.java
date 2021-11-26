@@ -1461,8 +1461,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         private TreeMap<PackageInstallerSession, TreeSet<PackageInstallerSession>> mSessionMap;
 
         private final Comparator<PackageInstallerSession> mSessionCreationComparator =
-                Comparator.comparingLong((PackageInstallerSession sess) -> sess.createdMillis)
-                          .thenComparingInt(sess -> sess.sessionId);
+                Comparator.comparingLong(
+                        (PackageInstallerSession sess) -> sess != null ? sess.createdMillis : -1)
+                        .thenComparingInt(sess -> sess != null ? sess.sessionId : -1);
 
         ParentChildSessionMap() {
             mSessionMap = new TreeMap<>(mSessionCreationComparator);
@@ -1500,10 +1501,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             for (Map.Entry<PackageInstallerSession, TreeSet<PackageInstallerSession>> entry
                     : mSessionMap.entrySet()) {
                 PackageInstallerSession parentSession = entry.getKey();
-                pw.print(tag + " ");
-                parentSession.dump(pw);
-                pw.println();
-                pw.increaseIndent();
+                if (parentSession != null) {
+                    pw.print(tag + " ");
+                    parentSession.dump(pw);
+                    pw.println();
+                    pw.increaseIndent();
+                }
 
                 for (PackageInstallerSession childSession : entry.getValue()) {
                     pw.print(tag + " Child ");
