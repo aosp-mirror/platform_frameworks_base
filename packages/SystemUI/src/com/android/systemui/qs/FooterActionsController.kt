@@ -116,7 +116,7 @@ class FooterActionsController @Inject constructor(
             }
         } else if (v === powerMenuLite) {
             uiEventLogger.log(GlobalActionsDialogLite.GlobalActionsEvent.GA_OPEN_QS)
-            globalActionsDialog.showOrHideDialog(false, true)
+            globalActionsDialog.showOrHideDialog(false, true, v)
         }
     }
 
