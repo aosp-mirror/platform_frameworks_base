@@ -32427,13 +32427,16 @@ package android.os {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationAttributes> CREATOR;
     field public static final int FLAG_BYPASS_INTERRUPTION_POLICY = 1; // 0x1
+    field public static final int USAGE_ACCESSIBILITY = 66; // 0x42
     field public static final int USAGE_ALARM = 17; // 0x11
     field public static final int USAGE_CLASS_ALARM = 1; // 0x1
     field public static final int USAGE_CLASS_FEEDBACK = 2; // 0x2
     field public static final int USAGE_CLASS_MASK = 15; // 0xf
+    field public static final int USAGE_CLASS_MEDIA = 3; // 0x3
     field public static final int USAGE_CLASS_UNKNOWN = 0; // 0x0
     field public static final int USAGE_COMMUNICATION_REQUEST = 65; // 0x41
     field public static final int USAGE_HARDWARE_FEEDBACK = 50; // 0x32
+    field public static final int USAGE_MEDIA = 19; // 0x13
     field public static final int USAGE_NOTIFICATION = 49; // 0x31
     field public static final int USAGE_PHYSICAL_EMULATION = 34; // 0x22
     field public static final int USAGE_RINGTONE = 33; // 0x21
