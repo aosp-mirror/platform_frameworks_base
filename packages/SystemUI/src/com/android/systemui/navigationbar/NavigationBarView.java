@@ -1205,7 +1205,9 @@ public class NavigationBarView extends FrameLayout implements
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mTmpLastConfiguration.updateFrom(mConfiguration);
-        mConfiguration.updateFrom(newConfig);
+        final int changes = mConfiguration.updateFrom(newConfig);
+        mFloatingRotationButton.onConfigurationChanged(changes);
+
         boolean uiCarModeChanged = updateCarMode();
         updateIcons(mTmpLastConfiguration);
         updateRecentsIcon();
