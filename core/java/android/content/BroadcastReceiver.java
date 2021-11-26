@@ -27,6 +27,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
@@ -98,6 +99,7 @@ public abstract class BroadcastReceiver {
         boolean mAbortBroadcast;
         @UnsupportedAppUsage
         boolean mFinished;
+        String mReceiverClassName;
 
         /** @hide */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -219,6 +221,12 @@ public abstract class BroadcastReceiver {
          * next broadcast will proceed.
          */
         public final void finish() {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.traceCounter(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        "PendingResult#finish#ClassName:" + mReceiverClassName,
+                        1);
+            }
+
             if (mType == TYPE_COMPONENT) {
                 final IActivityManager mgr = ActivityManager.getService();
                 if (QueuedWork.hasPendingWork()) {
@@ -383,6 +391,14 @@ public abstract class BroadcastReceiver {
     public final PendingResult goAsync() {
         PendingResult res = mPendingResult;
         mPendingResult = null;
+
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            res.mReceiverClassName = getClass().getName();
+            Trace.traceCounter(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    "BroadcastReceiver#goAsync#ClassName:" + res.mReceiverClassName,
+                    1);
+        }
+
         return res;
     }
 
