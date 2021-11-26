@@ -51145,6 +51145,7 @@ package android.view.accessibility {
     method public void addAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener);
     method public boolean addAccessibilityStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener);
     method public void addAccessibilityStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener, @Nullable android.os.Handler);
+    method public void addAudioDescriptionByDefaultStateChangeListener(@NonNull java.util.concurrent.Executor, @NonNull android.view.accessibility.AccessibilityManager.AudioDescriptionByDefaultStateChangeListener);
     method public boolean addTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener);
     method public void addTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener, @Nullable android.os.Handler);
     method @ColorInt public int getAccessibilityFocusColor();
@@ -51161,6 +51162,7 @@ package android.view.accessibility {
     method public void removeAccessibilityRequestPreparer(android.view.accessibility.AccessibilityRequestPreparer);
     method public boolean removeAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener);
     method public boolean removeAccessibilityStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener);
+    method public boolean removeAudioDescriptionByDefaultStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AudioDescriptionByDefaultStateChangeListener);
     method public boolean removeTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener);
     method public void sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     field public static final int FLAG_CONTENT_CONTROLS = 4; // 0x4
@@ -51174,6 +51176,10 @@ package android.view.accessibility {
 
   public static interface AccessibilityManager.AccessibilityStateChangeListener {
     method public void onAccessibilityStateChanged(boolean);
+  }
+
+  public static interface AccessibilityManager.AudioDescriptionByDefaultStateChangeListener {
+    method public void onAudioDescriptionByDefaultStateChanged(boolean);
   }
 
   public static interface AccessibilityManager.TouchExplorationStateChangeListener {
