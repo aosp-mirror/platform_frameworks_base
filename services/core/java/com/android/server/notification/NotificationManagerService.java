@@ -9639,7 +9639,7 @@ public class NotificationManagerService extends SystemService {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            List<String> associations = mCompanionManager.getAssociations(
+            List<?> associations = mCompanionManager.getAssociations(
                     info.component.getPackageName(), info.userid);
             if (!ArrayUtils.isEmpty(associations)) {
                 return true;

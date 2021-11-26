@@ -67,7 +67,7 @@ public class CompanionDevicePresenceController {
             Slog.i(LOG_TAG,
                     "Sending onDeviceAppeared to " + association.getPackageName() + ")");
             primaryConnector.run(
-                    service -> service.onDeviceAppeared(association.getDeviceMacAddress()));
+                    s -> s.onDeviceAppeared(association.getDeviceMacAddressAsString()));
         }
     }
 
@@ -78,7 +78,7 @@ public class CompanionDevicePresenceController {
             Slog.i(LOG_TAG,
                     "Sending onDeviceDisappeared to " + association.getPackageName() + ")");
             primaryConnector.run(
-                    service -> service.onDeviceDisappeared(association.getDeviceMacAddress()));
+                    s -> s.onDeviceDisappeared(association.getDeviceMacAddressAsString()));
         }
     }
 

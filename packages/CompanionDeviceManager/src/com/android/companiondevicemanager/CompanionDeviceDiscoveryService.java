@@ -42,8 +42,8 @@ import android.companion.AssociationRequest;
 import android.companion.BluetoothDeviceFilter;
 import android.companion.BluetoothLeDeviceFilter;
 import android.companion.DeviceFilter;
+import android.companion.IAssociationRequestCallback;
 import android.companion.ICompanionDeviceDiscoveryService;
-import android.companion.IFindDeviceCallback;
 import android.companion.WifiDeviceFilter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -92,7 +92,7 @@ public class CompanionDeviceDiscoveryService extends Service {
     AssociationRequest mRequest;
     List<DeviceFilterPair> mDevicesFound;
     DeviceFilterPair mSelectedDevice;
-    IFindDeviceCallback mFindCallback;
+    IAssociationRequestCallback mApplicationCallback;
 
     AndroidFuture<String> mServiceCallback;
     boolean mIsScanning = false;
@@ -104,13 +104,13 @@ public class CompanionDeviceDiscoveryService extends Service {
         @Override
         public void startDiscovery(AssociationRequest request,
                 String callingPackage,
-                IFindDeviceCallback findCallback,
+                IAssociationRequestCallback appCallback,
                 AndroidFuture<String> serviceCallback) {
             Log.i(LOG_TAG,
                     "startDiscovery() called with: filter = [" + request
-                            + "], findCallback = [" + findCallback + "]"
+                            + "], appCallback = [" + appCallback + "]"
                             + "], serviceCallback = [" + serviceCallback + "]");
-            mFindCallback = findCallback;
+            mApplicationCallback = appCallback;
             mServiceCallback = serviceCallback;
             Handler.getMain().sendMessage(obtainMessage(
                     CompanionDeviceDiscoveryService::startDiscovery,
@@ -299,7 +299,7 @@ public class CompanionDeviceDiscoveryService extends Service {
     //TODO also, on timeout -> call onFailure
     private void onReadyToShowUI() {
         try {
-            mFindCallback.onSuccess(PendingIntent.getActivity(
+            mApplicationCallback.onAssociationPending(PendingIntent.getActivity(
                     this, 0,
                     new Intent(this, CompanionDeviceActivity.class),
                     PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_CANCEL_CURRENT
