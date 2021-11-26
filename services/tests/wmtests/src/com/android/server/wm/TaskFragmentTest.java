@@ -16,11 +16,14 @@
 
 package com.android.server.wm;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.clearInvocations;
 
 import android.graphics.Rect;
@@ -91,6 +94,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         final Rect endBounds = new Rect(500, 500, 1000, 1000);
         mTaskFragment.setBounds(startBounds);
         doReturn(true).when(mTaskFragment).isVisible();
+        doReturn(true).when(mTaskFragment).isVisibleRequested();
 
         clearInvocations(mTransaction);
         mTaskFragment.setBounds(endBounds);
@@ -106,6 +110,25 @@ public class TaskFragmentTest extends WindowTestsBase {
         // Update surface after animation.
         verify(mTransaction).setPosition(mLeash, 500, 500);
         verify(mTransaction).setWindowCrop(mLeash, 500, 500);
+    }
+
+    @Test
+    public void testNotOkToAnimate_doNotStartChangeTransition() {
+        mockSurfaceFreezerSnapshot(mTaskFragment.mSurfaceFreezer);
+        final Rect startBounds = new Rect(0, 0, 1000, 1000);
+        final Rect endBounds = new Rect(500, 500, 1000, 1000);
+        mTaskFragment.setBounds(startBounds);
+        doReturn(true).when(mTaskFragment).isVisible();
+        doReturn(true).when(mTaskFragment).isVisibleRequested();
+
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+        displayPolicy.screenTurnedOff();
+
+        assertFalse(mTaskFragment.okToAnimate());
+
+        mTaskFragment.setBounds(endBounds);
+
+        verify(mTaskFragment, never()).initializeChangeTransition(any());
     }
 
     /**

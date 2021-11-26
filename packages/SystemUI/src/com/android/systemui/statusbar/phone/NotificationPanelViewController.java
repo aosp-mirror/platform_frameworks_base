@@ -88,6 +88,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -451,9 +452,13 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mUserSetupComplete;
     private boolean mHideIconsDuringLaunchAnimation = true;
     private int mStackScrollerMeasuringPass;
-    private ArrayList<Consumer<ExpandableNotificationRow>>
-            mTrackingHeadsUpListeners =
-            new ArrayList<>();
+    /**
+     * Non-null if there's a heads-up notification that we're currently tracking the position of.
+     */
+    @Nullable
+    private ExpandableNotificationRow mTrackedHeadsUpNotification;
+    private final ArrayList<Consumer<ExpandableNotificationRow>>
+            mTrackingHeadsUpListeners = new ArrayList<>();
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
 
     private int mPanelAlpha;
@@ -3050,16 +3055,22 @@ public class NotificationPanelViewController extends PanelViewController {
         mQsExpandImmediate = false;
         mNotificationStackScrollLayoutController.setShouldShowShelfOnly(false);
         mTwoFingerQsExpandPossible = false;
-        notifyListenersTrackingHeadsUp(null);
+        updateTrackingHeadsUp(null);
         mExpandingFromHeadsUp = false;
         setPanelScrimMinFraction(0.0f);
     }
 
-    private void notifyListenersTrackingHeadsUp(ExpandableNotificationRow pickedChild) {
+    private void updateTrackingHeadsUp(@Nullable ExpandableNotificationRow pickedChild) {
+        mTrackedHeadsUpNotification = pickedChild;
         for (int i = 0; i < mTrackingHeadsUpListeners.size(); i++) {
             Consumer<ExpandableNotificationRow> listener = mTrackingHeadsUpListeners.get(i);
             listener.accept(pickedChild);
         }
+    }
+
+    @Nullable
+    public ExpandableNotificationRow getTrackedHeadsUpNotification() {
+        return mTrackedHeadsUpNotification;
     }
 
     private void setListening(boolean listening) {
@@ -3298,7 +3309,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     public void setTrackedHeadsUp(ExpandableNotificationRow pickedChild) {
         if (pickedChild != null) {
-            notifyListenersTrackingHeadsUp(pickedChild);
+            updateTrackingHeadsUp(pickedChild);
             mExpandingFromHeadsUp = true;
         }
         // otherwise we update the state when the expansion is finished
