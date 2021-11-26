@@ -3471,7 +3471,10 @@ public class DevicePolicyManager {
      * Setting custom, overly-complicated password requirements leads to passwords that are hard
      * for users to remember and may not provide any security benefits given as Android uses
      * hardware-backed throttling to thwart online and offline brute-forcing of the device's
-     * screen lock.
+     * screen lock. Company-owned devices (fully-managed and organization-owned managed profile
+     * devices) are able to continue using this method, though it is recommended that
+     * {@link #setRequiredPasswordComplexity(int)} should be used instead.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param quality The new desired quality. One of {@link #PASSWORD_QUALITY_UNSPECIFIED},
      *            {@link #PASSWORD_QUALITY_BIOMETRIC_WEAK},
