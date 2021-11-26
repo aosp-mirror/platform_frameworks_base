@@ -225,26 +225,28 @@ public class CompanionDeviceManagerService extends SystemService {
         new PackageMonitor() {
             @Override
             public void onPackageRemoved(String packageName, int uid) {
-                Slog.d(LOG_TAG, "onPackageRemoved(packageName = " + packageName
-                        + ", uid = " + uid + ")");
-                int userId = getChangingUserId();
-                updateAssociations(
-                        set -> filterOut(set, it -> it.belongsToPackage(userId, packageName)),
-                        userId);
+                final int userId = getChangingUserId();
+                Slog.i(LOG_TAG, "onPackageRemoved() u" + userId + "/" + packageName);
 
-                mCompanionDevicePresenceController.unbindDevicePresenceListener(
-                        packageName, userId);
+                clearAssociationForPackage(userId, packageName);
+            }
+
+            @Override
+            public void onPackageDataCleared(String packageName, int uid) {
+                final int userId = getChangingUserId();
+                Slog.i(LOG_TAG, "onPackageDataCleared() u" + userId + "/" + packageName);
+
+                clearAssociationForPackage(userId, packageName);
             }
 
             @Override
             public void onPackageModified(String packageName) {
-                Slog.d(LOG_TAG, "onPackageModified(packageName = " + packageName + ")");
-                int userId = getChangingUserId();
-                forEach(getAssociations(userId, packageName), association -> {
-                    updateSpecialAccessPermissionForAssociatedPackage(association);
-                });
-            }
+                final int userId = getChangingUserId();
+                Slog.i(LOG_TAG, "onPackageModified() u" + userId + "/" + packageName);
 
+                forEach(getAssociations(userId, packageName), association ->
+                        updateSpecialAccessPermissionForAssociatedPackage(association));
+            }
         }.register(getContext(), FgThread.get().getLooper(), UserHandle.ALL, true);
     }
 
@@ -740,6 +742,14 @@ public class CompanionDeviceManagerService extends SystemService {
                 }), userId);
 
         restartBleScan();
+    }
+
+    void clearAssociationForPackage(@UserIdInt int userId, @NonNull String packageName) {
+        if (DEBUG) Slog.d(LOG_TAG, "clearAssociationForPackage() u" + userId + "/" + packageName);
+
+        mCompanionDevicePresenceController.unbindDevicePresenceListener(packageName, userId);
+        updateAssociations(set -> filterOut(set, it -> it.belongsToPackage(userId, packageName)),
+                userId);
     }
 
     private void markIdAsPreviouslyUsedForPackage(
