@@ -481,7 +481,9 @@ public class RotationButtonController {
      * orientation overview.
      */
     public void setSkipOverrideUserLockPrefsOnce() {
-        mSkipOverrideUserLockPrefsOnce = true;
+        // If live-tile is enabled (recents animation keeps running in overview), there is no
+        // activity switch so the display rotation is not changed, then it is no need to skip.
+        mSkipOverrideUserLockPrefsOnce = !mIsRecentsAnimationRunning;
     }
 
     private boolean shouldOverrideUserLockPrefs(final int rotation) {

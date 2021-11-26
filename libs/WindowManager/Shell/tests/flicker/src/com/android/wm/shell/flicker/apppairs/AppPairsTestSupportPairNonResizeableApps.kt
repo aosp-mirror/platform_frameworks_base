@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.apppairs
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -86,7 +87,7 @@ class AppPairsTestSupportPairNonResizeableApps(
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun statusBarLayerRotatesScales() {
         // This test doesn't work in shell transitions because of b/206753786

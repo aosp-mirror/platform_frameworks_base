@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Postsubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -82,19 +83,19 @@ class SetRequestedOrientationWhilePinnedTest(
             }
         }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
 
@@ -102,7 +103,7 @@ class SetRequestedOrientationWhilePinnedTest(
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun statusBarLayerRotatesScales() {
         // This test doesn't work in shell transitions because of b/206753786
@@ -110,7 +111,7 @@ class SetRequestedOrientationWhilePinnedTest(
         super.statusBarLayerRotatesScales()
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     fun pipWindowInsideDisplay() {
         testSpec.assertWmStart {
@@ -118,7 +119,7 @@ class SetRequestedOrientationWhilePinnedTest(
         }
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     fun pipAppShowsOnTop() {
         testSpec.assertWmEnd {
@@ -126,7 +127,7 @@ class SetRequestedOrientationWhilePinnedTest(
         }
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     fun pipLayerInsideDisplay() {
         testSpec.assertLayersStart {
@@ -134,13 +135,13 @@ class SetRequestedOrientationWhilePinnedTest(
         }
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     fun pipAlwaysVisible() = testSpec.assertWm {
         this.isAppWindowVisible(pipApp.component)
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     fun pipAppLayerCoversFullScreen() {
         testSpec.assertLayersEnd {
@@ -148,7 +149,7 @@ class SetRequestedOrientationWhilePinnedTest(
         }
     }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
 

@@ -40,6 +40,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.RankingBuilder;
+import com.android.systemui.statusbar.notification.SectionClassifier;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
@@ -92,7 +93,9 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private IStatusBarService mService;
     @Spy private FakeNotifInflater mNotifInflater = new FakeNotifInflater();
-    private final TestableAdjustmentProvider mAdjustmentProvider = new TestableAdjustmentProvider();
+    private final SectionClassifier mSectionClassifier = new SectionClassifier();
+    private final NotifUiAdjustmentProvider mAdjustmentProvider =
+            new NotifUiAdjustmentProvider(mSectionClassifier);
 
     @NonNull
     private NotificationEntryBuilder getNotificationEntryBuilder() {
@@ -107,7 +110,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
         mInflationError = new Exception(TEST_MESSAGE);
         mErrorManager = new NotifInflationErrorManager();
         when(mNotifSection.getSectioner()).thenReturn(mNotifSectioner);
-        mAdjustmentProvider.setSectionIsLowPriority(false);
+        setSectionIsLowPriority(false);
 
         PreparationCoordinator coordinator = new PreparationCoordinator(
                 mock(PreparationCoordinatorLogger.class),
@@ -222,7 +225,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
         mNotifInflater.invokeInflateCallbackForEntry(mEntry);
 
         // WHEN notification moves to a min priority section
-        mAdjustmentProvider.setSectionIsLowPriority(true);
+        setSectionIsLowPriority(true);
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
 
         // THEN we rebind it
@@ -236,7 +239,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Test
     public void testMinimizedEntryMovedIntoGroupWillRebindViews() {
         // GIVEN an inflated, minimized notification
-        mAdjustmentProvider.setSectionIsLowPriority(true);
+        setSectionIsLowPriority(true);
         mCollectionListener.onEntryAdded(mEntry);
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
         verify(mNotifInflater).inflateViews(eq(mEntry), mParamsCaptor.capture(), any());
@@ -471,11 +474,9 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     private static final int TEST_CHILD_BIND_CUTOFF = 9;
     private static final int TEST_MAX_GROUP_DELAY = 100;
 
-    private class TestableAdjustmentProvider extends NotifUiAdjustmentProvider {
-        private void setSectionIsLowPriority(boolean lowPriority) {
-            setLowPrioritySections(lowPriority
-                    ? Collections.singleton(mNotifSection.getSectioner())
-                    : Collections.emptyList());
-        }
+    private void setSectionIsLowPriority(boolean minimized) {
+        mSectionClassifier.setMinimizedSections(minimized
+                ? Collections.singleton(mNotifSection.getSectioner())
+                : Collections.emptyList());
     }
 }

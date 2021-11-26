@@ -4628,7 +4628,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private void ensureRemovedFromTransientContainer(View v) {
-        if (v.getParent() == this && v instanceof SectionHeaderView) {
+        if (v.getParent() == this && v instanceof ExpandableView) {
             ExpandableView expandableView = (ExpandableView) v;
             ViewGroup transientContainer = expandableView.getTransientContainer();
             // If the child is animating away, it will still have a parent, so
@@ -6092,6 +6092,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     public ExpandHelper.Callback getExpandHelperCallback() {
         return mExpandHelperCallback;
+    }
+
+    float getAppearFraction() {
+        return mLastSentAppear;
+    }
+
+    float getExpandedHeight() {
+        return mLastSentExpandedHeight;
     }
 
     /** Enum for selecting some or all notification rows (does not included non-notif views). */

@@ -60,6 +60,7 @@ import java.util.function.Function;
 public class TimeZoneDetectorStrategyImplTest {
 
     private static final @UserIdInt int USER_ID = 9876;
+    private static final long ARBITRARY_ELAPSED_REALTIME_MILLIS = 1234;
     /** A time zone used for initialization that does not occur elsewhere in tests. */
     private static final String ARBITRARY_TIME_ZONE_ID = "Etc/UTC";
     private static final int SLOT_INDEX1 = 10000;
@@ -89,6 +90,7 @@ public class TimeZoneDetectorStrategyImplTest {
                     .setUserConfigAllowed(false)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
+                    .setTelephonyFallbackSupported(false)
                     .setAutoDetectionEnabledSetting(false)
                     .setLocationEnabledSetting(true)
                     .setGeoDetectionEnabledSetting(false)
@@ -99,6 +101,7 @@ public class TimeZoneDetectorStrategyImplTest {
                     .setUserConfigAllowed(false)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
+                    .setTelephonyFallbackSupported(false)
                     .setAutoDetectionEnabledSetting(true)
                     .setLocationEnabledSetting(true)
                     .setGeoDetectionEnabledSetting(true)
@@ -109,6 +112,7 @@ public class TimeZoneDetectorStrategyImplTest {
                     .setUserConfigAllowed(true)
                     .setTelephonyDetectionFeatureSupported(false)
                     .setGeoDetectionFeatureSupported(false)
+                    .setTelephonyFallbackSupported(false)
                     .setAutoDetectionEnabledSetting(false)
                     .setLocationEnabledSetting(true)
                     .setGeoDetectionEnabledSetting(false)
@@ -119,6 +123,7 @@ public class TimeZoneDetectorStrategyImplTest {
                     .setUserConfigAllowed(true)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
+                    .setTelephonyFallbackSupported(false)
                     .setAutoDetectionEnabledSetting(false)
                     .setLocationEnabledSetting(true)
                     .setGeoDetectionEnabledSetting(false)
@@ -128,6 +133,7 @@ public class TimeZoneDetectorStrategyImplTest {
             new ConfigurationInternal.Builder(USER_ID)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
+                    .setTelephonyFallbackSupported(false)
                     .setUserConfigAllowed(true)
                     .setAutoDetectionEnabledSetting(true)
                     .setLocationEnabledSetting(true)
@@ -138,6 +144,7 @@ public class TimeZoneDetectorStrategyImplTest {
             new ConfigurationInternal.Builder(USER_ID)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
+                    .setTelephonyFallbackSupported(false)
                     .setUserConfigAllowed(true)
                     .setAutoDetectionEnabledSetting(true)
                     .setLocationEnabledSetting(true)
@@ -146,9 +153,6 @@ public class TimeZoneDetectorStrategyImplTest {
 
     private TimeZoneDetectorStrategyImpl mTimeZoneDetectorStrategy;
     private FakeEnvironment mFakeEnvironment;
-
-    // A fake source of time for suggestions. This will typically be incremented after every use.
-    @ElapsedRealtimeLong private long mElapsedRealtimeMillis;
 
     @Before
     public void setUp() {
@@ -753,6 +757,204 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     @Test
+    public void testTelephonyFallback() {
+        ConfigurationInternal config = new ConfigurationInternal.Builder(
+                CONFIG_AUTO_ENABLED_GEO_ENABLED)
+                .setTelephonyFallbackSupported(true)
+                .build();
+
+        Script script = new Script()
+                .initializeClock(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
+                .simulateConfigurationInternalChange(config)
+                .resetConfigurationTracking();
+
+        // Confirm initial state is as expected.
+        script.verifyTelephonyFallbackIsEnabled(true)
+                .verifyTimeZoneNotChanged();
+
+        // Although geolocation detection is enabled, telephony fallback should be used initially
+        // and until a suitable "certain" geolocation suggestion is received.
+        {
+            TelephonyTimeZoneSuggestion telephonySuggestion = createTelephonySuggestion(
+                    SLOT_INDEX1, MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE,
+                    "Europe/Paris");
+            script.simulateIncrementClock()
+                    .simulateTelephonyTimeZoneSuggestion(telephonySuggestion)
+                    .verifyTimeZoneChangedAndReset(telephonySuggestion)
+                    .verifyTelephonyFallbackIsEnabled(true);
+        }
+
+        // Receiving an "uncertain" geolocation suggestion should have no effect.
+        {
+            GeolocationTimeZoneSuggestion uncertainGeolocationSuggestion =
+                    createUncertainGeolocationSuggestion();
+            script.simulateIncrementClock()
+                    .simulateGeolocationTimeZoneSuggestion(uncertainGeolocationSuggestion)
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(true);
+        }
+
+        // Receiving a "certain" geolocation suggestion should disable telephony fallback mode.
+        {
+            GeolocationTimeZoneSuggestion geolocationSuggestion =
+                    createCertainGeolocationSuggestion("Europe/London");
+            script.simulateIncrementClock()
+                    .simulateGeolocationTimeZoneSuggestion(geolocationSuggestion)
+                    .verifyTimeZoneChangedAndReset(geolocationSuggestion)
+                    .verifyTelephonyFallbackIsEnabled(false);
+        }
+
+        // Used to record the last telephony suggestion received, which will be used when fallback
+        // takes place.
+        TelephonyTimeZoneSuggestion lastTelephonySuggestion;
+
+        // Telephony suggestions should now be ignored and geolocation detection is "in control".
+        {
+            TelephonyTimeZoneSuggestion telephonySuggestion = createTelephonySuggestion(
+                    SLOT_INDEX1, MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE,
+                    "Europe/Berlin");
+            script.simulateIncrementClock()
+                    .simulateTelephonyTimeZoneSuggestion(telephonySuggestion)
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(false);
+            lastTelephonySuggestion = telephonySuggestion;
+        }
+
+        // Geolocation suggestions should continue to be used as normal (previous telephony
+        // suggestions are not used, even when the geolocation suggestion is uncertain).
+        {
+            GeolocationTimeZoneSuggestion geolocationSuggestion =
+                    createCertainGeolocationSuggestion("Europe/Rome");
+            script.simulateIncrementClock()
+                    .simulateGeolocationTimeZoneSuggestion(geolocationSuggestion)
+                    .verifyTimeZoneChangedAndReset(geolocationSuggestion)
+                    .verifyTelephonyFallbackIsEnabled(false);
+
+            GeolocationTimeZoneSuggestion uncertainGeolocationSuggestion =
+                    createUncertainGeolocationSuggestion();
+            script.simulateIncrementClock()
+                    .simulateGeolocationTimeZoneSuggestion(uncertainGeolocationSuggestion)
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(false);
+
+            script.simulateIncrementClock()
+                    .simulateGeolocationTimeZoneSuggestion(geolocationSuggestion)
+                    // No change needed, device will already be set to Europe/Rome.
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(false);
+        }
+
+        // Enable telephony fallback. Nothing will change, because the geolocation is still certain,
+        // but fallback will remain enabled.
+        {
+            script.simulateIncrementClock()
+                    .simulateEnableTelephonyFallback()
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(true);
+        }
+
+        // Make the geolocation algorithm uncertain.
+        {
+            GeolocationTimeZoneSuggestion uncertainGeolocationSuggestion =
+                    createUncertainGeolocationSuggestion();
+            script.simulateIncrementClock()
+                    .simulateGeolocationTimeZoneSuggestion(uncertainGeolocationSuggestion)
+                    .verifyTimeZoneChangedAndReset(lastTelephonySuggestion)
+                    .verifyTelephonyFallbackIsEnabled(true);
+        }
+
+        // Make the geolocation algorithm certain, disabling telephony fallback.
+        {
+            GeolocationTimeZoneSuggestion geolocationSuggestion =
+                    createCertainGeolocationSuggestion("Europe/Lisbon");
+            script.simulateIncrementClock()
+                    .simulateGeolocationTimeZoneSuggestion(geolocationSuggestion)
+                    .verifyTimeZoneChangedAndReset(geolocationSuggestion)
+                    .verifyTelephonyFallbackIsEnabled(false);
+
+        }
+
+        // Demonstrate what happens when geolocation is uncertain when telephony fallback is
+        // enabled.
+        {
+            GeolocationTimeZoneSuggestion uncertainGeolocationSuggestion =
+                    createUncertainGeolocationSuggestion();
+            script.simulateIncrementClock()
+                    .simulateGeolocationTimeZoneSuggestion(uncertainGeolocationSuggestion)
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(false)
+                    .simulateEnableTelephonyFallback()
+                    .verifyTimeZoneChangedAndReset(lastTelephonySuggestion)
+                    .verifyTelephonyFallbackIsEnabled(true);
+        }
+    }
+
+    @Test
+    public void testTelephonyFallback_noTelephonySuggestionToFallBackTo() {
+        ConfigurationInternal config = new ConfigurationInternal.Builder(
+                CONFIG_AUTO_ENABLED_GEO_ENABLED)
+                .setTelephonyFallbackSupported(true)
+                .build();
+
+        Script script = new Script()
+                .initializeClock(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
+                .simulateConfigurationInternalChange(config)
+                .resetConfigurationTracking();
+
+        // Confirm initial state is as expected.
+        script.verifyTelephonyFallbackIsEnabled(true)
+                .verifyTimeZoneNotChanged();
+
+        // Receiving an "uncertain" geolocation suggestion should have no effect.
+        {
+            GeolocationTimeZoneSuggestion uncertainGeolocationSuggestion =
+                    createUncertainGeolocationSuggestion();
+            script.simulateIncrementClock()
+                    .simulateGeolocationTimeZoneSuggestion(uncertainGeolocationSuggestion)
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(true);
+        }
+
+        // Make an uncertain geolocation suggestion, there is no telephony suggestion to fall back
+        // to
+        {
+            GeolocationTimeZoneSuggestion uncertainGeolocationSuggestion =
+                    createUncertainGeolocationSuggestion();
+            script.simulateIncrementClock()
+                    .simulateGeolocationTimeZoneSuggestion(uncertainGeolocationSuggestion)
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(true);
+        }
+
+        // Similar to the case above, but force a fallback attempt after making a "certain"
+        // geolocation suggestion.
+        // Geolocation suggestions should continue to be used as normal (previous telephony
+        // suggestions are not used, even when the geolocation suggestion is uncertain).
+        {
+            GeolocationTimeZoneSuggestion geolocationSuggestion =
+                    createCertainGeolocationSuggestion("Europe/Rome");
+            script.simulateIncrementClock()
+                    .simulateGeolocationTimeZoneSuggestion(geolocationSuggestion)
+                    .verifyTimeZoneChangedAndReset(geolocationSuggestion)
+                    .verifyTelephonyFallbackIsEnabled(false);
+
+            GeolocationTimeZoneSuggestion uncertainGeolocationSuggestion =
+                    createUncertainGeolocationSuggestion();
+            script.simulateIncrementClock()
+                    .simulateGeolocationTimeZoneSuggestion(uncertainGeolocationSuggestion)
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(false);
+
+            script.simulateIncrementClock()
+                    .simulateEnableTelephonyFallback()
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(true);
+        }
+    }
+
+    @Test
     public void testGenerateMetricsState() {
         ConfigurationInternal expectedInternalConfig = CONFIG_AUTO_DISABLED_GEO_DISABLED;
         String expectedDeviceTimeZoneId = "InitialZoneId";
@@ -835,6 +1037,8 @@ public class TimeZoneDetectorStrategyImplTest {
         assertEquals(config.isTelephonyDetectionSupported(),
                 actualState.isTelephonyDetectionSupported());
         assertEquals(config.isGeoDetectionSupported(), actualState.isGeoDetectionSupported());
+        assertEquals(config.isTelephonyFallbackSupported(),
+                actualState.isTelephonyTimeZoneFallbackSupported());
         assertEquals(config.getAutoDetectionEnabledSetting(),
                 actualState.getAutoDetectionEnabledSetting());
         assertEquals(config.getGeoDetectionEnabledSetting(),
@@ -865,7 +1069,7 @@ public class TimeZoneDetectorStrategyImplTest {
 
     private GeolocationTimeZoneSuggestion createUncertainGeolocationSuggestion() {
         return GeolocationTimeZoneSuggestion.createCertainSuggestion(
-                mElapsedRealtimeMillis++, null);
+                mFakeEnvironment.elapsedRealtimeMillis(), null);
     }
 
     private GeolocationTimeZoneSuggestion createCertainGeolocationSuggestion(
@@ -874,7 +1078,7 @@ public class TimeZoneDetectorStrategyImplTest {
 
         GeolocationTimeZoneSuggestion suggestion =
                 GeolocationTimeZoneSuggestion.createCertainSuggestion(
-                        mElapsedRealtimeMillis++, Arrays.asList(zoneIds));
+                        mFakeEnvironment.elapsedRealtimeMillis(), Arrays.asList(zoneIds));
         suggestion.addDebugInfo("Test suggestion");
         return suggestion;
     }
@@ -883,14 +1087,23 @@ public class TimeZoneDetectorStrategyImplTest {
 
         private final TestState<String> mTimeZoneId = new TestState<>();
         private ConfigurationInternal mConfigurationInternal;
+        private @ElapsedRealtimeLong long mElapsedRealtimeMillis;
         private ConfigurationChangeListener mConfigurationInternalChangeListener;
 
         void initializeConfig(ConfigurationInternal configurationInternal) {
             mConfigurationInternal = configurationInternal;
         }
 
+        void initializeClock(@ElapsedRealtimeLong long elapsedRealtimeMillis) {
+            mElapsedRealtimeMillis = elapsedRealtimeMillis;
+        }
+
         void initializeTimeZoneSetting(String zoneId) {
             mTimeZoneId.init(zoneId);
+        }
+
+        void incrementClock() {
+            mElapsedRealtimeMillis++;
         }
 
         @Override
@@ -936,6 +1149,12 @@ public class TimeZoneDetectorStrategyImplTest {
         void commitAllChanges() {
             mTimeZoneId.commitLatest();
         }
+
+        @Override
+        @ElapsedRealtimeLong
+        public long elapsedRealtimeMillis() {
+            return mElapsedRealtimeMillis;
+        }
     }
 
     /**
@@ -946,6 +1165,16 @@ public class TimeZoneDetectorStrategyImplTest {
 
         Script initializeTimeZoneSetting(String zoneId) {
             mFakeEnvironment.initializeTimeZoneSetting(zoneId);
+            return this;
+        }
+
+        Script initializeClock(long elapsedRealtimeMillis) {
+            mFakeEnvironment.initializeClock(elapsedRealtimeMillis);
+            return this;
+        }
+
+        Script simulateIncrementClock() {
+            mFakeEnvironment.incrementClock();
             return this;
         }
 
@@ -1009,6 +1238,15 @@ public class TimeZoneDetectorStrategyImplTest {
         }
 
         /**
+         * Simulates the time zone detection strategty receiving a signal that allows it to do
+         * telephony fallback.
+         */
+        Script simulateEnableTelephonyFallback() {
+            mTimeZoneDetectorStrategy.enableTelephonyTimeZoneFallback();
+            return this;
+        }
+
+        /**
          * Confirms that the device's time zone has not been set by previous actions since the test
          * state was last reset.
          */
@@ -1041,6 +1279,13 @@ public class TimeZoneDetectorStrategyImplTest {
                     1, suggestion.getZoneIds().size());
             mFakeEnvironment.assertTimeZoneChangedTo(suggestion.getZoneIds().get(0));
             mFakeEnvironment.commitAllChanges();
+            return this;
+        }
+
+        /** Verifies the state for telephony fallback. */
+        Script verifyTelephonyFallbackIsEnabled(boolean expectedEnabled) {
+            assertEquals(expectedEnabled,
+                    mTimeZoneDetectorStrategy.isTelephonyFallbackEnabledForTests());
             return this;
         }
 

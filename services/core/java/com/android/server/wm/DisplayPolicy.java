@@ -426,7 +426,7 @@ public class DisplayPolicy {
                 : service.mContext.createDisplayContext(displayContent.getDisplay());
         mUiContext = displayContent.isDefaultDisplay ? service.mAtmService.mUiContext
                 : service.mAtmService.mSystemThread
-                        .createSystemUiContext(displayContent.getDisplayId());
+                        .getSystemUiContext(displayContent.getDisplayId());
         mDisplayContent = displayContent;
         mLock = service.getWindowManagerLock();
 
@@ -1887,7 +1887,8 @@ public class DisplayPolicy {
         // user's package info (see ContextImpl.createDisplayContext)
         final LoadedApk pi = ActivityThread.currentActivityThread().getPackageInfo(
                 uiContext.getPackageName(), null, 0, userId);
-        mCurrentUserResources = ResourcesManager.getInstance().getResources(null,
+        mCurrentUserResources = ResourcesManager.getInstance().getResources(
+                uiContext.getWindowContextToken(),
                 pi.getResDir(),
                 null /* splitResDirs */,
                 pi.getOverlayDirs(),

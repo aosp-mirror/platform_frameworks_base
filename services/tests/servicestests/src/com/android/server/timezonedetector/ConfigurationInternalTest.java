@@ -48,6 +48,7 @@ public class ConfigurationInternalTest {
                 .setUserConfigAllowed(true)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
+                .setTelephonyFallbackSupported(false)
                 .setAutoDetectionEnabledSetting(true)
                 .setLocationEnabledSetting(true)
                 .setGeoDetectionEnabledSetting(true)
@@ -110,6 +111,7 @@ public class ConfigurationInternalTest {
                 .setUserConfigAllowed(false)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
+                .setTelephonyFallbackSupported(false)
                 .setAutoDetectionEnabledSetting(true)
                 .setLocationEnabledSetting(true)
                 .setGeoDetectionEnabledSetting(true)
@@ -174,6 +176,7 @@ public class ConfigurationInternalTest {
                 .setUserConfigAllowed(true)
                 .setTelephonyDetectionFeatureSupported(false)
                 .setGeoDetectionFeatureSupported(false)
+                .setTelephonyFallbackSupported(false)
                 .setAutoDetectionEnabledSetting(true)
                 .setLocationEnabledSetting(true)
                 .setGeoDetectionEnabledSetting(true)
@@ -236,6 +239,7 @@ public class ConfigurationInternalTest {
                 .setUserConfigAllowed(true)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(false)
+                .setTelephonyFallbackSupported(false)
                 .setAutoDetectionEnabledSetting(true)
                 .setLocationEnabledSetting(true)
                 .setGeoDetectionEnabledSetting(true)
@@ -287,5 +291,19 @@ public class ConfigurationInternalTest {
             assertFalse(configuration.isAutoDetectionEnabled());
             assertTrue(configuration.isGeoDetectionEnabled());
         }
+    }
+
+    @Test
+    public void test_telephonyFallbackSupported() {
+        ConfigurationInternal config = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
+                .setUserConfigAllowed(true)
+                .setTelephonyDetectionFeatureSupported(true)
+                .setGeoDetectionFeatureSupported(false)
+                .setTelephonyFallbackSupported(true)
+                .setAutoDetectionEnabledSetting(true)
+                .setLocationEnabledSetting(true)
+                .setGeoDetectionEnabledSetting(true)
+                .build();
+        assertTrue(config.isTelephonyFallbackSupported());
     }
 }

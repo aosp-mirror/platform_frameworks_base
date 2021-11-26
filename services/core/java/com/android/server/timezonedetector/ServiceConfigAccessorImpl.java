@@ -64,6 +64,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
+                    ServerFlags.KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED,
             }));
 
     /**
@@ -294,6 +295,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
                 .setTelephonyDetectionFeatureSupported(
                         isTelephonyTimeZoneDetectionFeatureSupported())
                 .setGeoDetectionFeatureSupported(isGeoTimeZoneDetectionFeatureSupported())
+                .setTelephonyFallbackSupported(isTelephonyFallbackSupported())
                 .setAutoDetectionEnabledSetting(getAutoDetectionEnabledSetting())
                 .setUserConfigAllowed(isUserConfigAllowed(userId))
                 .setLocationEnabledSetting(getLocationEnabledSetting(userId))
@@ -547,6 +549,13 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         mTestSecondaryLocationTimeZoneProviderPackageName = null;
         mTestSecondaryLocationTimeZoneProviderMode = null;
         mRecordProviderStateChanges = false;
+    }
+
+    private boolean isTelephonyFallbackSupported() {
+        return mServerFlags.getBoolean(
+                ServerFlags.KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED,
+                getConfigBoolean(
+                        com.android.internal.R.bool.config_supportTelephonyTimeZoneFallback));
     }
 
     private boolean getConfigBoolean(int providerEnabledConfigId) {

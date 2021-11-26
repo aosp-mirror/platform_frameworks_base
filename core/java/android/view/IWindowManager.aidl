@@ -855,6 +855,23 @@ interface IWindowManager
     void attachWindowContextToWindowToken(IBinder clientToken, IBinder token);
 
     /**
+     * Attaches a {@code clientToken} to associate with DisplayContent.
+     * <p>
+     * Note that this API should be invoked after calling
+     * {@link android.window.WindowTokenClient#attachContext(Context)}
+     * </p>
+     *
+     * @param clientToken {@link android.window.WindowContext#getWindowContextToken()
+     * the WindowContext's token}
+     * @param displayId The display associated with the window context
+     *
+     * @return the DisplayContent's {@link android.app.res.Configuration} if the Context is
+     * attached to the DisplayContent successfully. {@code null}, otherwise.
+     * @throws android.view.WindowManager.InvalidDisplayException if the display ID is invalid
+     */
+    Configuration attachToDisplayContent(IBinder clientToken, int displayId);
+
+    /**
      * Detaches {@link android.window.WindowContext} from the window manager node it's currently
      * attached to. It is no-op if the WindowContext is not attached to a window manager node.
      *
