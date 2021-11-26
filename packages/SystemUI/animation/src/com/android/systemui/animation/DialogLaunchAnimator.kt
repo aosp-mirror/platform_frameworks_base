@@ -27,7 +27,6 @@ import android.os.Looper
 import android.util.Log
 import android.util.MathUtils
 import android.view.GhostView
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnPreDrawListener
@@ -87,10 +86,11 @@ class DialogLaunchAnimator(
         // If the parent of the view we are launching from is the background of some other animated
         // dialog, then this means the caller intent is to launch a dialog from another dialog. In
         // this case, we also animate the parent (which is the dialog background).
-        val animatedParent = openedDialogs
-            .firstOrNull { it.dialogContentParent == view.parent }
-        val parentHostDialog = animatedParent?.hostDialog
-        val animateFrom = animatedParent?.dialogContentParent ?: view
+        val animatedParent = openedDialogs.firstOrNull {
+            it.dialogContentWithBackground == view || it.dialogContentWithBackground == view.parent
+        }
+        val dialogContentWithBackground = animatedParent?.dialogContentWithBackground
+        val animateFrom = dialogContentWithBackground ?: view
 
         // Make sure we don't run the launch animation from the same view twice at the same time.
         if (animateFrom.getTag(TAG_LAUNCH_ANIMATION_RUNNING) != null) {
@@ -109,7 +109,7 @@ class DialogLaunchAnimator(
                 onDialogDismissed = { openedDialogs.remove(it) },
                 originalDialog = dialog,
                 animateBackgroundBoundsChange,
-                openedDialogs.firstOrNull { it.hostDialog == parentHostDialog }
+                animatedParent
         )
         val hostDialog = animatedDialog.hostDialog
         openedDialogs.add(animatedDialog)
@@ -288,13 +288,12 @@ private class AnimatedDialog(
     private val hostDialogRoot = FrameLayout(context)
 
     /**
-     * The parent of the original dialog content view, that serves as a fake window that will have
-     * the same size as the original dialog window and to which we will set the original dialog
-     * window background.
+     * The dialog content with its background. When animating a fullscreen dialog, this is just the
+     * first ViewGroup of the dialog that has a background. When animating a normal (not fullscreen)
+     * dialog, this is an additional view that serves as a fake window that will have the same size
+     * as the original dialog window and to which we will set the original dialog window background.
      */
-    val dialogContentParent = FrameLayout(context).apply {
-        id = DIALOG_CONTENT_PARENT_ID
-    }
+    var dialogContentWithBackground: ViewGroup? = null
 
     /**
      * The background color of [originalDialogView], taking into consideration the [originalDialog]
@@ -451,59 +450,87 @@ private class AnimatedDialog(
         hostDialogRoot.setOnClickListener { hostDialog.dismiss() }
         dialogView.isClickable = true
 
-        // Set the background of the window dialog to the dialog itself.
-        // TODO(b/193634619): Support dialog windows without background.
-        // TODO(b/193634619): Support dialog whose background comes from the content view instead of
-        // the window.
-        val typedArray =
-            originalDialog.context.obtainStyledAttributes(com.android.internal.R.styleable.Window)
-        val backgroundRes =
-            typedArray.getResourceId(com.android.internal.R.styleable.Window_windowBackground, 0)
-        typedArray.recycle()
-        if (backgroundRes == 0) {
-            throw IllegalStateException("Dialogs with no backgrounds on window are not supported")
+        // Remove the original dialog view from its parent.
+        (dialogView.parent as? ViewGroup)?.removeView(dialogView)
+
+        val originalDialogWindow = originalDialog.window!!
+        val isOriginalWindowFullScreen =
+            originalDialogWindow.attributes.width == ViewGroup.LayoutParams.MATCH_PARENT &&
+            originalDialogWindow.attributes.height == ViewGroup.LayoutParams.MATCH_PARENT
+        if (isOriginalWindowFullScreen) {
+            // If the original dialog window is fullscreen, then we look for the first ViewGroup
+            // that has a background and animate towards that ViewGroup given that this is probably
+            // what represents the actual dialog view.
+            dialogContentWithBackground = findFirstViewGroupWithBackground(dialogView)
+                ?: throw IllegalStateException("Unable to find ViewGroup with background")
+
+            hostDialogRoot.addView(
+                dialogView,
+
+                FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+            )
+        } else {
+            // Add a parent view to the original dialog view to which we will set the original
+            // dialog window background. This View serves as a fake window with background, so that
+            // we are sure that we don't override the original dialog content view paddings with the
+            // window background that usually has insets.
+            dialogContentWithBackground = FrameLayout(context).apply {
+                id = DIALOG_CONTENT_PARENT_ID
+
+                // TODO(b/193634619): Support dialog windows without background.
+                background = originalDialogWindow.decorView?.background
+                    ?: throw IllegalStateException(
+                        "Dialogs with no backgrounds on window are not supported")
+
+                addView(
+                    dialogView,
+
+                    // It should match its parent size, which is sized the same as the original
+                    // dialog window.
+                    FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                )
+            }
+
+            // Add the parent (that has the background) to the host window.
+            hostDialogRoot.addView(
+                dialogContentWithBackground,
+
+                // We give it the size and gravity of its original dialog window.
+                FrameLayout.LayoutParams(
+                    originalDialogWindow.attributes.width,
+                    originalDialogWindow.attributes.height,
+                    originalDialogWindow.attributes.gravity
+                )
+            )
         }
 
-        // Add a parent view to the original dialog view to which we will set the original dialog
-        // window background. This View serves as a fake window with background, so that we are sure
-        // that we don't override the dialog view paddings with the window background that usually
-        // has insets.
-        dialogContentParent.setBackgroundResource(backgroundRes)
-        hostDialogRoot.addView(
-            dialogContentParent,
+        val dialogContentWithBackground = this.dialogContentWithBackground!!
 
-            // We give it the size of its original dialog window.
-            FrameLayout.LayoutParams(
-                originalDialog.window.attributes.width,
-                originalDialog.window.attributes.height,
-                Gravity.CENTER
-            )
-        )
+        // Make the dialog and its background invisible for now, to make sure it's not drawn yet.
+        dialogContentWithBackground.visibility = View.INVISIBLE
 
-        // Make the dialog view parent invisible for now, to make sure it's not drawn yet.
-        dialogContentParent.visibility = View.INVISIBLE
-
-        val background = dialogContentParent.background!!
+        val background = dialogContentWithBackground.background!!
         originalDialogBackgroundColor =
             GhostedViewLaunchAnimatorController.findGradientDrawable(background)
                 ?.color
                 ?.defaultColor ?: Color.BLACK
 
-        // Add the dialog view to its parent (that has the original window background).
-        (dialogView.parent as? ViewGroup)?.removeView(dialogView)
-        dialogContentParent.addView(
-            dialogView,
-
-            // It should match its parent size, which is sized the same as the original dialog
-            // window.
-            FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        )
+        if (isOriginalWindowFullScreen) {
+            // If the original window is full screen, the ViewGroup with background might already be
+            // correctly laid out. Make sure we relayout and that the layout listener below is still
+            // called.
+            dialogContentWithBackground.layout(0, 0, 0, 0)
+            dialogContentWithBackground.requestLayout()
+        }
 
         // Start the animation when the dialog is laid out in the center of the host dialog.
-        dialogContentParent.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+        dialogContentWithBackground.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
             override fun onLayoutChange(
                 view: View,
                 left: Int,
@@ -515,12 +542,31 @@ private class AnimatedDialog(
                 oldRight: Int,
                 oldBottom: Int
             ) {
-                dialogContentParent.removeOnLayoutChangeListener(this)
+                dialogContentWithBackground.removeOnLayoutChangeListener(this)
 
                 isOriginalDialogViewLaidOut = true
                 maybeStartLaunchAnimation()
             }
         })
+    }
+
+    private fun findFirstViewGroupWithBackground(view: View): ViewGroup? {
+        if (view !is ViewGroup) {
+            return null
+        }
+
+        if (view.background != null) {
+            return view
+        }
+
+        for (i in 0 until view.childCount) {
+            val match = findFirstViewGroupWithBackground(view.getChildAt(i))
+            if (match != null) {
+                return match
+            }
+        }
+
+        return null
     }
 
     fun onOriginalDialogSizeChanged() {
@@ -571,7 +617,8 @@ private class AnimatedDialog(
                 // at the end of the launch animation, because the lauch animation already correctly
                 // handles bounds changes.
                 if (backgroundLayoutListener != null) {
-                    dialogContentParent.addOnLayoutChangeListener(backgroundLayoutListener)
+                    dialogContentWithBackground!!
+                        .addOnLayoutChangeListener(backgroundLayoutListener)
                 }
             }
         )
@@ -638,10 +685,12 @@ private class AnimatedDialog(
                 (touchSurface as? LaunchableView)?.setShouldBlockVisibilityChanges(false)
 
                 touchSurface.visibility = View.VISIBLE
-                dialogContentParent.visibility = View.INVISIBLE
+                val dialogContentWithBackground = this.dialogContentWithBackground!!
+                dialogContentWithBackground.visibility = View.INVISIBLE
 
                 if (backgroundLayoutListener != null) {
-                    dialogContentParent.removeOnLayoutChangeListener(backgroundLayoutListener)
+                    dialogContentWithBackground
+                        .removeOnLayoutChangeListener(backgroundLayoutListener)
                 }
 
                 // The animated ghost was just removed. We create a temporary ghost that will be
@@ -674,8 +723,8 @@ private class AnimatedDialog(
     ) {
         // Create 2 ghost controllers to animate both the dialog and the touch surface in the host
         // dialog.
-        val startView = if (isLaunching) touchSurface else dialogContentParent
-        val endView = if (isLaunching) dialogContentParent else touchSurface
+        val startView = if (isLaunching) touchSurface else dialogContentWithBackground!!
+        val endView = if (isLaunching) dialogContentWithBackground!! else touchSurface
         val startViewController = GhostedViewLaunchAnimatorController(startView)
         val endViewController = GhostedViewLaunchAnimatorController(endView)
         startViewController.launchContainer = hostDialogRoot
@@ -736,7 +785,9 @@ private class AnimatedDialog(
     }
 
     private fun shouldAnimateDialogIntoView(): Boolean {
-        if (exitAnimationDisabled) {
+        // Don't animate if the dialog was previously hidden using hide() (either on the host dialog
+        // or on the original dialog) or if we disabled the exit animation.
+        if (exitAnimationDisabled || !hostDialog.isShowing) {
             return false
         }
 
