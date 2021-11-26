@@ -664,7 +664,6 @@ public class StatusBar extends SystemUI implements
     private boolean mNoAnimationOnNextBarModeChange;
     private final SysuiStatusBarStateController mStatusBarStateController;
 
-    private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
     private NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
     protected StatusBarNotificationPresenter mPresenter;
@@ -1163,21 +1162,6 @@ public class StatusBar extends SystemUI implements
                     // displayed).
                     mNotificationPanelViewController.updatePanelExpansionAndVisibility();
                     setBouncerShowingForStatusBarComponents(mBouncerShowing);
-
-                    HeadsUpAppearanceController oldController = mHeadsUpAppearanceController;
-                    if (mHeadsUpAppearanceController != null) {
-                        // This view is being recreated, let's destroy the old one
-                        mHeadsUpAppearanceController.destroy();
-                    }
-                    // TODO (b/136993073) Separate notification shade and status bar
-                    // TODO(b/205609837): Migrate this to StatusBarFragmentComponent.
-                    mHeadsUpAppearanceController = new HeadsUpAppearanceController(
-                            mNotificationIconAreaController, mHeadsUpManager,
-                            mStackScrollerController,
-                            mStatusBarStateController, mKeyguardBypassController,
-                            mKeyguardStateController, mWakeUpCoordinator, mCommandQueue,
-                            mNotificationPanelViewController, mStatusBarView);
-                    mHeadsUpAppearanceController.readFrom(oldController);
 
                     mLightsOutNotifController.setLightsOutNotifView(
                             mStatusBarView.findViewById(R.id.notification_lights_out));
@@ -1902,10 +1886,6 @@ public class StatusBar extends SystemUI implements
         mIsOccluded = occluded;
         mStatusBarHideIconsForBouncerManager.setIsOccludedAndTriggerUpdate(occluded);
         mScrimController.setKeyguardOccluded(occluded);
-    }
-
-    public boolean headsUpShouldBeVisible() {
-        return mHeadsUpAppearanceController.shouldBeVisible();
     }
 
     /** A launch animation was cancelled. */

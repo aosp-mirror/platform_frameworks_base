@@ -68,7 +68,7 @@ import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
-@Module
+@Module(subcomponents = StatusBarFragmentComponent.class)
 public abstract class StatusBarViewModule {
 
     public static final String SPLIT_SHADE_HEADER = "split_shade_header";
