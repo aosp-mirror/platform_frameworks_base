@@ -15,6 +15,7 @@
  */
 package com.android.server.hdmi;
 
+import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -115,6 +116,7 @@ public class ArcInitiationActionFromAvrTest {
         mAction = new ArcInitiationActionFromAvr(mHdmiCecLocalDeviceAudioSystem);
 
         mLocalDevices.add(mHdmiCecLocalDeviceAudioSystem);
+        hdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         hdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
     }

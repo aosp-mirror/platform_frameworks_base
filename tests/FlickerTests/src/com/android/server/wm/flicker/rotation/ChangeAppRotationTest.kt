@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.rotation
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -97,13 +96,13 @@ class ChangeAppRotationTest(
             }
         }
 
-    @Postsubmit
+    @FlakyTest
     @Test
     fun runPresubmitAssertion() {
         flickerRule.checkPresubmitAssertions()
     }
 
-    @Postsubmit
+    @FlakyTest
     @Test
     fun runPostsubmitAssertion() {
         flickerRule.checkPostsubmitAssertions()

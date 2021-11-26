@@ -2152,10 +2152,7 @@ class Task extends TaskFragment {
     }
 
     private boolean shouldStartChangeTransition(int prevWinMode, int newWinMode) {
-        if (mWmService.mDisableTransitionAnimation
-                || !isVisible()
-                || getSurfaceControl() == null
-                || !isLeafTask()) {
+        if (!isLeafTask() || !canStartChangeTransition()) {
             return false;
         }
         // Only do an animation into and out-of freeform mode for now. Other mode

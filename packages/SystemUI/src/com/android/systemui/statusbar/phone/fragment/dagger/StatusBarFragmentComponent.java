@@ -57,6 +57,7 @@ public interface StatusBarFragmentComponent {
         // No one accesses this controller, so we need to make sure we reference it here so it does
         // get initialized.
         getBatteryMeterViewController().init();
+        getHeadsUpAppearanceController().init();
     }
 
     /** */

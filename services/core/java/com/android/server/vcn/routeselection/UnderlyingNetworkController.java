@@ -16,11 +16,12 @@
 
 package com.android.server.vcn.routeselection;
 
-import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
-import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener;
 
 import static com.android.server.VcnManagementService.LOCAL_LOG;
+import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.getWifiEntryRssiThreshold;
+import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.getWifiExitRssiThreshold;
+import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.isOpportunistic;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -31,28 +32,23 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.TelephonyNetworkSpecifier;
-import android.net.vcn.VcnManager;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
-import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Slog;
-import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.VcnContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -70,56 +66,6 @@ import java.util.TreeSet;
  */
 public class UnderlyingNetworkController {
     @NonNull private static final String TAG = UnderlyingNetworkController.class.getSimpleName();
-
-    /**
-     * Minimum signal strength for a WiFi network to be eligible for switching to
-     *
-     * <p>A network that satisfies this is eligible to become the selected underlying network with
-     * no additional conditions
-     */
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    static final int WIFI_ENTRY_RSSI_THRESHOLD_DEFAULT = -70;
-
-    /**
-     * Minimum signal strength to continue using a WiFi network
-     *
-     * <p>A network that satisfies the conditions may ONLY continue to be used if it is already
-     * selected as the underlying network. A WiFi network satisfying this condition, but NOT the
-     * prospective-network RSSI threshold CANNOT be switched to.
-     */
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    static final int WIFI_EXIT_RSSI_THRESHOLD_DEFAULT = -74;
-
-    /** Priority for any cellular network for which the subscription is listed as opportunistic */
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    static final int PRIORITY_OPPORTUNISTIC_CELLULAR = 0;
-
-    /** Priority for any WiFi network which is in use, and satisfies the in-use RSSI threshold */
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    static final int PRIORITY_WIFI_IN_USE = 1;
-
-    /** Priority for any WiFi network which satisfies the prospective-network RSSI threshold */
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    static final int PRIORITY_WIFI_PROSPECTIVE = 2;
-
-    /** Priority for any standard macro cellular network */
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    static final int PRIORITY_MACRO_CELLULAR = 3;
-
-    /** Priority for any other networks (including unvalidated, etc) */
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    static final int PRIORITY_ANY = Integer.MAX_VALUE;
-
-    private static final SparseArray<String> PRIORITY_TO_STRING_MAP = new SparseArray<>();
-
-    static {
-        PRIORITY_TO_STRING_MAP.put(
-                PRIORITY_OPPORTUNISTIC_CELLULAR, "PRIORITY_OPPORTUNISTIC_CELLULAR");
-        PRIORITY_TO_STRING_MAP.put(PRIORITY_WIFI_IN_USE, "PRIORITY_WIFI_IN_USE");
-        PRIORITY_TO_STRING_MAP.put(PRIORITY_WIFI_PROSPECTIVE, "PRIORITY_WIFI_PROSPECTIVE");
-        PRIORITY_TO_STRING_MAP.put(PRIORITY_MACRO_CELLULAR, "PRIORITY_MACRO_CELLULAR");
-        PRIORITY_TO_STRING_MAP.put(PRIORITY_ANY, "PRIORITY_ANY");
-    }
 
     @NonNull private final VcnContext mVcnContext;
     @NonNull private final ParcelUuid mSubscriptionGroup;
@@ -425,22 +371,6 @@ public class UnderlyingNetworkController {
         mCb.onSelectedUnderlyingNetworkChanged(mCurrentRecord);
     }
 
-    private static boolean isOpportunistic(
-            @NonNull TelephonySubscriptionSnapshot snapshot, Set<Integer> subIds) {
-        if (snapshot == null) {
-            logWtf("Got null snapshot");
-            return false;
-        }
-
-        for (int subId : subIds) {
-            if (snapshot.isOpportunistic(subId)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     /**
      * NetworkBringupCallback is used to keep background, VCN-managed Networks from being reaped.
      *
@@ -541,230 +471,6 @@ public class UnderlyingNetworkController {
             builder.setIsBlocked(isBlocked);
             if (builder.isValid()) {
                 reevaluateNetworks();
-            }
-        }
-    }
-
-    private static int getWifiEntryRssiThreshold(@Nullable PersistableBundle carrierConfig) {
-        if (carrierConfig != null) {
-            return carrierConfig.getInt(
-                    VcnManager.VCN_NETWORK_SELECTION_WIFI_ENTRY_RSSI_THRESHOLD_KEY,
-                    WIFI_ENTRY_RSSI_THRESHOLD_DEFAULT);
-        }
-
-        return WIFI_ENTRY_RSSI_THRESHOLD_DEFAULT;
-    }
-
-    private static int getWifiExitRssiThreshold(@Nullable PersistableBundle carrierConfig) {
-        if (carrierConfig != null) {
-            return carrierConfig.getInt(
-                    VcnManager.VCN_NETWORK_SELECTION_WIFI_EXIT_RSSI_THRESHOLD_KEY,
-                    WIFI_EXIT_RSSI_THRESHOLD_DEFAULT);
-        }
-
-        return WIFI_EXIT_RSSI_THRESHOLD_DEFAULT;
-    }
-
-    /** A record of a single underlying network, caching relevant fields. */
-    public static class UnderlyingNetworkRecord {
-        @NonNull public final Network network;
-        @NonNull public final NetworkCapabilities networkCapabilities;
-        @NonNull public final LinkProperties linkProperties;
-        public final boolean isBlocked;
-
-        @VisibleForTesting(visibility = Visibility.PRIVATE)
-        public UnderlyingNetworkRecord(
-                @NonNull Network network,
-                @NonNull NetworkCapabilities networkCapabilities,
-                @NonNull LinkProperties linkProperties,
-                boolean isBlocked) {
-            this.network = network;
-            this.networkCapabilities = networkCapabilities;
-            this.linkProperties = linkProperties;
-            this.isBlocked = isBlocked;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof UnderlyingNetworkRecord)) return false;
-            final UnderlyingNetworkRecord that = (UnderlyingNetworkRecord) o;
-
-            return network.equals(that.network)
-                    && networkCapabilities.equals(that.networkCapabilities)
-                    && linkProperties.equals(that.linkProperties)
-                    && isBlocked == that.isBlocked;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(network, networkCapabilities, linkProperties, isBlocked);
-        }
-
-        /**
-         * Gives networks a priority class, based on the following priorities:
-         *
-         * <ol>
-         *   <li>Opportunistic cellular
-         *   <li>Carrier WiFi, signal strength >= WIFI_ENTRY_RSSI_THRESHOLD_DEFAULT
-         *   <li>Carrier WiFi, active network + signal strength >= WIFI_EXIT_RSSI_THRESHOLD_DEFAULT
-         *   <li>Macro cellular
-         *   <li>Any others
-         * </ol>
-         */
-        private int calculatePriorityClass(
-                ParcelUuid subscriptionGroup,
-                TelephonySubscriptionSnapshot snapshot,
-                UnderlyingNetworkRecord currentlySelected,
-                PersistableBundle carrierConfig) {
-            final NetworkCapabilities caps = networkCapabilities;
-
-            // mRouteSelectionNetworkRequest requires a network be both VALIDATED and NOT_SUSPENDED
-
-            if (isBlocked) {
-                logWtf("Network blocked for System Server: " + network);
-                return PRIORITY_ANY;
-            }
-
-            if (caps.hasTransport(TRANSPORT_CELLULAR)
-                    && isOpportunistic(snapshot, caps.getSubscriptionIds())) {
-                // If this carrier is the active data provider, ensure that opportunistic is only
-                // ever prioritized if it is also the active data subscription. This ensures that
-                // if an opportunistic subscription is still in the process of being switched to,
-                // or switched away from, the VCN does not attempt to continue using it against the
-                // decision made at the telephony layer. Failure to do so may result in the modem
-                // switching back and forth.
-                //
-                // Allow the following two cases:
-                // 1. Active subId is NOT in the group that this VCN is supporting
-                // 2. This opportunistic subscription is for the active subId
-                if (!snapshot.getAllSubIdsInGroup(subscriptionGroup)
-                                .contains(SubscriptionManager.getActiveDataSubscriptionId())
-                        || caps.getSubscriptionIds()
-                                .contains(SubscriptionManager.getActiveDataSubscriptionId())) {
-                    return PRIORITY_OPPORTUNISTIC_CELLULAR;
-                }
-            }
-
-            if (caps.hasTransport(TRANSPORT_WIFI)) {
-                if (caps.getSignalStrength() >= getWifiExitRssiThreshold(carrierConfig)
-                        && currentlySelected != null
-                        && network.equals(currentlySelected.network)) {
-                    return PRIORITY_WIFI_IN_USE;
-                }
-
-                if (caps.getSignalStrength() >= getWifiEntryRssiThreshold(carrierConfig)) {
-                    return PRIORITY_WIFI_PROSPECTIVE;
-                }
-            }
-
-            // Disallow opportunistic subscriptions from matching PRIORITY_MACRO_CELLULAR, as might
-            // be the case when Default Data SubId (CBRS) != Active Data SubId (MACRO), as might be
-            // the case if the Default Data SubId does not support certain services (eg voice
-            // calling)
-            if (caps.hasTransport(TRANSPORT_CELLULAR)
-                    && !isOpportunistic(snapshot, caps.getSubscriptionIds())) {
-                return PRIORITY_MACRO_CELLULAR;
-            }
-
-            return PRIORITY_ANY;
-        }
-
-        private static Comparator<UnderlyingNetworkRecord> getComparator(
-                ParcelUuid subscriptionGroup,
-                TelephonySubscriptionSnapshot snapshot,
-                UnderlyingNetworkRecord currentlySelected,
-                PersistableBundle carrierConfig) {
-            return (left, right) -> {
-                return Integer.compare(
-                        left.calculatePriorityClass(
-                                subscriptionGroup, snapshot, currentlySelected, carrierConfig),
-                        right.calculatePriorityClass(
-                                subscriptionGroup, snapshot, currentlySelected, carrierConfig));
-            };
-        }
-
-        /** Dumps the state of this record for logging and debugging purposes. */
-        private void dump(
-                IndentingPrintWriter pw,
-                ParcelUuid subscriptionGroup,
-                TelephonySubscriptionSnapshot snapshot,
-                UnderlyingNetworkRecord currentlySelected,
-                PersistableBundle carrierConfig) {
-            pw.println("UnderlyingNetworkRecord:");
-            pw.increaseIndent();
-
-            final int priorityClass =
-                    calculatePriorityClass(
-                            subscriptionGroup, snapshot, currentlySelected, carrierConfig);
-            pw.println(
-                    "Priority class: " + PRIORITY_TO_STRING_MAP.get(priorityClass) + " ("
-                            + priorityClass + ")");
-            pw.println("mNetwork: " + network);
-            pw.println("mNetworkCapabilities: " + networkCapabilities);
-            pw.println("mLinkProperties: " + linkProperties);
-
-            pw.decreaseIndent();
-        }
-
-        /** Builder to incrementally construct an UnderlyingNetworkRecord. */
-        private static class Builder {
-            @NonNull private final Network mNetwork;
-
-            @Nullable private NetworkCapabilities mNetworkCapabilities;
-            @Nullable private LinkProperties mLinkProperties;
-            boolean mIsBlocked;
-            boolean mWasIsBlockedSet;
-
-            @Nullable private UnderlyingNetworkRecord mCached;
-
-            private Builder(@NonNull Network network) {
-                mNetwork = network;
-            }
-
-            @NonNull
-            private Network getNetwork() {
-                return mNetwork;
-            }
-
-            private void setNetworkCapabilities(@NonNull NetworkCapabilities networkCapabilities) {
-                mNetworkCapabilities = networkCapabilities;
-                mCached = null;
-            }
-
-            @Nullable
-            private NetworkCapabilities getNetworkCapabilities() {
-                return mNetworkCapabilities;
-            }
-
-            private void setLinkProperties(@NonNull LinkProperties linkProperties) {
-                mLinkProperties = linkProperties;
-                mCached = null;
-            }
-
-            private void setIsBlocked(boolean isBlocked) {
-                mIsBlocked = isBlocked;
-                mWasIsBlockedSet = true;
-                mCached = null;
-            }
-
-            private boolean isValid() {
-                return mNetworkCapabilities != null && mLinkProperties != null && mWasIsBlockedSet;
-            }
-
-            private UnderlyingNetworkRecord build() {
-                if (!isValid()) {
-                    throw new IllegalArgumentException(
-                            "Called build before UnderlyingNetworkRecord was valid");
-                }
-
-                if (mCached == null) {
-                    mCached =
-                            new UnderlyingNetworkRecord(
-                                    mNetwork, mNetworkCapabilities, mLinkProperties, mIsBlocked);
-                }
-
-                return mCached;
             }
         }
     }

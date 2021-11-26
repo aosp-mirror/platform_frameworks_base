@@ -114,6 +114,10 @@ public class Flags {
     public static final BooleanFlag MONET =
             new BooleanFlag(800, true, R.bool.flag_monet);
 
+    /***************************************/
+    // 900 - media
+    public static final BooleanFlag MEDIA_TAP_TO_TRANSFER = new BooleanFlag(900, false);
+
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
     // |                                                           |

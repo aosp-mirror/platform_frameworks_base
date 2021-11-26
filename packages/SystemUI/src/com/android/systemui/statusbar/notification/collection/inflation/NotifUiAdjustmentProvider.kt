@@ -17,9 +17,9 @@
 package com.android.systemui.statusbar.notification.collection.inflation
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.SectionClassifier
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import javax.inject.Inject
 
 /**
@@ -27,25 +27,17 @@ import javax.inject.Inject
  * to ensure that notifications are reinflated when ranking-derived information changes.
  */
 @SysUISingleton
-open class NotifUiAdjustmentProvider @Inject constructor() {
-
-    private lateinit var lowPrioritySections: Set<NotifSectioner>
-
-    /**
-     * Feed the provider the information it needs about which sections should have minimized top
-     * level views, so that it can calculate the correct minimized value in the adjustment.
-     */
-    fun setLowPrioritySections(sections: Collection<NotifSectioner>) {
-        lowPrioritySections = sections.toSet()
-    }
+open class NotifUiAdjustmentProvider @Inject constructor(
+    private val sectionClassifier: SectionClassifier
+) {
 
     private fun isEntryMinimized(entry: NotificationEntry): Boolean {
         val section = entry.section ?: error("Entry must have a section to determine if minimized")
         val parent = entry.parent ?: error("Entry must have a parent to determine if minimized")
-        val isLowPrioritySection = lowPrioritySections.contains(section.sectioner)
+        val isMinimizedSection = sectionClassifier.isMinimizedSection(section)
         val isTopLevelEntry = parent == GroupEntry.ROOT_ENTRY
         val isGroupSummary = parent.summary == entry
-        return isLowPrioritySection && (isTopLevelEntry || isGroupSummary)
+        return isMinimizedSection && (isTopLevelEntry || isGroupSummary)
     }
 
     /**
