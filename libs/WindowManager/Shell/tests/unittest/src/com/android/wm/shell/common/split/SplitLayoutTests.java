@@ -106,6 +106,12 @@ public class SplitLayoutTests extends ShellTestCase {
     }
 
     @Test
+    public void testSetDivideRatio() {
+        mSplitLayout.setDivideRatio(0.5f);
+        verify(mSplitLayoutHandler).onLayoutSizeChanged(any(SplitLayout.class));
+    }
+
+    @Test
     public void testOnDoubleTappedDivider() {
         mSplitLayout.onDoubleTappedDivider();
         verify(mSplitLayoutHandler).onDoubleTappedDivider();
