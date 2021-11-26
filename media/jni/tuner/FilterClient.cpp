@@ -346,4 +346,13 @@ void FilterClient::closeAvSharedMemory() {
     mAvSharedMemSize = 0;
     mAvSharedHandle = nullptr;
 }
+
+Result FilterClient::setDelayHint(const FilterDelayHint& hint) {
+    if (mTunerFilter) {
+        Status s = mTunerFilter->setDelayHint(hint);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+    return Result::INVALID_STATE;
+}
+
 }  // namespace android
