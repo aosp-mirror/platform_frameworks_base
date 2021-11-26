@@ -24,11 +24,12 @@ import com.android.server.timezonedetector.TimeZoneDetectorInternal;
 
 /**
  * The real implementation of {@link LocationTimeZoneProviderController.Callback} used by
- * {@link ControllerImpl} to interact with other server components.
+ * {@link LocationTimeZoneProviderController} to interact with other server components.
  */
-class ControllerCallbackImpl extends LocationTimeZoneProviderController.Callback {
+class LocationTimeZoneProviderControllerCallbackImpl
+        extends LocationTimeZoneProviderController.Callback {
 
-    ControllerCallbackImpl(@NonNull ThreadingDomain threadingDomain) {
+    LocationTimeZoneProviderControllerCallbackImpl(@NonNull ThreadingDomain threadingDomain) {
         super(threadingDomain);
     }
 
