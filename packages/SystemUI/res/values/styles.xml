@@ -373,11 +373,11 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
-    <style name="Theme.SystemUI.Dialog.GlobalActionsLite" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen">
-        <item name="android:windowIsFloating">true</item>
+    <style name="Theme.SystemUI.Dialog.GlobalActionsLite" parent="Theme.SystemUI.Dialog">
+        <!-- Settings windowFullscreen: true is necessary to be able to intercept touch events -->
+        <!-- that would otherwise be intercepted by the Shade. -->
+        <item name="android:windowFullscreen">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
 
     <style name="QSBorderlessButton">
