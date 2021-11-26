@@ -4631,6 +4631,36 @@ public class CarrierConfigManager {
         public static final String KEY_RCS_REQUEST_RETRY_INTERVAL_MILLIS_LONG =
                 KEY_PREFIX + "rcs_request_retry_interval_millis_long";
 
+        /**
+         * An array of strings, each entry contains a MMTEL capability and registration
+         * technology tuple that requires provisioning. If a tuple is not present, the
+         * framework will not require that the tuple requires provisioning before
+         * enabling the capability.
+         * <p>
+         * Format for each tuple is two integers separated by a comma. The first
+         * integer is an integer defined in
+         * {@link MmTelFeature.MmTelCapabilities.MmTelCapability} and the second integer is
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationTech}
+         * @hide
+         */
+        public static final String KEY_MMTEL_REQUIRES_PROVISIONING_STRING_ARRAY =
+                KEY_PREFIX + "mmtel_requires_provisioning_string_array";
+
+        /**
+         * An array of strings, each entry contains a RCS capability and registration
+         * technology tuple that requires provisioning. If a tuple is not present, the
+         * framework will not require that the tuple requires provisioning before
+         * enabling the capability.
+         * <p>
+         * Format for each tuple is two integers separated by a comma. The first
+         * integer is an integer defined in
+         * {@link RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag} and the second integer is
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationTech}
+         * @hide
+         */
+        public static final String KEY_RCS_REQUIRES_PROVISIONING_STRING_ARRAY =
+                KEY_PREFIX + "rcs_requires_provisioning_string_array";
+
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
@@ -4666,6 +4696,8 @@ public class CarrierConfigManager {
                     "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.chatbot.sa\"",
                     "+g.gsma.rcs.botversion=\"#=1,#=2\"",
                     "+g.gsma.rcs.cpimext"});
+            defaults.putStringArray(KEY_MMTEL_REQUIRES_PROVISIONING_STRING_ARRAY, new String[] {});
+            defaults.putStringArray(KEY_RCS_REQUIRES_PROVISIONING_STRING_ARRAY, new String[] {});
 
             return defaults;
         }
