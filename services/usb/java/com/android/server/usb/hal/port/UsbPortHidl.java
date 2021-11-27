@@ -271,6 +271,17 @@ public final class UsbPortHidl implements UsbPortHal {
     }
 
     @Override
+    public void enableLimitPowerTransfer(String portName, boolean limit, long transactionId,
+            IUsbOperationInternal callback) {
+        /* Not supported in HIDL hals*/
+        try {
+            callback.onOperationComplete(USB_OPERATION_ERROR_NOT_SUPPORTED);
+        } catch (RemoteException e) {
+            logAndPrintException(mPw, "Failed to call onOperationComplete", e);
+        }
+    }
+
+    @Override
     public void switchDataRole(String portId, @HalUsbDataRole int newDataRole, long transactionId) {
         synchronized (mLock) {
             if (mProxy == null) {
@@ -382,7 +393,8 @@ public final class UsbPortHidl implements UsbPortHal {
                         current.canChangePowerRole,
                         current.currentDataRole, current.canChangeDataRole,
                         false, CONTAMINANT_PROTECTION_NONE,
-                        false, CONTAMINANT_DETECTION_NOT_SUPPORTED, sUsbDataEnabled);
+                        false, CONTAMINANT_DETECTION_NOT_SUPPORTED, sUsbDataEnabled,
+                        false);
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback V1_0: "
                         + current.portName);
@@ -415,7 +427,8 @@ public final class UsbPortHidl implements UsbPortHal {
                         current.status.canChangePowerRole,
                         current.status.currentDataRole, current.status.canChangeDataRole,
                         false, CONTAMINANT_PROTECTION_NONE,
-                        false, CONTAMINANT_DETECTION_NOT_SUPPORTED, sUsbDataEnabled);
+                        false, CONTAMINANT_DETECTION_NOT_SUPPORTED, sUsbDataEnabled,
+                        false);
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback V1_1: "
                         + current.status.portName);
@@ -452,7 +465,8 @@ public final class UsbPortHidl implements UsbPortHal {
                         current.contaminantProtectionStatus,
                         current.supportsEnableContaminantPresenceDetection,
                         current.contaminantDetectionStatus,
-                        sUsbDataEnabled);
+                        sUsbDataEnabled,
+                        false);
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback V1_2: "
                         + current.status_1_1.status.portName);

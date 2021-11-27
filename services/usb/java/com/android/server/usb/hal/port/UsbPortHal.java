@@ -166,4 +166,19 @@ public interface UsbPortHal {
      */
     public boolean enableUsbData(String portName, boolean enable, long transactionId,
             IUsbOperationInternal callback);
+
+    /**
+     * Invoked to enableLimitPowerTransfer on the specified port.
+     *
+     * @param portName Port Identifier.
+     * @param limit limit power transfer when true. Port wouldn't charge or power USB accessoried
+     *              when set.
+     *              Lift power transfer restrictions when false.
+     * @param transactionId Used for tracking the current request and is passed down to the HAL
+     *                      implementation as needed.
+     * @param callback callback object to be invoked to invoke the status of the operation upon
+     *                 completion.
+     */
+    public void enableLimitPowerTransfer(String portName, boolean limit, long transactionId,
+            IUsbOperationInternal callback);
 }

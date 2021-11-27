@@ -157,6 +157,11 @@ interface IUsbManager
     /* Sets the port's current role. */
     void setPortRoles(in String portId, int powerRole, int dataRole);
 
+    /* Limit power transfer in & out of the port within the allowed limit by the USB
+     * specification.
+     */
+    void enableLimitPowerTransfer(in String portId, boolean limit, int operationId, in IUsbOperationInternal callback);
+
     /* Enable/disable contaminant detection */
     void enableContaminantDetection(in String portId, boolean enable);
 

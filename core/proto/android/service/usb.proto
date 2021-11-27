@@ -265,6 +265,7 @@ message UsbPortStatusProto {
     repeated UsbPortStatusRoleCombinationProto role_combinations = 5;
     optional android.service.ContaminantPresenceStatus contaminant_presence_status = 6;
     optional bool usb_data_enabled = 7;
+    optional bool is_power_transfer_limited = 8;
 }
 
 message UsbPortStatusRoleCombinationProto {

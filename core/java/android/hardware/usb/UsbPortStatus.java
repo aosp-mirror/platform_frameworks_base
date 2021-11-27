@@ -43,6 +43,7 @@ public final class UsbPortStatus implements Parcelable {
     private final @ContaminantProtectionStatus int mContaminantProtectionStatus;
     private final @ContaminantDetectionStatus int mContaminantDetectionStatus;
     private final boolean mUsbDataEnabled;
+    private final boolean mPowerTransferLimited;
 
     /**
      * Power role: This USB port does not have a power role.
@@ -224,7 +225,8 @@ public final class UsbPortStatus implements Parcelable {
     /** @hide */
     public UsbPortStatus(int currentMode, int currentPowerRole, int currentDataRole,
             int supportedRoleCombinations, int contaminantProtectionStatus,
-            int contaminantDetectionStatus, boolean usbDataEnabled) {
+            int contaminantDetectionStatus, boolean usbDataEnabled,
+            boolean powerTransferLimited) {
         mCurrentMode = currentMode;
         mCurrentPowerRole = currentPowerRole;
         mCurrentDataRole = currentDataRole;
@@ -232,6 +234,7 @@ public final class UsbPortStatus implements Parcelable {
         mContaminantProtectionStatus = contaminantProtectionStatus;
         mContaminantDetectionStatus = contaminantDetectionStatus;
         mUsbDataEnabled = usbDataEnabled;
+        mPowerTransferLimited = powerTransferLimited;
     }
 
     /** @hide */
@@ -245,6 +248,7 @@ public final class UsbPortStatus implements Parcelable {
         mContaminantProtectionStatus = contaminantProtectionStatus;
         mContaminantDetectionStatus = contaminantDetectionStatus;
         mUsbDataEnabled = true;
+        mPowerTransferLimited = false;
     }
 
     /**
@@ -336,6 +340,16 @@ public final class UsbPortStatus implements Parcelable {
         return mUsbDataEnabled;
     }
 
+    /**
+     * Returns whether power transfer is limited.
+     *
+     * @return true when power transfer is limited.
+     *         false otherwise.
+     */
+    public boolean isPowerTransferLimited() {
+        return mPowerTransferLimited;
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -351,6 +365,8 @@ public final class UsbPortStatus implements Parcelable {
                         + getContaminantProtectionStatus()
                 + ", usbDataEnabled="
                         + getUsbDataStatus()
+                + ", isPowerTransferLimited="
+                        + isPowerTransferLimited()
                 + "}";
     }
 
@@ -368,6 +384,7 @@ public final class UsbPortStatus implements Parcelable {
         dest.writeInt(mContaminantProtectionStatus);
         dest.writeInt(mContaminantDetectionStatus);
         dest.writeBoolean(mUsbDataEnabled);
+        dest.writeBoolean(mPowerTransferLimited);
     }
 
     public static final @NonNull Parcelable.Creator<UsbPortStatus> CREATOR =
@@ -381,9 +398,10 @@ public final class UsbPortStatus implements Parcelable {
             int contaminantProtectionStatus = in.readInt();
             int contaminantDetectionStatus = in.readInt();
             boolean usbDataEnabled = in.readBoolean();
+            boolean powerTransferLimited = in.readBoolean();
             return new UsbPortStatus(currentMode, currentPowerRole, currentDataRole,
                     supportedRoleCombinations, contaminantProtectionStatus,
-                    contaminantDetectionStatus, usbDataEnabled);
+                    contaminantDetectionStatus, usbDataEnabled, powerTransferLimited);
         }
 
         @Override

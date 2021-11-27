@@ -1292,6 +1292,38 @@ public class UsbManager {
     }
 
     /**
+     * Should only be called by {@link UsbPort#enableLimitPowerTransfer}.
+     * <p>
+     * limits or restores power transfer in and out of USB port.
+     *
+     * @param port USB port for which power transfer has to be limited or restored.
+     * @param limit limit power transfer when true.
+     *              relax power transfer restrictions when false.
+     * @param operationId operationId for the request.
+     * @param callback callback object to be invoked when the operation is complete.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    void enableLimitPowerTransfer(@NonNull UsbPort port, boolean limit, int operationId,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(port, "enableLimitPowerTransfer:port must not be null. opId:"
+                + operationId);
+        try {
+            mService.enableLimitPowerTransfer(port.getId(), limit, operationId, callback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "enableLimitPowerTransfer failed. opId:" + operationId, e);
+            try {
+                callback.onOperationComplete(UsbOperationInternal.USB_OPERATION_ERROR_INTERNAL);
+            } catch (RemoteException r) {
+                Log.e(TAG, "enableLimitPowerTransfer failed to call onOperationComplete. opId:"
+                        + operationId, r);
+            }
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Should only be called by {@link UsbPort#enableUsbData}.
      * <p>
      * Enables or disables USB data on the specific port.

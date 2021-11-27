@@ -38,6 +38,7 @@ public final class RawPortInfo implements Parcelable {
     public boolean supportsEnableContaminantPresenceDetection;
     public int contaminantDetectionStatus;
     public boolean usbDataEnabled;
+    public boolean powerTransferLimited;
 
     public RawPortInfo(String portId, int supportedModes) {
         this.portId = portId;
@@ -48,6 +49,7 @@ public final class RawPortInfo implements Parcelable {
         this.supportsEnableContaminantPresenceDetection = false;
         this.contaminantDetectionStatus = UsbPortStatus.CONTAMINANT_DETECTION_NOT_SUPPORTED;
         this.usbDataEnabled = true;
+        this.powerTransferLimited = false;
     }
 
     public RawPortInfo(String portId, int supportedModes, int supportedContaminantProtectionModes,
@@ -58,7 +60,8 @@ public final class RawPortInfo implements Parcelable {
             int contaminantProtectionStatus,
             boolean supportsEnableContaminantPresenceDetection,
             int contaminantDetectionStatus,
-            boolean usbDataEnabled) {
+            boolean usbDataEnabled,
+            boolean powerTransferLimited) {
         this.portId = portId;
         this.supportedModes = supportedModes;
         this.supportedContaminantProtectionModes = supportedContaminantProtectionModes;
@@ -75,6 +78,7 @@ public final class RawPortInfo implements Parcelable {
                 supportsEnableContaminantPresenceDetection;
         this.contaminantDetectionStatus = contaminantDetectionStatus;
         this.usbDataEnabled = usbDataEnabled;
+        this.powerTransferLimited = powerTransferLimited;
     }
 
     @Override
@@ -98,6 +102,7 @@ public final class RawPortInfo implements Parcelable {
         dest.writeBoolean(supportsEnableContaminantPresenceDetection);
         dest.writeInt(contaminantDetectionStatus);
         dest.writeBoolean(usbDataEnabled);
+        dest.writeBoolean(powerTransferLimited);
     }
 
     public static final Parcelable.Creator<RawPortInfo> CREATOR =
@@ -118,6 +123,7 @@ public final class RawPortInfo implements Parcelable {
             boolean supportsEnableContaminantPresenceDetection = in.readBoolean();
             int contaminantDetectionStatus = in.readInt();
             boolean usbDataEnabled = in.readBoolean();
+            boolean powerTransferLimited = in.readBoolean();
             return new RawPortInfo(id, supportedModes,
                     supportedContaminantProtectionModes, currentMode, canChangeMode,
                     currentPowerRole, canChangePowerRole,
@@ -125,7 +131,8 @@ public final class RawPortInfo implements Parcelable {
                     supportsEnableContaminantPresenceProtection,
                     contaminantProtectionStatus,
                     supportsEnableContaminantPresenceDetection,
-                    contaminantDetectionStatus, usbDataEnabled);
+                    contaminantDetectionStatus, usbDataEnabled,
+                    powerTransferLimited);
         }
 
         @Override

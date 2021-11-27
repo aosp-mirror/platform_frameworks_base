@@ -734,6 +734,28 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public void enableLimitPowerTransfer(String portId, boolean limit, int operationId,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(portId, "portId must not be null. opID:" + operationId);
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (mPortManager != null) {
+                mPortManager.enableLimitPowerTransfer(portId, limit, operationId, callback, null);
+            } else {
+                try {
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "enableLimitPowerTransfer: Failed to call onOperationComplete", e);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public void enableContaminantDetection(String portId, boolean enable) {
         Objects.requireNonNull(portId, "portId must not be null");
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);

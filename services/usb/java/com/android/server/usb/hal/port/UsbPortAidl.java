@@ -281,6 +281,47 @@ public final class UsbPortAidl implements UsbPortHal {
         }
     }
 
+    @Override
+    public void enableLimitPowerTransfer(String portName, boolean limit, long operationID,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(portName);
+        long key = operationID;
+        synchronized (mLock) {
+            try {
+                if (mProxy == null) {
+                    logAndPrint(Log.ERROR, mPw,
+                            "enableLimitPowerTransfer: Proxy is null. Retry !opID:"
+                            + operationID);
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                    return;
+                }
+                while (sCallbacks.get(key) != null) {
+                    key = ThreadLocalRandom.current().nextInt();
+                }
+                if (key != operationID) {
+                    logAndPrint(Log.INFO, mPw, "enableUsbData: operationID exists ! opID:"
+                            + operationID + " key:" + key);
+                }
+                try {
+                    sCallbacks.put(key, callback);
+                    mProxy.limitPowerTransfer(portName, limit, key);
+                } catch (RemoteException e) {
+                    logAndPrintException(mPw,
+                            "enableLimitPowerTransfer: Failed while invoking AIDL HAL"
+                            + " portID=" + portName + " opID:" + operationID, e);
+                    if (callback != null) {
+                        callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                    }
+                    sCallbacks.remove(key);
+                }
+            } catch (RemoteException e) {
+                logAndPrintException(mPw,
+                        "enableLimitPowerTransfer: Failed to call onOperationComplete portID="
+                        + portName + " opID:" + operationID, e);
+            }
+        }
+    }
+
     private static class HALCallback extends IUsbCallback.Stub {
         public IndentingPrintWriter mPw;
         public UsbPortManager mPortManager;
@@ -393,7 +434,8 @@ public final class UsbPortAidl implements UsbPortHal {
                         toContaminantProtectionStatus(current.contaminantProtectionStatus),
                         current.supportsEnableContaminantPresenceDetection,
                         current.contaminantDetectionStatus,
-                        current.usbDataEnabled);
+                        current.usbDataEnabled,
+                        current.powerTransferLimited);
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback AIDL V1: "
                         + current.portName);
@@ -460,6 +502,31 @@ public final class UsbPortAidl implements UsbPortHal {
                 UsbPortManager.logAndPrint(Log.ERROR, mPw, portName
                         + "notifyContaminantEnabledStatus: opID:"
                         + operationID + " failed. err:" + retval);
+            }
+        }
+
+        @Override
+        public void notifyLimitPowerTransferStatus(String portName, boolean limit, int retval,
+                long operationID) {
+            if (retval == Status.SUCCESS) {
+                UsbPortManager.logAndPrint(Log.INFO, mPw, portName + ": opID:"
+                        + operationID + " successful");
+            } else {
+                UsbPortManager.logAndPrint(Log.ERROR, mPw, portName
+                        + "notifyLimitPowerTransferStatus: opID:"
+                        + operationID + " failed. err:" + retval);
+            }
+            try {
+                IUsbOperationInternal callback = sCallbacks.get(operationID);
+                if (callback != null) {
+                    sCallbacks.get(operationID).onOperationComplete(retval == Status.SUCCESS
+                            ? USB_OPERATION_SUCCESS
+                            : USB_OPERATION_ERROR_INTERNAL);
+                }
+            } catch (RemoteException e) {
+                logAndPrintException(mPw,
+                        "enableLimitPowerTransfer: Failed to call onOperationComplete",
+                        e);
             }
         }
     }
