@@ -1458,6 +1458,7 @@ package android.media {
     method public boolean hasRegisteredDynamicPolicy();
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.QUERY_AUDIO_STATE}) public boolean isFullVolumeDevice();
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int requestAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String, int, int);
+    method public void setRampingRingerEnabled(boolean);
   }
 
   public static final class AudioRecord.MetricsConstants {

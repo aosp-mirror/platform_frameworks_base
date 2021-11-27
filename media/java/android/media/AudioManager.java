@@ -62,6 +62,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -1018,6 +1019,29 @@ public class AudioManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns the current user setting for ramping ringer on incoming phone call ringtone.
+     *
+     * @return true if the incoming phone call ringtone is configured to gradually increase its
+     * volume, false otherwise.
+     */
+    public boolean isRampingRingerEnabled() {
+        return Settings.System.getInt(getContext().getContentResolver(),
+                Settings.System.APPLY_RAMPING_RINGER, 0) != 0;
+    }
+
+    /**
+     * Sets the flag for enabling ramping ringer on incoming phone call ringtone.
+     *
+     * @see #isRampingRingerEnabled()
+     * @hide
+     */
+    @TestApi
+    public void setRampingRingerEnabled(boolean enabled) {
+        Settings.System.putInt(getContext().getContentResolver(),
+                Settings.System.APPLY_RAMPING_RINGER, enabled ? 1 : 0);
     }
 
     /**

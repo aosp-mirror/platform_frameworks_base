@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@
 package android.companion;
 
 import android.app.PendingIntent;
+import android.companion.AssociationInfo;
 
 /** @hide */
-interface IFindDeviceCallback {
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
-    oneway void onSuccess(in PendingIntent launcher);
-    oneway void onFailure(in CharSequence reason);
+interface IAssociationRequestCallback {
+    oneway void onAssociationPending(in PendingIntent pendingIntent);
+
+    oneway void onAssociationCreated(in AssociationInfo associationInfo);
+
+    oneway void onFailure(in CharSequence error);
 }

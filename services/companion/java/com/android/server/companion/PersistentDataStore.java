@@ -16,8 +16,6 @@
 
 package com.android.server.companion;
 
-import static android.companion.DeviceId.TYPE_MAC_ADDRESS;
-
 import static com.android.internal.util.CollectionUtils.forEach;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -35,7 +33,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.companion.AssociationInfo;
-import android.companion.DeviceId;
+import android.net.MacAddress;
 import android.os.Environment;
 import android.util.AtomicFile;
 import android.util.ExceptionUtils;
@@ -53,10 +51,7 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -101,8 +96,8 @@ import java.util.concurrent.ConcurrentMap;
  * Since Android T the data is stored using the v1 schema.
  * In the v1 schema, a list of the previously used IDs is storead along with the association
  * records.
- * In the v1 schema, we no longer store MAC addresses, instead each assocition record may have a
- * number of DeviceIds.
+ * V1 schema adds a new optional `display_name` attribute, and makes the `mac_address` attribute
+ * optional.
  *
  * @see #CURRENT_PERSISTENCE_VERSION
  * @see #readAssociationsV1(TypedXmlPullParser, int, Set)
@@ -116,21 +111,19 @@ import java.util.concurrent.ConcurrentMap;
  *         <association
  *             id="1"
  *             package="com.sample.companion.app"
- *             managed_by_app="false"
+ *             mac_address="AA:BB:CC:DD:EE:00"
+ *             self_managed="false"
  *             notify_device_nearby="false"
- *             time_approved="1634389553216">
- *             <device-id type="mac_address" value="AA:BB:CC:DD:EE:00" />
- *         </association>
+ *             time_approved="1634389553216"/>
  *
  *         <association
  *             id="3"
  *             profile="android.app.role.COMPANION_DEVICE_WATCH"
  *             package="com.sample.companion.another.app"
- *             managed_by_app="false"
+ *             display_name="Jhon's Chromebook"
+ *             self_managed="true"
  *             notify_device_nearby="false"
- *             time_approved="1634641160229">
- *             <device-id type="mac_address" value="AA:BB:CC:DD:EE:FF" />
- *         </association>
+ *             time_approved="1634641160229"/>
  *     </associations>
  *
  *     <previously-used-ids>
@@ -153,7 +146,6 @@ final class PersistentDataStore {
     private static final String XML_TAG_STATE = "state";
     private static final String XML_TAG_ASSOCIATIONS = "associations";
     private static final String XML_TAG_ASSOCIATION = "association";
-    private static final String XML_TAG_DEVICE_ID = "device-id";
     private static final String XML_TAG_PREVIOUSLY_USED_IDS = "previously-used-ids";
     private static final String XML_TAG_PACKAGE = "package";
     private static final String XML_TAG_ID = "id";
@@ -164,13 +156,14 @@ final class PersistentDataStore {
     private static final String XML_ATTR_PACKAGE_NAME = "package_name";
     // Used in <association> elements, nested within <associations> elements.
     private static final String XML_ATTR_PACKAGE = "package";
-    private static final String XML_ATTR_DEVICE = "device";
+    private static final String XML_ATTR_MAC_ADDRESS = "mac_address";
+    private static final String XML_ATTR_DISPLAY_NAME = "display_name";
     private static final String XML_ATTR_PROFILE = "profile";
-    private static final String XML_ATTR_MANAGED_BY_APP = "managed_by_app";
+    private static final String XML_ATTR_SELF_MANAGED = "self_managed";
     private static final String XML_ATTR_NOTIFY_DEVICE_NEARBY = "notify_device_nearby";
     private static final String XML_ATTR_TIME_APPROVED = "time_approved";
-    private static final String XML_ATTR_TYPE = "type";
-    private static final String XML_ATTR_VALUE = "value";
+
+    private static final String LEGACY_XML_ATTR_DEVICE = "device";
 
     private final @NonNull ConcurrentMap<Integer, AtomicFile> mUserIdToStorageFile =
             new ConcurrentHashMap<>();
@@ -353,9 +346,7 @@ final class PersistentDataStore {
         requireStartOfTag(parser, XML_TAG_ASSOCIATION);
 
         final String appPackage = readStringAttribute(parser, XML_ATTR_PACKAGE);
-        // In v0, CDM did not have a notion of a DeviceId yet, instead each Association had a MAC
-        // address.
-        final String deviceAddress = readStringAttribute(parser, XML_ATTR_DEVICE);
+        final String deviceAddress = readStringAttribute(parser, LEGACY_XML_ATTR_DEVICE);
 
         if (appPackage == null || deviceAddress == null) return;
 
@@ -363,10 +354,8 @@ final class PersistentDataStore {
         final boolean notify = readBooleanAttribute(parser, XML_ATTR_NOTIFY_DEVICE_NEARBY);
         final long timeApproved = readLongAttribute(parser, XML_ATTR_TIME_APPROVED, 0L);
 
-        // "Convert" MAC address into a DeviceId.
-        final List<DeviceId> deviceIds = Arrays.asList(
-                new DeviceId(TYPE_MAC_ADDRESS, deviceAddress));
-        out.add(new AssociationInfo(associationId, userId, appPackage, deviceIds, profile,
+        out.add(new AssociationInfo(associationId, userId, appPackage,
+                MacAddress.fromString(deviceAddress), null, profile,
                 /* managedByCompanionApp */false, notify, timeApproved));
     }
 
@@ -391,23 +380,18 @@ final class PersistentDataStore {
         final int associationId = readIntAttribute(parser, XML_ATTR_ID);
         final String profile = readStringAttribute(parser, XML_ATTR_PROFILE);
         final String appPackage = readStringAttribute(parser, XML_ATTR_PACKAGE);
-        final boolean managedByApp = readBooleanAttribute(parser, XML_ATTR_MANAGED_BY_APP);
+        final MacAddress macAddress = stringToMacAddress(
+                readStringAttribute(parser, XML_ATTR_MAC_ADDRESS));
+        final String displayName = readStringAttribute(parser, XML_ATTR_DISPLAY_NAME);
+        final boolean selfManaged = readBooleanAttribute(parser, XML_ATTR_SELF_MANAGED);
         final boolean notify = readBooleanAttribute(parser, XML_ATTR_NOTIFY_DEVICE_NEARBY);
         final long timeApproved = readLongAttribute(parser, XML_ATTR_TIME_APPROVED, 0L);
 
-        final List<DeviceId> deviceIds = new ArrayList<>();
-        while (true) {
-            parser.nextTag();
-            if (isEndOfTag(parser, XML_TAG_ASSOCIATION)) break;
-            if (!isStartOfTag(parser, XML_TAG_DEVICE_ID)) continue;
-
-            final String type = readStringAttribute(parser, XML_ATTR_TYPE);
-            final String value = readStringAttribute(parser, XML_ATTR_VALUE);
-            deviceIds.add(new DeviceId(type, value));
+        final AssociationInfo associationInfo = createAssociationInfoNoThrow(associationId, userId,
+                appPackage, macAddress, displayName, profile, selfManaged, notify, timeApproved);
+        if (associationInfo != null) {
+            out.add(associationInfo);
         }
-
-        out.add(new AssociationInfo(associationId, userId, appPackage, deviceIds, profile,
-                managedByApp, notify, timeApproved));
     }
 
     private static void readPreviouslyUsedIdsV1(@NonNull TypedXmlPullParser parser,
@@ -447,30 +431,17 @@ final class PersistentDataStore {
             throws IOException {
         final XmlSerializer serializer = parent.startTag(null, XML_TAG_ASSOCIATION);
 
-        writeIntAttribute(serializer, XML_ATTR_ID, a.getAssociationId());
+        writeIntAttribute(serializer, XML_ATTR_ID, a.getId());
         writeStringAttribute(serializer, XML_ATTR_PROFILE, a.getDeviceProfile());
         writeStringAttribute(serializer, XML_ATTR_PACKAGE, a.getPackageName());
-        writeBooleanAttribute(serializer, XML_ATTR_MANAGED_BY_APP, a.isManagedByCompanionApp());
+        writeStringAttribute(serializer, XML_ATTR_MAC_ADDRESS, a.getDeviceMacAddressAsString());
+        writeStringAttribute(serializer, XML_ATTR_DISPLAY_NAME, a.getDisplayName());
+        writeBooleanAttribute(serializer, XML_ATTR_SELF_MANAGED, a.isSelfManaged());
         writeBooleanAttribute(
                 serializer, XML_ATTR_NOTIFY_DEVICE_NEARBY, a.isNotifyOnDeviceNearby());
         writeLongAttribute(serializer, XML_ATTR_TIME_APPROVED, a.getTimeApprovedMs());
 
-        final List<DeviceId> deviceIds = a.getDeviceIds();
-        for (int i = 0, size = deviceIds.size(); i < size; i++) {
-            writeDeviceId(serializer, deviceIds.get(i));
-        }
-
         serializer.endTag(null, XML_TAG_ASSOCIATION);
-    }
-
-    private static void writeDeviceId(@NonNull XmlSerializer parent, @NonNull DeviceId deviceId)
-            throws IOException {
-        final XmlSerializer serializer = parent.startTag(null, XML_TAG_DEVICE_ID);
-
-        writeStringAttribute(serializer, XML_ATTR_TYPE, deviceId.getType());
-        writeStringAttribute(serializer, XML_ATTR_VALUE, deviceId.getValue());
-
-        serializer.endTag(null, XML_TAG_DEVICE_ID);
     }
 
     private static void writePreviouslyUsedIds(@NonNull XmlSerializer parent,
@@ -508,5 +479,23 @@ final class PersistentDataStore {
         if (isStartOfTag(parser, tag)) return;
         throw new XmlPullParserException(
                 "Should be at the start of \"" + XML_TAG_ASSOCIATIONS + "\" tag");
+    }
+
+    private static @Nullable MacAddress stringToMacAddress(@Nullable String address) {
+        return address != null ? MacAddress.fromString(address) : null;
+    }
+
+    private static AssociationInfo createAssociationInfoNoThrow(int associationId,
+            @UserIdInt int userId, @NonNull String appPackage, @Nullable MacAddress macAddress,
+            @Nullable CharSequence displayName, @Nullable String profile, boolean selfManaged,
+            boolean notify, long timeApproved) {
+        AssociationInfo associationInfo = null;
+        try {
+            associationInfo = new AssociationInfo(associationId, userId, appPackage, macAddress,
+                    displayName, profile, selfManaged, notify, timeApproved);
+        } catch (Exception e) {
+            if (DEBUG) Slog.w(LOG_TAG, "Could not create AssociationInfo", e);
+        }
+        return associationInfo;
     }
 }

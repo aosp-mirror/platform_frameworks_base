@@ -29,14 +29,15 @@ import java.util.Objects;
 
 /**
  * The real implementation of {@link LocationTimeZoneProviderController.Environment} used by
- * {@link ControllerImpl} to interact with other server components.
+ * {@link LocationTimeZoneProviderController} to interact with other server components.
  */
-class ControllerEnvironmentImpl extends LocationTimeZoneProviderController.Environment {
+class LocationTimeZoneProviderControllerEnvironmentImpl
+        extends LocationTimeZoneProviderController.Environment {
 
     @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
     @NonNull private final ConfigurationChangeListener mConfigurationInternalChangeListener;
 
-    ControllerEnvironmentImpl(@NonNull ThreadingDomain threadingDomain,
+    LocationTimeZoneProviderControllerEnvironmentImpl(@NonNull ThreadingDomain threadingDomain,
             @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull LocationTimeZoneProviderController controller) {
         super(threadingDomain);

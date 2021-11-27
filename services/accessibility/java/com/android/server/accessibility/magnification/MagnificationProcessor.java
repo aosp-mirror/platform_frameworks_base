@@ -98,6 +98,10 @@ public class MagnificationProcessor {
      */
     public boolean setMagnificationConfig(int displayId, @NonNull MagnificationConfig config,
             boolean animate, int id) {
+        if (transitionModeIfNeeded(displayId, config, animate)) {
+            return true;
+        }
+
         int configMode = config.getMode();
         if (configMode == DEFAULT_MODE) {
             configMode = getControllingMode(displayId);
@@ -111,6 +115,21 @@ public class MagnificationProcessor {
                     config.getScale(), config.getCenterX(), config.getCenterY());
         }
         return false;
+    }
+
+    /**
+     * Returns {@code true} if transition magnification mode needed. And it is no need to transition
+     * mode when the controlling mode is unchanged or the controlling magnifier is not activated.
+     */
+    private boolean transitionModeIfNeeded(int displayId, MagnificationConfig config,
+            boolean animate) {
+        int currentMode = getControllingMode(displayId);
+        if (currentMode == config.getMode()
+                || !mController.hasDisableMagnificationCallback(displayId)) {
+            return false;
+        }
+        mController.transitionMagnificationConfigMode(displayId, config, animate);
+        return true;
     }
 
     /**

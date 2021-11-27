@@ -9948,6 +9948,16 @@ package android.bluetooth.le {
 
 package android.companion {
 
+  public final class AssociationInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.net.MacAddress getDeviceMacAddress();
+    method @Nullable public String getDeviceProfile();
+    method @Nullable public CharSequence getDisplayName();
+    method public int getId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.companion.AssociationInfo> CREATOR;
+  }
+
   public final class AssociationRequest implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -9960,6 +9970,7 @@ package android.companion {
     method @NonNull public android.companion.AssociationRequest.Builder addDeviceFilter(@Nullable android.companion.DeviceFilter<?>);
     method @NonNull public android.companion.AssociationRequest build();
     method @NonNull public android.companion.AssociationRequest.Builder setDeviceProfile(@NonNull String);
+    method @NonNull public android.companion.AssociationRequest.Builder setDisplayName(@NonNull CharSequence);
     method @NonNull public android.companion.AssociationRequest.Builder setSingleDevice(boolean);
   }
 
@@ -9995,20 +10006,26 @@ package android.companion {
   }
 
   public final class CompanionDeviceManager {
-    method @RequiresPermission(value=android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull android.companion.CompanionDeviceManager.Callback, @Nullable android.os.Handler);
-    method public void disassociate(@NonNull String);
-    method @NonNull public java.util.List<java.lang.String> getAssociations();
+    method @RequiresPermission(anyOf={android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, "android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING", "android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION"}, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull android.companion.CompanionDeviceManager.Callback, @Nullable android.os.Handler);
+    method @RequiresPermission(anyOf={android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, "android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING", "android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION"}, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.Callback);
+    method @Deprecated public void disassociate(@NonNull String);
+    method public void disassociate(int);
+    method @Deprecated @NonNull public java.util.List<java.lang.String> getAssociations();
+    method @NonNull public java.util.List<android.companion.AssociationInfo> getMyAssociations();
     method @Deprecated public boolean hasNotificationAccess(android.content.ComponentName);
     method public void requestNotificationAccess(android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void startObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void stopObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
-    field public static final String EXTRA_DEVICE = "android.companion.extra.DEVICE";
+    field public static final String EXTRA_ASSOCIATION = "android.companion.extra.ASSOCIATION";
+    field @Deprecated public static final String EXTRA_DEVICE = "android.companion.extra.DEVICE";
   }
 
   public abstract static class CompanionDeviceManager.Callback {
     ctor public CompanionDeviceManager.Callback();
-    method public abstract void onDeviceFound(android.content.IntentSender);
-    method public abstract void onFailure(CharSequence);
+    method public void onAssociationCreated(@NonNull android.companion.AssociationInfo);
+    method public void onAssociationPending(@NonNull android.content.IntentSender);
+    method @Deprecated public void onDeviceFound(@NonNull android.content.IntentSender);
+    method public abstract void onFailure(@Nullable CharSequence);
   }
 
   public abstract class CompanionDeviceService extends android.app.Service {
@@ -20684,6 +20701,7 @@ package android.media {
     method public boolean isMicrophoneMute();
     method public boolean isMusicActive();
     method public static boolean isOffloadedPlaybackSupported(@NonNull android.media.AudioFormat, @NonNull android.media.AudioAttributes);
+    method public boolean isRampingRingerEnabled();
     method public boolean isSpeakerphoneOn();
     method public boolean isStreamMute(int);
     method public boolean isSurroundFormatEnabled(int);
@@ -35596,7 +35614,7 @@ package android.provider {
     field public static final String AIRPLANE_MODE_RADIOS = "airplane_mode_radios";
     field public static final String ALWAYS_FINISH_ACTIVITIES = "always_finish_activities";
     field public static final String ANIMATOR_DURATION_SCALE = "animator_duration_scale";
-    field public static final String APPLY_RAMPING_RINGER = "apply_ramping_ringer";
+    field @Deprecated public static final String APPLY_RAMPING_RINGER = "apply_ramping_ringer";
     field public static final String AUTO_TIME = "auto_time";
     field public static final String AUTO_TIME_ZONE = "auto_time_zone";
     field public static final String BLUETOOTH_ON = "bluetooth_on";
@@ -51154,6 +51172,7 @@ package android.view.accessibility {
     method public int getRecommendedTimeoutMillis(int, int);
     method public void interrupt();
     method public static boolean isAccessibilityButtonSupported();
+    method public boolean isAudioDescriptionRequested();
     method public boolean isEnabled();
     method public boolean isTouchExplorationEnabled();
     method public void removeAccessibilityRequestPreparer(android.view.accessibility.AccessibilityRequestPreparer);

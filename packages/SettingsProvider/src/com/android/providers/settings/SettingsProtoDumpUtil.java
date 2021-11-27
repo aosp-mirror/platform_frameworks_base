@@ -1620,7 +1620,11 @@ class SettingsProtoDumpUtil {
         p.end(token);
         // Please insert new settings using the same order as in GlobalSettingsProto.
 
+        // The rest of the settings were moved to Settings.Secure or Settings.System, and are thus
+        // excluded here since they're deprecated from Settings.Global.
+
         // Settings.Global.INSTALL_NON_MARKET_APPS intentionally excluded since it's deprecated.
+        // Settings.Global.APPLY_RAMPING_RINGER intentionally excluded since it's deprecated.
     }
 
     private static void dumpProtoConfigSettingsLocked(
@@ -2952,6 +2956,10 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.WHEN_TO_MAKE_WIFI_CALLS,
                 SystemSettingsProto.WHEN_TO_MAKE_WIFI_CALLS);
+
+        dumpSetting(s, p,
+                Settings.System.APPLY_RAMPING_RINGER,
+                SystemSettingsProto.APPLY_RAMPING_RINGER);
 
         // Please insert new settings using the same order as in SecureSettingsProto.
 

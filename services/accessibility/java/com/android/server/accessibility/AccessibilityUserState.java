@@ -105,6 +105,7 @@ class AccessibilityUserState {
     private String mTargetAssignedToAccessibilityButton;
 
     private boolean mBindInstantServiceAllowed;
+    private boolean mIsAudioDescriptionByDefaultRequested;
     private boolean mIsAutoclickEnabled;
     private boolean mIsDisplayMagnificationEnabled;
     private boolean mIsFilterKeyEventsEnabled;
@@ -411,6 +412,10 @@ class AccessibilityUserState {
         if (mIsTextHighContrastEnabled) {
             clientState |= AccessibilityManager.STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED;
         }
+        if (mIsAudioDescriptionByDefaultRequested) {
+            clientState |=
+                    AccessibilityManager.STATE_FLAG_AUDIO_DESCRIPTION_BY_DEFAULT_ENABLED;
+        }
 
         clientState |= traceClientState;
 
@@ -506,6 +511,8 @@ class AccessibilityUserState {
         pw.append(", magnificationModes=").append(String.valueOf(mMagnificationModes));
         pw.append(", magnificationCapabilities=")
                 .append(String.valueOf(mMagnificationCapabilities));
+        pw.append(", audioDescriptionByDefaultEnabled=")
+                .append(String.valueOf(mIsAudioDescriptionByDefaultRequested));
         pw.append("}");
         pw.println();
         pw.append("     shortcut key:{");
@@ -822,6 +829,14 @@ class AccessibilityUserState {
 
     public void setTextHighContrastEnabledLocked(boolean enabled) {
         mIsTextHighContrastEnabled = enabled;
+    }
+
+    public boolean isAudioDescriptionByDefaultEnabledLocked() {
+        return mIsAudioDescriptionByDefaultRequested;
+    }
+
+    public void setAudioDescriptionByDefaultEnabledLocked(boolean enabled) {
+        mIsAudioDescriptionByDefaultRequested = enabled;
     }
 
     public boolean isTouchExplorationEnabledLocked() {
