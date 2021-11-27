@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.collection.render
+package com.android.systemui.statusbar.notification.collection.provider
 
 import com.android.internal.statusbar.NotificationVisibility
-import com.android.systemui.statusbar.notification.collection.NotifPipeline
+import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider
 import com.android.systemui.statusbar.notification.logging.NotificationLogger
 import javax.inject.Inject
 
-/** New pipeline implementation for getting [NotificationVisibility]. */
+/** pipeline-agnostic implementation for getting [NotificationVisibility]. */
 class NotificationVisibilityProviderImpl @Inject constructor(
-    private val notifPipeline: NotifPipeline
+    private val notifDataStore: NotifLiveDataStore,
+    private val notifCollection: CommonNotifCollection
 ) : NotificationVisibilityProvider {
+
     override fun obtain(entry: NotificationEntry, visible: Boolean): NotificationVisibility {
-        val count: Int = notifPipeline.getShadeListCount()
+        val count: Int = getCount()
         val rank = entry.ranking.rank
         val hasRow = entry.row != null
         val location = NotificationLogger.getNotificationLocation(entry)
@@ -35,9 +39,11 @@ class NotificationVisibilityProviderImpl @Inject constructor(
     }
 
     override fun obtain(key: String, visible: Boolean): NotificationVisibility =
-        notifPipeline.getEntry(key)?.let { return obtain(it, visible) }
-            ?: NotificationVisibility.obtain(key, -1, notifPipeline.getShadeListCount(), false)
+        notifCollection.getEntry(key)?.let { return obtain(it, visible) }
+            ?: NotificationVisibility.obtain(key, -1, getCount(), false)
 
     override fun getLocation(key: String): NotificationVisibility.NotificationLocation =
-            NotificationLogger.getNotificationLocation(notifPipeline.getEntry(key))
+        NotificationLogger.getNotificationLocation(notifCollection.getEntry(key))
+
+    private fun getCount() = notifDataStore.activeNotifCount.value
 }
