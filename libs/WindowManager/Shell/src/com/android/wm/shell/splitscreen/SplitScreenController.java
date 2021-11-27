@@ -610,21 +610,21 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         @Override
         public void startTasksWithLegacyTransition(int mainTaskId, @Nullable Bundle mainOptions,
                 int sideTaskId, @Nullable Bundle sideOptions, @SplitPosition int sidePosition,
-                RemoteAnimationAdapter adapter) {
+                float splitRatio, RemoteAnimationAdapter adapter) {
             executeRemoteCallWithTaskPermission(mController, "startTasks",
                     (controller) -> controller.mStageCoordinator.startTasksWithLegacyTransition(
                             mainTaskId, mainOptions, sideTaskId, sideOptions, sidePosition,
-                            adapter));
+                            splitRatio, adapter));
         }
 
         @Override
         public void startTasks(int mainTaskId, @Nullable Bundle mainOptions,
                 int sideTaskId, @Nullable Bundle sideOptions,
-                @SplitPosition int sidePosition,
+                @SplitPosition int sidePosition, float splitRatio,
                 @Nullable RemoteTransition remoteTransition) {
             executeRemoteCallWithTaskPermission(mController, "startTasks",
                     (controller) -> controller.mStageCoordinator.startTasks(mainTaskId, mainOptions,
-                            sideTaskId, sideOptions, sidePosition, remoteTransition));
+                            sideTaskId, sideOptions, sidePosition, splitRatio, remoteTransition));
         }
 
         @Override
