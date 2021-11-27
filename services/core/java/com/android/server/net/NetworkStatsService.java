@@ -150,6 +150,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.net.module.util.BinderUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 
@@ -2097,14 +2098,18 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         @Override
         public void notifyAlertReached() throws RemoteException {
-            mAlertObserver.limitReached(LIMIT_GLOBAL_ALERT, null /* unused */);
+            // This binder object can only have been obtained by a process that holds
+            // NETWORK_STATS_PROVIDER. Thus, no additional permission check is required.
+            BinderUtils.withCleanCallingIdentity(() ->
+                    mAlertObserver.limitReached(LIMIT_GLOBAL_ALERT, null /* unused */));
         }
 
         @Override
         public void notifyWarningOrLimitReached() {
             Log.d(TAG, mTag + ": notifyWarningOrLimitReached");
-            LocalServices.getService(NetworkPolicyManagerInternal.class)
-                    .onStatsProviderWarningOrLimitReached(mTag);
+            BinderUtils.withCleanCallingIdentity(() ->
+                    LocalServices.getService(NetworkPolicyManagerInternal.class)
+                            .onStatsProviderWarningOrLimitReached(mTag));
         }
 
         @Override

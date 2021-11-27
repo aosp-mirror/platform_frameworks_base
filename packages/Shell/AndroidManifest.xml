@@ -90,7 +90,6 @@
     <uses-permission android:name="android.permission.RESTART_PACKAGES" />
     <uses-permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND" />
     <uses-permission android:name="android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND" />
-    <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_WATCH" />
     <uses-permission android:name="android.permission.HIDE_OVERLAY_WINDOWS" />
     <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
@@ -297,9 +296,13 @@
     <!-- Permission needed to wipe the device for Test Harness Mode -->
     <uses-permission android:name="android.permission.ENABLE_TEST_HARNESS_MODE" />
 
-    <!-- Permissions required to test CompanionDeviceManager teses in CTS -->
-    <uses-permission android:name="android.permission.MANAGE_COMPANION_DEVICES" />
+    <!-- Permission needed for CTS test - CompanionDeviceManagerTest -->
     <uses-permission android:name="android.permission.COMPANION_APPROVE_WIFI_CONNECTIONS" />
+    <uses-permission android:name="android.permission.MANAGE_COMPANION_DEVICES" />
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING" />
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION" />
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_WATCH" />
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_SELF_MANAGED" />
 
     <uses-permission android:name="android.permission.MANAGE_APPOPS" />
     <uses-permission android:name="android.permission.WATCH_APPOPS" />

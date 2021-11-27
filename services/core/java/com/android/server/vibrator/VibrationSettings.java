@@ -186,7 +186,7 @@ final class VibrationSettings {
 
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES));
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_WHEN_RINGING));
-        registerSettingsObserver(Settings.Global.getUriFor(Settings.Global.APPLY_RAMPING_RINGER));
+        registerSettingsObserver(Settings.System.getUriFor(Settings.System.APPLY_RAMPING_RINGER));
         registerSettingsObserver(Settings.Global.getUriFor(Settings.Global.ZEN_MODE));
         registerSettingsObserver(
                 Settings.System.getUriFor(Settings.System.HAPTIC_FEEDBACK_INTENSITY));
@@ -366,7 +366,7 @@ final class VibrationSettings {
     public void updateSettings() {
         synchronized (mLock) {
             mVibrateWhenRinging = getSystemSetting(Settings.System.VIBRATE_WHEN_RINGING, 0) != 0;
-            mApplyRampingRinger = getGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 0) != 0;
+            mApplyRampingRinger = getSystemSetting(Settings.System.APPLY_RAMPING_RINGER, 0) != 0;
             mHapticFeedbackIntensity = getSystemSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY,
                     getDefaultIntensity(USAGE_TOUCH));
             mHardwareFeedbackIntensity = getSystemSetting(

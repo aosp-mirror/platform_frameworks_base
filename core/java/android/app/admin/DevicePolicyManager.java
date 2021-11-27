@@ -3471,7 +3471,10 @@ public class DevicePolicyManager {
      * Setting custom, overly-complicated password requirements leads to passwords that are hard
      * for users to remember and may not provide any security benefits given as Android uses
      * hardware-backed throttling to thwart online and offline brute-forcing of the device's
-     * screen lock.
+     * screen lock. Company-owned devices (fully-managed and organization-owned managed profile
+     * devices) are able to continue using this method, though it is recommended that
+     * {@link #setRequiredPasswordComplexity(int)} should be used instead.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param quality The new desired quality. One of {@link #PASSWORD_QUALITY_UNSPECIFIED},
      *            {@link #PASSWORD_QUALITY_BIOMETRIC_WEAK},
@@ -9279,12 +9282,40 @@ public class DevicePolicyManager {
         throwIfParentInstance("getPermittedInputMethodsForCurrentUser");
         if (mService != null) {
             try {
-                return mService.getPermittedInputMethodsForCurrentUser();
+                return mService.getPermittedInputMethodsAsUser(UserHandle.myUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
         return null;
+    }
+
+    /**
+     * Returns the list of input methods permitted.
+     *
+     * <p>When this method returns empty list means all input methods are allowed, if a non-empty
+     * list is returned it will contain the intersection of the permitted lists for any device or
+     * profile owners that apply to this user. It will also include any system input methods.
+     *
+     * @return List of input method package names.
+     * @hide
+     */
+    @UserHandleAware
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            android.Manifest.permission.MANAGE_USERS
+            }, conditional = true)
+    public @NonNull List<String> getPermittedInputMethods() {
+        throwIfParentInstance("getPermittedInputMethods");
+        List<String> result = null;
+        if (mService != null) {
+            try {
+                result = mService.getPermittedInputMethodsAsUser(myUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return result != null ? result : Collections.emptyList();
     }
 
     /**

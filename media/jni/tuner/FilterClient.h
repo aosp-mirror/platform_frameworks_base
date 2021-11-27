@@ -33,6 +33,7 @@ using ::aidl::android::hardware::tv::tuner::DemuxFilterEvent;
 using ::aidl::android::hardware::tv::tuner::DemuxFilterSettings;
 using ::aidl::android::hardware::tv::tuner::DemuxFilterStatus;
 using ::aidl::android::hardware::tv::tuner::DemuxFilterType;
+using ::aidl::android::hardware::tv::tuner::FilterDelayHint;
 using ::aidl::android::media::tv::tuner::BnTunerFilterCallback;
 using ::aidl::android::media::tv::tuner::ITunerFilter;
 using ::android::hardware::EventFlag;
@@ -151,6 +152,11 @@ public:
      * Release SharedFiler token.
      */
     Result freeSharedFilterToken(const string& filterToken);
+
+    /**
+     * Set a filter delay hint.
+     */
+    Result setDelayHint(const FilterDelayHint& hint);
 
 private:
     Result getFilterMq();

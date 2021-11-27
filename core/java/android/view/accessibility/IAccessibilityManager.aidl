@@ -98,4 +98,6 @@ interface IAccessibilityManager {
     int getFocusStrokeWidth();
 
     int getFocusColor();
+
+    boolean isAudioDescriptionByDefaultEnabled();
 }

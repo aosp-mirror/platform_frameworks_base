@@ -664,7 +664,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** All tokens used to put activities on this root task to sleep (including mOffToken) */
     final ArrayList<RootWindowContainer.SleepToken> mAllSleepTokens = new ArrayList<>();
     /** The token acquirer to put root tasks on the display to sleep */
-    private final ActivityTaskManagerInternal.SleepTokenAcquirer mOffTokenAcquirer;
+    private final ActivityTaskManagerService.SleepTokenAcquirer mOffTokenAcquirer;
 
     private boolean mSleeping;
 
@@ -5479,6 +5479,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mMetricsLogger;
     }
 
+    void acquireScreenOffToken(boolean acquire) {
+        if (acquire) {
+            mOffTokenAcquirer.acquire(mDisplayId);
+        } else {
+            mOffTokenAcquirer.release(mDisplayId);
+        }
+    }
+
     void onDisplayChanged() {
         mDisplay.getRealSize(mTmpDisplaySize);
         setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
@@ -5490,9 +5498,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final int displayState = mDisplayInfo.state;
         if (displayId != DEFAULT_DISPLAY) {
             if (displayState == Display.STATE_OFF) {
-                mOffTokenAcquirer.acquire(mDisplayId);
+                acquireScreenOffToken(true /* acquire */);
             } else if (displayState == Display.STATE_ON) {
-                mOffTokenAcquirer.release(mDisplayId);
+                acquireScreenOffToken(false /* acquire */);
             }
             ProtoLog.v(WM_DEBUG_LAYER_MIRRORING,
                     "Display %d state is now (%d), so update layer mirroring?",

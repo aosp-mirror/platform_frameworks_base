@@ -536,7 +536,7 @@ public class VibratorManagerServiceTest {
 
         setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
-        setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 0);
+        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
         VibratorManagerService service = createSystemReadyService();
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), RINGTONE_ATTRS);
         // Wait before checking it never played.
@@ -544,14 +544,14 @@ public class VibratorManagerServiceTest {
                 service, /* timeout= */ 50));
 
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
-        setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 1);
+        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 1);
         service = createSystemReadyService();
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK), RINGTONE_ATTRS);
         assertTrue(waitUntil(s -> fakeVibrator.getEffectSegments().size() == 1,
                 service, TEST_TIMEOUT_MILLIS));
 
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
-        setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 0);
+        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
         service = createSystemReadyService();
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK), RINGTONE_ATTRS);
         assertTrue(waitUntil(s -> fakeVibrator.getEffectSegments().size() == 2,
@@ -1109,19 +1109,19 @@ public class VibratorManagerServiceTest {
 
         setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
-        setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 0);
+        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
         createSystemReadyService();
         int scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
         assertEquals(IExternalVibratorService.SCALE_MUTE, scale);
 
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
-        setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 1);
+        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 1);
         createSystemReadyService();
         scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
         assertEquals(IExternalVibratorService.SCALE_NONE, scale);
 
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
-        setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 0);
+        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
         createSystemReadyService();
         scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
         assertEquals(IExternalVibratorService.SCALE_NONE, scale);

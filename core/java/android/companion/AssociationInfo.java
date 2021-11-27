@@ -15,29 +15,24 @@
  */
 package android.companion;
 
-import static android.companion.DeviceId.TYPE_MAC_ADDRESS;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
+import android.net.MacAddress;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
- * A record indicating that a device with a given address was confirmed by the user to be
- * associated to a given companion app
- *
- * @hide
- * TODO(b/1979395): un-hide and rename to AssociationInfo when implementing public APIs that use
- *                  this class.
+ * Details for a specific "association" that has been established between an app and companion
+ * device.
+ * <p>
+ * An association gives an app the ability to interact with a companion device without needing to
+ * acquire broader runtime permissions. An association only exists after the user has confirmed that
+ * an app should have access to a companion device.
  */
 public final class AssociationInfo implements Parcelable {
     /**
@@ -45,15 +40,16 @@ public final class AssociationInfo implements Parcelable {
      * Disclosed to the clients (ie. companion applications) for referring to this record (eg. in
      * {@code disassociate()} API call).
      */
-    private final int mAssociationId;
+    private final int mId;
 
     private final @UserIdInt int mUserId;
     private final @NonNull String mPackageName;
 
-    private final @NonNull List<DeviceId> mDeviceIds;
+    private final @Nullable MacAddress mDeviceMacAddress;
+    private final @Nullable CharSequence mDisplayName;
     private final @Nullable String mDeviceProfile;
 
-    private final boolean mManagedByCompanionApp;
+    private final boolean mSelfManaged;
     private boolean mNotifyOnDeviceNearby;
     private final long mTimeApprovedMs;
 
@@ -63,23 +59,28 @@ public final class AssociationInfo implements Parcelable {
      *
      * @hide
      */
-    public AssociationInfo(int associationId, @UserIdInt int userId, @NonNull String packageName,
-            @NonNull List<DeviceId> deviceIds, @Nullable String deviceProfile,
-            boolean managedByCompanionApp, boolean notifyOnDeviceNearby, long timeApprovedMs) {
-        if (associationId <= 0) {
+    public AssociationInfo(int id, @UserIdInt int userId, @NonNull String packageName,
+            @Nullable MacAddress macAddress, @Nullable CharSequence displayName,
+            @Nullable String deviceProfile, boolean selfManaged, boolean notifyOnDeviceNearby,
+            long timeApprovedMs) {
+        if (id <= 0) {
             throw new IllegalArgumentException("Association ID should be greater than 0");
         }
-        validateDeviceIds(deviceIds);
+        if (macAddress == null && displayName == null) {
+            throw new IllegalArgumentException("MAC address and the Display Name must NOT be null "
+                    + "at the same time");
+        }
 
-        mAssociationId = associationId;
+        mId = id;
 
         mUserId = userId;
         mPackageName = packageName;
 
+        mDeviceMacAddress = macAddress;
+        mDisplayName = displayName;
         mDeviceProfile = deviceProfile;
-        mDeviceIds = new ArrayList<>(deviceIds);
 
-        mManagedByCompanionApp = managedByCompanionApp;
+        mSelfManaged = selfManaged;
         mNotifyOnDeviceNearby = notifyOnDeviceNearby;
         mTimeApprovedMs = timeApprovedMs;
     }
@@ -87,55 +88,66 @@ public final class AssociationInfo implements Parcelable {
     /**
      * @return the unique ID of this association record.
      */
-    public int getAssociationId() {
-        return mAssociationId;
+    public int getId() {
+        return mId;
     }
 
-    /** @hide */
-    public int getUserId() {
+    /**
+     * @return the ID of the user who "owns" this association.
+     * @hide
+     */
+    public @UserIdInt int getUserId() {
         return mUserId;
     }
 
-    /** @hide */
+    /**
+     * @return the package name of the app which this association refers to.
+     * @hide
+     */
+    @SystemApi
     public @NonNull String getPackageName() {
         return mPackageName;
     }
 
     /**
-     * @return list of the device's IDs. At any time a device has at least 1 ID.
+     * @return the MAC address of the device.
      */
-    public @NonNull List<DeviceId> getDeviceIds() {
-        return Collections.unmodifiableList(mDeviceIds);
-    }
-
-    /**
-     * @param type type of the ID.
-     * @return ID of the type if the device has such ID, {@code null} otherwise.
-     */
-    public @Nullable String getIdOfType(@NonNull String type) {
-        for (int i = mDeviceIds.size() - 1; i >= 0; i--) {
-            final DeviceId id = mDeviceIds.get(i);
-            if (Objects.equals(mDeviceIds.get(i).getType(), type)) return id.getValue();
-        }
-        return null;
+    public @Nullable MacAddress getDeviceMacAddress() {
+        return mDeviceMacAddress;
     }
 
     /** @hide */
-    public @NonNull String getDeviceMacAddress() {
-        return Objects.requireNonNull(getIdOfType(TYPE_MAC_ADDRESS),
-                "MAC address of this device is not specified.");
+    public @Nullable String getDeviceMacAddressAsString() {
+        return mDeviceMacAddress != null ? mDeviceMacAddress.toString() : null;
     }
 
     /**
-     * @return the profile of the device.
+     * @return the display name of the companion device (optionally) provided by the companion
+     * application.
+     *
+     * @see AssociationRequest.Builder#setDisplayName(CharSequence)
+     */
+    public @Nullable CharSequence getDisplayName() {
+        return mDisplayName;
+    }
+
+    /**
+     * @return the companion device profile used when establishing this
+     *         association, or {@code null} if no specific profile was used.
+     * @see AssociationRequest.Builder#setDeviceProfile(String)
      */
     public @Nullable String getDeviceProfile() {
         return mDeviceProfile;
     }
 
-    /** @hide */
-    public boolean isManagedByCompanionApp() {
-        return mManagedByCompanionApp;
+    /**
+     * @return whether the association is managed by the companion application it belongs to.
+     * @see AssociationRequest.Builder#setSelfManaged(boolean)
+     * @hide
+     */
+    @SystemApi
+    public boolean isSelfManaged() {
+        return mSelfManaged;
     }
 
     /**
@@ -161,15 +173,40 @@ public final class AssociationInfo implements Parcelable {
         return mUserId == userId && Objects.equals(mPackageName, packageName);
     }
 
+    /**
+     * Utility method for checking if the association represents a device with the given MAC
+     * address.
+     *
+     * @return {@code false} if the association is "self-managed".
+     *         {@code false} if the {@code addr} is {@code null} or is not a valid MAC address.
+     *         Otherwise - the result of {@link MacAddress#equals(Object)}
+     *
+     * @hide
+     */
+    public boolean isLinkedTo(@Nullable String addr) {
+        if (mSelfManaged) return false;
+
+        if (addr == null) return false;
+
+        final MacAddress macAddress;
+        try {
+            macAddress = MacAddress.fromString(addr);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        return macAddress.equals(mDeviceMacAddress);
+    }
+
     @Override
     public String toString() {
         return "Association{"
-                + "mAssociationId=" + mAssociationId
+                + "mId=" + mId
                 + ", mUserId=" + mUserId
                 + ", mPackageName='" + mPackageName + '\''
-                + ", mDeviceIds=" + mDeviceIds
+                + ", mDeviceMacAddress=" + mDeviceMacAddress
+                + ", mDisplayName='" + mDisplayName + '\''
                 + ", mDeviceProfile='" + mDeviceProfile + '\''
-                + ", mManagedByCompanionApp=" + mManagedByCompanionApp
+                + ", mSelfManaged=" + mSelfManaged
                 + ", mNotifyOnDeviceNearby=" + mNotifyOnDeviceNearby
                 + ", mTimeApprovedMs=" + new Date(mTimeApprovedMs)
                 + '}';
@@ -180,20 +217,21 @@ public final class AssociationInfo implements Parcelable {
         if (this == o) return true;
         if (!(o instanceof AssociationInfo)) return false;
         final AssociationInfo that = (AssociationInfo) o;
-        return mAssociationId == that.mAssociationId
+        return mId == that.mId
                 && mUserId == that.mUserId
-                && mManagedByCompanionApp == that.mManagedByCompanionApp
+                && mSelfManaged == that.mSelfManaged
                 && mNotifyOnDeviceNearby == that.mNotifyOnDeviceNearby
                 && mTimeApprovedMs == that.mTimeApprovedMs
                 && Objects.equals(mPackageName, that.mPackageName)
-                && Objects.equals(mDeviceProfile, that.mDeviceProfile)
-                && Objects.equals(mDeviceIds, that.mDeviceIds);
+                && Objects.equals(mDeviceMacAddress, that.mDeviceMacAddress)
+                && Objects.equals(mDisplayName, that.mDisplayName)
+                && Objects.equals(mDeviceProfile, that.mDeviceProfile);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mAssociationId, mUserId, mPackageName, mDeviceIds, mDeviceProfile,
-                mManagedByCompanionApp, mNotifyOnDeviceNearby, mTimeApprovedMs);
+        return Objects.hash(mId, mUserId, mPackageName, mDeviceMacAddress, mDisplayName,
+                mDeviceProfile, mSelfManaged, mNotifyOnDeviceNearby, mTimeApprovedMs);
     }
 
     @Override
@@ -203,33 +241,36 @@ public final class AssociationInfo implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(mAssociationId);
+        dest.writeInt(mId);
 
         dest.writeInt(mUserId);
         dest.writeString(mPackageName);
 
-        dest.writeParcelableList(mDeviceIds, 0);
+        dest.writeTypedObject(mDeviceMacAddress, 0);
+        dest.writeCharSequence(mDisplayName);
         dest.writeString(mDeviceProfile);
 
-        dest.writeBoolean(mManagedByCompanionApp);
+        dest.writeBoolean(mSelfManaged);
         dest.writeBoolean(mNotifyOnDeviceNearby);
         dest.writeLong(mTimeApprovedMs);
     }
 
     private AssociationInfo(@NonNull Parcel in) {
-        mAssociationId = in.readInt();
+        mId = in.readInt();
 
         mUserId = in.readInt();
         mPackageName = in.readString();
 
-        mDeviceIds = in.readParcelableList(new ArrayList<>(), DeviceId.class.getClassLoader());
+        mDeviceMacAddress = in.readTypedObject(MacAddress.CREATOR);
+        mDisplayName = in.readCharSequence();
         mDeviceProfile = in.readString();
 
-        mManagedByCompanionApp = in.readBoolean();
+        mSelfManaged = in.readBoolean();
         mNotifyOnDeviceNearby = in.readBoolean();
         mTimeApprovedMs = in.readLong();
     }
 
+    @NonNull
     public static final Parcelable.Creator<AssociationInfo> CREATOR =
             new Parcelable.Creator<AssociationInfo>() {
         @Override
@@ -242,19 +283,4 @@ public final class AssociationInfo implements Parcelable {
             return new AssociationInfo(in);
         }
     };
-
-    private static void validateDeviceIds(@NonNull List<DeviceId> ids) {
-        if (ids.isEmpty()) throw new IllegalArgumentException("Device must have at least 1 id.");
-
-        // Make sure none of the IDs are null, and they all have different types.
-        final Set<String> types = new HashSet<>(ids.size());
-        for (int i = ids.size() - 1; i >= 0; i--) {
-            final DeviceId deviceId = ids.get(i);
-            if (deviceId == null) throw new IllegalArgumentException("DeviceId must not be null");
-            if (!types.add(deviceId.getType())) {
-                throw new IllegalArgumentException(
-                        "DeviceId cannot have multiple IDs of the same type");
-            }
-        }
-    }
 }

@@ -99,6 +99,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
@@ -119,6 +122,7 @@ import android.app.RemoteInput;
 import android.app.StatsManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.UsageStatsManagerInternal;
+import android.companion.AssociationInfo;
 import android.companion.ICompanionDeviceManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -2335,10 +2339,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testCreateChannelNotifyListener() throws Exception {
-        List<String> associations = new ArrayList<>();
-        associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(associations);
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mPreferencesHelper.getNotificationChannel(eq(PKG), anyInt(),
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
@@ -2364,10 +2366,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testCreateChannelGroupNotifyListener() throws Exception {
-        List<String> associations = new ArrayList<>();
-        associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(associations);
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
         mService.setPreferencesHelper(mPreferencesHelper);
         NotificationChannelGroup group1 = new NotificationChannelGroup("a", "b");
         NotificationChannelGroup group2 = new NotificationChannelGroup("n", "m");
@@ -2385,10 +2385,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testUpdateChannelNotifyListener() throws Exception {
-        List<String> associations = new ArrayList<>();
-        associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(associations);
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
         mService.setPreferencesHelper(mPreferencesHelper);
         mTestNotificationChannel.setLightColor(Color.CYAN);
         when(mPreferencesHelper.getNotificationChannel(eq(PKG), anyInt(),
@@ -2404,10 +2402,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testDeleteChannelNotifyListener() throws Exception {
-        List<String> associations = new ArrayList<>();
-        associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(associations);
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mPreferencesHelper.getNotificationChannel(eq(PKG), anyInt(),
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
@@ -2423,10 +2419,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testDeleteChannelOnlyDoExtraWorkIfExisted() throws Exception {
-        List<String> associations = new ArrayList<>();
-        associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(associations);
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mPreferencesHelper.getNotificationChannel(eq(PKG), anyInt(),
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
@@ -2439,10 +2433,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testDeleteChannelGroupNotifyListener() throws Exception {
-        List<String> associations = new ArrayList<>();
-        associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(associations);
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
         NotificationChannelGroup ncg = new NotificationChannelGroup("a", "b/c");
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mPreferencesHelper.getNotificationChannelGroup(eq(ncg.getId()), eq(PKG), anyInt()))
@@ -2457,10 +2449,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testUpdateNotificationChannelFromPrivilegedListener_success() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
-        List<String> associations = new ArrayList<>();
-        associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(associations);
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
         when(mPreferencesHelper.getNotificationChannel(eq(PKG), anyInt(),
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
                 .thenReturn(mTestNotificationChannel);
@@ -2479,9 +2469,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testUpdateNotificationChannelFromPrivilegedListener_noAccess() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
-        List<String> associations = new ArrayList<>();
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(associations);
+                .thenReturn(emptyList());
 
         try {
             mBinderService.updateNotificationChannelFromPrivilegedListener(
@@ -2502,10 +2491,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testUpdateNotificationChannelFromPrivilegedListener_badUser() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
-        List<String> associations = new ArrayList<>();
-        associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(associations);
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
         mListener = mock(ManagedServices.ManagedServiceInfo.class);
         mListener.component = new ComponentName(PKG, PKG);
         when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
@@ -2530,10 +2517,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testGetNotificationChannelFromPrivilegedListener_cdm_success() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
-        List<String> associations = new ArrayList<>();
-        associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(associations);
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
 
         mBinderService.getNotificationChannelsFromPrivilegedListener(
                 null, PKG, Process.myUserHandle());
@@ -2545,9 +2530,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testGetNotificationChannelFromPrivilegedListener_cdm_noAccess() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
-        List<String> associations = new ArrayList<>();
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(associations);
+                .thenReturn(emptyList());
 
         try {
             mBinderService.getNotificationChannelsFromPrivilegedListener(
@@ -2566,7 +2550,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(new ArrayList<>());
+                .thenReturn(emptyList());
         when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
 
         mBinderService.getNotificationChannelsFromPrivilegedListener(
@@ -2581,7 +2565,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(new ArrayList<>());
+                .thenReturn(emptyList());
         when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(false);
 
         try {
@@ -2599,10 +2583,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testGetNotificationChannelFromPrivilegedListener_badUser() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
-        List<String> associations = new ArrayList<>();
-        associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(associations);
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
         mListener = mock(ManagedServices.ManagedServiceInfo.class);
         when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
         when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
@@ -2622,10 +2604,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testGetNotificationChannelGroupsFromPrivilegedListener_success() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
-        List<String> associations = new ArrayList<>();
-        associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(associations);
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
 
         mBinderService.getNotificationChannelGroupsFromPrivilegedListener(
                 null, PKG, Process.myUserHandle());
@@ -2636,9 +2616,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testGetNotificationChannelGroupsFromPrivilegedListener_noAccess() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
-        List<String> associations = new ArrayList<>();
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(associations);
+                .thenReturn(emptyList());
 
         try {
             mBinderService.getNotificationChannelGroupsFromPrivilegedListener(
@@ -2654,9 +2633,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testGetNotificationChannelGroupsFromPrivilegedListener_badUser() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
-        List<String> associations = new ArrayList<>();
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
-                .thenReturn(associations);
+                .thenReturn(emptyList());
         mListener = mock(ManagedServices.ManagedServiceInfo.class);
         when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
         when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
@@ -7326,12 +7304,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Make sure the shortcut is cached.
         verify(mShortcutServiceInternal).cacheShortcuts(
-                anyInt(), any(), eq(PKG), eq(Collections.singletonList(VALID_CONVO_SHORTCUT_ID)),
+                anyInt(), any(), eq(PKG), eq(singletonList(VALID_CONVO_SHORTCUT_ID)),
                 eq(USER_SYSTEM), eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
 
         // Test: Remove the shortcut
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(null);
-        launcherAppsCallback.getValue().onShortcutsChanged(PKG, Collections.emptyList(),
+        launcherAppsCallback.getValue().onShortcutsChanged(PKG, emptyList(),
                 UserHandle.getUserHandleForUid(mUid));
         waitForIdle();
 
@@ -7399,7 +7377,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Make sure the shortcut is cached.
         verify(mShortcutServiceInternal).cacheShortcuts(
-                anyInt(), any(), eq(PKG), eq(Collections.singletonList(shortcutId)),
+                anyInt(), any(), eq(PKG), eq(singletonList(shortcutId)),
                 eq(USER_SYSTEM), eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
 
         // Test: Remove the notification

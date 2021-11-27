@@ -121,6 +121,8 @@ public final class AccessibilityManager {
     public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CLIENT_ENABLED = 0x00000400;
     /** @hide */
     public static final int STATE_FLAG_TRACE_A11Y_SERVICE_ENABLED = 0x00000800;
+    /** @hide */
+    public static final int STATE_FLAG_AUDIO_DESCRIPTION_BY_DEFAULT_ENABLED = 0x00001000;
 
     /** @hide */
     public static final int DALTONIZER_DISABLED = -1;
@@ -243,6 +245,8 @@ public final class AccessibilityManager {
 
     @UnsupportedAppUsage(trackingBug = 123768939L)
     boolean mIsHighTextContrastEnabled;
+
+    boolean mIsAudioDescriptionByDefaultRequested;
 
     // accessibility tracing state
     int mAccessibilityTracingState = 0;
@@ -1293,15 +1297,19 @@ public final class AccessibilityManager {
                 (stateFlags & STATE_FLAG_TOUCH_EXPLORATION_ENABLED) != 0;
         final boolean highTextContrastEnabled =
                 (stateFlags & STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED) != 0;
+        final boolean audioDescriptionEnabled =
+                (stateFlags & STATE_FLAG_AUDIO_DESCRIPTION_BY_DEFAULT_ENABLED) != 0;
 
         final boolean wasEnabled = isEnabled();
         final boolean wasTouchExplorationEnabled = mIsTouchExplorationEnabled;
         final boolean wasHighTextContrastEnabled = mIsHighTextContrastEnabled;
 
+
         // Ensure listeners get current state from isZzzEnabled() calls.
         mIsEnabled = enabled;
         mIsTouchExplorationEnabled = touchExplorationEnabled;
         mIsHighTextContrastEnabled = highTextContrastEnabled;
+        mIsAudioDescriptionByDefaultRequested = audioDescriptionEnabled;
 
         if (wasEnabled != isEnabled()) {
             notifyAccessibilityStateChanged();
@@ -1675,6 +1683,29 @@ public final class AccessibilityManager {
             service.setWindowMagnificationConnection(connection);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error setting window magnfication connection", re);
+        }
+    }
+
+    /**
+     * Determines if users want to select sound track with audio description by default.
+     *
+     * Audio description, also referred to as a video description, described video, or
+     * more precisely called a visual description, is a form of narration used to provide
+     * information surrounding key visual elements in a media work for the benefit of
+     * blind and visually impaired consumers.
+     *
+     * The method provides the preference value to content provider apps to select the
+     * default sound track during playing a video or movie.
+     *
+     * @return {@code true} if the audio description is enabled, {@code false} otherwise.
+     */
+    public boolean isAudioDescriptionRequested() {
+        synchronized (mLock) {
+            IAccessibilityManager service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+            return mIsAudioDescriptionByDefaultRequested;
         }
     }
 

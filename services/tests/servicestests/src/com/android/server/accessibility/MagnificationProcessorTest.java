@@ -22,6 +22,7 @@ import static android.accessibilityservice.MagnificationConfig.WINDOW_MODE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -314,6 +315,34 @@ public class MagnificationProcessorTest {
                 TEST_DISPLAY);
 
         assertConfigEquals(config, result);
+    }
+
+    @Test
+    public void setMagnificationConfig_controllingModeChangeAndAnimating_transitionConfigMode() {
+        final int currentActivatedMode = WINDOW_MODE;
+        final int targetMode = FULLSCREEN_MODE;
+        final MagnificationConfig oldConfig = new MagnificationConfig.Builder()
+                .setMode(currentActivatedMode)
+                .setScale(TEST_SCALE)
+                .setCenterX(TEST_CENTER_X)
+                .setCenterY(TEST_CENTER_Y).build();
+        setMagnificationActivated(TEST_DISPLAY, oldConfig);
+        final MagnificationConfig newConfig = new MagnificationConfig.Builder()
+                .setMode(targetMode)
+                .setScale(TEST_SCALE)
+                .setCenterX(TEST_CENTER_X + 10)
+                .setCenterY(TEST_CENTER_Y + 10).build();
+
+        // Has magnification animation running
+        when(mMockMagnificationController.hasDisableMagnificationCallback(TEST_DISPLAY)).thenReturn(
+                true);
+        setMagnificationActivated(TEST_DISPLAY, newConfig);
+
+        final MagnificationConfig result = mMagnificationProcessor.getMagnificationConfig(
+                TEST_DISPLAY);
+        verify(mMockMagnificationController).transitionMagnificationConfigMode(eq(TEST_DISPLAY),
+                eq(newConfig), anyBoolean());
+        assertConfigEquals(newConfig, result);
     }
 
     private void setMagnificationActivated(int displayId, int configMode) {

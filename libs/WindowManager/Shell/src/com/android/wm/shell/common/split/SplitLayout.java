@@ -321,6 +321,16 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mSplitLayoutHandler.onLayoutSizeChanged(this);
     }
 
+    /** Sets divide position base on the ratio within root bounds. */
+    public void setDivideRatio(float ratio) {
+        final int position = isLandscape()
+                ? mRootBounds.left + (int) (mRootBounds.width() * ratio)
+                : mRootBounds.top + (int) (mRootBounds.height() * ratio);
+        DividerSnapAlgorithm.SnapTarget snapTarget =
+                mDividerSnapAlgorithm.calculateNonDismissingSnapTarget(position);
+        setDividePosition(snapTarget.position);
+    }
+
     /** Resets divider position. */
     public void resetDividerPosition() {
         mDividePosition = mDividerSnapAlgorithm.getMiddleTarget().position;

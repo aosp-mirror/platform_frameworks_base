@@ -19,6 +19,7 @@ package com.android.server.companion;
 import static com.android.internal.util.CollectionUtils.forEach;
 import static com.android.server.companion.CompanionDeviceManagerService.LOG_TAG;
 
+import android.companion.AssociationInfo;
 import android.util.Log;
 import android.util.Slog;
 
@@ -37,7 +38,7 @@ class CompanionDeviceShellCommand extends android.os.ShellCommand {
             switch (cmd) {
                 case "list": {
                     forEach(
-                            mService.getAllAssociations(getNextArgInt()),
+                            mService.getAllAssociationsForUser(getNextArgInt()),
                             a -> getOutPrintWriter()
                                     .println(a.getPackageName() + " "
                                             + a.getDeviceMacAddress()));
@@ -53,8 +54,14 @@ class CompanionDeviceShellCommand extends android.os.ShellCommand {
                 break;
 
                 case "disassociate": {
-                    mService.removeAssociation(getNextArgInt(), getNextArgRequired(),
-                            getNextArgRequired());
+                    final int userId = getNextArgInt();
+                    final String packageName = getNextArgRequired();
+                    final String address = getNextArgRequired();
+                    final AssociationInfo association =
+                            mService.getAssociationWithCallerChecks(userId, packageName, address);
+                    if (association != null) {
+                        mService.disassociateInternal(userId, association.getId());
+                    }
                 }
                 break;
 
