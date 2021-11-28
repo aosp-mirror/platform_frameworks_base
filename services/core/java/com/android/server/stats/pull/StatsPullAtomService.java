@@ -166,6 +166,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.StatsEvent;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -177,7 +178,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
-import com.android.internal.os.DmabufInfoReader;
+import com.android.internal.os.KernelAllocationStats;
 import com.android.internal.os.KernelCpuBpfTracking;
 import com.android.internal.os.KernelCpuThreadReader;
 import com.android.internal.os.KernelCpuThreadReaderDiff;
@@ -418,7 +419,6 @@ public class StatsPullAtomService extends SystemService {
     private final Object mSystemUptimeLock = new Object();
     private final Object mProcessMemoryStateLock = new Object();
     private final Object mProcessMemoryHighWaterMarkLock = new Object();
-    private final Object mProcessMemorySnapshotLock = new Object();
     private final Object mSystemIonHeapSizeLock = new Object();
     private final Object mIonHeapSizeLock = new Object();
     private final Object mProcessSystemIonHeapSizeLock = new Object();
@@ -556,9 +556,7 @@ public class StatsPullAtomService extends SystemService {
                             return pullProcessMemoryHighWaterMarkLocked(atomTag, data);
                         }
                     case FrameworkStatsLog.PROCESS_MEMORY_SNAPSHOT:
-                        synchronized (mProcessMemorySnapshotLock) {
-                            return pullProcessMemorySnapshotLocked(atomTag, data);
-                        }
+                        return pullProcessMemorySnapshot(atomTag, data);
                     case FrameworkStatsLog.SYSTEM_ION_HEAP_SIZE:
                         synchronized (mSystemIonHeapSizeLock) {
                             return pullSystemIonHeapSizeLocked(atomTag, data);
@@ -2211,10 +2209,16 @@ public class StatsPullAtomService extends SystemService {
         );
     }
 
-    int pullProcessMemorySnapshotLocked(int atomTag, List<StatsEvent> pulledData) {
+    int pullProcessMemorySnapshot(int atomTag, List<StatsEvent> pulledData) {
         List<ProcessMemoryState> managedProcessList =
                 LocalServices.getService(ActivityManagerInternal.class)
                         .getMemoryStateForProcesses();
+        KernelAllocationStats.ProcessGpuMem[] gpuAllocations =
+                KernelAllocationStats.getGpuAllocations();
+        SparseIntArray gpuMemPerPid = new SparseIntArray(gpuAllocations.length);
+        for (KernelAllocationStats.ProcessGpuMem processGpuMem : gpuAllocations) {
+            gpuMemPerPid.put(processGpuMem.pid, processGpuMem.gpuMemoryKb);
+        }
         for (ProcessMemoryState managedProcess : managedProcessList) {
             final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(managedProcess.pid);
             if (snapshot == null) {
@@ -2223,7 +2227,8 @@ public class StatsPullAtomService extends SystemService {
             pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, managedProcess.uid,
                     managedProcess.processName, managedProcess.pid, managedProcess.oomScore,
                     snapshot.rssInKilobytes, snapshot.anonRssInKilobytes, snapshot.swapInKilobytes,
-                    snapshot.anonRssInKilobytes + snapshot.swapInKilobytes));
+                    snapshot.anonRssInKilobytes + snapshot.swapInKilobytes,
+                    gpuMemPerPid.get(managedProcess.pid)));
         }
         // Complement the data with native system processes. Given these measurements can be taken
         // in response to LMKs happening, we want to first collect the managed app stats (to
@@ -2241,7 +2246,8 @@ public class StatsPullAtomService extends SystemService {
                     processCmdlines.valueAt(i), pid,
                     -1001 /*Placeholder for native processes, OOM_SCORE_ADJ_MIN - 1.*/,
                     snapshot.rssInKilobytes, snapshot.anonRssInKilobytes, snapshot.swapInKilobytes,
-                    snapshot.anonRssInKilobytes + snapshot.swapInKilobytes));
+                    snapshot.anonRssInKilobytes + snapshot.swapInKilobytes,
+                    gpuMemPerPid.get(pid)));
         }
         return StatsManager.PULL_SUCCESS;
     }
@@ -2321,7 +2327,8 @@ public class StatsPullAtomService extends SystemService {
             if (process.uid == Process.SYSTEM_UID) {
                 continue;
             }
-            DmabufInfoReader.ProcessDmabuf proc = DmabufInfoReader.getProcessStats(process.pid);
+            KernelAllocationStats.ProcessDmabuf proc =
+                    KernelAllocationStats.getDmabufAllocations(process.pid);
             if (proc == null || (proc.retainedBuffersCount <= 0 && proc.mappedBuffersCount <= 0)) {
                 continue;
             }
