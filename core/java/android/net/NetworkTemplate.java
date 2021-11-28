@@ -70,9 +70,17 @@ public class NetworkTemplate implements Parcelable {
     private static final String TAG = "NetworkTemplate";
 
     /**
+     * Initial Version of the backup serializer.
+     */
+    public static final int BACKUP_VERSION_1_INIT = 1;
+    /**
+     * Version of the backup serializer that added carrier template support.
+     */
+    public static final int BACKUP_VERSION_2_SUPPORT_CARRIER_TEMPLATE = 2;
+    /**
      * Current Version of the Backup Serializer.
      */
-    private static final int BACKUP_VERSION = 1;
+    private static final int BACKUP_VERSION = BACKUP_VERSION_2_SUPPORT_CARRIER_TEMPLATE;
 
     public static final int MATCH_MOBILE = 1;
     public static final int MATCH_WIFI = 4;
@@ -285,6 +293,10 @@ public class NetworkTemplate implements Parcelable {
     private final int mRoaming;
     private final int mDefaultNetwork;
     private final int mSubType;
+    /**
+     * The subscriber Id match rule defines how the template should match networks with
+     * specific subscriberId(s). See NetworkTemplate#SUBSCRIBER_ID_MATCH_RULE_* for more detail.
+     */
     private final int mSubscriberIdMatchRule;
 
     // Bitfield containing OEM network properties{@code NetworkIdentity#OEM_*}.
@@ -348,7 +360,7 @@ public class NetworkTemplate implements Parcelable {
         mSubscriberIdMatchRule = subscriberIdMatchRule;
         checkValidSubscriberIdMatchRule();
         if (!isKnownMatchRule(matchRule)) {
-            Log.e(TAG, "Unknown network template rule " + matchRule
+            throw new IllegalArgumentException("Unknown network template rule " + matchRule
                     + " will not match any identity.");
         }
     }
@@ -842,11 +854,17 @@ public class NetworkTemplate implements Parcelable {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(baos);
 
+        if (!isPersistable()) {
+            Log.wtf(TAG, "Trying to backup non-persistable template: " + this);
+        }
+
         out.writeInt(BACKUP_VERSION);
 
         out.writeInt(mMatchRule);
         BackupUtils.writeString(out, mSubscriberId);
         BackupUtils.writeString(out, mNetworkId);
+        out.writeInt(mMetered);
+        out.writeInt(mSubscriberIdMatchRule);
 
         return baos.toByteArray();
     }
@@ -854,7 +872,7 @@ public class NetworkTemplate implements Parcelable {
     public static NetworkTemplate getNetworkTemplateFromBackup(DataInputStream in)
             throws IOException, BackupUtils.BadVersionException {
         int version = in.readInt();
-        if (version < 1 || version > BACKUP_VERSION) {
+        if (version < BACKUP_VERSION_1_INIT || version > BACKUP_VERSION) {
             throw new BackupUtils.BadVersionException("Unknown Backup Serialization Version");
         }
 
@@ -862,11 +880,27 @@ public class NetworkTemplate implements Parcelable {
         String subscriberId = BackupUtils.readString(in);
         String networkId = BackupUtils.readString(in);
 
-        if (!isKnownMatchRule(matchRule)) {
-            throw new BackupUtils.BadVersionException(
-                    "Restored network template contains unknown match rule " + matchRule);
+        final int metered;
+        final int subscriberIdMatchRule;
+        if (version >= BACKUP_VERSION_2_SUPPORT_CARRIER_TEMPLATE) {
+            metered = in.readInt();
+            subscriberIdMatchRule = in.readInt();
+        } else {
+            // For backward compatibility, fill the missing filters from match rules.
+            metered = (matchRule == MATCH_MOBILE || matchRule == MATCH_MOBILE_WILDCARD
+                    || matchRule == MATCH_CARRIER) ? METERED_YES : METERED_ALL;
+            subscriberIdMatchRule = SUBSCRIBER_ID_MATCH_RULE_EXACT;
         }
 
-        return new NetworkTemplate(matchRule, subscriberId, networkId);
+        try {
+            return new NetworkTemplate(matchRule,
+                    subscriberId, new String[] { subscriberId },
+                    networkId, metered, NetworkStats.ROAMING_ALL,
+                    NetworkStats.DEFAULT_NETWORK_ALL, NetworkTemplate.NETWORK_TYPE_ALL,
+                    NetworkTemplate.OEM_MANAGED_ALL, subscriberIdMatchRule);
+        } catch (IllegalArgumentException e) {
+            throw new BackupUtils.BadVersionException(
+                    "Restored network template contains unknown match rule " + matchRule, e);
+        }
     }
 }

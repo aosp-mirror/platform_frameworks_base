@@ -160,10 +160,12 @@ public class BluetoothEventManager {
     private void registerIntentReceiver(BroadcastReceiver receiver, IntentFilter filter) {
         if (mUserHandle == null) {
             // If userHandle has not been provided, simply call registerReceiver.
-            mContext.registerReceiver(receiver, filter, null, mReceiverHandler);
+            mContext.registerReceiver(receiver, filter, null, mReceiverHandler,
+                    Context.RECEIVER_EXPORTED);
         } else {
             // userHandle was explicitly specified, so need to call multi-user aware API.
-            mContext.registerReceiverAsUser(receiver, mUserHandle, filter, null, mReceiverHandler);
+            mContext.registerReceiverAsUser(receiver, mUserHandle, filter, null, mReceiverHandler,
+                    Context.RECEIVER_EXPORTED);
         }
     }
 
@@ -305,7 +307,8 @@ public class BluetoothEventManager {
             CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
             if (cachedDevice == null) {
                 cachedDevice = mDeviceManager.addDevice(device);
-                Log.d(TAG, "DeviceFoundHandler created new CachedBluetoothDevice");
+                Log.d(TAG, "DeviceFoundHandler created new CachedBluetoothDevice "
+                        + cachedDevice.getDevice().getAnonymizedAddress());
             } else if (cachedDevice.getBondState() == BluetoothDevice.BOND_BONDED
                     && !cachedDevice.getDevice().isConnected()) {
                 // Dispatch device add callback to show bonded but
