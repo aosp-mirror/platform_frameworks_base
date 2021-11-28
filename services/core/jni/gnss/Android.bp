@@ -29,6 +29,8 @@ cc_library_shared {
         "GnssConfiguration.cpp",
         "GnssMeasurement.cpp",
         "GnssMeasurementCallback.cpp",
+        "GnssNavigationMessage.cpp",
+        "GnssNavigationMessageCallback.cpp",
         "Utils.cpp",
     ],
 }
