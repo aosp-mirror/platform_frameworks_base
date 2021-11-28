@@ -7501,6 +7501,7 @@ package android.app.admin {
     field public static final String ACTION_CHECK_POLICY_COMPLIANCE = "android.app.action.CHECK_POLICY_COMPLIANCE";
     field public static final String ACTION_DEVICE_ADMIN_SERVICE = "android.app.action.DEVICE_ADMIN_SERVICE";
     field public static final String ACTION_DEVICE_OWNER_CHANGED = "android.app.action.DEVICE_OWNER_CHANGED";
+    field public static final String ACTION_DEVICE_POLICY_RESOURCE_UPDATED = "android.app.action.DEVICE_POLICY_RESOURCE_UPDATED";
     field public static final String ACTION_GET_PROVISIONING_MODE = "android.app.action.GET_PROVISIONING_MODE";
     field public static final String ACTION_MANAGED_PROFILE_PROVISIONED = "android.app.action.MANAGED_PROFILE_PROVISIONED";
     field public static final String ACTION_PROFILE_OWNER_CHANGED = "android.app.action.PROFILE_OWNER_CHANGED";
@@ -7576,6 +7577,8 @@ package android.app.admin {
     field public static final String EXTRA_PROVISIONING_WIFI_SECURITY_TYPE = "android.app.extra.PROVISIONING_WIFI_SECURITY_TYPE";
     field public static final String EXTRA_PROVISIONING_WIFI_SSID = "android.app.extra.PROVISIONING_WIFI_SSID";
     field public static final String EXTRA_PROVISIONING_WIFI_USER_CERTIFICATE = "android.app.extra.PROVISIONING_WIFI_USER_CERTIFICATE";
+    field public static final String EXTRA_RESOURCE_ID = "android.app.extra.RESOURCE_ID";
+    field public static final String EXTRA_RESOURCE_TYPE_DRAWABLE = "android.app.extra.RESOURCE_TYPE_DRAWABLE";
     field public static final int FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY = 1; // 0x1
     field public static final int FLAG_MANAGED_CAN_ACCESS_PARENT = 2; // 0x2
     field public static final int FLAG_PARENT_CAN_ACCESS_MANAGED = 1; // 0x1

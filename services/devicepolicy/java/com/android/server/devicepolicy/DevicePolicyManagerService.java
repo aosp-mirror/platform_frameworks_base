@@ -26,6 +26,7 @@ import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.admin.DeviceAdminReceiver.ACTION_COMPLIANCE_ACKNOWLEDGEMENT_REQUIRED;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE;
+import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_RESOURCE_UPDATED;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
@@ -56,6 +57,8 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_ACCESS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PERMISSION_GRANT;
 import static android.app.admin.DevicePolicyManager.DELEGATION_SECURITY_LOGGING;
 import static android.app.admin.DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER;
+import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_ID;
+import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE_DRAWABLE;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_BASE_INFO;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_IMEI;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_INDIVIDUAL_ATTESTATION;
@@ -17976,11 +17979,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         Objects.requireNonNull(drawables, "drawables must be provided.");
 
-        // TODO(b/203548565): add new broadcast to indicate a resource has changed
-        mInjector.binderWithCleanCallingIdentity(() ->
-                mDeviceManagementResourcesProvider.updateDrawables(drawables));
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            if (mDeviceManagementResourcesProvider.updateDrawables(drawables)) {
+                sendDrawableUpdatedBroadcast(
+                        drawables.stream().mapToInt(d -> d.getDrawableId()).toArray());
+            }
+        });
     }
-
 
     @Override
     public void resetDrawables(@NonNull int[] drawableIds) {
@@ -17989,16 +17994,31 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         Objects.requireNonNull(drawableIds, "drawableIds must be provided.");
 
-        // TODO(b/203548565): add new broadcast to indicate a resource has changed
-        mInjector.binderWithCleanCallingIdentity(() ->
-                mDeviceManagementResourcesProvider.removeDrawables(drawableIds));
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            if (mDeviceManagementResourcesProvider.removeDrawables(drawableIds)) {
+                sendDrawableUpdatedBroadcast(drawableIds);
+            }
+        });
     }
 
     @Override
-    public ParcelableResource getDrawable(
-            int drawableId, int drawableStyle, int drawableSource) {
+    public ParcelableResource getDrawable(int drawableId, int drawableStyle, int drawableSource) {
         return mInjector.binderWithCleanCallingIdentity(() ->
                 mDeviceManagementResourcesProvider.getDrawable(
                         drawableId, drawableStyle, drawableSource));
+    }
+
+    private void sendDrawableUpdatedBroadcast(int[] drawableIds) {
+        final Intent intent = new Intent(ACTION_DEVICE_POLICY_RESOURCE_UPDATED);
+        intent.putExtra(EXTRA_RESOURCE_ID, drawableIds);
+        intent.putExtra(EXTRA_RESOURCE_TYPE_DRAWABLE, /* value= */ true);
+        intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+
+        List<UserInfo> users = mUserManager.getAliveUsers();
+        for (int i = 0; i < users.size(); i++) {
+            UserHandle user = users.get(i).getUserHandle();
+            mContext.sendBroadcastAsUser(intent, user);
+        }
     }
 }

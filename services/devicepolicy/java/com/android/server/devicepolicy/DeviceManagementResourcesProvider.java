@@ -83,7 +83,11 @@ class DeviceManagementResourcesProvider {
         mInjector = requireNonNull(injector);
     }
 
-    void updateDrawables(@NonNull List<DevicePolicyDrawableResource> drawables) {
+    /**
+     * Returns {@code false} if no resources were updated.
+     */
+    boolean updateDrawables(@NonNull List<DevicePolicyDrawableResource> drawables) {
+        boolean updated = false;
         for (int i = 0; i < drawables.size(); i++) {
             int drawableId = drawables.get(i).getDrawableId();
             int drawableStyle = drawables.get(i).getDrawableStyle();
@@ -93,40 +97,46 @@ class DeviceManagementResourcesProvider {
             Objects.requireNonNull(resource, "ParcelableResource must be provided.");
 
             if (drawableSource == DevicePolicyResources.Drawable.Source.UNDEFINED) {
-                updateDrawable(drawableId, drawableStyle, resource);
+                updated |= updateDrawable(drawableId, drawableStyle, resource);
             } else {
-                updateDrawableForSource(drawableId, drawableSource, resource);
+                updated |= updateDrawableForSource(drawableId, drawableSource, resource);
             }
         }
-        if (!drawables.isEmpty()) {
-            synchronized (mLock) {
-                write();
-            }
+        if (!updated) {
+            return false;
+        }
+        synchronized (mLock) {
+            write();
+            return true;
         }
     }
 
-    private void updateDrawable(
+    private boolean updateDrawable(
             int drawableId, int drawableStyle, ParcelableResource updatableResource) {
         if (!UPDATABLE_DRAWABLE_IDS.contains(drawableId)) {
             throw new IllegalArgumentException(
-                    "Can't update drawable resource, invalid drawable "
-                            + "id " + drawableId);
+                    "Can't update drawable resource, invalid drawable " + "id " + drawableId);
         }
         if (!UPDATABLE_DRAWABLE_STYLES.contains(drawableStyle)) {
             throw new IllegalArgumentException(
-                    "Can't update drawable resource, invalid style id "
-                            + drawableStyle);
+                    "Can't update drawable resource, invalid style id " + drawableStyle);
         }
         synchronized (mLock) {
             if (!mUpdatedDrawablesForStyle.containsKey(drawableId)) {
                 mUpdatedDrawablesForStyle.put(drawableId, new HashMap<>());
             }
+            ParcelableResource current = mUpdatedDrawablesForStyle.get(drawableId).get(
+                    drawableStyle);
+            if (updatableResource.equals(current)) {
+                return false;
+            }
             mUpdatedDrawablesForStyle.get(drawableId).put(drawableStyle, updatableResource);
+            return true;
         }
     }
 
     // TODO(b/214576716): change this to respect style
-    private void updateDrawableForSource(
+    private boolean updateDrawableForSource(
             int drawableId, int drawableSource, ParcelableResource updatableResource) {
         if (!UPDATABLE_DRAWABLE_IDS.contains(drawableId)) {
             throw new IllegalArgumentException("Can't update drawable resource, invalid drawable "
@@ -140,21 +150,32 @@ class DeviceManagementResourcesProvider {
             if (!mUpdatedDrawablesForSource.containsKey(drawableId)) {
                 mUpdatedDrawablesForSource.put(drawableId, new HashMap<>());
             }
-            mUpdatedDrawablesForSource.get(drawableId).put(
-                    drawableSource, updatableResource);
+            ParcelableResource current = mUpdatedDrawablesForSource.get(drawableId).get(
+                    drawableSource);
+            if (updatableResource.equals(current)) {
+                return false;
+            }
+            mUpdatedDrawablesForSource.get(drawableId).put(drawableSource, updatableResource);
+            return true;
         }
     }
 
-    void removeDrawables(@NonNull int[] drawableIds) {
+    /**
+     * Returns {@code false} if no resources were removed.
+     */
+    boolean removeDrawables(@NonNull int[] drawableIds) {
         synchronized (mLock) {
+            boolean removed = false;
             for (int i = 0; i < drawableIds.length; i++) {
                 int drawableId = drawableIds[i];
-                mUpdatedDrawablesForStyle.remove(drawableId);
-                mUpdatedDrawablesForSource.remove(drawableId);
+                removed |= mUpdatedDrawablesForStyle.remove(drawableId) != null
+                        || mUpdatedDrawablesForSource.remove(drawableId) != null;
             }
-            if (drawableIds.length != 0) {
-                write();
+            if (!removed) {
+                return false;
             }
+            write();
+            return true;
         }
     }
 

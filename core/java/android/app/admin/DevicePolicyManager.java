@@ -3188,6 +3188,36 @@ public class DevicePolicyManager {
      */
     public static final int OPERATION_SAFETY_REASON_DRIVING_DISTRACTION = 1;
 
+    /**
+     * Broadcast action: notify system apps (e.g. settings, SysUI, etc) that the device management
+     * resources with IDs {@link #EXTRA_RESOURCE_ID} has been updated using, the updated resources
+     * can be retrieved using {@link #getDrawable}.
+     *
+     * <p>This broadcast is sent to registered receivers only.
+     *
+     * <p> The following extras will be included to identify the type of resource being updated:
+     * <ul>
+     *     <li>{@link #EXTRA_RESOURCE_TYPE_DRAWABLE} for drawable resources</li>
+     * </ul>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DEVICE_POLICY_RESOURCE_UPDATED =
+            "android.app.action.DEVICE_POLICY_RESOURCE_UPDATED";
+
+    /**
+     * A boolean extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate that a
+     * resource of type {@link Drawable} is being updated.
+     */
+    public static final String EXTRA_RESOURCE_TYPE_DRAWABLE =
+            "android.app.extra.RESOURCE_TYPE_DRAWABLE";
+
+    /**
+     * An integer array extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate which
+     * drawable IDs (see {@link DevicePolicyResources.UpdatableDrawableId}) have been updated.
+     */
+    public static final String EXTRA_RESOURCE_ID =
+            "android.app.extra.RESOURCE_ID";
+
     /** @hide */
     @NonNull
     @TestApi
@@ -14396,13 +14426,16 @@ public class DevicePolicyManager {
      * {@link DevicePolicyResources.Drawable.Source}, it overrides any drawables that was set for
      * the same {@code drawableId} and {@code drawableStyle} for the provided source.
      *
+     * <p>Sends a broadcast with action {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to
+     * registered receivers when a resource has been updated successfully.
+     *
      * <p>Important notes to consider when using this API:
      * <ul>
-     * <li> {@link #getDrawable} references the resource
+     * <li>{@link #getDrawable} references the resource
      * {@link DevicePolicyDrawableResource#getCallingPackageResourceId()} in the
      * calling package each time it gets called. You have to ensure that the resource is always
      * available in the calling package as long as it is used as an updated resource.
-     * <li> You still have to re-call {@code setDrawables} even if you only make changes to the
+     * <li>You still have to re-call {@code setDrawables} even if you only make changes to the
      * content of the resource with ID
      * {@link DevicePolicyDrawableResource#getCallingPackageResourceId()} as the content might be
      * cached and would need updating.
@@ -14437,8 +14470,10 @@ public class DevicePolicyManager {
      * {@link DevicePolicyResources.Drawable.Source} will return the default drawable from
      * {@code defaultDrawableLoader}.
      *
-     * @param drawableIds The list of IDs  to remove
-     *                    the updated resources for.
+     * <p>Sends a broadcast with action {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to
+     * registered receivers when a resource has been reset successfully.
+     *
+     * @param drawableIds The list of IDs  to remove.
      *
      * @throws IllegalArgumentException if IDs are not defined in
      * {@link DevicePolicyResources.Drawable}
@@ -14470,6 +14505,9 @@ public class DevicePolicyManager {
      * set a different value use
      * {@link #getDrawableForDensity(int, int, int, Callable)}.
      *
+     * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
+     * notified when a resource has been updated.
+     *
      * <p>Note that each call to this API loads the resource from the package that called
      * {@code setDrawables} to set the updated resource.
      *
@@ -14491,6 +14529,9 @@ public class DevicePolicyManager {
      * a {@code drawableSource} (see {@link DevicePolicyResources.Drawable.Source}) which
      * could result in returning a different drawable than {@link #getDrawable(int, int, Callable)}
      * if an override was set for that specific source.
+     *
+     * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
+     * notified when a resource has been updated.
      *
      * @param drawableId The drawable ID to get the updated resource for.
      * @param drawableStyle The drawable style to use.
@@ -14536,6 +14577,9 @@ public class DevicePolicyManager {
      * Similar to {@link #getDrawable(int, int, Callable)}, but also accepts
      * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
      *
+     * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
+     * notified when a resource has been updated.
+     *
      * @param drawableId The drawable ID to get the updated resource for.
      * @param drawableStyle The drawable style to use.
      * @param density The desired screen density indicated by the resource as
@@ -14561,6 +14605,9 @@ public class DevicePolicyManager {
      /**
      * Similar to {@link #getDrawable(int, int, int, Callable)}, but also accepts
      * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
+     *
+     * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
+     * notified when a resource has been updated.
      *
      * @param drawableId The drawable ID to get the updated resource for.
      * @param drawableStyle The drawable style to use.
