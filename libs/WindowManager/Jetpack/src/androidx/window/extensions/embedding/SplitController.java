@@ -293,11 +293,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             @NonNull TaskFragmentContainer primaryContainer, @NonNull Activity primaryActivity,
             @NonNull TaskFragmentContainer secondaryContainer,
             @NonNull SplitRule splitRule) {
+        SplitContainer splitContainer = new SplitContainer(primaryContainer, primaryActivity,
+                secondaryContainer, splitRule);
+        // Remove container later to prevent pinning escaping toast showing in lock task mode.
         if (splitRule instanceof SplitPairRule && ((SplitPairRule) splitRule).shouldClearTop()) {
             removeExistingSecondaryContainers(wct, primaryContainer);
         }
-        SplitContainer splitContainer = new SplitContainer(primaryContainer, primaryActivity,
-                secondaryContainer, splitRule);
         mSplitContainers.add(splitContainer);
     }
 
