@@ -768,6 +768,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             // Make the stages adjacent to each other so they occlude what's behind them.
             wct.setAdjacentRoots(mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token);
+            wct.setLaunchAdjacentFlagRoot(mSideStage.mRootTaskInfo.token);
             mTaskOrganizer.applyTransaction(wct);
         }
     }
@@ -775,6 +776,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void onStageRootTaskVanished(StageListenerImpl stageListener) {
         if (stageListener == mMainStageListener || stageListener == mSideStageListener) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
+            wct.clearLaunchAdjacentFlagRoot(mSideStage.mRootTaskInfo.token);
             // Deactivate the main stage if it no longer has a root task.
             mMainStage.deactivate(wct);
             mTaskOrganizer.applyTransaction(wct);
