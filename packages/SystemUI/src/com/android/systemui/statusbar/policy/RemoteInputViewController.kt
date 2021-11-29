@@ -95,7 +95,6 @@ class RemoteInputViewControllerImpl @Inject constructor(
     private val uiEventLogger: UiEventLogger
 ) : RemoteInputViewController {
 
-    private object Token
     private val onSendListeners = ArraySet<OnSendRemoteInputListener>()
     private val resources get() = view.resources
 
@@ -179,8 +178,8 @@ class RemoteInputViewControllerImpl @Inject constructor(
 
         entry.lastRemoteInputSent = SystemClock.elapsedRealtime()
         entry.mRemoteEditImeAnimatingAway = true
-        remoteInputController.addSpinning(entry.key, Token)
-        remoteInputController.removeRemoteInput(entry, Token)
+        remoteInputController.addSpinning(entry.key, view.mToken)
+        remoteInputController.removeRemoteInput(entry, view.mToken)
         remoteInputController.remoteInputSent(entry)
         entry.setHasSentReply()
 
