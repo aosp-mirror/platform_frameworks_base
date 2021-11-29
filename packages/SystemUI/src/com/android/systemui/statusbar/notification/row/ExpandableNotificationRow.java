@@ -54,6 +54,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Pair;
@@ -3431,46 +3432,47 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+        IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         // Skip super call; dump viewState ourselves
         pw.println("Notification: " + mEntry.getKey());
-        DumpUtilsKt.withIndenting(pw, ipw -> {
-            ipw.print("visibility: " + getVisibility());
-            ipw.print(", alpha: " + getAlpha());
-            ipw.print(", translation: " + getTranslation());
-            ipw.print(", removed: " + isRemoved());
-            ipw.print(", expandAnimationRunning: " + mExpandAnimationRunning);
+        DumpUtilsKt.withIncreasedIndent(pw, () -> {
+            pw.print("visibility: " + getVisibility());
+            pw.print(", alpha: " + getAlpha());
+            pw.print(", translation: " + getTranslation());
+            pw.print(", removed: " + isRemoved());
+            pw.print(", expandAnimationRunning: " + mExpandAnimationRunning);
             NotificationContentView showingLayout = getShowingLayout();
-            ipw.print(", privateShowing: " + (showingLayout == mPrivateLayout));
-            ipw.println();
-            showingLayout.dump(fd, ipw, args);
+            pw.print(", privateShowing: " + (showingLayout == mPrivateLayout));
+            pw.println();
+            showingLayout.dump(fd, pw, args);
 
             if (getViewState() != null) {
-                getViewState().dump(fd, ipw, args);
-                ipw.println();
+                getViewState().dump(fd, pw, args);
+                pw.println();
             } else {
-                ipw.println("no viewState!!!");
+                pw.println("no viewState!!!");
             }
 
             if (mIsSummaryWithChildren) {
-                ipw.println();
-                ipw.print("ChildrenContainer");
-                ipw.print(" visibility: " + mChildrenContainer.getVisibility());
-                ipw.print(", alpha: " + mChildrenContainer.getAlpha());
-                ipw.print(", translationY: " + mChildrenContainer.getTranslationY());
-                ipw.println();
+                pw.println();
+                pw.print("ChildrenContainer");
+                pw.print(" visibility: " + mChildrenContainer.getVisibility());
+                pw.print(", alpha: " + mChildrenContainer.getAlpha());
+                pw.print(", translationY: " + mChildrenContainer.getTranslationY());
+                pw.println();
                 List<ExpandableNotificationRow> notificationChildren = getAttachedChildren();
-                ipw.println("Children: " + notificationChildren.size());
-                ipw.print("{");
-                ipw.increaseIndent();
+                pw.println("Children: " + notificationChildren.size());
+                pw.print("{");
+                pw.increaseIndent();
                 for (ExpandableNotificationRow child : notificationChildren) {
-                    ipw.println();
-                    child.dump(fd, ipw, args);
+                    pw.println();
+                    child.dump(fd, pw, args);
                 }
-                ipw.decreaseIndent();
-                ipw.println("}");
+                pw.decreaseIndent();
+                pw.println("}");
             } else if (mPrivateLayout != null) {
-                mPrivateLayout.dumpSmartReplies(ipw);
+                mPrivateLayout.dumpSmartReplies(pw);
             }
         });
     }

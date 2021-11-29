@@ -47,6 +47,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Pair;
@@ -4901,7 +4902,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+        IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         StringBuilder sb = new StringBuilder("[")
                 .append(this.getClass().getSimpleName()).append(":")
                 .append(" pulsing=").append(mPulsing ? "T" : "f")
@@ -4915,15 +4917,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 .append(" hideAmount=").append(mAmbientState.getHideAmount())
                 .append("]");
         pw.println(sb.toString());
-        DumpUtilsKt.withIndenting(pw, ipw -> {
+        DumpUtilsKt.withIncreasedIndent(pw, () -> {
             int childCount = getChildCount();
-            ipw.println("Number of children: " + childCount);
-            ipw.println();
+            pw.println("Number of children: " + childCount);
+            pw.println();
 
             for (int i = 0; i < childCount; i++) {
                 ExpandableView child = (ExpandableView) getChildAt(i);
-                child.dump(fd, ipw, args);
-                ipw.println();
+                child.dump(fd, pw, args);
+                pw.println();
             }
             int transientViewCount = getTransientViewCount();
             pw.println("Transient Views: " + transientViewCount);
