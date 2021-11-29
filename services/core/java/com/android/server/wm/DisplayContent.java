@@ -591,7 +591,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** Caches the value whether told display manager that we have content. */
     private boolean mLastHasContent;
 
-    private static DisplayRotationUtil sRotationUtil = new DisplayRotationUtil();
+    private DisplayRotationUtil mRotationUtil = new DisplayRotationUtil();
 
     /**
      * The input method window for this display.
@@ -2090,35 +2090,29 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mDisplayCutoutCache.getOrCompute(mInitialDisplayCutout, rotation);
     }
 
-    static WmDisplayCutout calculateDisplayCutoutForRotationAndDisplaySizeUncached(
-            DisplayCutout cutout, int rotation, int displayWidth, int displayHeight) {
+    private WmDisplayCutout calculateDisplayCutoutForRotationUncached(
+            DisplayCutout cutout, int rotation) {
         if (cutout == null || cutout == DisplayCutout.NO_CUTOUT) {
             return WmDisplayCutout.NO_CUTOUT;
         }
         if (rotation == ROTATION_0) {
             return WmDisplayCutout.computeSafeInsets(
-                    cutout, displayWidth, displayHeight);
+                    cutout, mInitialDisplayWidth, mInitialDisplayHeight);
         }
         final Insets waterfallInsets =
                 RotationUtils.rotateInsets(cutout.getWaterfallInsets(), rotation);
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
-        final Rect[] newBounds = sRotationUtil.getRotatedBounds(
+        final Rect[] newBounds = mRotationUtil.getRotatedBounds(
                 cutout.getBoundingRectsAll(),
-                rotation, displayWidth, displayHeight);
+                rotation, mInitialDisplayWidth, mInitialDisplayHeight);
         final CutoutPathParserInfo info = cutout.getCutoutPathParserInfo();
         final CutoutPathParserInfo newInfo = new CutoutPathParserInfo(
                 info.getDisplayWidth(), info.getDisplayHeight(), info.getDensity(),
                 info.getCutoutSpec(), rotation, info.getScale());
         return WmDisplayCutout.computeSafeInsets(
                 DisplayCutout.constructDisplayCutout(newBounds, waterfallInsets, newInfo),
-                rotated ? displayHeight : displayWidth,
-                rotated ? displayWidth : displayHeight);
-    }
-
-    private WmDisplayCutout calculateDisplayCutoutForRotationUncached(
-            DisplayCutout cutout, int rotation) {
-        return calculateDisplayCutoutForRotationAndDisplaySizeUncached(cutout, rotation,
-                mInitialDisplayWidth, mInitialDisplayHeight);
+                rotated ? mInitialDisplayHeight : mInitialDisplayWidth,
+                rotated ? mInitialDisplayWidth : mInitialDisplayHeight);
     }
 
     RoundedCorners calculateRoundedCornersForRotation(int rotation) {
