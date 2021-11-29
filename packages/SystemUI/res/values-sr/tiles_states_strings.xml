@@ -151,12 +151,19 @@
     <item msgid="7571394439974244289">"Искључено"</item>
     <item msgid="6866424167599381915">"Укључено"</item>
   </string-array>
-    <!-- no translation found for tile_states_qr_code_scanner:0 (7435143266149257618) -->
-    <!-- no translation found for tile_states_qr_code_scanner:1 (3301403109049256043) -->
-    <!-- no translation found for tile_states_qr_code_scanner:2 (8878684975184010135) -->
+  <string-array name="tile_states_qr_code_scanner">
+    <item msgid="7435143266149257618">"Недоступно"</item>
+    <item msgid="3301403109049256043">"Искључено"</item>
+    <item msgid="8878684975184010135">"Укључено"</item>
+  </string-array>
   <string-array name="tile_states_alarm">
     <item msgid="4936533380177298776">"Недоступно"</item>
     <item msgid="2710157085538036590">"Искључено"</item>
     <item msgid="7809470840976856149">"Укључено"</item>
+  </string-array>
+  <string-array name="tile_states_onehanded">
+    <item msgid="8189342855739930015">"Недоступно"</item>
+    <item msgid="146088982397753810">"Искључено"</item>
+    <item msgid="460891964396502657">"Укључено"</item>
   </string-array>
 </resources>
