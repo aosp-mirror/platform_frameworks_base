@@ -142,7 +142,9 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_MICROPHONE_TOGGLE,
             UserManager.DISALLOW_CAMERA_TOGGLE,
             UserManager.DISALLOW_CHANGE_WIFI_STATE,
-            UserManager.DISALLOW_WIFI_TETHERING
+            UserManager.DISALLOW_WIFI_TETHERING,
+            UserManager.DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI
+
     });
 
     public static final Set<String> DEPRECATED_USER_RESTRICTIONS = Sets.newArraySet(

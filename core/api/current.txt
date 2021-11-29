@@ -32393,6 +32393,7 @@ package android.os {
     field public static final String DISALLOW_SET_WALLPAPER = "no_set_wallpaper";
     field public static final String DISALLOW_SHARE_INTO_MANAGED_PROFILE = "no_sharing_into_profile";
     field public static final String DISALLOW_SHARE_LOCATION = "no_share_location";
+    field public static final String DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI = "no_sharing_admin_configured_wifi";
     field public static final String DISALLOW_SMS = "no_sms";
     field public static final String DISALLOW_SYSTEM_ERROR_DIALOGS = "no_system_error_dialogs";
     field public static final String DISALLOW_UNIFIED_PASSWORD = "no_unified_password";
