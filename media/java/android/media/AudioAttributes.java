@@ -1157,6 +1157,9 @@ public final class AudioAttributes implements Parcelable {
                     case AudioSystem.STREAM_ACCESSIBILITY:
                         mContentType = CONTENT_TYPE_SPEECH;
                         break;
+                    case AudioSystem.STREAM_ASSISTANT:
+                        mContentType = CONTENT_TYPE_SPEECH;
+                        break;
                     default:
                         Log.e(TAG, "Invalid stream type " + streamType + " for AudioAttributes");
                 }
@@ -1571,6 +1574,8 @@ public final class AudioAttributes implements Parcelable {
                 return USAGE_VOICE_COMMUNICATION_SIGNALLING;
             case AudioSystem.STREAM_ACCESSIBILITY:
                 return USAGE_ASSISTANCE_ACCESSIBILITY;
+            case AudioSystem.STREAM_ASSISTANT:
+                return USAGE_ASSISTANT;
             case AudioSystem.STREAM_TTS:
             default:
                 return USAGE_UNKNOWN;
