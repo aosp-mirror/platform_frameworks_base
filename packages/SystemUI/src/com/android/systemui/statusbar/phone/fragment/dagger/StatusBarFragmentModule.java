@@ -19,7 +19,9 @@ package com.android.systemui.statusbar.phone.fragment.dagger;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
+import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
+import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 
 import dagger.Module;
@@ -42,5 +44,17 @@ public interface StatusBarFragmentModule {
     @StatusBarFragmentScope
     static BatteryMeterView provideBatteryMeterView(@RootView PhoneStatusBarView view) {
         return view.findViewById(R.id.battery);
+    }
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
+    static PhoneStatusBarViewController providePhoneStatusBarViewController(
+            PhoneStatusBarViewController.Factory phoneStatusBarViewControllerFactory,
+            @RootView PhoneStatusBarView phoneStatusBarView,
+            NotificationPanelViewController notificationPanelViewController) {
+        return phoneStatusBarViewControllerFactory.create(
+                phoneStatusBarView,
+                notificationPanelViewController.getStatusBarTouchEventHandler());
     }
 }
