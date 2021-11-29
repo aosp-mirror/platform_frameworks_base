@@ -16,6 +16,8 @@
 
 package com.android.server.location.gnss;
 
+import static android.content.pm.PackageManager.FEATURE_WATCH;
+
 import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
 import static android.location.provider.ProviderProperties.ACCURACY_FINE;
 import static android.location.provider.ProviderProperties.POWER_USAGE_HIGH;
@@ -55,6 +57,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.location.GnssCapabilities;
 import android.location.GnssStatus;
@@ -141,6 +144,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // The AGPS SUPL mode
     private static final int AGPS_SUPL_MODE_MSA = 0x02;
     private static final int AGPS_SUPL_MODE_MSB = 0x01;
+
+    // PSDS stands for Predicted Satellite Data Service
+    private static final int DOWNLOAD_PSDS_DATA = 6;
 
     // TCP/IP constants.
     // Valid TCP/UDP port range is (0, 65535].
@@ -651,6 +657,14 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                         mPsdsBackOff.reset();
                     }
                 });
+                PackageManager pm = mContext.getPackageManager();
+                if (pm != null && pm.hasSystemFeature(FEATURE_WATCH)
+                        && mGnssConfiguration.isPsdsPeriodicDownloadEnabled()) {
+                    if (DEBUG) Log.d(TAG, "scheduling next Psds download");
+                    mHandler.removeMessages(DOWNLOAD_PSDS_DATA);
+                    mHandler.sendEmptyMessageDelayed(DOWNLOAD_PSDS_DATA,
+                            GnssPsdsDownloader.PSDS_INTERVAL);
+                }
             } else {
                 // Try download PSDS data again later according to backoff time.
                 // Since this is delayed and not urgent, we do not hold a wake lock here.
