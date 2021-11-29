@@ -36,7 +36,7 @@ import static com.android.internal.util.Preconditions.checkState;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 import static com.android.server.companion.PermissionsUtils.checkCallerCanManageAssociationsForPackage;
-import static com.android.server.companion.PermissionsUtils.checkCallerCanManagerCompanionDevice;
+import static com.android.server.companion.PermissionsUtils.checkCallerCanManageCompanionDevice;
 import static com.android.server.companion.PermissionsUtils.enforceCallerCanInteractWithUserId;
 import static com.android.server.companion.PermissionsUtils.enforceCallerCanManagerCompanionDevice;
 import static com.android.server.companion.PermissionsUtils.enforceCallerIsSystemOr;
@@ -411,7 +411,7 @@ public class CompanionDeviceManagerService extends SystemService {
                         + "permissions to get associations for u" + userId + "/" + packageName);
             }
 
-            if (!checkCallerCanManagerCompanionDevice(getContext())) {
+            if (!checkCallerCanManageCompanionDevice(getContext())) {
                 // If the caller neither is system nor holds MANAGE_COMPANION_DEVICES: it needs to
                 // request the feature (also: the caller is the app itself).
                 checkUsesFeature(packageName, getCallingUserId());
@@ -456,7 +456,7 @@ public class CompanionDeviceManagerService extends SystemService {
             if (association == null) {
                 throw new IllegalArgumentException("Association does not exist "
                         + "or the caller does not have permissions to manage it "
-                        + "(ie. it belongs ot a different package or a different user).");
+                        + "(ie. it belongs to a different package or a different user).");
             }
 
             disassociateInternal(userId, association.getId());
@@ -594,7 +594,7 @@ public class CompanionDeviceManagerService extends SystemService {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES, "createAssociation");
 
-            createAssociationInternal(userId, macAddress, packageName, null);
+            legacyCreateAssociation(userId, macAddress, packageName, null);
         }
 
         private void checkCanCallNotificationApi(String callingPackage) {
@@ -671,21 +671,29 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    void createAssociationInternal(
-            int userId, String deviceMacAddress, String packageName, String deviceProfile) {
-        final AssociationInfo association = new AssociationInfo(
-                getNewAssociationIdForPackage(userId, packageName),
-                userId,
-                packageName,
-                MacAddress.fromString(deviceMacAddress),
-                null,
-                deviceProfile,
-                /* managedByCompanionApp */false,
-                /* notifyOnDeviceNearby */ false ,
-                System.currentTimeMillis());
+    /**
+     * @deprecated use
+     * {@link #createAssociation(int, String, MacAddress, CharSequence, String, boolean)}
+     */
+    @Deprecated
+    void legacyCreateAssociation(@UserIdInt int userId, @NonNull String deviceMacAddress,
+            @NonNull String packageName, @Nullable String deviceProfile) {
+        final MacAddress macAddress = MacAddress.fromString(deviceMacAddress);
+        createAssociation(userId, packageName, macAddress, null, deviceProfile, false);
+    }
+
+    AssociationInfo createAssociation(@UserIdInt int userId, @NonNull String packageName,
+            @Nullable MacAddress macAddress, @Nullable CharSequence displayName,
+            @Nullable String deviceProfile, boolean selfManaged) {
+        final int id = getNewAssociationIdForPackage(userId, packageName);
+        final long timestamp = System.currentTimeMillis();
+        final AssociationInfo association = new AssociationInfo(id, userId, packageName,
+                macAddress, displayName, deviceProfile, selfManaged, false, timestamp);
 
         updateSpecialAccessPermissionForAssociatedPackage(association);
         recordAssociation(association, userId);
+
+        return association;
     }
 
     @GuardedBy("mLock")
