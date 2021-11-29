@@ -107,8 +107,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Puhelin"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Ääniapuri"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
-    <!-- no translation found for accessibility_qr_code_scanner_button (7521277927692910795) -->
-    <skip />
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR-koodiskanneri"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Avaa lukitus"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Laite lukittu"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Kasvojen skannaus"</string>
@@ -293,6 +292,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Näytön tallennus"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Aloita"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Lopeta"</string>
+    <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Yhden käden moodi"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Kumotaanko laitteen mikrofonin esto?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Kumotaanko laitteen kameran esto?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Kumotaanko laitteen kameran ja mikrofonin esto?"</string>
@@ -466,10 +466,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Avaa lukitus ja käytä"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Korttien noutamisessa oli ongelma, yritä myöhemmin uudelleen"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Lukitusnäytön asetukset"</string>
-    <!-- no translation found for qr_code_scanner_title (1598912458255252498) -->
-    <skip />
-    <!-- no translation found for qr_code_scanner_description (7452098243938659945) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="1598912458255252498">"Skannaa QR-koodi"</string>
+    <string name="qr_code_scanner_description" msgid="7452098243938659945">"Skannaa QR-koodi klikkaamalla"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Työprofiili"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Lentokonetila"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Et kuule seuraavaa hälytystäsi (<xliff:g id="WHEN">%1$s</xliff:g>)."</string>

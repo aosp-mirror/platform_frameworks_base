@@ -107,8 +107,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Điện thoại"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Trợ lý thoại"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Ví"</string>
-    <!-- no translation found for accessibility_qr_code_scanner_button (7521277927692910795) -->
-    <skip />
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Trình quét mã QR"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Mở khóa"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Đã khóa thiết bị"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Quét tìm khuôn mặt"</string>
@@ -293,6 +292,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Ghi màn hình"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Bắt đầu"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Dừng"</string>
+    <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Chế độ một tay"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Bỏ chặn micrô của thiết bị?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Bỏ chặn máy ảnh của thiết bị?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Bỏ chặn máy ảnh và micrô của thiết bị?"</string>
@@ -466,10 +466,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Mở khóa để sử dụng"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Đã xảy ra sự cố khi tải thẻ của bạn. Vui lòng thử lại sau"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Cài đặt màn hình khóa"</string>
-    <!-- no translation found for qr_code_scanner_title (1598912458255252498) -->
-    <skip />
-    <!-- no translation found for qr_code_scanner_description (7452098243938659945) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="1598912458255252498">"Quét mã QR"</string>
+    <string name="qr_code_scanner_description" msgid="7452098243938659945">"Nhấp để quét mã QR"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Hồ sơ công việc"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Chế độ máy bay"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Bạn sẽ không nghe thấy báo thức tiếp theo lúc <xliff:g id="WHEN">%1$s</xliff:g> của mình"</string>
