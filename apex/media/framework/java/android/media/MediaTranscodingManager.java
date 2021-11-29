@@ -949,6 +949,8 @@ public final class MediaTranscodingManager {
              *
              * @return the video track format to be used if transcoding should be performed,
              *         and null otherwise.
+             * @throws IllegalArgumentException if the hinted source video format contains invalid
+             *         parameters.
              */
             @Nullable
             public MediaFormat resolveVideoFormat() {
@@ -959,20 +961,19 @@ public final class MediaTranscodingManager {
                 MediaFormat videoTrackFormat = new MediaFormat(mSrcVideoFormatHint);
                 videoTrackFormat.setString(MediaFormat.KEY_MIME, MediaFormat.MIMETYPE_VIDEO_AVC);
 
-                int width = mSrcVideoFormatHint.getInteger(MediaFormat.KEY_WIDTH);
-                int height = mSrcVideoFormatHint.getInteger(MediaFormat.KEY_HEIGHT);
+                int width = mSrcVideoFormatHint.getInteger(MediaFormat.KEY_WIDTH, -1);
+                int height = mSrcVideoFormatHint.getInteger(MediaFormat.KEY_HEIGHT, -1);
                 if (width <= 0 || height <= 0) {
                     throw new IllegalArgumentException(
                             "Source Width and height must be larger than 0");
                 }
 
-                float frameRate = 30.0f; // default to 30fps.
-                if (mSrcVideoFormatHint.containsKey(MediaFormat.KEY_FRAME_RATE)) {
-                    frameRate = mSrcVideoFormatHint.getFloat(MediaFormat.KEY_FRAME_RATE);
-                    if (frameRate <= 0) {
-                        throw new IllegalArgumentException(
-                                "frameRate must be larger than 0");
-                    }
+                float frameRate =
+                        mSrcVideoFormatHint.getNumber(MediaFormat.KEY_FRAME_RATE, 30.0)
+                        .floatValue();
+                if (frameRate <= 0) {
+                    throw new IllegalArgumentException(
+                            "frameRate must be larger than 0");
                 }
 
                 int bitrate = getAVCBitrate(width, height, frameRate);
