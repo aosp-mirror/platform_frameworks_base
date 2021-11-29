@@ -1255,11 +1255,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         } else if (isOutPipDirection(direction)) {
             // If we are animating to fullscreen or split screen, then we need to reset the
             // override bounds on the task to ensure that the task "matches" the parent's bounds.
-            if (direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN) {
-                taskBounds = destinationBounds;
-            } else {
-                taskBounds = null;
-            }
+            taskBounds = null;
             applyWindowingModeChangeOnExit(wct, direction);
         } else {
             // Just a resize in PIP
