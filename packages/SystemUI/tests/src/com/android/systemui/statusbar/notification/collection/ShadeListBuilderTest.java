@@ -32,7 +32,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -52,6 +51,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.NotificationInteractionTracker;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder.OnRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
@@ -96,7 +96,9 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     private ShadeListBuilder mListBuilder;
     private FakeSystemClock mSystemClock = new FakeSystemClock();
 
+    @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private ShadeListBuilderLogger mLogger;
+    @Mock private DumpManager mDumpManager;
     @Mock private NotifCollection mNotifCollection;
     @Mock private NotificationInteractionTracker mInteractionTracker;
     @Spy private OnBeforeTransformGroupsListener mOnBeforeTransformGroupsListener;
@@ -122,7 +124,12 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         mListBuilder = new ShadeListBuilder(
-                mSystemClock, mLogger, mock(DumpManager.class), mInteractionTracker);
+                mSystemClock,
+                mNotifPipelineFlags,
+                mLogger,
+                mDumpManager,
+                mInteractionTracker
+        );
         mListBuilder.setOnRenderListListener(mOnRenderListListener);
 
         mListBuilder.attach(mNotifCollection);
