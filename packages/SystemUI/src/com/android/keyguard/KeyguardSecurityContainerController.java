@@ -54,6 +54,7 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.settings.GlobalSettings;
 
@@ -78,6 +79,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final SecurityCallback mSecurityCallback;
     private final ConfigurationController mConfigurationController;
     private final FalsingCollector mFalsingCollector;
+    private final UserSwitcherController mUserSwitcherController;
     private final GlobalSettings mGlobalSettings;
 
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
@@ -232,6 +234,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             KeyguardSecurityViewFlipperController securityViewFlipperController,
             ConfigurationController configurationController,
             FalsingCollector falsingCollector,
+            UserSwitcherController userSwitcherController,
             GlobalSettings globalSettings) {
         super(view);
         mLockPatternUtils = lockPatternUtils;
@@ -247,6 +250,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mConfigurationController = configurationController;
         mLastOrientation = getResources().getConfiguration().orientation;
         mFalsingCollector = falsingCollector;
+        mUserSwitcherController = userSwitcherController;
         mGlobalSettings = globalSettings;
     }
 
@@ -343,14 +347,14 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
     public void startAppearAnimation() {
         if (mCurrentSecurityMode != SecurityMode.None) {
+            mView.startAppearAnimation(mCurrentSecurityMode);
             getCurrentSecurityController().startAppearAnimation();
         }
     }
 
     public boolean startDisappearAnimation(Runnable onFinishRunnable) {
-        mView.startDisappearAnimation(getCurrentSecurityMode());
-
         if (mCurrentSecurityMode != SecurityMode.None) {
+            mView.startDisappearAnimation(mCurrentSecurityMode);
             return getCurrentSecurityController().startDisappearAnimation(onFinishRunnable);
         }
 
@@ -506,15 +510,16 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     private void configureMode() {
-        // One-handed mode and user-switcher are currently mutually exclusive, and enforced here
+        boolean useSimSecurity = mCurrentSecurityMode == SecurityMode.SimPin
+                || mCurrentSecurityMode == SecurityMode.SimPuk;
         int mode = KeyguardSecurityContainer.MODE_DEFAULT;
-        if (canDisplayUserSwitcher()) {
+        if (canDisplayUserSwitcher() && !useSimSecurity) {
             mode = KeyguardSecurityContainer.MODE_USER_SWITCHER;
         } else if (canUseOneHandedBouncer()) {
             mode = KeyguardSecurityContainer.MODE_ONE_HANDED;
         }
 
-        mView.initMode(mode, mGlobalSettings);
+        mView.initMode(mode, mGlobalSettings, mFalsingCollector, mUserSwitcherController);
     }
 
     public void reportFailedUnlockAttempt(int userId, int timeoutMs) {
@@ -605,6 +610,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         private final ConfigurationController mConfigurationController;
         private final FalsingCollector mFalsingCollector;
         private final GlobalSettings mGlobalSettings;
+        private final UserSwitcherController mUserSwitcherController;
 
         @Inject
         Factory(KeyguardSecurityContainer view,
@@ -619,6 +625,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 KeyguardSecurityViewFlipperController securityViewFlipperController,
                 ConfigurationController configurationController,
                 FalsingCollector falsingCollector,
+                UserSwitcherController userSwitcherController,
                 GlobalSettings globalSettings) {
             mView = view;
             mAdminSecondaryLockScreenControllerFactory = adminSecondaryLockScreenControllerFactory;
@@ -632,6 +639,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mConfigurationController = configurationController;
             mFalsingCollector = falsingCollector;
             mGlobalSettings = globalSettings;
+            mUserSwitcherController = userSwitcherController;
         }
 
         public KeyguardSecurityContainerController create(
@@ -640,7 +648,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
                     mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
                     mKeyguardStateController, securityCallback, mSecurityViewFlipperController,
-                    mConfigurationController, mFalsingCollector, mGlobalSettings);
+                    mConfigurationController, mFalsingCollector, mUserSwitcherController,
+                    mGlobalSettings);
         }
 
     }
