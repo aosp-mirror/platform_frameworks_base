@@ -71,6 +71,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
@@ -150,6 +151,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private ControlsComponent mControlsComponent;
     private boolean mControlServicesAvailable = false;
 
+    @Nullable private View mAmbientIndicationArea;
     private ViewGroup mIndicationArea;
     private TextView mIndicationText;
     private TextView mIndicationTextBottom;
@@ -270,6 +272,29 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     public void initFrom(KeyguardBottomAreaView oldBottomArea) {
         setStatusBar(oldBottomArea.mStatusBar);
+
+        // if it exists, continue to use the original ambient indication container
+        // instead of the newly inflated one
+        if (mAmbientIndicationArea != null) {
+            // remove old ambient indication from its parent
+            View originalAmbientIndicationView =
+                    oldBottomArea.findViewById(R.id.ambient_indication_container);
+            ((ViewGroup) originalAmbientIndicationView.getParent())
+                    .removeView(originalAmbientIndicationView);
+
+            // remove current ambient indication from its parent (discard)
+            ViewGroup ambientIndicationParent = (ViewGroup) mAmbientIndicationArea.getParent();
+            int ambientIndicationIndex =
+                    ambientIndicationParent.indexOfChild(mAmbientIndicationArea);
+            ambientIndicationParent.removeView(mAmbientIndicationArea);
+
+            // add the old ambient indication to this view
+            ambientIndicationParent.addView(originalAmbientIndicationView, ambientIndicationIndex);
+            mAmbientIndicationArea = originalAmbientIndicationView;
+
+            // update burn-in offsets
+            dozeTimeTick();
+        }
     }
 
     @Override
@@ -283,6 +308,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mWalletButton = findViewById(R.id.wallet_button);
         mControlsButton = findViewById(R.id.controls_button);
         mIndicationArea = findViewById(R.id.keyguard_indication_area);
+        mAmbientIndicationArea = findViewById(R.id.ambient_indication_container);
         mIndicationText = findViewById(R.id.keyguard_indication_text);
         mIndicationTextBottom = findViewById(R.id.keyguard_indication_text_bottom);
         mIndicationBottomMargin = getResources().getDimensionPixelSize(
@@ -901,6 +927,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         int burnInYOffset = getBurnInOffset(mBurnInYOffset * 2, false /* xAxis */)
                 - mBurnInYOffset;
         mIndicationArea.setTranslationY(burnInYOffset * mDarkAmount);
+        mAmbientIndicationArea.setTranslationY(burnInYOffset * mDarkAmount);
     }
 
     public void setAntiBurnInOffsetX(int burnInXOffset) {
@@ -909,6 +936,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
         mBurnInXOffset = burnInXOffset;
         mIndicationArea.setTranslationX(burnInXOffset);
+        mAmbientIndicationArea.setTranslationX(burnInXOffset);
     }
 
     /**
