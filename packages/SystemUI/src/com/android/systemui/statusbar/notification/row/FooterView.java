@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.AttributeSet;
+import android.util.IndentingPrintWriter;
 import android.view.View;
 
 import com.android.systemui.R;
@@ -49,14 +50,15 @@ public class FooterView extends StackScrollerDecorView {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+        IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         super.dump(fd, pw, args);
-        DumpUtilsKt.withIndenting(pw, ipw -> {
-            ipw.println("visibility: " + DumpUtilsKt.visibilityString(getVisibility()));
-            ipw.println("manageButton showHistory: " + mShowHistory);
-            ipw.println("manageButton visibility: "
+        DumpUtilsKt.withIncreasedIndent(pw, () -> {
+            pw.println("visibility: " + DumpUtilsKt.visibilityString(getVisibility()));
+            pw.println("manageButton showHistory: " + mShowHistory);
+            pw.println("manageButton visibility: "
                     + DumpUtilsKt.visibilityString(mDismissButton.getVisibility()));
-            ipw.println("dismissButton visibility: "
+            pw.println("dismissButton visibility: "
                     + DumpUtilsKt.visibilityString(mDismissButton.getVisibility()));
         });
     }

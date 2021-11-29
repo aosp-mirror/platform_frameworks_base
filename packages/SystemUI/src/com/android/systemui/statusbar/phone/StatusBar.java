@@ -90,6 +90,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
@@ -2315,7 +2316,8 @@ public class StatusBar extends CoreStartable implements
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+        IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         synchronized (mQueueLock) {
             pw.println("Current Status Bar state:");
             pw.println("  mExpandedVisible=" + mExpandedVisible);
@@ -2356,14 +2358,12 @@ public class StatusBar extends CoreStartable implements
         }
         pw.println("  mStackScroller: ");
         if (mStackScroller != null) {
-            DumpUtilsKt.withIndenting(pw, ipw -> {
-                // Triple indent until we rewrite the rest of this dump()
-                ipw.increaseIndent();
-                ipw.increaseIndent();
-                mStackScroller.dump(fd, ipw, args);
-                ipw.decreaseIndent();
-                ipw.decreaseIndent();
-            });
+            // Double indent until we rewrite the rest of this dump()
+            pw.increaseIndent();
+            pw.increaseIndent();
+            mStackScroller.dump(fd, pw, args);
+            pw.decreaseIndent();
+            pw.decreaseIndent();
         }
         pw.println("  Theme:");
         String nightMode = mUiModeManager == null ? "null" : mUiModeManager.getNightMode() + "";
