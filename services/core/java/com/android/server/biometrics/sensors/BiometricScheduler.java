@@ -605,6 +605,9 @@ public class BiometricScheduler {
         if (operation.mState == Operation.STATE_WAITING_FOR_COOKIE) {
             Slog.w(getTag(), "Skipping cancellation for non-started operation: " + operation);
             // We can set it to null immediately, since the HAL was never notified to start.
+            if (mCurrentOperation != null) {
+                mCurrentOperation.mClientMonitor.destroy();
+            }
             mCurrentOperation = null;
             startNextOperationIfIdle();
             return;
