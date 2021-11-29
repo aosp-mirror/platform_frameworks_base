@@ -18,6 +18,7 @@ package android.companion.virtual;
 
 import android.app.PendingIntent;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.hardware.input.VirtualKeyEvent;
 import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseRelativeEvent;
@@ -75,4 +76,5 @@ interface IVirtualDevice {
      */
     void launchPendingIntent(
             int displayId, in PendingIntent pendingIntent, in ResultReceiver resultReceiver);
+    PointF getCursorPosition(IBinder token);
 }

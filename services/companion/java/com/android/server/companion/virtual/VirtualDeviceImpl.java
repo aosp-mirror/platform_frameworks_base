@@ -32,7 +32,9 @@ import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.VirtualDeviceParams;
 import android.content.Context;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.hardware.display.DisplayManager;
+import android.hardware.input.InputManagerInternal;
 import android.hardware.input.VirtualKeyEvent;
 import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseRelativeEvent;
@@ -50,6 +52,7 @@ import android.util.SparseArray;
 import android.window.DisplayWindowPolicyController;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -201,7 +204,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
         final long token = Binder.clearCallingIdentity();
         try {
-            mInputController.createKeyboard(deviceName, vendorId, productId, deviceToken);
+            mInputController.createKeyboard(deviceName, vendorId, productId, deviceToken,
+                    displayId);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -226,7 +230,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
         final long token = Binder.clearCallingIdentity();
         try {
-            mInputController.createMouse(deviceName, vendorId, productId, deviceToken);
+            mInputController.createMouse(deviceName, vendorId, productId, deviceToken, displayId);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -253,7 +257,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         final long token = Binder.clearCallingIdentity();
         try {
             mInputController.createTouchscreen(deviceName, vendorId, productId,
-                    deviceToken, screenSize);
+                    deviceToken, displayId, screenSize);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -323,6 +327,16 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
+    @Override // Binder call
+    public PointF getCursorPosition(IBinder token) {
+        final long binderToken = Binder.clearCallingIdentity();
+        try {
+            return mInputController.getCursorPosition(token);
+        } finally {
+            Binder.restoreCallingIdentity(binderToken);
+        }
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
         fout.println("  VirtualDevice: ");
@@ -343,6 +357,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     "Virtual device already have a virtual display with ID " + displayId);
         }
         mVirtualDisplayIds.add(displayId);
+        LocalServices.getService(InputManagerInternal.class).setDisplayEligibilityForPointerCapture(
+                displayId, false);
         final GenericWindowPolicyController dwpc =
                 new GenericWindowPolicyController(FLAG_SECURE,
                         SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS, getAllowedUserHandles(),
@@ -376,6 +392,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     "Virtual device doesn't have a virtual display with ID " + displayId);
         }
         mVirtualDisplayIds.remove(displayId);
+        LocalServices.getService(InputManagerInternal.class).setDisplayEligibilityForPointerCapture(
+                displayId, true);
         mWindowPolicyControllers.remove(displayId);
     }
 
