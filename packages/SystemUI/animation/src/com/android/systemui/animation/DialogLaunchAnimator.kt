@@ -20,7 +20,6 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.Dialog
-import android.content.Context
 import android.graphics.Color
 import android.graphics.Rect
 import android.os.Looper
@@ -44,12 +43,13 @@ private const val TAG = "DialogLaunchAnimator"
  * nicely into the starting dialog.
  */
 class DialogLaunchAnimator @JvmOverloads constructor(
-    private val context: Context,
-    private val launchAnimator: LaunchAnimator,
     private val dreamManager: IDreamManager,
+    private val launchAnimator: LaunchAnimator = LaunchAnimator(TIMINGS, INTERPOLATORS),
     private var isForTesting: Boolean = false
 ) {
     private companion object {
+        private val TIMINGS = ActivityLaunchAnimator.TIMINGS
+        private val INTERPOLATORS = ActivityLaunchAnimator.INTERPOLATORS
         private val TAG_LAUNCH_ANIMATION_RUNNING = R.id.launch_animation_running
     }
 
@@ -98,7 +98,6 @@ class DialogLaunchAnimator @JvmOverloads constructor(
         animateFrom.setTag(TAG_LAUNCH_ANIMATION_RUNNING, true)
 
         val animatedDialog = AnimatedDialog(
-                context,
                 launchAnimator,
                 dreamManager,
                 animateFrom,
@@ -160,7 +159,6 @@ class DialogLaunchAnimator @JvmOverloads constructor(
 }
 
 private class AnimatedDialog(
-    private val context: Context,
     private val launchAnimator: LaunchAnimator,
     private val dreamManager: IDreamManager,
 
@@ -177,7 +175,7 @@ private class AnimatedDialog(
     val dialog: Dialog,
 
     /** Whether we should animate the dialog background when its bounds change. */
-    private val animateBackgroundBoundsChange: Boolean,
+    animateBackgroundBoundsChange: Boolean,
 
     /** Launch animation corresponding to the parent [AnimatedDialog]. */
     private val parentAnimatedDialog: AnimatedDialog? = null,
@@ -275,14 +273,14 @@ private class AnimatedDialog(
             // and the view that we added so that we can dismiss the dialog when this view is
             // clicked. This is necessary because DecorView overrides onTouchEvent and therefore we
             // can't set the click listener directly on the (now fullscreen) DecorView.
-            val fullscreenTransparentBackground = FrameLayout(context)
+            val fullscreenTransparentBackground = FrameLayout(dialog.context)
             decorView.addView(
                 fullscreenTransparentBackground,
                 0 /* index */,
                 FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
             )
 
-            val dialogContentWithBackground = FrameLayout(context)
+            val dialogContentWithBackground = FrameLayout(dialog.context)
             dialogContentWithBackground.background = decorView.background
 
             // Make the window background transparent. Note that setting the window (or DecorView)
@@ -510,7 +508,7 @@ private class AnimatedDialog(
 
     private fun onDialogDismissed() {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            context.mainExecutor.execute { onDialogDismissed() }
+            dialog.context.mainExecutor.execute { onDialogDismissed() }
             return
         }
 

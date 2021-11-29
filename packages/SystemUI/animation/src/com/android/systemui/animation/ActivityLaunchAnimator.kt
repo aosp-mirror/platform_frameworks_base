@@ -21,6 +21,7 @@ import android.app.ActivityTaskManager
 import android.app.PendingIntent
 import android.app.TaskInfo
 import android.graphics.Matrix
+import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
 import android.os.Looper
@@ -34,6 +35,7 @@ import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.animation.Interpolator
 import android.view.animation.PathInterpolator
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
@@ -45,16 +47,46 @@ private const val TAG = "ActivityLaunchAnimator"
  * A class that allows activities to be started in a seamless way from a view that is transforming
  * nicely into the starting window.
  */
-class ActivityLaunchAnimator(private val launchAnimator: LaunchAnimator) {
+class ActivityLaunchAnimator(
+    private val launchAnimator: LaunchAnimator = LaunchAnimator(TIMINGS, INTERPOLATORS)
+) {
     companion object {
+        @JvmField
+        val TIMINGS = LaunchAnimator.Timings(
+            totalDuration = 500L,
+            contentBeforeFadeOutDelay = 0L,
+            contentBeforeFadeOutDuration = 150L,
+            contentAfterFadeInDelay = 150L,
+            contentAfterFadeInDuration = 183L
+        )
+
+        val INTERPOLATORS = LaunchAnimator.Interpolators(
+            positionInterpolator = Interpolators.EMPHASIZED,
+            positionXInterpolator = createPositionXInterpolator(),
+            contentBeforeFadeOutInterpolator = Interpolators.LINEAR_OUT_SLOW_IN,
+            contentAfterFadeInInterpolator = PathInterpolator(0f, 0f, 0.6f, 1f)
+        )
+
+        /** Durations & interpolators for the navigation bar fading in & out. */
         private const val ANIMATION_DURATION_NAV_FADE_IN = 266L
         private const val ANIMATION_DURATION_NAV_FADE_OUT = 133L
-        private const val ANIMATION_DELAY_NAV_FADE_IN =
-            LaunchAnimator.ANIMATION_DURATION - ANIMATION_DURATION_NAV_FADE_IN
+        private val ANIMATION_DELAY_NAV_FADE_IN =
+            TIMINGS.totalDuration - ANIMATION_DURATION_NAV_FADE_IN
+
+        private val NAV_FADE_IN_INTERPOLATOR = Interpolators.STANDARD_DECELERATE
+        private val NAV_FADE_OUT_INTERPOLATOR = PathInterpolator(0.2f, 0f, 1f, 1f)
+
+        /** The time we wait before timing out the remote animation after starting the intent. */
         private const val LAUNCH_TIMEOUT = 1000L
 
-        private val NAV_FADE_IN_INTERPOLATOR = PathInterpolator(0f, 0f, 0f, 1f)
-        private val NAV_FADE_OUT_INTERPOLATOR = PathInterpolator(0.2f, 0f, 1f, 1f)
+        private fun createPositionXInterpolator(): Interpolator {
+            val path = Path().apply {
+                moveTo(0f, 0f)
+                cubicTo(0.1217f, 0.0462f, 0.15f, 0.4686f, 0.1667f, 0.66f)
+                cubicTo(0.1834f, 0.8878f, 0.1667f, 1f, 1f, 1f)
+            }
+            return PathInterpolator(path)
+        }
     }
 
     /**
@@ -107,8 +139,8 @@ class ActivityLaunchAnimator(private val launchAnimator: LaunchAnimator) {
         val animationAdapter = if (!hideKeyguardWithAnimation) {
             RemoteAnimationAdapter(
                 runner,
-                LaunchAnimator.ANIMATION_DURATION,
-                LaunchAnimator.ANIMATION_DURATION - 150 /* statusBarTransitionDelay */
+                TIMINGS.totalDuration,
+                TIMINGS.totalDuration - 150 /* statusBarTransitionDelay */
             )
         } else {
             null
@@ -449,7 +481,7 @@ class ActivityLaunchAnimator(private val launchAnimator: LaunchAnimator) {
             state: LaunchAnimator.State,
             linearProgress: Float
         ) {
-            val fadeInProgress = LaunchAnimator.getProgress(linearProgress,
+            val fadeInProgress = LaunchAnimator.getProgress(TIMINGS, linearProgress,
                 ANIMATION_DELAY_NAV_FADE_IN, ANIMATION_DURATION_NAV_FADE_OUT)
 
             val params = SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(navigationBar.leash)
@@ -464,7 +496,7 @@ class ActivityLaunchAnimator(private val launchAnimator: LaunchAnimator) {
                     .withWindowCrop(windowCrop)
                     .withVisibility(true)
             } else {
-                val fadeOutProgress = LaunchAnimator.getProgress(linearProgress, 0,
+                val fadeOutProgress = LaunchAnimator.getProgress(TIMINGS, linearProgress, 0,
                     ANIMATION_DURATION_NAV_FADE_OUT)
                 params.withAlpha(1f - NAV_FADE_OUT_INTERPOLATOR.getInterpolation(fadeOutProgress))
             }

@@ -27,25 +27,19 @@ import android.util.Log
 import android.util.MathUtils
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
-import android.view.animation.PathInterpolator
+import android.view.animation.Interpolator
+import com.android.systemui.animation.Interpolators.LINEAR
 import kotlin.math.roundToInt
 
 private const val TAG = "LaunchAnimator"
 
 /** A base class to animate a window launch (activity or dialog) from a view . */
-class LaunchAnimator @JvmOverloads constructor(
-    context: Context,
-    private val isForTesting: Boolean = false
+class LaunchAnimator(
+    private val timings: Timings,
+    private val interpolators: Interpolators
 ) {
     companion object {
         internal const val DEBUG = false
-        const val ANIMATION_DURATION = 500L
-        private const val ANIMATION_DURATION_FADE_OUT_CONTENT = 150L
-        private const val ANIMATION_DURATION_FADE_IN_WINDOW = 183L
-        private const val ANIMATION_DELAY_FADE_IN_WINDOW = ANIMATION_DURATION_FADE_OUT_CONTENT
-
-        private val WINDOW_FADE_IN_INTERPOLATOR = PathInterpolator(0f, 0f, 0.6f, 1f)
         private val SRC_MODE = PorterDuffXfermode(PorterDuff.Mode.SRC)
 
         /**
@@ -53,22 +47,19 @@ class LaunchAnimator @JvmOverloads constructor(
          * sub-animation starting [delay] ms after the launch animation and that lasts [duration].
          */
         @JvmStatic
-        fun getProgress(linearProgress: Float, delay: Long, duration: Long): Float {
+        fun getProgress(
+            timings: Timings,
+            linearProgress: Float,
+            delay: Long,
+            duration: Long
+        ): Float {
             return MathUtils.constrain(
-                (linearProgress * ANIMATION_DURATION - delay) / duration,
+                (linearProgress * timings.totalDuration - delay) / duration,
                 0.0f,
                 1.0f
             )
         }
     }
-
-    /** The interpolator used for the width, height, Y position and corner radius. */
-    private val animationInterpolator = AnimationUtils.loadInterpolator(context,
-        R.interpolator.launch_animation_interpolator_y)
-
-    /** The interpolator used for the X position. */
-    private val animationInterpolatorX = AnimationUtils.loadInterpolator(context,
-        R.interpolator.launch_animation_interpolator_x)
 
     private val launchContainerLocation = IntArray(2)
     private val cornerRadii = FloatArray(8)
@@ -159,6 +150,45 @@ class LaunchAnimator @JvmOverloads constructor(
         fun cancel()
     }
 
+    /** The timings (durations and delays) used by this animator. */
+    class Timings(
+        /** The total duration of the animation. */
+        val totalDuration: Long,
+
+        /** The time to wait before fading out the expanding content. */
+        val contentBeforeFadeOutDelay: Long,
+
+        /** The duration of the expanding content fade out. */
+        val contentBeforeFadeOutDuration: Long,
+
+        /**
+         * The time to wait before fading in the expanded content (usually an activity or dialog
+         * window).
+         */
+        val contentAfterFadeInDelay: Long,
+
+        /** The duration of the expanded content fade in. */
+        val contentAfterFadeInDuration: Long
+    )
+
+    /** The interpolators used by this animator. */
+    class Interpolators(
+        /** The interpolator used for the Y position, width, height and corner radius. */
+        val positionInterpolator: Interpolator,
+
+        /**
+         * The interpolator used for the X position. This can be different than
+         * [positionInterpolator] to create an arc-path during the animation.
+         */
+        val positionXInterpolator: Interpolator = positionInterpolator,
+
+        /** The interpolator used when fading out the expanding content. */
+        val contentBeforeFadeOutInterpolator: Interpolator,
+
+        /** The interpolator used when fading in the expanded content. */
+        val contentAfterFadeInInterpolator: Interpolator
+    )
+
     /**
      * Start a launch animation controlled by [controller] towards [endState]. An intermediary
      * layer with [windowBackgroundColor] will fade in then fade out above the expanding view, and
@@ -221,8 +251,8 @@ class LaunchAnimator @JvmOverloads constructor(
 
         // Update state.
         val animator = ValueAnimator.ofFloat(0f, 1f)
-        animator.duration = if (isForTesting) 0 else ANIMATION_DURATION
-        animator.interpolator = Interpolators.LINEAR
+        animator.duration = timings.totalDuration
+        animator.interpolator = LINEAR
 
         val launchContainerOverlay = launchContainer.overlay
         var cancelled = false
@@ -260,8 +290,8 @@ class LaunchAnimator @JvmOverloads constructor(
             // TODO(b/184121838): Use reverse interpolators to get the same path/arc as the non
             // reversed animation.
             val linearProgress = animation.animatedFraction
-            val progress = animationInterpolator.getInterpolation(linearProgress)
-            val xProgress = animationInterpolatorX.getInterpolation(linearProgress)
+            val progress = interpolators.positionInterpolator.getInterpolation(linearProgress)
+            val xProgress = interpolators.positionXInterpolator.getInterpolation(linearProgress)
 
             val xCenter = MathUtils.lerp(startCenterX, endCenterX, xProgress)
             val halfWidth = MathUtils.lerp(startWidth, endWidth, progress) / 2f
@@ -278,7 +308,12 @@ class LaunchAnimator @JvmOverloads constructor(
 
             // The expanding view can/should be hidden once it is completely covered by the opening
             // window.
-            state.visible = getProgress(linearProgress, 0, ANIMATION_DURATION_FADE_OUT_CONTENT) < 1
+            state.visible = getProgress(
+                timings,
+                linearProgress,
+                timings.contentBeforeFadeOutDelay,
+                timings.contentBeforeFadeOutDuration
+            ) < 1
 
             applyStateToWindowBackgroundLayer(
                 windowBackgroundLayer,
@@ -337,14 +372,25 @@ class LaunchAnimator @JvmOverloads constructor(
 
         // We first fade in the background layer to hide the expanding view, then fade it out
         // with SRC mode to draw a hole punch in the status bar and reveal the opening window.
-        val fadeInProgress = getProgress(linearProgress, 0, ANIMATION_DURATION_FADE_OUT_CONTENT)
+        val fadeInProgress = getProgress(
+            timings,
+            linearProgress,
+            timings.contentBeforeFadeOutDelay,
+            timings.contentBeforeFadeOutDuration
+        )
         if (fadeInProgress < 1) {
-            val alpha = Interpolators.LINEAR_OUT_SLOW_IN.getInterpolation(fadeInProgress)
+            val alpha =
+                interpolators.contentBeforeFadeOutInterpolator.getInterpolation(fadeInProgress)
             drawable.alpha = (alpha * 0xFF).roundToInt()
         } else {
             val fadeOutProgress = getProgress(
-                linearProgress, ANIMATION_DELAY_FADE_IN_WINDOW, ANIMATION_DURATION_FADE_IN_WINDOW)
-            val alpha = 1 - WINDOW_FADE_IN_INTERPOLATOR.getInterpolation(fadeOutProgress)
+                timings,
+                linearProgress,
+                timings.contentAfterFadeInDelay,
+                timings.contentAfterFadeInDuration
+            )
+            val alpha =
+                1 - interpolators.contentAfterFadeInInterpolator.getInterpolation(fadeOutProgress)
             drawable.alpha = (alpha * 0xFF).roundToInt()
 
             if (drawHole) {
