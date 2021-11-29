@@ -67,6 +67,7 @@ import com.android.internal.annotations.GuardedBy;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -398,6 +399,16 @@ public final class BluetoothAdapter {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScanMode {}
+
+    /** @hide */
+    @IntDef(value = {
+            BluetoothStatusCodes.SUCCESS,
+            BluetoothStatusCodes.ERROR_UNKNOWN,
+            BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED,
+            BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_SCAN_PERMISSION
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScanModeStatusCode {}
 
     /**
      * Indicates that both inquiry scan and page scan are disabled on the local
@@ -1615,7 +1626,7 @@ public final class BluetoothAdapter {
                 return mService.getScanMode(mAttributionSource);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "", e);
+            throw e.rethrowFromSystemServer();
         } finally {
             mServiceLock.readLock().unlock();
         }
@@ -1623,143 +1634,110 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Set the Bluetooth scan mode of the local Bluetooth adapter.
-     * <p>The Bluetooth scan mode determines if the local adapter is
-     * connectable and/or discoverable from remote Bluetooth devices.
-     * <p>For privacy reasons, discoverable mode is automatically turned off
-     * after <code>durationMillis</code> milliseconds. For example, 120000 milliseconds should be
-     * enough for a remote device to initiate and complete its discovery process.
-     * <p>Valid scan mode values are:
-     * {@link #SCAN_MODE_NONE},
-     * {@link #SCAN_MODE_CONNECTABLE},
-     * {@link #SCAN_MODE_CONNECTABLE_DISCOVERABLE}.
-     * <p>If Bluetooth state is not {@link #STATE_ON}, this API
-     * will return false. After turning on Bluetooth,
-     * wait for {@link #ACTION_STATE_CHANGED} with {@link #STATE_ON}
-     * to get the updated value.
+     * Set the local Bluetooth adapter connectablility and discoverability.
+     * <p>If the scan mode is set to {@link #SCAN_MODE_CONNECTABLE_DISCOVERABLE},
+     * it will change to {@link #SCAN_MODE_CONNECTABLE} after the discoverable timeout.
+     * The discoverable timeout can be set with {@link #setDiscoverableTimeout} and
+     * checked with {@link #getDiscoverableTimeout}. By default, the timeout is usually
+     * 120 seconds on phones which is enough for a remote device to initiate and complete
+     * its discovery process.
      * <p>Applications cannot set the scan mode. They should use
-     * <code>startActivityForResult(
-     * BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE})
-     * </code>instead.
+     * {@link #ACTION_REQUEST_DISCOVERABLE} instead.
      *
-     * @param mode valid scan mode
-     * @param durationMillis time in milliseconds to apply scan mode, only used for {@link
-     * #SCAN_MODE_CONNECTABLE_DISCOVERABLE}
-     * @return true if the scan mode was set, false otherwise
+     * @param mode represents the desired state of the local device scan mode
+     *
+     * @return status code indicating whether the scan mode was successfully set
      * @hide
      */
-    @UnsupportedAppUsage(publicAlternatives = "Use {@link #ACTION_REQUEST_DISCOVERABLE}, which "
-            + "shows UI that confirms the user wants to go into discoverable mode.")
-    @RequiresLegacyBluetoothPermission
+    @SystemApi
     @RequiresBluetoothScanPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
-    public boolean setScanMode(@ScanMode int mode, long durationMillis) {
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_SCAN,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
+    @ScanModeStatusCode
+    public int setScanMode(@ScanMode int mode) {
         if (getState() != STATE_ON) {
-            return false;
+            return BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED;
         }
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                int durationSeconds = Math.toIntExact(durationMillis / 1000);
-                return mService.setScanMode(mode, durationSeconds, mAttributionSource);
+                return mService.setScanMode(mode, mAttributionSource);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        } catch (ArithmeticException ex) {
-            Log.e(TAG, "setScanMode: Duration in seconds outside of the bounds of an int");
-            throw new IllegalArgumentException("Duration not in bounds. In seconds, the "
-                    + "durationMillis must be in the range of an int");
+            throw e.rethrowFromSystemServer();
         } finally {
             mServiceLock.readLock().unlock();
         }
-        return false;
+        return BluetoothStatusCodes.ERROR_UNKNOWN;
     }
 
     /**
-     * Set the Bluetooth scan mode of the local Bluetooth adapter.
-     * <p>The Bluetooth scan mode determines if the local adapter is
-     * connectable and/or discoverable from remote Bluetooth devices.
-     * <p>For privacy reasons, discoverable mode is automatically turned off
-     * after <code>duration</code> seconds. For example, 120 seconds should be
-     * enough for a remote device to initiate and complete its discovery
-     * process.
-     * <p>Valid scan mode values are:
-     * {@link #SCAN_MODE_NONE},
-     * {@link #SCAN_MODE_CONNECTABLE},
-     * {@link #SCAN_MODE_CONNECTABLE_DISCOVERABLE}.
-     * <p>If Bluetooth state is not {@link #STATE_ON}, this API
-     * will return false. After turning on Bluetooth,
-     * wait for {@link #ACTION_STATE_CHANGED} with {@link #STATE_ON}
-     * to get the updated value.
-     * <p>Applications cannot set the scan mode. They should use
-     * <code>startActivityForResult(
-     * BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE})
-     * </code>instead.
+     * Get the timeout duration of the {@link #SCAN_MODE_CONNECTABLE_DISCOVERABLE}.
      *
-     * @param mode valid scan mode
-     * @return true if the scan mode was set, false otherwise
+     * @return the duration of the discoverable timeout or null if an error has occurred
+     */
+    @RequiresBluetoothScanPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
+    public @Nullable Duration getDiscoverableTimeout() {
+        if (getState() != STATE_ON) {
+            return null;
+        }
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                long timeout = mService.getDiscoverableTimeout(mAttributionSource);
+                return (timeout == -1) ? null : Duration.ofSeconds(timeout);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return null;
+    }
+
+    /**
+     * Set the total time the Bluetooth local adapter will stay discoverable when
+     * {@link #setScanMode} is called with {@link #SCAN_MODE_CONNECTABLE_DISCOVERABLE} mode.
+     * After this timeout, the scan mode will fallback to {@link #SCAN_MODE_CONNECTABLE}.
+     * <p>If <code>timeout</code> is set to 0, no timeout will occur and the scan mode will
+     * be persisted until a subsequent call to {@link #setScanMode}.
+     *
+     * @param timeout represents the total duration the local Bluetooth adapter will remain
+     *                discoverable, or no timeout if set to 0
+     * @return whether the timeout was successfully set
+     * @throws IllegalArgumentException if <code>timeout</code> duration in seconds is more
+     *         than {@link Integer#MAX_VALUE}
      * @hide
      */
-    @UnsupportedAppUsage
-    @RequiresLegacyBluetoothPermission
+    @SystemApi
     @RequiresBluetoothScanPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
-    public boolean setScanMode(@ScanMode int mode) {
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_SCAN,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
+    @ScanModeStatusCode
+    public int setDiscoverableTimeout(@NonNull Duration timeout) {
         if (getState() != STATE_ON) {
-            return false;
+            return BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED;
+        }
+        if (timeout.toSeconds() > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Timeout in seconds must be less or equal to "
+                    + Integer.MAX_VALUE);
         }
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.setScanMode(mode, getDiscoverableTimeout(), mAttributionSource);
+                return mService.setDiscoverableTimeout(timeout.toSeconds(), mAttributionSource);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "", e);
+            throw e.rethrowFromSystemServer();
         } finally {
             mServiceLock.readLock().unlock();
         }
-        return false;
-    }
-
-    /** @hide */
-    @UnsupportedAppUsage
-    @RequiresBluetoothScanPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
-    public int getDiscoverableTimeout() {
-        if (getState() != STATE_ON) {
-            return -1;
-        }
-        try {
-            mServiceLock.readLock().lock();
-            if (mService != null) {
-                return mService.getDiscoverableTimeout(mAttributionSource);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        } finally {
-            mServiceLock.readLock().unlock();
-        }
-        return -1;
-    }
-
-    /** @hide */
-    @UnsupportedAppUsage
-    @RequiresBluetoothScanPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
-    public void setDiscoverableTimeout(int timeout) {
-        if (getState() != STATE_ON) {
-            return;
-        }
-        try {
-            mServiceLock.readLock().lock();
-            if (mService != null) {
-                mService.setDiscoverableTimeout(timeout, mAttributionSource);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        } finally {
-            mServiceLock.readLock().unlock();
-        }
+        return BluetoothStatusCodes.ERROR_UNKNOWN;
     }
 
     /**

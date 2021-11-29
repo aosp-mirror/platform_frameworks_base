@@ -40,7 +40,7 @@ public final class BluetoothStatusCodes {
 
     /**
      * Error code indicating that the API call was initiated by neither the system nor the active
-     * Zuser
+     * user
      */
     public static final int ERROR_BLUETOOTH_NOT_ALLOWED = 2;
 
