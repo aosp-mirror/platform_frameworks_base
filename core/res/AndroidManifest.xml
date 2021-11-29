@@ -1481,7 +1481,25 @@
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_bodySensors"
         android:description="@string/permdesc_bodySensors"
+        android:backgroundPermission="android.permission.BODY_SENSORS_BACKGROUND"
         android:protectionLevel="dangerous" />
+
+    <!-- Allows an application to access data from sensors that the user uses to measure what is
+         happening inside their body, such as heart rate. If you're requesting this permission, you
+         must also request {@link #BODY_SENSORS}. Requesting this permission by itself doesn't give
+         you Body sensors access.
+         <p>Protection level: dangerous
+
+         <p> This is a hard restricted permission which cannot be held by an app until
+         the installer on record whitelists the permission. For more details see
+         {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
+    -->
+    <permission android:name="android.permission.BODY_SENSORS_BACKGROUND"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:label="@string/permlab_bodySensors_background"
+        android:description="@string/permdesc_bodySensors_background"
+        android:protectionLevel="dangerous"
+        android:permissionFlags="hardRestricted" />
 
     <!-- Allows an app to use fingerprint hardware.
          <p>Protection level: normal
