@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"තිරය අගුළු හැරීමේදී වැරදියට ටයිප් කළ මුරපද ගණන නිරීක්ෂණය කරන්න සහ ටැබ්ලටය අගුළු දමන්න හෝ වැරදි මුරපද බොහෝ ගණනක් ටයිප් කර ඇති නම් ටැබ්ලටයේ සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් ඔබේ Android TV උපාංගය අගුලු දමන්න නැතහොත් මෙම Android TV උපාංගයෙහි සියලු දත්ත මකන්න."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් තොරතුරු විනෝදාස්වාද පද්ධතිය අගුලු දමන්න නැතහොත් මෙම තොරතුරු විනෝදාස්වාද පද්ධතියෙහි සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"තිරය අගුළු හැරීමේදී වැරදියට ටයිප් කළ මුරපද ගණන නිරීක්ෂණය කරන්න සහ දුරකථනය අගුළු දමන්න හෝ වැරදි මුරපද බොහෝ ගණනක් ටයිප් කර ඇති නම් දුරකථනයේ සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් ටැබ්ලටය අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් ඔබේ Android TV අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් තොරතුරු විනෝදාස්වාද පද්ධතිය අගුලු දමන්න නැතහොත් මෙම පැතිකඩෙහි සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් දුරකථනය අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"තිර අගුල වෙනස් කරන්න"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"තිර අගුල වෙනස් කරන්න."</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"සියලු දත්ත මකන්න"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"කර්මාන්ත ශාලා දත්ත යළි පිහිටුවීමෙන් පසුව අනතුරු ඇඟවිමකින් තොරවම ටැබ්ලට් දත්ත මකා දමයි."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"කර්මාන්ත ශාලා දත්ත යළි සැකසීමක් සිදු කිරීම මගින්, අනතුරු ඇඟවිමකින් තොරව ඔබේ Android TV දත්ත මකයි."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"අනතුරු ඇඟවීමෙන් තොරව කර්මාන්තශාලා දත්ත යළි සැකසීමක් සිදු කිරීම මගින් තොරතුරු විනෝදාස්වාද පද්ධතියේ දත්ත මකන්න."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"කර්මාන්ත ශාලා දත්ත යළි පිහිටුවීමෙන් පසුව අනතුරු ඇඟවිමකින් තොරවම දුරකථන දත්ත මකා දමයි."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"පරිශීලක දත්ත මකන්න"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"පැතිකඩ දත්ත මකන්න"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"පරිශීලක දත්ත මකන්න"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"අනතුරු ඇඟවීමකින් තොරව මෙම ටැබ්ලටයෙහි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"අනතුරු ඇඟවීමකින් තොරව මෙම Android TV උපාංගයෙහි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"අනතුරු ඇඟවීමෙන් තොරව මෙම තොරතුරු විනෝදාස්වාද පද්ධතියේ මෙම පැතිකඩෙහි දත්ත මකන්න."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"අනතුරු ඇඟවීමකින් තොරව මෙම දුරකථනයෙහි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"උපාංග ගෝලීය නියුතුව සකස් කිරීම"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"ප්‍රතිපත්තිය සක්‍රිය අතරතුර ගෝලීය ප්‍රොක්සි භාවිත කිරීමට උපාංගය සකසන්න. උපාංග හිමිකරුට පමණක් ගෝලීය ප්‍රොක්සි සැකසිය හැකිය."</string>

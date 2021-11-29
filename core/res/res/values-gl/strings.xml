@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Controlar os intentos de desbloqueo da pantalla"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Supervisa o número de contrasinais incorrectos escritos ao desbloquear a pantalla e bloquea a tableta ou borra todos os datos da tableta se se escriben demasiados contrasinais incorrectos."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Controla o número de contrasinais incorrectos escritos ao desbloquear a pantalla e bloquea o dispositivo Android TV ou borra todos os datos do dispositivo se se escriben demasiados contrasinais incorrectos."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Supervisa o número de contrasinais incorrectos que se escriben ao desbloquear a pantalla e bloquea o sistema de información e entretemento ou borra todos os seus datos se se meten demasiados incorrectos."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Supervisa o número de contrasinais incorrectos escritos ao desbloquear a pantalla e bloquea o teléfono ou borra todos os datos do teléfono se se escriben demasiados contrasinais incorrectos."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Supervisar o número de contrasinais incorrectos escritos ao desbloquear a pantalla e bloquear a tableta ou borrar todos os datos do usuario se se escriben demasiados contrasinais incorrectos."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Controla o número de contrasinais incorrectos escritos ao desbloquear a pantalla e bloquea o dispositivo Android TV ou borra todos os datos deste usuario se se escriben demasiados contrasinais incorrectos."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Supervisa o número de contrasinais incorrectos que se escriben ao desbloquear a pantalla e bloquea o sistema de información e entretemento ou borra todos os datos deste perfil se se meten demasiados incorrectos."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Supervisar o número de contrasinais incorrectos escritos ao desbloquear a pantalla e bloquear o teléfono ou borrar todos os datos do usuario se se escriben demasiados contrasinais incorrectos."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Cambiar o bloqueo da pantalla"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Cambia o bloqueo da pantalla."</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Borrar todos os datos"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Borra os datos da tableta sen previo aviso mediante a realización dun restablecemento dos datos de fábrica."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Borra a información do dispositivo Android TV sen avisar e realiza un restablecemento dos datos de fábrica."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Borra os datos do sistema de información e entretemento sen previo aviso a través do restablecemento dos datos de fábrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Borra os datos do teléfono sen previo aviso mediante a realización dun restablecemento dos datos de fábrica."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Borrar os datos do usuario"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Borrar os datos do perfil"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Borrar os datos do usuario"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Borra os datos deste usuario nesta tableta sen previo aviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Borra os datos deste usuario neste dispositivo Android TV sen avisar."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Borra os datos deste perfil do sistema de información e entretemento sen previo aviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Borra os datos deste usuario neste teléfono sen previo aviso."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Establecer o proxy global do dispositivo"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Configura o proxy global do dispositivo que se debe usar cando a política está activada. Só o propietario do dispositivo pode configurar o proxy global."</string>

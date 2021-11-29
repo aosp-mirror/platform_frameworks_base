@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Վերահսկել էկրանի ապակողպման փորձերը"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Վերահսկել սխալ գաղտնաբառերի թիվը, որոնք մուտքագրվել են էկրանն ապակողպելիս, և կողպել պլանշետը կամ ջնջել պլանշետի բոլոր տվյալները, եթե մուտքագրվել են չափից շատ սխալ գաղտնաբառեր:"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Գրանցել էկրանի ապակողպման համար մուտքագրվող սխալ գաղտնաբառերի թիվը և կողպել Android TV սարքը կամ ջնջել սարքի բոլոր տվյալները՝ չափից ավելի շատ սխալ գաղտնաբառեր մուտքագրելու դեպքում:"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Վերահսկել սխալ գաղտնաբառերի թիվը, որոնք մուտքագրվել են էկրանը ապակողպելիս, և կողպել տեղեկատվաժամանցային համակարգը կամ ջնջել բոլոր տվյալները, եթե չափից ավելի սխալ գաղտնաբառեր են մուտքագրվել։"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Վերահսկել սխալ գաղտնաբառերի թիվը, որոնք մուտքագրվել են էկրանն ապակողպելիս, և կողպել հեռախոսը կամ ջնջել հեռախոսի բոլոր տվյալները, եթե մուտքագրվել են չափից շատ սխալ գաղտնաբառեր:"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Կառավարել էկրանն ապակողպելիս մուտքագրվող սխալ գաղտնաբառերի թիվը և կողպել պլանշետը կամ ջնջել այս օգտատիրոջ բոլոր տվյալները չափից ավելի սխալ գաղտնաբառեր մուտքագրելու դեպքում:"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Գրանցել էկրանի ապակողպման համար մուտքագրվող սխալ գաղտնաբառերի թիվը և կողպել Android TV սարքը կամ ջնջել այս օգտատիրոջ բոլոր տվյալները՝ չափից ավելի շատ սխալ գաղտնաբառեր մուտքագրելու դեպքում:"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Վերահսկել սխալ գաղտնաբառերի թիվը, որոնք մուտքագրվել են էկրանը ապակողպելիս, և կողպել տեղեկատվաժամանցային համակարգը կամ ջնջել այս պրոֆիլի բոլոր տվյալները, եթե չափից ավելի սխալ գաղտնաբառեր են մուտքագրվել։"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Կառավարել էկրանն ապակողպելիս մուտքագրվող սխալ գաղտնաբառերի թիվը և կողպել հեռախոսը կամ ջնջել այս օգտատիրոջ բոլոր տվյալները չափից ավելի սխալ գաղտնաբառեր մուտքագրելու դեպքում:"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Փոխել էկրանի կողպման գաղտնաբառը"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Փոխել էկրանի կողպման գաղտնաբառը:"</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Ջնջել բոլոր տվյալները"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Ջնջել պլանշետի տվյալներն առանց նախազգուշացման` կատարելով գործարանային տվյալների վերակայում:"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Ջնջել Android TV սարքի տվյալներն առանց զգուշացման՝ վերականգնելով գործարանային կարգավորումները:"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Ջնջել տեղեկատվաժամանցային համակարգի տվյալները առանց զգուշացման՝ վերականգնելով գործարանային կարգավորումները։"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Ջնջել հեռախոսի տվյալներն առանց նախազգուշացման` կատարելով գործարանային տվյալների վերակայում:"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Ջնջել օգտատիրոջ տվյալները"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Պրոֆիլի տվյալների ջնջում"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Ջնջել օգտատիրոջ տվյալները"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Ջնջել այս օգտատիրոջ տվյալներն այս պլանշետում առանց նախազգուշացման:"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Ջնջել այս օգտատիրոջ տվյալներն Android TV սարքում առանց նախազգուշացման:"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Ջնջել տեղեկատվաժամանցային համակարգի այս պրոֆիլի տվյալները առանց զգուշացման։"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Ջնջել այս օգտատիրոջ տվյալներն այս հեռախոսում առանց նախազգուշացման:"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Կարգավորել սարքի համաշխարհային պրոքսին"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Կարգավորել, որ սարքի համընդհանուր պրոքսի-սերվերն օգտագործվի, երբ քաղաքականությունը միացված է: Միայն սարքի սեփականատերը կարող է կարգավորել համընդհանուր պրոքսի-սերվերը:"</string>

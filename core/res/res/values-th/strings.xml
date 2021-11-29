@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ตรวจสอบจำนวนของรหัสผ่านที่พิมพ์ไม่ถูกต้องขณะปลดล็อกหน้าจอ และล็อกแท็บเล็ตหรือลบข้อมูลทั้งหมดในแท็บเล็ตถ้ามีการพิมพ์รหัสผ่านที่ไม่ถูกต้องมากเกินไป"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"ตรวจสอบรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกอุปกรณ์ Android TV หรือลบข้อมูลทั้งหมดของอุปกรณ์ Android TV หากมีการพิมพ์รหัสผ่านไม่ถูกต้องหลายครั้งเกินไป"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ตรวจสอบจำนวนครั้งที่พิมพ์รหัสผ่านไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกระบบสาระบันเทิงหรือลบข้อมูลทั้งหมดของระบบสาระบันเทิงหากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยเกินไป"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ตรวจสอบจำนวนการพิมพ์รหัสผ่านที่ไม่ถูกต้องขณะปลดล็อกหน้าจอ และล็อกโทรศัพท์หรือลบข้อมูลทั้งหมดในโทรศัพท์ถ้ามีการพิมพ์รหัสผ่านที่ไม่ถูกต้องมากเกินไป"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ตรวจสอบจำนวนรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกแท็บเล็ตหรือลบข้อมูลทั้งหมดของผู้ใช้นี้หากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยเกินไป"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"ตรวจสอบจำนวนรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกอุปกรณ์ Android TV หรือลบข้อมูลทั้งหมดของผู้ใช้นี้หากพิมพ์รหัสผ่านไม่ถูกต้องหลายครั้งเกินไป"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ตรวจสอบจำนวนครั้งที่พิมพ์รหัสผ่านไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกระบบสาระบันเทิงหรือลบข้อมูลทั้งหมดของโปรไฟล์นี้หากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยเกินไป"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"ตรวจสอบจำนวนรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกโทรศัพท์หรือลบข้อมูลทั้งหมดของผู้ใช้นี้หากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยเกินไป"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"เปลี่ยนการล็อกหน้าจอ"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"เปลี่ยนการล็อกหน้าจอ"</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"ลบข้อมูลทั้งหมด"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ลบข้อมูลของแท็บเล็ตโดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ลบข้อมูลของอุปกรณ์ Android TV โดยไม่มีการเตือนด้วยการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"ดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้นเพื่อลบข้อมูลของระบบสาระบันเทิงโดยไม่มีการเตือน"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ลบข้อมูลโทรศัพท์โดยไม่มีการเตือน ด้วยการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ลบข้อมูลผู้ใช้"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"ลบข้อมูลโปรไฟล์"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"ลบข้อมูลผู้ใช้"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"ลบข้อมูลของผู้ใช้นี้ในแท็บเล็ตเครื่องนี้โดยไม่มีการเตือน"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"ลบข้อมูลของผู้ใช้นี้ในอุปกรณ์ Android TV เครื่องนี้โดยไม่มีการเตือน"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"ลบข้อมูลของโปรไฟล์ดังกล่าวในระบบสาระบันเทิงนี้โดยไม่มีการเตือน"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"ลบข้อมูลของผู้ใช้นี้ในโทรศัพท์เครื่องนี้โดยไม่มีการเตือน"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์ที่จะใช้ขณะที่เปิดใช้นโยบายอยู่ เฉพาะเจ้าของอุปกรณ์เท่านั้นที่สามารถตั้งค่าพร็อกซีส่วนกลาง"</string>
