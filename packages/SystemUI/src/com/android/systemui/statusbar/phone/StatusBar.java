@@ -521,7 +521,6 @@ public class StatusBar extends CoreStartable implements
     private QSPanelController mQSPanelController;
 
     private final OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
-    private final PhoneStatusBarViewController.Factory mPhoneStatusBarViewControllerFactory;
     KeyguardIndicationController mKeyguardIndicationController;
 
     private View mReportRejectedTouch;
@@ -767,7 +766,6 @@ public class StatusBar extends CoreStartable implements
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
             OperatorNameViewController.Factory operatorNameViewControllerFactory,
-            PhoneStatusBarViewController.Factory phoneStatusBarViewControllerFactory,
             PhoneStatusBarPolicy phoneStatusBarPolicy,
             KeyguardIndicationController keyguardIndicationController,
             DemoModeController demoModeController,
@@ -807,7 +805,6 @@ public class StatusBar extends CoreStartable implements
         mKeyguardStateController = keyguardStateController;
         mHeadsUpManager = headsUpManagerPhone;
         mOperatorNameViewControllerFactory = operatorNameViewControllerFactory;
-        mPhoneStatusBarViewControllerFactory = phoneStatusBarViewControllerFactory;
         mKeyguardIndicationController = keyguardIndicationController;
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
         mDynamicPrivacyController = dynamicPrivacyController;
@@ -1153,12 +1150,8 @@ public class StatusBar extends CoreStartable implements
                     }
 
                     mStatusBarView = statusBarFragmentComponent.getPhoneStatusBarView();
-
-                    // TODO(b/205609837): Migrate this to StatusBarFragmentComponent.
-                    mPhoneStatusBarViewController = mPhoneStatusBarViewControllerFactory
-                            .create(mStatusBarView, mNotificationPanelViewController
-                                    .getStatusBarTouchEventHandler());
-                    mPhoneStatusBarViewController.init();
+                    mPhoneStatusBarViewController =
+                            statusBarFragmentComponent.getPhoneStatusBarViewController();
 
                     // Ensure we re-propagate panel expansion values to the panel controller and
                     // any listeners it may have, such as PanelBar. This will also ensure we
