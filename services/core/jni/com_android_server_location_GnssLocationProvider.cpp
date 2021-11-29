@@ -29,6 +29,7 @@
 #include <android/hardware/gnss/2.1/IGnssMeasurement.h>
 #include <android/hardware/gnss/BnGnss.h>
 #include <android/hardware/gnss/BnGnssCallback.h>
+#include <android/hardware/gnss/BnGnssDebug.h>
 #include <android/hardware/gnss/BnGnssGeofence.h>
 #include <android/hardware/gnss/BnGnssGeofenceCallback.h>
 #include <android/hardware/gnss/BnGnssMeasurementCallback.h>
@@ -53,6 +54,7 @@
 #include "gnss/GnssAntennaInfoCallback.h"
 #include "gnss/GnssBatching.h"
 #include "gnss/GnssConfiguration.h"
+#include "gnss/GnssDebug.h"
 #include "gnss/GnssGeofence.h"
 #include "gnss/GnssMeasurement.h"
 #include "gnss/GnssNavigationMessage.h"
@@ -155,8 +157,6 @@ using IGnss_V2_1 = android::hardware::gnss::V2_1::IGnss;
 using IGnssCallback_V1_0 = android::hardware::gnss::V1_0::IGnssCallback;
 using IGnssCallback_V2_0 = android::hardware::gnss::V2_0::IGnssCallback;
 using IGnssCallback_V2_1 = android::hardware::gnss::V2_1::IGnssCallback;
-using IGnssDebug_V1_0 = android::hardware::gnss::V1_0::IGnssDebug;
-using IGnssDebug_V2_0 = android::hardware::gnss::V2_0::IGnssDebug;
 using IGnssAntennaInfo = android::hardware::gnss::V2_1::IGnssAntennaInfo;
 using IAGnssRil_V1_0 = android::hardware::gnss::V1_0::IAGnssRil;
 using IAGnssRil_V2_0 = android::hardware::gnss::V2_0::IAGnssRil;
@@ -179,6 +179,7 @@ using IAGnssAidl = android::hardware::gnss::IAGnss;
 using IGnssAidl = android::hardware::gnss::IGnss;
 using IGnssCallbackAidl = android::hardware::gnss::IGnssCallback;
 using IGnssBatchingAidl = android::hardware::gnss::IGnssBatching;
+using IGnssDebugAidl = android::hardware::gnss::IGnssDebug;
 using IGnssPsdsAidl = android::hardware::gnss::IGnssPsds;
 using IGnssPsdsCallbackAidl = android::hardware::gnss::IGnssPsdsCallback;
 using IGnssConfigurationAidl = android::hardware::gnss::IGnssConfiguration;
@@ -209,8 +210,6 @@ sp<IGnssPsdsAidl> gnssPsdsAidlIface = nullptr;
 sp<IGnssXtra> gnssXtraIface = nullptr;
 sp<IAGnssRil_V1_0> agnssRilIface = nullptr;
 sp<IAGnssRil_V2_0> agnssRilIface_V2_0 = nullptr;
-sp<IGnssDebug_V1_0> gnssDebugIface = nullptr;
-sp<IGnssDebug_V2_0> gnssDebugIface_V2_0 = nullptr;
 sp<IGnssNi> gnssNiIface = nullptr;
 sp<IGnssPowerIndication> gnssPowerIndicationIface = nullptr;
 sp<IMeasurementCorrections_V1_0> gnssCorrectionsIface_V1_0 = nullptr;
@@ -224,6 +223,7 @@ std::unique_ptr<android::gnss::GnssNavigationMessageInterface> gnssNavigationMes
 std::unique_ptr<android::gnss::GnssBatchingInterface> gnssBatchingIface = nullptr;
 std::unique_ptr<android::gnss::GnssGeofenceInterface> gnssGeofencingIface = nullptr;
 std::unique_ptr<android::gnss::AGnssInterface> agnssIface = nullptr;
+std::unique_ptr<android::gnss::GnssDebugInterface> gnssDebugIface = nullptr;
 
 #define WAKE_LOCK_NAME  "GPS"
 
@@ -1104,22 +1104,24 @@ static void android_location_gnss_hal_GnssNative_init_once(JNIEnv* env, jobject 
     // Allow all causal combinations between IGnss.hal and IGnssDebug.hal. That means,
     // 2.0@IGnss can be paired with {1.0, 2.0}@IGnssDebug
     // 1.0@IGnss is paired with 1.0@IGnssDebug
-    gnssDebugIface = nullptr;
-    if (gnssHal_V2_0 != nullptr) {
-        auto gnssDebug = gnssHal_V2_0->getExtensionGnssDebug_2_0();
-        if (!gnssDebug.isOk()) {
-            ALOGD("Unable to get a handle to GnssDebug_V2_0");
-        } else {
-            gnssDebugIface_V2_0 = gnssDebug;
-            gnssDebugIface = gnssDebugIface_V2_0;
+
+    if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() >= 2) {
+        sp<IGnssDebugAidl> gnssDebugAidl;
+        auto status = gnssHalAidl->getExtensionGnssDebug(&gnssDebugAidl);
+        if (checkAidlStatus(status, "Unable to get a handle to GnssDebug interface.")) {
+            gnssDebugIface = std::make_unique<gnss::GnssDebug>(gnssDebugAidl);
+        }
+    }
+    if (gnssHal_V2_0 != nullptr && gnssDebugIface == nullptr) {
+        auto gnssDebug_V2_0 = gnssHal_V2_0->getExtensionGnssDebug_2_0();
+        if (checkHidlReturn(gnssDebug_V2_0, "Unable to get a handle to GnssDebug_V2_0.")) {
+            gnssDebugIface = std::make_unique<gnss::GnssDebug_V2_0>(gnssDebug_V2_0);
         }
     }
     if (gnssHal != nullptr && gnssDebugIface == nullptr) {
-        auto gnssDebug = gnssHal->getExtensionGnssDebug();
-        if (!gnssDebug.isOk()) {
-            ALOGD("Unable to get a handle to GnssDebug");
-        } else {
-            gnssDebugIface = gnssDebug;
+        auto gnssDebug_V1_0 = gnssHal->getExtensionGnssDebug();
+        if (checkHidlReturn(gnssDebug_V1_0, "Unable to get a handle to GnssDebug_V1_0.")) {
+            gnssDebugIface = std::make_unique<gnss::GnssDebug_V1_0>(gnssDebug_V1_0);
         }
     }
 
@@ -1639,108 +1641,16 @@ static void android_location_gnss_hal_GnssNative_send_ni_response(JNIEnv* /* env
     checkHidlReturn(result, "IGnssNi respond() failed.");
 }
 
-const IGnssDebug_V1_0::SatelliteData& getSatelliteData(
-        const hidl_vec<IGnssDebug_V1_0::SatelliteData>& satelliteDataArray, size_t i) {
-    return satelliteDataArray[i];
-}
-
-const IGnssDebug_V1_0::SatelliteData& getSatelliteData(
-        const hidl_vec<IGnssDebug_V2_0::SatelliteData>& satelliteDataArray, size_t i) {
-    return satelliteDataArray[i].v1_0;
-}
-
-template<class T>
-uint32_t getConstellationType(const hidl_vec<T>& satelliteDataArray, size_t i) {
-    return static_cast<uint32_t>(satelliteDataArray[i].constellation);
-}
-
-template<class T>
-static jstring parseDebugData(JNIEnv* env, std::stringstream& internalState, const T& data) {
-    internalState << "Gnss Location Data:: ";
-    if (!data.position.valid) {
-        internalState << "not valid";
-    } else {
-        internalState << "LatitudeDegrees: " << data.position.latitudeDegrees
-                      << ", LongitudeDegrees: " << data.position.longitudeDegrees
-                      << ", altitudeMeters: " << data.position.altitudeMeters
-                      << ", speedMetersPerSecond: " << data.position.speedMetersPerSec
-                      << ", bearingDegrees: " << data.position.bearingDegrees
-                      << ", horizontalAccuracyMeters: "
-                      << data.position.horizontalAccuracyMeters
-                      << ", verticalAccuracyMeters: " << data.position.verticalAccuracyMeters
-                      << ", speedAccuracyMetersPerSecond: "
-                      << data.position.speedAccuracyMetersPerSecond
-                      << ", bearingAccuracyDegrees: " << data.position.bearingAccuracyDegrees
-                      << ", ageSeconds: " << data.position.ageSeconds;
-    }
-    internalState << std::endl;
-
-    internalState << "Gnss Time Data:: timeEstimate: " << data.time.timeEstimate
-                  << ", timeUncertaintyNs: " << data.time.timeUncertaintyNs
-                  << ", frequencyUncertaintyNsPerSec: "
-                  << data.time.frequencyUncertaintyNsPerSec << std::endl;
-
-    if (data.satelliteDataArray.size() != 0) {
-        internalState << "Satellite Data for " << data.satelliteDataArray.size()
-                      << " satellites:: " << std::endl;
-    }
-
-    internalState << "constell: 1=GPS, 2=SBAS, 3=GLO, 4=QZSS, 5=BDS, 6=GAL, 7=IRNSS; "
-                  << "ephType: 0=Eph, 1=Alm, 2=Unk; "
-                  << "ephSource: 0=Demod, 1=Supl, 2=Server, 3=Unk; "
-                  << "ephHealth: 0=Good, 1=Bad, 2=Unk" << std::endl;
-    for (size_t i = 0; i < data.satelliteDataArray.size(); i++) {
-        IGnssDebug_V1_0::SatelliteData satelliteData =
-                getSatelliteData(data.satelliteDataArray, i);
-        internalState << "constell: "
-                      << getConstellationType(data.satelliteDataArray, i)
-                      << ", svid: " << std::setw(3) << satelliteData.svid
-                      << ", serverPredAvail: "
-                      << satelliteData.serverPredictionIsAvailable
-                      << ", serverPredAgeSec: " << std::setw(7)
-                      << satelliteData.serverPredictionAgeSeconds
-                      << ", ephType: "
-                      << static_cast<uint32_t>(satelliteData.ephemerisType)
-                      << ", ephSource: "
-                      << static_cast<uint32_t>(satelliteData.ephemerisSource)
-                      << ", ephHealth: "
-                      << static_cast<uint32_t>(satelliteData.ephemerisHealth)
-                      << ", ephAgeSec: " << std::setw(7)
-                      << satelliteData.ephemerisAgeSeconds << std::endl;
-    }
-    return (jstring) env->NewStringUTF(internalState.str().c_str());
-}
-
 static jstring android_location_gnss_hal_GnssNative_get_internal_state(JNIEnv* env, jclass) {
-    jstring internalStateStr = nullptr;
     /*
      * TODO: Create a jobject to represent GnssDebug.
      */
 
-    std::stringstream internalState;
-
     if (gnssDebugIface == nullptr) {
         ALOGE("%s: IGnssDebug interface not available.", __func__);
-    } else if (gnssDebugIface_V2_0 != nullptr) {
-        IGnssDebug_V2_0::DebugData data;
-        auto result = gnssDebugIface_V2_0->getDebugData_2_0(
-                [&data](const IGnssDebug_V2_0::DebugData& debugData) {
-                    data = debugData;
-                });
-        if (checkHidlReturn(result, "IGnssDebug getDebugData_2_0() failed.")) {
-            internalStateStr = parseDebugData(env, internalState, data);
-        }
-    } else {
-        IGnssDebug_V1_0::DebugData data;
-        auto result = gnssDebugIface->getDebugData(
-                [&data](const IGnssDebug_V1_0::DebugData& debugData) {
-                    data = debugData;
-                });
-        if (checkHidlReturn(result, "IGnssDebug getDebugData() failed.")) {
-            internalStateStr = parseDebugData(env, internalState, data);
-        }
+        return nullptr;
     }
-    return internalStateStr;
+    return gnssDebugIface->getDebugData(env);
 }
 
 static void android_location_gnss_hal_GnssNative_request_power_stats(JNIEnv* env) {

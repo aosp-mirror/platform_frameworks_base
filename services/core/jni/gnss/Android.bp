@@ -29,6 +29,7 @@ cc_library_shared {
         "GnssBatching.cpp",
         "GnssBatchingCallback.cpp",
         "GnssConfiguration.cpp",
+        "GnssDebug.cpp",
         "GnssGeofence.cpp",
         "GnssGeofenceCallback.cpp",
         "GnssMeasurement.cpp",
