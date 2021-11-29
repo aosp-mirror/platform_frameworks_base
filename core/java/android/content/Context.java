@@ -3842,6 +3842,7 @@ public abstract class Context {
             UWB_SERVICE,
             MEDIA_METRICS_SERVICE,
             SUPPLEMENTAL_PROCESS_SERVICE,
+            //@hide: ATTESTATION_VERIFICATION_SERVICE,
             //@hide: SAFETY_CENTER_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -5737,6 +5738,15 @@ public abstract class Context {
      * @hide
      */
     public static final String INCREMENTAL_SERVICE = "incremental";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.security.attestationverification.AttestationVerificationManager}.
+     * @see #getSystemService(String)
+     * @see android.security.attestationverification.AttestationVerificationManager
+     * @hide
+     */
+    public static final String ATTESTATION_VERIFICATION_SERVICE = "attestation_verification";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
