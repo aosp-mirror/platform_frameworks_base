@@ -315,6 +315,16 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     private static final String TAG = "Service";
 
     /**
+     * Selector for {@link #stopForeground(int)}:  equivalent to passing {@code false}
+     * to the legacy API {@link #stopForeground(boolean)}.
+     *
+     * @deprecated Use {@link #STOP_FOREGROUND_DETACH} instead.  The legacy
+     * behavior was inconsistent, leading to bugs around unpredictable results.
+     */
+    @Deprecated
+    public static final int STOP_FOREGROUND_LEGACY = 0;
+
+    /**
      * Selector for {@link #stopForeground(int)}: if supplied, the notification previously
      * supplied to {@link #startForeground} will be cancelled and removed from display.
      */
@@ -329,6 +339,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
 
     /** @hide */
     @IntDef(flag = false, prefix = { "STOP_FOREGROUND_" }, value = {
+            STOP_FOREGROUND_LEGACY,
             STOP_FOREGROUND_REMOVE,
             STOP_FOREGROUND_DETACH
     })
@@ -795,15 +806,17 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * Legacy version of {@link #stopForeground(int)}.
      * @param removeNotification If true, the {@link #STOP_FOREGROUND_REMOVE}
      * selector will be passed to {@link #stopForeground(int)}; otherwise
-     * {@code zero} will be passed.
+     * {@link #STOP_FOREGROUND_LEGACY} will be passed.
      * @see #stopForeground(int)
      * @see #startForeground(int, Notification)
      *
-     * @deprecated use {@link #stopForeground(int)} instead.
+     * @deprecated call {@link #stopForeground(int)} and pass either
+     * {@link #STOP_FOREGROUND_REMOVE} or {@link #STOP_FOREGROUND_DETACH}
+     * explicitly instead.
      */
     @Deprecated
     public final void stopForeground(boolean removeNotification) {
-        stopForeground(removeNotification ? STOP_FOREGROUND_REMOVE : 0);
+        stopForeground(removeNotification ? STOP_FOREGROUND_REMOVE : STOP_FOREGROUND_LEGACY);
     }
 
     /**

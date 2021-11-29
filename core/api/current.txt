@@ -6749,6 +6749,7 @@ package android.app {
     field public static final int START_STICKY = 1; // 0x1
     field public static final int START_STICKY_COMPATIBILITY = 0; // 0x0
     field public static final int STOP_FOREGROUND_DETACH = 2; // 0x2
+    field @Deprecated public static final int STOP_FOREGROUND_LEGACY = 0; // 0x0
     field public static final int STOP_FOREGROUND_REMOVE = 1; // 0x1
   }
 
