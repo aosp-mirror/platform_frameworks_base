@@ -728,6 +728,10 @@ package android.app {
     field public static final String ACTION_DOWNLOAD_COMPLETED = "android.intent.action.DOWNLOAD_COMPLETED";
   }
 
+  public final class GameManager {
+    method @RequiresPermission("android.permission.MANAGE_GAME_MODE") public void setGameMode(@NonNull String, int);
+  }
+
   public abstract class InstantAppResolverService extends android.app.Service {
     ctor public InstantAppResolverService();
     method public final void attachBaseContext(android.content.Context);
