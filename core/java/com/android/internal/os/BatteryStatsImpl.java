@@ -3522,6 +3522,10 @@ public class BatteryStatsImpl extends BatteryStats {
      * <code>(index | TAG_FIRST_OCCURRENCE_FLAG)</code>
      */
     private int writeHistoryTag(HistoryTag tag) {
+        if (tag.string == null) {
+            Slog.wtfStack(TAG, "writeHistoryTag called with null name");
+        }
+
         Integer idxObj = mHistoryTagPool.get(tag);
         int idx;
         if (idxObj != null) {

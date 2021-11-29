@@ -7354,9 +7354,11 @@ public abstract class BatteryStats implements Parcelable {
                         pw.print(getHistoryTagPoolUid(i));
                         pw.print(",\"");
                         String str = getHistoryTagPoolString(i);
-                        str = str.replace("\\", "\\\\");
-                        str = str.replace("\"", "\\\"");
-                        pw.print(str);
+                        if (str != null) {
+                            str = str.replace("\\", "\\\\");
+                            str = str.replace("\"", "\\\"");
+                            pw.print(str);
+                        }
                         pw.print("\"");
                         pw.println();
                     }
