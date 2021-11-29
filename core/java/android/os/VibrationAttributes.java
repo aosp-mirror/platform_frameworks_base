@@ -81,6 +81,11 @@ public final class VibrationAttributes implements Parcelable {
      * actions, such as emulation of physical effects, and texting feedback vibration.
      */
     public static final int USAGE_CLASS_FEEDBACK = 0x2;
+    /**
+     * Vibration usage class value to use when the vibration is part of media, such as music, movie,
+     * soundtrack, game or animations.
+     */
+    public static final int USAGE_CLASS_MEDIA = 0x3;
 
     /**
      * Mask for vibration usage class value.
@@ -121,6 +126,15 @@ public final class VibrationAttributes implements Parcelable {
      * such as a fingerprint sensor.
      */
     public static final int USAGE_HARDWARE_FEEDBACK = 0x30 | USAGE_CLASS_FEEDBACK;
+    /**
+     * Usage value to use for accessibility vibrations, such as with a screen reader.
+     */
+    public static final int USAGE_ACCESSIBILITY = 0x40 | USAGE_CLASS_FEEDBACK;
+    /**
+     * Usage value to use for media vibrations, such as music, movie, soundtrack, animations, games,
+     * or any interactive media that isn't for touch feedback specifically.
+     */
+    public static final int USAGE_MEDIA = 0x10 | USAGE_CLASS_MEDIA;
 
     /**
      * @hide
@@ -208,13 +222,17 @@ public final class VibrationAttributes implements Parcelable {
             case USAGE_NOTIFICATION:
                 return AudioAttributes.USAGE_NOTIFICATION;
             case USAGE_COMMUNICATION_REQUEST:
-                return AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST;
+                return AudioAttributes.USAGE_VOICE_COMMUNICATION;
             case USAGE_RINGTONE:
                 return AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
             case USAGE_TOUCH:
                 return AudioAttributes.USAGE_ASSISTANCE_SONIFICATION;
             case USAGE_ALARM:
                 return AudioAttributes.USAGE_ALARM;
+            case USAGE_ACCESSIBILITY:
+                return AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY;
+            case USAGE_MEDIA:
+                return AudioAttributes.USAGE_MEDIA;
             default:
                 return AudioAttributes.USAGE_UNKNOWN;
         }
@@ -286,12 +304,16 @@ public final class VibrationAttributes implements Parcelable {
                 return "UNKNOWN";
             case USAGE_ALARM:
                 return "ALARM";
+            case USAGE_ACCESSIBILITY:
+                return "ACCESSIBILITY";
             case USAGE_RINGTONE:
                 return "RINGTONE";
             case USAGE_NOTIFICATION:
                 return "NOTIFICATION";
             case USAGE_COMMUNICATION_REQUEST:
                 return "COMMUNICATION_REQUEST";
+            case USAGE_MEDIA:
+                return "MEDIA";
             case USAGE_TOUCH:
                 return "TOUCH";
             case USAGE_PHYSICAL_EMULATION:
@@ -405,20 +427,30 @@ public final class VibrationAttributes implements Parcelable {
                 case AudioAttributes.USAGE_NOTIFICATION_EVENT:
                 case AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_DELAYED:
                 case AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_INSTANT:
+                case AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST:
                     mUsage = USAGE_NOTIFICATION;
                     break;
-                case AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST:
-                case AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY:
+                case AudioAttributes.USAGE_VOICE_COMMUNICATION:
+                case AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING:
+                case AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE:
+                case AudioAttributes.USAGE_ASSISTANT:
                     mUsage = USAGE_COMMUNICATION_REQUEST;
                     break;
                 case AudioAttributes.USAGE_NOTIFICATION_RINGTONE:
                     mUsage = USAGE_RINGTONE;
+                    break;
+                case AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY:
+                    mUsage = USAGE_ACCESSIBILITY;
                     break;
                 case AudioAttributes.USAGE_ASSISTANCE_SONIFICATION:
                     mUsage = USAGE_TOUCH;
                     break;
                 case AudioAttributes.USAGE_ALARM:
                     mUsage = USAGE_ALARM;
+                    break;
+                case AudioAttributes.USAGE_MEDIA:
+                case AudioAttributes.USAGE_GAME:
+                    mUsage = USAGE_MEDIA;
                     break;
                 default:
                     mUsage = USAGE_UNKNOWN;
@@ -450,6 +482,8 @@ public final class VibrationAttributes implements Parcelable {
          * {@link VibrationAttributes#USAGE_TOUCH},
          * {@link VibrationAttributes#USAGE_PHYSICAL_EMULATION},
          * {@link VibrationAttributes#USAGE_HARDWARE_FEEDBACK}.
+         * {@link VibrationAttributes#USAGE_ACCESSIBILITY}.
+         * {@link VibrationAttributes#USAGE_MEDIA}.
          * @return the same Builder instance.
          */
         public @NonNull Builder setUsage(int usage) {

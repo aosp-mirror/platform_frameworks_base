@@ -223,7 +223,7 @@ public class VibratorTest {
     public void vibrate_withAudioAttributes_createsVibrationAttributesWithSameUsage() {
         VibrationEffect effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
         AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(
-                AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY).build();
+                AudioAttributes.USAGE_VOICE_COMMUNICATION).build();
 
         mVibratorSpy.vibrate(effect, audioAttributes);
 
@@ -235,7 +235,7 @@ public class VibratorTest {
         assertEquals(VibrationAttributes.USAGE_COMMUNICATION_REQUEST,
                 vibrationAttributes.getUsage());
         // Keeps original AudioAttributes usage to be used by the VibratorService.
-        assertEquals(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY,
+        assertEquals(AudioAttributes.USAGE_VOICE_COMMUNICATION,
                 vibrationAttributes.getAudioUsage());
     }
 
