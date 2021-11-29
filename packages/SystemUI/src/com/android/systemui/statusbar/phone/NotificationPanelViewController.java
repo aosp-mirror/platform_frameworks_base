@@ -157,6 +157,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
+import com.android.systemui.statusbar.QsFrameTranslateController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -339,6 +340,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private KeyguardStatusBarViewController mKeyguardStatusBarViewController;
     @VisibleForTesting QS mQs;
     private FrameLayout mQsFrame;
+    private QsFrameTranslateController mQsFrameTranslateController;
     @Nullable
     private CommunalHostViewController mCommunalViewController;
     private KeyguardStatusViewController mKeyguardStatusViewController;
@@ -775,7 +777,8 @@ public class NotificationPanelViewController extends PanelViewController {
             NotificationRemoteInputManager remoteInputManager,
             Optional<SysUIUnfoldComponent> unfoldComponent,
             ControlsComponent controlsComponent,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            QsFrameTranslateController qsFrameTranslateController) {
         super(view,
                 falsingManager,
                 dozeLog,
@@ -900,7 +903,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
         mMaxKeyguardNotifications = resources.getInteger(R.integer.keyguard_max_notification_count);
         mKeyguardUnfoldTransition = unfoldComponent.map(c -> c.getKeyguardUnfoldTransition());
-
         mCommunalSourceCallback = () -> {
             mUiExecutor.execute(() -> setCommunalSource(null /*source*/));
         };
@@ -908,7 +910,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mCommunalSourceMonitorCallback = (source) -> {
             mUiExecutor.execute(() -> setCommunalSource(source));
         };
-
+        mQsFrameTranslateController = qsFrameTranslateController;
         updateUserSwitcherFlags();
         onFinishInflate();
     }
@@ -2667,7 +2669,8 @@ public class NotificationPanelViewController extends PanelViewController {
                     (float) (mQsMaxExpansionHeight),
                     computeQsExpansionFraction());
         } else {
-            return mQsExpansionHeight;
+            return mQsFrameTranslateController.getNotificationsTopPadding(mQsExpansionHeight,
+                    mNotificationStackScrollLayoutController);
         }
     }
 
@@ -3251,8 +3254,8 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private void updateQsFrameTranslation() {
-        float translation = mOverExpansion / 2.0f + mQsTranslationForFullShadeTransition;
-        mQsFrame.setTranslationY(translation);
+        mQsFrameTranslateController.translateQsFrame(mQsFrame, mQs, mOverExpansion,
+                mQsTranslationForFullShadeTransition);
     }
 
     @Override
