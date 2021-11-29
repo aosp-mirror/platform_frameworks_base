@@ -909,7 +909,7 @@
     <string name="emergency_calls_only" msgid="3057351206678279851">"فقط تماس‌های اضطراری"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"شبکه قفل شد"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"‏سیم کارت با PUK قفل شده است."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"لطفاً به راهنمای کاربر مراجعه کرده یا با مرکز پشتیبانی از مشتریان تماس بگیرید."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"لطفاً به «راهنمای کاربر» مراجعه کنید یا با مرکز «مراقبت از مشتریان» تماس بگیرید."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"سیم کارت قفل شد."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"بازگشایی قفل سیم کارت…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"‏الگوی بازگشایی قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎‌اید. \n\nپس‌از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>

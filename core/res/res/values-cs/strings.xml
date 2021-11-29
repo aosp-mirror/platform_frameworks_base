@@ -992,7 +992,7 @@
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nOpravdu tuto stránku chcete opustit?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"Potvrdit"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"Tip: Dvojitým klepnutím můžete zobrazení přiblížit nebo oddálit."</string>
-    <string name="autofill_this_form" msgid="3187132440451621492">"Aut.vyp."</string>
+    <string name="autofill_this_form" msgid="3187132440451621492">"Autofill"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"Nastav aut. vyp."</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"Automatické vyplňování pomocí služby <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="8190155636149596125">" "</string>
