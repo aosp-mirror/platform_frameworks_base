@@ -737,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitor pogings om skerm te ontsluit"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitor die aantal keer wat \'n verkeerde wagwoorde ingevoer is wanneer die skerm ontsluit word. Sluit die tablet of vee al die data uit as die wagwoord te veel keer verkeerd ingevoer word."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitor die aantal verkeerde wagwoorde wat ingetik word wanneer die skerm ontsluit word, en sluit jou Android TV-toestel of vee al jou Android TV-toestel se data uit as te veel verkeerde wagwoorde ingetik word."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitor die aantal verkeerde wagwoorde wat ingevoer word wanneer die skerm ontsluit word, en sluit die inligtingvermaakstelsel of vee al die inligtingvermaakstelsel se data uit as te veel verkeerde wagwoorde ingevoer word."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Monitor die aantal keer wat \'n verkeerde wagwoorde ingevoer is wanneer die skerm ontsluit word. Sluit die foon of vee al die data uit as die wagwoord te veel keer verkeerd ingevoer word."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Monitor die aantal verkeerde wagwoorde wat ingevoer word wanneer die skerm ontsluit word, en sluit die tablet of vee al hierdie gebruiker se data uit as te veel verkeerde wagwoorde ingevoer word."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Monitor die aantal verkeerde wagwoorde wat ingetik word wanneer die skerm ontsluit word, en sluit jou Android TV-toestel of vee al hierdie gebruiker se data uit as hulle te veel verkeerde wagwoorde intik."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Monitor die aantal verkeerde wagwoorde wat ingevoer word wanneer die skerm ontsluit word, en sluit die inligtingvermaakstelsel of vee al hierdie profiel se data uit as te veel verkeerde wagwoorde ingevoer word."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Monitor die aantal verkeerde wagwoorde wat ingevoer word wanneer die skerm ontsluit word, en sluit die foon of vee al hierdie gebruiker se data uit as te veel verkeerde wagwoorde ingevoer word."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Om die skermslot te verander"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Verander die skermslot."</string>
@@ -748,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Om alle data uit te vee"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Vee die tablet se data uit sonder waarskuwing, deur \'n fabrieksterugstelling uit te voer."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Vee jou Android TV-toestel se data sonder waarskuwing uit deur \'n fabrieksterugstelling uit te voer."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Vee die inligtingvermaakstelsel se data sonder waarskuwing uit deur \'n fabriekterugstelling te doen."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Vee die foon se data uit sonder waarskuwing, deur \'n fabrieksterugstelling uit te voer."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Vee gebruikerdata uit"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Vee profieldata uit"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Vee gebruikerdata uit"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Vee hierdie gebruiker se data in hierdie tablet sonder waarskuwing uit."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Vee hierdie gebruiker se data op hierdie Android TV-toestel sonder waarskuwing uit."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Vee hierdie profiel se data op hierdie inligtingvermaakstelsel sonder waarskuwing uit."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Vee hierdie gebruiker se data in hierdie foon sonder waarskuwing uit."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Stel die toestel se globale instaan"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Stel die toestel se globale instaanbediener wat gebruik moet word terwyl die beleid geaktiveer is. Net die toesteladministrateur kan die globale instaanbediener stel."</string>

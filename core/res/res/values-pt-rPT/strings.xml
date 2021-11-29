@@ -737,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitorizar tentativas de desbloqueio do ecrã"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitorizar o número de palavras-passe incorretas escritas ao desbloquear o ecrã e bloquear o tablet ou apagar todos os dados do tablet, se forem escritas demasiadas palavras-passe incorretas."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitorizar o número de palavras-passe incorretas introduzidas ao desbloquear o ecrã e bloquear o seu dispositivo Android TV ou apagar todos os dados do mesmo se forem introduzidas demasiadas palavras-passe incorretas."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitorize o número de palavras-passe incorretas introduzidas ao desbloquear o ecrã e bloqueie o sistema de infoentretenimento ou apague todos os dados do sistema de infoentretenimento, se forem escritas demasiadas palavras-passe incorretas."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Monitorizar o número de palavras-passe incorretas introduzidas ao desbloquear o ecrã e bloquear o telemóvel ou apagar todos os dados do telemóvel caso tenham sido introduzidas demasiadas palavras-passe."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Monitorizar o número de palavras-passe incorretas introduzidas ao desbloquear o ecrã e bloquear o tablet ou apagar todos os dados deste utilizador se forem introduzidas demasiadas palavras-passe incorretas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Monitorizar o número de palavras-passe incorretas introduzidas ao desbloquear o ecrã e bloquear o dispositivo Android TV ou apagar todos os dados deste utilizador se forem introduzidas demasiadas palavras-passe incorretas."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Monitorize o número de palavras-passe incorretas introduzidas ao desbloquear o ecrã e bloqueie o sistema de infoentretenimento ou apague todos os dados deste utilizador, se forem introduzidas demasiadas palavras-passe incorretas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Monitorizar o número de palavras-passe incorretas introduzidas ao desbloquear o ecrã e bloquear o telemóvel ou apagar todos os dados deste utilizador se forem introduzidas demasiadas palavras-passe incorretas."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Alterar o bloqueio de ecrã"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Altera o bloqueio de ecrã."</string>
@@ -748,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Apagar todos os dados"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Apagar os dados do tablet sem avisar através de uma reposição de dados de fábrica."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Apagar os dados do seu dispositivo Android TV sem avisar ao efetuar uma reposição de dados de fábrica."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Apague os dados do sistema de infoentretenimento sem aviso ao executar uma reposição de dados de fábrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Apaga os dados do telemóvel sem avisar ao efetuar uma reposição de dados de fábrica."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Apagar os dados do utilizador"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Apague os dados do perfil"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Apagar os dados do utilizador"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Apagar os dados deste utilizador neste tablet sem aviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Apagar os dados deste utilizador neste dispositivo Android TV sem aviso."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Apague os dados deste perfil neste sistema de infoentretenimento sem aviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Apagar os dados deste utilizador neste telemóvel sem aviso."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Definir o proxy global do aparelho"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Definir o proxy global do dispositivo a utilizar enquanto a política está ativada. Apenas o proprietário do dispositivo pode definir o proxy global."</string>

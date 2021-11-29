@@ -737,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ຕິດຕາມການພະຍາຍາມປົດລັອກໜ້າຈໍ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ຕິດຕາມເບິ່ງຈຳນວນການພິມລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງ ໃນເວລາປົດລັອກໜ້າຈໍ ແລະລັອກແທັບເລັດ ຫຼືລຶບຂໍ້ມູນທັງໝົດຂອງແທັບເລັດ ຖ້າມີການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງຫຼາຍເທື່ອເກີນໄປ."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"ຕິດຕາມຈຳນວນລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງທີ່ພິມຕອນກຳລັງປົດລັອກໜ້າຈໍ ແລະ ລັອກອຸປະກອນ Android TV ຂອງທ່ານ ຫຼື ລຶບຂໍ້ມູນຂອງອຸປະກອນ Android TV ຂອງທ່ານຫາກພິມລະຫັດຜ່ານຜິດຫຼາຍເທື່ອເກີນໄປ."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ຕິດຕາມຈຳນວນການພິມລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງໃນເວລາປົດລັອກໜ້າຈໍ ແລະ ລັອກລະບົບສາລະບັນເທີງ ຫຼື ລຶບຂໍ້ມູນຂອງລະບົບສາລະບັນເທີງທັງໝົດຫາກມີການພິມລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງຫຼາຍເກີນໄປ."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ຕິດຕາມເບິ່ງຈຳນວນການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ ໃນເວລາປົດລັອກໜ້າຈໍ ແລະລັອກໂທລະສັບ ຫຼືລຶບຂໍ້ມູນທັງໝົດຂອງໂປລະສັບ ຖ້າມີການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງຫຼາຍເທື່ອເກີນໄປ."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ຕິດ​ຕາມ​ຈຳ​ນວນ​ຂອງ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ທີ່​ພິມ​ໄປ​ແລ້ວ ເມື່ອ​ປົດ​ລັອກ​ໜ້າ​ຈໍ, ແລະ​ລັອກແທັບ​ເລັດ ຫຼື​ລຶບ​ທຸກ​ຂໍ້​ມູນຜູ້​ໃຊ້​ນີ້ ຖ້າ​ໄດ້​ພິມ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ເຂົ້າ​ໄປ​ຫຼາຍ​ອັນ​ເກີນ​ໄປ."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"ຕິດຕາມຈຳນວນຂອງລະຫັດຜ່ານບໍ່ຖືກຕ້ອງທີ່ພິມໄປແລ້ວຕອນກຳລັງປົດລັອກໜ້າຈໍ ແລະ ລັອກອຸປະກອນ Android TV ຂອງທ່ານ ຫຼື ລຶບທຸກຂໍ້ມູນຜູ້ໃຊ້ນີ້ຖ້າພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງເຂົ້າໄປຫຼາຍເທື່ອເກີນໄປ."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ຕິດຕາມຈຳນວນການພິມລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງໃນເວລາປົດລັອກໜ້າຈໍ ແລະ ລັອກລະບົບສາລະບັນເທີງ ຫຼື ລຶບຂໍ້ມູນຂອງໂປຣໄຟລ໌ນີ້ທັງໝົດຫາກມີການພິມລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງຫຼາຍເກີນໄປ."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"ຕິດ​ຕາມ​ຈຳ​ນວນ​ຂອງ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ທີ່​ພິມ​ໄປ​ແລ້ວ ເມື່ອ​ປົດ​ລັອກ​ໜ້າ​ຈໍ, ແລະ​ລັອກໂທລະສັບ ຫຼື​ລຶບ​ທຸກ​ຂໍ້​ມູນຜູ້​ໃຊ້​ນີ້ ຖ້າ​ໄດ້​ພິມ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ເຂົ້າ​ໄປ​ຫຼາຍ​ອັນ​ເກີນ​ໄປ."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"ປ່ຽນ​ລັອກ​ໜ້າ​ຈໍ"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"ປ່ຽນ​ລັອກ​ໜ້າ​ຈໍ."</string>
@@ -748,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"ລຶບຂໍ້ມູນທັງໝົດ"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ລຶບຂໍ້ມູນຂອງແທັບເລັດໂດຍບໍ່ມີການເຕືອນ ໂດຍການຣີເຊັດກັບຄືນໃຫ້ເປັນແບບທີ່ມາຈາກໂຮງງານ."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ລຶບຂໍ້ມູນຂອງອຸປະກອນ Android TV ທ່ານໂດຍບໍ່ຕ້ອງແຈ້ງເຕືອນດ້ວຍການຣີເຊັດຂໍ້ມູນເປັນຄ່າເລີ່ມຕົ້ນຈາກໂຮງງານ."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"ລຶບຂໍ້ມູນຂອງລະບົບສາລະບັນເທີງໂດຍບໍ່ມີຄຳເຕືອນດ້ວຍການດຳເນີນການຕັ້ງຄ່າຈາກໂຮງງານ."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ລຶບຂໍ້ມູນຂອງໂທລະສັບໂດຍບໍ່ມີການເຕືອນ ໂດຍການຣີເຊັດກັບຄືນໃຫ້ເປັນແບບທີ່ມາຈາກໂຮງງານ."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ລຶບ​ຂໍ້​ມູນ​ຜູ້​ໃຊ້"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"ລຶບຂໍ້ມູນໂປຣໄຟລ໌"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"ລຶບ​ຂໍ້​ມູນ​ຜູ້​ໃຊ້"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"ລຶບ​ຂໍ້​ມູນ​ຂອງ​ຜູ້​ໃຊ້​ນີ້​ຢູ່​ໃນ​ໂທ​ລະ​ທັດ​ນີ້​ໂດຍ​ບໍ່​ມີ​ການ​ເຕືອນ."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"ລຶບຂໍ້ມູນຂອງຜູ້ໃຊ້ນີ້ຢູ່ອຸປະກອນ Android TV ນີ້ໂດຍບໍ່ຕ້ອງມີການເຕືອນ."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"ລຶບຂໍ້ມູນຂອງໂປຣໄຟລ໌ນີ້ຢູ່ລະບົບສາລະບັນເທີງນີ້ໂດຍບໍ່ມີຄຳເຕືອນ."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"ລຶບ​ຂໍ້​ມູນ​ຂອງ​ຜູ້​ໃຊ້​ນີ້​ຢູ່​ໃນ​ໂທ​ລະ​ສັບ​ນີ້​ໂດຍ​ບໍ່​ມີ​ການ​ເຕືອນ."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"ປ່ຽນ proxy ຮວມຂອງອຸປະກອນ"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"ຕັ້ງໃຫ້ພຣັອກຊີສ່ວນກາງຂອງອຸປະກອນ ທີ່ຈະໃຊ້ໃນຂະນະທີ່ເປີດນຳໃຊ້ນະໂຍບາຍ. ພຽງ​ແຕ່​ເຈົ້າ​ຂອງ​ອຸ​ປະ​ກອນ​ເທົ່າ​ນັ້ນ​ສາ​ມາດ​ຕັ້ງ​ພ​ຣັອກ​ຊີ​ທົ່ວ​ໄປ​ໄດ້."</string>

@@ -676,10 +676,10 @@
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"Kontu baten sinkronizazio-ezarpenak aldatzeko baimena ematen die aplikazioei. Adibidez, Jendea aplikazioa kontu batekin sinkronizatzeko erabil daiteke."</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"irakurri sinkronizazio-estatistikak"</string>
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Kontu baten sinkronizazio-estatistikak irakurtzeko baimena ematen dio; besteak beste, sinkronizazio-gertaeren historia eta sinkronizatutako datu kopurua."</string>
-    <string name="permlab_sdcardRead" msgid="5791467020950064920">"Irakurri biltegiratze partekatuko edukia"</string>
-    <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Biltegiratze partekatuko edukia irakurtzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"aldatu edo ezabatu biltegiratze partekatuko edukia"</string>
-    <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Biltegiratze partekatuko edukian idazteko baimena ematen die aplikazioei."</string>
+    <string name="permlab_sdcardRead" msgid="5791467020950064920">"Irakurri biltegi partekatuko edukia"</string>
+    <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Biltegi partekatuko edukia irakurtzeko baimena ematen die aplikazioei."</string>
+    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"aldatu edo ezabatu biltegi partekatuko edukia"</string>
+    <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Biltegi partekatuko edukian idazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"egin/jaso SIP deiak"</string>
     <string name="permdesc_use_sip" msgid="3590270893253204451">"SIP deiak egitea eta jasotzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_register_sim_subscription" msgid="1653054249287576161">"erregistratu telekomunikabideekiko SIM konexio berriak"</string>
@@ -737,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Gainbegiratu pantaila desblokeatzeko saiakerak"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Kontrolatu pantaila desblokeatzen saiatzean idatzitako pasahitz oker kopurua, eta blokeatu tableta edo ezabatu bere datuak pasahitza gehiegitan oker idazten bada."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Kontrolatu zenbat aldiz idatzi duzun oker pasahitza pantaila desblokeatzen saiatzean, eta blokeatu Android TV gailua edo ezabatu bertako datu guztiak pasahitza gehiegitan idazten baduzu oker."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Kontrolatu zenbatetan idazten duzun pasahitza oker pantaila desblokeatzen saiatzean eta, gehiegitan idazten bada oker, blokeatu informazio- eta aisia-sistema edo ezabatu hango eduki guztia."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Kontrolatu pantaila desblokeatzen saiatzean idatzitako pasahitz oker kopurua, eta blokeatu telefonoa edo ezabatu bere datuak pasahitza gehiegitan oker idazten bada."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Kontrolatu pantaila desblokeatzen saiatzean idatzitako pasahitz oker kopurua, eta blokeatu tableta edo ezabatu erabiltzailearen datuak pasahitza gehiegitan oker idazten bada."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Kontrolatu zenbat aldiz idatzi duzun oker pasahitza pantaila desblokeatzen saiatzean, eta blokeatu Android TV gailua edo ezabatu erabiltzailearen datuak pasahitza gehiegitan idazten baduzu oker."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Kontrolatu zenbatetan idazten duzun pasahitza oker pantaila desblokeatzen saiatzean eta, gehiegitan idazten bada oker, blokeatu informazio- eta aisia-sistema edo ezabatu profil honetako eduki guztia."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Kontrolatu pantaila desblokeatzen saiatzean idatzitako pasahitz oker kopurua, eta blokeatu telefonoa edo ezabatu erabiltzailearen datuak pasahitza gehiegitan oker idazten bada."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Aldatu pantailaren blokeoa"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Aldatu pantailaren blokeoa."</string>
@@ -748,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Ezabatu datu guztiak"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Ezabatu tabletaren datuak abisatu gabe, jatorrizko datuak berrezarrita."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Ezabatu Android TV gailuaren datuak abisatu gabe eta berrezarri jatorrizko datuak."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Berrezarri informazio- eta aisia-sistemako jatorrizko datuak abisatu gabe, bertan zegoen eduki guztia ezabatzeko."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Ezabatu telefonoaren datuak abisatu gabe, jatorrizko datuak berrezarrita."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Ezabatu erabiltzailearen datuak"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Ezabatu profileko eduki guztia"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Ezabatu erabiltzailearen datuak"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Ezabatu erabiltzaileak tabletan dituen datuak abisatu gabe."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Ezabatu erabiltzaileak Android TV gailuan dituen datuak abisatu gabe."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Ezabatu informazio- eta aisia-sisteman dagoen profil honetako eduki guztia abisatu gabe."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Ezabatu erabiltzaileak telefonoan dituen datuak abisatu gabe."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Ezarri gailuaren proxy orokorra"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Ezarri gailuaren proxy orokorra gidalerroak gaituta dauden bitartean erabiltzeko. Gailuaren jabeak soilik ezar dezake proxy orokorra."</string>
@@ -1530,7 +1535,7 @@
       <item quantity="one">Emaitza bat</item>
     </plurals>
     <string name="action_mode_done" msgid="2536182504764803222">"Eginda"</string>
-    <string name="progress_erasing" msgid="6891435992721028004">"Biltegiratze partekatuko eduki guztia ezabatzen…"</string>
+    <string name="progress_erasing" msgid="6891435992721028004">"Biltegi partekatuko eduki guztia ezabatzen…"</string>
     <string name="share" msgid="4157615043345227321">"Partekatu"</string>
     <string name="find" msgid="5015737188624767706">"Aurkitu"</string>
     <string name="websearch" msgid="5624340204512793290">"Web-bilaketa"</string>
@@ -1585,7 +1590,7 @@
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"Aukera gehiago"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="8490227947584914460">"Barneko memoria partekatua"</string>
+    <string name="storage_internal" msgid="8490227947584914460">"Barneko biltegi partekatua"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"SD txartela"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD txartela"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"USB bidezko unitatea"</string>

@@ -740,9 +740,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Nadziri pokušaje otključavanja zaslona"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Nadziri broj netočnih zaporki unesenih pri otključavanju zaslona i zaključaj tabletno računalo ili izbriši sve podatke na njemu ako je uneseno previše netočnih zaporki."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava Android TV uređaj ili s njega briše sve podatke ako se unese previše netočnih zaporki."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava sustav za informiranje i zabavu ili briše sve njegove podatke ako se unese previše netočnih zaporki."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Nadzire broj netočno unesenih zaporki pri otključavanju zaslona i zaključava telefon ili briše sve podatke na telefonu ako je uneseno previše netočnih zaporki."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava tablet ili briše sve podatke korisnika ako se unese previše netočnih zaporki."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava Android TV uređaj ili briše sve podatke korisnika ako se unese previše netočnih zaporki."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava sustav za informiranje i zabavu ili briše sve podatke profila ako se unese previše netočnih zaporki."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava telefon ili briše sve podatke korisnika ako se unese previše netočnih zaporki."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Mijenjanje zaporke za zaključavanje"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Mijenja se zaporka za zaključavanje zaslona."</string>
@@ -751,10 +753,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Brisanje svih podataka"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Vraćanjem u tvorničko stanje izbriši podatke tabletnog računala bez upozorenja."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Podatke Android TV uređaja izbrišite bez upozorenja vraćanjem uređaja na tvorničke postavke."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Briše podatke sustava za informiranje i zabavu bez upozorenja vraćanjem na tvorničko stanje."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Vraćanjem na tvorničke postavke brišu se podaci s telefona bez upozorenja."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Izbriši podatke korisnika"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Izbriši podatke profila"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Izbriši podatke korisnika"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Briše podatke korisnika na ovom tabletu bez upozorenja."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Briše podatke korisnika na Android TV uređaju bez upozorenja."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Briše podatke profila na ovom sustavu za informiranje i zabavu bez upozorenja."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Briše podatke korisnika na ovom telefonu bez upozorenja."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"postavi globalni proxy uređaja"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Postavlja globalni proxy za uređaj koji će se upotrebljavati dok je pravilo omogućeno. Samo vlasnik uređaja može postaviti globalni proxy."</string>

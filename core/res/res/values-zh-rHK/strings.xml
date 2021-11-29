@@ -737,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"監控螢幕解鎖嘗試次數"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"監視為螢幕解鎖時輸入錯誤密碼的次數；如果輸入錯誤密碼的次數過多，則會鎖定平板電腦或清除平板電腦的所有資料。"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"監察螢幕解鎖時錯誤輸入密碼的次數，並在錯誤輸入密碼的次數過多時，將 Android TV 裝置上鎖或清除裝置上的所有資料。"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"監察螢幕解鎖時錯誤輸入密碼的次數，如果錯誤輸入密碼的次數過多，即鎖定資訊娛樂系統或清除資訊娛樂系統中的所有資料。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"監視為螢幕解鎖時輸入錯誤密碼的次數，如果輸入錯誤密碼的次數過多，則會鎖定手機或清除手機的所有資料。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"監察螢幕解鎖時錯誤輸入密碼的次數，如果錯誤輸入密碼的次數過多，即鎖定平板電腦或清除這個使用者的資料。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"監察螢幕解鎖密碼輸入錯誤的次數，並在密碼輸入錯誤的次數超出上限時將 Android TV 裝置上鎖，或清除該使用者的所有資料。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"監察螢幕解鎖時錯誤輸入密碼的次數，如果錯誤輸入密碼的次數過多，即鎖定資訊娛樂系統或清除這個設定檔的所有資料。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"監察螢幕解鎖時錯誤輸入密碼的次數，如果錯誤輸入密碼的次數過多，即鎖定手機或清除這個使用者的資料。"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"變更螢幕鎖定"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"變更螢幕鎖定。"</string>
@@ -748,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"清除所有資料"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"重設平板電腦為原廠設定，在不提出警告的情況下直接清除平板電腦的資料。"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"系統可將 Android TV 裝置回復原廠設定，在沒有警告的情況下清除裝置的資料。"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"回復資訊娛樂系統為原廠設定，在不提出警告的情況下直接清除資訊娛樂系統的資料。"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"重設手機為原廠設定，在不提出警告的情況下直接清除手機的資料。"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"清除使用者資料"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"清除個人檔案資料"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"清除使用者資料"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"清除這個使用者在這部平板電腦上的資料而不作警告。"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"在沒有警告的情況下，清除這位使用者在此 Android TV 裝置上的資料。"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"在不提出警告的情況下直接清除此設定檔在資訊娛樂系統上的資料。"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"清除這個使用者在這部手機上的資料而不作警告。"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"設定裝置的全域代理伺服器"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"設定政策啟用時所要使用的裝置全域代理伺服器，只有裝置擁有者可以設定全域代理伺服器。"</string>
