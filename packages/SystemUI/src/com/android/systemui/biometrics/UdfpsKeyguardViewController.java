@@ -102,7 +102,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     }
 
     @Override
-    @NonNull String getTag() {
+    @NonNull protected String getTag() {
         return "UdfpsKeyguardViewController";
     }
 
@@ -115,21 +115,21 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @Override
     protected void onViewAttached() {
         super.onViewAttached();
-        final float dozeAmount = mStatusBarStateController.getDozeAmount();
+        final float dozeAmount = getStatusBarStateController().getDozeAmount();
         mLastDozeAmount = dozeAmount;
         mStateListener.onDozeAmountChanged(dozeAmount, dozeAmount);
-        mStatusBarStateController.addCallback(mStateListener);
+        getStatusBarStateController().addCallback(mStateListener);
 
         mUdfpsRequested = false;
 
         mLaunchTransitionFadingAway = mKeyguardStateController.isLaunchTransitionFadingAway();
         mKeyguardStateController.addCallback(mKeyguardStateControllerCallback);
-        mStatusBarState = mStatusBarStateController.getState();
+        mStatusBarState = getStatusBarStateController().getState();
         mQsExpanded = mKeyguardViewManager.isQsExpanded();
         mInputBouncerHiddenAmount = KeyguardBouncer.EXPANSION_HIDDEN;
         mIsBouncerVisible = mKeyguardViewManager.bouncerIsOrWillBeShowing();
         mConfigurationController.addCallback(mConfigurationListener);
-        mPanelExpansionStateManager.addExpansionListener(mPanelExpansionListener);
+        getPanelExpansionStateManager().addExpansionListener(mPanelExpansionListener);
         updateAlpha();
         updatePauseAuth();
 
@@ -144,11 +144,11 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mFaceDetectRunning = false;
 
         mKeyguardStateController.removeCallback(mKeyguardStateControllerCallback);
-        mStatusBarStateController.removeCallback(mStateListener);
+        getStatusBarStateController().removeCallback(mStateListener);
         mKeyguardViewManager.removeAlternateAuthInterceptor(mAlternateAuthInterceptor);
         mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
         mConfigurationController.removeCallback(mConfigurationListener);
-        mPanelExpansionStateManager.removeExpansionListener(mPanelExpansionListener);
+        getPanelExpansionStateManager().removeExpansionListener(mPanelExpansionListener);
         if (mLockScreenShadeTransitionController.getUdfpsKeyguardViewController() == this) {
             mLockScreenShadeTransitionController.setUdfpsKeyguardViewController(null);
         }
@@ -214,13 +214,13 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             return false;
         }
 
-        if (mUdfpsRequested && !mNotificationShadeVisible
+        if (mUdfpsRequested && !getNotificationShadeVisible()
                 && (!mIsBouncerVisible
                 || mInputBouncerHiddenAmount != KeyguardBouncer.EXPANSION_VISIBLE)) {
             return false;
         }
 
-        if (mDialogManager.shouldHideAffordance()) {
+        if (getDialogManager().shouldHideAffordance()) {
             return true;
         }
 

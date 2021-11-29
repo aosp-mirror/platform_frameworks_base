@@ -165,7 +165,11 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private UdfpsKeyguardView mKeyguardView;
     @Mock
-    private UdfpsKeyguardViewController mUdfpsKeyguardViewController;
+    private UdfpsBpView mBpView;
+    @Mock
+    private UdfpsFpmOtherView mFpmOtherView;
+    private UdfpsAnimationViewController mUdfpsKeyguardViewController =
+            mock(UdfpsKeyguardViewController.class);
     @Mock
     private TypedArray mBrightnessValues;
     @Mock
@@ -192,6 +196,10 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 .thenReturn(mEnrollView); // for showOverlay REASON_ENROLL_ENROLLING
         when(mLayoutInflater.inflate(R.layout.udfps_keyguard_view, null))
                 .thenReturn(mKeyguardView); // for showOverlay REASON_AUTH_FPM_KEYGUARD
+        when(mLayoutInflater.inflate(R.layout.udfps_bp_view, null))
+                .thenReturn(mBpView);
+        when(mLayoutInflater.inflate(R.layout.udfps_fpm_other_view, null))
+                .thenReturn(mFpmOtherView);
         when(mEnrollView.getContext()).thenReturn(mContext);
         when(mKeyguardStateController.isOccluded()).thenReturn(false);
         final List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
@@ -340,7 +348,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
         when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
         when(mUdfpsView.getAnimationViewController()).thenReturn(
-                mock(UdfpsEnrollViewController.class));
+                (UdfpsAnimationViewController) mock(UdfpsEnrollViewController.class));
 
         // GIVEN that the overlay is showing
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,

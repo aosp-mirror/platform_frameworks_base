@@ -102,7 +102,7 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
 
         mSensorOutlinePaint = new Paint(0 /* flags */);
         mSensorOutlinePaint.setAntiAlias(true);
-        mSensorOutlinePaint.setColor(mContext.getColor(R.color.udfps_moving_target_fill));
+        mSensorOutlinePaint.setColor(context.getColor(R.color.udfps_moving_target_fill));
         mSensorOutlinePaint.setStyle(Paint.Style.FILL);
 
         mBlueFill = new Paint(0 /* flags */);
@@ -112,10 +112,10 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
 
         mMovingTargetFpIcon = context.getResources()
                 .getDrawable(R.drawable.ic_kg_fingerprint, null);
-        mMovingTargetFpIcon.setTint(mContext.getColor(R.color.udfps_enroll_icon));
+        mMovingTargetFpIcon.setTint(context.getColor(R.color.udfps_enroll_icon));
         mMovingTargetFpIcon.mutate();
 
-        mFingerprintDrawable.setTint(mContext.getColor(R.color.udfps_enroll_icon));
+        getFingerprintDrawable().setTint(context.getColor(R.color.udfps_enroll_icon));
 
         mHintColorFaded = context.getColor(R.color.udfps_moving_target_fill);
         mHintColorHighlight = context.getColor(R.color.udfps_enroll_progress);
@@ -404,9 +404,9 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
             if (mSensorRect != null) {
                 canvas.drawOval(mSensorRect, mSensorOutlinePaint);
             }
-            mFingerprintDrawable.draw(canvas);
-            mFingerprintDrawable.setAlpha(mAlpha);
-            mSensorOutlinePaint.setAlpha(mAlpha);
+            getFingerprintDrawable().draw(canvas);
+            getFingerprintDrawable().setAlpha(getAlpha());
+            mSensorOutlinePaint.setAlpha(getAlpha());
         }
 
         // Draw the finger tip or edges hint.
