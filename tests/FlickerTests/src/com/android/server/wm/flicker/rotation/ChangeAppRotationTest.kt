@@ -114,11 +114,16 @@ class ChangeAppRotationTest(
         flickerRule.checkFlakyAssertions()
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Windows maybe recreated when rotated. Checks that the focus does not change or if it does,
+     * focus returns to [testApp]
+     */
     @FlakyTest(bugId = 190185577)
     @Test
-    override fun focusDoesNotChange() {
-        super.focusDoesNotChange()
+    fun focusChanges() {
+        testSpec.assertEventLog {
+            this.focusChanges(testApp.`package`)
+        }
     }
 
     /**
