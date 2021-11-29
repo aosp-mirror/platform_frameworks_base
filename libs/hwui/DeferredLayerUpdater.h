@@ -91,7 +91,7 @@ public:
     void detachSurfaceTexture();
 
     void updateLayer(bool forceFilter, const sk_sp<SkImage>& layerImage, const uint32_t transform,
-                     SkRect currentCrop);
+                     SkRect currentCrop, float maxLuminanceNits = -1.f);
 
     void destroyLayer();
 
