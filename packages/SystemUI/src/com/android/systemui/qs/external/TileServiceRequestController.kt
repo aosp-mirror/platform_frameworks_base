@@ -44,6 +44,7 @@ class TileServiceRequestController constructor(
     private val qsTileHost: QSTileHost,
     private val commandQueue: CommandQueue,
     private val commandRegistry: CommandRegistry,
+    private val eventLogger: TileRequestDialogEventLogger,
     private val dialogCreator: () -> TileRequestDialog = { TileRequestDialog(qsTileHost.context) }
 ) {
 
@@ -97,25 +98,31 @@ class TileServiceRequestController constructor(
         icon: Icon?,
         callback: Consumer<Int>
     ) {
+        val instanceId = eventLogger.newInstanceId()
+        val packageName = componentName.packageName
         if (isTileAlreadyAdded(componentName)) {
             callback.accept(TILE_ALREADY_ADDED)
+            eventLogger.logTileAlreadyAdded(packageName, instanceId)
             return
         }
         val dialogResponse = Consumer<Int> { response ->
             if (response == ADD_TILE) {
                 addTile(componentName)
             }
+            dialogCanceller = null
+            eventLogger.logUserResponse(response, packageName, instanceId)
             callback.accept(response)
         }
         val tileData = TileRequestDialog.TileData(appName, label, icon)
         createDialog(tileData, dialogResponse).also { dialog ->
             dialogCanceller = {
-                if (componentName.packageName == it) {
+                if (packageName == it) {
                     dialog.cancel()
                 }
                 dialogCanceller = null
             }
         }.show()
+        eventLogger.logDialogShown(packageName, instanceId)
     }
 
     private fun createDialog(
@@ -168,7 +175,12 @@ class TileServiceRequestController constructor(
         private val commandRegistry: CommandRegistry
     ) {
         fun create(qsTileHost: QSTileHost): TileServiceRequestController {
-            return TileServiceRequestController(qsTileHost, commandQueue, commandRegistry)
+            return TileServiceRequestController(
+                    qsTileHost,
+                    commandQueue,
+                    commandRegistry,
+                    TileRequestDialogEventLogger()
+            )
         }
     }
 }
