@@ -1243,6 +1243,8 @@
 
     <!-- Internet panel related dimensions -->
     <dimen name="internet_dialog_list_max_height">662dp</dimen>
+    <!-- The height of the WiFi network in Internet panel. -->
+    <dimen name="internet_dialog_wifi_network_height">72dp</dimen>
 
     <!-- The width of large/content heavy dialogs (e.g. Internet, Media output, etc) -->
     <dimen name="large_dialog_width">@dimen/match_parent</dimen>

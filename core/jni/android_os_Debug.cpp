@@ -34,6 +34,7 @@
 #include <vector>
 
 #include <android-base/logging.h>
+#include <android-base/properties.h>
 #include <bionic/malloc.h>
 #include <debuggerd/client.h>
 #include <log/log.h>
@@ -859,7 +860,22 @@ static jlong android_os_Debug_getDmabufHeapPoolsSizeKb(JNIEnv* env, jobject claz
     return poolsSizeKb;
 }
 
+static bool halSupportsGpuPrivateMemory() {
+    int productApiLevel =
+            android::base::GetIntProperty("ro.product.first_api_level",
+                                          android::base::GetIntProperty("ro.build.version.sdk",
+                                                                         __ANDROID_API_FUTURE__));
+    int boardApiLevel =
+            android::base::GetIntProperty("ro.board.api_level",
+                                          android::base::GetIntProperty("ro.board.first_api_level",
+                                                                         __ANDROID_API_FUTURE__));
+
+    return std::min(productApiLevel, boardApiLevel) >= __ANDROID_API_S__;
+}
+
 static jlong android_os_Debug_getGpuPrivateMemoryKb(JNIEnv* env, jobject clazz) {
+    static bool gpuPrivateMemorySupported = halSupportsGpuPrivateMemory();
+
     struct memtrack_proc* p = memtrack_proc_new();
     if (p == nullptr) {
         LOG(ERROR) << "getGpuPrivateMemoryKb: Failed to create memtrack_proc";
@@ -876,6 +892,12 @@ static jlong android_os_Debug_getGpuPrivateMemoryKb(JNIEnv* env, jobject clazz) 
     ssize_t gpuPrivateMem = memtrack_proc_gl_pss(p);
 
     memtrack_proc_destroy(p);
+
+    // Old HAL implementations may return 0 for GPU private memory if not supported
+    if (gpuPrivateMem == 0 && !gpuPrivateMemorySupported) {
+        return -1;
+    }
+
     return gpuPrivateMem / 1024;
 }
 

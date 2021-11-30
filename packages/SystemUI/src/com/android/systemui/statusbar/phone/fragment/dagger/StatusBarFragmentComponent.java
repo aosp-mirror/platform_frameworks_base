@@ -20,6 +20,7 @@ import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
+import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 
 import dagger.BindsInstance;
@@ -58,6 +59,7 @@ public interface StatusBarFragmentComponent {
         // get initialized.
         getBatteryMeterViewController().init();
         getHeadsUpAppearanceController().init();
+        getPhoneStatusBarViewController().init();
     }
 
     /** */
@@ -68,6 +70,10 @@ public interface StatusBarFragmentComponent {
     @StatusBarFragmentScope
     @RootView
     PhoneStatusBarView getPhoneStatusBarView();
+
+    /** */
+    @StatusBarFragmentScope
+    PhoneStatusBarViewController getPhoneStatusBarViewController();
 
     /** */
     @StatusBarFragmentScope
