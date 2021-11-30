@@ -79,7 +79,7 @@ import java.util.Arrays;
  * mask using {@code setId(..., android.R.id.mask)} or an existing mask layer
  * may be replaced using {@code setDrawableByLayerId(android.R.id.mask, ...)}.
  * <pre>
- * <code>&lt;!-- A red ripple masked against an opaque rectangle. --/>
+ * <code>&lt;!-- A red ripple masked against an opaque rectangle. -->
  * &lt;ripple android:color="#ffff0000">
  *   &lt;item android:id="@android:id/mask"
  *         android:drawable="@android:color/white" />
@@ -92,12 +92,12 @@ import java.util.Arrays;
  * If no mask layer is set, the ripple effect is masked against the composite
  * of the child layers.
  * <pre>
- * <code>&lt;!-- A green ripple drawn atop a black rectangle. --/>
+ * <code>&lt;!-- A green ripple drawn atop a black rectangle. -->
  * &lt;ripple android:color="#ff00ff00">
  *   &lt;item android:drawable="@android:color/black" />
  * &lt;/ripple>
  *
- * &lt;!-- A blue ripple drawn atop a drawable resource. --/>
+ * &lt;!-- A blue ripple drawn atop a drawable resource. -->
  * &lt;ripple android:color="#ff0000ff">
  *   &lt;item android:drawable="@drawable/my_drawable" />
  * &lt;/ripple></code>
@@ -108,7 +108,7 @@ import java.util.Arrays;
  * background within the View's hierarchy. In this case, the drawing region
  * may extend outside of the Drawable bounds.
  * <pre>
- * <code>&lt;!-- An unbounded red ripple. --/>
+ * <code>&lt;!-- An unbounded red ripple. -->
  * &lt;ripple android:color="#ffff0000" /></code>
  * </pre>
  *
