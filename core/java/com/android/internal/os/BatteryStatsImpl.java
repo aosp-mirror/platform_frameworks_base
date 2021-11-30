@@ -12186,7 +12186,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         mHistoryTags = new SparseArray<>(mHistoryTagPool.size());
         for (Map.Entry<HistoryTag, Integer> entry: mHistoryTagPool.entrySet()) {
-            mHistoryTags.put(entry.getValue(), entry.getKey());
+            mHistoryTags.put(entry.getValue() & ~TAG_FIRST_OCCURRENCE_FLAG, entry.getKey());
         }
     }
 
@@ -16345,9 +16345,6 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<numTags; i++) {
             int idx = in.readInt();
             String str = in.readString();
-            if (str == null) {
-                throw new ParcelFormatException("null history tag string");
-            }
             int uid = in.readInt();
             HistoryTag tag = new HistoryTag();
             tag.string = str;
