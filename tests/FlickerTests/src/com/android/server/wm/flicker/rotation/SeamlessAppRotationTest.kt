@@ -146,15 +146,6 @@ class SeamlessAppRotationTest(
         }
     }
 
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun focusDoesNotChange() {
-        // This test doesn't work in shell transitions because of b/206101151
-        assumeFalse(isShellTransitionsEnabled)
-        super.focusDoesNotChange()
-    }
-
     /**
      * Checks that [testApp] layer covers the entire screen during the whole transition
      */
@@ -193,6 +184,19 @@ class SeamlessAppRotationTest(
     fun statusBarLayerIsAlwaysInvisible() {
         testSpec.assertLayers {
             this.isInvisible(FlickerComponentName.STATUS_BAR)
+        }
+    }
+
+    /**
+     * Checks that the focus doesn't change during animation
+     */
+    @Presubmit
+    @Test
+    fun focusDoesNotChange() {
+        // This test doesn't work in shell transitions because of b/206101151
+        assumeFalse(isShellTransitionsEnabled)
+        testSpec.assertEventLog {
+            this.focusDoesNotChange()
         }
     }
 
