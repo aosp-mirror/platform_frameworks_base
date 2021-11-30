@@ -67,6 +67,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
     @GuardedBy("mLock")
     private final SparseArray<Matrix> mMagnificationSpecInverseMatrix = new SparseArray<>();
     @GuardedBy("mLock")
+    private final SparseArray<DisplayInfo> mDisplayInfos = new SparseArray<>();
+    @GuardedBy("mLock")
     private final List<InputWindowHandle> mVisibleWindows = new ArrayList<>();
     @GuardedBy("mLock")
     private boolean mWindowsNotificationEnabled = false;
@@ -93,6 +95,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             List<AccessibilityWindow> outWindows) {
         List<InputWindowHandle> inputWindowHandles;
         final Matrix inverseMatrix = new Matrix();
+        final Matrix displayMatrix = new Matrix();
 
         synchronized (mLock) {
             inputWindowHandles = mInputWindowHandlesOnDisplays.get(displayId);
@@ -101,25 +104,34 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
 
                 return;
             }
-
             inverseMatrix.set(mMagnificationSpecInverseMatrix.get(displayId));
+
+            final DisplayInfo displayInfo = mDisplayInfos.get(displayId);
+            if (displayInfo != null) {
+                displayMatrix.set(displayInfo.mTransform);
+            } else {
+                Slog.w(TAG, "The displayInfo of this displayId (" + displayId + ") called "
+                        + "back from the surface fligner is null");
+            }
         }
 
         final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
         final ShellRoot shellroot = dc.mShellRoots.get(WindowManager.SHELL_ROOT_LAYER_PIP);
         final IBinder pipMenuIBinder =
                 shellroot != null ? shellroot.getAccessibilityWindowToken() : null;
+
         for (final InputWindowHandle windowHandle : inputWindowHandles) {
             final AccessibilityWindow accessibilityWindow =
                     AccessibilityWindow.initializeData(mService, windowHandle, inverseMatrix,
-                            pipMenuIBinder);
+                            pipMenuIBinder, displayMatrix);
 
             outWindows.add(accessibilityWindow);
         }
     }
 
     @Override
-    public void onWindowInfosChanged(InputWindowHandle[] windowHandles) {
+    public void onWindowInfosChanged(InputWindowHandle[] windowHandles,
+            DisplayInfo[] displayInfos) {
         synchronized (mLock) {
             mVisibleWindows.clear();
             for (InputWindowHandle window : windowHandles) {
@@ -127,6 +139,12 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
                     mVisibleWindows.add(window);
                 }
             }
+
+            mDisplayInfos.clear();
+            for (final DisplayInfo displayInfo : displayInfos) {
+                mDisplayInfos.put(displayInfo.mDisplayId, displayInfo);
+            }
+
             if (mWindowsNotificationEnabled) {
                 if (!mHandler.hasMessages(
                         MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED_BY_TIMEOUT)) {
@@ -290,6 +308,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         mInputWindowHandlesOnDisplays.clear();
         mMagnificationSpecInverseMatrix.clear();
         mVisibleWindows.clear();
+        mDisplayInfos.clear();
         mWindowsNotificationEnabled = false;
         mHandler.removeCallbacksAndMessages(null);
     }
@@ -357,7 +376,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
          * @param inverseMatrix The magnification spec inverse matrix.
          */
         public static AccessibilityWindow initializeData(WindowManagerService service,
-                InputWindowHandle inputWindowHandle, Matrix inverseMatrix, IBinder pipIBinder) {
+                InputWindowHandle inputWindowHandle, Matrix inverseMatrix, IBinder pipIBinder,
+                Matrix displayMatrix) {
             final IWindow window = inputWindowHandle.getWindow();
             final WindowState windowState = window != null ? service.mWindowMap.get(
                     window.asBinder()) : null;
@@ -390,10 +410,10 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
                     inputWindowHandle.frameTop, inputWindowHandle.frameRight,
                     inputWindowHandle.frameBottom);
             getTouchableRegionInWindow(instance.mShouldMagnify, inputWindowHandle.touchableRegion,
-                    instance.mTouchableRegionInWindow, windowFrame, inverseMatrix);
+                    instance.mTouchableRegionInWindow, windowFrame, inverseMatrix, displayMatrix);
             getUnMagnifiedTouchableRegion(instance.mShouldMagnify,
                     inputWindowHandle.touchableRegion, instance.mTouchableRegionInScreen,
-                    inverseMatrix);
+                    inverseMatrix, displayMatrix);
             instance.mWindowInfo = windowState != null
                     ? windowState.getWindowInfo() : getWindowInfoForWindowlessWindows(instance);
 
@@ -507,7 +527,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         }
 
         private static void getTouchableRegionInWindow(boolean shouldMagnify, Region inRegion,
-                Region outRegion, Rect frame, Matrix inverseMatrix) {
+                Region outRegion, Rect frame, Matrix inverseMatrix, Matrix displayMatrix) {
             // Some modal windows, like the activity with Theme.dialog, has the full screen
             // as its touchable region, but its window frame is smaller than the touchable
             // region. The region we report should be the touchable area in the window frame
@@ -518,7 +538,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             touchRegion.set(inRegion);
             touchRegion.op(frame, Region.Op.INTERSECT);
 
-            getUnMagnifiedTouchableRegion(shouldMagnify, touchRegion, outRegion, inverseMatrix);
+            getUnMagnifiedTouchableRegion(shouldMagnify, touchRegion, outRegion, inverseMatrix,
+                    displayMatrix);
         }
 
         /**
@@ -529,10 +550,12 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
          * @param inRegion The touchable region of this window.
          * @param outRegion The un-magnified touchable region of this window.
          * @param inverseMatrix The inverse matrix of the magnification spec.
+         * @param displayMatrix The display transform matrix which takes display coordinates to
+         *                      logical display coordinates.
          */
         private static void getUnMagnifiedTouchableRegion(boolean shouldMagnify, Region inRegion,
-                Region outRegion, Matrix inverseMatrix) {
-            if (!shouldMagnify || inverseMatrix.isIdentity()) {
+                Region outRegion, Matrix inverseMatrix, Matrix displayMatrix) {
+            if ((!shouldMagnify || inverseMatrix.isIdentity()) && displayMatrix.isIdentity()) {
                 outRegion.set(inRegion);
                 return;
             }
@@ -543,6 +566,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
                 windowFrame.set(rect);
 
                 inverseMatrix.mapRect(windowFrame);
+                displayMatrix.mapRect(windowFrame);
                 // Union all rects.
                 outRegion.union(new Rect((int) windowFrame.left, (int) windowFrame.top,
                         (int) windowFrame.right, (int) windowFrame.bottom));
@@ -585,9 +609,9 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
                     + ", type=" + mType
                     + ", privateFlag=0x" + Integer.toHexString(mPrivateFlags)
                     + ", focused=" + mIsFocused
-                    + ", mShouldMagnify=" + mShouldMagnify
+                    + ", shouldMagnify=" + mShouldMagnify
                     + ", ignoreDuetoRecentsAnimation=" + mIgnoreDuetoRecentsAnimation
-                    + ", mIsTrustedOverlay=" + mIsTrustedOverlay
+                    + ", isTrustedOverlay=" + mIsTrustedOverlay
                     + ", regionInScreen=" + mTouchableRegionInScreen
                     + ", touchableRegion=" + mTouchableRegionInWindow
                     + ", letterBoxBounds=" + mLetterBoxBounds
