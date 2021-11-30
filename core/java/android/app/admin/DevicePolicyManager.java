@@ -7272,6 +7272,9 @@ public class DevicePolicyManager {
      * Returns the current runtime nearby notification streaming policy set by the device or profile
      * owner.
      */
+    @RequiresPermission(
+            value = android.Manifest.permission.READ_NEARBY_STREAMING_POLICY,
+            conditional = true)
     public @NearbyStreamingPolicy int getNearbyNotificationStreamingPolicy() {
         return getNearbyNotificationStreamingPolicy(myUserId());
     }
@@ -7312,6 +7315,9 @@ public class DevicePolicyManager {
     /**
      * Returns the current runtime nearby app streaming policy set by the device or profile owner.
      */
+    @RequiresPermission(
+            value = android.Manifest.permission.READ_NEARBY_STREAMING_POLICY,
+            conditional = true)
     public @NearbyStreamingPolicy int getNearbyAppStreamingPolicy() {
         return getNearbyAppStreamingPolicy(myUserId());
     }
