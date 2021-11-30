@@ -216,6 +216,14 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         }
     }
 
+    @Override
+    public void unregisterOrganizer() {
+        super.unregisterOrganizer();
+        if (mStartingWindow != null) {
+            mStartingWindow.clearAllWindows();
+        }
+    }
+
     public void createRootTask(int displayId, int windowingMode, TaskListener listener) {
         ProtoLog.v(WM_SHELL_TASK_ORG, "createRootTask() displayId=%d winMode=%d listener=%s",
                 displayId, windowingMode, listener.toString());
