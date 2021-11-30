@@ -42,6 +42,9 @@ class NotifPipelineFlags @Inject constructor(
     fun isNewPipelineEnabled(): Boolean =
         featureFlags.isEnabled(Flags.NEW_NOTIFICATION_PIPELINE_RENDERING)
 
+    fun isDevLoggingEnabled(): Boolean =
+        featureFlags.isEnabled(Flags.NOTIFICATION_PIPELINE_DEVELOPER_LOGGING)
+
     fun isSmartspaceDedupingEnabled(): Boolean =
             featureFlags.isEnabled(Flags.SMARTSPACE) &&
                     featureFlags.isEnabled(Flags.SMARTSPACE_DEDUPING)

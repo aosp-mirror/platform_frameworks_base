@@ -537,6 +537,8 @@ public class TouchExplorer extends BaseEventStreamTransformation
         // touch, we figure out what to do. If were waiting
         // we resent the delayed callback and wait again.
         mSendHoverEnterAndMoveDelayed.cancel();
+        // clear any hover events that might have been queued and never sent.
+        mSendHoverEnterAndMoveDelayed.clear();
         mSendHoverExitDelayed.cancel();
         // If a touch exploration gesture is in progress send events for its end.
         if (mState.isTouchExploring()) {

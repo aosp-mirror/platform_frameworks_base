@@ -308,6 +308,25 @@ public class UserManager {
     public static final String DISALLOW_WIFI_TETHERING = "no_wifi_tethering";
 
     /**
+     * Specifies if users are disallowed from sharing Wi-Fi for admin configured networks.
+     *
+     * <p>Device owner and profile owner can set this restriction.
+     * When it is set by any of these owners, it prevents all users from
+     * sharing Wi-Fi for networks configured by these owners.
+     * Other networks not configured by these owners are not affected.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI =
+            "no_sharing_admin_configured_wifi";
+
+    /**
      * Specifies if a user is disallowed from changing the device
      * language. The default value is <code>false</code>.
      *
@@ -1478,6 +1497,9 @@ public class UserManager {
             DISALLOW_CAMERA_TOGGLE,
             KEY_RESTRICTIONS_PENDING,
             DISALLOW_BIOMETRIC,
+            DISALLOW_CHANGE_WIFI_STATE,
+            DISALLOW_WIFI_TETHERING,
+            DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}
@@ -3930,6 +3952,25 @@ public class UserManager {
     public boolean canAddMoreProfilesToUser(@NonNull String userType, @UserIdInt int userId) {
         try {
             return mService.canAddMoreProfilesToUser(userType, userId, false);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks whether this device supports users of the given user type.
+     *
+     * @param userType the type of user, such as {@link UserManager#USER_TYPE_FULL_SECONDARY}.
+     * @return true if the creation of users of the given user type is enabled on this device.
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS
+    })
+    public boolean isUserTypeEnabled(@NonNull String userType) {
+        try {
+            return mService.isUserTypeEnabled(userType);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

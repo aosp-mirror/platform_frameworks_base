@@ -50,6 +50,12 @@
                 {"include-filter": "com.android.cts.net.HostsideRestrictBackgroundNetworkTests#testMeteredNetworkAccess_expeditedJob"},
                 {"include-filter": "com.android.cts.net.HostsideRestrictBackgroundNetworkTests#testNonMeteredNetworkAccess_expeditedJob"}
             ]
+        },
+        {
+            "name": "CtsStatsdAtomHostTestCases",
+            "options": [
+                {"include-filter": "android.cts.statsdatom.jobscheduler"}
+            ]
         }
     ]
 }

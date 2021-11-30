@@ -46,6 +46,10 @@ public class Flags {
     public static final BooleanFlag NOTIFICATION_UPDATES =
             new BooleanFlag(102, true);
 
+    public static final BooleanFlag NOTIFICATION_PIPELINE_DEVELOPER_LOGGING =
+            new BooleanFlag(103, false);
+
+
     /***************************************/
     // 200 - keyguard/lockscreen
     public static final BooleanFlag KEYGUARD_LAYOUT =

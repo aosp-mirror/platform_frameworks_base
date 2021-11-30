@@ -28,6 +28,7 @@ import android.annotation.NonNull;
 import android.app.job.JobInfo;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.EstimatedLaunchTimeChangedListener;
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -63,6 +64,13 @@ public class PrefetchController extends StateController {
     private final PcConstants mPcConstants;
     private final PcHandler mHandler;
 
+    // Note: when determining prefetch bit satisfaction, we mark the bit as satisfied for apps with
+    // active widgets assuming that any prefetch jobs are being used for the widget. However, we
+    // don't have a callback telling us when widget status changes, which is incongruent with the
+    // aforementioned assumption. This inconsistency _should_ be fine since any jobs scheduled
+    // before the widget is activated are definitely not for the widget and don't have to be updated
+    // to "satisfied=true".
+    private AppWidgetManager mAppWidgetManager;
     private final UsageStatsManagerInternal mUsageStatsManagerInternal;
 
     @GuardedBy("mLock")
@@ -115,6 +123,11 @@ public class PrefetchController extends StateController {
 
         mUsageStatsManagerInternal
                 .registerLaunchTimeChangedListener(mEstimatedLaunchTimeChangedListener);
+    }
+
+    @Override
+    public void onSystemServicesReady() {
+        mAppWidgetManager = mContext.getSystemService(AppWidgetManager.class);
     }
 
     @Override
@@ -298,11 +311,23 @@ public class PrefetchController extends StateController {
         // Mark a prefetch constraint as satisfied in the following scenarios:
         //   1. The app is not open but it will be launched soon
         //   2. The app is open and the job is already running (so we let it finish)
+        //   3. The app is not open but has an active widget (we can't tell if a widget displays
+        //      status/data, so this assumes the prefetch job is to update the data displayed on
+        //      the widget).
         final boolean appIsOpen = mTopUids.get(jobStatus.getSourceUid());
         final boolean satisfied;
         if (!appIsOpen) {
-            satisfied = willBeLaunchedSoonLocked(
-                    jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(), now);
+            final int userId = jobStatus.getSourceUserId();
+            final String pkgName = jobStatus.getSourcePackageName();
+            satisfied = willBeLaunchedSoonLocked(userId, pkgName, now)
+                    // At the time of implementation, isBoundWidgetPackage() results in a process ID
+                    // check and then a lookup into a map. Calling the method here every time
+                    // is based on the assumption that widgets won't change often and
+                    // AppWidgetManager won't be a bottleneck, so having a local cache won't provide
+                    // huge performance gains. If anything changes, we should reconsider having a
+                    // local cache.
+                    || (mAppWidgetManager != null
+                            && mAppWidgetManager.isBoundWidgetPackage(pkgName, userId));
         } else {
             satisfied = mService.isCurrentlyRunningLocked(jobStatus);
         }

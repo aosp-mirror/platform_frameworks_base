@@ -3842,6 +3842,7 @@ public abstract class Context {
             UWB_SERVICE,
             MEDIA_METRICS_SERVICE,
             SUPPLEMENTAL_PROCESS_SERVICE,
+            //@hide: ATTESTATION_VERIFICATION_SERVICE,
             //@hide: SAFETY_CENTER_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -5740,6 +5741,15 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.security.attestationverification.AttestationVerificationManager}.
+     * @see #getSystemService(String)
+     * @see android.security.attestationverification.AttestationVerificationManager
+     * @hide
+     */
+    public static final String ATTESTATION_VERIFICATION_SERVICE = "attestation_verification";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.security.FileIntegrityManager}.
      * @see #getSystemService(String)
      * @see android.security.FileIntegrityManager
@@ -5881,6 +5891,16 @@ public abstract class Context {
      */
     @SystemApi
     public static final String SAFETY_CENTER_SERVICE = "safety_center";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.nearby.NearbyManager} to discover nearby devices.
+     *
+     * @see #getSystemService(String)
+     * @see android.nearby.NearbyManager
+     * @hide
+     */
+    public static final String NEARBY_SERVICE = "nearby";
 
     /**
      * Determine whether the given permission is allowed for a particular

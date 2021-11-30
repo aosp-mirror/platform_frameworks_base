@@ -279,7 +279,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private StartingSurface mStartingSurface;
     @Mock private OperatorNameViewController mOperatorNameViewController;
     @Mock private OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
-    @Mock private PhoneStatusBarViewController.Factory mPhoneStatusBarViewControllerFactory;
     @Mock private ActivityLaunchAnimator mActivityLaunchAnimator;
     @Mock private NotifPipelineFlags mNotifPipelineFlags;
     private ShadeController mShadeController;
@@ -446,7 +445,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mExtensionController,
                 mUserInfoControllerImpl,
                 mOperatorNameViewControllerFactory,
-                mPhoneStatusBarViewControllerFactory,
                 mPhoneStatusBarPolicy,
                 mKeyguardIndicationController,
                 mDemoModeController,

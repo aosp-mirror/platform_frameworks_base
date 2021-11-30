@@ -150,6 +150,7 @@ public class BugreportProgressService extends Service {
     // Internal intents used on notification actions.
     static final String INTENT_BUGREPORT_CANCEL = "android.intent.action.BUGREPORT_CANCEL";
     static final String INTENT_BUGREPORT_SHARE = "android.intent.action.BUGREPORT_SHARE";
+    static final String INTENT_BUGREPORT_DONE = "android.intent.action.BUGREPORT_DONE";
     static final String INTENT_BUGREPORT_INFO_LAUNCH =
             "android.intent.action.BUGREPORT_INFO_LAUNCH";
     static final String INTENT_BUGREPORT_SCREENSHOT =
@@ -555,6 +556,8 @@ public class BugreportProgressService extends Service {
                 case INTENT_BUGREPORT_SHARE:
                     shareBugreport(id, (BugreportInfo) intent.getParcelableExtra(EXTRA_INFO));
                     break;
+                case INTENT_BUGREPORT_DONE:
+                    maybeShowWarningMessageAndCloseNotification(id);
                 case INTENT_BUGREPORT_CANCEL:
                     cancel(id);
                     break;
@@ -809,10 +812,30 @@ public class BugreportProgressService extends Service {
     }
 
     /**
+     * Creates a {@link PendingIntent} for a notification action used to show warning about the
+     * sensitivity of bugreport data and then close bugreport notification.
+     *
+     * Note that, the warning message may not be shown if the user has chosen not to see the
+     * message anymore.
+     */
+    private static PendingIntent newBugreportDoneIntent(Context context, BugreportInfo info) {
+        final Intent intent = new Intent(INTENT_BUGREPORT_DONE);
+        intent.setClass(context, BugreportProgressService.class);
+        intent.putExtra(EXTRA_ID, info.id);
+        return PendingIntent.getService(context, info.id, intent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    @GuardedBy("mLock")
+    private void stopProgressLocked(int id) {
+        stopProgressLocked(id, /* cancelNotification */ true);
+    }
+
+    /**
      * Finalizes the progress on a given bugreport and cancel its notification.
      */
     @GuardedBy("mLock")
-    private void stopProgressLocked(int id) {
+    private void stopProgressLocked(int id, boolean cancelNotification) {
         if (mBugreportInfos.indexOfKey(id) < 0) {
             Log.w(TAG, "ID not watched: " + id);
         } else {
@@ -821,8 +844,13 @@ public class BugreportProgressService extends Service {
         }
         // Must stop foreground service first, otherwise notif.cancel() will fail below.
         stopForegroundWhenDoneLocked(id);
-        Log.d(TAG, "stopProgress(" + id + "): cancel notification");
-        NotificationManager.from(mContext).cancel(id);
+
+        if (cancelNotification) {
+            Log.d(TAG, "stopProgress(" + id + "): cancel notification");
+            NotificationManager.from(mContext).cancel(id);
+        } else {
+            Log.d(TAG, "stopProgress(" + id + ")");
+        }
         stopSelfWhenDoneLocked();
     }
 
@@ -1039,7 +1067,8 @@ public class BugreportProgressService extends Service {
     }
 
     /**
-     * Wraps up bugreport generation and triggers a notification to share the bugreport.
+     * Wraps up bugreport generation and triggers a notification to either share the bugreport or
+     * just notify the ending of the bugreport generation, according to the device type.
      */
     private void onBugreportFinished(BugreportInfo info) {
         if (!TextUtils.isEmpty(info.shareTitle)) {
@@ -1054,25 +1083,46 @@ public class BugreportProgressService extends Service {
             stopForegroundWhenDoneLocked(info.id);
         }
 
-        triggerLocalNotification(mContext, info);
-    }
-
-    /**
-     * Responsible for triggering a notification that allows the user to start a "share" intent with
-     * the bugreport. On watches we have other methods to allow the user to start this intent
-     * (usually by triggering it on another connected device); we don't need to display the
-     * notification in this case.
-     */
-    private void triggerLocalNotification(final Context context, final BugreportInfo info) {
         if (!info.bugreportFile.exists() || !info.bugreportFile.canRead()) {
             Log.e(TAG, "Could not read bugreport file " + info.bugreportFile);
-            Toast.makeText(context, R.string.bugreport_unreadable_text, Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext, R.string.bugreport_unreadable_text, Toast.LENGTH_LONG).show();
             synchronized (mLock) {
                 stopProgressLocked(info.id);
             }
             return;
         }
 
+        if (mIsWatch) {
+            // Wear wants to send the notification directly and not wait for the user to tap on the
+            // notification.
+            triggerShareBugreportAndLocalNotification(info);
+        } else {
+            triggerLocalNotification(info);
+        }
+    }
+
+    /**
+     * Responsible for starting the bugerport sharing process and posting a notification which
+     * shows that the bugreport has been taken and that the sharing process has kicked-off.
+     */
+    private void triggerShareBugreportAndLocalNotification(final BugreportInfo info) {
+        boolean isPlainText = info.bugreportFile.getName().toLowerCase().endsWith(".txt");
+        if (!isPlainText) {
+            // Already zipped, share it right away.
+            shareBugreport(info.id, info, /* showWarning */ false,
+                /* cancelNotificationWhenStoppingProgress */ false);
+            sendBugreportNotification(info, mTakingScreenshot);
+        } else {
+            // Asynchronously zip the file first, then share it.
+            shareAndPostNotificationForZippedBugreport(info, mTakingScreenshot);
+        }
+    }
+
+    /**
+     * Responsible for triggering a notification that allows the user to start a "share" intent with
+     * the bugreport.
+     */
+    private void triggerLocalNotification(final BugreportInfo info) {
         boolean isPlainText = info.bugreportFile.getName().toLowerCase().endsWith(".txt");
         if (!isPlainText) {
             // Already zipped, send it right away.
@@ -1083,9 +1133,11 @@ public class BugreportProgressService extends Service {
         }
     }
 
-    private static Intent buildWarningIntent(Context context, Intent sendIntent) {
+    private static Intent buildWarningIntent(Context context, @Nullable Intent sendIntent) {
         final Intent intent = new Intent(context, BugreportWarningActivity.class);
-        intent.putExtra(Intent.EXTRA_INTENT, sendIntent);
+        if (sendIntent != null) {
+            intent.putExtra(Intent.EXTRA_INTENT, sendIntent);
+        }
         return intent;
     }
 
@@ -1163,11 +1215,30 @@ public class BugreportProgressService extends Service {
         return intent;
     }
 
+    private boolean hasUserDecidedNotToGetWarningMessage() {
+        return getWarningState(mContext, STATE_UNKNOWN) == STATE_HIDE;
+    }
+
+    private void maybeShowWarningMessageAndCloseNotification(int id) {
+        if (!hasUserDecidedNotToGetWarningMessage()) {
+            Intent warningIntent = buildWarningIntent(mContext, /* sendIntent */ null);
+            warningIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(warningIntent);
+        }
+        NotificationManager.from(mContext).cancel(id);
+    }
+
+    private void shareBugreport(int id, BugreportInfo sharedInfo) {
+        shareBugreport(id, sharedInfo, !hasUserDecidedNotToGetWarningMessage(),
+            /* cancelNotificationWhenStoppingProgress */ true);
+    }
+
     /**
      * Shares the bugreport upon user's request by issuing a {@link Intent#ACTION_SEND_MULTIPLE}
      * intent, but issuing a warning dialog the first time.
      */
-    private void shareBugreport(int id, BugreportInfo sharedInfo) {
+    private void shareBugreport(int id, BugreportInfo sharedInfo, boolean showWarning,
+            boolean cancelNotificationWhenStoppingProgress) {
         MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_SHARE);
         BugreportInfo info;
         synchronized (mLock) {
@@ -1199,7 +1270,7 @@ public class BugreportProgressService extends Service {
         boolean useChooser = true;
 
         // Send through warning dialog by default
-        if (getWarningState(mContext, STATE_UNKNOWN) != STATE_HIDE) {
+        if (showWarning) {
             notifIntent = buildWarningIntent(mContext, sendIntent);
             // No need to show a chooser in this case.
             useChooser = false;
@@ -1216,7 +1287,7 @@ public class BugreportProgressService extends Service {
         }
         synchronized (mLock) {
             // ... and stop watching this process.
-            stopProgressLocked(id);
+            stopProgressLocked(id, cancelNotificationWhenStoppingProgress);
         }
     }
 
@@ -1240,12 +1311,6 @@ public class BugreportProgressService extends Service {
         // Since adding the details can take a while, do it before notifying user.
         addDetailsToZipFile(info);
 
-        final Intent shareIntent = new Intent(INTENT_BUGREPORT_SHARE);
-        shareIntent.setClass(mContext, BugreportProgressService.class);
-        shareIntent.setAction(INTENT_BUGREPORT_SHARE);
-        shareIntent.putExtra(EXTRA_ID, info.id);
-        shareIntent.putExtra(EXTRA_INFO, info);
-
         String content;
         content = takingScreenshot ?
                 mContext.getString(R.string.bugreport_finished_pending_screenshot_text)
@@ -1263,11 +1328,32 @@ public class BugreportProgressService extends Service {
         final Notification.Builder builder = newBaseNotification(mContext)
                 .setContentTitle(title)
                 .setTicker(title)
-                .setContentText(content)
-                .setContentIntent(PendingIntent.getService(mContext, info.id, shareIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))
                 .setOnlyAlertOnce(false)
-                .setDeleteIntent(newCancelIntent(mContext, info));
+                .setContentText(content);
+
+        if (!mIsWatch) {
+            final Intent shareIntent = new Intent(INTENT_BUGREPORT_SHARE);
+            shareIntent.setClass(mContext, BugreportProgressService.class);
+            shareIntent.setAction(INTENT_BUGREPORT_SHARE);
+            shareIntent.putExtra(EXTRA_ID, info.id);
+            shareIntent.putExtra(EXTRA_INFO, info);
+
+            builder.setContentIntent(PendingIntent.getService(mContext, info.id, shareIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))
+                    .setDeleteIntent(newCancelIntent(mContext, info));
+        } else {
+            // Device is a watch.
+            if (hasUserDecidedNotToGetWarningMessage()) {
+                // No action button needed for the notification. User can swipe to dimiss.
+                builder.setActions(new Action[0]);
+            } else {
+                // Add action button to lead user to the warning screen.
+                builder.setActions(
+                        new Action.Builder(
+                                null, mContext.getString(R.string.bugreport_info_action),
+                        newBugreportDoneIntent(mContext, info)).build());
+            }
+        }
 
         if (!TextUtils.isEmpty(info.getName())) {
             builder.setSubText(info.getName());
@@ -1321,6 +1407,24 @@ public class BugreportProgressService extends Service {
                 Looper.prepare();
                 zipBugreport(info);
                 sendBugreportNotification(info, takingScreenshot);
+                return null;
+            }
+        }.execute();
+    }
+
+    /**
+     * Zips a bugreport, shares it, and sends for it a bugreport notification.
+     */
+    private void shareAndPostNotificationForZippedBugreport(final BugreportInfo info,
+            final boolean takingScreenshot) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                Looper.prepare();
+                zipBugreport(info);
+                shareBugreport(info.id, info, /* showWarning */ false,
+                /* cancelNotificationWhenStoppingProgress */ false);
+                sendBugreportNotification(info, mTakingScreenshot);
                 return null;
             }
         }.execute();

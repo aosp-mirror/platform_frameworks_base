@@ -1371,7 +1371,11 @@ public class JobSchedulerService extends com.android.server.SystemService
                     jobStatus.hasContentTriggerConstraint(),
                     jobStatus.isRequestedExpeditedJob(),
                     /* isRunningAsExpeditedJob */ false,
-                    JobProtoEnums.STOP_REASON_UNDEFINED);
+                    JobProtoEnums.STOP_REASON_UNDEFINED,
+                    jobStatus.getJob().isPrefetch(),
+                    jobStatus.getJob().getPriority(),
+                    jobStatus.getEffectivePriority(),
+                    jobStatus.getNumFailures());
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially

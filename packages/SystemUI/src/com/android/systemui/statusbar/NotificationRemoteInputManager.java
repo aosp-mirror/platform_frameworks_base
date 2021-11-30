@@ -33,6 +33,7 @@ import android.os.UserManager;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
@@ -66,6 +67,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
+import com.android.systemui.util.DumpUtilsKt;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -653,9 +655,19 @@ public class NotificationRemoteInputManager implements Dumpable {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+        IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
+        if (mRemoteInputController != null) {
+            pw.println("mRemoteInputController: " + mRemoteInputController);
+            pw.increaseIndent();
+            mRemoteInputController.dump(pw);
+            pw.decreaseIndent();
+        }
         if (mRemoteInputListener instanceof Dumpable) {
+            pw.println("mRemoteInputListener: " + mRemoteInputListener.getClass().getSimpleName());
+            pw.increaseIndent();
             ((Dumpable) mRemoteInputListener).dump(fd, pw, args);
+            pw.decreaseIndent();
         }
     }
 

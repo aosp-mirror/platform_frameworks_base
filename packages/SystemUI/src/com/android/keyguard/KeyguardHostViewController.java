@@ -479,9 +479,7 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
 
         Resources resources = mView.getResources();
 
-        if (resources.getBoolean(R.bool.can_use_one_handed_bouncer)
-                && resources.getBoolean(
-                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning)) {
+        if (resources.getBoolean(R.bool.can_use_one_handed_bouncer)) {
             gravity = resources.getInteger(
                     R.integer.keyguard_host_view_one_handed_gravity);
         } else {

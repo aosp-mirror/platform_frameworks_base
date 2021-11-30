@@ -15,12 +15,19 @@
  */
 
 #include "LayerDrawable.h"
+
+#include <shaders/shaders.h>
+#include <utils/Color.h>
 #include <utils/MathUtils.h>
 
+#include "DeviceInfo.h"
 #include "GrBackendSurface.h"
 #include "SkColorFilter.h"
+#include "SkRuntimeEffect.h"
 #include "SkSurface.h"
 #include "gl/GrGLTypes.h"
+#include "math/mat4.h"
+#include "system/graphics-base-v1.0.h"
 #include "system/window.h"
 
 namespace android {
@@ -67,6 +74,35 @@ static bool shouldFilterRect(const SkMatrix& matrix, const SkRect& srcRect, cons
              isIntegerAligned(srcRect.y()) &&
              isIntegerAligned(dstDevRect.x()) &&
              isIntegerAligned(dstDevRect.y()));
+}
+
+static sk_sp<SkShader> createLinearEffectShader(sk_sp<SkShader> shader,
+                                                const shaders::LinearEffect& linearEffect,
+                                                float maxDisplayLuminance, float maxLuminance) {
+    auto shaderString = SkString(shaders::buildLinearEffectSkSL(linearEffect));
+    auto [runtimeEffect, error] = SkRuntimeEffect::MakeForShader(std::move(shaderString));
+    if (!runtimeEffect) {
+        LOG_ALWAYS_FATAL("LinearColorFilter construction error: %s", error.c_str());
+    }
+
+    SkRuntimeShaderBuilder effectBuilder(std::move(runtimeEffect));
+
+    effectBuilder.child("child") = std::move(shader);
+
+    const auto uniforms = shaders::buildLinearEffectUniforms(linearEffect, mat4(),
+                                                             maxDisplayLuminance, maxLuminance);
+
+    for (const auto& uniform : uniforms) {
+        effectBuilder.uniform(uniform.name.c_str()).set(uniform.value.data(), uniform.value.size());
+    }
+
+    return effectBuilder.makeShader(nullptr, false);
+}
+
+static bool isHdrDataspace(ui::Dataspace dataspace) {
+    const auto transfer = dataspace & HAL_DATASPACE_TRANSFER_MASK;
+
+    return transfer == HAL_DATASPACE_TRANSFER_ST2084 || transfer == HAL_DATASPACE_TRANSFER_HLG;
 }
 
 // TODO: Context arg probably doesn't belong here – do debug check at callsite instead.
@@ -150,8 +186,30 @@ bool LayerDrawable::DrawLayer(GrRecordingContext* context,
             sampling = SkSamplingOptions(SkFilterMode::kLinear);
         }
 
-        canvas->drawImageRect(layerImage.get(), skiaSrcRect, skiaDestRect, sampling, &paint,
-                              constraint);
+        const auto sourceDataspace = static_cast<ui::Dataspace>(
+                ColorSpaceToADataSpace(layerImage->colorSpace(), layerImage->colorType()));
+        const SkImageInfo& imageInfo = canvas->imageInfo();
+        const auto destinationDataspace = static_cast<ui::Dataspace>(
+                ColorSpaceToADataSpace(imageInfo.colorSpace(), imageInfo.colorType()));
+
+        if (isHdrDataspace(sourceDataspace) || isHdrDataspace(destinationDataspace)) {
+            const auto effect = shaders::LinearEffect{
+                    .inputDataspace = sourceDataspace,
+                    .outputDataspace = destinationDataspace,
+                    .undoPremultipliedAlpha = layerImage->alphaType() == kPremul_SkAlphaType,
+                    .fakeInputDataspace = destinationDataspace};
+            auto shader = layerImage->makeShader(sampling,
+                                                 SkMatrix::RectToRect(skiaSrcRect, skiaDestRect));
+            constexpr float kMaxDisplayBrightess = 1000.f;
+            shader = createLinearEffectShader(std::move(shader), effect, kMaxDisplayBrightess,
+                                              layer->getMaxLuminanceNits());
+            paint.setShader(shader);
+            canvas->drawRect(skiaDestRect, paint);
+        } else {
+            canvas->drawImageRect(layerImage.get(), skiaSrcRect, skiaDestRect, sampling, &paint,
+                                  constraint);
+        }
+
         canvas->restore();
         // restore the original matrix
         if (useLayerTransform) {
