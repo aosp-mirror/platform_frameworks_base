@@ -304,12 +304,23 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @see android.R.attr#colorMode
      */
     public static final int COLOR_MODE_HDR = 2;
+    // 3 Corresponds to android::uirenderer::ColorMode::Hdr10.
+    /**
+     * Value of {@link #colorMode} indicating that the activity should use an
+     * 8 bit alpha buffer if the presentation display supports it.
+     *
+     * @see android.R.attr#colorMode
+     * @hide
+     */
+    public static final int COLOR_MODE_A8 = 4;
+
 
     /** @hide */
     @IntDef(prefix = { "COLOR_MODE_" }, value = {
             COLOR_MODE_DEFAULT,
             COLOR_MODE_WIDE_COLOR_GAMUT,
             COLOR_MODE_HDR,
+            COLOR_MODE_A8,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ColorMode {}
@@ -1682,6 +1693,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
                 return "COLOR_MODE_WIDE_COLOR_GAMUT";
             case COLOR_MODE_HDR:
                 return "COLOR_MODE_HDR";
+            case COLOR_MODE_A8:
+                return "COLOR_MODE_A8";
             default:
                 return Integer.toString(colorMode);
         }
