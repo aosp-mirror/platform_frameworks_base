@@ -397,7 +397,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // MockPackageManager - default returns ApplicationInfo with matching calling UID
         mContext.setMockPackageManager(mPackageManagerClient);
 
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), anyInt()))
+        when(mPackageManager.getApplicationInfo(anyString(), anyLong(), anyInt()))
                 .thenAnswer((Answer<ApplicationInfo>) invocation -> {
                     Object[] args = invocation.getArguments();
                     return getApplicationInfo((String) args[0], mUid);
@@ -5043,7 +5043,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testIsCallerInstantApp_primaryUser() throws Exception {
         ApplicationInfo info = new ApplicationInfo();
         info.privateFlags = ApplicationInfo.PRIVATE_FLAG_INSTANT;
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(0))).thenReturn(info);
+        when(mPackageManager.getApplicationInfo(anyString(), anyLong(), eq(0))).thenReturn(info);
         when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(new String[]{"any"});
 
         assertTrue(mService.isCallerInstantApp(45770, 0));
@@ -5056,8 +5056,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testIsCallerInstantApp_secondaryUser() throws Exception {
         ApplicationInfo info = new ApplicationInfo();
         info.privateFlags = ApplicationInfo.PRIVATE_FLAG_INSTANT;
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(10))).thenReturn(info);
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(0))).thenReturn(null);
+        when(mPackageManager.getApplicationInfo(anyString(), anyLong(), eq(10))).thenReturn(info);
+        when(mPackageManager.getApplicationInfo(anyString(), anyLong(), eq(0))).thenReturn(null);
         when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(new String[]{"any"});
 
         assertTrue(mService.isCallerInstantApp(68638450, 10));
@@ -5067,7 +5067,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testIsCallerInstantApp_userAllNotification() throws Exception {
         ApplicationInfo info = new ApplicationInfo();
         info.privateFlags = ApplicationInfo.PRIVATE_FLAG_INSTANT;
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(USER_SYSTEM)))
+        when(mPackageManager.getApplicationInfo(anyString(), anyLong(), eq(USER_SYSTEM)))
                 .thenReturn(info);
         when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(new String[]{"any"});
 
@@ -5081,8 +5081,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testResolveNotificationUid_sameApp_nonSystemUser() throws Exception {
         ApplicationInfo info = new ApplicationInfo();
         info.uid = Binder.getCallingUid();
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(10))).thenReturn(info);
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(0))).thenReturn(null);
+        when(mPackageManager.getApplicationInfo(anyString(), anyLong(), eq(10))).thenReturn(info);
+        when(mPackageManager.getApplicationInfo(anyString(), anyLong(), eq(0))).thenReturn(null);
 
         int actualUid = mService.resolveNotificationUid("caller", "caller", info.uid, 10);
 
@@ -5093,7 +5093,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testResolveNotificationUid_sameApp() throws Exception {
         ApplicationInfo info = new ApplicationInfo();
         info.uid = Binder.getCallingUid();
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(0))).thenReturn(info);
+        when(mPackageManager.getApplicationInfo(anyString(), anyLong(), eq(0))).thenReturn(info);
 
         int actualUid = mService.resolveNotificationUid("caller", "caller", info.uid, 0);
 
@@ -5104,7 +5104,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testResolveNotificationUid_sameAppDiffPackage() throws Exception {
         ApplicationInfo info = new ApplicationInfo();
         info.uid = Binder.getCallingUid();
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(0))).thenReturn(info);
+        when(mPackageManager.getApplicationInfo(anyString(), anyLong(), eq(0))).thenReturn(info);
 
         int actualUid = mService.resolveNotificationUid("caller", "callerAlso", info.uid, 0);
 
@@ -5115,7 +5115,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testResolveNotificationUid_sameAppWrongUid() throws Exception {
         ApplicationInfo info = new ApplicationInfo();
         info.uid = 1356347;
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), anyInt())).thenReturn(info);
+        when(mPackageManager.getApplicationInfo(anyString(), anyLong(), anyInt())).thenReturn(info);
 
         try {
             mService.resolveNotificationUid("caller", "caller", 9, 0);
@@ -5154,7 +5154,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 PackageManager.NameNotFoundException.class);
         ApplicationInfo ai = new ApplicationInfo();
         ai.uid = -1;
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), anyInt())).thenReturn(ai);
+        when(mPackageManager.getApplicationInfo(anyString(), anyLong(), anyInt())).thenReturn(ai);
 
         final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
         try {
@@ -5174,7 +5174,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 PackageManager.NameNotFoundException.class);
         ApplicationInfo ai = new ApplicationInfo();
         ai.uid = -1;
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), anyInt())).thenReturn(ai);
+        when(mPackageManager.getApplicationInfo(anyString(), anyLong(), anyInt())).thenReturn(ai);
 
         // unlike the post case, ignore instead of throwing
         final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();

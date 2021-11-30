@@ -29,7 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.intThat;
+import static org.mockito.ArgumentMatchers.longThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -135,7 +135,7 @@ public final class AppHibernationServiceTest {
         packages.add(makePackageInfo(PACKAGE_NAME_2));
         packages.add(makePackageInfo(PACKAGE_NAME_3));
         doReturn(new ParceledListSlice<>(packages)).when(mIPackageManager).getInstalledPackages(
-                intThat(arg -> (arg & MATCH_ANY_USER) != 0), anyInt());
+                longThat(arg -> (arg & MATCH_ANY_USER) != 0), anyInt());
         mAppHibernationService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
 
         UserInfo userInfo = addUser(USER_ID_1);
@@ -412,7 +412,7 @@ public final class AppHibernationServiceTest {
         UserInfo userInfo = new UserInfo(userId, "user_" + userId, 0 /* flags */);
         mUserInfos.add(userInfo);
         doReturn(new ParceledListSlice<>(userPackages)).when(mIPackageManager)
-                .getInstalledPackages(intThat(arg -> (arg & MATCH_ANY_USER) == 0), eq(userId));
+                .getInstalledPackages(longThat(arg -> (arg & MATCH_ANY_USER) == 0), eq(userId));
         return userInfo;
     }
 

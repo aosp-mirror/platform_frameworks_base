@@ -154,7 +154,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -4150,7 +4149,7 @@ public final class Settings implements Watchable, Snappable {
         return getDisabledSystemPkgLPr(enabledPackageSetting.getPackageName());
     }
 
-    boolean isEnabledAndMatchLPr(ComponentInfo componentInfo, int flags, int userId) {
+    boolean isEnabledAndMatchLPr(ComponentInfo componentInfo, long flags, int userId) {
         final PackageSetting ps = mPackages.get(componentInfo.packageName);
         if (ps == null) return false;
 
@@ -4160,7 +4159,7 @@ public final class Settings implements Watchable, Snappable {
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public boolean isEnabledAndMatchLPr(AndroidPackage pkg, ParsedMainComponent component,
-            int flags, int userId) {
+            long flags, int userId) {
         final PackageSetting ps = mPackages.get(component.getPackageName());
         if (ps == null) return false;
 

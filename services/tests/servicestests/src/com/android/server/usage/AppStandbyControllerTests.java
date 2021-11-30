@@ -63,6 +63,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -530,8 +531,8 @@ public class AppStandbyControllerTests {
                     eq(UserHandle.getAppId(ai.uid)), eq(userIdForTest), anyLong()))
                     .thenReturn(idle[i]);
         }
-        when(mInjector.mPackageManagerInternal.getInstalledApplications(anyInt(), eq(userIdForTest),
-                anyInt())).thenReturn(installedApps);
+        when(mInjector.mPackageManagerInternal.getInstalledApplications(anyLong(),
+                eq(userIdForTest), anyInt())).thenReturn(installedApps);
         final int[] returnedIdleUids = controllerUnderTest.getIdleUidsForUser(userIdForTest);
 
         assertEquals(expectedIdleUids.length, returnedIdleUids.length);

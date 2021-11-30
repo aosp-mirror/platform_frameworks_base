@@ -75,8 +75,8 @@ final class PreferredActivityHelper {
     }
 
     private ResolveInfo findPreferredActivityNotLocked(Intent intent, String resolvedType,
-            int flags, List<ResolveInfo> query, boolean always, boolean removeMatches,
-            boolean debug, int userId) {
+            @PackageManager.ResolveInfoFlags long flags, List<ResolveInfo> query, boolean always,
+            boolean removeMatches, boolean debug, int userId) {
         return findPreferredActivityNotLocked(
                 intent, resolvedType, flags, query, always, removeMatches, debug, userId,
                 UserHandle.getAppId(Binder.getCallingUid()) >= Process.FIRST_APPLICATION_UID);
@@ -85,8 +85,9 @@ final class PreferredActivityHelper {
     // TODO: handle preferred activities missing while user has amnesia
     /** <b>must not hold {@link PackageManagerService.mLock}</b> */
     public ResolveInfo findPreferredActivityNotLocked(
-            Intent intent, String resolvedType, int flags, List<ResolveInfo> query, boolean always,
-            boolean removeMatches, boolean debug, int userId, boolean queryMayBeFiltered) {
+            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlags long flags,
+            List<ResolveInfo> query, boolean always, boolean removeMatches, boolean debug,
+            int userId, boolean queryMayBeFiltered) {
         if (Thread.holdsLock(mPm.mLock)) {
             Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
                     + " is holding mLock", new Throwable());
@@ -675,7 +676,7 @@ final class PreferredActivityHelper {
         final int callingUid = Binder.getCallingUid();
         intent = PackageManagerServiceUtils.updateIntentForResolve(intent);
         final String resolvedType = intent.resolveTypeIfNeeded(mPm.mContext.getContentResolver());
-        final int flags = mPm.updateFlagsForResolve(
+        final long flags = mPm.updateFlagsForResolve(
                 0, userId, callingUid, false /*includeInstantApps*/,
                 mPm.isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
                         0));

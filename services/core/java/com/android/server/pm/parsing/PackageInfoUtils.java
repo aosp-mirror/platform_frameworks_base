@@ -84,8 +84,8 @@ public class PackageInfoUtils {
      */
     @Nullable
     public static PackageInfo generate(AndroidPackage pkg, int[] gids,
-            @PackageManager.PackageInfoFlags int flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, PackageUserState state, int userId,
+            @PackageManager.PackageInfoFlags long flags, long firstInstallTime,
+            long lastUpdateTime, Set<String> grantedPermissions, PackageUserState state, int userId,
             @Nullable PackageStateInternal pkgSetting) {
         return generateWithComponents(pkg, gids, flags, firstInstallTime, lastUpdateTime,
                 grantedPermissions, state, userId, null, pkgSetting);
@@ -105,8 +105,8 @@ public class PackageInfoUtils {
      * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
      */
     private static PackageInfo generateWithComponents(AndroidPackage pkg, int[] gids,
-            @PackageManager.PackageInfoFlags int flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, PackageUserState state, int userId,
+            @PackageManager.PackageInfoFlags long flags, long firstInstallTime,
+            long lastUpdateTime, Set<String> grantedPermissions, PackageUserState state, int userId,
             @Nullable ApexInfo apexInfo, @Nullable PackageStateInternal pkgSetting) {
         ApplicationInfo applicationInfo = generateApplicationInfo(pkg, flags, state, userId,
                 pkgSetting);
@@ -209,7 +209,7 @@ public class PackageInfoUtils {
      */
     @Nullable
     public static ApplicationInfo generateApplicationInfo(AndroidPackage pkg,
-            @PackageManager.ApplicationInfoFlags int flags, @NonNull PackageUserState state,
+            @PackageManager.ApplicationInfoFlags long flags, @NonNull PackageUserState state,
             int userId, @Nullable PackageStateInternal pkgSetting) {
         if (pkg == null) {
             return null;
@@ -255,7 +255,7 @@ public class PackageInfoUtils {
      */
     @Nullable
     public static ActivityInfo generateActivityInfo(AndroidPackage pkg, ParsedActivity a,
-            @PackageManager.ComponentInfoFlags int flags, PackageUserState state, int userId,
+            @PackageManager.ComponentInfoFlags long flags, PackageUserState state, int userId,
             @Nullable PackageStateInternal pkgSetting) {
         return generateActivityInfo(pkg, a, flags, state, null, userId, pkgSetting);
     }
@@ -265,7 +265,7 @@ public class PackageInfoUtils {
      */
     @Nullable
     private static ActivityInfo generateActivityInfo(AndroidPackage pkg, ParsedActivity a,
-            @PackageManager.ComponentInfoFlags int flags, PackageUserState state,
+            @PackageManager.ComponentInfoFlags long flags, PackageUserState state,
             @Nullable ApplicationInfo applicationInfo, int userId,
             @Nullable PackageStateInternal pkgSetting) {
         if (a == null) return null;
@@ -291,7 +291,7 @@ public class PackageInfoUtils {
      */
     @Nullable
     public static ServiceInfo generateServiceInfo(AndroidPackage pkg, ParsedService s,
-            @PackageManager.ComponentInfoFlags int flags, PackageUserState state, int userId,
+            @PackageManager.ComponentInfoFlags long flags, PackageUserState state, int userId,
             @Nullable PackageStateInternal pkgSetting) {
         return generateServiceInfo(pkg, s, flags, state, null, userId, pkgSetting);
     }
@@ -301,7 +301,7 @@ public class PackageInfoUtils {
      */
     @Nullable
     private static ServiceInfo generateServiceInfo(AndroidPackage pkg, ParsedService s,
-            @PackageManager.ComponentInfoFlags int flags, PackageUserState state,
+            @PackageManager.ComponentInfoFlags long flags, PackageUserState state,
             @Nullable ApplicationInfo applicationInfo, int userId,
             @Nullable PackageStateInternal pkgSetting) {
         if (s == null) return null;
@@ -326,7 +326,7 @@ public class PackageInfoUtils {
      */
     @Nullable
     public static ProviderInfo generateProviderInfo(AndroidPackage pkg, ParsedProvider p,
-            @PackageManager.ComponentInfoFlags int flags, PackageUserState state,
+            @PackageManager.ComponentInfoFlags long flags, PackageUserState state,
             @NonNull ApplicationInfo applicationInfo, int userId,
             @Nullable PackageStateInternal pkgSetting) {
         if (p == null) return null;
@@ -353,7 +353,7 @@ public class PackageInfoUtils {
      */
     @Nullable
     public static InstrumentationInfo generateInstrumentationInfo(ParsedInstrumentation i,
-            AndroidPackage pkg, @PackageManager.ComponentInfoFlags int flags, int userId,
+            AndroidPackage pkg, @PackageManager.ComponentInfoFlags long flags, int userId,
             @Nullable PackageStateInternal pkgSetting) {
         if (i == null) return null;
 
@@ -381,7 +381,7 @@ public class PackageInfoUtils {
     //  PackageStateInternal os that checkUseInstalledOrHidden filter can apply
     @Nullable
     public static PermissionInfo generatePermissionInfo(ParsedPermission p,
-            @PackageManager.ComponentInfoFlags int flags) {
+            @PackageManager.ComponentInfoFlags long flags) {
         // TODO(b/135203078): Remove null checks and make all usages @NonNull
         if (p == null) return null;
 
@@ -391,7 +391,7 @@ public class PackageInfoUtils {
 
     @Nullable
     public static PermissionGroupInfo generatePermissionGroupInfo(ParsedPermissionGroup pg,
-            @PackageManager.ComponentInfoFlags int flags) {
+            @PackageManager.ComponentInfoFlags long flags) {
         if (pg == null) return null;
 
         // For now, permissions don't have state-adjustable fields; return directly
@@ -400,7 +400,7 @@ public class PackageInfoUtils {
 
     @Nullable
     public static ArrayMap<String, ProcessInfo> generateProcessInfo(
-            Map<String, ParsedProcess> procs, @PackageManager.ComponentInfoFlags int flags) {
+            Map<String, ParsedProcess> procs, @PackageManager.ComponentInfoFlags long flags) {
         if (procs == null) {
             return null;
         }
@@ -423,7 +423,7 @@ public class PackageInfoUtils {
      */
     public static boolean checkUseInstalledOrHidden(AndroidPackage pkg,
             PackageStateInternal pkgSetting, PackageUserState state,
-            @PackageManager.PackageInfoFlags int flags) {
+            @PackageManager.PackageInfoFlags long flags) {
         // Returns false if the package is hidden system app until installed.
         if ((flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) == 0
                 && !state.isInstalled()
@@ -628,7 +628,7 @@ public class PackageInfoUtils {
          */
         @Nullable
         public ApplicationInfo generate(AndroidPackage pkg,
-                @PackageManager.ApplicationInfoFlags int flags, PackageUserState state, int userId,
+                @PackageManager.ApplicationInfoFlags long flags, PackageUserState state, int userId,
                 @Nullable PackageStateInternal pkgSetting) {
             ApplicationInfo appInfo = mCache.get(pkg.getPackageName());
             if (appInfo != null) {

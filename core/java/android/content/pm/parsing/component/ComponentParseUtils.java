@@ -170,13 +170,13 @@ public class ComponentParseUtils {
     }
 
     public static boolean isMatch(FrameworkPackageUserState state, boolean isSystem,
-            boolean isPackageEnabled, ParsedMainComponent component, int flags) {
+            boolean isPackageEnabled, ParsedMainComponent component, long flags) {
         return PackageUserStateUtils.isMatch(state, isSystem, isPackageEnabled,
                 component.isEnabled(), component.isDirectBootAware(), component.getName(), flags);
     }
 
     public static boolean isEnabled(FrameworkPackageUserState state, boolean isPackageEnabled,
-            ParsedMainComponent parsedComponent, int flags) {
+            ParsedMainComponent parsedComponent, long flags) {
         return PackageUserStateUtils.isEnabled(state, isPackageEnabled, parsedComponent.isEnabled(),
                 parsedComponent.getName(), flags);
     }

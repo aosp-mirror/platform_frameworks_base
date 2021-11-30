@@ -69,41 +69,34 @@ interface IPackageManager {
     void checkPackageStartable(String packageName, int userId);
     @UnsupportedAppUsage(trackingBug = 171933273)
     boolean isPackageAvailable(String packageName, int userId);
-    @UnsupportedAppUsage
-    PackageInfo getPackageInfo(String packageName, int flags, int userId);
+    PackageInfo getPackageInfo(String packageName, long flags, int userId);
     PackageInfo getPackageInfoVersioned(in VersionedPackage versionedPackage,
-            int flags, int userId);
-    @UnsupportedAppUsage
-    int getPackageUid(String packageName, int flags, int userId);
-    int[] getPackageGids(String packageName, int flags, int userId);
+            long flags, int userId);
+    int getPackageUid(String packageName, long flags, int userId);
+    int[] getPackageGids(String packageName, long flags, int userId);
 
     @UnsupportedAppUsage
     String[] currentToCanonicalPackageNames(in String[] names);
     @UnsupportedAppUsage
     String[] canonicalToCurrentPackageNames(in String[] names);
 
-    @UnsupportedAppUsage
-    ApplicationInfo getApplicationInfo(String packageName, int flags ,int userId);
+    ApplicationInfo getApplicationInfo(String packageName, long flags, int userId);
 
     /**
      * @return the target SDK for the given package name, or -1 if it cannot be retrieved
      */
     int getTargetSdkVersion(String packageName);
 
-    @UnsupportedAppUsage
-    ActivityInfo getActivityInfo(in ComponentName className, int flags, int userId);
+    ActivityInfo getActivityInfo(in ComponentName className, long flags, int userId);
 
     boolean activitySupportsIntent(in ComponentName className, in Intent intent,
             String resolvedType);
 
-    @UnsupportedAppUsage
-    ActivityInfo getReceiverInfo(in ComponentName className, int flags, int userId);
+    ActivityInfo getReceiverInfo(in ComponentName className, long flags, int userId);
 
-    @UnsupportedAppUsage
-    ServiceInfo getServiceInfo(in ComponentName className, int flags, int userId);
+    ServiceInfo getServiceInfo(in ComponentName className, long flags, int userId);
 
-    @UnsupportedAppUsage
-    ProviderInfo getProviderInfo(in ComponentName className, int flags, int userId);
+    ProviderInfo getProviderInfo(in ComponentName className, long flags, int userId);
 
     boolean isProtectedBroadcast(String actionName);
 
@@ -133,33 +126,31 @@ interface IPackageManager {
     @UnsupportedAppUsage
     boolean isUidPrivileged(int uid);
 
-    @UnsupportedAppUsage
-    ResolveInfo resolveIntent(in Intent intent, String resolvedType, int flags, int userId);
+    ResolveInfo resolveIntent(in Intent intent, String resolvedType, long flags, int userId);
 
     ResolveInfo findPersistentPreferredActivity(in Intent intent, int userId);
 
     boolean canForwardTo(in Intent intent, String resolvedType, int sourceUserId, int targetUserId);
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     ParceledListSlice queryIntentActivities(in Intent intent,
-            String resolvedType, int flags, int userId);
+            String resolvedType, long flags, int userId);
 
     ParceledListSlice queryIntentActivityOptions(
             in ComponentName caller, in Intent[] specifics,
             in String[] specificTypes, in Intent intent,
-            String resolvedType, int flags, int userId);
+            String resolvedType, long flags, int userId);
 
     ParceledListSlice queryIntentReceivers(in Intent intent,
-            String resolvedType, int flags, int userId);
+            String resolvedType, long flags, int userId);
 
     ResolveInfo resolveService(in Intent intent,
-            String resolvedType, int flags, int userId);
+            String resolvedType, long flags, int userId);
 
     ParceledListSlice queryIntentServices(in Intent intent,
-            String resolvedType, int flags, int userId);
+            String resolvedType, long flags, int userId);
 
     ParceledListSlice queryIntentContentProviders(in Intent intent,
-            String resolvedType, int flags, int userId);
+            String resolvedType, long flags, int userId);
 
     /**
      * This implements getInstalledPackages via a "last returned row"
@@ -167,8 +158,7 @@ interface IPackageManager {
      * limit that kicks in when flags are included that bloat up the data
      * returned.
      */
-    @UnsupportedAppUsage
-    ParceledListSlice getInstalledPackages(int flags, in int userId);
+    ParceledListSlice getInstalledPackages(long flags, in int userId);
 
     /**
      * This implements getPackagesHoldingPermissions via a "last returned row"
@@ -177,7 +167,7 @@ interface IPackageManager {
      * returned.
      */
     ParceledListSlice getPackagesHoldingPermissions(in String[] permissions,
-            int flags, int userId);
+            long flags, int userId);
 
     /**
      * This implements getInstalledApplications via a "last returned row"
@@ -185,18 +175,17 @@ interface IPackageManager {
      * limit that kicks in when flags are included that bloat up the data
      * returned.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
-    ParceledListSlice getInstalledApplications(int flags, int userId);
+    ParceledListSlice getInstalledApplications(long flags, int userId);
 
     /**
      * Retrieve all applications that are marked as persistent.
      *
-     * @return A List&lt;applicationInfo> containing one entry for each persistent
+     * @return A List<ApplicationInfo> containing one entry for each persistent
      *         application.
      */
     ParceledListSlice getPersistentApplications(int flags);
 
-    ProviderInfo resolveContentProvider(String name, int flags, int userId);
+    ProviderInfo resolveContentProvider(String name, long flags, int userId);
 
     /**
      * Retrieve sync information for all content providers.
@@ -211,7 +200,7 @@ interface IPackageManager {
             inout List<ProviderInfo> outInfo);
 
     ParceledListSlice queryContentProviders(
-            String processName, int uid, int flags, String metaDataKey);
+            String processName, int uid, long flags, String metaDataKey);
 
     @UnsupportedAppUsage
     InstrumentationInfo getInstrumentationInfo(
@@ -690,9 +679,9 @@ interface IPackageManager {
 
     int getInstallReason(String packageName, int userId);
 
-    ParceledListSlice getSharedLibraries(in String packageName, int flags, int userId);
+    ParceledListSlice getSharedLibraries(in String packageName, long flags, int userId);
 
-    ParceledListSlice getDeclaredSharedLibraries(in String packageName, int flags, int userId);
+    ParceledListSlice getDeclaredSharedLibraries(in String packageName, long flags, int userId);
 
     boolean canRequestPackageInstalls(String packageName, int userId);
 
