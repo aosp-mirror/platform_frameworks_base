@@ -613,7 +613,10 @@ public final class ThreadedRenderer extends HardwareRenderer {
         // If there's no arguments, eg 'dumpsys gfxinfo', then dump everything.
         // If there's a targetted package, eg 'dumpsys gfxinfo com.android.systemui', then only
         // dump the summary information
-        int flags = (args == null || args.length == 0) ? FLAG_DUMP_ALL : 0;
+        if (args == null || args.length == 0) {
+            return FLAG_DUMP_ALL;
+        }
+        int flags = 0;
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
                 case "framestats":

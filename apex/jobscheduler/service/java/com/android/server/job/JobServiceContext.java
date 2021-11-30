@@ -356,7 +356,11 @@ public final class JobServiceContext implements ServiceConnection {
                     job.hasContentTriggerConstraint(),
                     job.isRequestedExpeditedJob(),
                     job.shouldTreatAsExpeditedJob(),
-                    JobProtoEnums.STOP_REASON_UNDEFINED);
+                    JobProtoEnums.STOP_REASON_UNDEFINED,
+                    job.getJob().isPrefetch(),
+                    job.getJob().getPriority(),
+                    job.getEffectivePriority(),
+                    job.getNumFailures());
             try {
                 mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
             } catch (RemoteException e) {
@@ -1028,7 +1032,11 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.hasContentTriggerConstraint(),
                 completedJob.isRequestedExpeditedJob(),
                 completedJob.startedAsExpeditedJob,
-                mParams.getStopReason());
+                mParams.getStopReason(),
+                completedJob.getJob().isPrefetch(),
+                completedJob.getJob().getPriority(),
+                completedJob.getEffectivePriority(),
+                completedJob.getNumFailures());
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(), mRunningJob.getSourceUid(),
                     internalStopReason);

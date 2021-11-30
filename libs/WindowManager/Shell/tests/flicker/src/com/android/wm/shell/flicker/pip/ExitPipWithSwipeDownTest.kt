@@ -72,22 +72,6 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
             }
         }
 
-    @Presubmit
-    @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
-
-    @Presubmit
-    @Test
-    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
-
-    @Presubmit
-    @Test
-    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
-
-    @Presubmit
-    @Test
-    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
-
     @FlakyTest
     @Test
     override fun pipWindowBecomesInvisible() = super.pipWindowBecomesInvisible()
@@ -103,14 +87,6 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
         assumeFalse(isShellTransitionsEnabled)
         testSpec.statusBarLayerRotatesScales()
     }
-
-    @Presubmit
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
-
-    @Presubmit
-    @Test
-    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
     companion object {
         /**

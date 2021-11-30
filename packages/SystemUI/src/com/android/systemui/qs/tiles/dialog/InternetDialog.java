@@ -130,6 +130,7 @@ public class InternetDialog extends SystemUIDialog implements
     private boolean mCanConfigMobileData;
 
     // Wi-Fi entries
+    private int mWifiNetworkHeight;
     @VisibleForTesting
     protected WifiEntry mConnectedWifiEntry;
     @VisibleForTesting
@@ -186,6 +187,9 @@ public class InternetDialog extends SystemUIDialog implements
         window.setContentView(mDialogView);
 
         window.setWindowAnimations(R.style.Animation_InternetDialog);
+
+        mWifiNetworkHeight = mContext.getResources()
+                .getDimensionPixelSize(R.dimen.internet_dialog_wifi_network_height);
 
         mInternetDialogLayout = mDialogView.requireViewById(R.id.internet_connectivity_dialog);
         mInternetDialogTitle = mDialogView.requireViewById(R.id.internet_dialog_title);
@@ -335,9 +339,6 @@ public class InternetDialog extends SystemUIDialog implements
         mSeeAllLayout.setOnClickListener(v -> onClickSeeMoreButton());
         mWiFiToggle.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> {
-                    if (isChecked) {
-                        mWifiScanNotifyLayout.setVisibility(View.GONE);
-                    }
                     buttonView.setChecked(isChecked);
                     mWifiManager.setWifiEnabled(isChecked);
                 });
@@ -427,9 +428,26 @@ public class InternetDialog extends SystemUIDialog implements
             mSeeAllLayout.setVisibility(View.GONE);
             return;
         }
-        mWifiRecyclerView.setVisibility(mWifiEntriesCount > 0 ? View.VISIBLE : View.GONE);
-        mSeeAllLayout.setVisibility(
-                (mConnectedWifiEntry != null || mWifiEntriesCount > 0) ? View.VISIBLE : View.GONE);
+        mWifiRecyclerView.setMinimumHeight(mWifiNetworkHeight * getWifiListMaxCount());
+        mWifiRecyclerView.setVisibility(View.VISIBLE);
+        final boolean showSeeAll = mConnectedWifiEntry != null || mWifiEntriesCount > 0;
+        mSeeAllLayout.setVisibility(showSeeAll ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @VisibleForTesting
+    @MainThread
+    int getWifiListMaxCount() {
+        int count = InternetDialogController.MAX_WIFI_ENTRY_COUNT;
+        if (mEthernetLayout.getVisibility() == View.VISIBLE) {
+            count -= 1;
+        }
+        if (mMobileNetworkLayout.getVisibility() == View.VISIBLE) {
+            count -= 1;
+        }
+        if (mConnectedWifListLayout.getVisibility() == View.VISIBLE) {
+            count -= 1;
+        }
+        return count;
     }
 
     @MainThread

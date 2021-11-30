@@ -89,7 +89,6 @@ import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
-import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -217,7 +216,6 @@ public interface StatusBarPhoneModule {
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
             OperatorNameViewController.Factory operatorNameViewControllerFactory,
-            PhoneStatusBarViewController.Factory phoneStatusBarViewControllerFactory,
             PhoneStatusBarPolicy phoneStatusBarPolicy,
             KeyguardIndicationController keyguardIndicationController,
             DemoModeController demoModeController,
@@ -319,7 +317,6 @@ public interface StatusBarPhoneModule {
                 extensionController,
                 userInfoControllerImpl,
                 operatorNameViewControllerFactory,
-                phoneStatusBarViewControllerFactory,
                 phoneStatusBarPolicy,
                 keyguardIndicationController,
                 demoModeController,

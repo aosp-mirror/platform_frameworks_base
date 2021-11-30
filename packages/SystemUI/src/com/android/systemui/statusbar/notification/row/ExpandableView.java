@@ -22,6 +22,7 @@ import android.content.res.Configuration;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.IndentingPrintWriter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -743,15 +744,16 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+        IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         pw.println(getClass().getSimpleName());
-        DumpUtilsKt.withIndenting(pw, ipw -> {
+        DumpUtilsKt.withIncreasedIndent(pw, () -> {
             ExpandableViewState viewState = getViewState();
             if (viewState == null) {
-                ipw.println("no viewState!!!");
+                pw.println("no viewState!!!");
             } else {
-                viewState.dump(fd, ipw, args);
-                ipw.println();
+                viewState.dump(fd, pw, args);
+                pw.println();
             }
         });
     }

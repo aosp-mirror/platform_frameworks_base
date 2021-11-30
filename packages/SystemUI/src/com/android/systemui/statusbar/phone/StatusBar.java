@@ -90,6 +90,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
@@ -521,7 +522,6 @@ public class StatusBar extends CoreStartable implements
     private QSPanelController mQSPanelController;
 
     private final OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
-    private final PhoneStatusBarViewController.Factory mPhoneStatusBarViewControllerFactory;
     KeyguardIndicationController mKeyguardIndicationController;
 
     private View mReportRejectedTouch;
@@ -767,7 +767,6 @@ public class StatusBar extends CoreStartable implements
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
             OperatorNameViewController.Factory operatorNameViewControllerFactory,
-            PhoneStatusBarViewController.Factory phoneStatusBarViewControllerFactory,
             PhoneStatusBarPolicy phoneStatusBarPolicy,
             KeyguardIndicationController keyguardIndicationController,
             DemoModeController demoModeController,
@@ -807,7 +806,6 @@ public class StatusBar extends CoreStartable implements
         mKeyguardStateController = keyguardStateController;
         mHeadsUpManager = headsUpManagerPhone;
         mOperatorNameViewControllerFactory = operatorNameViewControllerFactory;
-        mPhoneStatusBarViewControllerFactory = phoneStatusBarViewControllerFactory;
         mKeyguardIndicationController = keyguardIndicationController;
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
         mDynamicPrivacyController = dynamicPrivacyController;
@@ -1153,12 +1151,8 @@ public class StatusBar extends CoreStartable implements
                     }
 
                     mStatusBarView = statusBarFragmentComponent.getPhoneStatusBarView();
-
-                    // TODO(b/205609837): Migrate this to StatusBarFragmentComponent.
-                    mPhoneStatusBarViewController = mPhoneStatusBarViewControllerFactory
-                            .create(mStatusBarView, mNotificationPanelViewController
-                                    .getStatusBarTouchEventHandler());
-                    mPhoneStatusBarViewController.init();
+                    mPhoneStatusBarViewController =
+                            statusBarFragmentComponent.getPhoneStatusBarViewController();
 
                     // Ensure we re-propagate panel expansion values to the panel controller and
                     // any listeners it may have, such as PanelBar. This will also ensure we
@@ -2299,7 +2293,8 @@ public class StatusBar extends CoreStartable implements
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+        IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         synchronized (mQueueLock) {
             pw.println("Current Status Bar state:");
             pw.println("  mExpandedVisible=" + mExpandedVisible);
@@ -2340,14 +2335,12 @@ public class StatusBar extends CoreStartable implements
         }
         pw.println("  mStackScroller: ");
         if (mStackScroller != null) {
-            DumpUtilsKt.withIndenting(pw, ipw -> {
-                // Triple indent until we rewrite the rest of this dump()
-                ipw.increaseIndent();
-                ipw.increaseIndent();
-                mStackScroller.dump(fd, ipw, args);
-                ipw.decreaseIndent();
-                ipw.decreaseIndent();
-            });
+            // Double indent until we rewrite the rest of this dump()
+            pw.increaseIndent();
+            pw.increaseIndent();
+            mStackScroller.dump(fd, pw, args);
+            pw.decreaseIndent();
+            pw.decreaseIndent();
         }
         pw.println("  Theme:");
         String nightMode = mUiModeManager == null ? "null" : mUiModeManager.getNightMode() + "";

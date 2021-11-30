@@ -8742,6 +8742,7 @@ package android.bluetooth {
     method public android.bluetooth.le.BluetoothLeScanner getBluetoothLeScanner();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public java.util.Set<android.bluetooth.BluetoothDevice> getBondedDevices();
     method @Deprecated public static android.bluetooth.BluetoothAdapter getDefaultAdapter();
+    method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN) public java.time.Duration getDiscoverableTimeout();
     method public int getLeMaximumAdvertisingDataLength();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public String getName();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getProfileConnectionState(int);
@@ -9354,7 +9355,8 @@ package android.bluetooth {
     method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
     method public android.bluetooth.BluetoothGattService getService(java.util.UUID);
     method public java.util.List<android.bluetooth.BluetoothGattService> getServices();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean notifyCharacteristicChanged(android.bluetooth.BluetoothDevice, android.bluetooth.BluetoothGattCharacteristic, boolean);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean notifyCharacteristicChanged(android.bluetooth.BluetoothDevice, android.bluetooth.BluetoothGattCharacteristic, boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int notifyCharacteristicChanged(@NonNull android.bluetooth.BluetoothDevice, @NonNull android.bluetooth.BluetoothGattCharacteristic, boolean, @NonNull byte[]);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public void readPhy(android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean removeService(android.bluetooth.BluetoothGattService);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean sendResponse(android.bluetooth.BluetoothDevice, int, int, int, byte[]);
@@ -16528,11 +16530,13 @@ package android.graphics.drawable {
 
   public class AdaptiveIconDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
     ctor public AdaptiveIconDrawable(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
+    ctor public AdaptiveIconDrawable(@Nullable android.graphics.drawable.Drawable, @Nullable android.graphics.drawable.Drawable, @Nullable android.graphics.drawable.Drawable);
     method public void draw(android.graphics.Canvas);
     method public android.graphics.drawable.Drawable getBackground();
     method public static float getExtraInsetFraction();
     method public android.graphics.drawable.Drawable getForeground();
     method public android.graphics.Path getIconMask();
+    method @Nullable public android.graphics.drawable.Drawable getMonochrome();
     method public int getOpacity();
     method public void invalidateDrawable(@NonNull android.graphics.drawable.Drawable);
     method public void scheduleDrawable(@NonNull android.graphics.drawable.Drawable, @NonNull Runnable, long);
@@ -32390,6 +32394,7 @@ package android.os {
     field public static final String DISALLOW_SET_WALLPAPER = "no_set_wallpaper";
     field public static final String DISALLOW_SHARE_INTO_MANAGED_PROFILE = "no_sharing_into_profile";
     field public static final String DISALLOW_SHARE_LOCATION = "no_share_location";
+    field public static final String DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI = "no_sharing_admin_configured_wifi";
     field public static final String DISALLOW_SMS = "no_sms";
     field public static final String DISALLOW_SYSTEM_ERROR_DIALOGS = "no_system_error_dialogs";
     field public static final String DISALLOW_UNIFIED_PASSWORD = "no_unified_password";
@@ -32426,13 +32431,16 @@ package android.os {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationAttributes> CREATOR;
     field public static final int FLAG_BYPASS_INTERRUPTION_POLICY = 1; // 0x1
+    field public static final int USAGE_ACCESSIBILITY = 66; // 0x42
     field public static final int USAGE_ALARM = 17; // 0x11
     field public static final int USAGE_CLASS_ALARM = 1; // 0x1
     field public static final int USAGE_CLASS_FEEDBACK = 2; // 0x2
     field public static final int USAGE_CLASS_MASK = 15; // 0xf
+    field public static final int USAGE_CLASS_MEDIA = 3; // 0x3
     field public static final int USAGE_CLASS_UNKNOWN = 0; // 0x0
     field public static final int USAGE_COMMUNICATION_REQUEST = 65; // 0x41
     field public static final int USAGE_HARDWARE_FEEDBACK = 50; // 0x32
+    field public static final int USAGE_MEDIA = 19; // 0x13
     field public static final int USAGE_NOTIFICATION = 49; // 0x31
     field public static final int USAGE_PHYSICAL_EMULATION = 34; // 0x22
     field public static final int USAGE_RINGTONE = 33; // 0x21

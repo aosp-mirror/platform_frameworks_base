@@ -42,6 +42,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.NotificationInteractionTracker;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
@@ -87,6 +88,7 @@ public class ShadeListBuilder implements Dumpable {
     private final NotificationInteractionTracker mInteractionTracker;
     // used exclusivly by ShadeListBuilder#notifySectionEntriesUpdated
     private final ArrayList<ListEntry> mTempSectionMembers = new ArrayList<>();
+    private final boolean mAlwaysLogList;
 
     private List<ListEntry> mNotifList = new ArrayList<>();
     private List<ListEntry> mNewNotifList = new ArrayList<>();
@@ -119,6 +121,7 @@ public class ShadeListBuilder implements Dumpable {
     @Inject
     public ShadeListBuilder(
             SystemClock systemClock,
+            NotifPipelineFlags flags,
             ShadeListBuilderLogger logger,
             DumpManager dumpManager,
             NotificationInteractionTracker interactionTracker
@@ -126,6 +129,7 @@ public class ShadeListBuilder implements Dumpable {
         Assert.isMainThread();
         mSystemClock = systemClock;
         mLogger = logger;
+        mAlwaysLogList = flags.isDevLoggingEnabled();
         mInteractionTracker = interactionTracker;
         dumpManager.registerDumpable(TAG, this);
 
@@ -407,7 +411,7 @@ public class ShadeListBuilder implements Dumpable {
                 mIterationCount,
                 mReadOnlyNotifList.size(),
                 countChildren(mReadOnlyNotifList));
-        if (mIterationCount % 10 == 0) {
+        if (mAlwaysLogList || mIterationCount % 10 == 0) {
             mLogger.logFinalList(mNotifList);
         }
         mPipelineState.setState(STATE_IDLE);

@@ -635,7 +635,7 @@ public class VibratorManagerServiceTest {
         inOrderVerifier.verify(mAppOpsManagerMock).checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
                 eq(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION), anyInt(), anyString());
         inOrderVerifier.verify(mAppOpsManagerMock).checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
-                eq(AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST),
+                eq(AudioAttributes.USAGE_VOICE_COMMUNICATION),
                 anyInt(), anyString());
         inOrderVerifier.verify(mAppOpsManagerMock).checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
                 eq(AudioAttributes.USAGE_UNKNOWN), anyInt(), anyString());

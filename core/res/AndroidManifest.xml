@@ -3470,6 +3470,23 @@
     <permission android:name="android.permission.UPDATE_FONTS"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an application to use the AttestationVerificationService.
+         @hide -->
+    <permission android:name="android.permission.USE_ATTESTATION_VERIFICATION_SERVICE"
+                android:protectionLevel="signature" />
+
+    <!-- Allows an application to export a AttestationVerificationService to verify attestations on
+         behalf of AttestationVerificationManager for system-defined attestation profiles.
+         @hide -->
+    <permission android:name="android.permission.VERIFY_ATTESTATION"
+                android:protectionLevel="signature" />
+
+    <!-- Must be required by any AttestationVerificationService to ensure that only the system can
+         bind to it.
+         @hide -->
+    <permission android:name="android.permission.BIND_ATTESTATION_VERIFICATION_SERVICE"
+                android:protectionLevel="signature" />
+
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->

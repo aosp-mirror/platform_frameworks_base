@@ -406,7 +406,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     @Override
     public void dispatchGesture(int sequence, ParceledListSlice gestureSteps, int displayId) {
         synchronized (mLock) {
-            if (mSecurityPolicy.canPerformGestures(this)) {
+            if (mServiceInterface != null && mSecurityPolicy.canPerformGestures(this)) {
                 MotionEventInjector motionEventInjector =
                         mSystemSupport.getMotionEventInjectorForDisplayLocked(displayId);
                 if (wmTracingEnabled()) {

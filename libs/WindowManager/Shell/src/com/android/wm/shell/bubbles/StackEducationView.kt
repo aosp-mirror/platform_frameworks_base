@@ -125,6 +125,7 @@ class StackEducationView constructor(
      * @return true if user education was shown, false otherwise.
      */
     fun show(stackPosition: PointF): Boolean {
+        isHiding = false
         if (visibility == VISIBLE) return false
 
         controller.updateWindowFlagsForBackpress(true /* interceptBack */)
@@ -164,6 +165,7 @@ class StackEducationView constructor(
      */
     fun hide(isExpanding: Boolean) {
         if (visibility != VISIBLE || isHiding) return
+        isHiding = true
 
         controller.updateWindowFlagsForBackpress(false /* interceptBack */)
         animate()

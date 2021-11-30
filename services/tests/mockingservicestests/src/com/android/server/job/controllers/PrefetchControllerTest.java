@@ -43,6 +43,7 @@ import android.app.AlarmManager;
 import android.app.job.JobInfo;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.EstimatedLaunchTimeChangedListener;
+import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
@@ -168,12 +169,15 @@ public class PrefetchControllerTest {
         }
     }
 
-    private JobStatus createJobStatus(String testTag, int jobId) {
-        JobInfo jobInfo = new JobInfo.Builder(jobId,
+    private JobInfo createJobInfo(int jobId) {
+        return new JobInfo.Builder(jobId,
                 new ComponentName(mContext, "TestPrefetchJobService"))
                 .setPrefetch(true)
                 .build();
-        return createJobStatus(testTag, SOURCE_PACKAGE, CALLING_UID, jobInfo);
+    }
+
+    private JobStatus createJobStatus(String testTag, int jobId) {
+        return createJobStatus(testTag, SOURCE_PACKAGE, CALLING_UID, createJobInfo(jobId));
     }
 
     private static JobStatus createJobStatus(String testTag, String packageName, int callingUid,
@@ -328,6 +332,32 @@ public class PrefetchControllerTest {
                 .onControllerStateChanged(any());
         assertTrue(jobPending.isConstraintSatisfied(JobStatus.CONSTRAINT_PREFETCH));
         assertTrue(jobRunning.isConstraintSatisfied(JobStatus.CONSTRAINT_PREFETCH));
+    }
+
+    @Test
+    public void testConstraintSatisfiedWhenWidget() {
+        final JobStatus jobNonWidget = createJobStatus("testConstraintSatisfiedWhenWidget", 1);
+        final JobStatus jobWidget = createJobStatus("testConstraintSatisfiedWhenWidget", 2);
+
+        when(mUsageStatsManagerInternal
+                .getEstimatedPackageLaunchTime(SOURCE_PACKAGE, SOURCE_USER_ID))
+                .thenReturn(sSystemClock.millis() + 100 * HOUR_IN_MILLIS);
+
+        final AppWidgetManager appWidgetManager = mock(AppWidgetManager.class);
+        when(mContext.getSystemService(AppWidgetManager.class)).thenReturn(appWidgetManager);
+        mPrefetchController.onSystemServicesReady();
+
+        when(appWidgetManager.isBoundWidgetPackage(SOURCE_PACKAGE, SOURCE_USER_ID))
+                .thenReturn(false);
+        trackJobs(jobNonWidget);
+        verify(mUsageStatsManagerInternal, timeout(DEFAULT_WAIT_MS))
+                .getEstimatedPackageLaunchTime(SOURCE_PACKAGE, SOURCE_USER_ID);
+        assertFalse(jobNonWidget.isConstraintSatisfied(JobStatus.CONSTRAINT_PREFETCH));
+
+        when(appWidgetManager.isBoundWidgetPackage(SOURCE_PACKAGE, SOURCE_USER_ID))
+                .thenReturn(true);
+        trackJobs(jobWidget);
+        assertTrue(jobWidget.isConstraintSatisfied(JobStatus.CONSTRAINT_PREFETCH));
     }
 
     @Test

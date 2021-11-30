@@ -16,8 +16,10 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -25,8 +27,10 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.rules.WMFlickerServiceRuleForTestSpec
 import org.junit.Assume.assumeFalse
 import org.junit.FixMethodOrder
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -56,6 +60,8 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
 class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransition(testSpec) {
+    @get:Rule
+    val flickerRule = WMFlickerServiceRuleForTestSpec(testSpec)
 
     /**
      * Defines the transition used to run the test
@@ -75,6 +81,24 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
                 wmHelper.waitForSurfaceAppeared(testApp.component.toWindowName())
             }
         }
+
+    @Postsubmit
+    @Test
+    fun runPresubmitAssertion() {
+        flickerRule.checkPresubmitAssertions()
+    }
+
+    @Postsubmit
+    @Test
+    fun runPostsubmitAssertion() {
+        flickerRule.checkPostsubmitAssertions()
+    }
+
+    @FlakyTest
+    @Test
+    fun runFlakyAssertion() {
+        flickerRule.checkFlakyAssertions()
+    }
 
     /** {@inheritDoc}  */
     @Presubmit

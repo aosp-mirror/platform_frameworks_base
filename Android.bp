@@ -384,6 +384,9 @@ java_library {
         "//frameworks/base/packages/Tethering/tests/unit",
         "//packages/modules/Connectivity/Tethering/tests/unit",
     ],
+    lint: {
+        extra_check_modules: ["AndroidFrameworkLintChecker"],
+    },
     errorprone: {
         javacflags: [
             "-Xep:AndroidFrameworkBinderIdentity:ERROR",
