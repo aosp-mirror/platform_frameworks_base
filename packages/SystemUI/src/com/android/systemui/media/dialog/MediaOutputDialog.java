@@ -17,6 +17,7 @@
 package com.android.systemui.media.dialog;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -76,6 +77,11 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
     @Override
     CharSequence getHeaderSubtitle() {
         return mMediaOutputController.getHeaderSubTitle();
+    }
+
+    @Override
+    Drawable getAppSourceIcon() {
+        return mMediaOutputController.getAppSourceIcon();
     }
 
     @Override

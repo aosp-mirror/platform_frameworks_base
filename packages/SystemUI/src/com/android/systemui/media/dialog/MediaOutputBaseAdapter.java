@@ -30,6 +30,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -40,7 +41,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
@@ -113,6 +113,7 @@ public abstract class MediaOutputBaseAdapter extends
         private static final int ANIM_DURATION = 200;
 
         final LinearLayout mContainerLayout;
+        final FrameLayout mItemLayout;
         final TextView mTitleText;
         final TextView mTwoLineTitleText;
         final TextView mSubTitleText;
@@ -121,13 +122,14 @@ public abstract class MediaOutputBaseAdapter extends
         final ProgressBar mProgressBar;
         final SeekBar mSeekBar;
         final RelativeLayout mTwoLineLayout;
-        final View mBottomDivider;
+        final ImageView mStatusIcon;
         final CheckBox mCheckBox;
         private String mDeviceId;
 
         MediaDeviceBaseViewHolder(View view) {
             super(view);
             mContainerLayout = view.requireViewById(R.id.device_container);
+            mItemLayout = view.requireViewById(R.id.item_layout);
             mTitleText = view.requireViewById(R.id.title);
             mSubTitleText = view.requireViewById(R.id.subtitle);
             mTwoLineLayout = view.requireViewById(R.id.two_line_layout);
@@ -135,8 +137,8 @@ public abstract class MediaOutputBaseAdapter extends
             mTitleIcon = view.requireViewById(R.id.title_icon);
             mProgressBar = view.requireViewById(R.id.volume_indeterminate_progress);
             mSeekBar = view.requireViewById(R.id.volume_seekbar);
-            mBottomDivider = view.requireViewById(R.id.bottom_divider);
             mAddIcon = view.requireViewById(R.id.add_icon);
+            mStatusIcon = view.requireViewById(R.id.media_output_item_status);
             mCheckBox = view.requireViewById(R.id.check_box);
         }
 
@@ -156,11 +158,26 @@ public abstract class MediaOutputBaseAdapter extends
         abstract void onBind(int customizedItem, boolean topMargin, boolean bottomMargin);
 
         void setSingleLineLayout(CharSequence title, boolean bFocused) {
+            setSingleLineLayout(title, bFocused, false, false, false);
+        }
+
+        void setSingleLineLayout(CharSequence title, boolean bFocused, boolean showSeekBar,
+                boolean showProgressBar, boolean showStatus) {
             mTwoLineLayout.setVisibility(View.GONE);
-            mProgressBar.setVisibility(View.GONE);
+            final Drawable backgroundDrawable =
+                    showSeekBar
+                            ? mContext.getDrawable(R.drawable.media_output_item_background_active)
+                                    .mutate() : mContext.getDrawable(
+                            R.drawable.media_output_item_background)
+                            .mutate();
+            mItemLayout.setBackground(backgroundDrawable);
+            mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
+            mSeekBar.setAlpha(1);
+            mSeekBar.setVisibility(showSeekBar ? View.VISIBLE : View.GONE);
+            mStatusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
+            mTitleText.setText(title);
             mTitleText.setVisibility(View.VISIBLE);
             mTitleText.setTranslationY(0);
-            mTitleText.setText(title);
             if (bFocused) {
                 mTitleText.setTypeface(Typeface.create(mContext.getString(
                         com.android.internal.R.string.config_headlineFontFamilyMedium),
@@ -173,20 +190,32 @@ public abstract class MediaOutputBaseAdapter extends
 
         void setTwoLineLayout(MediaDevice device, boolean bFocused, boolean showSeekBar,
                 boolean showProgressBar, boolean showSubtitle) {
-            setTwoLineLayout(device, null, bFocused, showSeekBar, showProgressBar, showSubtitle);
+            setTwoLineLayout(device, null, bFocused, showSeekBar, showProgressBar, showSubtitle,
+                    false);
+        }
+
+        void setTwoLineLayout(MediaDevice device, boolean bFocused, boolean showSeekBar,
+                boolean showProgressBar, boolean showSubtitle, boolean showStatus) {
+            setTwoLineLayout(device, null, bFocused, showSeekBar, showProgressBar, showSubtitle,
+                    showStatus);
         }
 
         void setTwoLineLayout(CharSequence title, boolean bFocused, boolean showSeekBar,
                 boolean showProgressBar, boolean showSubtitle) {
-            setTwoLineLayout(null, title, bFocused, showSeekBar, showProgressBar, showSubtitle);
+            setTwoLineLayout(null, title, bFocused, showSeekBar, showProgressBar, showSubtitle,
+                    false);
         }
 
         private void setTwoLineLayout(MediaDevice device, CharSequence title, boolean bFocused,
-                boolean showSeekBar, boolean showProgressBar, boolean showSubtitle) {
+                boolean showSeekBar, boolean showProgressBar, boolean showSubtitle,
+                boolean showStatus) {
             mTitleText.setVisibility(View.GONE);
             mTwoLineLayout.setVisibility(View.VISIBLE);
+            mStatusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
             mSeekBar.setAlpha(1);
             mSeekBar.setVisibility(showSeekBar ? View.VISIBLE : View.GONE);
+            mItemLayout.setBackground(mContext.getDrawable(R.drawable.media_output_item_background)
+                    .mutate());
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
             mSubTitleText.setVisibility(showSubtitle ? View.VISIBLE : View.GONE);
             mTwoLineTitleText.setTranslationY(0);
@@ -334,7 +363,7 @@ public abstract class MediaOutputBaseAdapter extends
                     R.color.advanced_icon_color, mContext.getTheme());
             drawable.setColorFilter(new PorterDuffColorFilter(list.getDefaultColor(),
                     PorterDuff.Mode.SRC_IN));
-            return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
+            return drawable;
         }
 
         private void disableSeekBar() {
