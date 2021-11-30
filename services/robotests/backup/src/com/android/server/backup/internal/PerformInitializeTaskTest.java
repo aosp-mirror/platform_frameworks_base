@@ -50,7 +50,7 @@ import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportConnection;
 import com.android.server.testing.shadows.ShadowSlog;
 
 import org.junit.Before;
@@ -285,7 +285,7 @@ public class PerformInitializeTaskTest {
             TransportData transport = transportsIterator.next();
             verify(mTransportManager).getTransportClient(eq(transport.transportName), any());
             verify(mTransportManager)
-                    .disposeOfTransportClient(eq(transportMock.transportClient), any());
+                    .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
         }
     }
 
@@ -303,9 +303,9 @@ public class PerformInitializeTaskTest {
         performInitializeTask.run();
 
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMocks.get(0).transportClient), any());
+                .disposeOfTransportClient(eq(transportMocks.get(0).mTransportConnection), any());
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMocks.get(1).transportClient), any());
+                .disposeOfTransportClient(eq(transportMocks.get(1).mTransportConnection), any());
     }
 
     @Test
@@ -328,14 +328,16 @@ public class PerformInitializeTaskTest {
                 setUpTransports(mTransportManager, transport1, transport2);
         String registeredTransportName = transport2.transportName;
         IBackupTransport registeredTransport = transportMocks.get(1).transport;
-        TransportClient registeredTransportClient = transportMocks.get(1).transportClient;
+        TransportConnection
+                registeredTransportConnection = transportMocks.get(1).mTransportConnection;
         PerformInitializeTask performInitializeTask =
                 createPerformInitializeTask(transport1.transportName, transport2.transportName);
 
         performInitializeTask.run();
 
         verify(registeredTransport).initializeDevice();
-        verify(mTransportManager).disposeOfTransportClient(eq(registeredTransportClient), any());
+        verify(mTransportManager).disposeOfTransportClient(eq(registeredTransportConnection),
+                any());
         verify(mObserver).onResult(eq(registeredTransportName), eq(TRANSPORT_OK));
     }
 
@@ -347,7 +349,7 @@ public class PerformInitializeTaskTest {
         performInitializeTask.run();
 
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMock.transportClient), any());
+                .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
         verify(mObserver).backupFinished(eq(TRANSPORT_ERROR));
         verify(mListener).onFinished(any());
     }
@@ -356,13 +358,13 @@ public class PerformInitializeTaskTest {
     public void testRun_whenTransportThrowsDeadObjectException() throws Exception {
         TransportMock transportMock = setUpTransport(mTransport);
         IBackupTransport transport = transportMock.transport;
-        TransportClient transportClient = transportMock.transportClient;
+        TransportConnection transportConnection = transportMock.mTransportConnection;
         when(transport.initializeDevice()).thenThrow(DeadObjectException.class);
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(mTransportName);
 
         performInitializeTask.run();
 
-        verify(mTransportManager).disposeOfTransportClient(eq(transportClient), any());
+        verify(mTransportManager).disposeOfTransportClient(eq(transportConnection), any());
         verify(mObserver).backupFinished(eq(TRANSPORT_ERROR));
         verify(mListener).onFinished(any());
     }

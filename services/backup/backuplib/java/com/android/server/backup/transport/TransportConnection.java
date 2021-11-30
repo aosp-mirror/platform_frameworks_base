@@ -59,16 +59,17 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 /**
- * A {@link TransportClient} manages the connection to an {@link IBackupTransport} service, obtained
- * via the {@param bindIntent} parameter provided in the constructor. A {@link TransportClient} is
- * responsible for only one connection to the transport service, not more.
+ * A {@link TransportConnection} manages the connection to an {@link IBackupTransport} service,
+ * obtained via the {@param bindIntent} parameter provided in the constructor. A
+ * {@link TransportConnection} is responsible for only one connection to the transport service,
+ * not more.
  *
  * <p>After retrieved using {@link TransportManager#getTransportClient(String, String)}, you can
  * call either {@link #connect(String)}, if you can block your thread, or {@link
  * #connectAsync(TransportConnectionListener, String)}, otherwise, to obtain a {@link
  * IBackupTransport} instance. It's meant to be passed around as a token to a connected transport.
  * When the connection is not needed anymore you should call {@link #unbind(String)} or indirectly
- * via {@link TransportManager#disposeOfTransportClient(TransportClient, String)}.
+ * via {@link TransportManager#disposeOfTransportClient(TransportConnection, String)}.
  *
  * <p>DO NOT forget to unbind otherwise there will be dangling connections floating around.
  *
@@ -76,8 +77,8 @@ import java.util.concurrent.ExecutionException;
  *
  * @see TransportManager
  */
-public class TransportClient {
-    @VisibleForTesting static final String TAG = "TransportClient";
+public class TransportConnection {
+    @VisibleForTesting static final String TAG = "TransportConnection";
     private static final int LOG_BUFFER_SIZE = 5;
 
     private final @UserIdInt int mUserId;
@@ -107,7 +108,7 @@ public class TransportClient {
     @GuardedBy("mStateLock")
     private volatile IBackupTransport mTransport;
 
-    TransportClient(
+    TransportConnection(
             @UserIdInt int userId,
             Context context,
             TransportStats transportStats,
@@ -127,7 +128,7 @@ public class TransportClient {
     }
 
     @VisibleForTesting
-    TransportClient(
+    TransportConnection(
             @UserIdInt int userId,
             Context context,
             TransportStats transportStats,
@@ -144,7 +145,7 @@ public class TransportClient {
         mIdentifier = identifier;
         mCreatorLogString = caller;
         mListenerHandler = listenerHandler;
-        mConnection = new TransportConnection(context, this);
+        mConnection = new TransportConnectionMonitor(context, this);
 
         // For logging
         String classNameForLog = mTransportComponent.getShortClassName().replaceFirst(".*\\.", "");
@@ -192,7 +193,7 @@ public class TransportClient {
      * For unusable transport binders check {@link DeadObjectException}.
      *
      * @param listener The listener that will be called with the (possibly null or unusable) {@link
-     *     IBackupTransport} instance and this {@link TransportClient} object.
+     *     IBackupTransport} instance and this {@link TransportConnection} object.
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. This
      *     should be a human-readable short string that is easily identifiable in the logs. Ideally
      *     TAG.methodName(), where TAG is the one used in logcat. In cases where this is is not very
@@ -373,8 +374,8 @@ public class TransportClient {
     }
 
     /**
-     * If the {@link TransportClient} is already connected to the transport, returns the transport,
-     * otherwise throws {@link TransportNotAvailableException}.
+     * If the {@link TransportConnection} is already connected to the transport, returns the
+     * transport, otherwise throws {@link TransportNotAvailableException}.
      *
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
      *     {@link #connectAsync(TransportConnectionListener, String)} for more details.
@@ -647,19 +648,20 @@ public class TransportClient {
      * This class is a proxy to TransportClient methods that doesn't hold a strong reference to the
      * TransportClient, allowing it to be GC'ed. If the reference was lost it logs a message.
      */
-    private static class TransportConnection implements ServiceConnection {
+    private static class TransportConnectionMonitor implements ServiceConnection {
         private final Context mContext;
-        private final WeakReference<TransportClient> mTransportClientRef;
+        private final WeakReference<TransportConnection> mTransportClientRef;
 
-        private TransportConnection(Context context, TransportClient transportClient) {
+        private TransportConnectionMonitor(Context context,
+                TransportConnection transportConnection) {
             mContext = context;
-            mTransportClientRef = new WeakReference<>(transportClient);
+            mTransportClientRef = new WeakReference<>(transportConnection);
         }
 
         @Override
         public void onServiceConnected(ComponentName transportComponent, IBinder binder) {
-            TransportClient transportClient = mTransportClientRef.get();
-            if (transportClient == null) {
+            TransportConnection transportConnection = mTransportClientRef.get();
+            if (transportConnection == null) {
                 referenceLost("TransportConnection.onServiceConnected()");
                 return;
             }
@@ -667,30 +669,30 @@ public class TransportClient {
             // In short-term, blocking calls are OK as the transports come from the allowlist at
             // {@link SystemConfig#getBackupTransportWhitelist()}
             Binder.allowBlocking(binder);
-            transportClient.onServiceConnected(binder);
+            transportConnection.onServiceConnected(binder);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName transportComponent) {
-            TransportClient transportClient = mTransportClientRef.get();
-            if (transportClient == null) {
+            TransportConnection transportConnection = mTransportClientRef.get();
+            if (transportConnection == null) {
                 referenceLost("TransportConnection.onServiceDisconnected()");
                 return;
             }
-            transportClient.onServiceDisconnected();
+            transportConnection.onServiceDisconnected();
         }
 
         @Override
         public void onBindingDied(ComponentName transportComponent) {
-            TransportClient transportClient = mTransportClientRef.get();
-            if (transportClient == null) {
+            TransportConnection transportConnection = mTransportClientRef.get();
+            if (transportConnection == null) {
                 referenceLost("TransportConnection.onBindingDied()");
                 return;
             }
-            transportClient.onBindingDied();
+            transportConnection.onBindingDied();
         }
 
-        /** @see TransportClient#finalize() */
+        /** @see TransportConnection#finalize() */
         private void referenceLost(String caller) {
             mContext.unbindService(this);
             TransportUtils.log(

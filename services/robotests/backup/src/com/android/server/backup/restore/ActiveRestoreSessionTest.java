@@ -202,7 +202,7 @@ public class ActiveRestoreSessionTest {
         verify(mObserver)
                 .restoreSetsAvailable(aryEq(new RestoreSet[] {mRestoreSet1, mRestoreSet2}));
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMock.transportClient), any());
+                .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
         assertThat(mWakeLock.isHeld()).isFalse();
     }
 
@@ -235,7 +235,7 @@ public class ActiveRestoreSessionTest {
         verify(mObserver).restoreSetsAvailable(isNull());
         assertEventLogged(EventLogTags.RESTORE_TRANSPORT_FAILURE);
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMock.transportClient), any());
+                .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
         assertThat(mWakeLock.isHeld()).isFalse();
     }
 
@@ -253,7 +253,7 @@ public class ActiveRestoreSessionTest {
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(0);
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMock.transportClient), any());
+                .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
         assertThat(mWakeLock.isHeld()).isFalse();
         assertThat(mBackupManagerService.isRestoreInProgress()).isFalse();
         // Verify it created the task properly
@@ -341,7 +341,7 @@ public class ActiveRestoreSessionTest {
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(0);
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMock.transportClient), any());
+                .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
         assertThat(mWakeLock.isHeld()).isFalse();
         assertThat(mBackupManagerService.isRestoreInProgress()).isFalse();
         ShadowPerformUnifiedRestoreTask shadowTask =
@@ -463,7 +463,7 @@ public class ActiveRestoreSessionTest {
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(0);
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMock.transportClient), any());
+                .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
         assertThat(mWakeLock.isHeld()).isFalse();
         assertThat(mBackupManagerService.isRestoreInProgress()).isFalse();
         ShadowPerformUnifiedRestoreTask shadowTask =

@@ -65,7 +65,7 @@ import com.android.server.backup.internal.Operation;
 import com.android.server.backup.remote.RemoteCall;
 import com.android.server.backup.remote.RemoteCallable;
 import com.android.server.backup.remote.RemoteResult;
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.utils.BackupEligibilityRules;
 
@@ -192,10 +192,10 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
      * dedicated thread and kicks off the operation in it.
      *
      * @param backupManagerService The {@link UserBackupManagerService} instance.
-     * @param transportClient The {@link TransportClient} that contains the transport used for the
-     *     operation.
+     * @param transportConnection The {@link TransportConnection} that contains the transport used
+     *     for the operation.
      * @param transportDirName The value of {@link IBackupTransport#transportDirName()} for the
-     *     transport whose {@link TransportClient} was provided above.
+     *     transport whose {@link TransportConnection} was provided above.
      * @param queue The list of package names that will be backed-up.
      * @param dataChangedJournal The old data-changed journal file that will be deleted when the
      *     operation finishes (successfully or not) or {@code null}.
@@ -211,7 +211,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
      */
     public static KeyValueBackupTask start(
             UserBackupManagerService backupManagerService,
-            TransportClient transportClient,
+            TransportConnection transportConnection,
             String transportDirName,
             List<String> queue,
             @Nullable DataChangedJournal dataChangedJournal,
@@ -227,7 +227,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         KeyValueBackupTask task =
                 new KeyValueBackupTask(
                         backupManagerService,
-                        transportClient,
+                        transportConnection,
                         transportDirName,
                         queue,
                         dataChangedJournal,
@@ -245,7 +245,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
     private final UserBackupManagerService mBackupManagerService;
     private final PackageManager mPackageManager;
-    private final TransportClient mTransportClient;
+    private final TransportConnection mTransportConnection;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final KeyValueBackupReporter mReporter;
     private final OnTaskFinishedListener mTaskFinishedListener;
@@ -302,7 +302,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     @VisibleForTesting
     public KeyValueBackupTask(
             UserBackupManagerService backupManagerService,
-            TransportClient transportClient,
+            TransportConnection transportConnection,
             String transportDirName,
             List<String> queue,
             @Nullable DataChangedJournal journal,
@@ -314,7 +314,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             BackupEligibilityRules backupEligibilityRules) {
         mBackupManagerService = backupManagerService;
         mPackageManager = backupManagerService.getPackageManager();
-        mTransportClient = transportClient;
+        mTransportConnection = transportConnection;
         mOriginalQueue = queue;
         // We need to retain the original queue contents in case of transport failure
         mQueue = new ArrayList<>(queue);
@@ -418,7 +418,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         boolean noDataPackageEncountered = false;
         try {
             IBackupTransport transport =
-                    mTransportClient.connectOrThrow("KVBT.informTransportOfEmptyBackups()");
+                    mTransportConnection.connectOrThrow("KVBT.informTransportOfEmptyBackups()");
 
             for (String packageName : succeedingPackages) {
                 if (appsBackedUp.contains(packageName)) {
@@ -463,7 +463,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     private boolean isEligibleForNoDataCall(PackageInfo packageInfo) {
         return mBackupEligibilityRules.appIsKeyValueOnly(packageInfo)
                 && mBackupEligibilityRules.appIsRunningAndEligibleForBackupWithTransport(
-                        mTransportClient, packageInfo.packageName);
+                mTransportConnection, packageInfo.packageName);
     }
 
     /** Send the "no data changed" message to a transport for a specific package */
@@ -608,7 +608,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         mReporter.onQueueReady(mQueue);
         File pmState = new File(mStateDirectory, PM_PACKAGE);
         try {
-            IBackupTransport transport = mTransportClient.connectOrThrow("KVBT.startTask()");
+            IBackupTransport transport = mTransportConnection.connectOrThrow("KVBT.startTask()");
             String transportName = transport.name();
             if (transportName.contains("EncryptedLocalTransport")) {
                 // Temporary code for EiTF POC. Only supports non-incremental backups.
@@ -638,7 +638,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     private PerformFullTransportBackupTask createFullBackupTask(List<String> packages) {
         return new PerformFullTransportBackupTask(
                 mBackupManagerService,
-                mTransportClient,
+                mTransportConnection,
                 /* fullBackupRestoreObserver */ null,
                 packages.toArray(new String[packages.size()]),
                 /* updateSchedule */ false,
@@ -764,7 +764,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         long currentToken = mBackupManagerService.getCurrentToken();
         if (mHasDataToBackup && (status == BackupTransport.TRANSPORT_OK) && (currentToken == 0)) {
             try {
-                IBackupTransport transport = mTransportClient.connectOrThrow(callerLogString);
+                IBackupTransport transport = mTransportConnection.connectOrThrow(callerLogString);
                 transportName = transport.name();
                 mBackupManagerService.setCurrentToken(transport.getCurrentRestoreSet());
                 mBackupManagerService.writeRestoreTokens();
@@ -836,7 +836,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     @GuardedBy("mQueueLock")
     private void triggerTransportInitializationLocked() throws Exception {
         IBackupTransport transport =
-                mTransportClient.connectOrThrow("KVBT.triggerTransportInitializationLocked");
+                mTransportConnection.connectOrThrow("KVBT.triggerTransportInitializationLocked");
         mBackupManagerService.getPendingInits().add(transport.name());
         deletePmStateFile();
         mBackupManagerService.backupNow();
@@ -919,7 +919,8 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
                 }
             }
 
-            IBackupTransport transport = mTransportClient.connectOrThrow("KVBT.extractAgentData()");
+            IBackupTransport transport = mTransportConnection.connectOrThrow(
+                    "KVBT.extractAgentData()");
             long quota = transport.getBackupQuota(packageName, /* isFullBackup */ false);
             int transportFlags = transport.getTransportFlags();
 
@@ -1078,7 +1079,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         try (ParcelFileDescriptor backupData =
                 ParcelFileDescriptor.open(backupDataFile, MODE_READ_ONLY)) {
             IBackupTransport transport =
-                    mTransportClient.connectOrThrow("KVBT.transportPerformBackup()");
+                    mTransportConnection.connectOrThrow("KVBT.transportPerformBackup()");
             mReporter.onTransportPerformBackup(packageName);
             int flags = getPerformBackupFlags(mUserInitiated, nonIncremental);
 
@@ -1131,7 +1132,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         if (agent != null) {
             try {
                 IBackupTransport transport =
-                        mTransportClient.connectOrThrow("KVBT.agentDoQuotaExceeded()");
+                        mTransportConnection.connectOrThrow("KVBT.agentDoQuotaExceeded()");
                 long quota = transport.getBackupQuota(packageName, false);
                 remoteCall(
                         callback -> agent.doQuotaExceeded(size, quota, callback),
@@ -1227,7 +1228,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         long delay;
         try {
             IBackupTransport transport =
-                    mTransportClient.connectOrThrow("KVBT.revertTask()");
+                    mTransportConnection.connectOrThrow("KVBT.revertTask()");
             delay = transport.requestBackupTime();
         } catch (Exception e) {
             mReporter.onTransportRequestBackupTimeError(e);
