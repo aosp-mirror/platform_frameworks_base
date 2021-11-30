@@ -512,6 +512,11 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String DEFAULT_QR_CODE_SCANNER = "default_qr_code_scanner";
 
+    /**
+     * (boolean) Whether the task manager entrypoint is enabled.
+     */
+    public static final String TASK_MANAGER_ENABLED = "task_manager_enabled";
+
     private SystemUiDeviceConfigFlags() {
     }
 }

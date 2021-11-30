@@ -2358,4 +2358,9 @@
 
     <!-- Title for User Switch dialog. [CHAR LIMIT=20] -->
     <string name="qs_user_switch_dialog_title">Select user</string>
+
+    <!-- Title for dialog listing applications currently running in the backing [CHAR LIMIT=NONE]-->
+    <string name="fgs_manager_dialog_title">Apps running in the background</string>
+    <!-- Label of the button to stop the app from running in the background [CHAR LIMIT=12]-->
+    <string name="fgs_manager_app_item_stop_button_label">Stop</string>
 </resources>
