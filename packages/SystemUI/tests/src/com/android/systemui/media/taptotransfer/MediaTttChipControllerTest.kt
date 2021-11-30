@@ -110,30 +110,33 @@ class MediaTttChipControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun moveCloserToTransfer_chipTextContainsDeviceName_noLoadingIcon() {
+    fun moveCloserToTransfer_chipTextContainsDeviceName_noLoadingIcon_noUndo() {
         commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
 
         val chipView = getChipView()
         assertThat(chipView.getChipText()).contains(DEVICE_NAME)
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
+        assertThat(chipView.getUndoButtonVisibility()).isEqualTo(View.GONE)
     }
 
     @Test
-    fun transferInitiated_chipTextContainsDeviceName_loadingIcon() {
+    fun transferInitiated_chipTextContainsDeviceName_loadingIcon_noUndo() {
         commandRegistry.onShellCommand(pw, getTransferInitiatedCommand())
 
         val chipView = getChipView()
         assertThat(chipView.getChipText()).contains(DEVICE_NAME)
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
+        assertThat(chipView.getUndoButtonVisibility()).isEqualTo(View.GONE)
     }
 
     @Test
-    fun transferSucceeded_chipTextContainsDeviceName_noLoadingIcon() {
+    fun transferSucceeded_chipTextContainsDeviceName_noLoadingIcon_undo() {
         commandRegistry.onShellCommand(pw, getTransferSucceededCommand())
 
         val chipView = getChipView()
         assertThat(chipView.getChipText()).contains(DEVICE_NAME)
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
+        assertThat(chipView.getUndoButtonVisibility()).isEqualTo(View.VISIBLE)
     }
 
     @Test
@@ -150,6 +153,22 @@ class MediaTttChipControllerTest : SysuiTestCase() {
         commandRegistry.onShellCommand(pw, getTransferSucceededCommand())
 
         assertThat(getChipView().getLoadingIconVisibility()).isEqualTo(View.GONE)
+    }
+
+    @Test
+    fun changeFromTransferInitiatedToTransferSucceeded_undoButtonAppears() {
+        commandRegistry.onShellCommand(pw, getTransferInitiatedCommand())
+        commandRegistry.onShellCommand(pw, getTransferSucceededCommand())
+
+        assertThat(getChipView().getUndoButtonVisibility()).isEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    fun changeFromTransferSucceededToMoveCloser_undoButtonDisappears() {
+        commandRegistry.onShellCommand(pw, getTransferSucceededCommand())
+        commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
+
+        assertThat(getChipView().getUndoButtonVisibility()).isEqualTo(View.GONE)
     }
 
     private fun getMoveCloserToTransferCommand(): Array<String> =
@@ -178,6 +197,9 @@ class MediaTttChipControllerTest : SysuiTestCase() {
 
     private fun LinearLayout.getLoadingIconVisibility(): Int =
         this.requireViewById<View>(R.id.loading).visibility
+
+    private fun LinearLayout.getUndoButtonVisibility(): Int =
+        this.requireViewById<View>(R.id.undo).visibility
 
     private fun getChipView(): LinearLayout {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)

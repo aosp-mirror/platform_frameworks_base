@@ -980,6 +980,8 @@
     <dimen name="media_ttt_chip_outer_padding">16dp</dimen>
     <dimen name="media_ttt_text_size">16sp</dimen>
     <dimen name="media_ttt_icon_size">16dp</dimen>
+    <dimen name="media_ttt_undo_button_vertical_padding">8dp</dimen>
+    <dimen name="media_ttt_undo_button_vertical_negative_margin">-8dp</dimen>
 
     <!-- Window magnification -->
     <dimen name="magnification_border_drag_size">35dp</dimen>
