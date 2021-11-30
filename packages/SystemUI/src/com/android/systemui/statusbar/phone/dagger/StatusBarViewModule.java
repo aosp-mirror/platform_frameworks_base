@@ -46,7 +46,6 @@ import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
@@ -61,11 +60,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tuner.TunerService;
 
-import java.util.Optional;
-
 import javax.inject.Named;
 
-import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
@@ -243,7 +239,6 @@ public abstract class StatusBarViewModule {
             NotificationPanelViewController notificationPanelViewController,
             NetworkController networkController,
             StatusBarStateController statusBarStateController,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             CommandQueue commandQueue,
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             OperatorNameViewController.Factory operatorNameViewControllerFactory
@@ -261,7 +256,6 @@ public abstract class StatusBarViewModule {
                 notificationPanelViewController,
                 networkController,
                 statusBarStateController,
-                statusBarOptionalLazy,
                 commandQueue,
                 collapsedStatusBarFragmentLogger,
                 operatorNameViewControllerFactory);
