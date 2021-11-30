@@ -422,10 +422,12 @@ abstract public class ManagedServices {
     private void loadAllowedComponentsFromSettings() {
         for (UserInfo user : mUm.getUsers()) {
             final ContentResolver cr = mContext.getContentResolver();
-            addApprovedList(Settings.Secure.getStringForUser(
-                    cr,
-                    getConfig().secureSettingName,
-                    user.id), user.id, true);
+            if (!TextUtils.isEmpty(getConfig().secureSettingName)) {
+                addApprovedList(Settings.Secure.getStringForUser(
+                        cr,
+                        getConfig().secureSettingName,
+                        user.id), user.id, true);
+            }
             if (!TextUtils.isEmpty(getConfig().secondarySettingName)) {
                 addApprovedList(Settings.Secure.getStringForUser(
                         cr,
