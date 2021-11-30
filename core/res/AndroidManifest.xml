@@ -5461,6 +5461,16 @@
         android:protectionLevel="signature|installer" />
 
     <!--
+        @SystemApi
+        Allows the holder to start the screen to review permission decisions.
+        <p>Protection level: signature|installer
+        @hide -->
+    <permission android:name="android.permission.START_REVIEW_PERMISSION_DECISIONS"
+        android:label="@string/permlab_startReviewPermissionDecisions"
+        android:description="@string/permdesc_startReviewPermissionDecisions"
+        android:protectionLevel="signature|installer" />
+
+    <!--
         Allows the holder to start the screen with a list of app features.
         <p>Protection level: signature|installer
     -->
