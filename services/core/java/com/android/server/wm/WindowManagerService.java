@@ -267,6 +267,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.ScrollCaptureResponse;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 import android.view.SurfaceSession;
 import android.view.TaskTransitionSpec;
 import android.view.View;
@@ -7890,6 +7891,28 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public boolean shouldRestoreImeVisibility(IBinder imeTargetWindowToken) {
             return WindowManagerService.this.shouldRestoreImeVisibility(imeTargetWindowToken);
+        }
+
+        @Override
+        public void addTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay) {
+            synchronized (mGlobalLock) {
+                final Task task = mRoot.getRootTask(taskId);
+                if (task == null) {
+                    throw new IllegalArgumentException("no task with taskId" + taskId);
+                }
+                task.addOverlay(overlay);
+            }
+        }
+
+        @Override
+        public void removeTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay) {
+            synchronized (mGlobalLock) {
+                final Task task = mRoot.getRootTask(taskId);
+                if (task == null) {
+                    throw new IllegalArgumentException("no task with taskId" + taskId);
+                }
+                task.removeOverlay(overlay);
+            }
         }
     }
 

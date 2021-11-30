@@ -32,6 +32,7 @@ import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationTarget;
+import android.view.SurfaceControlViewHost;
 import android.view.WindowInfo;
 import android.view.WindowManager.DisplayImePolicy;
 
@@ -767,4 +768,16 @@ public abstract class WindowManagerInternal {
      *         {@code false} otherwise.
      */
     public abstract boolean shouldRestoreImeVisibility(IBinder imeTargetWindowToken);
+
+    /**
+     * Internal methods for other parts of SystemServer to manage
+     * SurfacePackage based overlays on tasks.
+     *
+     * Callers prepare a view hierarchy with SurfaceControlViewHost
+     * and send the package to WM here. The remote view hierarchy will receive
+     * configuration change, lifecycle events, etc, forwarded over the
+     * ISurfaceControlViewHost interface inside the SurfacePackage.
+     */
+    public abstract void addTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay);
+    public abstract void removeTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay);
 }
