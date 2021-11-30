@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.media.tv.BroadcastInfoRequest;
+import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvInputManager;
 import android.os.Handler;
 import android.os.IBinder;
@@ -115,6 +117,18 @@ public final class TvIAppManager {
                         return;
                     }
                     record.postLayoutSurface(left, top, right, bottom);
+                }
+            }
+
+            @Override
+            public void onBroadcastInfoRequest(BroadcastInfoRequest request, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postBroadcastInfoRequest(request);
                 }
             }
         };
@@ -486,6 +500,23 @@ public final class TvIAppManager {
         }
 
         /**
+         * Notifies of any broadcast info response passed in from TIS.
+         *
+         * @param response response passed in from TIS.
+         */
+        public void notifyBroadcastInfoResponse(BroadcastInfoResponse response) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyBroadcastInfoResponse(mToken, response, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Releases this session.
          */
         public void release() {
@@ -741,6 +772,15 @@ public final class TvIAppManager {
                 @Override
                 public void run() {
                     mSessionCallback.onLayoutSurface(mSession, left, top, right, bottom);
+                }
+            });
+        }
+
+        void postBroadcastInfoRequest(final BroadcastInfoRequest request) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSession.getInputSession().requestBroadcastInfo(request);
                 }
             });
         }
