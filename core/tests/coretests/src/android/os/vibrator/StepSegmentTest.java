@@ -141,4 +141,16 @@ public class StepSegmentTest {
         assertEquals(VibrationEffect.DEFAULT_AMPLITUDE, initial.scale(1.5f).getAmplitude(),
                 TOLERANCE);
     }
+
+    @Test
+    public void testDuration() {
+        assertEquals(5, new StepSegment(0, 0, 5).getDuration());
+    }
+
+    @Test
+    public void testIsHapticFeedbackCandidate_returnsTrue() {
+        // A single step segment duration is not checked here, but contributes to the effect known
+        // duration checked in VibrationEffect implementations.
+        assertTrue(new StepSegment(0, 0, 5_000).isHapticFeedbackCandidate());
+    }
 }

@@ -250,17 +250,4 @@ public class VibratorTest {
         VibrationAttributes vibrationAttributes = captor.getValue();
         assertEquals(new VibrationAttributes.Builder().build(), vibrationAttributes);
     }
-
-    @Test
-    public void vibrate_withoutAudioAttributesAndLongEffect_hasUnknownUsage() {
-        mVibratorSpy.vibrate(VibrationEffect.createOneShot(10_000, 255));
-
-        ArgumentCaptor<VibrationAttributes> captor = ArgumentCaptor.forClass(
-                VibrationAttributes.class);
-        verify(mVibratorSpy).vibrate(anyInt(), anyString(), any(), isNull(), captor.capture());
-
-        VibrationAttributes vibrationAttributes = captor.getValue();
-        assertEquals(VibrationAttributes.USAGE_UNKNOWN, vibrationAttributes.getUsage());
-        assertEquals(AudioAttributes.USAGE_UNKNOWN, vibrationAttributes.getAudioUsage());
-    }
 }
