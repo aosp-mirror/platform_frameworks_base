@@ -87,7 +87,7 @@ public class WindowlessWindowManager implements IWindowSession {
         mHostInputToken = hostInputToken;
     }
 
-    protected void setConfiguration(Configuration configuration) {
+    public void setConfiguration(Configuration configuration) {
         mConfiguration.setTo(configuration);
     }
 

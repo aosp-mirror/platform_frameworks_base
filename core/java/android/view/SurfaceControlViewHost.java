@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -44,6 +45,35 @@ public class SurfaceControlViewHost {
 
     private SurfaceControl mSurfaceControl;
     private IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
+
+    private final class ISurfaceControlViewHostImpl extends ISurfaceControlViewHost.Stub {
+        @Override
+        public void onConfigurationChanged(Configuration configuration) {
+            if (mViewRoot == null) {
+                return;
+            }
+            mViewRoot.mHandler.post(() -> {
+                if (mWm != null) {
+                    mWm.setConfiguration(configuration);
+                }
+                if (mViewRoot != null) {
+                    mViewRoot.forceWmRelayout();
+                }
+            });
+        }
+
+        @Override
+        public void onDispatchDetachedFromWindow() {
+            if (mViewRoot == null) {
+                return;
+            }
+            mViewRoot.mHandler.post(() -> {
+                release();
+            });
+        }
+    }
+
+    private ISurfaceControlViewHost mRemoteInterface = new ISurfaceControlViewHostImpl();
 
     /**
      * Package encapsulating a Surface hierarchy which contains interactive view
@@ -71,12 +101,14 @@ public class SurfaceControlViewHost {
         private SurfaceControl mSurfaceControl;
         private final IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
         private final IBinder mInputToken;
+        private final ISurfaceControlViewHost mRemoteInterface;
 
         SurfacePackage(SurfaceControl sc, IAccessibilityEmbeddedConnection connection,
-                       IBinder inputToken) {
+               IBinder inputToken, ISurfaceControlViewHost ri) {
             mSurfaceControl = sc;
             mAccessibilityEmbeddedConnection = connection;
             mInputToken = inputToken;
+            mRemoteInterface = ri;
         }
 
         /**
@@ -97,6 +129,7 @@ public class SurfaceControlViewHost {
             }
             mAccessibilityEmbeddedConnection = other.mAccessibilityEmbeddedConnection;
             mInputToken = other.mInputToken;
+            mRemoteInterface = other.mRemoteInterface;
         }
 
         private SurfacePackage(Parcel in) {
@@ -105,6 +138,8 @@ public class SurfaceControlViewHost {
             mAccessibilityEmbeddedConnection = IAccessibilityEmbeddedConnection.Stub.asInterface(
                     in.readStrongBinder());
             mInputToken = in.readStrongBinder();
+            mRemoteInterface = ISurfaceControlViewHost.Stub.asInterface(
+                in.readStrongBinder());
         }
 
         /**
@@ -126,6 +161,13 @@ public class SurfaceControlViewHost {
             return mAccessibilityEmbeddedConnection;
         }
 
+        /**
+         * @hide
+         */
+        public ISurfaceControlViewHost getRemoteInterface() {
+            return mRemoteInterface;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -136,6 +178,7 @@ public class SurfaceControlViewHost {
             mSurfaceControl.writeToParcel(out, flags);
             out.writeStrongBinder(mAccessibilityEmbeddedConnection.asBinder());
             out.writeStrongBinder(mInputToken);
+            out.writeStrongBinder(mRemoteInterface.asBinder());
         }
 
         /**
@@ -231,7 +274,7 @@ public class SurfaceControlViewHost {
     public @Nullable SurfacePackage getSurfacePackage() {
         if (mSurfaceControl != null && mAccessibilityEmbeddedConnection != null) {
             return new SurfacePackage(mSurfaceControl, mAccessibilityEmbeddedConnection,
-                    mViewRoot.getInputToken());
+                mViewRoot.getInputToken(), mRemoteInterface);
         } else {
             return null;
         }
