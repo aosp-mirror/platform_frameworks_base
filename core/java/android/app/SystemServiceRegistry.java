@@ -200,6 +200,8 @@ import android.safetycenter.SafetyCenterFrameworkInitializer;
 import android.scheduling.SchedulingFrameworkInitializer;
 import android.security.FileIntegrityManager;
 import android.security.IFileIntegrityService;
+import android.security.attestationverification.AttestationVerificationManager;
+import android.security.attestationverification.IAttestationVerificationManagerService;
 import android.service.oemlock.IOemLockService;
 import android.service.oemlock.OemLockManager;
 import android.service.persistentdata.IPersistentDataBlockService;
@@ -1425,6 +1427,19 @@ public final class SystemServiceRegistry {
                         return new FileIntegrityManager(ctx.getOuterContext(),
                                 IFileIntegrityService.Stub.asInterface(b));
                     }});
+
+        registerService(Context.ATTESTATION_VERIFICATION_SERVICE,
+                AttestationVerificationManager.class,
+                new CachedServiceFetcher<AttestationVerificationManager>() {
+                    @Override
+                    public AttestationVerificationManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.ATTESTATION_VERIFICATION_SERVICE);
+                        return new AttestationVerificationManager(ctx.getOuterContext(),
+                                IAttestationVerificationManagerService.Stub.asInterface(b));
+                    }});
+
         //CHECKSTYLE:ON IndentationCheck
         registerService(Context.APP_INTEGRITY_SERVICE, AppIntegrityManager.class,
                 new CachedServiceFetcher<AppIntegrityManager>() {
