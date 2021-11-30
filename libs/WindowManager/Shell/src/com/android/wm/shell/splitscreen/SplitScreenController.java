@@ -261,9 +261,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mStageCoordinator.unregisterSplitScreenListener(listener);
     }
 
-    public void startTask(int taskId, @SplitScreen.StageType int stage,
-            @SplitPosition int position, @Nullable Bundle options) {
-        options = mStageCoordinator.resolveStartStage(stage, position, options, null /* wct */);
+    public void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options) {
+        options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options,
+                null /* wct */);
 
         try {
             final WindowContainerTransaction evictWct = new WindowContainerTransaction();
@@ -278,10 +278,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
     }
 
-    public void startShortcut(String packageName, String shortcutId,
-            @SplitScreen.StageType int stage, @SplitPosition int position,
+    public void startShortcut(String packageName, String shortcutId, @SplitPosition int position,
             @Nullable Bundle options, UserHandle user) {
-        options = mStageCoordinator.resolveStartStage(stage, position, options, null /* wct */);
+        options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options,
+                null /* wct */);
         final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         mStageCoordinator.prepareEvictChildTasks(position, evictWct);
 
@@ -296,20 +296,18 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
     }
 
-    public void startIntent(PendingIntent intent, Intent fillInIntent,
-            @SplitScreen.StageType int stage, @SplitPosition int position,
+    public void startIntent(PendingIntent intent, Intent fillInIntent, @SplitPosition int position,
             @Nullable Bundle options) {
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
-            startIntentLegacy(intent, fillInIntent, stage, position, options);
+            startIntentLegacy(intent, fillInIntent, position, options);
             return;
         }
-        mStageCoordinator.startIntent(intent, fillInIntent, stage, position, options,
+        mStageCoordinator.startIntent(intent, fillInIntent, STAGE_TYPE_UNDEFINED, position, options,
                 null /* remote */);
     }
 
     private void startIntentLegacy(PendingIntent intent, Intent fillInIntent,
-            @SplitScreen.StageType int stage, @SplitPosition int position,
-            @Nullable Bundle options) {
+            @SplitPosition int position, @Nullable Bundle options) {
         final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         mStageCoordinator.prepareEvictChildTasks(position, evictWct);
 
@@ -343,7 +341,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         };
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        options = mStageCoordinator.resolveStartStage(stage, position, options, wct);
+        options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options, wct);
         wct.sendPendingIntent(intent, fillInIntent, options);
         mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
     }
@@ -600,10 +598,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         @Override
-        public void startTask(int taskId, int stage, int position, @Nullable Bundle options) {
+        public void startTask(int taskId, int position, @Nullable Bundle options) {
             executeRemoteCallWithTaskPermission(mController, "startTask",
                     (controller) -> {
-                        controller.startTask(taskId, stage, position, options);
+                        controller.startTask(taskId, position, options);
                     });
         }
 
@@ -628,21 +626,20 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         @Override
-        public void startShortcut(String packageName, String shortcutId, int stage, int position,
+        public void startShortcut(String packageName, String shortcutId, int position,
                 @Nullable Bundle options, UserHandle user) {
             executeRemoteCallWithTaskPermission(mController, "startShortcut",
                     (controller) -> {
-                        controller.startShortcut(packageName, shortcutId, stage, position,
-                                options, user);
+                        controller.startShortcut(packageName, shortcutId, position, options, user);
                     });
         }
 
         @Override
-        public void startIntent(PendingIntent intent, Intent fillInIntent, int stage, int position,
+        public void startIntent(PendingIntent intent, Intent fillInIntent, int position,
                 @Nullable Bundle options) {
             executeRemoteCallWithTaskPermission(mController, "startIntent",
                     (controller) -> {
-                        controller.startIntent(intent, fillInIntent, stage, position, options);
+                        controller.startIntent(intent, fillInIntent, position, options);
                     });
         }
 
