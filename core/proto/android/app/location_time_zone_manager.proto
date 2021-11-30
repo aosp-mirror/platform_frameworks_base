@@ -23,6 +23,19 @@ import "frameworks/base/core/proto/android/privacy.proto";
 option java_multiple_files = true;
 option java_outer_classname = "LocationTimeZoneManagerProto";
 
+// A state enum that matches states for LocationTimeZoneProviderController. See that class for
+// details.
+enum ControllerStateEnum {
+  CONTROLLER_STATE_UNKNOWN = 0;
+  CONTROLLER_STATE_PROVIDERS_INITIALIZING = 1;
+  CONTROLLER_STATE_STOPPED = 2;
+  CONTROLLER_STATE_INITIALIZING = 3;
+  CONTROLLER_STATE_UNCERTAIN = 4;
+  CONTROLLER_STATE_CERTAIN = 5;
+  CONTROLLER_STATE_FAILED = 6;
+  CONTROLLER_STATE_DESTROYED = 7;
+}
+
 // Represents the state of the LocationTimeZoneManagerService for use in tests.
 message LocationTimeZoneManagerServiceStateProto {
   option (android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -30,6 +43,7 @@ message LocationTimeZoneManagerServiceStateProto {
   optional GeolocationTimeZoneSuggestionProto last_suggestion = 1;
   repeated TimeZoneProviderStateProto primary_provider_states = 2;
   repeated TimeZoneProviderStateProto secondary_provider_states = 3;
+  repeated ControllerStateEnum controller_states = 4;
 }
 
 // The state tracked for a LocationTimeZoneProvider.

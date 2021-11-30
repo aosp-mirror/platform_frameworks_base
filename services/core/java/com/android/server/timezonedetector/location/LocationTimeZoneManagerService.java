@@ -247,8 +247,7 @@ public class LocationTimeZoneManagerService extends Binder {
      * completion, it cannot be called from the {@code mThreadingDomain} thread.
      */
     void startWithTestProviders(@Nullable String testPrimaryProviderPackageName,
-            @Nullable String testSecondaryProviderPackageName,
-            boolean recordProviderStateChanges) {
+            @Nullable String testSecondaryProviderPackageName, boolean recordStateChanges) {
         enforceManageTimeZoneDetectorPermission();
 
         if (testPrimaryProviderPackageName == null && testSecondaryProviderPackageName == null) {
@@ -263,7 +262,7 @@ public class LocationTimeZoneManagerService extends Binder {
                         testPrimaryProviderPackageName);
                 mServiceConfigAccessor.setTestSecondaryLocationTimeZoneProviderPackageName(
                         testSecondaryProviderPackageName);
-                mServiceConfigAccessor.setRecordProviderStateChanges(recordProviderStateChanges);
+                mServiceConfigAccessor.setRecordStateChangesForTests(recordStateChanges);
                 startOnDomainThread();
             }
         }, BLOCKING_OP_WAIT_DURATION_MILLIS);
@@ -281,10 +280,20 @@ public class LocationTimeZoneManagerService extends Binder {
             if (mLocationTimeZoneProviderController == null) {
                 LocationTimeZoneProvider primary = mPrimaryProviderConfig.createProvider();
                 LocationTimeZoneProvider secondary = mSecondaryProviderConfig.createProvider();
+                LocationTimeZoneProviderController.MetricsLogger metricsLogger =
+                        new LocationTimeZoneProviderController.MetricsLogger() {
+                            @Override
+                            public void onStateChange(
+                                    @LocationTimeZoneProviderController.State String state) {
+                                // TODO b/200279201 - wire this up to metrics code
+                                // No-op.
+                            }
+                        };
 
+                boolean recordStateChanges = mServiceConfigAccessor.getRecordStateChangesForTests();
                 LocationTimeZoneProviderController controller =
-                        new LocationTimeZoneProviderController(
-                                mThreadingDomain, primary, secondary);
+                        new LocationTimeZoneProviderController(mThreadingDomain, metricsLogger,
+                                primary, secondary, recordStateChanges);
                 LocationTimeZoneProviderControllerEnvironmentImpl environment =
                         new LocationTimeZoneProviderControllerEnvironmentImpl(
                                 mThreadingDomain, mServiceConfigAccessor, controller);
@@ -342,7 +351,7 @@ public class LocationTimeZoneManagerService extends Binder {
         mThreadingDomain.postAndWait(() -> {
             synchronized (mSharedLock) {
                 if (mLocationTimeZoneProviderController != null) {
-                    mLocationTimeZoneProviderController.clearRecordedProviderStates();
+                    mLocationTimeZoneProviderController.clearRecordedStates();
                 }
             }
         }, BLOCKING_OP_WAIT_DURATION_MILLIS);
@@ -450,7 +459,7 @@ public class LocationTimeZoneManagerService extends Binder {
             ProviderMetricsLogger providerMetricsLogger = new RealProviderMetricsLogger(mIndex);
             return new BinderLocationTimeZoneProvider(
                     providerMetricsLogger, mThreadingDomain, mName, proxy,
-                    mServiceConfigAccessor.getRecordProviderStateChanges());
+                    mServiceConfigAccessor.getRecordStateChangesForTests());
         }
 
         @Override
