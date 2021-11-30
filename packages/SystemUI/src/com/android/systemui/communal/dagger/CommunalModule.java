@@ -21,10 +21,12 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.systemui.communal.conditions.CommunalCondition;
+import com.android.systemui.communal.conditions.CommunalSettingCondition;
 import com.android.systemui.idle.AmbientLightModeMonitor;
 import com.android.systemui.idle.LightSensorEventsDebounceAlgorithm;
 import com.android.systemui.idle.dagger.IdleViewComponent;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -69,7 +71,8 @@ public interface CommunalModule {
     @Provides
     @ElementsIntoSet
     @Named(COMMUNAL_CONDITIONS)
-    static Set<CommunalCondition> provideCommunalConditions() {
-        return new HashSet<>();
+    static Set<CommunalCondition> provideCommunalConditions(
+            CommunalSettingCondition communalSettingCondition) {
+        return new HashSet<>(Collections.singletonList(communalSettingCondition));
     }
 }
