@@ -29,9 +29,7 @@ import android.app.TaskInfo;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.Trace;
-import android.util.Slog;
 import android.util.SparseIntArray;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowInfo.StartingWindowType;
@@ -196,6 +194,18 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
                 mTaskBackgroundColors.delete(removalInfo.taskId);
             }
         }, TASK_BG_COLOR_RETAIN_TIME_MS);
+    }
+
+    /**
+     * Clear all starting window immediately, called this method when releasing the task organizer.
+     */
+    public void clearAllWindows() {
+        mSplashScreenExecutor.execute(() -> {
+            mStartingSurfaceDrawer.clearAllWindows();
+            synchronized (mTaskBackgroundColors) {
+                mTaskBackgroundColors.clear();
+            }
+        });
     }
 
     /**
