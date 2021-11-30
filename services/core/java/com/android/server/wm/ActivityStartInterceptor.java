@@ -37,6 +37,7 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
+import android.app.TaskInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.IIntentSender;
@@ -401,5 +402,17 @@ class ActivityStartInterceptor {
         mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0, mRealCallingUid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
+    }
+
+    /**
+     * Called when an activity is successfully launched.
+     */
+    void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo) {
+        final SparseArray<ActivityInterceptorCallback> callbacks =
+                mService.getActivityInterceptorCallbacks();
+        for (int i = 0; i < callbacks.size(); i++) {
+            final ActivityInterceptorCallback callback = callbacks.valueAt(i);
+            callback.onActivityLaunched(taskInfo, activityInfo);
+        }
     }
 }

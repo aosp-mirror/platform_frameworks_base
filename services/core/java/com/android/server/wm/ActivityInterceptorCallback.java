@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
+import android.app.TaskInfo;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
@@ -38,6 +39,12 @@ public abstract class ActivityInterceptorCallback {
      * existing intent.
      */
     public abstract @Nullable Intent intercept(ActivityInterceptorInfo info);
+
+    /**
+     * Called when an activity is successfully launched.
+     */
+    public void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo) {
+    }
 
     /**
      * The unique id of each interceptor which determines the order it will execute in.
