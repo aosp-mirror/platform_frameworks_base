@@ -43,8 +43,10 @@ import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
 import android.test.MoreAsserts;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.frameworks.servicestests.R;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
@@ -64,6 +66,7 @@ import java.util.Locale;
  adb shell am instrument -e class com.android.server.pm.ShortcutManagerTest2 \
  -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  */
+@Presubmit
 @SmallTest
 public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
     // ShortcutInfo tests

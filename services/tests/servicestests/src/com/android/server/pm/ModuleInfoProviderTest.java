@@ -21,6 +21,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import android.content.Context;
 import android.content.pm.ModuleInfo;
 import android.content.pm.PackageManager;
+import android.platform.test.annotations.Presubmit;
 import android.test.InstrumentationTestCase;
 
 import com.android.frameworks.servicestests.R;
@@ -30,6 +31,7 @@ import org.mockito.Mock;
 import java.util.Collections;
 import java.util.List;
 
+@Presubmit
 public class ModuleInfoProviderTest extends InstrumentationTestCase {
 
     @Mock private ApexManager mApexManager;

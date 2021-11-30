@@ -24,6 +24,7 @@ import static org.junit.Assert.fail;
 import android.content.Context;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
+import android.platform.test.annotations.Presubmit;
 import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
@@ -44,6 +45,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class PackageSignaturesTest {
     private static final String TEST_RESOURCES_FOLDER = "PackageSignaturesTest";

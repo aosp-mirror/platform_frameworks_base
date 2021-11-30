@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.platform.test.annotations.Postsubmit;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
@@ -42,6 +43,7 @@ import java.util.concurrent.TimeUnit;
  * To run the test:
  * bit FrameworksServicesTests:com.android.server.pm.UserLifecycleStressTest
  */
+@Postsubmit
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class UserLifecycleStressTest {
