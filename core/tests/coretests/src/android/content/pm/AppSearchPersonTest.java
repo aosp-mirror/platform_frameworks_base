@@ -19,9 +19,11 @@ package android.content.pm;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.Person;
+import android.platform.test.annotations.Presubmit;
 
 import org.junit.Test;
 
+@Presubmit
 public class AppSearchPersonTest {
 
     @Test

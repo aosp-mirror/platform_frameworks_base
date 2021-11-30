@@ -22,6 +22,7 @@ import static java.util.function.Function.identity;
 
 import android.content.pm.PackagePartitions.SystemPartition;
 import android.os.SystemProperties;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -30,6 +31,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class PackagePartitionsTest {
 

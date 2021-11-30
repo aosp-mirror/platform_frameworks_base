@@ -21,6 +21,7 @@ import android.os.FileUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
 import android.util.AttributeSet;
 import android.util.SparseArray;
@@ -45,6 +46,7 @@ import java.util.Set;
 /**
  * Tests for {@link android.content.pm.RegisteredServicesCache}
  */
+@Presubmit
 @LargeTest
 public class RegisteredServicesCacheTest extends AndroidTestCase {
     private static final int U0 = 0;
