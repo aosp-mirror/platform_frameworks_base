@@ -18,6 +18,7 @@ package com.android.systemui.navigationbar;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 
 import org.junit.Before;
@@ -41,6 +43,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 import dagger.Lazy;
 
@@ -82,8 +86,8 @@ public class NavBarHelperTest extends SysuiTestCase {
 
         mNavBarHelper = new NavBarHelper(mContext, mAccessibilityManager,
                 mAccessibilityManagerWrapper, mAccessibilityButtonModeObserver,
-                mOverviewProxyService, mAssistManagerLazy, mNavigationModeController,
-                mUserTracker, mDumpManager);
+                mOverviewProxyService, mAssistManagerLazy, () -> Optional.of(mock(StatusBar.class)),
+                mNavigationModeController, mUserTracker, mDumpManager);
 
     }
 

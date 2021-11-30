@@ -72,7 +72,6 @@ import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.inputmethodservice.InputMethodService;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -884,7 +883,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         if (displayId != mDisplayId) {
             return;
         }
-        boolean imeShown = (vis & InputMethodService.IME_VISIBLE) != 0;
+        boolean imeShown = mNavBarHelper.isImeShown(vis);
+        showImeSwitcher = imeShown && showImeSwitcher;
         int hints = Utilities.calculateBackDispositionHints(mNavigationIconHints, backDisposition,
                 imeShown, showImeSwitcher);
         if (hints == mNavigationIconHints) return;
