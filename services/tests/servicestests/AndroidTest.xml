@@ -16,6 +16,13 @@
 <configuration description="Runs Frameworks Services Tests.">
     <option name="test-suite-tag" value="apct" />
     <option name="test-suite-tag" value="apct-instrumentation" />
+
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
+        <option name="cleanup" value="true" />
+        <option name="push-file" key="SimpleServiceTestApp3.apk"
+                value="/data/local/tmp/cts/content/SimpleServiceTestApp3.apk" />
+    </target_preparer>
+
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true" />
         <option name="install-arg" value="-t" />
