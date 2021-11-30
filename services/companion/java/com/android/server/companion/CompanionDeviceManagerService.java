@@ -23,6 +23,7 @@ import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.FEATURE_COMPANION_DEVICE_SETUP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Binder.getCallingUid;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.UserHandle.getCallingUserId;
 
@@ -1257,7 +1258,7 @@ public class CompanionDeviceManagerService extends SystemService {
     }
 
     void checkUsesFeature(@NonNull String pkg, @UserIdInt int userId) {
-        if (getCallingUserId() == SYSTEM_UID) return;
+        if (getCallingUid() == SYSTEM_UID) return;
 
         final FeatureInfo[] requestedFeatures = getPackageInfo(pkg, userId).reqFeatures;
         if (requestedFeatures != null) {
