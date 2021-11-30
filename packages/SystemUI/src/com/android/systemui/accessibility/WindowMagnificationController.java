@@ -95,16 +95,45 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     @Surface.Rotation
     @VisibleForTesting
     int mRotation;
-    private final Rect mMagnificationFrame = new Rect();
     private final SurfaceControl.Transaction mTransaction;
 
     private final WindowManager mWm;
 
     private float mScale;
 
+    /**
+     * MagnificationFrame represents the bound of {@link #mMirrorSurface} and is constrained
+     * by the {@link #mMagnificationFrameBoundary}.
+     * We use MagnificationFrame to calculate the position of {@link #mMirrorView}.
+     * We combine MagnificationFrame with {@link #mMagnificationFrameOffsetX} and
+     * {@link #mMagnificationFrameOffsetY} to calculate the position of {@link #mSourceBounds}.
+     */
+    private final Rect mMagnificationFrame = new Rect();
     private final Rect mTmpRect = new Rect();
+
+    /**
+     * MirrorViewBounds is the bound of the {@link #mMirrorView} which displays the magnified
+     * content.
+     * {@link #mMirrorView}'s center is equal to {@link #mMagnificationFrame}'s center.
+     */
     private final Rect mMirrorViewBounds = new Rect();
+
+    /**
+     * SourceBound is the bound of the magnified region which projects the magnified content.
+     * SourceBound's center is equal to the parameters centerX and centerY in
+     * {@link WindowMagnificationController#enableWindowMagnificationInternal(float, float, float)}}
+     * but it is calculated from {@link #mMagnificationFrame}'s center in the runtime.
+     */
     private final Rect mSourceBounds = new Rect();
+
+    /**
+     * The relation of centers between {@link #mSourceBounds} and {@link #mMagnificationFrame} is
+     * calculated in {@link #calculateSourceBounds(Rect, float)} and the equations are as following:
+     *      MagnificationFrame = SourceBound (e.g., centerX & centerY) + MagnificationFrameOffset
+     *      SourceBound = MagnificationFrame - MagnificationFrameOffset
+     */
+    private int mMagnificationFrameOffsetX = 0;
+    private int mMagnificationFrameOffsetY = 0;
 
     // The root of the mirrored content
     private SurfaceControl mMirrorSurface;
@@ -123,6 +152,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private final Runnable mMirrorViewRunnable;
     private final Runnable mUpdateStateDescriptionRunnable;
     private final Runnable mWindowInsetChangeRunnable;
+    // MirrorView is the mirror window which displays the magnified content.
     private View mMirrorView;
     private SurfaceView mMirrorSurfaceView;
     private int mMirrorSurfaceMargin;
@@ -339,7 +369,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         // window size changed not caused by rotation.
         if (isWindowVisible() && reCreateWindow) {
             deleteWindowMagnification();
-            enableWindowMagnification(Float.NaN, Float.NaN, Float.NaN);
+            enableWindowMagnificationInternal(Float.NaN, Float.NaN, Float.NaN);
         }
     }
 
@@ -633,6 +663,26 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         int top = displayFrame.top + (halfHeight - (int) (halfHeight / scale));
         int bottom = displayFrame.bottom - (halfHeight - (int) (halfHeight / scale));
         mSourceBounds.set(left, top, right, bottom);
+
+        // SourceBound's center is equal to center[X,Y] but calculated from MagnificationFrame's
+        // center. The relation between SourceBound and MagnificationFrame is as following:
+        //          MagnificationFrame = SourceBound (center[X,Y]) + MagnificationFrameOffset
+        //          SourceBound = MagnificationFrame - MagnificationFrameOffset
+        mSourceBounds.offset(-mMagnificationFrameOffsetX, -mMagnificationFrameOffsetY);
+
+        if (mSourceBounds.left < 0) {
+            mSourceBounds.offsetTo(0, mSourceBounds.top);
+        } else if (mSourceBounds.right > mWindowBounds.width()) {
+            mSourceBounds.offsetTo(mWindowBounds.width() - mSourceBounds.width(),
+                    mSourceBounds.top);
+        }
+
+        if (mSourceBounds.top < 0) {
+            mSourceBounds.offsetTo(mSourceBounds.left, 0);
+        } else if (mSourceBounds.bottom > mWindowBounds.height()) {
+            mSourceBounds.offsetTo(mSourceBounds.left,
+                    mWindowBounds.height() - mSourceBounds.height());
+        }
     }
 
     private void calculateMagnificationFrameBoundary() {
@@ -646,11 +696,31 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         final int scaledWidth = (int) (halfWidth / mScale);
         // The scaled half height of magnified region.
         final int scaledHeight = (int) (halfHeight / mScale);
-        final int exceededWidth = halfWidth - scaledWidth;
-        final int exceededHeight = halfHeight - scaledHeight;
 
-        mMagnificationFrameBoundary.set(-exceededWidth, -exceededHeight,
-                mWindowBounds.width() + exceededWidth, mWindowBounds.height() + exceededHeight);
+        // MagnificationFrameBoundary constrain the space of MagnificationFrame, and it also has
+        // to leave enough space for SourceBound to magnify the whole screen space.
+        // However, there is an offset between SourceBound and MagnificationFrame.
+        // The relation between SourceBound and MagnificationFrame is as following:
+        //      SourceBound = MagnificationFrame - MagnificationFrameOffset
+        // Therefore, we have to adjust the exceededBoundary based on the offset.
+        //
+        // We have to increase the offset space for the SourceBound edges which are located in
+        // the MagnificationFrame. For example, if the offsetX and offsetY are negative, which
+        // means SourceBound is at right-bottom size of MagnificationFrame, the left and top
+        // edges of SourceBound are located in MagnificationFrame. So, we have to leave extra
+        // offset space at left and top sides and don't have to leave extra space at right and
+        // bottom sides.
+        final int exceededLeft = Math.max(halfWidth - scaledWidth - mMagnificationFrameOffsetX, 0);
+        final int exceededRight = Math.max(halfWidth - scaledWidth + mMagnificationFrameOffsetX, 0);
+        final int exceededTop = Math.max(halfHeight - scaledHeight - mMagnificationFrameOffsetY, 0);
+        final int exceededBottom = Math.max(halfHeight - scaledHeight + mMagnificationFrameOffsetY,
+                0);
+
+        mMagnificationFrameBoundary.set(
+                -exceededLeft,
+                -exceededTop,
+                mWindowBounds.width() + exceededRight,
+                mWindowBounds.height() + exceededBottom);
     }
 
     /**
@@ -711,24 +781,30 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     /**
-     * Wraps {@link WindowMagnificationController#enableWindowMagnification(float, float, float)}
+     * Wraps {@link WindowMagnificationController#enableWindowMagnificationInternal(float, float,
+     * float, float, float)}
      * with transition animation. If the window magnification is not enabled, the scale will start
      * from 1.0 and the center won't be changed during the animation. If animator is
      * {@code STATE_DISABLING}, the animation runs in reverse.
      *
      * @param scale   The target scale, or {@link Float#NaN} to leave unchanged.
-     * @param centerX The screen-relative X coordinate around which to center,
+     * @param centerX The screen-relative X coordinate around which to center for magnification,
      *                or {@link Float#NaN} to leave unchanged.
-     * @param centerY The screen-relative Y coordinate around which to center,
+     * @param centerY The screen-relative Y coordinate around which to center for magnification,
      *                or {@link Float#NaN} to leave unchanged.
+     * @param magnificationFrameOffsetRatioX Indicate the X coordinate offset
+     *                                       between frame position X and centerX
+     * @param magnificationFrameOffsetRatioY Indicate the Y coordinate offset
+     *                                       between frame position Y and centerY
      * @param animationCallback Called when the transition is complete, the given arguments
      *                          are as same as current values, or the transition is interrupted
      *                          due to the new transition request.
      */
     void enableWindowMagnification(float scale, float centerX, float centerY,
+            float magnificationFrameOffsetRatioX, float magnificationFrameOffsetRatioY,
             @Nullable IRemoteMagnificationAnimationCallback animationCallback) {
-        mAnimationController.enableWindowMagnification(scale, centerX,
-                centerY, animationCallback);
+        mAnimationController.enableWindowMagnification(scale, centerX, centerY,
+                magnificationFrameOffsetRatioX, magnificationFrameOffsetRatioY, animationCallback);
     }
 
     /**
@@ -738,21 +814,56 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      * be consistent with the behavior of display magnification.
      *
      * @param scale   the target scale, or {@link Float#NaN} to leave unchanged
-     * @param centerX the screen-relative X coordinate around which to center,
+     * @param centerX the screen-relative X coordinate around which to center for magnification,
      *                or {@link Float#NaN} to leave unchanged.
-     * @param centerY the screen-relative Y coordinate around which to center,
+     * @param centerY the screen-relative Y coordinate around which to center for magnification,
      *                or {@link Float#NaN} to leave unchanged.
      */
-    void enableWindowMagnification(float scale, float centerX, float centerY) {
+    void enableWindowMagnificationInternal(float scale, float centerX, float centerY) {
+        enableWindowMagnificationInternal(scale, centerX, centerY, Float.NaN, Float.NaN);
+    }
+
+    /**
+     * Enables window magnification with specified parameters. If the given scale is <strong>less
+     * than or equal to 1.0f<strong>, then
+     * {@link WindowMagnificationController#deleteWindowMagnification()} will be called instead to
+     * be consistent with the behavior of display magnification.
+     *
+     * @param scale   the target scale, or {@link Float#NaN} to leave unchanged
+     * @param centerX the screen-relative X coordinate around which to center for magnification,
+     *                or {@link Float#NaN} to leave unchanged.
+     * @param centerY the screen-relative Y coordinate around which to center for magnification,
+     *                or {@link Float#NaN} to leave unchanged.
+     * @param magnificationFrameOffsetRatioX Indicate the X coordinate offset
+     *                                       between frame position X and centerX,
+     *                                       or {@link Float#NaN} to leave unchanged.
+     * @param magnificationFrameOffsetRatioY Indicate the Y coordinate offset
+     *                                       between frame position Y and centerY,
+     *                                       or {@link Float#NaN} to leave unchanged.
+     */
+    void enableWindowMagnificationInternal(float scale, float centerX, float centerY,
+            float magnificationFrameOffsetRatioX, float magnificationFrameOffsetRatioY) {
         if (Float.compare(scale, 1.0f)  <= 0) {
             deleteWindowMagnification();
             return;
         }
 
+        mMagnificationFrameOffsetX = Float.isNaN(magnificationFrameOffsetRatioX)
+                ? mMagnificationFrameOffsetX
+                : (int) (mMagnificationFrame.width() / 2 * magnificationFrameOffsetRatioX);
+        mMagnificationFrameOffsetY = Float.isNaN(magnificationFrameOffsetRatioY)
+                ? mMagnificationFrameOffsetY
+                : (int) (mMagnificationFrame.height() / 2 * magnificationFrameOffsetRatioY);
+
+        // The relation of centers between SourceBound and MagnificationFrame is as following:
+        // MagnificationFrame = SourceBound (e.g., centerX & centerY) + MagnificationFrameOffset
+        final float newMagnificationFrameCenterX = centerX + mMagnificationFrameOffsetX;
+        final float newMagnificationFrameCenterY = centerY + mMagnificationFrameOffsetY;
+
         final float offsetX = Float.isNaN(centerX) ? 0
-                : centerX - mMagnificationFrame.exactCenterX();
+                : newMagnificationFrameCenterX - mMagnificationFrame.exactCenterX();
         final float offsetY = Float.isNaN(centerY) ? 0
-                : centerY - mMagnificationFrame.exactCenterY();
+                : newMagnificationFrameCenterY - mMagnificationFrame.exactCenterY();
         mScale = Float.isNaN(scale) ? mScale : scale;
 
         calculateMagnificationFrameBoundary();
@@ -774,7 +885,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if (mAnimationController.isAnimating() || !isWindowVisible() || mScale == scale) {
             return;
         }
-        enableWindowMagnification(scale, Float.NaN, Float.NaN);
+        enableWindowMagnificationInternal(scale, Float.NaN, Float.NaN);
         mHandler.removeCallbacks(mUpdateStateDescriptionRunnable);
         mHandler.postDelayed(mUpdateStateDescriptionRunnable, UPDATE_STATE_DESCRIPTION_DELAY_MS);
     }

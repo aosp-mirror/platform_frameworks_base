@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mock;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.testing.TestableContext;
 import android.util.DebugUtils;
 import android.view.InputDevice;
@@ -58,10 +59,11 @@ public class WindowMagnificationGestureHandlerTest {
     public static final int STATE_SHOW_MAGNIFIER_SHORTCUT = 2;
     public static final int STATE_TWO_FINGERS_DOWN = 3;
     public static final int STATE_SHOW_MAGNIFIER_TRIPLE_TAP = 4;
+    public static final int STATE_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD = 5;
     //TODO: Test it after can injecting Handler to GestureMatcher is available.
 
     public static final int FIRST_STATE = STATE_IDLE;
-    public static final int LAST_STATE = STATE_SHOW_MAGNIFIER_TRIPLE_TAP;
+    public static final int LAST_STATE = STATE_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD;
 
     // Co-prime x and y, to potentially catch x-y-swapped errors
     public static final float DEFAULT_TAP_X = 301;
@@ -178,6 +180,12 @@ public class WindowMagnificationGestureHandlerTest {
                         == mWindowMagnificationGestureHandler.mDetectingState, state);
             }
                 break;
+            case STATE_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD: {
+                check(isWindowMagnifierEnabled(DISPLAY_0), state);
+                check(mWindowMagnificationGestureHandler.mCurrentState
+                        == mWindowMagnificationGestureHandler.mViewportDraggingState, state);
+            }
+            break;
             case STATE_TWO_FINGERS_DOWN: {
                 check(isWindowMagnifierEnabled(DISPLAY_0), state);
                 check(mWindowMagnificationGestureHandler.mCurrentState
@@ -229,6 +237,13 @@ public class WindowMagnificationGestureHandlerTest {
                     tap();
                 }
                 break;
+                case STATE_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD: {
+                    // Perform triple tap and hold gesture
+                    tap();
+                    tap();
+                    tapAndHold();
+                }
+                break;
                 default:
                     throw new IllegalArgumentException("Illegal state: " + state);
             }
@@ -260,6 +275,10 @@ public class WindowMagnificationGestureHandlerTest {
                 tap();
                 tap();
                 tap();
+            }
+            break;
+            case STATE_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD: {
+                send(upEvent(DEFAULT_TAP_X, DEFAULT_TAP_Y));
             }
             break;
             default:
@@ -306,6 +325,11 @@ public class WindowMagnificationGestureHandlerTest {
     private void tap() {
         send(downEvent(DEFAULT_TAP_X, DEFAULT_TAP_Y));
         send(upEvent(DEFAULT_TAP_X, DEFAULT_TAP_Y));
+    }
+
+    private void tapAndHold() {
+        send(downEvent(DEFAULT_TAP_X, DEFAULT_TAP_Y));
+        SystemClock.sleep(ViewConfiguration.getLongPressTimeout() + 100);
     }
 
     private String stateDump() {

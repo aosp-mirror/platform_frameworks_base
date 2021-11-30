@@ -100,11 +100,11 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     @Test
     public void enableWindowMagnification_passThrough() throws RemoteException {
         mIWindowMagnificationConnection.enableWindowMagnification(TEST_DISPLAY, 3.0f, Float.NaN,
-                Float.NaN, mAnimationCallback);
+                Float.NaN, 0f, 0f, mAnimationCallback);
         waitForIdleSync();
 
         verify(mWindowMagnificationController).enableWindowMagnification(eq(3.0f),
-                eq(Float.NaN), eq(Float.NaN), eq(mAnimationCallback));
+                eq(Float.NaN), eq(Float.NaN), eq(0f), eq(0f), eq(mAnimationCallback));
     }
 
     @Test
