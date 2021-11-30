@@ -32,7 +32,6 @@ import android.media.MediaRouter2Manager;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
-import com.android.settingslib.bluetooth.BluetoothUtils;
 
 /**
  * PhoneMediaDevice extends MediaDevice to represents Phone device.
@@ -87,7 +86,7 @@ public class PhoneMediaDevice extends MediaDevice {
     public Drawable getIcon() {
         final Drawable drawable = getIconWithoutBackground();
         setColorFilter(drawable);
-        return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
+        return drawable;
     }
 
     @Override
