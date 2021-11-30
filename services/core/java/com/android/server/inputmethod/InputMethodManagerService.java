@@ -542,9 +542,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     private InputMethodSubtype mCurrentSubtype;
 
-    // Was the keyguard locked when this client became current?
-    private boolean mCurClientInKeyguard;
-
     /**
      * {@code true} if the IME has not been mostly hidden via {@link android.view.InsetsController}
      */
@@ -2363,14 +2360,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mImeHiddenByDisplayPolicy = false;
 
         if (mCurClient != cs) {
-            // Was the keyguard locked when switching over to the new client?
-            mCurClientInKeyguard = isKeyguardLocked();
             // If the client is changing, we need to switch over to the new
             // one.
             unbindCurrentClientLocked(UnbindReason.SWITCH_CLIENT);
-            if (DEBUG) Slog.v(TAG, "switching to client: client="
-                    + cs.client.asBinder() + " keyguard=" + mCurClientInKeyguard);
-
             // If the screen is on, inform the new client it is active
             if (mIsInteractive) {
                 scheduleSetActiveToClient(cs, true /* active */, false /* fullscreen */,
@@ -2875,10 +2867,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // all updateSystemUi happens on system previlege.
         final long ident = Binder.clearCallingIdentity();
         try {
-            // apply policy for binder calls
-            if (vis != 0 && isKeyguardLocked() && !mCurClientInKeyguard) {
-                vis = 0;
-            }
             if (!mCurPerceptible) {
                 vis &= ~InputMethodService.IME_VISIBLE;
             }
