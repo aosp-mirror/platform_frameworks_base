@@ -16,14 +16,20 @@
 
 package com.android.systemui.media.taptotransfer
 
+import android.view.View
 import android.view.WindowManager
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.test.filters.SmallTest
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.util.mockito.any
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
@@ -48,7 +54,7 @@ class MediaTttChipControllerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        mediaTttChipController = MediaTttChipController(context, commandRegistry, windowManager)
+        mediaTttChipController = MediaTttChipController(commandRegistry, context, windowManager)
     }
 
     @Test(expected = IllegalStateException::class)
@@ -71,24 +77,24 @@ class MediaTttChipControllerTest : SysuiTestCase() {
 
     @Test
     fun addChipCommand_chipAdded() {
-        commandRegistry.onShellCommand(pw, arrayOf(MediaTttChipController.ADD_CHIP_COMMAND_TAG))
+        commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
 
         verify(windowManager).addView(any(), any())
     }
 
     @Test
     fun addChipCommand_twice_chipNotAddedTwice() {
-        commandRegistry.onShellCommand(pw, arrayOf(MediaTttChipController.ADD_CHIP_COMMAND_TAG))
+        commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
         reset(windowManager)
 
-        commandRegistry.onShellCommand(pw, arrayOf(MediaTttChipController.ADD_CHIP_COMMAND_TAG))
+        commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
         verify(windowManager, never()).addView(any(), any())
     }
 
     @Test
     fun removeChipCommand_chipRemoved() {
         // First, add the chip
-        commandRegistry.onShellCommand(pw, arrayOf(MediaTttChipController.ADD_CHIP_COMMAND_TAG))
+        commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
 
         // Then, remove it
         commandRegistry.onShellCommand(pw, arrayOf(MediaTttChipController.REMOVE_CHIP_COMMAND_TAG))
@@ -103,6 +109,55 @@ class MediaTttChipControllerTest : SysuiTestCase() {
         verify(windowManager, never()).removeView(any())
     }
 
+    @Test
+    fun moveCloserToTransfer_chipTextContainsDeviceName() {
+        commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
+
+        assertThat(getChipText()).contains(DEVICE_NAME)
+    }
+
+    @Test
+    fun transferInitiated_chipTextContainsDeviceName() {
+        commandRegistry.onShellCommand(pw, getTransferInitiatedCommand())
+
+        assertThat(getChipText()).contains(DEVICE_NAME)
+    }
+
+    @Test
+    fun transferSucceeded_chipTextContainsDeviceName() {
+        commandRegistry.onShellCommand(pw, getTransferSucceededCommand())
+
+        assertThat(getChipText()).contains(DEVICE_NAME)
+    }
+
+    private fun getMoveCloserToTransferCommand(): Array<String> =
+        arrayOf(
+            MediaTttChipController.ADD_CHIP_COMMAND_TAG,
+            DEVICE_NAME,
+            MediaTttChipController.ChipType.MOVE_CLOSER_TO_TRANSFER.name
+        )
+
+    private fun getTransferInitiatedCommand(): Array<String> =
+        arrayOf(
+            MediaTttChipController.ADD_CHIP_COMMAND_TAG,
+            DEVICE_NAME,
+            MediaTttChipController.ChipType.TRANSFER_INITIATED.name
+        )
+
+    private fun getTransferSucceededCommand(): Array<String> =
+        arrayOf(
+            MediaTttChipController.ADD_CHIP_COMMAND_TAG,
+            DEVICE_NAME,
+            MediaTttChipController.ChipType.TRANSFER_SUCCEEDED.name
+        )
+
+    private fun getChipText(): String {
+        val viewCaptor = ArgumentCaptor.forClass(View::class.java)
+        verify(windowManager).addView(viewCaptor.capture(), any())
+        val chipView = viewCaptor.value as LinearLayout
+        return (chipView.requireViewById(R.id.text) as TextView).text as String
+    }
+
     class EmptyCommand : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {
         }
@@ -111,3 +166,5 @@ class MediaTttChipControllerTest : SysuiTestCase() {
         }
     }
 }
+
+private const val DEVICE_NAME = "My Tablet"

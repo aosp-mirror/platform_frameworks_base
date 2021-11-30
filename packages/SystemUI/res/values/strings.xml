@@ -2173,6 +2173,14 @@
     <!-- Description for Smartspace recommendation's media item which doesn't have artist info, including information for the media's title and the source app [CHAR LIMIT=NONE]-->
     <string name="controls_media_smartspace_rec_item_no_artist_description">Play <xliff:g id="song_name" example="Daily mix">%1$s</xliff:g> from <xliff:g id="app_label" example="Spotify">%2$s</xliff:g></string>
 
+    <!--- ****** Media tap-to-transfer ****** -->
+    <!-- Text for a button to undo the media transfer. [CHAR LIMIT=20] -->
+    <string name="media_transfer_undo">Undo</string>
+    <!-- Text to ask the user to move their device closer to a different device (deviceName) in order to play music on the different device. [CHAR LIMIT=75] -->
+    <string name="media_move_closer_to_transfer">Move closer to play on <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g></string>
+    <!-- Text informing the user that their media is now playing on a different device (deviceName). [CHAR LIMIT=50] -->
+    <string name="media_transfer_playing">Playing on <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g></string>
+
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>
     <!-- Error message indicating that the control is no longer available in the application [CHAR LIMIT=30] -->
