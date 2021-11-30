@@ -15,6 +15,7 @@
   -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:orientation="horizontal"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -31,6 +32,16 @@
         android:layout_height="wrap_content"
         android:textSize="@dimen/media_ttt_text_size"
         android:textColor="?android:attr/textColorPrimary"
+        />
+
+    <ProgressBar
+        android:id="@+id/loading"
+        android:indeterminate="true"
+        android:layout_width="@dimen/media_ttt_icon_size"
+        android:layout_height="@dimen/media_ttt_icon_size"
+        android:layout_marginStart="12dp"
+        android:indeterminateTint="?androidprv:attr/colorAccentPrimaryVariant"
+        style="?android:attr/progressBarStyleSmall"
         />
 
 </LinearLayout>
