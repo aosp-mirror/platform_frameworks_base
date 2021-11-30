@@ -219,6 +219,7 @@ public class SmartReplyView extends ViewGroup {
     private void clearLayoutLineCount(View view) {
         if (view instanceof TextView) {
             ((TextView) view).nullLayouts();
+            view.forceLayout();
         }
     }
 
@@ -270,6 +271,9 @@ public class SmartReplyView extends ViewGroup {
 
             clearLayoutLineCount(child);
             child.measure(MEASURE_SPEC_ANY_LENGTH, heightMeasureSpec);
+            if (((Button) child).getLayout() == null) {
+                Log.wtf(TAG, "Button layout is null after measure.");
+            }
 
             coveredSuggestions.add(child);
 
@@ -590,6 +594,9 @@ public class SmartReplyView extends ViewGroup {
                 button.getPaddingLeft() + button.getPaddingRight() + textWidth
                       + getLeftCompoundDrawableWidthWithPadding(button), MeasureSpec.AT_MOST);
         button.measure(widthMeasureSpec, heightMeasureSpec);
+        if (button.getLayout() == null) {
+            Log.wtf(TAG, "Button layout is null after measure.");
+        }
 
         final int newWidth = button.getMeasuredWidth();
 
