@@ -118,7 +118,7 @@ public final class AssociationInfo implements Parcelable {
 
     /** @hide */
     public @Nullable String getDeviceMacAddressAsString() {
-        return mDeviceMacAddress != null ? mDeviceMacAddress.toString() : null;
+        return mDeviceMacAddress != null ? mDeviceMacAddress.toString().toUpperCase() : null;
     }
 
     /**
