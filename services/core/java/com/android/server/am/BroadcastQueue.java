@@ -611,7 +611,7 @@ public final class BroadcastQueue {
                         Slog.w(TAG, "Can't deliver broadcast to " + app.processName
                                 + " (pid " + app.getPid() + "). Crashing it.");
                         app.scheduleCrashLocked("can't deliver broadcast",
-                                CannotDeliverBroadcastException.TYPE_ID);
+                                CannotDeliverBroadcastException.TYPE_ID, /* extras=*/ null);
                     }
                     throw ex;
                 }
