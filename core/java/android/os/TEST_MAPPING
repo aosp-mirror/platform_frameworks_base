@@ -73,6 +73,15 @@
         "[^/]*BatteryConsumer[^/]*\\.java"
       ],
       "name": "BatteryUsageStatsProtoTests"
+    },
+    {
+      "file_patterns": ["SharedMemory[^/]*\\.java"],
+      "name": "CtsOsTestCases",
+      "options": [
+        {
+          "include-filter": "android.os.cts.SharedMemoryTest"
+        }
+      ]
     }
   ],
   "postsubmit": [
