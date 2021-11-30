@@ -49,7 +49,7 @@ class CompanionDeviceShellCommand extends android.os.ShellCommand {
                     int userId = getNextArgInt();
                     String packageName = getNextArgRequired();
                     String address = getNextArgRequired();
-                    mService.createAssociationInternal(userId, address, packageName, null);
+                    mService.legacyCreateAssociation(userId, address, packageName, null);
                 }
                 break;
 

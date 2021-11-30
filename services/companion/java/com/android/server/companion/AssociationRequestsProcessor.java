@@ -20,10 +20,7 @@ import static com.android.internal.util.CollectionUtils.filter;
 import static com.android.internal.util.FunctionalUtils.uncheckExceptions;
 import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
 import static com.android.server.companion.CompanionDeviceManagerService.LOG_TAG;
-import static com.android.server.companion.PermissionsUtils.enforceCallerCanInteractWithUserId;
-import static com.android.server.companion.PermissionsUtils.enforceCallerIsSystemOr;
-import static com.android.server.companion.PermissionsUtils.enforceRequestDeviceProfilePermissions;
-import static com.android.server.companion.PermissionsUtils.enforceRequestSelfManagedPermission;
+import static com.android.server.companion.PermissionsUtils.enforceCallerPermissionsToRequest;
 import static com.android.server.companion.RolesUtils.isRoleHolder;
 
 import static java.util.Objects.requireNonNull;
@@ -81,13 +78,13 @@ class AssociationRequestsProcessor {
         mService = service;
 
         final Intent serviceIntent = new Intent().setComponent(SERVICE_TO_BIND_TO);
-        mServiceConnectors = new PerUser<ServiceConnector<ICompanionDeviceDiscoveryService>>() {
+        mServiceConnectors = new PerUser<>() {
             @Override
             protected ServiceConnector<ICompanionDeviceDiscoveryService> create(int userId) {
                 return new ServiceConnector.Impl<>(
-                        mContext,
-                        serviceIntent, 0/* bindingFlags */, userId,
-                        ICompanionDeviceDiscoveryService.Stub::asInterface);
+                    mContext,
+                    serviceIntent, 0/* bindingFlags */, userId,
+                    ICompanionDeviceDiscoveryService.Stub::asInterface);
             }
         };
     }
@@ -99,6 +96,10 @@ class AssociationRequestsProcessor {
     void process(@NonNull AssociationRequest request, @NonNull String packageName,
             @UserIdInt int userId, @NonNull IAssociationRequestCallback callback) {
         requireNonNull(request, "Request MUST NOT be null");
+        if (request.isSelfManaged()) {
+            requireNonNull(request.getDisplayName(), "AssociationRequest.displayName "
+                    + "MUST NOT be null.");
+        }
         requireNonNull(packageName, "Package name MUST NOT be null");
         requireNonNull(callback, "Callback MUST NOT be null");
 
@@ -108,33 +109,33 @@ class AssociationRequestsProcessor {
                     + "package=u" + userId + "/" + packageName);
         }
 
-        enforceCallerCanInteractWithUserId(mContext, userId);
-        enforceCallerIsSystemOr(userId, packageName);
-
+        // 1. Enforce permissions and other requirements.
+        enforceCallerPermissionsToRequest(mContext, request, packageName, userId);
         mService.checkUsesFeature(packageName, userId);
 
-        if (request.isSelfManaged()) {
-            enforceRequestSelfManagedPermission(mContext);
+        // 2. Check if association can be created without launching UI (i.e. CDM needs NEITHER
+        // to perform discovery NOR to collect user consent).
+        if (request.isSelfManaged() && !request.isForceConfirmation()
+                && !willAddRoleHolder(request, packageName, userId)) {
+            // 2a. Create association right away.
+            final AssociationInfo association = mService.createAssociation(userId, packageName,
+                /* macAddress */ null, request.getDisplayName(), request.getDeviceProfile(),
+                /* selfManaged */true);
+            withCatchingRemoteException(() -> callback.onAssociationCreated(association));
+            return;
         }
 
-        final String deviceProfile = request.getDeviceProfile();
-        enforceRequestDeviceProfilePermissions(mContext, deviceProfile);
-
+        // 2b. Launch the UI.
         synchronized (mService.mLock) {
             if (mRequest != null) {
                 Slog.w(TAG, "CDM is already processing another AssociationRequest.");
 
-                try {
-                    callback.onFailure("Busy.");
-                } catch (RemoteException e) {
-                    // OK to ignore.
-                }
-                return;
+                withCatchingRemoteException(() -> callback.onFailure("Busy."));
             }
 
-            try {
-                callback.asBinder().linkToDeath(mBinderDeathRecipient /* recipient */, 0);
-            } catch (RemoteException e) {
+            final boolean linked = withCatchingRemoteException(
+                    () -> callback.asBinder().linkToDeath(mBinderDeathRecipient, 0));
+            if (!linked) {
                 // The process has died by now: do not proceed.
                 return;
             }
@@ -150,6 +151,7 @@ class AssociationRequestsProcessor {
             request.setSkipPrompt(true);
         }
 
+        final String deviceProfile = request.getDeviceProfile();
         mOngoingDeviceDiscovery = getDeviceProfilePermissionDescription(deviceProfile)
                 .thenComposeAsync(description -> {
                     if (DEBUG) {
@@ -171,7 +173,7 @@ class AssociationRequestsProcessor {
 
                 }, FgThread.getExecutor()).whenComplete(uncheckExceptions((deviceAddress, err) -> {
                     if (err == null) {
-                        mService.createAssociationInternal(
+                        mService.legacyCreateAssociation(
                                 userId, deviceAddress, packageName, deviceProfile);
                         mServiceConnectors.forUser(userId).post(
                                 ICompanionDeviceDiscoveryService::onAssociationCreated);
@@ -181,6 +183,18 @@ class AssociationRequestsProcessor {
                     }
                     cleanup();
                 }));
+    }
+
+    private boolean willAddRoleHolder(@NonNull AssociationRequest request,
+            @NonNull String packageName, @UserIdInt int userId) {
+        final String deviceProfile = request.getDeviceProfile();
+        if (deviceProfile == null) return false;
+
+        final boolean isRoleHolder = Binder.withCleanCallingIdentity(
+                () -> isRoleHolder(mContext, userId, packageName, deviceProfile));
+
+        // Don't need to "grant" the role, if the package already holds the role.
+        return !isRoleHolder;
     }
 
     private void cleanup() {
@@ -314,5 +328,18 @@ class AssociationRequestsProcessor {
         }
 
         return sameOemPackageCerts;
+    }
+
+    private static boolean withCatchingRemoteException(ThrowingRunnable runnable) {
+        try {
+            runnable.run();
+        } catch (RemoteException e) {
+            return false;
+        }
+        return true;
+    }
+
+    private interface ThrowingRunnable {
+        void run() throws RemoteException;
     }
 }
