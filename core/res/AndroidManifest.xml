@@ -2793,6 +2793,11 @@
         android:label="@string/permlab_manageProfileAndDeviceOwners"
         android:description="@string/permdesc_manageProfileAndDeviceOwners" />
 
+    <!-- @SystemApi @hide Allows an application to query device policies set by any admin on
+         the device.-->
+    <permission android:name="android.permission.QUERY_ADMIN_POLICY"
+                android:protectionLevel="signature|role" />
+
     <!-- @TestApi @hide Allows an application to reset the record of previous system update freeze
          periods. -->
     <permission android:name="android.permission.CLEAR_FREEZE_PERIOD"
