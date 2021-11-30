@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.os.PersistableBundle;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.util.Objects;
 
@@ -79,6 +80,12 @@ public final class VcnWifiUnderlyingNetworkPriority extends VcnUnderlyingNetwork
 
         final VcnWifiUnderlyingNetworkPriority rhs = (VcnWifiUnderlyingNetworkPriority) other;
         return mSsid == rhs.mSsid;
+    }
+
+    /** @hide */
+    @Override
+    void dumpTransportSpecificFields(IndentingPrintWriter pw) {
+        pw.println("mSsid: " + mSsid);
     }
 
     /** Retrieve the required SSID, or {@code null} if there is no requirement on SSID. */
