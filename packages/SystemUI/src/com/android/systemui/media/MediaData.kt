@@ -47,13 +47,18 @@ data class MediaData(
      */
     val artwork: Icon?,
     /**
-     * List of actions that can be performed on the player: prev, next, play, pause, etc.
+     * List of generic action buttons for the media player, based on notification actions
      */
     val actions: List<MediaAction>,
     /**
      * Same as above, but shown on smaller versions of the player, like in QQS or keyguard.
      */
     val actionsToShowInCompact: List<Int>,
+    /**
+     * Semantic actions buttons, based on the PlaybackState of the media session.
+     * If present, these actions will be preferred in the UI over [actions]
+     */
+    val semanticActions: MediaButton? = null,
     /**
      * Package name of the app that's posting the media.
      */
@@ -124,6 +129,32 @@ data class MediaData(
         return playbackLocation == PLAYBACK_LOCAL
     }
 }
+
+/**
+ * Contains [MediaAction] objects which represent specific buttons in the UI
+ */
+data class MediaButton(
+    /**
+     * Play/pause button
+     */
+    var playOrPause: MediaAction? = null,
+    /**
+     * Next button, or custom action
+     */
+    var nextOrCustom: MediaAction? = null,
+    /**
+     * Previous button, or custom action
+     */
+    var prevOrCustom: MediaAction? = null,
+    /**
+     * First custom action space
+     */
+    var startCustom: MediaAction? = null,
+    /**
+     * Last custom action space
+     */
+    var endCustom: MediaAction? = null
+)
 
 /** State of a media action. */
 data class MediaAction(

@@ -96,11 +96,24 @@ class MediaDataFilterTest : SysuiTestCase() {
         setUser(USER_MAIN)
 
         // Set up test media data
-        dataMain = MediaData(USER_MAIN, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-            emptyList(), PACKAGE, null, null, device, true, null)
-
-        dataGuest = MediaData(USER_GUEST, true, BG_COLOR, APP, null, ARTIST, TITLE, null,
-            emptyList(), emptyList(), PACKAGE, null, null, device, true, null)
+        dataMain = MediaData(
+                userId = USER_MAIN,
+                initialized = true,
+                backgroundColor = BG_COLOR,
+                app = APP,
+                appIcon = null,
+                artist = ARTIST,
+                song = TITLE,
+                artwork = null,
+                actions = emptyList(),
+                actionsToShowInCompact = emptyList(),
+                packageName = PACKAGE,
+                token = null,
+                clickIntent = null,
+                device = device,
+                active = true,
+                resumeAction = null)
+        dataGuest = dataMain.copy(userId = USER_GUEST)
 
         `when`(smartspaceData.targetId).thenReturn(SMARTSPACE_KEY)
         `when`(smartspaceData.isActive).thenReturn(true)

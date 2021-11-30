@@ -95,13 +95,26 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
             setPlaybackState(playbackBuilder.build())
         }
         session.setActive(true)
-        mediaData = MediaData(USER_ID, true, 0, PACKAGE, null, null, SESSION_TITLE, null,
-            emptyList(), emptyList(), PACKAGE, session.sessionToken, clickIntent = null,
-            device = null, active = true, resumeAction = null)
 
-        resumeData = MediaData(USER_ID, true, 0, PACKAGE, null, null, SESSION_TITLE, null,
-                emptyList(), emptyList(), PACKAGE, null, clickIntent = null,
-                device = null, active = false, resumeAction = null, resumption = true)
+        mediaData = MediaData(
+                userId = USER_ID,
+                initialized = true,
+                backgroundColor = 0,
+                app = PACKAGE,
+                appIcon = null,
+                artist = null,
+                song = SESSION_TITLE,
+                artwork = null,
+                actions = emptyList(),
+                actionsToShowInCompact = emptyList(),
+                packageName = PACKAGE,
+                token = session.sessionToken,
+                clickIntent = null,
+                device = null,
+                active = true,
+                resumeAction = null)
+
+        resumeData = mediaData.copy(token = null, active = false, resumption = true)
     }
 
     @Test

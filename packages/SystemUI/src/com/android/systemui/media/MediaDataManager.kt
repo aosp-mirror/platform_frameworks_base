@@ -38,6 +38,7 @@ import android.media.MediaDescription
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSession
+import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Parcelable
 import android.os.UserHandle
@@ -45,6 +46,7 @@ import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.text.TextUtils
 import android.util.Log
+import androidx.media.utils.MediaConstants
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.R
@@ -80,8 +82,24 @@ private const val TAG = "MediaDataManager"
 private const val DEBUG = true
 private const val EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY = "dismiss_intent"
 
-private val LOADING = MediaData(-1, false, 0, null, null, null, null, null,
-        emptyList(), emptyList(), "INVALID", null, null, null, true, null)
+private val LOADING = MediaData(
+        userId = -1,
+        initialized = false,
+        backgroundColor = 0,
+        app = null,
+        appIcon = null,
+        artist = null,
+        song = null,
+        artwork = null,
+        actions = emptyList(),
+        actionsToShowInCompact = emptyList(),
+        packageName = "INVALID",
+        token = null,
+        clickIntent = null,
+        device = null,
+        active = true,
+        resumeAction = null)
+
 @VisibleForTesting
 internal val EMPTY_SMARTSPACE_MEDIA_DATA = SmartspaceMediaData("INVALID", false, false,
     "INVALID", null, emptyList(), null, 0, 0)
@@ -112,7 +130,8 @@ class MediaDataManager(
     private var useMediaResumption: Boolean,
     private val useQsMediaPlayer: Boolean,
     private val systemClock: SystemClock,
-    private val tunerService: TunerService
+    private val tunerService: TunerService,
+    private val mediaFlags: MediaFlags,
 ) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
     companion object {
@@ -127,6 +146,10 @@ class MediaDataManager(
         // Maximum number of actions allowed in compact view
         @JvmField
         val MAX_COMPACT_ACTIONS = 3
+
+        /** Maximum number of [PlaybackState.CustomAction] buttons supported */
+        @JvmField
+        val MAX_CUSTOM_ACTIONS = 4
     }
 
     private val themeText = com.android.settingslib.Utils.getColorAttr(context,
@@ -182,12 +205,13 @@ class MediaDataManager(
         activityStarter: ActivityStarter,
         smartspaceMediaDataProvider: SmartspaceMediaDataProvider,
         clock: SystemClock,
-        tunerService: TunerService
+        tunerService: TunerService,
+        mediaFlags: MediaFlags
     ) : this(context, backgroundExecutor, foregroundExecutor, mediaControllerFactory,
             broadcastDispatcher, dumpManager, mediaTimeoutListener, mediaResumeListener,
             mediaSessionBasedFilter, mediaDeviceManager, mediaDataCombineLatest, mediaDataFilter,
             activityStarter, smartspaceMediaDataProvider, Utils.useMediaResumption(context),
-            Utils.useQsMediaPlayer(context), clock, tunerService)
+            Utils.useQsMediaPlayer(context), clock, tunerService, mediaFlags)
 
     private val appChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -522,7 +546,7 @@ class MediaDataManager(
         foregroundExecutor.execute {
             onMediaDataLoaded(packageName, null, MediaData(userId, true, bgColor, appName,
                     null, desc.subtitle, desc.title, artworkIcon, listOf(mediaAction), listOf(0),
-                    packageName, token, appIntent, device = null, active = false,
+                    null, packageName, token, appIntent, device = null, active = false,
                     resumeAction = resumeAction, resumption = true, notificationKey = packageName,
                     hasCheckedForResume = true, lastActive = lastActive))
         }
@@ -594,15 +618,55 @@ class MediaDataManager(
         }
 
         // Control buttons
+        // If flag is enabled and controller has a PlaybackState, create actions from session info
+        // Otherwise, use the notification actions
+        var actionIcons: List<MediaAction> = emptyList()
+        var actionsToShowCollapsed: List<Int> = emptyList()
+        var semanticActions: MediaButton? = null
+        if (mediaFlags.areMediaSessionActionsEnabled() && mediaController.playbackState != null) {
+            semanticActions = createActionsFromState(sbn.packageName, mediaController)
+        } else {
+            val actions = createActionsFromNotification(sbn)
+            actionIcons = actions.first
+            actionsToShowCollapsed = actions.second
+        }
+
+        val playbackLocation =
+                if (isRemoteCastNotification(sbn)) MediaData.PLAYBACK_CAST_REMOTE
+                else if (mediaController.playbackInfo?.playbackType ==
+                        MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL) MediaData.PLAYBACK_LOCAL
+                else MediaData.PLAYBACK_CAST_LOCAL
+        val isPlaying = mediaController.playbackState?.let { isPlayingState(it.state) } ?: null
+        val lastActive = systemClock.elapsedRealtime()
+        foregroundExecutor.execute {
+            val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
+            val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
+            val active = mediaEntries[key]?.active ?: true
+            onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, bgColor, app,
+                    smallIcon, artist, song, artWorkIcon, actionIcons, actionsToShowCollapsed,
+                    semanticActions, sbn.packageName, token, notif.contentIntent, null,
+                    active, resumeAction = resumeAction, playbackLocation = playbackLocation,
+                    notificationKey = key, hasCheckedForResume = hasCheckedForResume,
+                    isPlaying = isPlaying, isClearable = sbn.isClearable(),
+                    lastActive = lastActive))
+        }
+    }
+
+    /**
+     * Generate action buttons based on notification actions
+     */
+    private fun createActionsFromNotification(sbn: StatusBarNotification):
+            Pair<List<MediaAction>, List<Int>> {
+        val notif = sbn.notification
         val actionIcons: MutableList<MediaAction> = ArrayList()
         val actions = notif.actions
         var actionsToShowCollapsed = notif.extras.getIntArray(
-                Notification.EXTRA_COMPACT_ACTIONS)?.toMutableList() ?: mutableListOf<Int>()
+            Notification.EXTRA_COMPACT_ACTIONS)?.toMutableList() ?: mutableListOf()
         if (actionsToShowCollapsed.size > MAX_COMPACT_ACTIONS) {
-            Log.e(TAG, "Too many compact actions for $key, limiting to first $MAX_COMPACT_ACTIONS")
+            Log.e(TAG, "Too many compact actions for ${sbn.key}," +
+                "limiting to first $MAX_COMPACT_ACTIONS")
             actionsToShowCollapsed = actionsToShowCollapsed.subList(0, MAX_COMPACT_ACTIONS)
         }
-        // TODO: b/153736623 look into creating actions when this isn't a media style notification
 
         if (actions != null) {
             for ((index, action) in actions.withIndex()) {
@@ -631,32 +695,150 @@ class MediaDataManager(
                     action.getIcon()
                 }.setTint(themeText)
                 val mediaAction = MediaAction(
-                        mediaActionIcon,
-                        runnable,
-                        action.title)
+                    mediaActionIcon,
+                    runnable,
+                    action.title)
                 actionIcons.add(mediaAction)
             }
         }
+        return Pair(actionIcons, actionsToShowCollapsed)
+    }
 
-        val playbackLocation =
-                if (isRemoteCastNotification(sbn)) MediaData.PLAYBACK_CAST_REMOTE
-                else if (mediaController.playbackInfo?.playbackType ==
-                    MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL) MediaData.PLAYBACK_LOCAL
-                else MediaData.PLAYBACK_CAST_LOCAL
-        val isPlaying = mediaController.playbackState?.let { isPlayingState(it.state) } ?: null
-        val lastActive = systemClock.elapsedRealtime()
-        foregroundExecutor.execute {
-            val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
-            val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
-            val active = mediaEntries[key]?.active ?: true
-            onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, bgColor, app,
-                    smallIcon, artist, song, artWorkIcon, actionIcons,
-                    actionsToShowCollapsed, sbn.packageName, token, notif.contentIntent, null,
-                    active, resumeAction = resumeAction, playbackLocation = playbackLocation,
-                    notificationKey = key, hasCheckedForResume = hasCheckedForResume,
-                    isPlaying = isPlaying, isClearable = sbn.isClearable(),
-                    lastActive = lastActive))
+    /**
+     * Generates action button info for this media session based on the PlaybackState
+     *
+     * @param packageName Package name for the media app
+     * @param controller MediaController for the current session
+     * @return a Pair consisting of a list of media actions, and a list of ints representing which
+     *      of those actions should be shown in the compact player
+     */
+    private fun createActionsFromState(packageName: String, controller: MediaController):
+            MediaButton? {
+        val actions = MediaButton()
+        controller.playbackState?.let { state ->
+            // First, check for standard actions
+            actions.playOrPause = if (isPlayingState(state.state)) {
+                getStandardAction(controller, state.actions, PlaybackState.ACTION_PAUSE)
+            } else {
+                getStandardAction(controller, state.actions, PlaybackState.ACTION_PLAY)
+            }
+            val prevButton = getStandardAction(controller, state.actions,
+                    PlaybackState.ACTION_SKIP_TO_PREVIOUS)
+            val nextButton = getStandardAction(controller, state.actions,
+                    PlaybackState.ACTION_SKIP_TO_NEXT)
+
+            // Then, check for custom actions
+            val customActions = MutableList<MediaAction?>(4) { null }
+            var customCount = 0
+            for (i in 0..MAX_CUSTOM_ACTIONS) {
+                getCustomAction(state, packageName, controller, customCount)?.let {
+                    customActions[customCount++] = it
+                }
+            }
+
+            // Finally, assign the remaining button slots: C A play/pause B D
+            // A = previous, else custom action (if not reserved)
+            // B = next, else custom action (if not reserved)
+            // C and D are always custom actions
+            val reservePrev = controller.extras?.getBoolean(
+                    MediaConstants.SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_PREV) == true
+            val reserveNext = controller.extras?.getBoolean(
+                    MediaConstants.SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_NEXT) == true
+            var customIdx = 0
+
+            actions.prevOrCustom = if (prevButton != null) {
+                prevButton
+            } else if (!reservePrev) {
+                customActions[customIdx++]
+            } else {
+                null
+            }
+
+            actions.nextOrCustom = if (nextButton != null) {
+                nextButton
+            } else if (!reserveNext) {
+                customActions[customIdx++]
+            } else {
+                null
+            }
+
+            actions.startCustom = customActions[customIdx++]
+            actions.endCustom = customActions[customIdx++]
         }
+        return actions
+    }
+
+    /**
+     * Get a [MediaAction] representing one of
+     * - [PlaybackState.ACTION_PLAY]
+     * - [PlaybackState.ACTION_PAUSE]
+     * - [PlaybackState.ACTION_SKIP_TO_PREVIOUS]
+     * - [PlaybackState.ACTION_SKIP_TO_NEXT]
+     */
+    private fun getStandardAction(
+        controller: MediaController,
+        stateActions: Long,
+        action: Long
+    ): MediaAction? {
+        if (stateActions and action == 0L) {
+            return null
+        }
+
+        return when (action) {
+            PlaybackState.ACTION_PLAY -> {
+                MediaAction(
+                    Icon.createWithResource(context, com.android.internal.R.drawable.ic_media_play),
+                    { controller.transportControls.play() },
+                    context.getString(R.string.controls_media_button_play)
+                )
+            }
+            PlaybackState.ACTION_PAUSE -> {
+                MediaAction(
+                    Icon.createWithResource(context,
+                        com.android.internal.R.drawable.ic_media_pause),
+                    { controller.transportControls.pause() },
+                    context.getString(R.string.controls_media_button_pause)
+                )
+            }
+            PlaybackState.ACTION_SKIP_TO_PREVIOUS -> {
+                MediaAction(
+                    Icon.createWithResource(context,
+                        com.android.internal.R.drawable.ic_media_previous),
+                    { controller.transportControls.skipToPrevious() },
+                    context.getString(R.string.controls_media_button_prev)
+                )
+            }
+            PlaybackState.ACTION_SKIP_TO_NEXT -> {
+                MediaAction(
+                    Icon.createWithResource(context, com.android.internal.R.drawable.ic_media_next),
+                    { controller.transportControls.skipToNext() },
+                    context.getString(R.string.controls_media_button_next)
+                )
+            }
+            else -> null
+        }
+    }
+
+    /**
+     * Get a [MediaAction] representing a [PlaybackState.CustomAction]
+     */
+    private fun getCustomAction(
+        state: PlaybackState,
+        packageName: String,
+        controller: MediaController,
+        index: Int
+    ): MediaAction? {
+        if (state.customActions.size <= index || state.customActions[index] == null) {
+            if (DEBUG) { Log.d(TAG, "not enough actions or action was null at $index") }
+            return null
+        }
+
+        val it = state.customActions[index]
+        return MediaAction(
+            Icon.createWithResource(packageName, it.icon),
+            { controller.transportControls.sendCustomAction(it, it.extras) },
+            it.name
+        )
     }
 
     /**
