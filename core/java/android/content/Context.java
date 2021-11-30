@@ -6653,21 +6653,27 @@ public abstract class Context {
             @NonNull Configuration overrideConfiguration);
 
     /**
-     * Returns a new <code>Context</code> object from the current context but with resources
-     * adjusted to match the metrics of <code>display</code>. Each call to this method
+     * Returns a new {@code Context} object from the current context but with resources
+     * adjusted to match the metrics of {@code display}. Each call to this method
      * returns a new instance of a context object. Context objects are not shared; however,
      * common state (such as the {@link ClassLoader} and other resources for the same
-     * configuration) can be shared, so the <code>Context</code> itself is lightweight.
+     * configuration) can be shared, so the {@code Context} itself is lightweight.
+     *
+     * <p><b>Note:</b>
+     * This {@code Context} is <b>not</b> expected to be updated with new configuration if the
+     * underlying display configuration changes and the cached {@code Resources} it returns
+     * could be stale. It is suggested to use
+     * {@link android.hardware.display.DisplayManager.DisplayListener} to listen for
+     * changes and re-create an instance if necessary. </p>
      * <p>
+     * This {@code Context} is <b>not</b> a UI context, do not use it to access UI components
+     * or obtain a {@link WindowManager} instance.
+     * </p><p>
      * To obtain an instance of {@link WindowManager} configured to show windows on the given
      * display, call {@link #createWindowContext(int, Bundle)} on the returned display context,
      * then call {@link #getSystemService(String)} or {@link #getSystemService(Class)} on the
      * returned window context.
-     * <p>
-     * <b>Note:</b> The context returned by <code>createDisplayContext(Display)</code> is not a UI
-     * context. Do not access UI components or obtain a {@link WindowManager} from the context
-     * created by <code>createDisplayContext(Display)</code>.
-     *
+     * </p>
      * @param display The display to which the current context's resources are adjusted.
      *
      * @return A context for the display.
