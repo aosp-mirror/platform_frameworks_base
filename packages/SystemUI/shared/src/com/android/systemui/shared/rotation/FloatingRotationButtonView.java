@@ -17,6 +17,8 @@
 package com.android.systemui.shared.rotation;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -37,12 +39,15 @@ public class FloatingRotationButtonView extends ImageView {
     private KeyButtonRipple mRipple;
     private final Paint mOvalBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
 
+    private final Configuration mLastConfiguration;
+
     public FloatingRotationButtonView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
     public FloatingRotationButtonView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        mLastConfiguration = getResources().getConfiguration();
 
         setClickable(true);
 
@@ -60,6 +65,17 @@ public class FloatingRotationButtonView extends ImageView {
         super.onWindowVisibilityChanged(visibility);
         if (visibility != View.VISIBLE) {
             jumpDrawablesToCurrentState();
+        }
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        final int changes = mLastConfiguration.updateFrom(newConfig);
+        if ((changes & ActivityInfo.CONFIG_SCREEN_SIZE) != 0
+                || ((changes & ActivityInfo.CONFIG_DENSITY) != 0)) {
+            if (mRipple != null) {
+                mRipple.updateResources();
+            }
         }
     }
 

@@ -51,6 +51,9 @@ public class KeyButtonRipple extends Drawable {
     private static final Interpolator ALPHA_OUT_INTERPOLATOR =
             new PathInterpolator(0f, 0f, 0.8f, 1f);
 
+    @DimenRes
+    private final int mMaxWidthResource;
+
     private Paint mRipplePaint;
     private CanvasProperty<Float> mLeftProp;
     private CanvasProperty<Float> mTopProp;
@@ -90,8 +93,15 @@ public class KeyButtonRipple extends Drawable {
     private Type mType = Type.ROUNDED_RECT;
 
     public KeyButtonRipple(Context ctx, View targetView, @DimenRes int maxWidthResource) {
+        mMaxWidthResource = maxWidthResource;
         mMaxWidth = ctx.getResources().getDimensionPixelSize(maxWidthResource);
         mTargetView = targetView;
+    }
+
+    public void updateResources() {
+        mMaxWidth = mTargetView.getContext().getResources()
+                .getDimensionPixelSize(mMaxWidthResource);
+        invalidateSelf();
     }
 
     public void setDarkIntensity(float darkIntensity) {

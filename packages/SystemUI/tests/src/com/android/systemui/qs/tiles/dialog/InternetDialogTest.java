@@ -1,5 +1,7 @@
 package com.android.systemui.qs.tiles.dialog;
 
+import static com.android.systemui.qs.tiles.dialog.InternetDialogController.MAX_WIFI_ENTRY_COUNT;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -219,7 +221,7 @@ public class InternetDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void updateDialog_wifiOnAndNoWifiEntry_hideWifiEntryAndSeeAll() {
+    public void updateDialog_wifiOnAndNoWifiEntry_showWifiListAndSeeAllArea() {
         // The precondition WiFi ON is already in setUp()
         mInternetDialog.mConnectedWifiEntry = null;
         mInternetDialog.mWifiEntriesCount = 0;
@@ -227,19 +229,21 @@ public class InternetDialogTest extends SysuiTestCase {
         mInternetDialog.updateDialog(false);
 
         assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mWifiList.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mSeeAll.getVisibility()).isEqualTo(View.GONE);
+        // Show a blank block to fix the dialog height even if there is no WiFi list
+        assertThat(mWifiList.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mSeeAll.getVisibility()).isEqualTo(View.INVISIBLE);
     }
 
     @Test
-    public void updateDialog_wifiOnAndHasConnectedWifi_showConnectedWifiAndSeeAll() {
+    public void updateDialog_wifiOnAndHasConnectedWifi_showAllWifiAndSeeAllArea() {
         // The preconditions WiFi ON and WiFi entries are already in setUp()
         mInternetDialog.mWifiEntriesCount = 0;
 
         mInternetDialog.updateDialog(false);
 
         assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mWifiList.getVisibility()).isEqualTo(View.GONE);
+        // Show a blank block to fix the dialog height even if there is no WiFi list
+        assertThat(mWifiList.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mSeeAll.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
@@ -411,5 +415,55 @@ public class InternetDialogTest extends SysuiTestCase {
         // Then hide searching sub-title only
         assertThat(mInternetDialog.mIsProgressBarVisible).isTrue();
         assertThat(mInternetDialog.mIsSearchingHidden).isTrue();
+    }
+
+    @Test
+    public void getWifiListMaxCount_returnCountCorrectly() {
+        // Ethernet, MobileData, ConnectedWiFi are all hidden.
+        // Then the maximum count is equal to MAX_WIFI_ENTRY_COUNT.
+        setNetworkVisible(false, false, false);
+
+        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT);
+
+        // Only one of Ethernet, MobileData, ConnectedWiFi is displayed.
+        // Then the maximum count  is equal to MAX_WIFI_ENTRY_COUNT - 1.
+        setNetworkVisible(true, false, false);
+
+        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 1);
+
+        setNetworkVisible(false, true, false);
+
+        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 1);
+
+        setNetworkVisible(false, false, true);
+
+        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 1);
+
+        // Only one of Ethernet, MobileData, ConnectedWiFi is hidden.
+        // Then the maximum count  is equal to MAX_WIFI_ENTRY_COUNT - 2.
+        setNetworkVisible(true, true, false);
+
+        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 2);
+
+        setNetworkVisible(true, false, true);
+
+        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 2);
+
+        setNetworkVisible(false, true, true);
+
+        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 2);
+
+        // Ethernet, MobileData, ConnectedWiFi are all displayed.
+        // Then the maximum count  is equal to MAX_WIFI_ENTRY_COUNT - 3.
+        setNetworkVisible(true, true, true);
+
+        assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 3);
+    }
+
+    private void setNetworkVisible(boolean ethernetVisible, boolean mobileDataVisible,
+            boolean connectedWifiVisible) {
+        mEthernet.setVisibility(ethernetVisible ? View.VISIBLE : View.GONE);
+        mMobileDataToggle.setVisibility(mobileDataVisible ? View.VISIBLE : View.GONE);
+        mConnectedWifi.setVisibility(connectedWifiVisible ? View.VISIBLE : View.GONE);
     }
 }
