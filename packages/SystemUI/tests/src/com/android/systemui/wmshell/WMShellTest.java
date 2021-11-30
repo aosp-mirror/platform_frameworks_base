@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.draganddrop.DragAndDrop;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -79,6 +80,7 @@ public class WMShellTest extends SysuiTestCase {
     @Mock ShellCommandHandler mShellCommandHandler;
     @Mock SizeCompatUI mSizeCompatUI;
     @Mock ShellExecutor mSysUiMainExecutor;
+    @Mock DragAndDrop mDragAndDrop;
 
     @Before
     public void setUp() {
@@ -87,6 +89,7 @@ public class WMShellTest extends SysuiTestCase {
         mWMShell = new WMShell(mContext, Optional.of(mPip), Optional.of(mLegacySplitScreen),
                 Optional.of(mSplitScreen), Optional.of(mOneHanded), Optional.of(mHideDisplayCutout),
                 Optional.of(mShellCommandHandler), Optional.of(mSizeCompatUI),
+                Optional.of(mDragAndDrop),
                 mCommandQueue, mConfigurationController, mKeyguardUpdateMonitor,
                 mNavigationModeController, mScreenLifecycle, mSysUiState, mProtoTracer,
                 mWakefulnessLifecycle, mSysUiMainExecutor);

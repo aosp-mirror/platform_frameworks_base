@@ -32,6 +32,7 @@ import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
+import com.android.wm.shell.draganddrop.DragAndDrop;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -110,6 +111,9 @@ public interface SysUIComponent {
 
         @BindsInstance
         Builder setSizeCompatUI(Optional<SizeCompatUI> s);
+
+        @BindsInstance
+        Builder setDragAndDrop(Optional<DragAndDrop> d);
 
         SysUIComponent build();
     }

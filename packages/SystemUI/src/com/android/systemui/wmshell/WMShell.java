@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.ShellCommandHandler;
+import com.android.wm.shell.draganddrop.DragAndDrop;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.nano.WmShellTraceProto;
@@ -114,6 +115,7 @@ public final class WMShell extends SystemUI
     private final Optional<HideDisplayCutout> mHideDisplayCutoutOptional;
     private final Optional<ShellCommandHandler> mShellCommandHandler;
     private final Optional<SizeCompatUI> mSizeCompatUIOptional;
+    private final Optional<DragAndDrop> mDragAndDropOptional;
 
     private final CommandQueue mCommandQueue;
     private final ConfigurationController mConfigurationController;
@@ -142,6 +144,7 @@ public final class WMShell extends SystemUI
             Optional<HideDisplayCutout> hideDisplayCutoutOptional,
             Optional<ShellCommandHandler> shellCommandHandler,
             Optional<SizeCompatUI> sizeCompatUIOptional,
+            Optional<DragAndDrop> dragAndDropOptional,
             CommandQueue commandQueue,
             ConfigurationController configurationController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -167,6 +170,7 @@ public final class WMShell extends SystemUI
         mProtoTracer = protoTracer;
         mShellCommandHandler = shellCommandHandler;
         mSizeCompatUIOptional = sizeCompatUIOptional;
+        mDragAndDropOptional = dragAndDropOptional;
         mSysUiMainExecutor = sysUiMainExecutor;
     }
 
@@ -182,6 +186,7 @@ public final class WMShell extends SystemUI
         mOneHandedOptional.ifPresent(this::initOneHanded);
         mHideDisplayCutoutOptional.ifPresent(this::initHideDisplayCutout);
         mSizeCompatUIOptional.ifPresent(this::initSizeCompatUi);
+        mDragAndDropOptional.ifPresent(this::initDragAndDrop);
     }
 
     @VisibleForTesting
@@ -394,6 +399,20 @@ public final class WMShell extends SystemUI
             }
         };
         mKeyguardUpdateMonitor.registerCallback(mSizeCompatUIKeyguardCallback);
+    }
+
+    void initDragAndDrop(DragAndDrop dragAndDrop) {
+        mConfigurationController.addCallback(new ConfigurationController.ConfigurationListener() {
+            @Override
+            public void onConfigChanged(Configuration newConfig) {
+                dragAndDrop.onConfigChanged(newConfig);
+            }
+
+            @Override
+            public void onThemeChanged() {
+                dragAndDrop.onThemeChanged();
+            }
+        });
     }
 
     @Override
