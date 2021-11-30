@@ -16,9 +16,13 @@
 
 package com.android.server.companion.virtual;
 
+import static com.android.server.wm.ActivityInterceptorCallback.VIRTUAL_DEVICE_SERVICE_ORDERED_ID;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.companion.AssociationInfo;
 import android.companion.CompanionDeviceManager;
 import android.companion.CompanionDeviceManager.OnAssociationsChangedListener;
@@ -26,7 +30,9 @@ import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
 import android.content.Context;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.ExceptionUtils;
@@ -37,6 +43,9 @@ import android.window.DisplayWindowPolicyController;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
+import com.android.server.companion.virtual.VirtualDeviceImpl.PendingTrampoline;
+import com.android.server.wm.ActivityInterceptorCallback;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -48,10 +57,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class VirtualDeviceManagerService extends SystemService {
 
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = "VirtualDeviceManagerService";
+    private static final String TAG = "VirtualDeviceManagerService";
 
     private final Object mVirtualDeviceManagerLock = new Object();
     private final VirtualDeviceManagerImpl mImpl;
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final PendingTrampolineMap mPendingTrampolines = new PendingTrampolineMap(mHandler);
 
     /**
      * Mapping from CDM association IDs to virtual devices. Only one virtual device is allowed for
@@ -80,10 +91,39 @@ public class VirtualDeviceManagerService extends SystemService {
         mImpl = new VirtualDeviceManagerImpl();
     }
 
+    private final ActivityInterceptorCallback mActivityInterceptorCallback =
+            new ActivityInterceptorCallback() {
+
+        @Nullable
+        @Override
+        public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+            if (info.callingPackage == null) {
+                return null;
+            }
+            PendingTrampoline pt = mPendingTrampolines.remove(info.callingPackage);
+            if (pt == null) {
+                return null;
+            }
+            pt.mResultReceiver.send(Activity.RESULT_OK, null);
+            ActivityOptions options = info.checkedOptions;
+            if (options == null) {
+                options = ActivityOptions.makeBasic();
+            }
+            return new ActivityInterceptResult(
+                    info.intent, options.setLaunchDisplayId(pt.mDisplayId));
+        }
+    };
+
     @Override
     public void onStart() {
         publishBinderService(Context.VIRTUAL_DEVICE_SERVICE, mImpl);
         publishLocalService(VirtualDeviceManagerInternal.class, new LocalService());
+
+        ActivityTaskManagerInternal activityTaskManagerInternal = getLocalService(
+                ActivityTaskManagerInternal.class);
+        activityTaskManagerInternal.registerActivityStartInterceptor(
+                VIRTUAL_DEVICE_SERVICE_ORDERED_ID,
+                mActivityInterceptorCallback);
     }
 
     @GuardedBy("mVirtualDeviceManagerLock")
@@ -128,7 +168,8 @@ public class VirtualDeviceManagerService extends SystemService {
         }
     }
 
-    class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub {
+    class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub implements
+            VirtualDeviceImpl.PendingTrampolineCallback {
 
         @Override // Binder call
         public IVirtualDevice createVirtualDevice(
@@ -164,7 +205,8 @@ public class VirtualDeviceManagerService extends SystemService {
                                     mVirtualDevices.remove(associationId);
                                 }
                             }
-                        }, params);
+                        },
+                        this, params);
                 mVirtualDevices.put(associationInfo.getId(), virtualDevice);
                 return virtualDevice;
             }
@@ -185,7 +227,7 @@ public class VirtualDeviceManagerService extends SystemService {
                     }
                 }
             } else {
-                Slog.w(LOG_TAG, "No associations for user " + callingUserId);
+                Slog.w(TAG, "No associations for user " + callingUserId);
             }
             return null;
         }
@@ -196,7 +238,7 @@ public class VirtualDeviceManagerService extends SystemService {
             try {
                 return super.onTransact(code, data, reply, flags);
             } catch (Throwable e) {
-                Slog.e(LOG_TAG, "Error during IPC", e);
+                Slog.e(TAG, "Error during IPC", e);
                 throw ExceptionUtils.propagate(e, RemoteException.class);
             }
         }
@@ -205,7 +247,7 @@ public class VirtualDeviceManagerService extends SystemService {
         public void dump(@NonNull FileDescriptor fd,
                 @NonNull PrintWriter fout,
                 @Nullable String[] args) {
-            if (!DumpUtils.checkDumpAndUsageStatsPermission(getContext(), LOG_TAG, fout)) {
+            if (!DumpUtils.checkDumpAndUsageStatsPermission(getContext(), TAG, fout)) {
                 return;
             }
             fout.println("Created virtual devices: ");
@@ -215,10 +257,24 @@ public class VirtualDeviceManagerService extends SystemService {
                 }
             }
         }
+
+        @Override
+        public void startWaitingForPendingTrampoline(PendingTrampoline pendingTrampoline) {
+            PendingTrampoline existing = mPendingTrampolines.put(
+                    pendingTrampoline.mPendingIntent.getCreatorPackage(),
+                    pendingTrampoline);
+            if (existing != null) {
+                existing.mResultReceiver.send(Activity.RESULT_CANCELED, null);
+            }
+        }
+
+        @Override
+        public void stopWaitingForPendingTrampoline(PendingTrampoline pendingTrampoline) {
+            mPendingTrampolines.remove(pendingTrampoline.mPendingIntent.getCreatorPackage());
+        }
     }
 
     private final class LocalService extends VirtualDeviceManagerInternal {
-
         @Override
         public boolean isValidVirtualDevice(IVirtualDevice virtualDevice) {
             synchronized (mVirtualDeviceManagerLock) {
@@ -270,6 +326,44 @@ public class VirtualDeviceManagerService extends SystemService {
                 }
             }
             return false;
+        }
+    }
+
+    private static final class PendingTrampolineMap {
+        /**
+         * The maximum duration, in milliseconds, to wait for a trampoline activity launch after
+         * invoking a pending intent.
+         */
+        private static final int TRAMPOLINE_WAIT_MS = 5000;
+
+        private final ConcurrentHashMap<String, PendingTrampoline> mMap = new ConcurrentHashMap<>();
+        private final Handler mHandler;
+
+        PendingTrampolineMap(Handler handler) {
+            mHandler = handler;
+        }
+
+        PendingTrampoline put(
+                @NonNull String packageName, @NonNull PendingTrampoline pendingTrampoline) {
+            PendingTrampoline existing = mMap.put(packageName, pendingTrampoline);
+            mHandler.removeCallbacksAndMessages(existing);
+            mHandler.postDelayed(
+                    () -> {
+                        final String creatorPackage =
+                                pendingTrampoline.mPendingIntent.getCreatorPackage();
+                        if (creatorPackage != null) {
+                            remove(creatorPackage);
+                        }
+                    },
+                    pendingTrampoline,
+                    TRAMPOLINE_WAIT_MS);
+            return existing;
+        }
+
+        PendingTrampoline remove(@NonNull String packageName) {
+            PendingTrampoline pendingTrampoline = mMap.remove(packageName);
+            mHandler.removeCallbacksAndMessages(pendingTrampoline);
+            return pendingTrampoline;
         }
     }
 }
