@@ -16,6 +16,7 @@
 
 package android.accessibilityservice;
 
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.Parcel;
@@ -29,20 +30,21 @@ import java.lang.annotation.RetentionPolicy;
  * magnification.
  *
  * <p>
- * When the magnification config uses {@link #DEFAULT_MODE},
+ * When the magnification config uses {@link #MAGNIFICATION_MODE_DEFAULT},
  * {@link AccessibilityService} will be able to control the activated magnifier on the display.
  * If there is no magnifier activated, it controls the last-activated magnification mode.
  * If there is no magnifier activated before, it controls full-screen magnifier by default.
  * </p>
  *
  * <p>
- * When the magnification config uses {@link #FULLSCREEN_MODE}. {@link AccessibilityService} will
- * be able to control full-screen magnifier on the display.
+ * When the magnification config uses {@link #MAGNIFICATION_MODE_FULLSCREEN}.
+ * {@link AccessibilityService} will be able to control full-screen magnifier on the display.
  * </p>
  *
  * <p>
- * When the magnification config uses {@link #WINDOW_MODE}. {@link AccessibilityService} will be
- * able to control the activated window magnifier on the display.
+ * When the magnification config uses {@link #MAGNIFICATION_MODE_WINDOW}.
+ * {@link AccessibilityService} will be able to control the activated window magnifier
+ * on the display.
  * </p>
  *
  * <p>
@@ -54,22 +56,23 @@ import java.lang.annotation.RetentionPolicy;
 public final class MagnificationConfig implements Parcelable {
 
     /** The controlling magnification mode. It controls the activated magnifier. */
-    public static final int DEFAULT_MODE = 0;
+    public static final int MAGNIFICATION_MODE_DEFAULT = 0;
     /** The controlling magnification mode. It controls fullscreen magnifier. */
-    public static final int FULLSCREEN_MODE = 1;
+    public static final int MAGNIFICATION_MODE_FULLSCREEN = 1;
     /** The controlling magnification mode. It controls window magnifier. */
-    public static final int WINDOW_MODE = 2;
+    public static final int MAGNIFICATION_MODE_WINDOW = 2;
 
+    /** @hide */
     @IntDef(prefix = {"MAGNIFICATION_MODE"}, value = {
-            DEFAULT_MODE,
-            FULLSCREEN_MODE,
-            WINDOW_MODE,
+            MAGNIFICATION_MODE_DEFAULT,
+            MAGNIFICATION_MODE_FULLSCREEN,
+            MAGNIFICATION_MODE_WINDOW,
     })
     @Retention(RetentionPolicy.SOURCE)
-    @interface MAGNIFICATION_MODE {
+    @interface MagnificationMode {
     }
 
-    private int mMode = DEFAULT_MODE;
+    private int mMode = MAGNIFICATION_MODE_DEFAULT;
     private float mScale = Float.NaN;
     private float mCenterX = Float.NaN;
     private float mCenterY = Float.NaN;
@@ -107,9 +110,9 @@ public final class MagnificationConfig implements Parcelable {
     /**
      * Returns the screen-relative X coordinate of the center of the magnification viewport.
      *
-     * @return the X coordinate. If the controlling magnifier is {@link #WINDOW_MODE} but not
-     * enabled, it returns {@link Float#NaN}. If the controlling magnifier is {@link
-     * #FULLSCREEN_MODE} but not enabled, it returns 0
+     * @return the X coordinate. If the controlling magnifier is {@link #MAGNIFICATION_MODE_WINDOW}
+     * but not enabled, it returns {@link Float#NaN}. If the controlling magnifier is {@link
+     * #MAGNIFICATION_MODE_FULLSCREEN} but not enabled, it returns 0
      */
     public float getCenterX() {
         return mCenterX;
@@ -118,9 +121,9 @@ public final class MagnificationConfig implements Parcelable {
     /**
      * Returns the screen-relative Y coordinate of the center of the magnification viewport.
      *
-     * @return the Y coordinate If the controlling magnifier is {@link #WINDOW_MODE} but not
-     * enabled, it returns {@link Float#NaN}. If the controlling magnifier is {@link
-     * #FULLSCREEN_MODE} but not enabled, it returns 0
+     * @return the Y coordinate If the controlling magnifier is {@link #MAGNIFICATION_MODE_WINDOW}
+     * but not enabled, it returns {@link Float#NaN}. If the controlling magnifier is {@link
+     * #MAGNIFICATION_MODE_FULLSCREEN} but not enabled, it returns 0
      */
     public float getCenterY() {
         return mCenterY;
@@ -159,7 +162,7 @@ public final class MagnificationConfig implements Parcelable {
      */
     public static final class Builder {
 
-        private int mMode = DEFAULT_MODE;
+        private int mMode = MAGNIFICATION_MODE_DEFAULT;
         private float mScale = Float.NaN;
         private float mCenterX = Float.NaN;
         private float mCenterY = Float.NaN;
@@ -177,7 +180,7 @@ public final class MagnificationConfig implements Parcelable {
          * @return This builder
          */
         @NonNull
-        public MagnificationConfig.Builder setMode(@MAGNIFICATION_MODE int mode) {
+        public MagnificationConfig.Builder setMode(@MagnificationMode int mode) {
             mMode = mode;
             return this;
         }
@@ -185,20 +188,22 @@ public final class MagnificationConfig implements Parcelable {
         /**
          * Sets the magnification scale.
          *
-         * @param scale The magnification scale
+         * @param scale The magnification scale, in the range [1, 8]
          * @return This builder
          */
         @NonNull
-        public MagnificationConfig.Builder setScale(float scale) {
+        public MagnificationConfig.Builder setScale(@FloatRange(from = 1f, to = 8f) float scale) {
             mScale = scale;
             return this;
         }
 
         /**
          * Sets the X coordinate of the center of the magnification viewport.
+         * The controlling magnifier will apply the given position.
          *
          * @param centerX the screen-relative X coordinate around which to
-         *                center and scale, or {@link Float#NaN} to leave unchanged
+         *                center and scale that is in the range [0, screenWidth],
+         *                or {@link Float#NaN} to leave unchanged
          * @return This builder
          */
         @NonNull
@@ -209,9 +214,11 @@ public final class MagnificationConfig implements Parcelable {
 
         /**
          * Sets the Y coordinate of the center of the magnification viewport.
+         * The controlling magnifier will apply the given position.
          *
          * @param centerY the screen-relative Y coordinate around which to
-         *                center and scale, or {@link Float#NaN} to leave unchanged
+         *                center and scale that is in the range [0, screenHeight],
+         *                or {@link Float#NaN} to leave unchanged
          * @return This builder
          */
         @NonNull

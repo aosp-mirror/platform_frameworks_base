@@ -3264,9 +3264,9 @@ package android.accessibilityservice {
     method public float getScale();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.accessibilityservice.MagnificationConfig> CREATOR;
-    field public static final int DEFAULT_MODE = 0; // 0x0
-    field public static final int FULLSCREEN_MODE = 1; // 0x1
-    field public static final int WINDOW_MODE = 2; // 0x2
+    field public static final int MAGNIFICATION_MODE_DEFAULT = 0; // 0x0
+    field public static final int MAGNIFICATION_MODE_FULLSCREEN = 1; // 0x1
+    field public static final int MAGNIFICATION_MODE_WINDOW = 2; // 0x2
   }
 
   public static final class MagnificationConfig.Builder {
@@ -3275,7 +3275,7 @@ package android.accessibilityservice {
     method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setCenterX(float);
     method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setCenterY(float);
     method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setMode(int);
-    method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setScale(float);
+    method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setScale(@FloatRange(from=1.0f, to=8.0f) float);
   }
 
   public final class TouchInteractionController {

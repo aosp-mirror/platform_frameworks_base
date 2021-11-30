@@ -16,8 +16,8 @@
 
 package com.android.server.accessibility;
 
-import static android.accessibilityservice.MagnificationConfig.FULLSCREEN_MODE;
-import static android.accessibilityservice.MagnificationConfig.WINDOW_MODE;
+import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_FULLSCREEN;
+import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_WINDOW;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -82,7 +82,7 @@ public class MagnificationProcessorTest {
     @Test
     public void getScale_fullscreenMode_expectedValue() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
-                .setMode(FULLSCREEN_MODE)
+                .setMode(MAGNIFICATION_MODE_FULLSCREEN)
                 .setScale(TEST_SCALE).build();
         setMagnificationActivated(TEST_DISPLAY, config);
 
@@ -94,7 +94,7 @@ public class MagnificationProcessorTest {
     @Test
     public void getScale_windowMode_expectedValue() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
-                .setMode(WINDOW_MODE)
+                .setMode(MAGNIFICATION_MODE_WINDOW)
                 .setScale(TEST_SCALE).build();
         setMagnificationActivated(TEST_DISPLAY, config);
 
@@ -106,7 +106,7 @@ public class MagnificationProcessorTest {
     @Test
     public void getCenterX_canControlFullscreenMagnification_returnCenterX() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
-                .setMode(FULLSCREEN_MODE)
+                .setMode(MAGNIFICATION_MODE_FULLSCREEN)
                 .setCenterX(TEST_CENTER_X).build();
         setMagnificationActivated(TEST_DISPLAY, config);
 
@@ -119,7 +119,7 @@ public class MagnificationProcessorTest {
     @Test
     public void getCenterX_canControlWindowMagnification_returnCenterX() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
-                .setMode(WINDOW_MODE)
+                .setMode(MAGNIFICATION_MODE_WINDOW)
                 .setCenterX(TEST_CENTER_X).build();
         setMagnificationActivated(TEST_DISPLAY, config);
 
@@ -132,7 +132,7 @@ public class MagnificationProcessorTest {
     @Test
     public void getCenterY_canControlFullscreenMagnification_returnCenterY() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
-                .setMode(FULLSCREEN_MODE)
+                .setMode(MAGNIFICATION_MODE_FULLSCREEN)
                 .setCenterY(TEST_CENTER_Y).build();
         setMagnificationActivated(TEST_DISPLAY, config);
 
@@ -145,7 +145,7 @@ public class MagnificationProcessorTest {
     @Test
     public void getCenterY_canControlWindowMagnification_returnCenterY() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
-                .setMode(WINDOW_MODE)
+                .setMode(MAGNIFICATION_MODE_WINDOW)
                 .setCenterY(TEST_CENTER_Y).build();
         setMagnificationActivated(TEST_DISPLAY, config);
 
@@ -158,7 +158,7 @@ public class MagnificationProcessorTest {
     @Test
     public void getMagnificationRegion_canControlFullscreenMagnification_returnRegion() {
         final Region region = new Region(10, 20, 100, 200);
-        setMagnificationActivated(TEST_DISPLAY, FULLSCREEN_MODE);
+        setMagnificationActivated(TEST_DISPLAY, MAGNIFICATION_MODE_FULLSCREEN);
         mMagnificationProcessor.getMagnificationRegion(TEST_DISPLAY,
                 region,  /* canControlMagnification= */true);
 
@@ -169,7 +169,7 @@ public class MagnificationProcessorTest {
     @Test
     public void getMagnificationRegion_canControlWindowMagnification_returnRegion() {
         final Region region = new Region(10, 20, 100, 200);
-        setMagnificationActivated(TEST_DISPLAY, WINDOW_MODE);
+        setMagnificationActivated(TEST_DISPLAY, MAGNIFICATION_MODE_WINDOW);
         mMagnificationProcessor.getMagnificationRegion(TEST_DISPLAY,
                 region,  /* canControlMagnification= */true);
 
@@ -180,7 +180,7 @@ public class MagnificationProcessorTest {
     @Test
     public void getMagnificationRegion_fullscreenModeNotRegistered_shouldRegisterThenUnregister() {
         final Region region = new Region(10, 20, 100, 200);
-        setMagnificationActivated(TEST_DISPLAY, FULLSCREEN_MODE);
+        setMagnificationActivated(TEST_DISPLAY, MAGNIFICATION_MODE_FULLSCREEN);
         doAnswer((invocation) -> {
             ((Region) invocation.getArguments()[1]).set(region);
             return null;
@@ -198,7 +198,7 @@ public class MagnificationProcessorTest {
     @Test
     public void getMagnificationCenterX_fullscreenModeNotRegistered_shouldRegisterThenUnregister() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
-                .setMode(FULLSCREEN_MODE)
+                .setMode(MAGNIFICATION_MODE_FULLSCREEN)
                 .setCenterX(TEST_CENTER_X).build();
         setMagnificationActivated(TEST_DISPLAY, config);
 
@@ -212,7 +212,7 @@ public class MagnificationProcessorTest {
     @Test
     public void getMagnificationCenterY_fullscreenModeNotRegistered_shouldRegisterThenUnregister() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
-                .setMode(FULLSCREEN_MODE)
+                .setMode(MAGNIFICATION_MODE_FULLSCREEN)
                 .setCenterY(TEST_CENTER_Y).build();
         setMagnificationActivated(TEST_DISPLAY, config);
 
@@ -225,17 +225,17 @@ public class MagnificationProcessorTest {
 
     @Test
     public void getCurrentMode_configDefaultMode_returnActivatedMode() {
-        final int targetMode = WINDOW_MODE;
+        final int targetMode = MAGNIFICATION_MODE_WINDOW;
         setMagnificationActivated(TEST_DISPLAY, targetMode);
 
         int currentMode = mMagnificationProcessor.getControllingMode(TEST_DISPLAY);
 
-        assertEquals(WINDOW_MODE, currentMode);
+        assertEquals(MAGNIFICATION_MODE_WINDOW, currentMode);
     }
 
     @Test
     public void reset_fullscreenMagnificationActivated() {
-        setMagnificationActivated(TEST_DISPLAY, FULLSCREEN_MODE);
+        setMagnificationActivated(TEST_DISPLAY, MAGNIFICATION_MODE_FULLSCREEN);
 
         mMagnificationProcessor.reset(TEST_DISPLAY, /* animate= */false);
 
@@ -244,7 +244,7 @@ public class MagnificationProcessorTest {
 
     @Test
     public void reset_windowMagnificationActivated() {
-        setMagnificationActivated(TEST_DISPLAY, WINDOW_MODE);
+        setMagnificationActivated(TEST_DISPLAY, MAGNIFICATION_MODE_WINDOW);
 
         mMagnificationProcessor.reset(TEST_DISPLAY, /* animate= */false);
 
@@ -254,7 +254,7 @@ public class MagnificationProcessorTest {
     @Test
     public void setMagnificationConfig_fullscreenModeNotRegistered_shouldRegister() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
-                .setMode(FULLSCREEN_MODE)
+                .setMode(MAGNIFICATION_MODE_FULLSCREEN)
                 .setScale(TEST_SCALE)
                 .setCenterX(TEST_CENTER_X)
                 .setCenterY(TEST_CENTER_Y).build();
@@ -269,7 +269,7 @@ public class MagnificationProcessorTest {
     @Test
     public void setMagnificationConfig_windowMode_enableMagnification() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
-                .setMode(WINDOW_MODE)
+                .setMode(MAGNIFICATION_MODE_WINDOW)
                 .setScale(TEST_SCALE)
                 .setCenterX(TEST_CENTER_X)
                 .setCenterY(TEST_CENTER_Y).build();
@@ -284,7 +284,7 @@ public class MagnificationProcessorTest {
     @Test
     public void setMagnificationConfig_fullscreenEnabled_expectedConfigValues() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
-                .setMode(FULLSCREEN_MODE)
+                .setMode(MAGNIFICATION_MODE_FULLSCREEN)
                 .setScale(TEST_SCALE)
                 .setCenterX(TEST_CENTER_X)
                 .setCenterY(TEST_CENTER_Y).build();
@@ -302,7 +302,7 @@ public class MagnificationProcessorTest {
     @Test
     public void setMagnificationConfig_windowEnabled_expectedConfigValues() {
         final MagnificationConfig config = new MagnificationConfig.Builder()
-                .setMode(WINDOW_MODE)
+                .setMode(MAGNIFICATION_MODE_WINDOW)
                 .setScale(TEST_SCALE)
                 .setCenterX(TEST_CENTER_X)
                 .setCenterY(TEST_CENTER_Y).build();
@@ -319,8 +319,8 @@ public class MagnificationProcessorTest {
 
     @Test
     public void setMagnificationConfig_controllingModeChangeAndAnimating_transitionConfigMode() {
-        final int currentActivatedMode = WINDOW_MODE;
-        final int targetMode = FULLSCREEN_MODE;
+        final int currentActivatedMode = MAGNIFICATION_MODE_WINDOW;
+        final int targetMode = MAGNIFICATION_MODE_FULLSCREEN;
         final MagnificationConfig oldConfig = new MagnificationConfig.Builder()
                 .setMode(currentActivatedMode)
                 .setScale(TEST_SCALE)
@@ -354,15 +354,15 @@ public class MagnificationProcessorTest {
         when(mMockMagnificationController.isActivated(displayId, config.getMode())).thenReturn(
                 true);
         mMagnificationProcessor.setMagnificationConfig(displayId, config, false, SERVICE_ID);
-        if (config.getMode() == FULLSCREEN_MODE) {
-            when(mMockMagnificationController.isActivated(displayId, WINDOW_MODE)).thenReturn(
-                    false);
+        if (config.getMode() == MAGNIFICATION_MODE_FULLSCREEN) {
+            when(mMockMagnificationController.isActivated(displayId,
+                    MAGNIFICATION_MODE_WINDOW)).thenReturn(false);
             mFullScreenMagnificationControllerStub.resetAndStubMethods();
             mMockFullScreenMagnificationController.setScaleAndCenter(displayId, config.getScale(),
                     config.getCenterX(), config.getCenterY(), true, SERVICE_ID);
-        } else if (config.getMode() == WINDOW_MODE) {
-            when(mMockMagnificationController.isActivated(displayId, FULLSCREEN_MODE)).thenReturn(
-                    false);
+        } else if (config.getMode() == MAGNIFICATION_MODE_WINDOW) {
+            when(mMockMagnificationController.isActivated(displayId,
+                    MAGNIFICATION_MODE_FULLSCREEN)).thenReturn(false);
             mWindowMagnificationManagerStub.resetAndStubMethods();
             mMockWindowMagnificationManager.enableWindowMagnification(displayId, config.getScale(),
                     config.getCenterX(), config.getCenterY());
