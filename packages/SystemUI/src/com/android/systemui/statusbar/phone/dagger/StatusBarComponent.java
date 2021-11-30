@@ -23,6 +23,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import com.android.keyguard.LockIconViewController;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.statusbar.NotificationShelfController;
+import com.android.systemui.statusbar.core.StatusBarInitializer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
@@ -131,4 +132,10 @@ public interface StatusBarComponent {
      */
     @Named(STATUS_BAR_FRAGMENT)
     CollapsedStatusBarFragment createCollapsedStatusBarFragment();
+
+    /**
+     * Creates a StatusBarInitializer
+     */
+    @StatusBarScope
+    StatusBarInitializer getStatusBarInitializer();
 }
