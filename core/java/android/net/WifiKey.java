@@ -29,8 +29,10 @@ import java.util.regex.Pattern;
  * Information identifying a Wi-Fi network.
  * @see NetworkKey
  *
+ * @deprecated as part of the {@link NetworkScore} deprecation.
  * @hide
  */
+@Deprecated
 @SystemApi
 public class WifiKey implements Parcelable {
 

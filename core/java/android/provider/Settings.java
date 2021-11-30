@@ -12014,8 +12014,10 @@ public final class Settings {
          * Value to specify whether network quality scores and badging should be shown in the UI.
          *
          * Type: int (0 for false, 1 for true)
+         * @deprecated {@code NetworkScoreManager} is deprecated.
          * @hide
          */
+        @Deprecated
         @Readable
         public static final String NETWORK_SCORING_UI_ENABLED = "network_scoring_ui_enabled";
 
@@ -12024,8 +12026,10 @@ public final class Settings {
          * when generating SSID only bases score curves.
          *
          * Type: long
+         * @deprecated {@code NetworkScoreManager} is deprecated.
          * @hide
          */
+        @Deprecated
         @Readable
         public static final String SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS =
                 "speed_label_cache_eviction_age_millis";
@@ -12058,8 +12062,10 @@ public final class Settings {
          * {@link NetworkScoreManager#setActiveScorer(String)} to write it.
          *
          * Type: string - package name
+         * @deprecated {@code NetworkScoreManager} is deprecated.
          * @hide
          */
+        @Deprecated
         @Readable
         public static final String NETWORK_RECOMMENDATIONS_PACKAGE =
                 "network_recommendations_package";
@@ -12069,8 +12075,10 @@ public final class Settings {
          * networks automatically.
          *
          * Type: string package name or null if the feature is either not provided or disabled.
+         * @deprecated {@code NetworkScoreManager} is deprecated.
          * @hide
          */
+        @Deprecated
         @TestApi
         @Readable
         public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
@@ -12080,8 +12088,10 @@ public final class Settings {
          * {@link com.android.server.wifi.RecommendedNetworkEvaluator}.
          *
          * Type: long
+         * @deprecated {@code NetworkScoreManager} is deprecated.
          * @hide
          */
+        @Deprecated
         @Readable
         public static final String RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS =
                 "recommended_network_evaluator_cache_expiry_ms";
