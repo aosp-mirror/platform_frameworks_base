@@ -76,6 +76,7 @@ import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -90,6 +91,7 @@ import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
@@ -103,6 +105,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.util.Optional;
 
@@ -135,7 +138,6 @@ public class NavigationBarTest extends SysuiTestCase {
     EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
     @Mock
     EdgeBackGestureHandler mEdgeBackGestureHandler;
-    @Mock
     NavBarHelper mNavBarHelper;
     @Mock
     private LightBarController mLightBarController;
@@ -179,6 +181,12 @@ public class NavigationBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(OverviewProxyService.class, mOverviewProxyService);
         mDependency.injectTestDependency(NavigationModeController.class, mNavigationModeController);
         TestableLooper.get(this).runWithLooper(() -> {
+            mNavBarHelper = spy(new NavBarHelper(mContext, mock(AccessibilityManager.class),
+                    mock(AccessibilityManagerWrapper.class),
+                    mock(AccessibilityButtonModeObserver.class), mOverviewProxyService,
+                    () -> mock(AssistManager.class), () -> Optional.of(mStatusBar),
+                    mock(NavigationModeController.class), mock(UserTracker.class),
+                    mock(DumpManager.class)));
             mNavigationBar = createNavBar(mContext);
             mExternalDisplayNavigationBar = createNavBar(mSysuiTestableContextExternal);
         });
