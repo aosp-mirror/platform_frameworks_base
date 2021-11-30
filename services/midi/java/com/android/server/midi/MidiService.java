@@ -18,9 +18,11 @@ package com.android.server.midi;
 
 import android.annotation.NonNull;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -33,6 +35,7 @@ import android.media.midi.IMidiDeviceListener;
 import android.media.midi.IMidiDeviceOpenCallback;
 import android.media.midi.IMidiDeviceServer;
 import android.media.midi.IMidiManager;
+import android.media.midi.MidiDevice;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceService;
 import android.media.midi.MidiDeviceStatus;
@@ -55,6 +58,7 @@ import com.android.server.SystemService.TargetUser;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -96,8 +100,11 @@ public class MidiService extends IMidiManager.Stub {
             = new HashMap<MidiDeviceInfo, Device>();
 
     // list of all Bluetooth devices, keyed by BluetoothDevice
-     private final HashMap<BluetoothDevice, Device> mBluetoothDevices
+    private final HashMap<BluetoothDevice, Device> mBluetoothDevices
             = new HashMap<BluetoothDevice, Device>();
+
+    private final HashMap<BluetoothDevice, MidiDevice> mBleMidiDeviceMap =
+            new HashMap<BluetoothDevice, MidiDevice>();
 
     // list of all devices, keyed by IMidiDeviceServer
     private final HashMap<IBinder, Device> mDevicesByServer = new HashMap<IBinder, Device>();
@@ -569,9 +576,44 @@ public class MidiService extends IMidiManager.Stub {
         }
     }
 
+    private final BroadcastReceiver mBleMidiReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action == null) {
+                Log.w(TAG, "MidiService, action is null");
+                return;
+            }
+
+            switch (action) {
+                case BluetoothDevice.ACTION_ACL_CONNECTED: {
+                    Log.d(TAG, "ACTION_ACL_CONNECTED");
+                    BluetoothDevice btDevice =
+                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    openBluetoothDevice(btDevice);
+                }
+                break;
+
+                case BluetoothDevice.ACTION_ACL_DISCONNECTED: {
+                    Log.d(TAG, "ACTION_ACL_DISCONNECTED");
+                    BluetoothDevice btDevice =
+                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    closeBluetoothDevice(btDevice);
+                }
+                break;
+            }
+        }
+    };
+
     public MidiService(Context context) {
         mContext = context;
         mPackageManager = context.getPackageManager();
+
+        // Setup broadcast receivers
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        context.registerReceiver(mBleMidiReceiver, filter);
 
         mBluetoothServiceUid = -1;
     }
@@ -701,9 +743,43 @@ public class MidiService extends IMidiManager.Stub {
         }
     }
 
+    private void openBluetoothDevice(BluetoothDevice bluetoothDevice) {
+        Log.d(TAG, "openBluetoothDevice() device: " + bluetoothDevice);
+
+        MidiManager midiManager = mContext.getSystemService(MidiManager.class);
+        midiManager.openBluetoothDevice(bluetoothDevice,
+                new MidiManager.OnDeviceOpenedListener() {
+                    @Override
+                    public void onDeviceOpened(MidiDevice device) {
+                        synchronized (mBleMidiDeviceMap) {
+                            mBleMidiDeviceMap.put(bluetoothDevice, device);
+                        }
+                    }
+                }, null);
+    }
+
+    private void closeBluetoothDevice(BluetoothDevice bluetoothDevice) {
+        Log.d(TAG, "closeBluetoothDevice() device: " + bluetoothDevice);
+
+        MidiDevice midiDevice;
+        synchronized (mBleMidiDeviceMap) {
+            midiDevice = mBleMidiDeviceMap.remove(bluetoothDevice);
+        }
+
+        if (midiDevice != null) {
+            try {
+                midiDevice.close();
+            } catch (IOException ex) {
+                Log.e(TAG, "Exception closing BLE-MIDI device" + ex);
+            }
+        }
+    }
+
     @Override
     public void openBluetoothDevice(IBinder token, BluetoothDevice bluetoothDevice,
             IMidiDeviceOpenCallback callback) {
+        Log.d(TAG, "openBluetoothDevice()");
+
         Client client = getClient(token);
         if (client == null) return;
 

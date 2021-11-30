@@ -24,6 +24,7 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.media.midi.MidiDevice;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceServer;
 import android.media.midi.MidiDeviceStatus;
@@ -63,6 +64,7 @@ public final class BluetoothMidiDevice {
             "00002902-0000-1000-8000-00805f9b34fb");
 
     private final BluetoothDevice mBluetoothDevice;
+    private final Context mContext;
     private final BluetoothMidiService mService;
     private final MidiManager mMidiManager;
     private MidiReceiver mOutputReceiver;
@@ -136,6 +138,8 @@ public final class BluetoothMidiDevice {
                         // switch to receiving notifications
                         mBluetoothGatt.readCharacteristic(characteristic);
                     }
+
+                    openBluetoothDevice(mBluetoothDevice);
                 }
             } else {
                 Log.e(TAG, "onServicesDiscovered received: " + status);
@@ -249,6 +253,7 @@ public final class BluetoothMidiDevice {
 
         mBluetoothGatt = mBluetoothDevice.connectGatt(context, false, mGattCallback);
 
+        mContext = context;
         mMidiManager = (MidiManager)context.getSystemService(Context.MIDI_SERVICE);
 
         Bundle properties = new Bundle();
@@ -308,6 +313,18 @@ public final class BluetoothMidiDevice {
                 mBluetoothGatt = null;
             }
         }
+    }
+
+    void openBluetoothDevice(BluetoothDevice btDevice) {
+        Log.d(TAG, "openBluetoothDevice() device: " + btDevice);
+
+        MidiManager midiManager = mContext.getSystemService(MidiManager.class);
+        midiManager.openBluetoothDevice(btDevice,
+                new MidiManager.OnDeviceOpenedListener() {
+                    @Override
+                    public void onDeviceOpened(MidiDevice device) {
+                    }
+                }, null);
     }
 
     public IBinder getBinder() {
