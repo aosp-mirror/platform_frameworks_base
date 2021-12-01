@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -111,7 +113,7 @@ public class AutomaticBrightnessControllerTest {
 
         // Configure the brightness controller and grab an instance of the sensor listener,
         // through which we can deliver fake (for test) sensor values.
-        controller.configure(true /* enable */, null /* configuration */,
+        controller.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration */,
                 0 /* brightness */, false /* userChangedBrightness */, 0 /* adjustment */,
                 false /* userChanged */, DisplayPowerRequest.POLICY_BRIGHT);
 
@@ -227,7 +229,7 @@ public class AutomaticBrightnessControllerTest {
         listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 1000));
 
         // User sets brightness to 100
-        mController.configure(true /* enable */, null /* configuration */,
+        mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration */,
                 0.5f /* brightness */, true /* userChangedBrightness */, 0 /* adjustment */,
                 false /* userChanged */, DisplayPowerRequest.POLICY_BRIGHT);
 
@@ -250,7 +252,7 @@ public class AutomaticBrightnessControllerTest {
         listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 1000));
 
         // User sets brightness to 100
-        mController.configure(true /* enable */, null /* configuration */,
+        mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration */,
                 0.5f /* brightness */, true /* userChangedBrightness */, 0 /* adjustment */,
                 false /* userChanged */, DisplayPowerRequest.POLICY_BRIGHT);
 
@@ -267,7 +269,7 @@ public class AutomaticBrightnessControllerTest {
         verifyNoMoreInteractions(mBrightnessMappingStrategy);
 
         // User sets idle brightness to 0.5
-        mController.configure(true /* enable */, null /* configuration */,
+        mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration */,
                 0.5f /* brightness */, true /* userChangedBrightness */, 0 /* adjustment */,
                 false /* userChanged */, DisplayPowerRequest.POLICY_BRIGHT);
 
