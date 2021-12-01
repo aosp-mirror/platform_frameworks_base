@@ -32,11 +32,11 @@ import java.util.Optional;
 
 /**
  * Implementation of {@link androidx.window.util.DataProducer} that produces
- * {@link CommonDisplayFeature} parsed from a string stored in the resources config at
+ * {@link CommonFoldingFeature} parsed from a string stored in the resources config at
  * {@link R.string#config_display_features}.
  */
 public final class ResourceConfigDisplayFeatureProducer extends
-        BaseDataProducer<List<DisplayFeature>> {
+        BaseDataProducer<List<CommonFoldingFeature>> {
     private static final boolean DEBUG = false;
     private static final String TAG = "ResourceConfigDisplayFeatureProducer";
 
@@ -48,19 +48,19 @@ public final class ResourceConfigDisplayFeatureProducer extends
 
     @Override
     @Nullable
-    public Optional<List<DisplayFeature>> getData() {
+    public Optional<List<CommonFoldingFeature>> getData() {
         String displayFeaturesString = mContext.getResources().getString(
                 R.string.config_display_features);
         if (TextUtils.isEmpty(displayFeaturesString)) {
             return Optional.empty();
         }
 
-        List<DisplayFeature> features = new ArrayList<>();
+        List<CommonFoldingFeature> features = new ArrayList<>();
         String[] featureStrings =  displayFeaturesString.split(";");
         for (String featureString : featureStrings) {
-            CommonDisplayFeature feature;
+            CommonFoldingFeature feature;
             try {
-                feature = CommonDisplayFeature.parseFromString(featureString);
+                feature = CommonFoldingFeature.parseFromString(featureString);
             } catch (IllegalArgumentException e) {
                 if (DEBUG) {
                     Log.w(TAG, "Failed to parse display feature: " + featureString, e);

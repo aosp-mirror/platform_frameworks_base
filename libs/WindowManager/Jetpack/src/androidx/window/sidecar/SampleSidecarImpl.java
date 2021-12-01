@@ -29,8 +29,8 @@ import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerPostureProducer;
-import androidx.window.common.DisplayFeature;
 import androidx.window.common.ResourceConfigDisplayFeatureProducer;
 import androidx.window.common.SettingsDevicePostureProducer;
 import androidx.window.common.SettingsDisplayFeatureProducer;
@@ -54,7 +54,7 @@ class SampleSidecarImpl extends StubSidecar {
     private final DataProducer<Integer> mDevicePostureProducer;
 
     private final SettingsDisplayFeatureProducer mSettingsDisplayFeatureProducer;
-    private final DataProducer<List<DisplayFeature>> mDisplayFeatureProducer;
+    private final DataProducer<List<CommonFoldingFeature>> mDisplayFeatureProducer;
 
     SampleSidecarImpl(Context context) {
         mSettingsDevicePostureProducer = new SettingsDevicePostureProducer(context);
@@ -95,19 +95,19 @@ class SampleSidecarImpl extends StubSidecar {
     }
 
     private int deviceStateFromFeature() {
-        List<DisplayFeature> storedFeatures = mDisplayFeatureProducer.getData()
+        List<CommonFoldingFeature> storedFeatures = mDisplayFeatureProducer.getData()
                 .orElse(Collections.emptyList());
         for (int i = 0; i < storedFeatures.size(); i++) {
-            DisplayFeature feature = storedFeatures.get(i);
+            CommonFoldingFeature feature = storedFeatures.get(i);
             final int state = feature.getState() == null ? -1 : feature.getState();
             if (DEBUG && feature.getState() == null) {
                 Log.d(TAG, "feature#getState was null for DisplayFeature: " + feature);
             }
 
             switch (state) {
-                case DisplayFeature.COMMON_STATE_FLAT:
+                case CommonFoldingFeature.COMMON_STATE_FLAT:
                     return SidecarDeviceState.POSTURE_OPENED;
-                case DisplayFeature.COMMON_STATE_HALF_OPENED:
+                case CommonFoldingFeature.COMMON_STATE_HALF_OPENED:
                     return SidecarDeviceState.POSTURE_HALF_OPENED;
             }
         }
@@ -127,7 +127,7 @@ class SampleSidecarImpl extends StubSidecar {
     }
 
     private List<SidecarDisplayFeature> getDisplayFeatures(@NonNull Activity activity) {
-        List<SidecarDisplayFeature> features = new ArrayList<SidecarDisplayFeature>();
+        List<SidecarDisplayFeature> features = new ArrayList<>();
         int displayId = activity.getDisplay().getDisplayId();
         if (displayId != DEFAULT_DISPLAY) {
             Log.w(TAG, "This sample doesn't support display features on secondary displays");
@@ -140,9 +140,9 @@ class SampleSidecarImpl extends StubSidecar {
             return features;
         }
 
-        Optional<List<DisplayFeature>> storedFeatures = mDisplayFeatureProducer.getData();
+        Optional<List<CommonFoldingFeature>> storedFeatures = mDisplayFeatureProducer.getData();
         if (storedFeatures.isPresent()) {
-            for (DisplayFeature baseFeature : storedFeatures.get()) {
+            for (CommonFoldingFeature baseFeature : storedFeatures.get()) {
                 SidecarDisplayFeature feature = new SidecarDisplayFeature();
                 Rect featureRect = baseFeature.getRect();
                 rotateRectToDisplayRotation(displayId, featureRect);
