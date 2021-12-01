@@ -84,7 +84,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
 
     public MediaOutputBaseDialog(Context context, MediaOutputController mediaOutputController) {
         super(context);
-        mContext = context;
+
+        // Save the context that is wrapped with our theme.
+        mContext = getContext();
         mMediaOutputController = mediaOutputController;
         mLayoutManager = new LinearLayoutManager(mContext);
         mListMaxHeight = context.getResources().getDimensionPixelSize(

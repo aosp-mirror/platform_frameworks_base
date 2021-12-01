@@ -157,7 +157,9 @@ public class InternetDialog extends SystemUIDialog implements
         if (DEBUG) {
             Log.d(TAG, "Init InternetDialog");
         }
-        mContext = context;
+
+        // Save the context that is wrapped with our theme.
+        mContext = getContext();
         mHandler = handler;
         mBackgroundExecutor = executor;
         mInternetDialogFactory = internetDialogFactory;
