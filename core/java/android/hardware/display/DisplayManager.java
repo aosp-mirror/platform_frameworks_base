@@ -30,6 +30,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.KeyguardManager;
+import android.companion.virtual.IVirtualDevice;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
@@ -902,8 +903,16 @@ public final class DisplayManager {
             @NonNull VirtualDisplayConfig virtualDisplayConfig,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler,
             @Nullable Context windowContext) {
-        return mGlobal.createVirtualDisplay(mContext, projection, virtualDisplayConfig, callback,
-                handler, windowContext);
+        return mGlobal.createVirtualDisplay(mContext, projection, null /* virtualDevice */,
+                virtualDisplayConfig, callback, handler, windowContext);
+    }
+
+    /** @hide */
+    public VirtualDisplay createVirtualDisplay(@Nullable IVirtualDevice virtualDevice,
+            @NonNull VirtualDisplayConfig virtualDisplayConfig,
+            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
+        return mGlobal.createVirtualDisplay(mContext, null /* projection */, virtualDevice,
+                virtualDisplayConfig, callback, handler, null);
     }
 
     /**
