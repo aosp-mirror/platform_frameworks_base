@@ -462,12 +462,15 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @androidx.annotation.Nullable WindowContainerTransaction wct) {
         switch (stage) {
             case STAGE_TYPE_UNDEFINED: {
-                // Use the stage of the specified position is valid.
                 if (position != SPLIT_POSITION_UNDEFINED) {
-                    if (position == getSideStagePosition()) {
-                        options = resolveStartStage(STAGE_TYPE_SIDE, position, options, wct);
+                    if (mMainStage.isActive()) {
+                        // Use the stage of the specified position
+                        options = resolveStartStage(
+                                position == mSideStagePosition ? STAGE_TYPE_SIDE : STAGE_TYPE_MAIN,
+                                position, options, wct);
                     } else {
-                        options = resolveStartStage(STAGE_TYPE_MAIN, position, options, wct);
+                        // Use the side stage as default to active split screen
+                        options = resolveStartStage(STAGE_TYPE_SIDE, position, options, wct);
                     }
                 } else {
                     // Exit split-screen and launch fullscreen since stage wasn't specified.
