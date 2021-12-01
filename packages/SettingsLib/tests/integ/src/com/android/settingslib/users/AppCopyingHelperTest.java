@@ -19,6 +19,7 @@ package com.android.settingslib.users;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
@@ -135,11 +136,11 @@ public class AppCopyingHelperTest extends BaseTest {
         ApplicationInfo info = new ApplicationInfo();
         info.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HIDDEN;
         info.flags |= ApplicationInfo.FLAG_INSTALLED;
-        when(mIpm.getApplicationInfo(eq("app3"), anyInt(), eq(testUserId)))
+        when(mIpm.getApplicationInfo(eq("app3"), anyLong(), eq(testUserId)))
                 .thenReturn(info);
 
         info = new ApplicationInfo();
-        when(mIpm.getApplicationInfo(eq("app4"), anyInt(), eq(testUserId)))
+        when(mIpm.getApplicationInfo(eq("app4"), anyLong(), eq(testUserId)))
                 .thenReturn(info);
 
         mHelper.installSelectedApps();
