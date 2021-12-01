@@ -79,6 +79,7 @@ import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.graphics.ColorUtils;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -1271,6 +1272,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 change.setAllowEnterPip(topMostActivity != null
                         && topMostActivity.checkEnterPictureInPictureAppOpsState());
             }
+            final ActivityRecord activityRecord = target.asActivityRecord();
+            if (activityRecord != null) {
+                final Task arTask = activityRecord.getTask();
+                final int backgroundColor = ColorUtils.setAlphaComponent(
+                        arTask.getTaskDescription().getBackgroundColor(), 255);
+                change.setBackgroundColor(backgroundColor);
+            }
+
             out.addChange(change);
         }
 

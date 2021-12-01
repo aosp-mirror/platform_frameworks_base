@@ -36,6 +36,7 @@ import static android.view.WindowManager.TransitionFlags;
 import static android.view.WindowManager.TransitionType;
 import static android.view.WindowManager.transitTypeToString;
 
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -366,6 +367,7 @@ public final class TransitionInfo implements Parcelable {
         private int mStartRotation = ROTATION_UNDEFINED;
         private int mEndRotation = ROTATION_UNDEFINED;
         private int mRotationAnimation = ROTATION_ANIMATION_UNSPECIFIED;
+        private @ColorInt int mBackgroundColor;
 
         public Change(@Nullable WindowContainerToken container, @NonNull SurfaceControl leash) {
             mContainer = container;
@@ -387,6 +389,7 @@ public final class TransitionInfo implements Parcelable {
             mStartRotation = in.readInt();
             mEndRotation = in.readInt();
             mRotationAnimation = in.readInt();
+            mBackgroundColor = in.readInt();
         }
 
         /** Sets the parent of this change's container. The parent must be a participant or null. */
@@ -444,6 +447,11 @@ public final class TransitionInfo implements Parcelable {
          */
         public void setRotationAnimation(int anim) {
             mRotationAnimation = anim;
+        }
+
+        /** Sets the background color of this change's container. */
+        public void setBackgroundColor(@ColorInt int backgroundColor) {
+            mBackgroundColor = backgroundColor;
         }
 
         /** @return the container that is changing. May be null if non-remotable (eg. activity) */
@@ -526,6 +534,12 @@ public final class TransitionInfo implements Parcelable {
             return mRotationAnimation;
         }
 
+        /** @return get the background color of this change's container. */
+        @ColorInt
+        public int getBackgroundColor() {
+            return mBackgroundColor;
+        }
+
         /** @hide */
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -542,6 +556,7 @@ public final class TransitionInfo implements Parcelable {
             dest.writeInt(mStartRotation);
             dest.writeInt(mEndRotation);
             dest.writeInt(mRotationAnimation);
+            dest.writeInt(mBackgroundColor);
         }
 
         @NonNull
