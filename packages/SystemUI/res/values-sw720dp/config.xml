@@ -20,10 +20,7 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
-    <integer name="status_bar_config_maxNotificationIcons">5</integer>
-
     <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
          card. -->
     <integer name="keyguard_max_notification_count">5</integer>
 </resources>
-

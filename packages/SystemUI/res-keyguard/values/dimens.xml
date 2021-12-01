@@ -31,7 +31,6 @@
 
     <!-- Max Height of the sliding KeyguardSecurityContainer
          (includes 2x keyguard_security_view_top_margin) -->
-    <dimen name="keyguard_security_max_height">450dp</dimen>
 
     <!-- pin/password field max height -->
     <dimen name="keyguard_password_height">80dp</dimen>
@@ -57,7 +56,6 @@
     <!-- Clock without header -->
     <dimen name="widget_big_font_size">54dp</dimen>
     <dimen name="bottom_text_spacing_digital">0dp</dimen>
-    <dimen name="title_clock_padding">4dp</dimen>
     <!-- Clock with header -->
     <dimen name="widget_small_font_size">@dimen/widget_title_font_size</dimen>
     <dimen name="widget_vertical_padding">5dp</dimen>
@@ -68,10 +66,8 @@
     <dimen name="widget_icon_size">18dp</dimen>
     <dimen name="widget_icon_padding">8dp</dimen>
     <!-- Notification shelf padding when dark -->
-    <dimen name="widget_bottom_separator_padding">-6dp</dimen>
 
     <!-- The y translation to apply at the start in appear animations. -->
-    <dimen name="appear_y_translation_start">32dp</dimen>
 
     <!-- The size of the dots in the PIN unlock method. -->
     <dimen name="password_dot_size">9dp</dimen>
@@ -82,7 +78,6 @@
     <dimen name="password_char_padding">8dp</dimen>
 
     <!-- The vertical margin between the date and the owner info. -->
-    <dimen name="date_owner_info_margin">4dp</dimen>
 
     <!-- The translation for disappearing security views after having solved them. -->
     <dimen name="disappear_y_translation">-32dp</dimen>
