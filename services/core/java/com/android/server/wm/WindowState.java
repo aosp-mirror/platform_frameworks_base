@@ -217,7 +217,6 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -681,11 +680,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final InsetsState mAboveInsetsState = new InsetsState();
 
     /**
-     * The insets sources provided by this window.
-     */
-    final SparseArray<InsetsSource> mProvidedInsetsSources = new SparseArray<>();
-
-    /**
      * Surface insets from the previous call to relayout(), used to track
      * if we are changing the Surface insets.
      */
@@ -739,7 +733,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private boolean mIsDimming = false;
 
-    private @Nullable InsetsSourceProvider mControllableInsetProvider;
     private final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
 
     /**
@@ -5685,24 +5678,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void resetContentChanged() {
         mWindowFrames.setContentChanged(false);
-    }
-
-    /**
-     * Set's an {@link InsetsSourceProvider} to be associated with this window, but only if the
-     * provider itself is controllable, as one window can be the provider of more than one inset
-     * type (i.e. gesture insets). If this window is controllable, all its animations must be
-     * controlled by its control target, and the visibility of this window should be taken account
-     * into the state of the control target.
-     *
-     * @param insetProvider the provider which should not be visible to the client.
-     * @see #getInsetsState()
-     */
-    void setControllableInsetProvider(InsetsSourceProvider insetProvider) {
-        mControllableInsetProvider = insetProvider;
-    }
-
-    InsetsSourceProvider getControllableInsetProvider() {
-        return mControllableInsetProvider;
     }
 
     private final class MoveAnimationSpec implements AnimationSpec {
