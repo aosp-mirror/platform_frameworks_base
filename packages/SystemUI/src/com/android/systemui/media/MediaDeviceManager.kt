@@ -68,7 +68,7 @@ class MediaDeviceManager @Inject constructor(
         oldKey: String?,
         data: MediaData,
         immediately: Boolean,
-        isSsReactivated: Boolean
+        receivedSmartspaceCardLatency: Int
     ) {
         if (oldKey != null && oldKey != key) {
             val oldEntry = entries.remove(oldKey)
@@ -200,7 +200,7 @@ class MediaDeviceManager @Inject constructor(
         @WorkerThread
         private fun updateCurrent() {
             val device = localMediaManager.currentConnectedDevice
-            val route = controller?.let { mr2manager.getRoutingSessionForMediaController(it)}
+            val route = controller?.let { mr2manager.getRoutingSessionForMediaController(it) }
 
             // If we have a controller but get a null route, then don't trust the device
             val enabled = device != null && (controller == null || route != null)

@@ -84,7 +84,7 @@ private val LOADING = MediaData(-1, false, 0, null, null, null, null, null,
         emptyList(), emptyList(), "INVALID", null, null, null, true, null)
 @VisibleForTesting
 internal val EMPTY_SMARTSPACE_MEDIA_DATA = SmartspaceMediaData("INVALID", false, false,
-    "INVALID", null, emptyList(), null, 0)
+    "INVALID", null, emptyList(), null, 0, 0)
 
 fun isMediaNotification(sbn: StatusBarNotification): Boolean {
     return sbn.notification.isMediaNotification()
@@ -852,15 +852,16 @@ class MediaDataManager(
          * until the next refresh-round before UI becomes visible. True by default to take in place
          * immediately.
          *
-         * @param isSsReactivated indicates transition from a state with no active media players to
-         * a state with active media players upon receiving Smartspace media data.
+         * @param receivedSmartspaceCardLatency is the latency between headphone connects and sysUI
+         * displays Smartspace media targets. Will be 0 if the data is not activated by Smartspace
+         * signal.
          */
         fun onMediaDataLoaded(
             key: String,
             oldKey: String?,
             data: MediaData,
             immediately: Boolean = true,
-            isSsReactivated: Boolean = false
+            receivedSmartspaceCardLatency: Int = 0
         ) {}
 
         /**
@@ -869,11 +870,15 @@ class MediaDataManager(
          * @param shouldPrioritize indicates the sorting priority of the Smartspace card. If true,
          * it will be prioritized as the first card. Otherwise, it will show up as the last card as
          * default.
+         *
+         * @param isSsReactivated indicates resume media card is reactivated by Smartspace
+         * recommendation signal
          */
         fun onSmartspaceMediaDataLoaded(
             key: String,
             data: SmartspaceMediaData,
-            shouldPrioritize: Boolean = false
+            shouldPrioritize: Boolean = false,
+            isSsReactivated: Boolean = false
         ) {}
 
         /** Called whenever a previously existing Media notification was removed. */
@@ -909,12 +914,13 @@ class MediaDataManager(
         packageName(target)?.let {
             return SmartspaceMediaData(target.smartspaceTargetId, isActive, true, it,
                 target.baseAction, target.iconGrid,
-                dismissIntent, 0)
+                dismissIntent, 0, target.creationTimeMillis)
         }
         return EMPTY_SMARTSPACE_MEDIA_DATA
             .copy(targetId = target.smartspaceTargetId,
-                isActive = isActive,
-                dismissIntent = dismissIntent)
+                    isActive = isActive,
+                    dismissIntent = dismissIntent,
+                    headphoneConnectionTimeMillis = target.creationTimeMillis)
     }
 
     private fun packageName(target: SmartspaceTarget): String? {
