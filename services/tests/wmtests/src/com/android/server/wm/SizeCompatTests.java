@@ -535,6 +535,7 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mVisibleRequested = false;
         mActivity.visibleIgnoringKeyguard = false;
         mActivity.app.setReportedProcState(ActivityManager.PROCESS_STATE_CACHED_ACTIVITY);
+        mActivity.app.computeProcessActivityState();
 
         // Simulate the display changes orientation.
         final Configuration rotatedConfig = rotateDisplay(display, ROTATION_90);
