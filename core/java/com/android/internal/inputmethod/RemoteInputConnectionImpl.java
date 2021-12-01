@@ -35,6 +35,7 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.DumpableInputConnection;
@@ -242,8 +243,19 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                     }
                     if (handler.getLooper().isCurrentThread()) {
                         servedView.onInputConnectionClosedInternal();
+                        final ViewRootImpl viewRoot = servedView.getViewRootImpl();
+                        if (viewRoot != null) {
+                            viewRoot.getHandwritingInitiator().onInputConnectionClosed(servedView);
+                        }
                     } else {
                         handler.post(servedView::onInputConnectionClosedInternal);
+                        handler.post(() -> {
+                            final ViewRootImpl viewRoot = servedView.getViewRootImpl();
+                            if (viewRoot != null) {
+                                viewRoot.getHandwritingInitiator()
+                                        .onInputConnectionClosed(servedView);
+                            }
+                        });
                     }
                 }
             }

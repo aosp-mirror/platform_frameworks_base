@@ -2072,6 +2072,10 @@ public final class InputMethodManager {
                         + ", ic=" + ic + ", tba=" + tba + ", handler=" + icHandler);
             }
             view.onInputConnectionOpenedInternal(ic, tba, icHandler);
+            final ViewRootImpl viewRoot = view.getViewRootImpl();
+            if (viewRoot != null) {
+                viewRoot.getHandwritingInitiator().onInputConnectionCreated(view, tba);
+            }
         }
 
         return true;
