@@ -43,6 +43,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.TextAttribute;
+import android.view.inputmethod.TextSnapshot;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AndroidFuture;
@@ -50,6 +51,7 @@ import com.android.internal.view.IInputContext;
 
 import java.lang.annotation.Retention;
 import java.lang.ref.WeakReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -87,8 +89,8 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     private final InputMethodManager mParentInputMethodManager;
     private final WeakReference<View> mServedView;
 
-    // TODO(b/203086369): This is to be used when interruption is implemented.
     private final AtomicInteger mCurrentSessionId = new AtomicInteger(0);
+    private final AtomicBoolean mHasPendingInvalidation = new AtomicBoolean();
 
     public RemoteInputConnectionImpl(@NonNull Looper looper,
             @NonNull InputConnection inputConnection,
@@ -111,6 +113,14 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     /**
+     * @return {@code true} if there is a pending {@link InputMethodManager#invalidateInput(View)}
+     * call.
+     */
+    public boolean hasPendingInvalidation() {
+        return mHasPendingInvalidation.get();
+    }
+
+    /**
      * @return {@code true} until the target {@link InputConnection} receives
      * {@link InputConnection#closeConnection()} as a result of {@link #deactivate()}.
      */
@@ -126,6 +136,56 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
 
     public View getServedView() {
         return mServedView.get();
+    }
+
+    /**
+     * Schedule a task to execute
+     * {@link InputMethodManager#doInvalidateInput(RemoteInputConnectionImpl, TextSnapshot, int)}
+     * on the associated Handler if not yet scheduled.
+     *
+     * <p>By calling {@link InputConnection#takeSnapshot()} directly from the message loop, we can
+     * make sure that application code is not modifying text context in a reentrant manner.</p>
+     */
+    public void scheduleInvalidateInput() {
+        if (mHasPendingInvalidation.compareAndSet(false, true)) {
+            final int nextSessionId = mCurrentSessionId.incrementAndGet();
+            // By calling InputConnection#takeSnapshot() directly from the message loop, we can make
+            // sure that application code is not modifying text context in a reentrant manner.
+            // e.g. We may see methods like EditText#setText() in the callstack here.
+            mH.post(() -> {
+                try {
+                    if (isFinished()) {
+                        return;
+                    }
+                    final InputConnection ic = getInputConnection();
+                    if (ic == null) {
+                        return;
+                    }
+
+                    // Clean up composing text and batch edit.
+                    ic.finishComposingText();
+                    // Also clean up batch edit.
+                    while (true) {
+                        if (!ic.endBatchEdit()) {
+                            break;
+                        }
+                    }
+
+                    final TextSnapshot textSnapshot = ic.takeSnapshot();
+                    if (textSnapshot == null) {
+                        final View view = getServedView();
+                        if (view == null) {
+                            return;
+                        }
+                        mParentInputMethodManager.restartInput(view);
+                        return;
+                    }
+                    mParentInputMethodManager.doInvalidateInput(this, textSnapshot, nextSessionId);
+                } finally {
+                    mHasPendingInvalidation.set(false);
+                }
+            });
+        }
     }
 
     /**
