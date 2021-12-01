@@ -190,14 +190,10 @@ public class DndTile extends QSTileImpl<BooleanState> {
                 case Settings.Secure.ZEN_DURATION_PROMPT:
                     mUiHandler.post(() -> {
                         Dialog dialog = makeZenModeDialog();
+                        SystemUIDialog.registerDismissListener(dialog);
                         if (view != null) {
-                            final Dialog hostDialog =
-                                    mDialogLaunchAnimator.showFromView(dialog, view, false);
-                            setDialogListeners(dialog, hostDialog);
+                            mDialogLaunchAnimator.showFromView(dialog, view, false);
                         } else {
-                            // If we are not launching with animator, register default
-                            // dismiss listener
-                            SystemUIDialog.registerDismissListener(dialog);
                             dialog.show();
                         }
                     });
@@ -220,12 +216,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
         SystemUIDialog.applyFlags(dialog);
         SystemUIDialog.setShowForAllUsers(dialog, true);
         return dialog;
-    }
-
-    private void setDialogListeners(Dialog zenModeDialog, Dialog hostDialog) {
-        // Zen mode dialog is never hidden.
-        SystemUIDialog.registerDismissListener(zenModeDialog, hostDialog::dismiss);
-        zenModeDialog.setOnCancelListener(dialog -> hostDialog.cancel());
     }
 
     @Override

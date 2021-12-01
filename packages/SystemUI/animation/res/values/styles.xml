@@ -15,15 +15,10 @@
      limitations under the License.
 -->
 <resources>
-  <style name="HostDialogTheme">
-    <item name="android:windowAnimationStyle">@style/Animation.HostDialog</item>
-    <item name="android:windowIsFloating">false</item>
-    <item name="android:backgroundDimEnabled">true</item>
-    <item name="android:navigationBarColor">@android:color/transparent</item>
-  </style>
-
-  <style name="Animation.HostDialog" parent="@android:style/Animation">
-    <item name="android:windowEnterAnimation">@anim/launch_host_dialog_enter</item>
-    <item name="android:windowExitAnimation">@anim/launch_host_dialog_exit</item>
+  <!-- An animation used by DialogLaunchAnimator to make a dialog appear instantly (to animate -->
+  <!-- in-window) and disappear by fading out (when the exit into view is disabled). -->
+  <style name="Animation.LaunchAnimation" parent="@android:style/Animation">
+    <item name="android:windowEnterAnimation">@anim/launch_dialog_enter</item>
+    <item name="android:windowExitAnimation">@anim/launch_dialog_exit</item>
   </style>
 </resources>
