@@ -509,7 +509,7 @@ public class Scribe {
     }
 
     @GuardedBy("mIrs.getLock()")
-    void dumpLocked(IndentingPrintWriter pw) {
+    void dumpLocked(IndentingPrintWriter pw, boolean dumpAll) {
         pw.println("Ledgers:");
         pw.increaseIndent();
         mLedgers.forEach((userId, pkgName, ledger) -> {
@@ -519,7 +519,7 @@ public class Scribe {
             }
             pw.println();
             pw.increaseIndent();
-            ledger.dump(pw, MAX_NUM_TRANSACTION_DUMP);
+            ledger.dump(pw, dumpAll ? Integer.MAX_VALUE : MAX_NUM_TRANSACTION_DUMP);
             pw.decreaseIndent();
         });
         pw.decreaseIndent();
