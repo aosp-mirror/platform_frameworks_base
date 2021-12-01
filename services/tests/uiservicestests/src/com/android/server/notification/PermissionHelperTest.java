@@ -42,7 +42,6 @@ import android.content.pm.ParceledListSlice;
 import android.permission.IPermissionManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Pair;
-import android.util.Slog;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -312,11 +311,22 @@ public class PermissionHelperTest extends UiServiceTestCase {
         when(mPackageManager.getInstalledPackages(eq(GET_PERMISSIONS), anyInt()))
                 .thenReturn(requesting);
 
-        Map<Pair<Integer, String>, Boolean> expected = ImmutableMap.of(new Pair(1, "first"), true,
-                new Pair(2, "second"), true,
-                new Pair(3, "third"), false);
+        // 2 and 3 are user-set permissions
+        when(mPermManager.getPermissionFlags(
+                "first", Manifest.permission.POST_NOTIFICATIONS, userId)).thenReturn(0);
+        when(mPermManager.getPermissionFlags(
+                "second", Manifest.permission.POST_NOTIFICATIONS, userId))
+                .thenReturn(FLAG_PERMISSION_USER_SET);
+        when(mPermManager.getPermissionFlags(
+                "third", Manifest.permission.POST_NOTIFICATIONS, userId))
+                .thenReturn(FLAG_PERMISSION_USER_SET);
 
-        Map<Pair<Integer, String>, Boolean> actual =
+        Map<Pair<Integer, String>, Pair<Boolean, Boolean>> expected =
+                ImmutableMap.of(new Pair(1, "first"), new Pair(true, false),
+                    new Pair(2, "second"), new Pair(true, true),
+                    new Pair(3, "third"), new Pair(false, true));
+
+        Map<Pair<Integer, String>, Pair<Boolean, Boolean>> actual =
                 mPermissionHelper.getNotificationPermissionValues(userId);
 
         assertThat(actual).containsExactlyEntriesIn(expected);

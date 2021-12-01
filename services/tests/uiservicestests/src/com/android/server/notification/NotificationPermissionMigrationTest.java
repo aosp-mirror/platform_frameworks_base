@@ -839,21 +839,25 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         when(mUm.getUsers()).thenReturn(userInfos);
 
         // construct the permissions for each of them
-        ArrayMap<Pair<Integer, String>, Boolean> permissions0 = new ArrayMap<>(),
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> permissions0 = new ArrayMap<>(),
                 permissions1 = new ArrayMap<>();
-        permissions0.put(new Pair<>(10, "package1"), true);
-        permissions0.put(new Pair<>(20, "package2"), false);
-        permissions1.put(new Pair<>(11, "package1"), false);
-        permissions1.put(new Pair<>(21, "package2"), true);
+        permissions0.put(new Pair<>(10, "package1"), new Pair<>(true, false));
+        permissions0.put(new Pair<>(20, "package2"), new Pair<>(false, true));
+        permissions1.put(new Pair<>(11, "package1"), new Pair<>(false, false));
+        permissions1.put(new Pair<>(21, "package2"), new Pair<>(true, true));
         when(mPermissionHelper.getNotificationPermissionValues(0)).thenReturn(permissions0);
         when(mPermissionHelper.getNotificationPermissionValues(1)).thenReturn(permissions1);
         when(mPermissionHelper.getNotificationPermissionValues(2)).thenReturn(new ArrayMap<>());
 
-        ArrayMap<Pair<Integer, String>, Boolean> combinedPermissions =
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> combinedPermissions =
                 mService.getAllUsersNotificationPermissions();
-        assertTrue(combinedPermissions.get(new Pair<>(10, "package1")));
-        assertFalse(combinedPermissions.get(new Pair<>(20, "package2")));
-        assertFalse(combinedPermissions.get(new Pair<>(11, "package1")));
-        assertTrue(combinedPermissions.get(new Pair<>(21, "package2")));
+        assertTrue(combinedPermissions.get(new Pair<>(10, "package1")).first);
+        assertFalse(combinedPermissions.get(new Pair<>(10, "package1")).second);
+        assertFalse(combinedPermissions.get(new Pair<>(20, "package2")).first);
+        assertTrue(combinedPermissions.get(new Pair<>(20, "package2")).second);
+        assertFalse(combinedPermissions.get(new Pair<>(11, "package1")).first);
+        assertFalse(combinedPermissions.get(new Pair<>(11, "package1")).second);
+        assertTrue(combinedPermissions.get(new Pair<>(21, "package2")).first);
+        assertTrue(combinedPermissions.get(new Pair<>(21, "package2")).second);
     }
 }

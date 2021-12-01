@@ -707,12 +707,12 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
 
-        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), true);
-        appPermissions.put(new Pair(3, "third"), false);
-        appPermissions.put(new Pair(UID_P, PKG_P), true);
-        appPermissions.put(new Pair(UID_O, PKG_O), false);
-        appPermissions.put(new Pair(UID_N_MR1, PKG_N_MR1), true);
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), new Pair(true, false));
+        appPermissions.put(new Pair(3, "third"), new Pair(false, false));
+        appPermissions.put(new Pair(UID_P, PKG_P), new Pair(true, false));
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false));
+        appPermissions.put(new Pair(UID_N_MR1, PKG_N_MR1), new Pair(true, false));
 
         when(mPermissionHelper.getNotificationPermissionValues(UserHandle.USER_SYSTEM))
                 .thenReturn(appPermissions);
@@ -788,12 +788,12 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
 
-        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), true);
-        appPermissions.put(new Pair(3, "third"), false);
-        appPermissions.put(new Pair(UID_P, PKG_P), true);
-        appPermissions.put(new Pair(UID_O, PKG_O), false);
-        appPermissions.put(new Pair(UID_N_MR1, PKG_N_MR1), true);
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), new Pair(true, false));
+        appPermissions.put(new Pair(3, "third"), new Pair(false, false));
+        appPermissions.put(new Pair(UID_P, PKG_P), new Pair(true, false));
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false));
+        appPermissions.put(new Pair(UID_N_MR1, PKG_N_MR1), new Pair(true, false));
 
         when(mPermissionHelper.getNotificationPermissionValues(UserHandle.USER_SYSTEM))
                 .thenReturn(appPermissions);
@@ -875,9 +875,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
 
-        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(UID_P, PKG_P), true);
-        appPermissions.put(new Pair(UID_O, PKG_O), false);
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(UID_P, PKG_P), new Pair(true, false));
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false));
         when(mPermissionHelper.getNotificationPermissionValues(UserHandle.USER_SYSTEM))
                 .thenReturn(appPermissions);
 
@@ -955,12 +955,12 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
 
-        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), true);
-        appPermissions.put(new Pair(3, "third"), false);
-        appPermissions.put(new Pair(UID_P, PKG_P), true);
-        appPermissions.put(new Pair(UID_O, PKG_O), false);
-        appPermissions.put(new Pair(UID_N_MR1, PKG_N_MR1), true);
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), new Pair(true, false));
+        appPermissions.put(new Pair(3, "third"), new Pair(false, false));
+        appPermissions.put(new Pair(UID_P, PKG_P), new Pair(true, false));
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false));
+        appPermissions.put(new Pair(UID_N_MR1, PKG_N_MR1), new Pair(true, false));
 
         when(mPermissionHelper.getNotificationPermissionValues(UserHandle.USER_SYSTEM))
                 .thenReturn(appPermissions);
@@ -2556,11 +2556,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         //     know about, those are ignored if migration is not enabled
 
         // package permissions map to be passed in
-        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
-        appPermissions.put(new Pair(UID_P, PKG_P), true);  // in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), new Pair(false, false));   // not in local prefs
+        appPermissions.put(new Pair(UID_P, PKG_P), new Pair(true, false));  // in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
 
         NotificationChannel channel1 =
                 new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
@@ -2618,11 +2618,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         //     know about, those should still be included
 
         // package permissions map to be passed in
-        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
-        appPermissions.put(new Pair(UID_P, PKG_P), true);  // in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), new Pair(false, false));   // not in local prefs
+        appPermissions.put(new Pair(UID_P, PKG_P), new Pair(true, false));  // in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
 
         NotificationChannel channel1 =
                 new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
@@ -2701,10 +2701,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // not from the passed-in permissions map
         when(mPermissionHelper.isMigrationEnabled()).thenReturn(false);
 
-        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), new Pair(false, false));   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
 
         // package preferences: only PKG_P is banned
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
@@ -2726,10 +2726,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // have their permission set to false, and not based on PackagePreferences importance
         when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
 
-        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), new Pair(false, false));   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
 
         // package preferences: PKG_O not banned based on local importance, and PKG_P is
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
@@ -2770,10 +2770,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // confirm that the string resulting from dumpImpl contains only info from package prefs
         when(mPermissionHelper.isMigrationEnabled()).thenReturn(false);
 
-        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), new Pair(false, true));    // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
 
         // local package preferences: PKG_O is not banned even though the permissions would
         // indicate so
@@ -2796,6 +2796,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         ArrayList<String> notExpected = new ArrayList<>();
         notExpected.add("first (1) importance=DEFAULT");
         notExpected.add("third (3) importance=NONE");
+        notExpected.add("userSet=");  // no user-set information pre migration
 
         for (String exp : expected) {
             assertTrue(actual.contains(exp));
@@ -2819,10 +2820,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // confirm that the string resulting from dumpImpl contains only importances from permission
         when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
 
-        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), new Pair(false, true));   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
 
         // local package preferences
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
@@ -2837,9 +2838,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         // expected (substring) output for each preference via permissions
         ArrayList<String> expected = new ArrayList<>();
-        expected.add("first (1) importance=DEFAULT");
-        expected.add("third (3) importance=NONE");
-        expected.add(PKG_O + " (" + UID_O + ") importance=NONE");
+        expected.add("first (1) importance=DEFAULT userSet=false");
+        expected.add("third (3) importance=NONE userSet=true");
+        expected.add(PKG_O + " (" + UID_O + ") importance=NONE userSet=false");
         expected.add(PKG_P + " (" + UID_P + ")");
 
         // make sure we don't have package preference info
@@ -2881,10 +2882,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // test that dumping to proto gets the importances from the right place
         when(mPermissionHelper.isMigrationEnabled()).thenReturn(false);
 
-        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), new Pair(false, false));   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
 
         // local package preferences
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
@@ -2921,10 +2922,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
 
         // permissions -- these should take precedence
-        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), new Pair(false, false));   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
 
         // local package preferences
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
@@ -4993,10 +4994,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(mPermissionHelper.isMigrationEnabled()).thenReturn(false);
 
         // build a collection of app permissions that should be passed in but ignored
-        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), new Pair(false, false));   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
 
         // package preferences: PKG_O not banned based on local importance, and PKG_P is
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
@@ -5036,10 +5037,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
 
         // build a collection of app permissions that should be passed in but ignored
-        ArrayMap<Pair<Integer, String>, Boolean> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), true);    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), false);   // not in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), false); // in local prefs
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
+        appPermissions.put(new Pair(3, "third"), new Pair(false, false));   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
 
         // package preferences: PKG_O not banned based on local importance, and PKG_P is
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
