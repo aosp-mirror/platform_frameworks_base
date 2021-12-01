@@ -7930,9 +7930,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Above coordinates are in "@" space, now place "*" and "#" to screen space.
         final boolean fillContainer = resolvedBounds.equals(containingBounds);
         final int screenPosX = fillContainer ? containerBounds.left : containerAppBounds.left;
-        final int screenPosY = mSizeCompatBounds == null
+        // If the activity is not in size compat mode, calculate vertical centering
+        //     from the container and resolved bounds.
+        // If the activity is in size compat mode, calculate vertical centering
+        //     from the container and size compat bounds.
+        // The container bounds contain the parent bounds offset in the display, for
+        // example when an activity is in the lower split of split screen.
+        final int screenPosY = (mSizeCompatBounds == null
                 ? (containerBounds.height() - resolvedBounds.height()) / 2
-                : (containerBounds.height() - mSizeCompatBounds.height()) / 2;
+                : (containerBounds.height() - mSizeCompatBounds.height()) / 2)
+                + containerBounds.top;
+
         if (screenPosX != 0 || screenPosY != 0) {
             if (mSizeCompatBounds != null) {
                 mSizeCompatBounds.offset(screenPosX, screenPosY);
