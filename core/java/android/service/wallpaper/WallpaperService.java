@@ -193,7 +193,7 @@ public abstract class WallpaperService extends Service {
         final ArraySet<RectF> mLocalColorsToAdd = new ArraySet<>(4);
 
         // 2D matrix [x][y] to represent a page of a portion of a window
-        EngineWindowPage[] mWindowPages = new EngineWindowPage[1];
+        EngineWindowPage[] mWindowPages = new EngineWindowPage[0];
         Bitmap mLastScreenshot;
         int mLastWindowPage = -1;
         private boolean mResetWindowPages;
@@ -1528,14 +1528,8 @@ public abstract class WallpaperService extends Service {
                         mLocalColorAreas.add(colorArea);
                         int colorPage = getRectFPage(colorArea, finalXOffsetStep);
                         EngineWindowPage currentPage = mWindowPages[colorPage];
-                        if (currentPage == null) {
-                            currentPage = new EngineWindowPage();
-                            currentPage.addArea(colorArea);
-                            mWindowPages[colorPage] = currentPage;
-                        } else {
-                            currentPage.setLastUpdateTime(0);
-                            currentPage.removeColor(colorArea);
-                        }
+                        currentPage.setLastUpdateTime(0);
+                        currentPage.removeColor(colorArea);
                     }
                     mLocalColorsToAdd.clear();
                 }
@@ -1550,15 +1544,6 @@ public abstract class WallpaperService extends Service {
                     xPage = mWindowPages.length - 1;
                 }
                 current = mWindowPages[xPage];
-                if (current == null) {
-                    if (DEBUG) Log.d(TAG, "making page " + xPage + " out of " + xPages);
-                    if (DEBUG) {
-                        Log.d(TAG, "xOffsetStep " + finalXOffsetStep + " xOffset "
-                                + finalXOffset);
-                    }
-                    current = new EngineWindowPage();
-                    mWindowPages[xPage] = current;
-                }
                 updatePage(current, xPage, xPages, finalXOffsetStep);
             });
         }
@@ -1704,10 +1689,7 @@ public abstract class WallpaperService extends Service {
             mResetWindowPages = false;
             mLastWindowPage = -1;
             for (int i = 0; i < mWindowPages.length; i++) {
-                EngineWindowPage page = mWindowPages[i];
-                if (page != null) {
-                    page.setLastUpdateTime(0L);
-                }
+                mWindowPages[i].setLastUpdateTime(0L);
             }
         }
 
@@ -1755,8 +1737,7 @@ public abstract class WallpaperService extends Service {
                 }
                 for (int i = 0; i < mWindowPages.length; i++) {
                     for (int j = 0; j < regions.size(); j++) {
-                        EngineWindowPage page = mWindowPages[i];
-                        if (page != null) page.removeArea(regions.get(j));
+                        mWindowPages[i].removeArea(regions.get(j));
                     }
                 }
             });
