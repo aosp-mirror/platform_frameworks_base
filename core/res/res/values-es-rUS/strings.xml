@@ -737,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Supervisa los intentos para desbloquear la pantalla"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Controla la cantidad de contraseñas incorrectas ingresadas al desbloquear la pantalla y bloquea la tablet o borra todos los datos de la tablet si se ingresaron demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Supervisa la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquea el dispositivo Android TV o borra todos sus datos si se ingresan demasiadas contraseñas incorrectas."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Permite controlar la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquear el sistema de infoentretenimiento, o borrar todos los datos del sistema, si se ingresaron demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Supervisar la cantidad de contraseñas ingresadas incorrectamente al desbloquear la pantalla, y bloquear el dispositivo o borrar todos sus datos si se ingresan demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Permite controlar la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquear la tablet, o borrar todos los datos del usuario, si se ingresan demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Supervisa la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquea el dispositivo Android TV o borra todos los datos del usuario si se ingresan demasiadas contraseñas incorrectas."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Permite controlar la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquear el sistema de infoentretenimiento, o borrar todos los datos de perfil, si se ingresaron demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Permite controlar la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquear el teléfono, o borrar todos los datos del usuario, si se ingresan demasiadas contraseñas incorrectas."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Cambiar el bloqueo de pantalla"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Cambia el bloqueo de pantalla."</string>
@@ -748,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Borrar todos los datos"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Eliminar los datos de la tablet sin avisar y restablecer la configuración de fábrica"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Restablece la configuración de fábrica para borrar los datos del dispositivo Android TV sin previo aviso."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Permite borrar los datos del sistema de infoentretenimiento sin previo aviso mediante el restablecimiento de la configuración de fábrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Borra los datos del dispositivo sin avisar y restablece la configuración de fábrica."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Borrar los datos del usuario"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Borrar los datos de perfil"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Borrar los datos del usuario"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Permite borrar los datos del usuario en esta tablet sin previo aviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Borra los datos del usuario en este dispositivo Android TV sin previo aviso."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Permite borrar los datos de perfil en este sistema de infoentretenimiento sin previo aviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Permite borrar los datos del usuario en este teléfono sin previo aviso."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Configura el proxy global de dispositivo"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Configura el proxy global de dispositivo que se usará mientras se habilita la política. Solo el propietario del dispositivo puede configurar el proxy global."</string>

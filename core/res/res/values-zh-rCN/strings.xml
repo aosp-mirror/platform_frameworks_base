@@ -737,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"监控屏幕解锁尝试次数"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"监视在解锁屏幕时输错密码的次数，如果输错次数过多，则锁定平板电脑或清除其所有数据。"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"监控用户在解锁屏幕时输错密码的次数；如果用户输错密码的次数超出上限，系统就会锁定 Android TV 设备或清空 Android TV 设备上的所有数据。"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定信息娱乐系统或清除信息娱乐系统上的所有数据。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"监视在解锁屏幕时输错密码的次数，如果输错次数过多，则锁定手机或清除其所有数据。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定平板电脑或清空此用户的所有数据。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"监控用户在解锁屏幕时输错密码的次数；如果用户输错密码的次数超出上限，系统就会锁定 Android TV 设备或清空该用户的所有数据。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定信息娱乐系统或清除此个人资料的所有数据。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定手机或清空此用户的所有数据。"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"更改锁屏方式"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"更改锁屏方式。"</string>
@@ -748,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"清除所有数据"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"恢复出厂设置时，系统会在不发出警告的情况下清除平板电脑上的数据。"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"不事先发出警告就以恢复出厂设置的方式清空 Android TV 设备中的数据。"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"在不发出警告的情况下，通过恢复出厂设置来清除信息娱乐系统上的数据。"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"恢复出厂设置时，系统会在不发出警告的情况下清除手机上的数据。"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"清空用户数据"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"清除个人资料数据"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"清空用户数据"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"清空此用户在这台平板电脑上的数据，而不事先发出警告。"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"不事先发出警告就清空此用户在这台 Android TV 设备上的数据。"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"在不发出警告的情况下，从该信息娱乐系统中清除此个人资料的所有数据。"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"清空此用户在这部手机上的数据，而不事先发出警告。"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"设置设备全局代理"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"设置在规范启用时要使用的设备全局代理。只有设备所有者才能设置全局代理。"</string>

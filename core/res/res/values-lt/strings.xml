@@ -743,9 +743,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Stebėti bandymus atrakinti ekraną"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Stebimas neteisingai įvestų slaptažodžių skaičius atrakinant ekraną ir užrakinti planšetinį kompiuterį arba ištrinti visus jame esančius duomenis, jei įvedama per daug neteisingų slaptažodžių."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite „Android TV“ įrenginį arba ištrinkite visus „Android TV“ įrenginio duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Stebėti atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinti informacinę pramoginę sistemą arba ištrinti visus informacinės pramoginės sistemos duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Atrakindami ekraną stebėkite neteisingai įvestų slaptažodžių skaičių ir užrakinkite telefoną ar ištrinkite visus telefono duomenis, jei įvedama per daug neteisingų slaptažodžių."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite planšetinį kompiuterį arba ištrinkite visus šio naudotojo duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite „Android TV“ įrenginį arba ištrinkite visus šio naudotojo duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Stebėti atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinti informacinę pramoginę sistemą arba ištrinti visus šio profilio duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite telefoną arba ištrinkite visus šio naudotojo duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Pakeisti ekrano užraktą"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Pakeisti ekrano užraktą."</string>
@@ -754,10 +756,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Trinti visus duomenis"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Be įspėjimo ištrinti planšetinio kompiuterio duomenis atkuriant gamyklinius duomenis."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Neįspėjus ištrinami „Android TV“ įrenginio duomenys, atkūrus gamyklinius duomenis."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Ištrinti informacinės pramoginės sistemos be įspėjimo atliekant gamyklinių duomenų atkūrimą."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Be įspėjimo ištrinti telefono duomenis atkuriant gamyklinius duomenis."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Naudotojo duomenų ištrynimas"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Profilio duomenų ištrynimas"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Naudotojo duomenų ištrynimas"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Ištrinkite šio naudotojo duomenis šiame planšetiniame kompiuteryje be įspėjimo."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Ištrinami šio naudotojo duomenys šiame „Android TV“ įrenginyje be įspėjimo."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Ištrinti šio profilio duomenis šioje informacinėje pramoginėje sistemoje be įspėjimo."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Ištrinkite šio naudotojo duomenis šiame telefone be įspėjimo."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Nustatyti įrenginio bendrąjį tarpinį serverį"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Nustatykite įrenginio visuotinį tarpinį serverį, kuris bus naudojamas, kai politika įgalinta. Tik įrenginio savininkas gali nustatyti visuotinį tarpinį serverį."</string>

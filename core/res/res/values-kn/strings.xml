@@ -737,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ಪರದೆಯ ಅನ್‌ಲಾಕ್ ಪ್ರಯತ್ನಗಳನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ಪರದೆಯನ್ನು ಅನ್‌ಲಾಕ್‌ ಮಾಡುವಾಗ ತಪ್ಪಾಗಿ ಟೈಪ್‌ ಮಾಡಿದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ, ಮತ್ತು ಟ್ಯಾಬ್ಲೆಟ್‌ ಅನ್ನು ಲಾಕ್‌ ಮಾಡಿ ಅಥವಾ ಹಲವಾರು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಟೈಪ್‌ ಮಾಡಿದ್ದರೆ ಟ್ಯಾಬ್ಲೆಟ್‌ನ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"ಪರದೆಯನ್ನು ಅನ್ಲಾಕ್ ಮಾಡುವಾಗ ತಪ್ಪಾಗಿ ಟೈಪ್ ಮಾಡಿದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ನಿಮ್ಮ Android TV ಸಾಧನವನ್ನು ಲಾಕ್ ಮಾಡುತ್ತದೆ ಅಥವಾ ಹಲವಾರು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಟೈಪ್ ಮಾಡಿದರೆ ನಿಮ್ಮ ಎಲ್ಲಾ Android TV ಸಾಧನದ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕುತ್ತದೆ."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡುವಾಗ ತಪ್ಪಾಗಿ ಟೈಪ್ ಮಾಡಿದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ ಮತ್ತು ಇನ್‌ಫೋಟೈನ್‌ಮೆಂಟ್ ಸಿಸ್ಟಂ ಅನ್ನು ಲಾಕ್ ಮಾಡಿ ಅಥವಾ ಹಲವಾರು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಟೈಪ್ ಮಾಡಿದ್ದರೆ ಇನ್‌ಫೋಟೈನ್‌ಮೆಂಟ್ ಸಿಸ್ಟಂನ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿ."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ಪರದೆಯನ್ನು ಅನ್‌ಲಾಕ್‌ ಮಾಡಿದಾಗ ತಪ್ಪಾಗಿ ಟೈಪ್‌ ಮಾಡಿದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ, ಮತ್ತು ಫೋನ್‌‌ ಅನ್ನು ಲಾಕ್‌ ಮಾಡಿ ಅಥವಾ ಹಲವಾರು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಟೈಪ್‌ ಮಾಡಿದ್ದರೆ ಫೋನ್‌‌ನ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ಪರದೆಯನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡುವಾಗ ಟೈಪ್ ಮಾಡಲಾದ ತಪ್ಪಾಗಿರುವ ಪಾಸ್‌ವರ್ಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ಟ್ಯಾಬ್ಲೆಟ್ ಲಾಕ್ ಮಾಡಿ ಅಥವಾ ಹಲವಾರು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಟೈಪ್ ಮಾಡಲಾಗಿದ್ದರೆ ಈ ಬಳಕೆದಾರರ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"ಪರದೆಯನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡುವಾಗ ತಪ್ಪಾಗಿ ಟೈಪ್ ಮಾಡಲಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ ಮತ್ತು ನಿಮ್ಮ Android TV ಸಾಧನವನ್ನು ಲಾಕ್ ಮಾಡಿ ಅಥವಾ ಹಲವಾರು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಟೈಪ್ ಮಾಡಲಾಗಿದ್ದರೆ ಈ ಬಳಕೆದಾರರ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡುವಾಗ ತಪ್ಪಾಗಿ ಟೈಪ್ ಮಾಡಿದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ ಮತ್ತು ಇನ್‌ಫೋಟೈನ್‌ಮೆಂಟ್ ಸಿಸ್ಟಂ ಅನ್ನು ಲಾಕ್ ಮಾಡಿ ಅಥವಾ ಹಲವಾರು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಟೈಪ್ ಮಾಡಿದ್ದರೆ ಈ ಪ್ರೊಫೈಲ್‌ನ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿ."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"ಪರದೆಯನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡುವಾಗ ಟೈಪ್ ಮಾಡಲಾದ ತಪ್ಪಾಗಿರುವ ಪಾಸ್‌ವರ್ಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ಫೋನ್ ಲಾಕ್ ಮಾಡಿ ಅಥವಾ ಹಲವಾರು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಟೈಪ್ ಮಾಡಲಾಗಿದ್ದರೆ ಈ ಬಳಕೆದಾರರ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಬದಲಾಯಿಸಿ"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಬದಲಾಯಿಸಿ."</string>
@@ -748,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿ"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾ ರೀಸೆಟ್ ಅನ್ನು ನಿರ್ವಹಿಸುವ ಮೂಲಕ ಎಚ್ಚರಿಕೆಯನ್ನು ನೀಡದೆಯೇ ಟ್ಯಾಬ್ಲೆಟ್ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾ ರೀಸೆಟ್ ಮಾಡುವ ಮೂಲಕ ಎಚ್ಚರಿಕೆ ಇಲ್ಲದೆ ನಿಮ್ಮ Android TV ಸಾಧನದ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕುತ್ತದೆ."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾ ರೀಸೆಟ್ ಮಾಡುವ ಮೂಲಕ ಎಚ್ಚರಿಕೆ ಇಲ್ಲದೆ ಇನ್‌ಫೋಟೈನ್‌ಮೆಂಟ್ ಸಿಸ್ಟಂನ ಡೇಟಾವನ್ನು ಅಳಿಸಿ."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾ ರೀಸೆಟ್ ಅನ್ನು ನಿರ್ವಹಿಸುವ ಮೂಲಕ ಎಚ್ಚರಿಕೆಯನ್ನು ನೀಡದೆಯೇ ಫೋನ್ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ಬಳಕೆದಾರ ಡೇಟಾ ಅಳಿಸಿ"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"ಪ್ರೊಫೈಲ್‌ನ ಡೇಟಾವನ್ನು ಅಳಿಸಿ"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"ಬಳಕೆದಾರ ಡೇಟಾ ಅಳಿಸಿ"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"ಯಾವುದೇ ಸೂಚನೆ ಇಲ್ಲದೆ ಈ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಈ ಬಳಕೆದಾರರ ಡೇಟಾವನ್ನು ಅಳಿಸಿ."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"ಎಚ್ಚರಿಕೆ ಇಲ್ಲದೆ ಈ Android TV ಸಾಧನದಲ್ಲಿನ ಈ ಬಳಕೆದಾರರ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕುತ್ತದೆ."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"ಎಚ್ಚರಿಕೆಯಿಲ್ಲದೆ ಈ ಇನ್ಫೋಟೈನ್‌ಮೆಂಟ್ ಸಿಸ್ಟಂನಲ್ಲಿ ಈ ಪ್ರೊಫೈಲ್‌ನ ಡೇಟಾವನ್ನು ಅಳಿಸಿ."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"ಯಾವುದೇ ಸೂಚನೆ ಇಲ್ಲದೆ ಈ ಫೋನ್‌ನಲ್ಲಿ ಈ ಬಳಕೆದಾರರ ಡೇಟಾವನ್ನು ಅಳಿಸಿ."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"ಸಾಧನವನ್ನು ಜಾಗತಿಕ ಪ್ರಾಕ್ಸಿಗೆ ಹೊಂದಿಸಿ"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"ನೀತಿಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ ಬಳಸಬೇಕಾದ ಸಾಧನದ ಜಾಗತಿಕ ಪ್ರಾಕ್ಸಿಯನ್ನು ಹೊಂದಿಸಿ. ಸಾಧನದ ಮಾಲೀಕರು ಮಾತ್ರ ಜಾಗತಿಕ ಪ್ರಾಕ್ಸಿಯನ್ನು ಹೊಂದಿಸಬಹುದಾಗಿರುತ್ತದೆ."</string>
