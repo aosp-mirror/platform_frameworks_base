@@ -56,7 +56,6 @@ internal val SMARTSPACE_MAX_AGE = SystemProperties
 class MediaDataFilter @Inject constructor(
     private val context: Context,
     private val broadcastDispatcher: BroadcastDispatcher,
-    private val mediaResumeListener: MediaResumeListener,
     private val lockscreenUserManager: NotificationLockscreenUserManager,
     @Main private val executor: Executor,
     private val systemClock: SystemClock
@@ -88,7 +87,7 @@ class MediaDataFilter @Inject constructor(
         oldKey: String?,
         data: MediaData,
         immediately: Boolean,
-        isSsReactivated: Boolean
+        receivedSmartspaceCardLatency: Int
     ) {
         if (oldKey != null && oldKey != key) {
             allEntries.remove(oldKey)
@@ -106,14 +105,15 @@ class MediaDataFilter @Inject constructor(
 
         // Notify listeners
         listeners.forEach {
-            it.onMediaDataLoaded(key, oldKey, data, isSsReactivated = isSsReactivated)
+            it.onMediaDataLoaded(key, oldKey, data)
         }
     }
 
     override fun onSmartspaceMediaDataLoaded(
         key: String,
         data: SmartspaceMediaData,
-        shouldPrioritize: Boolean
+        shouldPrioritize: Boolean,
+        isSsReactivated: Boolean
     ) {
         if (!data.isActive) {
             Log.d(TAG, "Inactive recommendation data. Skip triggering.")
@@ -123,8 +123,6 @@ class MediaDataFilter @Inject constructor(
         // Override the pass-in value here, as the order of Smartspace card is only determined here.
         var shouldPrioritizeMutable = false
         smartspaceMediaData = data
-        // Override the pass-in value here, as the Smartspace reactivation could only happen here.
-        var isSsReactivated = false
 
         // Before forwarding the smartspace target, first check if we have recently inactive media
         val sorted = userEntries.toSortedMap(compareBy {
@@ -139,18 +137,25 @@ class MediaDataFilter @Inject constructor(
                 smartspaceMaxAgeMillis = TimeUnit.SECONDS.toMillis(smartspaceMaxAgeSeconds)
             }
         }
+
+        val activeMedia = userEntries.filter { (key, value) -> value.active }
+        var isSsReactivatedMutable = activeMedia.isEmpty() && userEntries.isNotEmpty()
+
         if (timeSinceActive < smartspaceMaxAgeMillis) {
-            val lastActiveKey = sorted.lastKey() // most recently active
-            // Notify listeners to consider this media active
-            Log.d(TAG, "reactivating $lastActiveKey instead of smartspace")
-            reactivatedKey = lastActiveKey
-            if (MediaPlayerData.firstActiveMediaIndex() == -1) {
-                isSsReactivated = true
-            }
-            val mediaData = sorted.get(lastActiveKey)!!.copy(active = true)
-            listeners.forEach {
-                it.onMediaDataLoaded(lastActiveKey, lastActiveKey, mediaData,
-                        isSsReactivated = isSsReactivated)
+            // It could happen there are existing active media resume cards, then we don't need to
+            // reactivate.
+            if (isSsReactivatedMutable) {
+                val lastActiveKey = sorted.lastKey() // most recently active
+                // Notify listeners to consider this media active
+                Log.d(TAG, "reactivating $lastActiveKey instead of smartspace")
+                reactivatedKey = lastActiveKey
+                val mediaData = sorted.get(lastActiveKey)!!.copy(active = true)
+                listeners.forEach {
+                    it.onMediaDataLoaded(lastActiveKey, lastActiveKey, mediaData,
+                            receivedSmartspaceCardLatency =
+                            (systemClock.currentTimeMillis() - data.headphoneConnectionTimeMillis)
+                                    .toInt())
+                }
             }
         } else {
             // Mark to prioritize Smartspace card if no recent media.
@@ -161,7 +166,8 @@ class MediaDataFilter @Inject constructor(
             Log.d(TAG, "Invalid recommendation data. Skip showing the rec card")
             return
         }
-        listeners.forEach { it.onSmartspaceMediaDataLoaded(key, data, shouldPrioritizeMutable) }
+        listeners.forEach { it.onSmartspaceMediaDataLoaded(key, data, shouldPrioritizeMutable,
+                isSsReactivatedMutable) }
     }
 
     override fun onMediaDataRemoved(key: String) {
