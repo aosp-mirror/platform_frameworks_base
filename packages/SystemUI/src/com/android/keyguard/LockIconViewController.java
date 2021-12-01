@@ -658,24 +658,36 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
      * @return whether to intercept the touch event
      */
     public boolean onTouchEvent(MotionEvent event, Runnable onGestureDetectedRunnable) {
-        if (mSensorTouchLocation.contains((int) event.getX(), (int) event.getY())
-                && (mView.getVisibility() == View.VISIBLE
-                || (mAodFp != null && mAodFp.getVisibility() == View.VISIBLE))) {
+        if (onInterceptTouchEvent(event)) {
             mOnGestureDetectedRunnable = onGestureDetectedRunnable;
             mGestureDetector.onTouchEvent(event);
-        }
-
-        // we continue to intercept all following touches until we see MotionEvent.ACTION_CANCEL UP
-        // or MotionEvent.ACTION_UP. this is to avoid passing the touch to NPV
-        // after the lock icon disappears on device entry
-        if (mDownDetected) {
-            if (event.getAction() == MotionEvent.ACTION_CANCEL
-                    || event.getAction() == MotionEvent.ACTION_UP) {
-                mDownDetected = false;
-            }
             return true;
         }
+
+        mDownDetected = false;
         return false;
+    }
+
+    /**
+     * Intercepts the touch if the onDown event and current event are within this lock icon view's
+     * bounds.
+     */
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (!inLockIconArea(event) || !isClickable()) {
+            return false;
+        }
+
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            return true;
+        }
+
+        return mDownDetected;
+    }
+
+    private boolean inLockIconArea(MotionEvent event) {
+        return mSensorTouchLocation.contains((int) event.getX(), (int) event.getY())
+                && (mView.getVisibility() == View.VISIBLE
+                || (mAodFp != null && mAodFp.getVisibility() == View.VISIBLE));
     }
 
     private boolean isClickable() {
