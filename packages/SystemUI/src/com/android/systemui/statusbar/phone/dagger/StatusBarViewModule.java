@@ -32,6 +32,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
@@ -49,6 +50,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
+import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.phone.TapAgainView;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
@@ -168,6 +170,21 @@ public abstract class StatusBarViewModule {
         stub.setLayoutResource(layoutId);
         View v = stub.inflate();
         return v;
+    }
+
+    /** */
+    @Provides
+    @StatusBarComponent.StatusBarScope
+    public static OngoingPrivacyChip getSplitShadeOngoingPrivacyChip(
+            @Named(SPLIT_SHADE_HEADER) View header) {
+        return header.findViewById(R.id.privacy_chip);
+    }
+
+    /** */
+    @Provides
+    @StatusBarComponent.StatusBarScope
+    static StatusIconContainer providesStatusIconContainer(@Named(SPLIT_SHADE_HEADER) View header) {
+        return header.findViewById(R.id.statusIcons);
     }
 
     /** */
