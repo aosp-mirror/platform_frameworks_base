@@ -29,40 +29,33 @@ using ::android::StringPiece;
 
 namespace android {
 
-void LocaleValue::set_language(const char* language_chars) {
+template <size_t N, class Transformer>
+static void safe_transform_copy(const char* source, char (&dest)[N], Transformer t) {
   size_t i = 0;
-  while ((*language_chars) != '\0') {
-    language[i++] = ::tolower(*language_chars);
-    language_chars++;
+  while (i < N && (*source) != '\0') {
+    dest[i++] = t(i, *source);
+    source++;
   }
+  while (i < N) {
+    dest[i++] = '\0';
+  }
+}
+
+void LocaleValue::set_language(const char* language_chars) {
+  safe_transform_copy(language_chars, language, [](size_t, char c) { return ::tolower(c); });
 }
 
 void LocaleValue::set_region(const char* region_chars) {
-  size_t i = 0;
-  while ((*region_chars) != '\0') {
-    region[i++] = ::toupper(*region_chars);
-    region_chars++;
-  }
+  safe_transform_copy(region_chars, region, [](size_t, char c) { return ::toupper(c); });
 }
 
 void LocaleValue::set_script(const char* script_chars) {
-  size_t i = 0;
-  while ((*script_chars) != '\0') {
-    if (i == 0) {
-      script[i++] = ::toupper(*script_chars);
-    } else {
-      script[i++] = ::tolower(*script_chars);
-    }
-    script_chars++;
-  }
+  safe_transform_copy(script_chars, script,
+                      [](size_t i, char c) { return i ? ::tolower(c) : ::toupper(c); });
 }
 
 void LocaleValue::set_variant(const char* variant_chars) {
-  size_t i = 0;
-  while ((*variant_chars) != '\0') {
-    variant[i++] = *variant_chars;
-    variant_chars++;
-  }
+  safe_transform_copy(variant_chars, variant, [](size_t, char c) { return c; });
 }
 
 static inline bool is_alpha(const std::string& str) {
@@ -233,6 +226,10 @@ ssize_t LocaleValue::InitFromParts(std::vector<std::string>::iterator iter,
   }
   return static_cast<ssize_t>(iter - start_iter);
 }
+
+// Make sure the following memcpy's are properly sized.
+static_assert(sizeof(ResTable_config::localeScript) == sizeof(LocaleValue::script));
+static_assert(sizeof(ResTable_config::localeVariant) == sizeof(LocaleValue::variant));
 
 void LocaleValue::InitFromResTable(const ResTable_config& config) {
   config.unpackLanguage(language);
