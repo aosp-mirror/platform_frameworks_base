@@ -313,7 +313,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     final int anim = getRotationAnimation(info);
                     if (!(isSeamless || anim == ROTATION_ANIMATION_JUMPCUT)) {
                         mRotationAnimation = new ScreenRotationAnimation(mContext, mSurfaceSession,
-                                mTransactionPool, startTransaction, change, info.getRootLeash());
+                                mTransactionPool, startTransaction, change, info.getRootLeash(),
+                                anim);
                         mRotationAnimation.startAnimation(animations, onAnimFinish,
                                 mTransitionAnimationScaleSetting, mMainExecutor, mAnimExecutor);
                         continue;
