@@ -6,3 +6,7 @@ per-file *SensorPrivacy* = file:platform/frameworks/native:/libs/sensorprivacy/O
 
 # Sensors framework
 per-file *Sensor*,*Trigger* = file:platform/frameworks/native:/services/sensorservice/OWNERS
+
+# Buffers
+per-file HardwareBuffer* = file:/graphics/java/android/graphics/OWNERS
+per-file DataSpace* = file:/graphics/java/android/graphics/OWNERS
