@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -83,27 +84,11 @@ class SetRequestedOrientationWhilePinnedTest(
             }
         }
 
-    @Postsubmit
-    @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
-
-    @Postsubmit
-    @Test
-    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
-
-    @Postsubmit
-    @Test
-    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
-
-    @Postsubmit
-    @Test
-    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
-
     @FlakyTest
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun statusBarLayerRotatesScales() {
         // This test doesn't work in shell transitions because of b/206753786
@@ -119,7 +104,7 @@ class SetRequestedOrientationWhilePinnedTest(
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipAppShowsOnTop() {
         testSpec.assertWmEnd {
@@ -135,7 +120,7 @@ class SetRequestedOrientationWhilePinnedTest(
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipAlwaysVisible() = testSpec.assertWm {
         this.isAppWindowVisible(pipApp.component)
@@ -148,10 +133,6 @@ class SetRequestedOrientationWhilePinnedTest(
             visibleRegion(pipApp.component).coversExactly(endingBounds)
         }
     }
-
-    @Postsubmit
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

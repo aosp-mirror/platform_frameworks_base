@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -72,13 +71,13 @@ class ExitPipWithDismissButtonTest(testSpec: FlickerTestParameter) : ExitPipTran
             }
         }
 
-    @Postsubmit
+    @FlakyTest
     @Test
     fun runPresubmitAssertion() {
         flickerRule.checkPresubmitAssertions()
     }
 
-    @Postsubmit
+    @FlakyTest
     @Test
     fun runPostsubmitAssertion() {
         flickerRule.checkPostsubmitAssertions()
