@@ -4634,4 +4634,6 @@
   <java-symbol type="string" name="config_systemGameService" />
 
   <java-symbol type="string" name="config_supervisedUserCreationPackage"/>
+
+  <java-symbol type="bool" name="config_enableSafetyCenter" />
 </resources>
