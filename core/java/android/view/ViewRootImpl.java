@@ -8411,7 +8411,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mTranslator != null) {
             mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
         }
-        if (insetsState != null && insetsState.getSource(ITYPE_IME).isVisible()) {
+        if (insetsState != null && insetsState.getSourceOrDefaultVisibility(ITYPE_IME)) {
             ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchInsetsChanged",
                     getInsetsController().getHost().getInputMethodManager(), null /* icProto */);
         }
@@ -8436,7 +8436,7 @@ public final class ViewRootImpl implements ViewParent,
             mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
             mTranslator.translateSourceControlsInScreenToAppWindow(activeControls);
         }
-        if (insetsState != null && insetsState.getSource(ITYPE_IME).isVisible()) {
+        if (insetsState != null && insetsState.getSourceOrDefaultVisibility(ITYPE_IME)) {
             ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchInsetsControlChanged",
                     getInsetsController().getHost().getInputMethodManager(), null /* icProto */);
         }
