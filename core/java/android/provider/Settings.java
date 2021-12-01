@@ -12014,7 +12014,7 @@ public final class Settings {
          * Value to specify whether network quality scores and badging should be shown in the UI.
          *
          * Type: int (0 for false, 1 for true)
-         * @deprecated {@code NetworkScoreManager} is deprecated.
+         * @deprecated {@link NetworkScoreManager} is deprecated.
          * @hide
          */
         @Deprecated
@@ -12026,7 +12026,7 @@ public final class Settings {
          * when generating SSID only bases score curves.
          *
          * Type: long
-         * @deprecated {@code NetworkScoreManager} is deprecated.
+         * @deprecated {@link NetworkScoreManager} is deprecated.
          * @hide
          */
         @Deprecated
@@ -12062,7 +12062,7 @@ public final class Settings {
          * {@link NetworkScoreManager#setActiveScorer(String)} to write it.
          *
          * Type: string - package name
-         * @deprecated {@code NetworkScoreManager} is deprecated.
+         * @deprecated {@link NetworkScoreManager} is deprecated.
          * @hide
          */
         @Deprecated
@@ -12075,7 +12075,7 @@ public final class Settings {
          * networks automatically.
          *
          * Type: string package name or null if the feature is either not provided or disabled.
-         * @deprecated {@code NetworkScoreManager} is deprecated.
+         * @deprecated {@link NetworkScoreManager} is deprecated.
          * @hide
          */
         @Deprecated
@@ -12088,7 +12088,7 @@ public final class Settings {
          * {@link com.android.server.wifi.RecommendedNetworkEvaluator}.
          *
          * Type: long
-         * @deprecated {@code NetworkScoreManager} is deprecated.
+         * @deprecated {@link NetworkScoreManager} is deprecated.
          * @hide
          */
         @Deprecated
