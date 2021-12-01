@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.render
 
-import android.util.Pair
+import com.android.systemui.statusbar.notification.FeedbackIcon
 
 /** A view controller for a notification row */
 interface NotifRowController {
@@ -34,9 +34,6 @@ interface NotifRowController {
      */
     fun setLastAudiblyAlertedMs(lastAudiblyAlertedMs: Long)
 
-    /**
-     * Sets both whether to show a feedback indicator and which resources to use for the drawable
-     * and content description.
-     */
-    fun showFeedbackIcon(showFeedbackIndicator: Boolean, feedbackResources: Pair<Int, Int>?)
+    /** Shows the given feedback icon, or hides the icon if null. */
+    fun setFeedbackIcon(icon: FeedbackIcon?)
 }

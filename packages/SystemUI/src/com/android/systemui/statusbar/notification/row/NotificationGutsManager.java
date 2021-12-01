@@ -337,14 +337,15 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     private void initializeFeedbackInfo(
             final ExpandableNotificationRow row,
             FeedbackInfo feedbackInfo) {
+        if (mAssistantFeedbackController.getFeedbackIcon(row.getEntry()) == null) {
+            return;
+        }
         StatusBarNotification sbn = row.getEntry().getSbn();
         UserHandle userHandle = sbn.getUser();
         PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
                 userHandle.getIdentifier());
 
-        if (mAssistantFeedbackController.showFeedbackIndicator(row.getEntry())) {
-            feedbackInfo.bindGuts(pmUser, sbn, row.getEntry(), row, mAssistantFeedbackController);
-        }
+        feedbackInfo.bindGuts(pmUser, sbn, row.getEntry(), row, mAssistantFeedbackController);
     }
 
     /**
