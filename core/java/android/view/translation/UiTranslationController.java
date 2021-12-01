@@ -663,8 +663,13 @@ public class UiTranslationController {
             Log.e(TAG, "Can not find TranslationManager when trying to create translator.");
             return null;
         }
-        final TranslationContext translationContext = new TranslationContext(sourceSpec,
-                targetSpec, /* translationFlags= */ 0);
+        final TranslationContext translationContext =
+                new TranslationContext.Builder(sourceSpec, targetSpec)
+                        .setActivityId(
+                                new ActivityId(
+                                        mActivity.getTaskId(),
+                                        mActivity.getShareableActivityToken()))
+                        .build();
         final Translator translator = tm.createTranslator(translationContext);
         if (translator != null) {
             final Pair<TranslationSpec, TranslationSpec> specs = new Pair<>(sourceSpec, targetSpec);
