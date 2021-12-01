@@ -1135,6 +1135,7 @@ package android {
     field public static final int popupWindowStyle = 16842870; // 0x1010076
     field public static final int port = 16842793; // 0x1010029
     field public static final int positiveButtonText = 16843253; // 0x10101f5
+    field public static final int preferKeepClear;
     field public static final int preferMinimalPostProcessing = 16844300; // 0x101060c
     field public static final int preferenceCategoryStyle = 16842892; // 0x101008c
     field public static final int preferenceFragmentStyle = 16844038; // 0x1010506
@@ -50270,6 +50271,7 @@ package android.view {
     method public float getPivotX();
     method public float getPivotY();
     method public android.view.PointerIcon getPointerIcon();
+    method @NonNull public final java.util.List<android.graphics.Rect> getPreferKeepClearRects();
     method @Nullable public String[] getReceiveContentMimeTypes();
     method public android.content.res.Resources getResources();
     method public final boolean getRevealOnFocusHint();
@@ -50387,6 +50389,7 @@ package android.view {
     method protected boolean isPaddingOffsetRequired();
     method public boolean isPaddingRelative();
     method public boolean isPivotSet();
+    method public final boolean isPreferKeepClear();
     method public boolean isPressed();
     method public boolean isSaveEnabled();
     method public boolean isSaveFromParentEnabled();
@@ -50629,6 +50632,8 @@ package android.view {
     method public void setPivotX(float);
     method public void setPivotY(float);
     method public void setPointerIcon(android.view.PointerIcon);
+    method public final void setPreferKeepClear(boolean);
+    method public final void setPreferKeepClearRects(@NonNull java.util.List<android.graphics.Rect>);
     method public void setPressed(boolean);
     method public void setRenderEffect(@Nullable android.graphics.RenderEffect);
     method public final void setRevealOnFocusHint(boolean);
