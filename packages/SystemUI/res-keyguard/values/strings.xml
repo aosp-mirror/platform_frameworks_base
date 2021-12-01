@@ -18,32 +18,6 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- App label in the manifest  -->
-    <string name="app_name">Keyguard</string>
-    <!-- Instructions telling the user to enter their SIM PIN to unlock the keyguard.
-         Displayed in one line in a large font.  -->
-    <string name="keyguard_password_enter_pin_code">Type PIN code</string>
-
-    <!-- Instructions telling the user to enter their SIM PUK to unlock the keyguard.
-         Displayed in one line in a large font.  -->
-    <string name="keyguard_password_enter_puk_code">Type SIM PUK and new PIN code</string>
-
-    <!-- Prompt to enter SIM PUK in Edit Text Box in unlock screen -->
-    <string name="keyguard_password_enter_puk_prompt">SIM PUK code</string>
-    <!-- Prompt to enter New SIM PIN in Edit Text Box in unlock screen -->
-    <string name="keyguard_password_enter_pin_prompt">New SIM PIN code</string>
-
-    <!-- Displayed as hint in passwordEntry EditText on PasswordUnlockScreen [CHAR LIMIT=30]-->
-    <string name="keyguard_password_entry_touch_hint"><font size="17">Touch to type password</font></string>
-
-    <!-- Instructions telling the user to enter their text password to unlock the keyguard.
-         Displayed in one line in a large font.  -->
-    <string name="keyguard_password_enter_password_code">Type password to unlock</string>
-
-    <!-- Instructions telling the user to enter their PIN password to unlock the keyguard.
-         Displayed in one line in a large font.  -->
-    <string name="keyguard_password_enter_pin_password_code">Type PIN to unlock</string>
-
     <!-- Instructions telling the user to enter their PIN password to unlock the keyguard [CHAR LIMIT=30] -->
     <string name="keyguard_enter_your_pin">Enter your PIN</string>
 
@@ -52,10 +26,6 @@
 
     <!-- Instructions telling the user to enter their text password to unlock the keyguard [CHAR LIMIT=30] -->
     <string name="keyguard_enter_your_password">Enter your password</string>
-
-    <!-- Instructions telling the user that they entered the wrong pin while trying
-         to unlock the keyguard.  Displayed in one line in a large font.  -->
-    <string name="keyguard_password_wrong_pin_code">Incorrect PIN code.</string>
 
     <!-- Shown in the lock screen when there is SIM card IO error. -->
     <string name="keyguard_sim_error_message_short">Invalid Card.</string>
@@ -81,10 +51,6 @@
 
     <!-- When the lock screen is showing and the phone plugged in, and the defend mode is triggered, say that charging is temporarily limited.  -->
     <string name="keyguard_plugged_in_charging_limited"><xliff:g id="percentage">%s</xliff:g> • Charging temporarily limited</string>
-
-    <!-- When the lock screen is showing and the battery is low, warn user to plug
-         in the phone soon. -->
-    <string name="keyguard_low_battery">Connect your charger.</string>
 
     <!-- On the keyguard screen, when pattern lock is disabled, only tell them to press menu to unlock.  This is shown in small font at the bottom. -->
     <string name="keyguard_instructions_when_pattern_disabled">Press Menu to unlock.</string>
@@ -132,9 +98,6 @@
     <!-- Accessibility description of the SIM PUK password view. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_sim_puk_area">SIM PUK area</string>
 
-    <!-- Accessibility description for the text view that indicates when the next alarm is set (not shown on screen). [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_next_alarm">Next alarm set for <xliff:g id="alarm" example="Fri 8:30 AM">%1$s</xliff:g></string>
-
     <!-- KeyguardPinView - accessibility support --><skip />
     <!-- Description of the Delete button in a KeyboardView. [CHAR LIMIT=NONE] -->
     <string name="keyboardview_keycode_delete">Delete</string>
@@ -147,8 +110,6 @@
     <!-- Description of the Enter button in a KeyboardView. [CHAR LIMIT=NONE] -->
     <string name="keyboardview_keycode_enter">Enter</string>
 
-    <!-- Message shown in pattern unlock after some number of unsuccessful attempts -->
-    <string name="kg_forgot_pattern_button_text">Forgot Pattern</string>
     <!-- Message shown when user enters wrong pattern -->
     <string name="kg_wrong_pattern">Wrong pattern</string>
     <!-- Message shown when user enters wrong password -->
@@ -160,18 +121,12 @@
         <item quantity="one">Try again in 1 second.</item>
         <item quantity="other">Try again in <xliff:g id="number">%d</xliff:g> seconds.</item>
     </plurals>
-    <!-- Instructions for using the pattern unlock screen -->
-    <string name="kg_pattern_instructions">Draw your pattern</string>
     <!-- Instructions for using the SIM PIN unlock screen -->
     <string name="kg_sim_pin_instructions">Enter SIM PIN.</string>
     <!-- Instructions for using the SIM PIN unlock screen when there's more than one SIM -->
     <string name="kg_sim_pin_instructions_multi">Enter SIM PIN for \"<xliff:g id="carrier" example="CARD 1">%1$s</xliff:g>\".</string>
     <!-- Instructions for disabling eSIM carrier to unlock the phone with embedded SIM. This message follows the original SIM PIN/PUK message of device without embedded SIM. -->
     <string name="kg_sim_lock_esim_instructions"><xliff:g id="previous_msg" example="Enter SIM PIN.">%1$s</xliff:g> Disable eSIM to use device without mobile service.</string>
-    <!-- Instructions for using the PIN unlock screen -->
-    <string name="kg_pin_instructions">Enter PIN</string>
-    <!-- Instructions for using the password unlock screen -->
-    <string name="kg_password_instructions">Enter Password</string>
     <!-- Hint shown in the PUK screen that asks the user to enter the PUK code given to them by their provider -->
     <string name="kg_puk_enter_puk_hint">SIM is now disabled. Enter PUK code to continue. Contact carrier for details.</string>
     <!-- Hint shown when there are multiple SIMs in the device to ask the user to enter the PUK code given to them by their provider -->
@@ -186,10 +141,6 @@
     <string name="kg_invalid_sim_pin_hint">Type a PIN that is 4 to 8 numbers.</string>
     <!-- Message shown when the user enters an invalid PUK code in the PUK screen -->
     <string name="kg_invalid_sim_puk_hint">PUK code should be 8 numbers or more.</string>
-    <!-- Message shown when the user enters an invalid PUK code -->
-    <string name="kg_invalid_puk">Re-enter the correct PUK code. Repeated attempts will permanently disable the SIM.</string>
-    <!-- Message shown when the user exceeds the maximum number of pattern attempts -->
-    <string name="kg_login_too_many_attempts">Too many pattern attempts</string>
     <!-- Message shown in dialog when max number of attempts are reached for PIN screen of keyguard -->
     <string name="kg_too_many_failed_pin_attempts_dialog_message">
         You have incorrectly typed your PIN <xliff:g id="number">%1$d</xliff:g> times.
@@ -230,13 +181,6 @@
     <!-- Instructions telling the user that the operation to unlock the keyguard
          with PUK failed. Displayed in one line in a large font.  -->
     <string name="kg_password_puk_failed">SIM PUK operation failed!</string>
-    <!-- Notification telling the user that the PIN1 they entered is valid -->
-    <string name="kg_pin_accepted">Code Accepted!</string>
-
-    <!-- On the keyguard screen, it shows the carrier the phone is connected to.
-        This is displayed if the phone is not connected to a carrier.-->
-    <string name="keyguard_carrier_default">No service.</string>
-
     <!-- Content description of the switch input method button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">Switch input method</string>
 
@@ -261,15 +205,6 @@
     <!-- An explanation text that the password needs to be entered since the user hasn't used strong authentication since quite some time. [CHAR LIMIT=80] -->
     <string name="kg_prompt_reason_timeout_password">Password required for additional security</string>
 
-    <!-- An explanation text that the pattern needs to be solved since profiles have just been switched. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_switch_profiles_pattern">Pattern required when you switch profiles</string>
-
-    <!-- An explanation text that the pin needs to be entered since profiles have just been switched. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_switch_profiles_pin">PIN required when you switch profiles</string>
-
-    <!-- An explanation text that the password needs to be entered since profiles have just been switched. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_switch_profiles_password">Password required when you switch profiles</string>
-
     <!-- An explanation text that the credential needs to be entered because a device admin has
     locked the device. [CHAR LIMIT=80] -->
     <string name="kg_prompt_reason_device_admin">Device locked by admin</string>
@@ -277,24 +212,6 @@
     <!-- An explanation text that the credential needs to be entered because the user has clicked
      the force lock button. [CHAR LIMIT=80] -->
     <string name="kg_prompt_reason_user_request">Device was locked manually</string>
-
-    <!-- An explanation text that the pattern needs to be solved since it hasn't been solved in a while. [CHAR LIMIT=80]-->
-    <plurals name="kg_prompt_reason_time_pattern">
-        <item quantity="one">Device hasn\'t been unlocked for <xliff:g id="number">%d</xliff:g> hour. Confirm pattern.</item>
-        <item quantity="other">Device hasn\'t been unlocked for <xliff:g id="number">%d</xliff:g> hours. Confirm pattern.</item>
-    </plurals>
-
-    <!-- An explanation text that the pin needs to be entered since it hasn't been entered in a while. [CHAR LIMIT=80]-->
-    <plurals name="kg_prompt_reason_time_pin">
-        <item quantity="one">Device hasn\'t been unlocked for <xliff:g id="number">%d</xliff:g> hour. Confirm PIN.</item>
-        <item quantity="other">Device hasn\'t been unlocked for <xliff:g id="number">%d</xliff:g> hours. Confirm PIN.</item>
-    </plurals>
-
-    <!-- An explanation text that the password needs to be entered since it hasn't been entered in a while. [CHAR LIMIT=80]-->
-    <plurals name="kg_prompt_reason_time_password">
-        <item quantity="one">Device hasn\'t been unlocked for <xliff:g id="number">%d</xliff:g> hour. Confirm password.</item>
-        <item quantity="other">Device hasn\'t been unlocked for <xliff:g id="number">%d</xliff:g> hours. Confirm password.</item>
-    </plurals>
 
     <!-- Fingerprint hint message when finger was not recognized.-->
     <string name="kg_fingerprint_not_recognized">Not recognized</string>
@@ -324,5 +241,4 @@ number">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.
     <string name="clock_title_bubble">Bubble</string>
     <!-- Name of the "Analog" clock face [CHAR LIMIT=15]-->
     <string name="clock_title_analog">Analog</string>
-
 </resources>

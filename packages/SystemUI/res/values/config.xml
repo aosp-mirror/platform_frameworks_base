@@ -20,14 +20,6 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
-    <!-- Whether to clip notification contents with a rounded rectangle. Might be expensive on
-         certain GPU's and thus can be turned off with only minimal visual impact. -->
-    <bool name="config_notifications_round_rect_clipping">true</bool>
-
-    <!-- Component to be used as the status bar service.  Must implement the IStatusBar
-     interface.  This name is in the ComponentName flattened format (package/class)  -->
-    <string name="config_statusBarComponent" translatable="false">com.android.systemui.statusbar.phone.StatusBar</string>
-
     <!-- Component to be used as the recents implementation.  Must implement the
      RecentsImplementation interface.  This name is in the ComponentName flattened format
      (package/class)  -->
@@ -45,30 +37,11 @@
         <item>400</item>
     </integer-array>
 
-    <!-- How many icons may be shown at once in the system bar. Includes any
-         slots that may be reused for things like IME control. -->
-    <integer name="config_maxNotificationIcons">5</integer>
-
-    <!-- Show phone (voice) signal strength instead of data in mobile RSSI. -->
-    <bool name="config_showPhoneRSSIForData">false</bool>
-
-    <!-- Show rotation lock toggle in System UI-->
-    <bool name="config_showRotationLock">true</bool>
-
-    <!-- Vibration duration for GlowPadView used in SearchPanelView -->
-    <integer translatable="false" name="config_vibration_duration">0</integer>
-
-    <!-- Vibration duration for GlowPadView used in SearchPanelView -->
-    <integer translatable="false" name="config_search_panel_view_vibration_duration">20</integer>
-
     <!-- Show mic or phone affordance on Keyguard -->
     <bool name="config_keyguardShowLeftAffordance">false</bool>
 
     <!-- Show camera affordance on Keyguard -->
     <bool name="config_keyguardShowCameraAffordance">false</bool>
-
-    <!-- The length of the vibration when the notification pops open. -->
-    <integer name="one_finger_pop_duration_ms">10</integer>
 
     <!-- decay duration (from size_max -> size), in ms -->
     <integer name="navigation_bar_deadzone_hold">333</integer>
@@ -95,7 +68,6 @@
     <integer name="quick_settings_max_rows">4</integer>
 
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
-    <integer name="quick_settings_user_time_settings_tile_span">1</integer>
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_default" translatable="false">
@@ -124,13 +96,6 @@
     <string-array name="config_quickSettingsAutoAdd" translatable="false">
         <item>accessibility_display_inversion_enabled:inversion</item>
     </string-array>
-
-    <!-- Whether or not the RSSI tile is capitalized or not. -->
-    <bool name="quick_settings_rssi_tile_capitalization">true</bool>
-
-    <!-- Timeouts for brightness dialog to disappear -->
-    <integer name="quick_settings_brightness_dialog_short_timeout">2000</integer>
-    <integer name="quick_settings_brightness_dialog_long_timeout">4000</integer>
 
     <!-- Show indicator for Wifi on but not connected. -->
     <bool name="config_showWifiIndicatorWhenEnabled">false</bool>
@@ -161,10 +126,6 @@
      card. -->
     <integer name="keyguard_max_notification_count">3</integer>
 
-    <!-- Defines the implementation of the velocity tracker to be used for the panel expansion. Can
-         be 'platform' or 'noisy' (i.e. for noisy touch screens). -->
-    <string name="velocity_tracker_impl" translatable="false">platform</string>
-
     <!-- Doze: does this device support STATE_DOZE?  -->
     <bool name="doze_display_state_supported">false</bool>
 
@@ -193,9 +154,6 @@
      sensor will be delayed when the device first enters dozing but the device has not entered its
      low powered state yet. -->
     <bool name="doze_long_press_uses_prox">true</bool>
-
-    <!-- Doze: should notifications be used as a pulse signal? -->
-    <bool name="doze_pulse_on_notifications">true</bool>
 
     <!-- Doze: duration to avoid false pickup gestures triggered by notification vibrations -->
     <integer name="doze_pickup_vibration_threshold">2000</integer>
@@ -272,17 +230,8 @@
     <!-- Doze: whether the double tap sensor reports 2D touch coordinates -->
     <bool name="doze_double_tap_reports_touch_coordinates">false</bool>
 
-    <!-- Hotspot tile: number of days to show after feature is used. -->
-    <integer name="days_to_show_hotspot_tile">30</integer>
-
-    <!-- Color inversion tile: number of days to show after feature is used. -->
-    <integer name="days_to_show_color_inversion_tile">7</integer>
-
     <!-- Number of times to show the strong alarm warning text in the volume dialog -->
     <integer name="zen_mode_alarm_warning_threshold">5</integer>
-
-    <!-- Maximum number of total conditions to display in the zen mode selection panel -->
-    <integer name="zen_mode_max_conditions">5</integer>
 
     <!-- Enable the default volume dialog -->
     <bool name="enable_volume_ui">true</bool>
@@ -292,12 +241,6 @@
 
     <!-- Whether to show operator name in the status bar -->
     <bool name="config_showOperatorNameInStatusBar">false</bool>
-
-    <!-- Duration of the full carrier network change icon animation. -->
-    <integer name="carrier_network_change_anim_time">3000</integer>
-
-    <!-- Duration of the expansion animation in the volume dialog -->
-    <item name="volume_expand_animation_duration" type="integer">300</item>
 
     <!-- Whether to show the full screen user switcher. -->
     <bool name="config_enableFullscreenUserSwitcher">false</bool>
@@ -354,18 +297,11 @@
     <string name="config_navBarLayoutQuickstep" translatable="false">back[1.7WC];home;contextual[1.7WC]</string>
     <string name="config_navBarLayoutHandle" translatable="false">back[70AC];home_handle;ime_switcher[70AC]</string>
 
-    <bool name="quick_settings_show_full_alarm">false</bool>
-
     <!-- Whether to show a warning notification when device's skin temperature is high. -->
     <integer name="config_showTemperatureWarning">0</integer>
 
     <!-- Whether to show a alarm dialog when device's usb port is overheating. -->
     <integer name="config_showUsbPortAlarm">0</integer>
-
-    <!-- Accessibility actions -->
-    <item type="id" name="action_split_task_to_left" />
-    <item type="id" name="action_split_task_to_right" />
-    <item type="id" name="action_split_task_to_top" />
 
     <item type="id" name="action_toggle_overview"/>
 
@@ -445,11 +381,6 @@
     <!-- Notifications are sized to match the width of two (of 4) qs tiles in landscape. -->
     <bool name="config_skinnyNotifsInLandscape">true</bool>
 
-    <!-- If true, enable the advance anti-falsing classifier on the lockscreen. On some devices it
-         does not work well, particularly with noisy touchscreens. Note that disabling it may
-         increase the rate of unintentional unlocks. -->
-    <bool name="config_lockscreenAntiFalsingClassifierEnabled">true</bool>
-
     <!-- Snooze: default notificaiton snooze time. -->
     <integer name="config_notification_snooze_time_default">60</integer>
 
@@ -506,8 +437,6 @@
         <item>com.android.systemui</item>
     </string-array>
 
-    <integer name="ongoing_appops_dialog_max_apps">5</integer>
-
     <!-- Launcher package name for overlaying icons. -->
     <string name="launcher_overlayable_package" translatable="false">com.android.launcher3</string>
 
@@ -526,9 +455,6 @@
 
     <!-- Preferred max refresh rate at keyguard, if supported by the display. -->
     <integer name="config_keyguardMaxRefreshRate">-1</integer>
-
-    <!-- Whether or not to add a "people" notifications section -->
-    <bool name="config_usePeopleFiltering">false</bool>
 
     <!-- Defines system icons to be excluded from the display. That is to say, the icons in the
          status bar that are part of this list are never displayed. Each item in the list must be a
@@ -576,8 +502,6 @@
     <!-- Max number of columns for quick controls area -->
     <integer name="controls_max_columns">2</integer>
 
-    <!-- Max number of columns for power menu -->
-    <integer name="power_menu_max_columns">3</integer>
     <!-- Max number of columns for power menu lite -->
     <integer name="power_menu_lite_max_columns">2</integer>
     <!-- Max number of rows for power menu lite -->
