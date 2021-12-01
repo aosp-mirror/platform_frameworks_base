@@ -219,6 +219,7 @@ sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
             gamut = SkNamedGamut::kSRGB;
             break;
         case HAL_DATASPACE_STANDARD_BT2020:
+        case HAL_DATASPACE_STANDARD_BT2020_CONSTANT_LUMINANCE:
             gamut = SkNamedGamut::kRec2020;
             break;
         case HAL_DATASPACE_STANDARD_DCI_P3:
@@ -233,7 +234,6 @@ sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
         case HAL_DATASPACE_STANDARD_BT601_625_UNADJUSTED:
         case HAL_DATASPACE_STANDARD_BT601_525:
         case HAL_DATASPACE_STANDARD_BT601_525_UNADJUSTED:
-        case HAL_DATASPACE_STANDARD_BT2020_CONSTANT_LUMINANCE:
         case HAL_DATASPACE_STANDARD_BT470M:
         case HAL_DATASPACE_STANDARD_FILM:
         default:
