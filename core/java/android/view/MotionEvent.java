@@ -1663,6 +1663,9 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     @CriticalNative
     private static native void nativeScale(long nativePtr, float scale);
 
+    @CriticalNative
+    private static native int nativeGetSurfaceRotation(long nativePtr);
+
     private MotionEvent() {
     }
 
@@ -3805,17 +3808,39 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Gets a rotation matrix that (when applied to a motionevent) will rotate that motion event
-     * such that the result coordinates end up in the same physical location on a display whose
-     * coordinates are rotated by `rotation`.
+     * Gets the rotation value of the transform for this MotionEvent.
      *
-     * For example, rotating 0,0 by 90 degrees will move a point from the physical top-left to
-     * the bottom-left of the 90-degree-rotated display.
+     * This MotionEvent's rotation can be changed by passing a rotation matrix to
+     * {@link #transform(Matrix)} to change the coordinate space of this event.
+     *
+     * @return the rotation value, or -1 if unknown or invalid.
+     * @see Surface.Rotation
+     * @see #createRotateMatrix(int, int, int)
      *
      * @hide
      */
+    public @Surface.Rotation int getSurfaceRotation() {
+        return nativeGetSurfaceRotation(mNativePtr);
+    }
+
+    /**
+     * Gets a rotation matrix that (when applied to a MotionEvent) will rotate that motion event
+     * such that the result coordinates end up in the same physical location on a frame whose
+     * coordinates are rotated by `rotation`.
+     *
+     * For example, rotating (0,0) by 90 degrees will move a point from the physical top-left to
+     * the bottom-left of the 90-degree-rotated frame.
+     *
+     * @param rotation the surface rotation of the output matrix
+     * @param rotatedFrameWidth the width of the rotated frame
+     * @param rotatedFrameHeight the height of the rotated frame
+     *
+     * @see #transform(Matrix)
+     * @see #getSurfaceRotation()
+     * @hide
+     */
     public static Matrix createRotateMatrix(
-            @Surface.Rotation int rotation, int displayW, int displayH) {
+            @Surface.Rotation int rotation, int rotatedFrameWidth, int rotatedFrameHeight) {
         if (rotation == Surface.ROTATION_0) {
             return new Matrix(Matrix.IDENTITY_MATRIX);
         }
@@ -3823,14 +3848,14 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         float[] values = null;
         if (rotation == Surface.ROTATION_90) {
             values = new float[]{0, 1, 0,
-                    -1, 0, displayH,
+                    -1, 0, rotatedFrameHeight,
                     0, 0, 1};
         } else if (rotation == Surface.ROTATION_180) {
-            values = new float[]{-1, 0, displayW,
-                    0, -1, displayH,
+            values = new float[]{-1, 0, rotatedFrameWidth,
+                    0, -1, rotatedFrameHeight,
                     0, 0, 1};
         } else if (rotation == Surface.ROTATION_270) {
-            values = new float[]{0, -1, displayW,
+            values = new float[]{0, -1, rotatedFrameWidth,
                     1, 0, 0,
                     0, 0, 1};
         }
