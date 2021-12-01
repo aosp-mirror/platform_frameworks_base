@@ -143,6 +143,7 @@ import android.Manifest;
 import android.Manifest.permission;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -282,6 +283,7 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.window.ClientWindowFrames;
+import android.window.IOnFpsCallbackListener;
 import android.window.TaskSnapshot;
 
 import com.android.internal.R;
@@ -708,6 +710,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final TaskSnapshotController mTaskSnapshotController;
 
     final BlurController mBlurController;
+    final TaskFpsCallbackController mTaskFpsCallbackController;
 
     boolean mIsTouchDevice;
     boolean mIsFakeTouchDevice;
@@ -1354,6 +1357,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mStartingSurfaceController = new StartingSurfaceController(this);
 
         mBlurController = new BlurController(mContext, mPowerManager);
+        mTaskFpsCallbackController = new TaskFpsCallbackController(mContext);
         mAccessibilityController = new AccessibilityController(this);
     }
 
@@ -8772,4 +8776,34 @@ public class WindowManagerService extends IWindowManager.Stub
         mTaskTransitionSpec = null;
     }
 
+    @Override
+    @RequiresPermission(Manifest.permission.ACCESS_FPS_COUNTER)
+    public void registerTaskFpsCallback(@IntRange(from = 0) int taskId,
+            IOnFpsCallbackListener listener) {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FPS_COUNTER)
+                != PackageManager.PERMISSION_GRANTED) {
+            final int pid = Binder.getCallingPid();
+            throw new SecurityException("Access denied to process: " + pid
+                    + ", must have permission " + Manifest.permission.ACCESS_FPS_COUNTER);
+        }
+
+        if (mRoot.anyTaskForId(taskId) == null) {
+            throw new IllegalArgumentException("no task with taskId: " + taskId);
+        }
+
+        mTaskFpsCallbackController.registerCallback(taskId, listener);
+    }
+
+    @Override
+    @RequiresPermission(Manifest.permission.ACCESS_FPS_COUNTER)
+    public void unregisterTaskFpsCallback(IOnFpsCallbackListener listener) {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FPS_COUNTER)
+                != PackageManager.PERMISSION_GRANTED) {
+            final int pid = Binder.getCallingPid();
+            throw new SecurityException("Access denied to process: " + pid
+                    + ", must have permission " + Manifest.permission.ACCESS_FPS_COUNTER);
+        }
+
+        mTaskFpsCallbackController.unregisterCallback(listener);
+    }
 }

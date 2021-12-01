@@ -8,6 +8,7 @@ package android {
     field public static final String ACCESS_CONTEXT_HUB = "android.permission.ACCESS_CONTEXT_HUB";
     field public static final String ACCESS_DRM_CERTIFICATES = "android.permission.ACCESS_DRM_CERTIFICATES";
     field @Deprecated public static final String ACCESS_FM_RADIO = "android.permission.ACCESS_FM_RADIO";
+    field public static final String ACCESS_FPS_COUNTER = "android.permission.ACCESS_FPS_COUNTER";
     field public static final String ACCESS_INSTANT_APPS = "android.permission.ACCESS_INSTANT_APPS";
     field public static final String ACCESS_LOCUS_ID_USAGE_STATS = "android.permission.ACCESS_LOCUS_ID_USAGE_STATS";
     field public static final String ACCESS_MOCK_LOCATION = "android.permission.ACCESS_MOCK_LOCATION";
@@ -15206,6 +15207,8 @@ package android.view {
 
   public interface WindowManager extends android.view.ViewManager {
     method @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS) public android.graphics.Region getCurrentImeTouchRegion();
+    method public default void registerTaskFpsCallback(@IntRange(from=0) int, @NonNull android.window.TaskFpsCallback);
+    method public default void unregisterTaskFpsCallback(@NonNull android.window.TaskFpsCallback);
   }
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
@@ -15789,6 +15792,18 @@ package android.webkit {
     method public static android.webkit.WebViewProviderInfo[] getAllWebViewPackages();
     method public static String getCurrentWebViewPackageName();
     method public static android.webkit.WebViewProviderInfo[] getValidWebViewPackages();
+  }
+
+}
+
+package android.window {
+
+  public final class TaskFpsCallback {
+    ctor public TaskFpsCallback(@NonNull java.util.concurrent.Executor, @NonNull android.window.TaskFpsCallback.OnFpsCallbackListener);
+  }
+
+  public static interface TaskFpsCallback.OnFpsCallbackListener {
+    method public void onFpsReported(float);
   }
 
 }

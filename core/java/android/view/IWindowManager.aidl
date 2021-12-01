@@ -66,6 +66,7 @@ import android.view.WindowManager;
 import android.view.SurfaceControl;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
+import android.window.IOnFpsCallbackListener;
 
 /**
  * System private interface to the window manager.
@@ -922,4 +923,28 @@ interface IWindowManager
      * reverts to using the default task transition with no spec changes.
      */
     void clearTaskTransitionSpec();
+
+    /**
+     * Registers the frame rate per second count callback for one given task ID.
+     * Each callback can only register for receiving FPS callback for one task id until unregister
+     * is called. If there's no task associated with the given task id,
+     * {@link IllegalArgumentException} will be thrown. If a task id destroyed after a callback is
+     * registered, the registered callback will not be unregistered until
+     * {@link unregisterTaskFpsCallback()} is called
+     * @param taskId task id of the task.
+     * @param listener listener to be registered.
+     *
+     * @hide
+     */
+    void registerTaskFpsCallback(in int taskId, in IOnFpsCallbackListener listener);
+
+    /**
+     * Unregisters the frame rate per second count callback which was registered with
+     * {@link #registerTaskFpsCallback(int,TaskFpsCallback)}.
+     *
+     * @param listener listener to be unregistered.
+     *
+     * @hide
+     */
+    void unregisterTaskFpsCallback(in IOnFpsCallbackListener listener);
 }
