@@ -2837,7 +2837,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return;
             }
             final IBinder targetWindow = mImeTargetWindowMap.get(startInputToken);
-            if (targetWindow != null && mLastImeTargetWindow != targetWindow) {
+            if (targetWindow != null) {
                 mWindowManagerInternal.updateInputMethodTargetWindow(token, targetWindow);
             }
             mLastImeTargetWindow = targetWindow;
