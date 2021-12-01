@@ -254,12 +254,11 @@ final class InstallPackageHelper {
             final List<SharedLibraryInfo> allowedSharedLibInfos =
                     SharedLibraryHelper.getAllowedSharedLibInfos(scanResult,
                             request.mSharedLibrarySource);
-            final SharedLibraryInfo staticLib = scanResult.mStaticSharedLibraryInfo;
             if (allowedSharedLibInfos != null) {
                 for (SharedLibraryInfo info : allowedSharedLibInfos) {
                     if (!SharedLibraryHelper.addSharedLibraryToPackageVersionMap(
                             incomingSharedLibraries, info)) {
-                        throw new ReconcileFailure("Static Shared Library " + staticLib.getName()
+                        throw new ReconcileFailure("Shared Library " + info.getName()
                                 + " is being installed twice in this set!");
                     }
                 }
@@ -1188,7 +1187,8 @@ final class InstallPackageHelper {
                     createdAppId.put(packageName, optimisticallyRegisterAppId(result));
                     versionInfos.put(result.mPkgSetting.getPkg().getPackageName(),
                             mPm.getSettingsVersionForPackage(result.mPkgSetting.getPkg()));
-                    if (result.mStaticSharedLibraryInfo != null) {
+                    if (result.mStaticSharedLibraryInfo != null
+                            || result.mSdkSharedLibraryInfo != null) {
                         final PackageSetting sharedLibLatestVersionSetting =
                                 mPm.getSharedLibLatestVersionSetting(result);
                         if (sharedLibLatestVersionSetting != null) {
@@ -2695,7 +2695,7 @@ final class InstallPackageHelper {
                 }
             }
 
-            if (dataOwnerPkg != null) {
+            if (dataOwnerPkg != null && !dataOwnerPkg.isSdkLibrary()) {
                 if (!PackageManagerServiceUtils.isDowngradePermitted(installFlags,
                         dataOwnerPkg.isDebuggable())) {
                     try {

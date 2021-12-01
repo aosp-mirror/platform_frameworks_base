@@ -274,7 +274,7 @@ class PackageManagerComponentLabelIconOverrideTest {
     private fun makePkgSetting(pkgName: String) = spy(
         PackageSetting(
             pkgName, null, File("/test"),
-            null, null, null, null, 0, 0, 0, 0, null, null, null,
+            null, null, null, null, 0, 0, 0, 0, null, null, null, null, null,
             UUID.fromString("3f9d52b7-d7b4-406a-a1da-d9f19984c72c")
         )
     ) {
