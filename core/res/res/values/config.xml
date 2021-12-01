@@ -1814,7 +1814,7 @@
          latency during some scenarios like air travel. Only useful when both geolocation and
          telephony time zone detection are supported on a device.
          See com.android.server.timezonedetector.TimeZoneDetectorStrategy for more information. -->
-    <bool name="config_supportTelephonyTimeZoneFallback" translatable="false">false</bool>
+    <bool name="config_supportTelephonyTimeZoneFallback" translatable="false">true</bool>
 
     <!-- Whether to enable network location overlay which allows network location provider to be
          replaced by an app at run-time. When disabled, only the
