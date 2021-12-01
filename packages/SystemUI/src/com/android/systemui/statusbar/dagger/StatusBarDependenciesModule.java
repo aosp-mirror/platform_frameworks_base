@@ -20,6 +20,7 @@ import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Handler;
+import android.service.dreams.IDreamManager;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -67,13 +68,10 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
-import com.android.systemui.statusbar.phone.SystemUIHostDialogProvider;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLogger;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
-import com.android.systemui.statusbar.window.StatusBarWindowModule;
-import com.android.systemui.statusbar.window.StatusBarWindowView;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
@@ -320,7 +318,7 @@ public interface StatusBarDependenciesModule {
     @Provides
     @SysUISingleton
     static DialogLaunchAnimator provideDialogLaunchAnimator(Context context,
-            LaunchAnimator launchAnimator) {
-        return new DialogLaunchAnimator(context, launchAnimator, new SystemUIHostDialogProvider());
+            LaunchAnimator launchAnimator, IDreamManager dreamManager) {
+        return new DialogLaunchAnimator(context, launchAnimator, dreamManager);
     }
 }
