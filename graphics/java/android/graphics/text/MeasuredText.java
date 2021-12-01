@@ -287,7 +287,7 @@ public class MeasuredText {
          *
          * @param computeHyphenation true if you want to use automatic hyphenations.
          */
-        public @NonNull Builder setComputeHyphenation(boolean computeHyphenation) {
+        public @NonNull @Deprecated Builder setComputeHyphenation(boolean computeHyphenation) {
             setComputeHyphenation(
                     computeHyphenation ? HYPHENATION_MODE_NORMAL : HYPHENATION_MODE_NONE);
             return this;
@@ -330,8 +330,6 @@ public class MeasuredText {
          * points faster with ignoring some typographic features, e.g. kerning.
          *
          * {@link #HYPHENATION_MODE_NONE} is by default.
-         *
-         * @see #setComputeHyphenation(boolean)
          *
          * @param mode a hyphenation mode.
          */

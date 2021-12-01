@@ -2665,7 +2665,7 @@ public class KeyValueBackupTaskTest  {
         KeyValueBackupTask task =
                 new KeyValueBackupTask(
                         mBackupManagerService,
-                        transportMock.transportClient,
+                        transportMock.mTransportConnection,
                         transportMock.transportData.transportDirName,
                         queue,
                         mOldJournal,

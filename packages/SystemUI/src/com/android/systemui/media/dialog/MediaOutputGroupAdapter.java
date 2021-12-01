@@ -97,7 +97,6 @@ public class MediaOutputGroupAdapter extends MediaOutputBaseAdapter {
         void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin, int position) {
             super.onBind(device, topMargin, bottomMargin, position);
             mAddIcon.setVisibility(View.GONE);
-            mBottomDivider.setVisibility(View.GONE);
             mCheckBox.setVisibility(View.VISIBLE);
             mCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 onCheckBoxClicked(isChecked, device);
@@ -131,7 +130,6 @@ public class MediaOutputGroupAdapter extends MediaOutputBaseAdapter {
                         true /* bFocused */, true /* showSeekBar */, false /* showProgressBar */,
                         false /* showSubtitle*/);
                 mTitleIcon.setImageDrawable(getSpeakerDrawable());
-                mBottomDivider.setVisibility(View.VISIBLE);
                 mCheckBox.setVisibility(View.GONE);
                 mAddIcon.setVisibility(View.GONE);
                 initSessionSeekbar();

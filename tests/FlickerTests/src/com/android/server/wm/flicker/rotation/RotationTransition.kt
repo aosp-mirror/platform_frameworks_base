@@ -129,17 +129,6 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     open fun entireScreenCovered() = testSpec.entireScreenCovered()
 
     /**
-     * Checks that the focus doesn't change during animation
-     */
-    @Presubmit
-    @Test
-    open fun focusDoesNotChange() {
-        testSpec.assertEventLog {
-            this.focusDoesNotChange()
-        }
-    }
-
-    /**
      * Checks that [testApp] layer covers the entire screen at the start of the transition
      */
     @Presubmit

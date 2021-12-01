@@ -21,6 +21,14 @@ import static com.android.server.timezonedetector.location.LocationTimeZoneProvi
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_UNCERTAIN;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STOPPED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_CERTAIN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_DESTROYED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_FAILED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_INITIALIZING;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_PROVIDERS_INITIALIZING;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_STOPPED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_UNCERTAIN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_UNKNOWN;
 import static com.android.server.timezonedetector.location.TestSupport.USER1_CONFIG_GEO_DETECTION_DISABLED;
 import static com.android.server.timezonedetector.location.TestSupport.USER1_CONFIG_GEO_DETECTION_ENABLED;
 import static com.android.server.timezonedetector.location.TestSupport.USER2_CONFIG_GEO_DETECTION_ENABLED;
@@ -45,7 +53,9 @@ import android.util.IndentingPrintWriter;
 import com.android.server.timezonedetector.ConfigurationInternal;
 import com.android.server.timezonedetector.GeolocationTimeZoneSuggestion;
 import com.android.server.timezonedetector.TestState;
+import com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderMetricsLogger;
 import com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.ProviderStateEnum;
+import com.android.server.timezonedetector.location.LocationTimeZoneProviderController.State;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -73,6 +83,7 @@ public class LocationTimeZoneProviderControllerTest {
             TimeZoneProviderEvent.createPermanentFailureEvent(ARBITRARY_TIME_MILLIS, "Test");
 
     private TestThreadingDomain mTestThreadingDomain;
+    private TestMetricsLogger mTestMetricsLogger;
     private TestCallback mTestCallback;
     private TestLocationTimeZoneProvider mTestPrimaryLocationTimeZoneProvider;
     private TestLocationTimeZoneProvider mTestSecondaryLocationTimeZoneProvider;
@@ -82,11 +93,12 @@ public class LocationTimeZoneProviderControllerTest {
         // For simplicity, the TestThreadingDomain uses the test's main thread. To execute posted
         // runnables, the test must call methods on mTestThreadingDomain otherwise those runnables
         // will never get a chance to execute.
-        LocationTimeZoneProvider.ProviderMetricsLogger stubbedProviderMetricsLogger = stateEnum -> {
-            // Stubbed.
-        };
         mTestThreadingDomain = new TestThreadingDomain();
+        mTestMetricsLogger = new TestMetricsLogger();
+
         mTestCallback = new TestCallback(mTestThreadingDomain);
+
+        ProviderMetricsLogger stubbedProviderMetricsLogger = stateEnum -> {};
         mTestPrimaryLocationTimeZoneProvider = new TestLocationTimeZoneProvider(
                 stubbedProviderMetricsLogger, mTestThreadingDomain, "primary");
         mTestSecondaryLocationTimeZoneProvider = new TestLocationTimeZoneProvider(
@@ -94,10 +106,18 @@ public class LocationTimeZoneProviderControllerTest {
     }
 
     @Test
+    public void controllerStartsInUnknownState() {
+        LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
+        assertControllerState(controller, STATE_UNKNOWN);
+    }
+
+    @Test
     public void initializationFailure_primary() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
         Duration expectedInitTimeout = testEnvironment.getProviderInitializationTimeout()
@@ -112,10 +132,13 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.assertInitialized();
         mTestSecondaryLocationTimeZoneProvider.assertInitialized();
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertInitializationTimeoutSet(expectedInitTimeout);
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
     }
@@ -123,8 +146,8 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void initializationFailure_secondary() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
         Duration expectedInitTimeout = testEnvironment.getProviderInitializationTimeout()
@@ -139,10 +162,13 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.assertInitialized();
         mTestSecondaryLocationTimeZoneProvider.assertInitialized();
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestPrimaryLocationTimeZoneProvider.assertInitializationTimeoutSet(expectedInitTimeout);
         mTestSecondaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
     }
@@ -150,8 +176,8 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void initializationFailure_both() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
@@ -165,8 +191,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.assertInitialized();
         mTestSecondaryLocationTimeZoneProvider.assertInitialized();
 
+        assertControllerState(controller, STATE_FAILED);
         mTestPrimaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING, STATE_FAILED);
         mTestCallback.assertUncertainSuggestionMadeAndCommit();
         assertFalse(controller.isUncertaintyTimeoutSet());
     }
@@ -174,8 +203,8 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void initialState_started() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
         Duration expectedInitTimeout = testEnvironment.getProviderInitializationTimeout()
@@ -188,10 +217,13 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.assertInitialized();
         mTestSecondaryLocationTimeZoneProvider.assertInitialized();
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestPrimaryLocationTimeZoneProvider.assertInitializationTimeoutSet(expectedInitTimeout);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
     }
@@ -199,8 +231,8 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void initialState_disabled() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_DISABLED);
 
@@ -211,8 +243,10 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.assertInitialized();
         mTestSecondaryLocationTimeZoneProvider.assertInitialized();
 
+        assertControllerState(controller, STATE_STOPPED);
         mTestPrimaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_PROVIDERS_INITIALIZING, STATE_STOPPED);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
     }
@@ -220,8 +254,8 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void enabled_uncertaintySuggestionSentIfNoEventReceived() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
@@ -231,18 +265,22 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
         // Simulate time passing with no provider event being received from the primary.
         mTestThreadingDomain.executeNext();
 
+        assertControllerState(controller, STATE_INITIALIZING);
         // The primary should have reported uncertainty, which should trigger the controller to
         // start the uncertainty timeout and start the secondary.
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertUncertaintyTimeoutSet(testEnvironment, controller);
 
@@ -250,12 +288,14 @@ public class LocationTimeZoneProviderControllerTest {
         // secondary.
         mTestThreadingDomain.executeNext();
 
+        assertControllerState(controller, STATE_INITIALIZING);
         // Now both initialization timeouts should have triggered. The uncertainty timeout should
         // still not be triggered.
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertUncertaintyTimeoutSet(testEnvironment, controller);
 
@@ -263,10 +303,12 @@ public class LocationTimeZoneProviderControllerTest {
         // suggestion.
         mTestThreadingDomain.executeNext();
 
+        assertControllerState(controller, STATE_UNCERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_UNCERTAIN);
         mTestCallback.assertUncertainSuggestionMadeAndCommit();
         assertFalse(controller.isUncertaintyTimeoutSet());
     }
@@ -274,17 +316,20 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void enabled_eventReceivedBeforeInitializationTimeout() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -293,9 +338,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_CERTAIN);
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -304,27 +351,32 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void enabled_eventReceivedFromPrimaryAfterInitializationTimeout() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
         // Simulate time passing with no provider event being received from the primary.
         mTestThreadingDomain.executeNext();
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertUncertaintyTimeoutSet(testEnvironment, controller);
 
@@ -333,9 +385,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_CERTAIN);
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -344,27 +398,32 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void enabled_eventReceivedFromSecondaryAfterInitializationTimeout() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
         // Simulate time passing with no provider event being received from the primary.
         mTestThreadingDomain.executeNext();
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertUncertaintyTimeoutSet(testEnvironment, controller);
 
@@ -373,10 +432,12 @@ public class LocationTimeZoneProviderControllerTest {
         mTestSecondaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_CERTAIN);
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -385,17 +446,20 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void enabled_repeatedPrimaryCertainty() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -404,9 +468,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_CERTAIN);
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -415,9 +481,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -425,9 +493,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -436,27 +506,32 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void enabled_repeatedSecondaryCertainty() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
         // Simulate time passing with no provider event being received from the primary.
         mTestThreadingDomain.executeNext();
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertUncertaintyTimeoutSet(testEnvironment, controller);
 
@@ -465,10 +540,12 @@ public class LocationTimeZoneProviderControllerTest {
         mTestSecondaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_CERTAIN);
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -477,10 +554,12 @@ public class LocationTimeZoneProviderControllerTest {
         mTestSecondaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -488,10 +567,12 @@ public class LocationTimeZoneProviderControllerTest {
         mTestSecondaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -500,17 +581,20 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void enabled_uncertaintyTriggersASuggestionAfterUncertaintyTimeout() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -519,9 +603,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_CERTAIN);
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -532,10 +618,12 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_UNCERTAIN_LOCATION_TIME_ZONE_EVENT);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertUncertaintyTimeoutSet(testEnvironment, controller);
 
@@ -545,10 +633,12 @@ public class LocationTimeZoneProviderControllerTest {
         mTestSecondaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -559,10 +649,12 @@ public class LocationTimeZoneProviderControllerTest {
         mTestSecondaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_UNCERTAIN_LOCATION_TIME_ZONE_EVENT);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertUncertaintyTimeoutSet(testEnvironment, controller);
 
@@ -570,10 +662,12 @@ public class LocationTimeZoneProviderControllerTest {
         // suggestion should be made.
         mTestThreadingDomain.executeNext();
 
+        assertControllerState(controller, STATE_UNCERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_UNCERTAIN);
         mTestCallback.assertUncertainSuggestionMadeFromEventAndCommit(
                 USER1_UNCERTAIN_LOCATION_TIME_ZONE_EVENT);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -582,17 +676,20 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void enabled_briefUncertaintyTriggersNoSuggestion() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -601,9 +698,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_CERTAIN);
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -613,10 +712,12 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_UNCERTAIN_LOCATION_TIME_ZONE_EVENT);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertUncertaintyTimeoutSet(testEnvironment, controller);
 
@@ -626,9 +727,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -637,33 +740,39 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void configChanges_enableAndDisableWithNoPreviousSuggestion() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_DISABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_STOPPED);
         mTestPrimaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_PROVIDERS_INITIALIZING, STATE_STOPPED);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
         // Now signal a config change so that geo detection is enabled.
         testEnvironment.simulateConfigChange(USER1_CONFIG_GEO_DETECTION_ENABLED);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
         // Now signal a config change so that geo detection is disabled.
         testEnvironment.simulateConfigChange(USER1_CONFIG_GEO_DETECTION_DISABLED);
 
+        assertControllerState(controller, STATE_STOPPED);
         mTestPrimaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_STOPPED);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
     }
@@ -671,25 +780,29 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void configChanges_enableAndDisableWithPreviousSuggestion() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_DISABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_STOPPED);
         mTestPrimaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_PROVIDERS_INITIALIZING, STATE_STOPPED);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
         // Now signal a config change so that geo detection is enabled.
         testEnvironment.simulateConfigChange(USER1_CONFIG_GEO_DETECTION_ENABLED);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -697,9 +810,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_CERTAIN);
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -710,8 +825,10 @@ public class LocationTimeZoneProviderControllerTest {
         // of the time zone.
         testEnvironment.simulateConfigChange(USER1_CONFIG_GEO_DETECTION_DISABLED);
 
+        assertControllerState(controller, STATE_STOPPED);
         mTestPrimaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_UNCERTAIN, STATE_STOPPED);
         mTestCallback.assertUncertainSuggestionMadeAndCommit();
         assertFalse(controller.isUncertaintyTimeoutSet());
     }
@@ -719,17 +836,20 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void configChanges_userSwitch_enabledToEnabled() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -739,9 +859,11 @@ public class LocationTimeZoneProviderControllerTest {
 
         // Receiving a "success" provider event should cause a suggestion to be made synchronously,
         // and also clear the scheduled uncertainty suggestion.
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_CERTAIN);
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -750,7 +872,7 @@ public class LocationTimeZoneProviderControllerTest {
         testEnvironment.simulateConfigChange(USER2_CONFIG_GEO_DETECTION_ENABLED);
 
         // Confirm that the previous suggestion was overridden.
-        mTestCallback.assertUncertainSuggestionMadeAndCommit();
+        assertControllerState(controller, STATE_INITIALIZING);
 
         // We expect the provider to end up in PROVIDER_STATE_STARTED_INITIALIZING, but it should
         // have been stopped when the user changed.
@@ -760,23 +882,29 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfig(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER2_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_UNCERTAIN, STATE_STOPPED, STATE_INITIALIZING);
+        mTestCallback.assertUncertainSuggestionMadeAndCommit();
         assertFalse(controller.isUncertaintyTimeoutSet());
     }
 
     @Test
     public void primaryPermFailure_secondaryEventsReceived() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -785,9 +913,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_PERM_FAILURE_LOCATION_TIME_ZONE_EVENT);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -795,9 +925,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestSecondaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_UNCERTAIN_LOCATION_TIME_ZONE_EVENT);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertUncertaintyTimeoutSet(testEnvironment, controller);
 
@@ -806,9 +938,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestSecondaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_CERTAIN);
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -817,9 +951,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestSecondaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_UNCERTAIN_LOCATION_TIME_ZONE_EVENT);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertUncertaintyTimeoutSet(testEnvironment, controller);
     }
@@ -827,17 +963,20 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void primaryPermFailure_disableAndEnable() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -846,26 +985,32 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_PERM_FAILURE_LOCATION_TIME_ZONE_EVENT);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
         // Now signal a config change so that geo detection is disabled.
         testEnvironment.simulateConfigChange(USER1_CONFIG_GEO_DETECTION_DISABLED);
 
+        assertControllerState(controller, STATE_STOPPED);
         mTestPrimaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_STOPPED);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
         // Now signal a config change so that geo detection is enabled.
         testEnvironment.simulateConfigChange(USER1_CONFIG_GEO_DETECTION_ENABLED);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
     }
@@ -873,17 +1018,20 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void secondaryPermFailure_primaryEventsReceived() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -893,10 +1041,12 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_UNCERTAIN_LOCATION_TIME_ZONE_EVENT);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertUncertaintyTimeoutSet(testEnvironment, controller);
 
@@ -904,9 +1054,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestSecondaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_PERM_FAILURE_LOCATION_TIME_ZONE_EVENT);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertUncertaintyTimeoutSet(testEnvironment, controller);
 
@@ -915,9 +1067,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_CERTAIN);
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
         assertFalse(controller.isUncertaintyTimeoutSet());
@@ -926,9 +1080,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_UNCERTAIN_LOCATION_TIME_ZONE_EVENT);
 
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertUncertaintyTimeoutSet(testEnvironment, controller);
     }
@@ -936,17 +1092,20 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void secondaryPermFailure_disableAndEnable() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -956,10 +1115,12 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_UNCERTAIN_LOCATION_TIME_ZONE_EVENT);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertUncertaintyTimeoutSet(testEnvironment, controller);
 
@@ -967,17 +1128,21 @@ public class LocationTimeZoneProviderControllerTest {
         mTestSecondaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_PERM_FAILURE_LOCATION_TIME_ZONE_EVENT);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertUncertaintyTimeoutSet(testEnvironment, controller);
 
         // Now signal a config change so that geo detection is disabled.
         testEnvironment.simulateConfigChange(USER1_CONFIG_GEO_DETECTION_DISABLED);
 
+        assertControllerState(controller, STATE_STOPPED);
         mTestPrimaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_STOPPED);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -985,9 +1150,11 @@ public class LocationTimeZoneProviderControllerTest {
         // started.
         testEnvironment.simulateConfigChange(USER1_CONFIG_GEO_DETECTION_ENABLED);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
     }
@@ -995,17 +1162,20 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void bothPermFailure_disableAndEnable() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -1013,9 +1183,11 @@ public class LocationTimeZoneProviderControllerTest {
         mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_PERM_FAILURE_LOCATION_TIME_ZONE_EVENT);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestMetricsLogger.assertStateChangesAndCommit();
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -1023,8 +1195,10 @@ public class LocationTimeZoneProviderControllerTest {
         mTestSecondaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
                 USER1_PERM_FAILURE_LOCATION_TIME_ZONE_EVENT);
 
+        assertControllerState(controller, STATE_FAILED);
         mTestPrimaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_FAILED);
         mTestCallback.assertUncertainSuggestionMadeAndCommit();
         assertFalse(controller.isUncertaintyTimeoutSet());
     }
@@ -1033,8 +1207,8 @@ public class LocationTimeZoneProviderControllerTest {
     public void stateRecording() {
         // The test provider enables state recording by default.
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, true /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
@@ -1043,12 +1217,15 @@ public class LocationTimeZoneProviderControllerTest {
 
         {
             LocationTimeZoneManagerServiceState state = controller.getStateForTests();
+            assertEquals(STATE_INITIALIZING, state.getControllerState());
             assertNull(state.getLastSuggestion());
+            assertControllerRecordedStates(state,
+                    STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
             assertProviderStates(state.getPrimaryProviderStates(),
                     PROVIDER_STATE_STOPPED, PROVIDER_STATE_STARTED_INITIALIZING);
             assertProviderStates(state.getSecondaryProviderStates(), PROVIDER_STATE_STOPPED);
         }
-        controller.clearRecordedProviderStates();
+        controller.clearRecordedStates();
 
         // Simulate some provider behavior that will show up in the state recording.
 
@@ -1058,13 +1235,15 @@ public class LocationTimeZoneProviderControllerTest {
 
         {
             LocationTimeZoneManagerServiceState state = controller.getStateForTests();
+            assertEquals(STATE_INITIALIZING, state.getControllerState());
             assertNull(state.getLastSuggestion());
+            assertControllerRecordedStates(state);
             assertProviderStates(
                     state.getPrimaryProviderStates(), PROVIDER_STATE_STARTED_UNCERTAIN);
             assertProviderStates(
                     state.getSecondaryProviderStates(), PROVIDER_STATE_STARTED_INITIALIZING);
         }
-        controller.clearRecordedProviderStates();
+        controller.clearRecordedStates();
 
         // Simulate a certain event from the secondary.
         mTestSecondaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
@@ -1072,18 +1251,22 @@ public class LocationTimeZoneProviderControllerTest {
 
         {
             LocationTimeZoneManagerServiceState state = controller.getStateForTests();
+            assertEquals(STATE_CERTAIN, state.getControllerState());
             assertEquals(USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds(),
                     state.getLastSuggestion().getZoneIds());
+            assertControllerRecordedStates(state, STATE_CERTAIN);
             assertProviderStates(state.getPrimaryProviderStates());
             assertProviderStates(
                     state.getSecondaryProviderStates(), PROVIDER_STATE_STARTED_CERTAIN);
         }
 
-        controller.clearRecordedProviderStates();
+        controller.clearRecordedStates();
         {
             LocationTimeZoneManagerServiceState state = controller.getStateForTests();
+            assertEquals(STATE_CERTAIN, state.getControllerState());
             assertEquals(USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds(),
                     state.getLastSuggestion().getZoneIds());
+            assertControllerRecordedStates(state);
             assertProviderStates(state.getPrimaryProviderStates());
             assertProviderStates(state.getSecondaryProviderStates());
         }
@@ -1101,17 +1284,20 @@ public class LocationTimeZoneProviderControllerTest {
     @Test
     public void destroy() {
         LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
-                mTestThreadingDomain, mTestPrimaryLocationTimeZoneProvider,
-                mTestSecondaryLocationTimeZoneProvider);
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
         TestEnvironment testEnvironment = new TestEnvironment(
                 mTestThreadingDomain, controller, USER1_CONFIG_GEO_DETECTION_ENABLED);
 
         // Initialize and check initial state.
         controller.initialize(testEnvironment, mTestCallback);
 
+        assertControllerState(controller, STATE_INITIALIZING);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_PROVIDERS_INITIALIZING, STATE_STOPPED, STATE_INITIALIZING);
         mTestCallback.assertNoSuggestionMade();
         assertFalse(controller.isUncertaintyTimeoutSet());
 
@@ -1121,15 +1307,21 @@ public class LocationTimeZoneProviderControllerTest {
 
         // Receiving a "success" provider event should cause a suggestion to be made synchronously,
         // and also clear the scheduled uncertainty suggestion.
+        assertControllerState(controller, STATE_CERTAIN);
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_CERTAIN);
         mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
                 USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controller.isUncertaintyTimeoutSet());
 
         // Trigger destroy().
         controller.destroy();
+
+        assertControllerState(controller, STATE_DESTROYED);
+        mTestMetricsLogger.assertStateChangesAndCommit(
+                STATE_UNCERTAIN, STATE_STOPPED, STATE_DESTROYED);
 
         // Confirm that the previous suggestion was overridden.
         mTestCallback.assertUncertainSuggestionMadeAndCommit();
@@ -1156,6 +1348,17 @@ public class LocationTimeZoneProviderControllerTest {
                         .setElapsedRealtimeMillis(ARBITRARY_TIME_MILLIS)
                         .setTimeZoneIds(timeZoneIds)
                         .build());
+    }
+
+    private static void assertControllerState(LocationTimeZoneProviderController controller,
+            @State String expectedState) {
+        assertEquals(expectedState, controller.getStateForTests().getControllerState());
+    }
+
+    private static void assertControllerRecordedStates(
+            LocationTimeZoneManagerServiceState state,
+            @State String... expectedStates) {
+        assertEquals(Arrays.asList(expectedStates), state.getControllerStates());
     }
 
     private static class TestEnvironment extends LocationTimeZoneProviderController.Environment {
@@ -1226,6 +1429,22 @@ public class LocationTimeZoneProviderControllerTest {
                 fail("Bad test? No config change when one was expected");
             }
             mController.onConfigurationInternalChanged();
+        }
+    }
+
+    private static class TestMetricsLogger
+            implements LocationTimeZoneProviderController.MetricsLogger {
+
+        private final TestState<@State String> mLatestStateEnum = new TestState<>();
+
+        @Override
+        public void onStateChange(@State String stateEnum) {
+            mLatestStateEnum.set(stateEnum);
+        }
+
+        public void assertStateChangesAndCommit(@State String... expectedStateEnums) {
+            mLatestStateEnum.assertChanges(expectedStateEnums);
+            mLatestStateEnum.commitLatest();
         }
     }
 

@@ -176,6 +176,7 @@ import com.android.server.recoverysystem.RecoverySystemService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.role.RoleServicePlatformHelper;
 import com.android.server.rotationresolver.RotationResolverManagerService;
+import com.android.server.security.AttestationVerificationManagerService;
 import com.android.server.security.FileIntegrityService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
@@ -2338,6 +2339,10 @@ public final class SystemServer implements Dumpable {
                 mSystemServiceManager.startService(PRINT_MANAGER_SERVICE_CLASS);
                 t.traceEnd();
             }
+
+            t.traceBegin("StartAttestationVerificationService");
+            mSystemServiceManager.startService(AttestationVerificationManagerService.class);
+            t.traceEnd();
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_COMPANION_DEVICE_SETUP)) {
                 t.traceBegin("StartCompanionDeviceManager");

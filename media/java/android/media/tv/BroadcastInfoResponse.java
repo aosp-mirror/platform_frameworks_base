@@ -46,6 +46,10 @@ public final class BroadcastInfoResponse implements Parcelable {
         requestId = source.readInt();
     }
 
+    public int getRequestId() {
+        return requestId;
+    }
+
     @Override
     public int describeContents() {
         return 0;

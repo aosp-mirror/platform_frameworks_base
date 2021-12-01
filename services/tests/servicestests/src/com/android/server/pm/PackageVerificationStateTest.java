@@ -18,8 +18,10 @@ package com.android.server.pm;
 
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
 
+@Presubmit
 public class PackageVerificationStateTest extends AndroidTestCase {
     private static final int REQUIRED_UID = 1948;
 

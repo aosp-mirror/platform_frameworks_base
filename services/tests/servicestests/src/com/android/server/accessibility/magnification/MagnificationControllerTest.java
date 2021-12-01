@@ -155,7 +155,7 @@ public class MagnificationControllerTest {
         verify(mScreenMagnificationController, never()).reset(anyInt(),
                 any(MagnificationAnimationCallback.class));
         verify(mMockConnection.getConnection(), never()).enableWindowMagnification(anyInt(),
-                anyFloat(), anyFloat(), anyFloat(),
+                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyFloat(),
                 nullable(IRemoteMagnificationAnimationCallback.class));
     }
 

@@ -7272,6 +7272,9 @@ public class DevicePolicyManager {
      * Returns the current runtime nearby notification streaming policy set by the device or profile
      * owner.
      */
+    @RequiresPermission(
+            value = android.Manifest.permission.READ_NEARBY_STREAMING_POLICY,
+            conditional = true)
     public @NearbyStreamingPolicy int getNearbyNotificationStreamingPolicy() {
         return getNearbyNotificationStreamingPolicy(myUserId());
     }
@@ -7312,6 +7315,9 @@ public class DevicePolicyManager {
     /**
      * Returns the current runtime nearby app streaming policy set by the device or profile owner.
      */
+    @RequiresPermission(
+            value = android.Manifest.permission.READ_NEARBY_STREAMING_POLICY,
+            conditional = true)
     public @NearbyStreamingPolicy int getNearbyAppStreamingPolicy() {
         return getNearbyAppStreamingPolicy(myUserId());
     }
@@ -9140,7 +9146,9 @@ public class DevicePolicyManager {
      * @hide
      */
      @SystemApi
-     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+     @RequiresPermission(anyOf = {
+             android.Manifest.permission.MANAGE_USERS,
+             android.Manifest.permission.QUERY_ADMIN_POLICY})
      public @Nullable List<String> getPermittedAccessibilityServices(int userId) {
         throwIfParentInstance("getPermittedAccessibilityServices");
         if (mService != null) {
@@ -9277,7 +9285,9 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.QUERY_ADMIN_POLICY})
     public @Nullable List<String> getPermittedInputMethodsForCurrentUser() {
         throwIfParentInstance("getPermittedInputMethodsForCurrentUser");
         if (mService != null) {

@@ -1016,9 +1016,8 @@ public final class InputManager {
     }
 
     /**
-     * Queries the framework about whether any physical keys exist on the
-     * any keyboard attached to the device that are capable of producing the given
-     * array of key codes.
+     * Queries the framework about whether any physical keys exist on any currently attached input
+     * devices that are capable of producing the given array of key codes.
      *
      * @param keyCodes The array of key codes to query.
      * @return A new array of the same size as the key codes array whose elements
@@ -1032,11 +1031,10 @@ public final class InputManager {
     }
 
     /**
-     * Queries the framework about whether any physical keys exist on the
-     * any keyboard attached to the device that are capable of producing the given
-     * array of key codes.
+     * Queries the framework about whether any physical keys exist on the specified input device
+     * that are capable of producing the given array of key codes.
      *
-     * @param id The id of the device to query.
+     * @param id The id of the input device to query or -1 to consult all devices.
      * @param keyCodes The array of key codes to query.
      * @return A new array of the same size as the key codes array whose elements are set to true
      * if the given device could produce the corresponding key code at the same index in the key

@@ -19,6 +19,7 @@ package com.android.systemui.media.dialog;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -234,7 +235,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
         mMediaOutputController.onRequestFailed(0 /* reason */);
 
-        verify(mCb).onRouteChanged();
+        verify(mCb, atLeastOnce()).onRouteChanged();
     }
 
     @Test

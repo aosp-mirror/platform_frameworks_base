@@ -2961,7 +2961,7 @@ public class AlarmManagerServiceTest {
     private void registerAppIds(String[] packages, Integer[] ids) {
         assertEquals(packages.length, ids.length);
 
-        when(mPackageManagerInternal.getPackageUid(anyString(), anyInt(), anyInt())).thenAnswer(
+        when(mPackageManagerInternal.getPackageUid(anyString(), anyLong(), anyInt())).thenAnswer(
                 invocation -> {
                     final String pkg = invocation.getArgument(0);
                     final int index = ArrayUtils.indexOf(packages, pkg);

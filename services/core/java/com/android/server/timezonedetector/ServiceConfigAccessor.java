@@ -172,12 +172,13 @@ public interface ServiceConfigAccessor {
      * Enables/disables the state recording mode for tests. The value is reset with {@link
      * #resetVolatileTestConfig()}.
      */
-    void setRecordProviderStateChanges(boolean enabled);
+    void setRecordStateChangesForTests(boolean enabled);
 
     /**
-     * Returns {@code true} if providers are expected to record their state changes for tests.
+     * Returns {@code true} if the controller / providers are expected to record their state changes
+     * for tests.
      */
-    boolean getRecordProviderStateChanges();
+    boolean getRecordStateChangesForTests();
 
     /**
      * Returns the mode for the primary location time zone provider.

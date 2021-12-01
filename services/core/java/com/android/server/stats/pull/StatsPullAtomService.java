@@ -64,6 +64,8 @@ import static com.android.server.stats.pull.ProcfsMemoryUtil.getProcessCmdlines;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.readCmdlineFromProcfs;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
 
+import static libcore.io.IoUtils.closeQuietly;
+
 import static java.lang.Math.min;
 import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
@@ -222,6 +224,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -3413,9 +3416,12 @@ public class StatsPullAtomService extends SystemService {
                     metricsState.getGeoDetectionEnabledSetting(),
                     convertToMetricsDetectionMode(metricsState.getDetectionMode()),
                     metricsState.getDeviceTimeZoneIdOrdinal(),
-                    metricsState.getLatestManualSuggestionProtoBytes(),
-                    metricsState.getLatestTelephonySuggestionProtoBytes(),
-                    metricsState.getLatestGeolocationSuggestionProtoBytes()
+                    convertTimeZoneSuggestionToProtoBytes(
+                            metricsState.getLatestManualSuggestion()),
+                    convertTimeZoneSuggestionToProtoBytes(
+                            metricsState.getLatestTelephonySuggestion()),
+                    convertTimeZoneSuggestionToProtoBytes(
+                            metricsState.getLatestGeolocationSuggestion())
             ));
         } catch (RuntimeException e) {
             Slog.e(TAG, "Getting time zone detection state failed: ", e);
@@ -3426,7 +3432,8 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
-    private int convertToMetricsDetectionMode(int detectionMode) {
+    private static int convertToMetricsDetectionMode(
+            @MetricsTimeZoneDetectorState.DetectionMode int detectionMode) {
         switch (detectionMode) {
             case MetricsTimeZoneDetectorState.DETECTION_MODE_MANUAL:
                 return TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__MANUAL;
@@ -3437,6 +3444,34 @@ public class StatsPullAtomService extends SystemService {
             default:
                 return TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__UNKNOWN;
         }
+    }
+
+    @Nullable
+    private static byte[] convertTimeZoneSuggestionToProtoBytes(
+            @Nullable MetricsTimeZoneDetectorState.MetricsTimeZoneSuggestion suggestion) {
+        if (suggestion == null) {
+            return null;
+        }
+
+        // We don't get access to the atoms.proto definition for nested proto fields, so we use
+        // an identically specified proto.
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ProtoOutputStream protoOutputStream = new ProtoOutputStream(byteArrayOutputStream);
+        int typeProtoValue = suggestion.isCertain()
+                ? android.app.time.MetricsTimeZoneSuggestion.CERTAIN
+                : android.app.time.MetricsTimeZoneSuggestion.UNCERTAIN;
+        protoOutputStream.write(android.app.time.MetricsTimeZoneSuggestion.TYPE,
+                typeProtoValue);
+        if (suggestion.isCertain()) {
+            for (int zoneIdOrdinal : suggestion.getZoneIdOrdinals()) {
+                protoOutputStream.write(
+                        android.app.time.MetricsTimeZoneSuggestion.TIME_ZONE_ORDINALS,
+                        zoneIdOrdinal);
+            }
+        }
+        protoOutputStream.flush();
+        closeQuietly(byteArrayOutputStream);
+        return byteArrayOutputStream.toByteArray();
     }
 
     private void registerExternalStorageInfo() {

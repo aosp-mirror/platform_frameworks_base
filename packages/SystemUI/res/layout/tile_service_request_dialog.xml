@@ -30,7 +30,6 @@
         android:layout_marginBottom="16dp"
         android:textDirection="locale"
         android:textAlignment="viewStart"
-        android:textAppearance="@style/TextAppearance.PrivacyDialog"
-        android:lineHeight="20sp"
+        android:textAppearance="@style/TextAppearance.Dialog.Body"
     />
 </LinearLayout>

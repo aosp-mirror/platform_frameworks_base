@@ -24,23 +24,23 @@ import android.util.Slog;
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportConnection;
 
 import java.io.File;
 
 public class PerformClearTask implements Runnable {
     private final UserBackupManagerService mBackupManagerService;
     private final TransportManager mTransportManager;
-    private final TransportClient mTransportClient;
+    private final TransportConnection mTransportConnection;
     private final PackageInfo mPackage;
     private final OnTaskFinishedListener mListener;
 
     PerformClearTask(UserBackupManagerService backupManagerService,
-            TransportClient transportClient, PackageInfo packageInfo,
+            TransportConnection transportConnection, PackageInfo packageInfo,
             OnTaskFinishedListener listener) {
         mBackupManagerService = backupManagerService;
         mTransportManager = backupManagerService.getTransportManager();
-        mTransportClient = transportClient;
+        mTransportConnection = transportConnection;
         mPackage = packageInfo;
         mListener = listener;
     }
@@ -51,12 +51,13 @@ public class PerformClearTask implements Runnable {
         try {
             // Clear the on-device backup state to ensure a full backup next time
             String transportDirName =
-                    mTransportManager.getTransportDirName(mTransportClient.getTransportComponent());
+                    mTransportManager.getTransportDirName(
+                            mTransportConnection.getTransportComponent());
             File stateDir = new File(mBackupManagerService.getBaseStateDir(), transportDirName);
             File stateFile = new File(stateDir, mPackage.packageName);
             stateFile.delete();
 
-            transport = mTransportClient.connectOrThrow(callerLogString);
+            transport = mTransportConnection.connectOrThrow(callerLogString);
             // Tell the transport to remove all the persistent storage for the app
             // TODO - need to handle failures
             transport.clearBackupData(mPackage);

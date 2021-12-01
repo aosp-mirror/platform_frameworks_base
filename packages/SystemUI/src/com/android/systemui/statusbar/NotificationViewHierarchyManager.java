@@ -368,6 +368,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             // NOTE: NotificationEntry.isClearable() will internally check group children to ensure
             //  the group itself definitively clearable.
             boolean isClearable = row.getEntry().isClearable();
+            visibleTopLevelEntries++;
             if (isSilent) {
                 if (isClearable) {
                     hasClearableSilentNotifs = true;

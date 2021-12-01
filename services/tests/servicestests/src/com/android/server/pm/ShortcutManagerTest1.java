@@ -95,12 +95,14 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
 import android.os.UserHandle;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.frameworks.servicestests.R;
 import com.android.server.pm.ShortcutService.ConfigConstants;
@@ -135,6 +137,7 @@ import java.util.function.BiConsumer;
  adb shell am instrument -e class com.android.server.pm.ShortcutManagerTest1 \
  -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  */
+@Presubmit
 @SmallTest
 public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 

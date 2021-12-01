@@ -19,6 +19,7 @@ package com.android.systemui.media.dialog;
 import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -179,6 +180,20 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     public void onRequestFailed(int reason) {
         mCallback.onRouteChanged();
         mMetricLogger.logOutputFailure(mMediaDevices, reason);
+    }
+
+    Drawable getAppSourceIcon() {
+        if (mPackageName.isEmpty()) {
+            return null;
+        }
+        try {
+            Log.d(TAG, "try to get app icon");
+            return mContext.getPackageManager()
+                    .getApplicationIcon(mPackageName);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.d(TAG, "icon not found");
+            return null;
+        }
     }
 
     CharSequence getHeaderTitle() {

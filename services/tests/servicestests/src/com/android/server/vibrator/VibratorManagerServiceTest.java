@@ -126,15 +126,23 @@ public class VibratorManagerServiceTest {
             new VibrationAttributes.Builder().setUsage(
                     VibrationAttributes.USAGE_RINGTONE).build();
 
-    @Rule public MockitoRule rule = MockitoJUnit.rule();
-    @Rule public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+    @Rule
+    public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
 
-    @Mock private VibratorManagerService.NativeWrapper mNativeWrapperMock;
-    @Mock private PackageManagerInternal mPackageManagerInternalMock;
-    @Mock private PowerManagerInternal mPowerManagerInternalMock;
-    @Mock private PowerSaveState mPowerSaveStateMock;
-    @Mock private AppOpsManager mAppOpsManagerMock;
-    @Mock private IInputManager mIInputManagerMock;
+    @Mock
+    private VibratorManagerService.NativeWrapper mNativeWrapperMock;
+    @Mock
+    private PackageManagerInternal mPackageManagerInternalMock;
+    @Mock
+    private PowerManagerInternal mPowerManagerInternalMock;
+    @Mock
+    private PowerSaveState mPowerSaveStateMock;
+    @Mock
+    private AppOpsManager mAppOpsManagerMock;
+    @Mock
+    private IInputManager mIInputManagerMock;
 
     private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
 
@@ -397,6 +405,7 @@ public class VibratorManagerServiceTest {
     @Test
     public void registerVibratorStateListener_multipleVibratorsAreTriggered() throws Exception {
         mockVibrators(0, 1, 2);
+        mVibratorProviders.get(1).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
         VibratorManagerService service = createSystemReadyService();
         IVibratorStateListener[] listeners = new IVibratorStateListener[3];
         for (int i = 0; i < 3; i++) {
@@ -601,8 +610,8 @@ public class VibratorManagerServiceTest {
         VibrationEffect effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY).build();
-        VibrationAttributes vibrationAttributes = new VibrationAttributes.Builder(
-                audioAttributes, effect).build();
+        VibrationAttributes vibrationAttributes =
+                new VibrationAttributes.Builder(audioAttributes).build();
 
         vibrate(service, effect, vibrationAttributes);
 
@@ -621,7 +630,7 @@ public class VibratorManagerServiceTest {
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
                 new VibrationAttributes.Builder().setUsage(
                         VibrationAttributes.USAGE_COMMUNICATION_REQUEST).build());
-        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_TICK),
+        vibrate(service, VibrationEffect.createOneShot(2000, 200),
                 new VibrationAttributes.Builder().setUsage(
                         VibrationAttributes.USAGE_UNKNOWN).build());
 
@@ -639,6 +648,60 @@ public class VibratorManagerServiceTest {
                 anyInt(), anyString());
         inOrderVerifier.verify(mAppOpsManagerMock).checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
                 eq(AudioAttributes.USAGE_UNKNOWN), anyInt(), anyString());
+    }
+
+    @Test
+    public void vibrate_withAttributesUnknownUsage_usesEffectToIdentifyTouchUsage() {
+        VibratorManagerService service = createSystemReadyService();
+
+        VibrationAttributes unknownAttributes = VibrationAttributes.createForUsage(
+                VibrationAttributes.USAGE_UNKNOWN);
+        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), unknownAttributes);
+        vibrate(service, VibrationEffect.createOneShot(200, 200), unknownAttributes);
+        vibrate(service, VibrationEffect.createWaveform(
+                new long[] { 100, 200, 300 }, new int[] {1, 2, 3}, -1), unknownAttributes);
+        vibrate(service,
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_QUICK_RISE)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_QUICK_FALL)
+                        .compose(),
+                unknownAttributes);
+
+        verify(mAppOpsManagerMock, times(4))
+                .checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
+                        eq(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION), anyInt(), anyString());
+        verify(mAppOpsManagerMock, never())
+                .checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
+                        eq(AudioAttributes.USAGE_UNKNOWN), anyInt(), anyString());
+    }
+
+    @Test
+    public void vibrate_withAttributesUnknownUsage_ignoresEffectIfNotHapticFeedbackCandidate() {
+        VibratorManagerService service = createSystemReadyService();
+
+        VibrationAttributes unknownAttributes = VibrationAttributes.createForUsage(
+                VibrationAttributes.USAGE_UNKNOWN);
+        vibrate(service, VibrationEffect.get(VibrationEffect.RINGTONES[0]), unknownAttributes);
+        vibrate(service, VibrationEffect.createOneShot(2000, 200), unknownAttributes);
+        vibrate(service, VibrationEffect.createWaveform(
+                new long[] { 100, 200, 300 }, new int[] {1, 2, 3}, 0), unknownAttributes);
+        vibrate(service,
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_QUICK_RISE)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_QUICK_FALL)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_SPIN)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK)
+                        .compose(),
+                unknownAttributes);
+
+        verify(mAppOpsManagerMock, never())
+                .checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
+                        eq(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION), anyInt(), anyString());
+        verify(mAppOpsManagerMock, times(4))
+                .checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
+                        eq(AudioAttributes.USAGE_UNKNOWN), anyInt(), anyString());
     }
 
     @Test

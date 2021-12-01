@@ -34,15 +34,15 @@ public class PackageUserStateUtils {
     private static final boolean DEBUG = false;
     private static final String TAG = "PackageUserStateUtils";
 
-    public static boolean isMatch(@NonNull FrameworkPackageUserState state, ComponentInfo componentInfo,
-            int flags) {
+    public static boolean isMatch(@NonNull FrameworkPackageUserState state,
+            ComponentInfo componentInfo, long flags) {
         return isMatch(state, componentInfo.applicationInfo.isSystemApp(),
                 componentInfo.applicationInfo.enabled, componentInfo.enabled,
                 componentInfo.directBootAware, componentInfo.name, flags);
     }
 
     public static boolean isMatch(@NonNull FrameworkPackageUserState state, boolean isSystem,
-            boolean isPackageEnabled, ParsedMainComponent component, int flags) {
+            boolean isPackageEnabled, ParsedMainComponent component, long flags) {
         return isMatch(state, isSystem, isPackageEnabled, component.isEnabled(),
                 component.isDirectBootAware(), component.getName(), flags);
     }
@@ -58,7 +58,7 @@ public class PackageUserStateUtils {
      */
     public static boolean isMatch(@NonNull FrameworkPackageUserState state, boolean isSystem,
             boolean isPackageEnabled, boolean isComponentEnabled,
-            boolean isComponentDirectBootAware, String componentName, int flags) {
+            boolean isComponentDirectBootAware, String componentName, long flags) {
         final boolean matchUninstalled = (flags & PackageManager.MATCH_KNOWN_PACKAGES) != 0;
         if (!isAvailable(state, flags) && !(isSystem && matchUninstalled)) {
             return reportIfDebug(false, flags);
@@ -81,7 +81,7 @@ public class PackageUserStateUtils {
         return reportIfDebug(matchesUnaware || matchesAware, flags);
     }
 
-    public static boolean isAvailable(@NonNull FrameworkPackageUserState state, int flags) {
+    public static boolean isAvailable(@NonNull FrameworkPackageUserState state, long flags) {
         // True if it is installed for this user and it is not hidden. If it is hidden,
         // still return true if the caller requested MATCH_UNINSTALLED_PACKAGES
         final boolean matchAnyUser = (flags & PackageManager.MATCH_ANY_USER) != 0;
@@ -91,7 +91,7 @@ public class PackageUserStateUtils {
                 && (!state.isHidden() || matchUninstalled));
     }
 
-    public static boolean reportIfDebug(boolean result, int flags) {
+    public static boolean reportIfDebug(boolean result, long flags) {
         if (DEBUG && !result) {
             Slog.i(TAG, "No match!; flags: "
                     + DebugUtils.flagsToString(PackageManager.class, "MATCH_", flags) + " "
@@ -101,13 +101,13 @@ public class PackageUserStateUtils {
     }
 
     public static boolean isEnabled(@NonNull FrameworkPackageUserState state, ComponentInfo componentInfo,
-            int flags) {
+            long flags) {
         return isEnabled(state, componentInfo.applicationInfo.enabled, componentInfo.enabled,
                 componentInfo.name, flags);
     }
 
     public static boolean isEnabled(@NonNull FrameworkPackageUserState state, boolean isPackageEnabled,
-            ParsedMainComponent parsedComponent, int flags) {
+            ParsedMainComponent parsedComponent, long flags) {
         return isEnabled(state, isPackageEnabled, parsedComponent.isEnabled(),
                 parsedComponent.getName(), flags);
     }
@@ -115,8 +115,9 @@ public class PackageUserStateUtils {
     /**
      * Test if the given component is considered enabled.
      */
-    public static boolean isEnabled(@NonNull FrameworkPackageUserState state, boolean isPackageEnabled,
-            boolean isComponentEnabled, String componentName, int flags) {
+    public static boolean isEnabled(@NonNull FrameworkPackageUserState state,
+            boolean isPackageEnabled, boolean isComponentEnabled, String componentName,
+            long flags) {
         if ((flags & MATCH_DISABLED_COMPONENTS) != 0) {
             return true;
         }

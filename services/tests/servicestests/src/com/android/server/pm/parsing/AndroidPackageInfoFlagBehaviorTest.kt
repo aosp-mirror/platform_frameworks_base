@@ -16,17 +16,18 @@
 
 package com.android.server.pm.parsing
 
+import android.Manifest
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageParser
 import android.platform.test.annotations.Postsubmit
+import com.android.internal.util.ArrayUtils
 import com.android.server.pm.parsing.AndroidPackageInfoFlagBehaviorTest.Companion.Param.Companion.appInfo
 import com.android.server.pm.parsing.AndroidPackageInfoFlagBehaviorTest.Companion.Param.Companion.pkgInfo
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -91,9 +92,18 @@ class AndroidPackageInfoFlagBehaviorTest : AndroidPackageParsingTestBase() {
                     listOf(it.configPreferences, it.reqFeatures, it.featureGroups)
                 },
                 pkgInfo(PackageManager.GET_PERMISSIONS) {
-                    listOf(it.permissions, it.requestedPermissions, it.requestedPermissionsFlags)
+                    listOf(
+                        it.permissions,
+                        // Strip compatibility permission added in T
+                        it.requestedPermissions?.filter { x ->
+                            x != Manifest.permission.POST_NOTIFICATIONS
+                        }?.ifEmpty { null }?.toTypedArray(),
+                        // Strip the flag from compatibility permission added in T
+                        it.requestedPermissionsFlags?.filterIndexed { index, _ ->
+                            index != ArrayUtils.indexOf(it.requestedPermissions,
+                                                        Manifest.permission.POST_NOTIFICATIONS)
+                        }?.ifEmpty { null }?.toTypedArray())
                 },
-
                 appInfo(PackageManager.GET_META_DATA) { listOf(it.metaData) },
                 appInfo(PackageManager.GET_SHARED_LIBRARY_FILES) {
                     listOf(it.sharedLibraryFiles, it.sharedLibraryFiles)

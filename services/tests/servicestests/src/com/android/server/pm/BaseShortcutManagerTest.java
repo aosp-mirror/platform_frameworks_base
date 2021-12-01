@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -2357,7 +2358,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected void prepareIntentActivities(ComponentName cn) {
         when(mMockPackageManagerInternal.queryIntentActivities(
-                anyOrNull(Intent.class), anyStringOrNull(), anyInt(), anyInt(), anyInt()))
+                anyOrNull(Intent.class), anyStringOrNull(), anyLong(), anyInt(), anyInt()))
                 .thenReturn(Collections.singletonList(
                         ri(cn.getPackageName(), cn.getClassName(), false, 0)));
     }

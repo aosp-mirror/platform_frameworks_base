@@ -58,72 +58,86 @@ public class LocationAttributionHelperTest {
     @Test
     public void testLocationMonitoring() {
         CallerIdentity caller1 = CallerIdentity.forTest(1, 1, "test1", null);
-        Object key1 = new Object();
-        Object key2 = new Object();
         CallerIdentity caller2 = CallerIdentity.forTest(2, 2, "test2", null);
-        Object key3 = new Object();
-        Object key4 = new Object();
 
-        mHelper.reportLocationStart(caller1, "gps", key1);
-        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_LOCATION, caller1);
-        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION, caller1);
+        mHelper.reportLocationStart(caller1);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_LOCATION,
+                CallerIdentity.forAggregation(caller1));
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION,
+                CallerIdentity.forAggregation(caller1));
 
-        mHelper.reportLocationStart(caller1, "gps", key2);
-        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_LOCATION, caller1);
-        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION, caller1);
+        mHelper.reportLocationStart(caller1);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_LOCATION,
+                CallerIdentity.forAggregation(caller1));
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION,
+                CallerIdentity.forAggregation(caller1));
 
-        mHelper.reportLocationStart(caller2, "gps", key3);
-        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_LOCATION, caller2);
-        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION, caller2);
+        mHelper.reportLocationStart(caller2);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_LOCATION,
+                CallerIdentity.forAggregation(caller2));
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION,
+                CallerIdentity.forAggregation(caller2));
 
-        mHelper.reportLocationStart(caller2, "gps", key4);
-        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_LOCATION, caller2);
-        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION, caller2);
+        mHelper.reportLocationStart(caller2);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_LOCATION,
+                CallerIdentity.forAggregation(caller2));
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION,
+                CallerIdentity.forAggregation(caller2));
 
-        mHelper.reportLocationStop(caller1, "gps", key2);
-        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION, caller1);
-        mHelper.reportLocationStop(caller1, "gps", key1);
-        verify(mAppOpsHelper).finishOp(OP_MONITOR_LOCATION, caller1);
+        mHelper.reportLocationStop(caller1);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION,
+                CallerIdentity.forAggregation(caller1));
+        mHelper.reportLocationStop(caller1);
+        verify(mAppOpsHelper).finishOp(OP_MONITOR_LOCATION, CallerIdentity.forAggregation(caller1));
 
-        mHelper.reportLocationStop(caller2, "gps", key3);
-        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION, caller2);
-        mHelper.reportLocationStop(caller2, "gps", key4);
-        verify(mAppOpsHelper).finishOp(OP_MONITOR_LOCATION, caller2);
+        mHelper.reportLocationStop(caller2);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_LOCATION,
+                CallerIdentity.forAggregation(caller2));
+        mHelper.reportLocationStop(caller2);
+        verify(mAppOpsHelper).finishOp(OP_MONITOR_LOCATION, CallerIdentity.forAggregation(caller2));
     }
 
     @Test
     public void testHighPowerLocationMonitoring() {
         CallerIdentity caller1 = CallerIdentity.forTest(1, 1, "test1", null);
-        Object key1 = new Object();
-        Object key2 = new Object();
         CallerIdentity caller2 = CallerIdentity.forTest(2, 2, "test2", null);
-        Object key3 = new Object();
-        Object key4 = new Object();
 
-        mHelper.reportHighPowerLocationStart(caller1, "gps", key1);
-        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, caller1);
-        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller1);
+        mHelper.reportHighPowerLocationStart(caller1);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION,
+                CallerIdentity.forAggregation(caller1));
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION,
+                CallerIdentity.forAggregation(caller1));
 
-        mHelper.reportHighPowerLocationStart(caller1, "gps", key2);
-        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, caller1);
-        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller1);
+        mHelper.reportHighPowerLocationStart(caller1);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION,
+                CallerIdentity.forAggregation(caller1));
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION,
+                CallerIdentity.forAggregation(caller1));
 
-        mHelper.reportHighPowerLocationStart(caller2, "gps", key3);
-        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, caller2);
-        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller2);
+        mHelper.reportHighPowerLocationStart(caller2);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION,
+                CallerIdentity.forAggregation(caller2));
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION,
+                CallerIdentity.forAggregation(caller2));
 
-        mHelper.reportHighPowerLocationStart(caller2, "gps", key4);
-        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, caller2);
-        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller2);
+        mHelper.reportHighPowerLocationStart(caller2);
+        verify(mAppOpsHelper).startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION,
+                CallerIdentity.forAggregation(caller2));
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION,
+                CallerIdentity.forAggregation(caller2));
 
-        mHelper.reportHighPowerLocationStop(caller1, "gps", key2);
-        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller1);
-        mHelper.reportHighPowerLocationStop(caller1, "gps", key1);
-        verify(mAppOpsHelper).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller1);
+        mHelper.reportHighPowerLocationStop(caller1);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION,
+                CallerIdentity.forAggregation(caller1));
+        mHelper.reportHighPowerLocationStop(caller1);
+        verify(mAppOpsHelper).finishOp(OP_MONITOR_HIGH_POWER_LOCATION,
+                CallerIdentity.forAggregation(caller1));
 
-        mHelper.reportHighPowerLocationStop(caller2, "gps", key3);
-        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller2);
-        mHelper.reportHighPowerLocationStop(caller2, "gps", key4);
-        verify(mAppOpsHelper).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, caller2);
+        mHelper.reportHighPowerLocationStop(caller2);
+        verify(mAppOpsHelper, never()).finishOp(OP_MONITOR_HIGH_POWER_LOCATION,
+                CallerIdentity.forAggregation(caller2));
+        mHelper.reportHighPowerLocationStop(caller2);
+        verify(mAppOpsHelper).finishOp(OP_MONITOR_HIGH_POWER_LOCATION,
+                CallerIdentity.forAggregation(caller2));
     }
 }

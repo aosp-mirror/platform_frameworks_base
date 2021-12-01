@@ -18,6 +18,7 @@ package com.android.server.accessibility.magnification;
 
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.MotionEvent.ACTION_CANCEL;
+import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
 
 import static java.util.Arrays.asList;
@@ -78,6 +79,8 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
     final DetectingState mDetectingState;
     @VisibleForTesting
     final PanningScalingGestureState mObservePanningScalingState;
+    @VisibleForTesting
+    final ViewportDraggingState mViewportDraggingState;
 
     @VisibleForTesting
     State mCurrentState;
@@ -105,6 +108,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                         policyFlags));
         mDelegatingState = new DelegatingState(mMotionEventDispatcherDelegate);
         mDetectingState = new DetectingState(context, mDetectTripleTap);
+        mViewportDraggingState = new ViewportDraggingState();
         mObservePanningScalingState = new PanningScalingGestureState(
                 new PanningScalingHandler(context, MAX_SCALE, MIN_SCALE, true,
                         new PanningScalingHandler.MagnificationDelegate() {
@@ -158,7 +162,8 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
     public void handleShortcutTriggered() {
         final Point screenSize = mTempPoint;
         getScreenSize(mTempPoint);
-        toggleMagnification(screenSize.x / 2.0f, screenSize.y / 2.0f);
+        toggleMagnification(screenSize.x / 2.0f, screenSize.y / 2.0f,
+                WindowMagnificationManager.WINDOW_POSITION_AT_CENTER);
     }
 
     private  void getScreenSize(Point outSize) {
@@ -171,14 +176,17 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         return Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
     }
 
-    private void enableWindowMagnifier(float centerX, float centerY) {
+    private void enableWindowMagnifier(float centerX, float centerY,
+            @WindowMagnificationManager.WindowPosition int windowPosition) {
         if (DEBUG_ALL) {
-            Slog.i(mLogTag, "enableWindowMagnifier :" + centerX + ", " + centerY);
+            Slog.i(mLogTag, "enableWindowMagnifier :"
+                    + centerX + ", " + centerY + ", " + windowPosition);
         }
 
         final float scale = MathUtils.constrain(
                 mWindowMagnificationMgr.getPersistedScale(mDisplayId), MIN_SCALE, MAX_SCALE);
-        mWindowMagnificationMgr.enableWindowMagnification(mDisplayId, scale, centerX, centerY);
+        mWindowMagnificationMgr.enableWindowMagnification(mDisplayId, scale, centerX, centerY,
+                windowPosition);
     }
 
     private void disableWindowMagnifier() {
@@ -188,11 +196,12 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         mWindowMagnificationMgr.disableWindowMagnification(mDisplayId, false);
     }
 
-    private void toggleMagnification(float centerX, float centerY) {
+    private void toggleMagnification(float centerX, float centerY,
+            @WindowMagnificationManager.WindowPosition int windowPosition) {
         if (mWindowMagnificationMgr.isWindowMagnifierEnabled(mDisplayId)) {
             disableWindowMagnifier();
         } else {
-            enableWindowMagnifier(centerX, centerY);
+            enableWindowMagnifier(centerX, centerY, windowPosition);
         }
     }
 
@@ -200,7 +209,17 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         if (DEBUG_DETECTING) {
             Slog.i(mLogTag, "onTripleTap()");
         }
-        toggleMagnification(up.getX(), up.getY());
+        toggleMagnification(up.getX(), up.getY(),
+                WindowMagnificationManager.WINDOW_POSITION_AT_CENTER);
+    }
+
+    private void onTripleTapAndHold(MotionEvent up) {
+        if (DEBUG_DETECTING) {
+            Slog.i(mLogTag, "onTripleTapAndHold()");
+        }
+        enableWindowMagnifier(up.getX(), up.getY(),
+                WindowMagnificationManager.WINDOW_POSITION_AT_TOP_LEFT);
+        transitionTo(mViewportDraggingState);
     }
 
     void resetToDetectState() {
@@ -319,6 +338,65 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         }
     }
 
+
+    /**
+     * This class handles motion events when the event dispatcher has
+     * determined that the user is performing a single-finger drag of the
+     * magnification viewport.
+     *
+     * Leaving this state until receiving {@link MotionEvent#ACTION_UP}
+     * or {@link MotionEvent#ACTION_CANCEL}.
+     */
+    final class ViewportDraggingState implements State {
+
+        private float mLastX = Float.NaN;
+        private float mLastY = Float.NaN;
+
+        @Override
+        public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+            final int action = event.getActionMasked();
+            switch (action) {
+                case ACTION_MOVE: {
+                    if (!Float.isNaN(mLastX) && !Float.isNaN(mLastY)) {
+                        float offsetX = event.getX() - mLastX;
+                        float offsetY = event.getY() - mLastY;
+                        mWindowMagnificationMgr.moveWindowMagnification(mDisplayId, offsetX,
+                                offsetY);
+                    }
+                    mLastX = event.getX();
+                    mLastY = event.getY();
+                }
+                break;
+
+                case ACTION_UP:
+                case ACTION_CANCEL: {
+                    mWindowMagnificationMgr.disableWindowMagnification(mDisplayId, true);
+                    transitionTo(mDetectingState);
+                }
+                    break;
+            }
+        }
+
+        @Override
+        public void clear() {
+            mLastX = Float.NaN;
+            mLastY = Float.NaN;
+        }
+
+        @Override
+        public void onExit() {
+            clear();
+        }
+
+        @Override
+        public String toString() {
+            return "ViewportDraggingState{"
+                    + "mLastX=" + mLastX
+                    + ",mLastY=" + mLastY
+                    + '}';
+        }
+    }
+
     /**
      * This class handles motion events in a duration to determine if the user is going to
      * manipulate the window magnifier or want to interact with current UI. The rule of leaving
@@ -405,6 +483,8 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                 transitionTo(mObservePanningScalingState);
             } else if (gestureId == MagnificationGestureMatcher.GESTURE_TRIPLE_TAP) {
                 onTripleTap(motionEvent);
+            } else if (gestureId == MagnificationGestureMatcher.GESTURE_TRIPLE_TAP_AND_HOLD) {
+                onTripleTapAndHold(motionEvent);
             } else {
                 mMotionEventDispatcherDelegate.sendDelayedMotionEvents(delayedEventQueue,
                         lastDownEventTime);
@@ -439,6 +519,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         return "WindowMagnificationGestureHandler{"
                 + "mDetectingState=" + mDetectingState
                 + ", mDelegatingState=" + mDelegatingState
+                + ", mViewportDraggingState=" + mViewportDraggingState
                 + ", mMagnifiedInteractionState=" + mObservePanningScalingState
                 + ", mCurrentState=" + State.nameOf(mCurrentState)
                 + ", mPreviousState=" + State.nameOf(mPreviousState)

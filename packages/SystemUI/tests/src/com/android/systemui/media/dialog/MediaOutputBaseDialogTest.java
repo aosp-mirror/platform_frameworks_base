@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.media.session.MediaSessionManager;
 import android.os.Bundle;
 import android.testing.AndroidTestingRunner;
@@ -70,6 +71,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     private MediaOutputController mMediaOutputController;
     private int mHeaderIconRes;
     private IconCompat mIconCompat;
+    private Drawable mAppSourceDrawable;
     private CharSequence mHeaderTitle;
     private CharSequence mHeaderSubtitle;
 
@@ -170,6 +172,11 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
             super(context, mediaOutputController);
 
             mAdapter = mMediaOutputBaseAdapter;
+        }
+
+        @Override
+        Drawable getAppSourceIcon() {
+            return mAppSourceDrawable;
         }
 
         @Override

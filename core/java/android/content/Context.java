@@ -5356,9 +5356,12 @@ public abstract class Context {
      * {@link android.net.NetworkScoreManager} for managing network scoring.
      * @see #getSystemService(String)
      * @see android.net.NetworkScoreManager
+     * @deprecated see https://developer.android.com/guide/topics/connectivity/wifi-suggest for
+     * alternative API to propose WiFi networks.
      * @hide
      */
     @SystemApi
+    @Deprecated
     public static final String NETWORK_SCORE_SERVICE = "network_score";
 
     /**

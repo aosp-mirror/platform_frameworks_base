@@ -124,10 +124,8 @@ Landroid/content/pm/IPackageInstallObserver2$Stub;->asInterface(Landroid/os/IBin
 Landroid/content/pm/IPackageManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IPackageManager$Stub$Proxy;->checkUidPermission(Ljava/lang/String;I)I
 Landroid/content/pm/IPackageManager$Stub$Proxy;->getAppOpPermissionPackages(Ljava/lang/String;)[Ljava/lang/String;
-Landroid/content/pm/IPackageManager$Stub$Proxy;->getInstalledPackages(II)Landroid/content/pm/ParceledListSlice;
 Landroid/content/pm/IPackageManager$Stub$Proxy;->getInstallLocation()I
 Landroid/content/pm/IPackageManager$Stub$Proxy;->getLastChosenActivity(Landroid/content/Intent;Ljava/lang/String;I)Landroid/content/pm/ResolveInfo;
-Landroid/content/pm/IPackageManager$Stub$Proxy;->getPackageInfo(Ljava/lang/String;II)Landroid/content/pm/PackageInfo;
 Landroid/content/pm/IPackageManager$Stub$Proxy;->getPackagesForUid(I)[Ljava/lang/String;
 Landroid/content/pm/IPackageManager$Stub$Proxy;->getSystemSharedLibraryNames()[Ljava/lang/String;
 Landroid/content/pm/IPackageManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageManager;

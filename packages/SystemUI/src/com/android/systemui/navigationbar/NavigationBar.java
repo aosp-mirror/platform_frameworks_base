@@ -71,7 +71,6 @@ import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.inputmethodservice.InputMethodService;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -93,7 +92,6 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.WindowInsets;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 import android.view.WindowManager;
@@ -884,17 +882,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         if (displayId != mDisplayId) {
             return;
         }
-        boolean imeVisibleOnShade = mStatusBarOptionalLazy.get().map(statusBar -> {
-            View shadeWindowView = statusBar.getNotificationShadeWindowView();
-            return shadeWindowView.isAttachedToWindow()
-                    && shadeWindowView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
-        }).orElse(false);
-        boolean isKeyguardShowing = mStatusBarOptionalLazy.get().map(
-                StatusBar::isKeyguardShowing).orElse(false);
-        boolean imeShown = imeVisibleOnShade
-                || (!isKeyguardShowing && (vis & InputMethodService.IME_VISIBLE) != 0);
+        boolean imeShown = mNavBarHelper.isImeShown(vis);
         showImeSwitcher = imeShown && showImeSwitcher;
-
         int hints = Utilities.calculateBackDispositionHints(mNavigationIconHints, backDisposition,
                 imeShown, showImeSwitcher);
         if (hints == mNavigationIconHints) return;

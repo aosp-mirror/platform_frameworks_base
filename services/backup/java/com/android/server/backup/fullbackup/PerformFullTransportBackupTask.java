@@ -51,7 +51,7 @@ import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.internal.Operation;
 import com.android.server.backup.remote.RemoteCall;
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
@@ -110,13 +110,15 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             String caller,
             BackupEligibilityRules backupEligibilityRules) {
         TransportManager transportManager = backupManagerService.getTransportManager();
-        TransportClient transportClient = transportManager.getCurrentTransportClient(caller);
+        TransportConnection transportConnection = transportManager.getCurrentTransportClient(
+                caller);
         OnTaskFinishedListener listener =
                 listenerCaller ->
-                        transportManager.disposeOfTransportClient(transportClient, listenerCaller);
+                        transportManager.disposeOfTransportClient(transportConnection,
+                                listenerCaller);
         return new PerformFullTransportBackupTask(
                 backupManagerService,
-                transportClient,
+                transportConnection,
                 observer,
                 whichPackages,
                 updateSchedule,
@@ -145,7 +147,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     SinglePackageBackupRunner mBackupRunner;
     private final int mBackupRunnerOpToken;
     private final OnTaskFinishedListener mListener;
-    private final TransportClient mTransportClient;
+    private final TransportConnection mTransportConnection;
     private final int mUserId;
 
     // This is true when a backup operation for some package is in progress.
@@ -156,7 +158,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     private final BackupEligibilityRules mBackupEligibilityRules;
 
     public PerformFullTransportBackupTask(UserBackupManagerService backupManagerService,
-            TransportClient transportClient,
+            TransportConnection transportConnection,
             IFullBackupRestoreObserver observer,
             String[] whichPackages, boolean updateSchedule,
             FullBackupJob runningJob, CountDownLatch latch, IBackupObserver backupObserver,
@@ -164,7 +166,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             boolean userInitiated, BackupEligibilityRules backupEligibilityRules) {
         super(observer);
         this.mUserBackupManagerService = backupManagerService;
-        mTransportClient = transportClient;
+        mTransportConnection = transportConnection;
         mUpdateSchedule = updateSchedule;
         mLatch = latch;
         mJob = runningJob;
@@ -299,7 +301,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 try {
                     // If we're running a backup we should be connected to a transport
                     IBackupTransport transport =
-                            mTransportClient.getConnectedTransport("PFTBT.handleCancel()");
+                            mTransportConnection.getConnectedTransport("PFTBT.handleCancel()");
                     transport.cancelFullBackup();
                 } catch (RemoteException | TransportNotAvailableException e) {
                     Slog.w(TAG, "Error calling cancelFullBackup() on transport: " + e);
@@ -351,7 +353,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 return;
             }
 
-            IBackupTransport transport = mTransportClient.connect("PFTBT.run()");
+            IBackupTransport transport = mTransportConnection.connect("PFTBT.run()");
             if (transport == null) {
                 Slog.w(TAG, "Transport not present; full data backup not performed");
                 backupRunStatus = BackupManager.ERROR_TRANSPORT_ABORTED;
@@ -395,7 +397,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                         enginePipes = ParcelFileDescriptor.createPipe();
                         mBackupRunner =
                                 new SinglePackageBackupRunner(enginePipes[1], currentPackage,
-                                        mTransportClient, quota, mBackupRunnerOpToken,
+                                        mTransportConnection, quota, mBackupRunnerOpToken,
                                         transport.getTransportFlags());
                         // The runner dup'd the pipe half, so we close it here
                         enginePipes[1].close();
@@ -697,17 +699,17 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     class SinglePackageBackupPreflight implements BackupRestoreTask, FullBackupPreflight {
         final AtomicLong mResult = new AtomicLong(BackupTransport.AGENT_ERROR);
         final CountDownLatch mLatch = new CountDownLatch(1);
-        final TransportClient mTransportClient;
+        final TransportConnection mTransportConnection;
         final long mQuota;
         private final int mCurrentOpToken;
         private final int mTransportFlags;
 
         SinglePackageBackupPreflight(
-                TransportClient transportClient,
+                TransportConnection transportConnection,
                 long quota,
                 int currentOpToken,
                 int transportFlags) {
-            mTransportClient = transportClient;
+            mTransportConnection = transportConnection;
             mQuota = quota;
             mCurrentOpToken = currentOpToken;
             mTransportFlags = transportFlags;
@@ -744,7 +746,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 }
 
                 IBackupTransport transport =
-                        mTransportClient.connectOrThrow("PFTBT$SPBP.preflightFullBackup()");
+                        mTransportConnection.connectOrThrow("PFTBT$SPBP.preflightFullBackup()");
                 result = transport.checkFullBackupSize(totalSize);
                 if (result == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
                     if (MORE_DEBUG) {
@@ -817,14 +819,14 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         private final int mTransportFlags;
 
         SinglePackageBackupRunner(ParcelFileDescriptor output, PackageInfo target,
-                TransportClient transportClient, long quota, int currentOpToken, int transportFlags)
-                throws IOException {
+                TransportConnection transportConnection, long quota, int currentOpToken,
+                int transportFlags) throws IOException {
             mOutput = ParcelFileDescriptor.dup(output.getFileDescriptor());
             mTarget = target;
             mCurrentOpToken = currentOpToken;
             mEphemeralToken = mUserBackupManagerService.generateRandomIntegerToken();
             mPreflight = new SinglePackageBackupPreflight(
-                    transportClient, quota, mEphemeralToken, transportFlags);
+                    transportConnection, quota, mEphemeralToken, transportFlags);
             mPreflightLatch = new CountDownLatch(1);
             mBackupLatch = new CountDownLatch(1);
             mPreflightResult = BackupTransport.AGENT_ERROR;

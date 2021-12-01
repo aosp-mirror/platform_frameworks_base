@@ -127,7 +127,7 @@ import com.android.server.backup.params.ClearRetryParams;
 import com.android.server.backup.params.RestoreParams;
 import com.android.server.backup.restore.ActiveRestoreSession;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.backup.utils.BackupEligibilityRules;
@@ -1894,16 +1894,16 @@ public class UserBackupManagerService {
             return BackupManager.ERROR_BACKUP_NOT_ALLOWED;
         }
 
-        final TransportClient transportClient;
+        final TransportConnection transportConnection;
         final String transportDirName;
         int operationType;
         try {
             transportDirName =
                     mTransportManager.getTransportDirName(
                             mTransportManager.getCurrentTransportName());
-            transportClient =
+            transportConnection =
                     mTransportManager.getCurrentTransportClientOrThrow("BMS.requestBackup()");
-            operationType = getOperationTypeFromTransport(transportClient);
+            operationType = getOperationTypeFromTransport(transportConnection);
         } catch (TransportNotRegisteredException | TransportNotAvailableException
                 | RemoteException e) {
             BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
@@ -1914,13 +1914,13 @@ public class UserBackupManagerService {
         }
 
         OnTaskFinishedListener listener =
-                caller -> mTransportManager.disposeOfTransportClient(transportClient, caller);
+                caller -> mTransportManager.disposeOfTransportClient(transportConnection, caller);
         BackupEligibilityRules backupEligibilityRules = getEligibilityRulesForOperation(
                 operationType);
 
         Message msg = mBackupHandler.obtainMessage(MSG_REQUEST_BACKUP);
         msg.obj = getRequestBackupParams(packages, observer, monitor, flags, backupEligibilityRules,
-                transportClient, transportDirName, listener);
+                transportConnection, transportDirName, listener);
         mBackupHandler.sendMessage(msg);
         return BackupManager.SUCCESS;
     }
@@ -1928,7 +1928,7 @@ public class UserBackupManagerService {
     @VisibleForTesting
     BackupParams getRequestBackupParams(String[] packages, IBackupObserver observer,
             IBackupManagerMonitor monitor, int flags, BackupEligibilityRules backupEligibilityRules,
-            TransportClient transportClient, String transportDirName,
+            TransportConnection transportConnection, String transportDirName,
             OnTaskFinishedListener listener) {
         ArrayList<String> fullBackupList = new ArrayList<>();
         ArrayList<String> kvBackupList = new ArrayList<>();
@@ -1974,7 +1974,7 @@ public class UserBackupManagerService {
 
         boolean nonIncrementalBackup = (flags & BackupManager.FLAG_NON_INCREMENTAL_BACKUP) != 0;
 
-        return new BackupParams(transportClient, transportDirName, kvBackupList, fullBackupList,
+        return new BackupParams(transportConnection, transportDirName, kvBackupList, fullBackupList,
                 observer, monitor, listener, /* userInitiated */ true, nonIncrementalBackup,
                 backupEligibilityRules);
     }
@@ -2875,10 +2875,10 @@ public class UserBackupManagerService {
             }
             mBackupHandler.removeMessages(MSG_RETRY_CLEAR);
             synchronized (mQueueLock) {
-                TransportClient transportClient =
+                TransportConnection transportConnection =
                         mTransportManager
                                 .getTransportClient(transportName, "BMS.clearBackupData()");
-                if (transportClient == null) {
+                if (transportConnection == null) {
                     // transport is currently unregistered -- make sure to retry
                     Message msg = mBackupHandler.obtainMessage(MSG_RETRY_CLEAR,
                             new ClearRetryParams(transportName, packageName));
@@ -2888,11 +2888,11 @@ public class UserBackupManagerService {
                 final long oldId = Binder.clearCallingIdentity();
                 try {
                     OnTaskFinishedListener listener = caller -> mTransportManager
-                            .disposeOfTransportClient(transportClient, caller);
+                            .disposeOfTransportClient(transportConnection, caller);
                     mWakelock.acquire();
                     Message msg = mBackupHandler.obtainMessage(
                             MSG_RUN_CLEAR,
-                            new ClearParams(transportClient, info, listener));
+                            new ClearParams(transportConnection, info, listener));
                     mBackupHandler.sendMessage(msg);
                 } finally {
                     Binder.restoreCallingIdentity(oldId);
@@ -3715,11 +3715,11 @@ public class UserBackupManagerService {
 
         // And update our current-dataset bookkeeping
         String callerLogString = "BMS.updateStateForTransport()";
-        TransportClient transportClient =
+        TransportConnection transportConnection =
                 mTransportManager.getTransportClient(newTransportName, callerLogString);
-        if (transportClient != null) {
+        if (transportConnection != null) {
             try {
-                IBackupTransport transport = transportClient.connectOrThrow(callerLogString);
+                IBackupTransport transport = transportConnection.connectOrThrow(callerLogString);
                 mCurrentToken = transport.getCurrentRestoreSet();
             } catch (Exception e) {
                 // Oops.  We can't know the current dataset token, so reset and figure it out
@@ -3733,7 +3733,7 @@ public class UserBackupManagerService {
                                         + newTransportName
                                         + " not available: current token = 0"));
             }
-            mTransportManager.disposeOfTransportClient(transportClient, callerLogString);
+            mTransportManager.disposeOfTransportClient(transportConnection, callerLogString);
         } else {
             Slog.w(
                     TAG,
@@ -3946,9 +3946,9 @@ public class UserBackupManagerService {
             skip = true;
         }
 
-        TransportClient transportClient =
+        TransportConnection transportConnection =
                 mTransportManager.getCurrentTransportClient("BMS.restoreAtInstall()");
-        if (transportClient == null) {
+        if (transportConnection == null) {
             if (DEBUG) Slog.w(TAG, addUserIdToLogMessage(mUserId, "No transport client"));
             skip = true;
         }
@@ -3972,7 +3972,7 @@ public class UserBackupManagerService {
                 mWakelock.acquire();
 
                 OnTaskFinishedListener listener = caller -> {
-                    mTransportManager.disposeOfTransportClient(transportClient, caller);
+                    mTransportManager.disposeOfTransportClient(transportConnection, caller);
                     mWakelock.release();
                 };
 
@@ -3984,7 +3984,7 @@ public class UserBackupManagerService {
                 Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
                 msg.obj =
                         RestoreParams.createForRestoreAtInstall(
-                                transportClient,
+                                transportConnection,
                                 /* observer */ null,
                                 /* monitor */ null,
                                 restoreSet,
@@ -4006,9 +4006,9 @@ public class UserBackupManagerService {
         if (skip) {
             // Auto-restore disabled or no way to attempt a restore
 
-            if (transportClient != null) {
+            if (transportConnection != null) {
                 mTransportManager.disposeOfTransportClient(
-                        transportClient, "BMS.restoreAtInstall()");
+                        transportConnection, "BMS.restoreAtInstall()");
             }
 
             // Tell the PackageManager to proceed with the post-install handling for this package.
@@ -4177,13 +4177,13 @@ public class UserBackupManagerService {
         final long oldToken = Binder.clearCallingIdentity();
         try {
             String callerLogString = "BMS.isAppEligibleForBackup";
-            TransportClient transportClient =
+            TransportConnection transportConnection =
                     mTransportManager.getCurrentTransportClient(callerLogString);
             boolean eligible =
                     mScheduledBackupEligibility.appIsRunningAndEligibleForBackupWithTransport(
-                            transportClient, packageName);
-            if (transportClient != null) {
-                mTransportManager.disposeOfTransportClient(transportClient, callerLogString);
+                            transportConnection, packageName);
+            if (transportConnection != null) {
+                mTransportManager.disposeOfTransportClient(transportConnection, callerLogString);
             }
             return eligible;
         } finally {
@@ -4199,17 +4199,17 @@ public class UserBackupManagerService {
         final long oldToken = Binder.clearCallingIdentity();
         try {
             String callerLogString = "BMS.filterAppsEligibleForBackup";
-            TransportClient transportClient =
+            TransportConnection transportConnection =
                     mTransportManager.getCurrentTransportClient(callerLogString);
             List<String> eligibleApps = new LinkedList<>();
             for (String packageName : packages) {
                 if (mScheduledBackupEligibility.appIsRunningAndEligibleForBackupWithTransport(
-                                transportClient, packageName)) {
+                        transportConnection, packageName)) {
                     eligibleApps.add(packageName);
                 }
             }
-            if (transportClient != null) {
-                mTransportManager.disposeOfTransportClient(transportClient, callerLogString);
+            if (transportConnection != null) {
+                mTransportManager.disposeOfTransportClient(transportConnection, callerLogString);
             }
             return eligibleApps.toArray(new String[eligibleApps.size()]);
         } finally {
@@ -4362,7 +4362,7 @@ public class UserBackupManagerService {
     }
 
     @VisibleForTesting
-    @OperationType int getOperationTypeFromTransport(TransportClient transportClient)
+    @OperationType int getOperationTypeFromTransport(TransportConnection transportConnection)
             throws TransportNotAvailableException, RemoteException {
         if (!shouldUseNewBackupEligibilityRules()) {
             // Return the default to stick to the legacy behaviour.
@@ -4371,7 +4371,7 @@ public class UserBackupManagerService {
 
         final long oldCallingId = Binder.clearCallingIdentity();
         try {
-            IBackupTransport transport = transportClient.connectOrThrow(
+            IBackupTransport transport = transportConnection.connectOrThrow(
                     /* caller */ "BMS.getOperationTypeFromTransport");
             if ((transport.getTransportFlags() & BackupAgent.FLAG_DEVICE_TO_DEVICE_TRANSFER) != 0) {
                 return OperationType.MIGRATION;

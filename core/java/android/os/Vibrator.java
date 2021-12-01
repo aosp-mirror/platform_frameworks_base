@@ -493,7 +493,7 @@ public abstract class Vibrator {
         vibrate(vibe,
                 attributes == null
                         ? new VibrationAttributes.Builder().build()
-                        : new VibrationAttributes.Builder(attributes, vibe).build());
+                        : new VibrationAttributes.Builder(attributes).build());
     }
 
     /**

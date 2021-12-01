@@ -28,6 +28,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
+import android.media.tv.BroadcastInfoRequest;
+import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.interactive.ITvIAppClient;
 import android.media.tv.interactive.ITvIAppManager;
 import android.media.tv.interactive.ITvIAppManagerCallback;
@@ -745,6 +747,29 @@ public class TvIAppManagerService extends SystemService {
         }
 
         @Override
+        public void notifyBroadcastInfoResponse(IBinder sessionToken,
+                BroadcastInfoResponse response, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
+                    "notifyBroadcastInfoResponse");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).notifyBroadcastInfoResponse(response);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in notifyBroadcastInfoResponse", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void registerCallback(final ITvIAppManagerCallback callback, int userId) {
             int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
@@ -1186,6 +1211,24 @@ public class TvIAppManagerService extends SystemService {
                             mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onLayoutSurface", e);
+                }
+            }
+        }
+
+        @Override
+        public void onBroadcastInfoRequest(BroadcastInfoRequest request) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onBroadcastInfoRequest (requestId="
+                            + request.getRequestId() + ")");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onBroadcastInfoRequest(request, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onBroadcastInfoRequest", e);
                 }
             }
         }

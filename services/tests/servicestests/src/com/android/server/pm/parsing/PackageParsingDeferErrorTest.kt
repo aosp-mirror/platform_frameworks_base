@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.pm.parsing.ParsingPackage
 import android.content.pm.parsing.ParsingPackageUtils
 import android.content.pm.parsing.result.ParseResult
+import android.platform.test.annotations.Presubmit
 import androidx.test.InstrumentationRegistry
 import com.android.frameworks.servicestests.R
 import com.google.common.truth.Truth.assertThat
@@ -36,6 +37,7 @@ import org.junit.rules.TemporaryFolder
  *
  * This verifies these failures when the APK targets R.
  */
+@Presubmit
 class PackageParsingDeferErrorTest {
 
     companion object {

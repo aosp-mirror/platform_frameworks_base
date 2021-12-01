@@ -89,7 +89,7 @@ public final class VibratorHelper {
      */
     public void vibrate(VibrationEffect effect, AudioAttributes attrs, String reason) {
         mVibrator.vibrate(Process.SYSTEM_UID, PackageManagerService.PLATFORM_PACKAGE_NAME,
-                effect, reason, new VibrationAttributes.Builder(attrs, effect).build());
+                effect, reason, new VibrationAttributes.Builder(attrs).build());
     }
 
     /** Stop all notification vibrations (ringtone, alarm, notification usages). */

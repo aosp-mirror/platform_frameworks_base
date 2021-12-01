@@ -93,7 +93,7 @@ class MockWindowMagnificationConnection {
             final float scale = invocation.getArgument(1);
             mScale = Float.isNaN(scale) ? mScale : scale;
             computeMirrorWindowFrame(invocation.getArgument(2), invocation.getArgument(3));
-            setAnimationCallback(invocation.getArgument(4));
+            setAnimationCallback(invocation.getArgument(6));
             computeSourceBounds();
             mHasPendingCallback = true;
             if (!mSuspendCallback) {
@@ -101,7 +101,7 @@ class MockWindowMagnificationConnection {
             }
             return null;
         }).when(mConnection).enableWindowMagnification(anyInt(), anyFloat(), anyFloat(), anyFloat(),
-                nullable(IRemoteMagnificationAnimationCallback.class));
+                anyFloat(), anyFloat(), nullable(IRemoteMagnificationAnimationCallback.class));
     }
 
     private void stubDisableWindowMagnification() throws RemoteException {
