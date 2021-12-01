@@ -2790,7 +2790,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             if (!mCurPerceptible) {
-                vis &= ~InputMethodService.IME_VISIBLE;
+                if ((vis & InputMethodService.IME_VISIBLE) != 0) {
+                    vis &= ~InputMethodService.IME_VISIBLE;
+                    vis |= InputMethodService.IME_VISIBLE_IMPERCEPTIBLE;
+                }
+            } else {
+                vis &= ~InputMethodService.IME_VISIBLE_IMPERCEPTIBLE;
             }
             // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
