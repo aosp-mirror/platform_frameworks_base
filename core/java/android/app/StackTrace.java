@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package android.hardware.devicestate;
+package android.app;
 
 /**
- * Device state manager local system service interface.
- *
- * @hide Only for use within the system server.
+ * An Exception subclass that's used only for logging stacktraces.
+ * @hide
  */
-public abstract class DeviceStateManagerInternal {
-
-    /** Returns the list of currently supported device state identifiers. */
-    public abstract int[] getSupportedStateIdentifiers();
+public class StackTrace extends Exception {
+    public StackTrace(String message) {
+        super(message);
+    }
 }
