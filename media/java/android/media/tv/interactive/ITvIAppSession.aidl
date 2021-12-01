@@ -17,6 +17,8 @@
 package android.media.tv.interactive;
 
 import android.graphics.Rect;
+import android.net.Uri;
+import android.media.tv.BroadcastInfoResponse;
 import android.view.Surface;
 import android.media.tv.BroadcastInfoResponse;
 
@@ -27,6 +29,7 @@ import android.media.tv.BroadcastInfoResponse;
 oneway interface ITvIAppSession {
     void startIApp();
     void release();
+    void notifyTuned(in Uri channelUri);
     void setSurface(in Surface surface);
     void dispatchSurfaceChanged(int format, int width, int height);
     void notifyBroadcastInfoResponse(in BroadcastInfoResponse response);

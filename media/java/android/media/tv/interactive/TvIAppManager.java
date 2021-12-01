@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvInputManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -334,6 +335,18 @@ public final class TvIAppManager {
     }
 
     /**
+     * Prepares TV IApp service for the given type.
+     * @hide
+     */
+    public void prepare(String tvIAppServiceId, int type) {
+        try {
+            mService.prepare(tvIAppServiceId, type, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Registers a {@link TvIAppManager.TvIAppCallback}.
      *
      * @param callback A callback used to monitor status of the TV IApp services.
@@ -594,6 +607,21 @@ public final class TvIAppManager {
             }
 
             releaseInternal();
+        }
+
+        /**
+         * Notifies IAPP session when a channels is tuned.
+         */
+        public void notifyTuned(Uri channelUri) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyTuned(mToken, channelUri, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         private void flushPendingEventsLocked() {

@@ -28,6 +28,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.IBinder;
@@ -117,8 +118,21 @@ public abstract class TvIAppService extends Service {
                 mServiceHandler.obtainMessage(ServiceHandler.DO_CREATE_SESSION, args)
                         .sendToTarget();
             }
+
+            @Override
+            public void prepare(int type) {
+                onPrepare(type);
+            }
         };
         return tvIAppServiceBinder;
+    }
+
+    /**
+     * Prepares TV IApp service for the given type.
+     * @hide
+     */
+    public void onPrepare(int type) {
+        // TODO: make it abstract when unhide
     }
 
 
@@ -237,14 +251,6 @@ public abstract class TvIAppService extends Service {
         }
 
         /**
-         * Called when a broadcast info response is received from TIS.
-         *
-         * @param response response received from TIS.
-         */
-        public void onNotifyBroadcastInfoResponse(BroadcastInfoResponse response) {
-        }
-
-        /**
          * Called when the size of the media view is changed by the application.
          *
          * <p>This is always called at least once when the session is created regardless of whether
@@ -273,6 +279,20 @@ public abstract class TvIAppService extends Service {
          * @hide
          */
         public void onRelease() {
+        }
+
+        /**
+         * Called when the corresponding TV input tuned to a channel.
+         * @hide
+         */
+        public void onTuned(Uri channelUri) {
+        }
+
+        /**
+         * Called when a broadcast info response is received.
+         * @hide
+         */
+        public void onBroadcastInfoResponse(BroadcastInfoResponse response) {
         }
 
         /**
@@ -362,6 +382,10 @@ public abstract class TvIAppService extends Service {
             });
         }
 
+        /**
+         * Requests broadcast related information from the related TV input.
+         * @param request
+         */
         public void requestBroadcastInfo(@NonNull final BroadcastInfoRequest request) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -399,6 +423,25 @@ public abstract class TvIAppService extends Service {
             // Removes the media view lastly so that any hanging on the main thread can be handled
             // in {@link #scheduleMediaViewCleanup}.
             removeMediaView(true);
+        }
+
+        void notifyTuned(Uri channelUri) {
+            if (DEBUG) {
+                Log.d(TAG, "notifyTuned (channelUri=" + channelUri + ")");
+            }
+            onTuned(channelUri);
+        }
+
+
+        /**
+         * Calls {@link #onBroadcastInfoResponse}.
+         */
+        void notifyBroadcastInfoResponse(BroadcastInfoResponse response) {
+            if (DEBUG) {
+                Log.d(TAG, "notifyBroadcastInfoResponse (requestId="
+                        + response.getRequestId() + ")");
+            }
+            onBroadcastInfoResponse(response);
         }
 
         /**
@@ -465,18 +508,6 @@ public abstract class TvIAppService extends Service {
                         + ", height=" + height + ")");
             }
             onSurfaceChanged(format, width, height);
-        }
-
-        /**
-         *
-         * Calls {@link #notifyBroadcastInfoResponse}.
-         */
-        void notifyBroadcastInfoResponse(BroadcastInfoResponse response) {
-            if (DEBUG) {
-                Log.d(TAG, "notifyBroadcastInfoResponse (requestId="
-                        + response.getRequestId() + ")");
-            }
-            onNotifyBroadcastInfoResponse(response);
         }
 
         private void executeOrPostRunnableOnMainThread(Runnable action) {
@@ -654,6 +685,11 @@ public abstract class TvIAppService extends Service {
         public void release() {
             mSessionImpl.scheduleMediaViewCleanup();
             mSessionImpl.release();
+        }
+
+        @Override
+        public void notifyTuned(Uri channelUri) {
+            mSessionImpl.notifyTuned(channelUri);
         }
 
         @Override

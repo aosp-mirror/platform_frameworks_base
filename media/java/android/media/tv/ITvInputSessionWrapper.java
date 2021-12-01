@@ -71,6 +71,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_PAUSE_RECORDING = 22;
     private static final int DO_RESUME_RECORDING = 23;
     private static final int DO_REQUEST_BROADCAST_INFO = 24;
+    private static final int DO_SET_IAPP_NOTIFICATION_ENABLED = 25;
 
     private final boolean mIsRecordingSession;
     private final HandlerCaller mCaller;
@@ -239,6 +240,10 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.requestBroadcastInfo((BroadcastInfoRequest) msg.obj);
                 break;
             }
+            case DO_SET_IAPP_NOTIFICATION_ENABLED: {
+                mTvInputSessionImpl.setIAppNotificationEnabled((Boolean) msg.obj);
+                break;
+            }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
                 break;
@@ -304,6 +309,12 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void selectTrack(int type, String trackId) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_SELECT_TRACK, type, trackId));
+    }
+
+    @Override
+    public void setIAppNotificationEnabled(boolean enabled) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_SET_IAPP_NOTIFICATION_ENABLED, enabled));
     }
 
     @Override

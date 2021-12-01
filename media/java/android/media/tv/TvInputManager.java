@@ -627,14 +627,20 @@ public final class TvInputManager {
         public void onTimeShiftCurrentPositionChanged(Session session, long timeMs) {
         }
 
-        // For the recording session only
         /**
-         * This is called when the recording session has been tuned to the given channel and is
-         * ready to start recording.
+         * This is called when AIT info is updated.
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         * @param aitInfo The current AIT info.
+         */
+        public void onAitInfoUpdated(Session session, AitInfo aitInfo) {
+        }
+
+        /**
+         * This is called when the session has been tuned to the given channel.
          *
          * @param channelUri The URI of a channel.
          */
-        void onTuned(Session session, Uri channelUri) {
+        public void onTuned(Session session, Uri channelUri) {
         }
 
         // For the recording session only
@@ -807,12 +813,23 @@ public final class TvInputManager {
             });
         }
 
-        // For the recording session only
+        void postAitInfoUpdated(final AitInfo aitInfo) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onAitInfoUpdated(mSession, aitInfo);
+                }
+            });
+        }
+
         void postTuned(final Uri channelUri) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     mSessionCallback.onTuned(mSession, channelUri);
+                    if (mSession.mIAppNotificationEnabled && mSession.getIAppSession() != null) {
+                        mSession.getIAppSession().notifyTuned(channelUri);
+                    }
                 }
             });
         }
@@ -838,12 +855,16 @@ public final class TvInputManager {
         }
 
         void postBroadcastInfoResponse(final BroadcastInfoResponse response) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mSession.getIAppSession().notifyBroadcastInfoResponse(response);
-                }
-            });
+            if (mSession.mIAppNotificationEnabled) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mSession.getIAppSession() != null) {
+                            mSession.getIAppSession().notifyBroadcastInfoResponse(response);
+                        }
+                    }
+                });
+            }
         }
     }
 
@@ -1209,7 +1230,19 @@ public final class TvInputManager {
             }
 
             @Override
-            public void onTuned(int seq, Uri channelUri) {
+            public void onAitInfoUpdated(AitInfo aitInfo, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postAitInfoUpdated(aitInfo);
+                }
+            }
+
+            @Override
+            public void onTuned(Uri channelUri, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
@@ -1217,6 +1250,13 @@ public final class TvInputManager {
                         return;
                     }
                     record.postTuned(channelUri);
+                    // TODO: synchronized and wrap the channelUri
+                    if (record.mSession.mIAppNotificationEnabled) {
+                        TvIAppManager.Session iappSession = record.mSession.mIAppSession;
+                        if (iappSession != null) {
+                            iappSession.notifyTuned(channelUri);
+                        }
+                    }
                 }
             }
 
@@ -2068,6 +2108,7 @@ public final class TvInputManager {
         private int mVideoHeight;
 
         private TvIAppManager.Session mIAppSession;
+        private boolean mIAppNotificationEnabled = false;
 
         private Session(IBinder token, InputChannel channel, ITvInputManager service, int userId,
                 int seq, SparseArray<SessionCallbackRecord> sessionCallbackRecordMap) {
@@ -2337,6 +2378,25 @@ public final class TvInputManager {
                 }
             }
             throw new IllegalArgumentException("invalid type: " + type);
+        }
+
+        /**
+         * Enables interactive app notification.
+         * @param enabled {@code true} if you want to enable interactive app notifications.
+         *                {@code false} otherwise.
+         * @hide
+         */
+        public void setIAppNotificationEnabled(boolean enabled) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.setIAppNotificationEnabled(mToken, enabled, mUserId);
+                mIAppNotificationEnabled = enabled;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         /**

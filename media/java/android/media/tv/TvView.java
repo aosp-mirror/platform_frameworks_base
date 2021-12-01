@@ -34,8 +34,6 @@ import android.media.PlaybackParams;
 import android.media.tv.TvInputManager.Session;
 import android.media.tv.TvInputManager.Session.FinishedInputEventCallback;
 import android.media.tv.TvInputManager.SessionCallback;
-import android.media.tv.interactive.TvIAppManager;
-import android.media.tv.interactive.TvIAppView;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -480,6 +478,18 @@ public class TvView extends ViewGroup {
             return null;
         }
         return mSession.getSelectedTrack(type);
+    }
+
+    /**
+     * Enables interactive app notification.
+     * @param enabled {@code true} if you want to enable interactive app notifications.
+     *                {@code false} otherwise.
+     * @hide
+     */
+    public void setIAppNotificationEnabled(boolean enabled) {
+        if (mSession != null) {
+            mSession.setIAppNotificationEnabled(enabled);
+        }
     }
 
     /**
@@ -1050,6 +1060,24 @@ public class TvView extends ViewGroup {
         public void onTimeShiftStatusChanged(
                 String inputId, @TvInputManager.TimeShiftStatus int status) {
         }
+
+        /**
+         * This is called when the AIT info has been updated.
+         *
+         * @param aitInfo The current AIT info.
+         * @hide
+         */
+        public void onAitInfoUpdated(String inputId, AitInfo aitInfo) {
+        }
+
+        /**
+         * This is called when the session has been tuned to the given channel.
+         *
+         * @param channelUri The URI of a channel.
+         * @hide
+         */
+        public void onTuned(String inputId, Uri channelUri) {
+        }
     }
 
     /**
@@ -1344,6 +1372,34 @@ public class TvView extends ViewGroup {
             }
             if (mTimeShiftPositionCallback != null) {
                 mTimeShiftPositionCallback.onTimeShiftCurrentPositionChanged(mInputId, timeMs);
+            }
+        }
+
+        @Override
+        public void onAitInfoUpdated(Session session, AitInfo aitInfo) {
+            if (DEBUG) {
+                Log.d(TAG, "onAitInfoUpdated(aitInfo=" + aitInfo + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onAitInfoUpdated - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onAitInfoUpdated(mInputId, aitInfo);
+            }
+        }
+
+        @Override
+        public void onTuned(Session session, Uri channelUri) {
+            if (DEBUG) {
+                Log.d(TAG, "onTuned(channelUri=" + channelUri + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onTuned - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onTuned(mInputId, channelUri);
             }
         }
     }

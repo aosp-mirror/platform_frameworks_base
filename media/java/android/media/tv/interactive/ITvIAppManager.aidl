@@ -17,10 +17,11 @@
 package android.media.tv.interactive;
 
 import android.graphics.Rect;
+import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.interactive.ITvIAppClient;
 import android.media.tv.interactive.ITvIAppManagerCallback;
 import android.media.tv.interactive.TvIAppInfo;
-import android.media.tv.BroadcastInfoResponse;
+import android.net.Uri;
 import android.view.Surface;
 
 /**
@@ -29,10 +30,12 @@ import android.view.Surface;
  */
 interface ITvIAppManager {
     List<TvIAppInfo> getTvIAppServiceList(int userId);
+    void prepare(String tiasId, int type, int userId);
     void startIApp(in IBinder sessionToken, int userId);
     void createSession(
             in ITvIAppClient client, in String iAppServiceId, int type, int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
+    void notifyTuned(in IBinder sessionToken, in Uri channelUri, int userId);
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);
     void dispatchSurfaceChanged(in IBinder sessionToken, int format, int width, int height,
             int userId);
