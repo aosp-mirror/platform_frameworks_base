@@ -119,18 +119,18 @@ public final class AssociationRequest implements Parcelable {
      * address, bonded devices are also searched among. This allows to obtain the necessary app
      * privileges even if the device is already paired.
      */
-    private boolean mSingleDevice = false;
+    private final boolean mSingleDevice;
 
     /**
      * If set, only devices matching either of the given filters will be shown to the user
      */
     @DataClass.PluralOf("deviceFilter")
-    private @NonNull List<DeviceFilter<?>> mDeviceFilters = new ArrayList<>();
+    private final @NonNull List<DeviceFilter<?>> mDeviceFilters;
 
     /**
-     * If set, association will be requested as a corresponding kind of device
+     * Profile of the device.
      */
-    private @Nullable @DeviceProfile String mDeviceProfile = null;
+    private final @Nullable @DeviceProfile String mDeviceProfile;
 
     /**
      * The Display name of the device to be shown in the CDM confirmation UI. Must be non-null for
@@ -157,7 +157,7 @@ public final class AssociationRequest implements Parcelable {
      *
      * @hide
      */
-    private @Nullable String mCallingPackage = null;
+    private @Nullable String mCallingPackage;
 
     /**
      * The user-readable description of the device profile's privileges.
@@ -166,7 +166,7 @@ public final class AssociationRequest implements Parcelable {
      *
      * @hide
      */
-    private @Nullable String mDeviceProfilePrivilegesDescription = null;
+    private @Nullable String mDeviceProfilePrivilegesDescription;
 
     /**
      * The time at which his request was created
@@ -182,7 +182,22 @@ public final class AssociationRequest implements Parcelable {
      *
      * @hide
      */
-    private boolean mSkipPrompt = false;
+    private boolean mSkipPrompt;
+
+    /**
+     * @return profile of the companion device.
+     */
+    public @Nullable @DeviceProfile String getDeviceProfile() {
+        return mDeviceProfile;
+    }
+
+    /**
+     * The Display name of the device to be shown in the CDM confirmation UI. Must be non-null for
+     * "self-managed" association.
+     */
+    public @Nullable CharSequence getDisplayName() {
+        return mDisplayName;
+    }
 
     /**
      * Whether the association is to be managed by the companion application.
@@ -210,6 +225,17 @@ public final class AssociationRequest implements Parcelable {
         return mForceConfirmation;
     }
 
+    /**
+     * Whether only a single device should match the provided filter.
+     *
+     * When scanning for a single device with a specific {@link BluetoothDeviceFilter} mac
+     * address, bonded devices are also searched among. This allows to obtain the necessary app
+     * privileges even if the device is already paired.
+     */
+    public boolean isSingleDevice() {
+        return mSingleDevice;
+    }
+
     /** @hide */
     public void setCallingPackage(@NonNull String pkg) {
         mCallingPackage = pkg;
@@ -223,12 +249,6 @@ public final class AssociationRequest implements Parcelable {
     /** @hide */
     public void setSkipPrompt(boolean value) {
         mSkipPrompt = true;
-    }
-
-    /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public boolean isSingleDevice() {
-        return mSingleDevice;
     }
 
     /** @hide */
@@ -386,7 +406,7 @@ public final class AssociationRequest implements Parcelable {
      * @param deviceFilters
      *   If set, only devices matching either of the given filters will be shown to the user
      * @param deviceProfile
-     *   If set, association will be requested as a corresponding kind of device
+     *   Profile of the device.
      * @param displayName
      *   The Display name of the device to be shown in the CDM confirmation UI. Must be non-null for
      *   "self-managed" association.
@@ -440,27 +460,6 @@ public final class AssociationRequest implements Parcelable {
         this.mSkipPrompt = skipPrompt;
 
         onConstructed();
-    }
-
-    /**
-     * If set, association will be requested as a corresponding kind of device
-     *
-     * @hide
-     */
-    @DataClass.Generated.Member
-    public @Nullable @DeviceProfile String getDeviceProfile() {
-        return mDeviceProfile;
-    }
-
-    /**
-     * The Display name of the device to be shown in the CDM confirmation UI. Must be non-null for
-     * "self-managed" association.
-     *
-     * @hide
-     */
-    @DataClass.Generated.Member
-    public @Nullable CharSequence getDisplayName() {
-        return mDisplayName;
     }
 
     /**
@@ -655,10 +654,10 @@ public final class AssociationRequest implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1637228802427L,
+            time = 1638368698639L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/companion/AssociationRequest.java",
-            inputSignatures = "public static final  java.lang.String DEVICE_PROFILE_WATCH\npublic static final @android.annotation.RequiresPermission @android.annotation.SystemApi java.lang.String DEVICE_PROFILE_APP_STREAMING\npublic static final @android.annotation.RequiresPermission @android.annotation.SystemApi java.lang.String DEVICE_PROFILE_AUTOMOTIVE_PROJECTION\nprivate  boolean mSingleDevice\nprivate @com.android.internal.util.DataClass.PluralOf(\"deviceFilter\") @android.annotation.NonNull java.util.List<android.companion.DeviceFilter<?>> mDeviceFilters\nprivate @android.annotation.Nullable @android.companion.AssociationRequest.DeviceProfile java.lang.String mDeviceProfile\nprivate final @android.annotation.Nullable java.lang.CharSequence mDisplayName\nprivate final  boolean mSelfManaged\nprivate final  boolean mForceConfirmation\nprivate @android.annotation.Nullable java.lang.String mCallingPackage\nprivate @android.annotation.Nullable java.lang.String mDeviceProfilePrivilegesDescription\nprivate  long mCreationTime\nprivate  boolean mSkipPrompt\npublic @android.annotation.SystemApi @android.annotation.RequiresPermission boolean isSelfManaged()\npublic @android.annotation.SystemApi @android.annotation.RequiresPermission boolean isForceConfirmation()\npublic  void setCallingPackage(java.lang.String)\npublic  void setDeviceProfilePrivilegesDescription(java.lang.String)\npublic  void setSkipPrompt(boolean)\npublic @android.compat.annotation.UnsupportedAppUsage boolean isSingleDevice()\npublic @android.annotation.NonNull @android.compat.annotation.UnsupportedAppUsage java.util.List<android.companion.DeviceFilter<?>> getDeviceFilters()\nprivate  void onConstructed()\nclass AssociationRequest extends java.lang.Object implements [android.os.Parcelable]\nprivate  boolean mSingleDevice\nprivate @android.annotation.Nullable java.util.ArrayList<android.companion.DeviceFilter<?>> mDeviceFilters\nprivate @android.annotation.Nullable java.lang.String mDeviceProfile\nprivate @android.annotation.Nullable java.lang.CharSequence mDisplayName\nprivate  boolean mSelfManaged\nprivate  boolean mForceConfirmation\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder setSingleDevice(boolean)\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder addDeviceFilter(android.companion.DeviceFilter<?>)\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder setDeviceProfile(java.lang.String)\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder setDisplayName(java.lang.CharSequence)\npublic @android.annotation.SystemApi @android.annotation.RequiresPermission @android.annotation.NonNull android.companion.AssociationRequest.Builder setSelfManaged(boolean)\npublic @android.annotation.SystemApi @android.annotation.RequiresPermission @android.annotation.NonNull android.companion.AssociationRequest.Builder setForceConfirmation(boolean)\npublic @android.annotation.NonNull @java.lang.Override android.companion.AssociationRequest build()\nclass Builder extends android.provider.OneTimeUseBuilder<android.companion.AssociationRequest> implements []\n@com.android.internal.util.DataClass(genToString=true, genEqualsHashCode=true, genHiddenGetters=true, genParcelable=true, genHiddenConstructor=true, genBuilder=false, genConstDefs=false)")
+            inputSignatures = "public static final  java.lang.String DEVICE_PROFILE_WATCH\npublic static final @android.annotation.RequiresPermission @android.annotation.SystemApi java.lang.String DEVICE_PROFILE_APP_STREAMING\npublic static final @android.annotation.RequiresPermission @android.annotation.SystemApi java.lang.String DEVICE_PROFILE_AUTOMOTIVE_PROJECTION\nprivate final  boolean mSingleDevice\nprivate final @com.android.internal.util.DataClass.PluralOf(\"deviceFilter\") @android.annotation.NonNull java.util.List<android.companion.DeviceFilter<?>> mDeviceFilters\nprivate final @android.annotation.Nullable @android.companion.AssociationRequest.DeviceProfile java.lang.String mDeviceProfile\nprivate final @android.annotation.Nullable java.lang.CharSequence mDisplayName\nprivate final  boolean mSelfManaged\nprivate final  boolean mForceConfirmation\nprivate @android.annotation.Nullable java.lang.String mCallingPackage\nprivate @android.annotation.Nullable java.lang.String mDeviceProfilePrivilegesDescription\nprivate  long mCreationTime\nprivate  boolean mSkipPrompt\npublic @android.annotation.Nullable @android.companion.AssociationRequest.DeviceProfile java.lang.String getDeviceProfile()\npublic @android.annotation.Nullable java.lang.CharSequence getDisplayName()\npublic @android.annotation.SystemApi @android.annotation.RequiresPermission boolean isSelfManaged()\npublic @android.annotation.SystemApi @android.annotation.RequiresPermission boolean isForceConfirmation()\npublic  boolean isSingleDevice()\npublic  void setCallingPackage(java.lang.String)\npublic  void setDeviceProfilePrivilegesDescription(java.lang.String)\npublic  void setSkipPrompt(boolean)\npublic @android.annotation.NonNull @android.compat.annotation.UnsupportedAppUsage java.util.List<android.companion.DeviceFilter<?>> getDeviceFilters()\nprivate  void onConstructed()\nclass AssociationRequest extends java.lang.Object implements [android.os.Parcelable]\nprivate  boolean mSingleDevice\nprivate @android.annotation.Nullable java.util.ArrayList<android.companion.DeviceFilter<?>> mDeviceFilters\nprivate @android.annotation.Nullable java.lang.String mDeviceProfile\nprivate @android.annotation.Nullable java.lang.CharSequence mDisplayName\nprivate  boolean mSelfManaged\nprivate  boolean mForceConfirmation\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder setSingleDevice(boolean)\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder addDeviceFilter(android.companion.DeviceFilter<?>)\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder setDeviceProfile(java.lang.String)\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder setDisplayName(java.lang.CharSequence)\npublic @android.annotation.SystemApi @android.annotation.RequiresPermission @android.annotation.NonNull android.companion.AssociationRequest.Builder setSelfManaged(boolean)\npublic @android.annotation.SystemApi @android.annotation.RequiresPermission @android.annotation.NonNull android.companion.AssociationRequest.Builder setForceConfirmation(boolean)\npublic @android.annotation.NonNull @java.lang.Override android.companion.AssociationRequest build()\nclass Builder extends android.provider.OneTimeUseBuilder<android.companion.AssociationRequest> implements []\n@com.android.internal.util.DataClass(genToString=true, genEqualsHashCode=true, genHiddenGetters=true, genParcelable=true, genHiddenConstructor=true, genBuilder=false, genConstDefs=false)")
     @Deprecated
     private void __metadata() {}
 
