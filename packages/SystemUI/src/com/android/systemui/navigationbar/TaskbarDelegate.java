@@ -60,6 +60,7 @@ import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -109,6 +110,9 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private final Context mContext;
     private final DisplayManager mDisplayManager;
     private Context mWindowContext;
+    private ScreenPinningNotify mScreenPinningNotify;
+    private int mNavigationMode;
+
     /**
      * Tracks the system calls for when taskbar should transiently show or hide so we can return
      * this value in {@link AutoHideUiElement#isVisible()} below.
@@ -197,6 +201,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         Display display = mDisplayManager.getDisplay(displayId);
         mWindowContext = mContext.createWindowContext(display, TYPE_APPLICATION, null);
         mWindowContext.registerComponentCallbacks(this);
+        mScreenPinningNotify = new ScreenPinningNotify(mWindowContext);
         // Set initial state for any listeners
         updateSysuiFlags();
         mAutoHideController.setNavigationBar(mAutoHideUiElement);
@@ -214,6 +219,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mNavBarHelper.destroy();
         mEdgeBackGestureHandler.onNavBarDetached();
+        mScreenPinningNotify = null;
         if (mWindowContext != null) {
             mWindowContext.unregisterComponentCallbacks(this);
             mWindowContext = null;
@@ -222,6 +228,14 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mLightBarTransitionsController.destroy(mContext);
         mLightBarController.setNavigationBar(null);
         mInitialized = false;
+    }
+
+    /**
+     * Returns {@code true} if this taskBar is {@link #init(int)}. Returns {@code false} if this
+     * taskbar has not yet been {@link #init(int)} or has been {@link #destroy()}.
+     */
+    public boolean isInitialized() {
+        return mInitialized;
     }
 
     private void updateSysuiFlags() {
@@ -345,6 +359,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     @Override
     public void onNavigationModeChanged(int mode) {
+        mNavigationMode = mode;
         mEdgeBackGestureHandler.onNavigationModeChanged(mode);
     }
 
@@ -365,9 +380,33 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     public void onLowMemory() {}
 
     @Override
+    public void showPinningEnterExitToast(boolean entering) {
+        updateSysuiFlags();
+        if (mScreenPinningNotify == null) {
+            return;
+        }
+        if (entering) {
+            mScreenPinningNotify.showPinningStartToast();
+        } else {
+            mScreenPinningNotify.showPinningExitToast();
+        }
+    }
+
+    @Override
+    public void showPinningEscapeToast() {
+        updateSysuiFlags();
+        if (mScreenPinningNotify == null) {
+            return;
+        }
+        mScreenPinningNotify.showEscapeToast(QuickStepContract.isGesturalMode(mNavigationMode),
+                !QuickStepContract.isGesturalMode(mNavigationMode));
+    }
+
+    @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("TaskbarDelegate (displayId=" + mDisplayId + "):");
         pw.println("  mNavigationIconHints=" + mNavigationIconHints);
+        pw.println("  mNavigationMode=" + mNavigationMode);
         pw.println("  mDisabledFlags=" + mDisabledFlags);
         pw.println("  mTaskBarWindowState=" + mTaskBarWindowState);
         pw.println("  mBehavior=" + mBehavior);
