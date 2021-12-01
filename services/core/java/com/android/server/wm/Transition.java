@@ -596,6 +596,12 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             }
         }
 
+        // This is non-null only if display has changes. It handles the visible windows that don't
+        // need to be participated in the transition.
+        final FadeRotationAnimationController controller = dc.getFadeRotationAnimationController();
+        if (controller != null) {
+            controller.setupStartTransaction(transaction);
+        }
         mStartTransaction = transaction;
         mFinishTransaction = mController.mAtm.mWindowManager.mTransactionFactory.get();
         buildFinishTransaction(mFinishTransaction, info.getRootLeash());

@@ -335,10 +335,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     // Go through all tasks and collect them before the rotation
                     // TODO(shell-transitions): move collect() to onConfigurationChange once
                     //       wallpaper handling is synchronized.
-                    dc.forAllTasks(task -> {
-                        if (task.isVisible()) transition.collect(task);
-                    });
-                    dc.getInsetsStateController().addProvidersToTransition();
+                    dc.mTransitionController.collectForDisplayChange(dc, transition);
                     dc.sendNewConfiguration();
                     effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }

@@ -18,6 +18,10 @@ package com.android.server.wm;
 
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_FIXED_TRANSFORM;
 
+import android.os.HandlerExecutor;
+import android.util.ArrayMap;
+import android.view.SurfaceControl;
+import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -33,10 +37,11 @@ import java.util.ArrayList;
  */
 public class FadeRotationAnimationController extends FadeAnimationController {
 
-    private final ArrayList<WindowToken> mTargetWindowTokens = new ArrayList<>();
+    /** The map of window token to its animation leash. */
+    private final ArrayMap<WindowToken, SurfaceControl> mTargetWindowTokens = new ArrayMap<>();
     private final WindowManagerService mService;
     /** If non-null, it usually indicates that there will be a screen rotation animation. */
-    private final Runnable mFrozenTimeoutRunnable;
+    private final Runnable mTimeoutRunnable;
     private final WindowToken mNavBarToken;
 
     /** A runnable which gets called when the {@link #show()} is called. */
@@ -45,16 +50,30 @@ public class FadeRotationAnimationController extends FadeAnimationController {
     /** Whether to use constant zero alpha animation. */
     private boolean mHideImmediately;
 
+    /** Whether this controller is triggered from shell transition. */
+    private final boolean mIsChangeTransition;
+
+    /** Whether the start transaction of the transition is committed (by shell). */
+    private boolean mIsStartTransactionCommitted;
+
+    /** The list to store the drawn tokens before the rotation animation starts. */
+    private ArrayList<WindowToken> mPendingShowTokens;
+
     public FadeRotationAnimationController(DisplayContent displayContent) {
         super(displayContent);
         mService = displayContent.mWmService;
-        mFrozenTimeoutRunnable = mService.mDisplayFrozen ? () -> {
+        mIsChangeTransition = displayContent.inTransition()
+                && displayContent.mTransitionController.getCollectingTransitionType()
+                == WindowManager.TRANSIT_CHANGE;
+        mIsStartTransactionCommitted = !mIsChangeTransition;
+        mTimeoutRunnable = displayContent.getRotationAnimation() != null
+                || mIsChangeTransition ? () -> {
             synchronized (mService.mGlobalLock) {
                 displayContent.finishFadeRotationAnimationIfPossible();
                 mService.mWindowPlacerLocked.performSurfacePlacement();
             }
         } : null;
-        if (mFrozenTimeoutRunnable != null) {
+        if (mTimeoutRunnable != null) {
             // Hide the windows immediately because screen should have been covered by screenshot.
             mHideImmediately = true;
         }
@@ -68,7 +87,7 @@ public class FadeRotationAnimationController extends FadeAnimationController {
             // Do not animate movable navigation bar (e.g. non-gesture mode) or when the navigation
             // bar is currently controlled by recents animation.
             if (!displayPolicy.navigationBarCanMove() && !navBarControlledByRecents) {
-                mTargetWindowTokens.add(mNavBarToken);
+                mTargetWindowTokens.put(mNavBarToken, null);
             }
         } else {
             mNavBarToken = null;
@@ -79,7 +98,7 @@ public class FadeRotationAnimationController extends FadeAnimationController {
             if (w.mActivityRecord == null && w.mHasSurface && !w.mForceSeamlesslyRotate
                     && !w.mIsWallpaper && !w.mIsImWindow && w != navigationBar
                     && w != notificationShade) {
-                mTargetWindowTokens.add(w.mToken);
+                mTargetWindowTokens.put(w.mToken, null);
             }
         }, true /* traverseTopToBottom */);
     }
@@ -87,12 +106,13 @@ public class FadeRotationAnimationController extends FadeAnimationController {
     /** Applies show animation on the previously hidden window tokens. */
     void show() {
         for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
-            final WindowToken windowToken = mTargetWindowTokens.get(i);
+            final WindowToken windowToken = mTargetWindowTokens.keyAt(i);
             fadeWindowToken(true /* show */, windowToken, ANIMATION_TYPE_FIXED_TRANSFORM);
         }
         mTargetWindowTokens.clear();
-        if (mFrozenTimeoutRunnable != null) {
-            mService.mH.removeCallbacks(mFrozenTimeoutRunnable);
+        mPendingShowTokens = null;
+        if (mTimeoutRunnable != null) {
+            mService.mH.removeCallbacks(mTimeoutRunnable);
         }
         if (mOnShowRunnable != null) {
             mOnShowRunnable.run();
@@ -105,10 +125,22 @@ public class FadeRotationAnimationController extends FadeAnimationController {
      * controller is created for normal rotation.
      */
     boolean show(WindowToken token) {
-        if (mFrozenTimeoutRunnable != null && mTargetWindowTokens.remove(token)) {
+        if (!mIsStartTransactionCommitted) {
+            // The fade-in animation should only start after the screenshot layer is shown by shell.
+            // Otherwise the window will be blinking before the rotation animation starts. So store
+            // to a pending list and animate them until the transaction is committed.
+            if (mTargetWindowTokens.containsKey(token)) {
+                if (mPendingShowTokens == null) {
+                    mPendingShowTokens = new ArrayList<>();
+                }
+                mPendingShowTokens.add(token);
+            }
+            return false;
+        }
+        if (mTimeoutRunnable != null && mTargetWindowTokens.remove(token) != null) {
             fadeWindowToken(true /* show */, token, ANIMATION_TYPE_FIXED_TRANSFORM);
             if (mTargetWindowTokens.isEmpty()) {
-                mService.mH.removeCallbacks(mFrozenTimeoutRunnable);
+                mService.mH.removeCallbacks(mTimeoutRunnable);
                 return true;
             }
         }
@@ -118,11 +150,11 @@ public class FadeRotationAnimationController extends FadeAnimationController {
     /** Applies hide animation on the window tokens which may be seamlessly rotated later. */
     void hide() {
         for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
-            final WindowToken windowToken = mTargetWindowTokens.get(i);
+            final WindowToken windowToken = mTargetWindowTokens.keyAt(i);
             fadeWindowToken(false /* show */, windowToken, ANIMATION_TYPE_FIXED_TRANSFORM);
         }
-        if (mFrozenTimeoutRunnable != null) {
-            mService.mH.postDelayed(mFrozenTimeoutRunnable,
+        if (mTimeoutRunnable != null) {
+            mService.mH.postDelayed(mTimeoutRunnable,
                     WindowManagerService.WINDOW_FREEZE_TIMEOUT_DURATION);
         }
     }
@@ -131,7 +163,6 @@ public class FadeRotationAnimationController extends FadeAnimationController {
     void hideImmediately(WindowToken windowToken) {
         final boolean original = mHideImmediately;
         mHideImmediately = true;
-        mTargetWindowTokens.add(windowToken);
         fadeWindowToken(false /* show */, windowToken, ANIMATION_TYPE_FIXED_TRANSFORM);
         mHideImmediately = original;
     }
@@ -143,16 +174,43 @@ public class FadeRotationAnimationController extends FadeAnimationController {
 
     /** Returns {@code true} if the controller will run fade animations on the window. */
     boolean isTargetToken(WindowToken token) {
-        return mTargetWindowTokens.contains(token);
+        return mTargetWindowTokens.containsKey(token);
     }
 
     void setOnShowRunnable(Runnable onShowRunnable) {
         mOnShowRunnable = onShowRunnable;
     }
 
+    /**
+     * Puts initial operation of leash to the transaction which will be executed when the
+     * transition starts. And associate transaction callback to consume pending animations.
+     */
+    void setupStartTransaction(SurfaceControl.Transaction t) {
+        // Hide the windows immediately because a screenshot layer should cover the screen.
+        for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
+            final SurfaceControl leash = mTargetWindowTokens.valueAt(i);
+            if (leash != null) {
+                t.setAlpha(leash, 0f);
+            }
+        }
+        // If there are windows have redrawn in new rotation but the start transaction has not
+        // been applied yet, the fade-in animation will be deferred. So once the transaction is
+        // committed, the fade-in animation can run with screen rotation animation.
+        t.addTransactionCommittedListener(new HandlerExecutor(mService.mH), () -> {
+            synchronized (mService.mGlobalLock) {
+                mIsStartTransactionCommitted = true;
+                if (mPendingShowTokens == null) return;
+                for (int i = mPendingShowTokens.size() - 1; i >= 0; i--) {
+                    mDisplayContent.finishFadeRotationAnimation(mPendingShowTokens.get(i));
+                }
+                mPendingShowTokens = null;
+            }
+        });
+    }
+
     @Override
     public Animation getFadeInAnimation() {
-        if (mFrozenTimeoutRunnable != null) {
+        if (mTimeoutRunnable != null) {
             // Use a shorter animation so it is easier to align with screen rotation animation.
             return AnimationUtils.loadAnimation(mContext, R.anim.screen_rotate_0_enter);
         }
@@ -162,8 +220,28 @@ public class FadeRotationAnimationController extends FadeAnimationController {
     @Override
     public Animation getFadeOutAnimation() {
         if (mHideImmediately) {
-            return new AlphaAnimation(0 /* fromAlpha */, 0 /* toAlpha */);
+            // For change transition, the hide transaction needs to be applied with sync transaction
+            // (setupStartTransaction). So keep alpha 1 just to get the animation leash.
+            final float alpha = mIsChangeTransition ? 1 : 0;
+            return new AlphaAnimation(alpha /* fromAlpha */, alpha /* toAlpha */);
         }
         return super.getFadeOutAnimation();
+    }
+
+    @Override
+    protected FadeAnimationAdapter createAdapter(LocalAnimationAdapter.AnimationSpec animationSpec,
+            boolean show, WindowToken windowToken) {
+        return new FadeAnimationAdapter(animationSpec,  windowToken.getSurfaceAnimationRunner(),
+                show, windowToken) {
+            @Override
+            public void startAnimation(SurfaceControl animationLeash, SurfaceControl.Transaction t,
+                    int type, SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
+                // The fade cycle is done when showing, so only need to store the leash when hiding.
+                if (!show) {
+                    mTargetWindowTokens.put(mToken, animationLeash);
+                }
+                super.startAnimation(animationLeash, t, type, finishCallback);
+            }
+        };
     }
 }

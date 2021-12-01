@@ -595,12 +595,8 @@ public class DisplayRotation {
                 // Go through all tasks and collect them before the rotation
                 // TODO(shell-transitions): move collect() to onConfigurationChange once wallpaper
                 //       handling is synchronized.
-                mDisplayContent.forAllTasks(task -> {
-                    if (task.isVisible()) {
-                        mDisplayContent.mTransitionController.collect(task);
-                    }
-                });
-                mDisplayContent.getInsetsStateController().addProvidersToTransition();
+                mDisplayContent.mTransitionController.collectForDisplayChange(mDisplayContent,
+                        null /* use collecting transition */);
             }
             mService.mAtmService.deferWindowLayout();
             try {

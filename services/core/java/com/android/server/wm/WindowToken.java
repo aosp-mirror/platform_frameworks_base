@@ -693,11 +693,8 @@ class WindowToken extends WindowContainer<WindowState> {
     @Override
     public String toString() {
         if (stringName == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("WindowToken{");
-            sb.append(Integer.toHexString(System.identityHashCode(this)));
-            sb.append(" "); sb.append(token); sb.append('}');
-            stringName = sb.toString();
+            stringName = "WindowToken{" + Integer.toHexString(System.identityHashCode(this))
+                    + " type=" + windowType + " " + token + "}";
         }
         return stringName;
     }
