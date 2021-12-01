@@ -23,17 +23,20 @@ import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.inputmethodservice.InputMethodService.IME_VISIBLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
+import static android.view.WindowInsets.Type.ime;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.HOME_BUTTON_LONG_PRESS_DURATION_MS;
 import static com.android.systemui.navigationbar.NavigationBar.NavBarActionEvent.NAVBAR_ASSIST_LONGPRESS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -57,6 +60,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityManager;
@@ -72,6 +76,7 @@ import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -83,8 +88,10 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarController;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
@@ -98,6 +105,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.util.Optional;
 
@@ -130,7 +138,6 @@ public class NavigationBarTest extends SysuiTestCase {
     EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
     @Mock
     EdgeBackGestureHandler mEdgeBackGestureHandler;
-    @Mock
     NavBarHelper mNavBarHelper;
     @Mock
     private LightBarController mLightBarController;
@@ -148,6 +155,8 @@ public class NavigationBarTest extends SysuiTestCase {
     private InputMethodManager mInputMethodManager;
     @Mock
     private AssistManager mAssistManager;
+    @Mock
+    private StatusBar mStatusBar;
 
     @Rule
     public final LeakCheckedTest.SysuiLeakCheck mLeakCheck = new LeakCheckedTest.SysuiLeakCheck();
@@ -172,6 +181,12 @@ public class NavigationBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(OverviewProxyService.class, mOverviewProxyService);
         mDependency.injectTestDependency(NavigationModeController.class, mNavigationModeController);
         TestableLooper.get(this).runWithLooper(() -> {
+            mNavBarHelper = spy(new NavBarHelper(mContext, mock(AccessibilityManager.class),
+                    mock(AccessibilityManagerWrapper.class),
+                    mock(AccessibilityButtonModeObserver.class), mOverviewProxyService,
+                    () -> mock(AssistManager.class), () -> Optional.of(mStatusBar),
+                    mock(NavigationModeController.class), mock(UserTracker.class),
+                    mock(DumpManager.class)));
             mNavigationBar = createNavBar(mContext);
             mExternalDisplayNavigationBar = createNavBar(mSysuiTestableContextExternal);
         });
@@ -256,6 +271,11 @@ public class NavigationBarTest extends SysuiTestCase {
         // Create default & external NavBar fragment.
         NavigationBar defaultNavBar = mNavigationBar;
         NavigationBar externalNavBar = mExternalDisplayNavigationBar;
+        NotificationShadeWindowView mockShadeWindowView = mock(NotificationShadeWindowView.class);
+        WindowInsets windowInsets = new WindowInsets.Builder().setVisible(ime(), false).build();
+        doReturn(windowInsets).when(mockShadeWindowView).getRootWindowInsets();
+        doReturn(mockShadeWindowView).when(mStatusBar).getNotificationShadeWindowView();
+        doReturn(true).when(mockShadeWindowView).isAttachedToWindow();
         doNothing().when(defaultNavBar).checkNavBarModes();
         doNothing().when(externalNavBar).checkNavBarModes();
         defaultNavBar.createView(null);
@@ -279,6 +299,40 @@ public class NavigationBarTest extends SysuiTestCase {
                 externalNavBar.getNavigationIconHints());
         assertFalse((defaultNavBar.getNavigationIconHints() & NAVIGATION_HINT_BACK_ALT) != 0);
         assertFalse((defaultNavBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SHOWN) != 0);
+    }
+
+    @Test
+    public void testSetImeWindowStatusWhenKeyguardLockingAndImeInsetsChange() {
+        NotificationShadeWindowView mockShadeWindowView = mock(NotificationShadeWindowView.class);
+        doReturn(mockShadeWindowView).when(mStatusBar).getNotificationShadeWindowView();
+        doReturn(true).when(mockShadeWindowView).isAttachedToWindow();
+        doNothing().when(mNavigationBar).checkNavBarModes();
+        mNavigationBar.createView(null);
+        WindowInsets windowInsets = new WindowInsets.Builder().setVisible(ime(), false).build();
+        doReturn(windowInsets).when(mockShadeWindowView).getRootWindowInsets();
+
+        // Verify navbar altered back icon when an app is showing IME
+        mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, null, IME_VISIBLE,
+                BACK_DISPOSITION_DEFAULT, true);
+        assertTrue((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_BACK_ALT) != 0);
+        assertTrue((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SHOWN) != 0);
+
+        // Verify navbar didn't alter and showing back icon when the keyguard is showing without
+        // requesting IME insets visible.
+        doReturn(true).when(mStatusBar).isKeyguardShowing();
+        mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, null, IME_VISIBLE,
+                BACK_DISPOSITION_DEFAULT, true);
+        assertFalse((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_BACK_ALT) != 0);
+        assertFalse((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SHOWN) != 0);
+
+        // Verify navbar altered and showing back icon when the keyguard is showing and
+        // requesting IME insets visible.
+        windowInsets = new WindowInsets.Builder().setVisible(ime(), true).build();
+        doReturn(windowInsets).when(mockShadeWindowView).getRootWindowInsets();
+        mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, null, IME_VISIBLE,
+                BACK_DISPOSITION_DEFAULT, true);
+        assertTrue((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_BACK_ALT) != 0);
+        assertTrue((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SHOWN) != 0);
     }
 
     @Test
@@ -314,7 +368,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 Optional.of(mock(Pip.class)),
                 Optional.of(mock(LegacySplitScreen.class)),
                 Optional.of(mock(Recents.class)),
-                () -> Optional.of(mock(StatusBar.class)),
+                () -> Optional.of(mStatusBar),
                 mock(ShadeController.class),
                 mock(NotificationRemoteInputManager.class),
                 mock(NotificationShadeDepthController.class),

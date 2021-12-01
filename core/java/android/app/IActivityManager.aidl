@@ -321,6 +321,8 @@ interface IActivityManager {
     boolean isTopActivityImmersive();
     void crashApplicationWithType(int uid, int initialPid, in String packageName, int userId,
             in String message, boolean force, int exceptionTypeId);
+    void crashApplicationWithTypeWithExtras(int uid, int initialPid, in String packageName,
+            int userId, in String message, boolean force, int exceptionTypeId, in Bundle extras);
     /** @deprecated -- use getProviderMimeTypeAsync */
     @UnsupportedAppUsage(maxTargetSdk = 29, publicAlternatives =
             "Use {@link android.content.ContentResolver#getType} public API instead.")

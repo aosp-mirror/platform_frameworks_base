@@ -678,6 +678,16 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         outBottomOrRightBounds.set(mSplitLayout.getBounds2());
     }
 
+    @SplitPosition
+    int getSplitPosition(int taskId) {
+        if (mSideStage.getTopVisibleChildTaskId() == taskId) {
+            return getSideStagePosition();
+        } else if (mMainStage.getTopVisibleChildTaskId() == taskId) {
+            return getMainStagePosition();
+        }
+        return SPLIT_POSITION_UNDEFINED;
+    }
+
     private void addActivityOptions(Bundle opts, StageTaskListener stage) {
         opts.putParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, stage.mRootTaskInfo.token);
     }
@@ -781,6 +791,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             // Make the stages adjacent to each other so they occlude what's behind them.
             wct.setAdjacentRoots(mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token);
+            wct.setLaunchAdjacentFlagRoot(mSideStage.mRootTaskInfo.token);
             mTaskOrganizer.applyTransaction(wct);
         }
     }
@@ -788,6 +799,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void onStageRootTaskVanished(StageListenerImpl stageListener) {
         if (stageListener == mMainStageListener || stageListener == mSideStageListener) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
+            wct.clearLaunchAdjacentFlagRoot(mSideStage.mRootTaskInfo.token);
             // Deactivate the main stage if it no longer has a root task.
             mMainStage.deactivate(wct);
             mTaskOrganizer.applyTransaction(wct);

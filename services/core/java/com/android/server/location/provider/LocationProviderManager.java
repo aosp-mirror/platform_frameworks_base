@@ -398,7 +398,7 @@ public class LocationProviderManager extends
             EVENT_LOG.logProviderClientActive(mName, getIdentity());
 
             if (!getRequest().isHiddenFromAppOps()) {
-                mLocationAttributionHelper.reportLocationStart(getIdentity(), getName(), getKey());
+                mLocationAttributionHelper.reportLocationStart(getIdentity());
             }
             onHighPowerUsageChanged();
 
@@ -413,7 +413,7 @@ public class LocationProviderManager extends
 
             onHighPowerUsageChanged();
             if (!getRequest().isHiddenFromAppOps()) {
-                mLocationAttributionHelper.reportLocationStop(getIdentity(), getName(), getKey());
+                mLocationAttributionHelper.reportLocationStop(getIdentity());
             }
 
             onProviderListenerInactive();
@@ -488,10 +488,10 @@ public class LocationProviderManager extends
                 if (!getRequest().isHiddenFromAppOps()) {
                     if (mIsUsingHighPower) {
                         mLocationAttributionHelper.reportHighPowerLocationStart(
-                                getIdentity(), getName(), getKey());
+                                getIdentity());
                     } else {
                         mLocationAttributionHelper.reportHighPowerLocationStop(
-                                getIdentity(), getName(), getKey());
+                                getIdentity());
                     }
                 }
             }

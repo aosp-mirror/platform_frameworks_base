@@ -24,12 +24,15 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.view.View;
+import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
@@ -42,12 +45,14 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -69,6 +74,7 @@ public final class NavBarHelper implements
         Dumpable {
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
+    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     private final UserTracker mUserTracker;
     private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
     private final List<NavbarTaskbarStateUpdater> mA11yEventListeners = new ArrayList<>();
@@ -98,12 +104,14 @@ public final class NavBarHelper implements
             AccessibilityButtonModeObserver accessibilityButtonModeObserver,
             OverviewProxyService overviewProxyService,
             Lazy<AssistManager> assistManagerLazy,
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             NavigationModeController navigationModeController,
             UserTracker userTracker,
             DumpManager dumpManager) {
         mContext = context;
         mAccessibilityManager = accessibilityManager;
         mAssistManagerLazy = assistManagerLazy;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
         mUserTracker = userTracker;
         accessibilityManagerWrapper.addCallback(
                 accessibilityManager1 -> NavBarHelper.this.dispatchA11yEventUpdate());
@@ -229,6 +237,19 @@ public final class NavBarHelper implements
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
         updateAssitantAvailability();
+    }
+
+    /**
+     * @return Whether the IME is shown on top of the screen given the {@code vis} flag of
+     * {@link InputMethodService} and the keyguard states.
+     */
+    public boolean isImeShown(int vis) {
+        View shadeWindowView = mStatusBarOptionalLazy.get().get().getNotificationShadeWindowView();
+        boolean isKeyguardShowing = mStatusBarOptionalLazy.get().get().isKeyguardShowing();
+        boolean imeVisibleOnShade = shadeWindowView != null && shadeWindowView.isAttachedToWindow()
+                && shadeWindowView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
+        return imeVisibleOnShade
+                || (!isKeyguardShowing && (vis & InputMethodService.IME_VISIBLE) != 0);
     }
 
     /**
