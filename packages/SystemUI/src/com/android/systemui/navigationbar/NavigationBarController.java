@@ -395,6 +395,24 @@ public class NavigationBarController implements
         return (navBar == null) ? null : navBar.getView();
     }
 
+    public void showPinningEnterExitToast(int displayId, boolean entering) {
+        final NavigationBarView navBarView = getNavigationBarView(displayId);
+        if (navBarView != null) {
+            navBarView.showPinningEnterExitToast(entering);
+        } else if (displayId == DEFAULT_DISPLAY && mTaskbarDelegate.isInitialized()) {
+            mTaskbarDelegate.showPinningEnterExitToast(entering);
+        }
+    }
+
+    public void showPinningEscapeToast(int displayId) {
+        final NavigationBarView navBarView = getNavigationBarView(displayId);
+        if (navBarView != null) {
+            navBarView.showPinningEscapeToast();
+        } else if (displayId == DEFAULT_DISPLAY && mTaskbarDelegate.isInitialized()) {
+            mTaskbarDelegate.showPinningEscapeToast();
+        }
+    }
+
     /** @return {@link NavigationBar} on the default display. */
     @Nullable
     public NavigationBar getDefaultNavigationBar() {
