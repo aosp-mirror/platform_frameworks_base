@@ -3435,6 +3435,14 @@ public class StatusBar extends CoreStartable implements
         return mNavigationBarController.getNavigationBarView(mDisplayId);
     }
 
+    public void showPinningEnterExitToast(boolean entering) {
+        mNavigationBarController.showPinningEnterExitToast(mDisplayId, entering);
+    }
+
+    public void showPinningEscapeToast() {
+        mNavigationBarController.showPinningEscapeToast(mDisplayId);
+    }
+
     /**
      * TODO: Remove this method. Views should not be passed forward. Will cause theme issues.
      * @return bottom area view

@@ -547,16 +547,12 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
 
     @Override
     public void showPinningEnterExitToast(boolean entering) {
-        if (mStatusBar.getNavigationBarView() != null) {
-            mStatusBar.getNavigationBarView().showPinningEnterExitToast(entering);
-        }
+        mStatusBar.showPinningEnterExitToast(entering);
     }
 
     @Override
     public void showPinningEscapeToast() {
-        if (mStatusBar.getNavigationBarView() != null) {
-            mStatusBar.getNavigationBarView().showPinningEscapeToast();
-        }
+        mStatusBar.showPinningEscapeToast();
     }
 
     @Override
