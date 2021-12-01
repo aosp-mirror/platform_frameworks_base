@@ -41,7 +41,6 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.Display;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
@@ -53,8 +52,10 @@ import android.widget.FrameLayout;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
@@ -71,16 +72,26 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
     private final Context mContext;
     private final DisplayController mDisplayController;
     private final DragAndDropEventLogger mLogger;
+    private final IconProvider mIconProvider;
     private SplitScreenController mSplitScreen;
+    private ShellExecutor mMainExecutor;
+    private DragAndDropImpl mImpl;
 
     private final SparseArray<PerDisplay> mDisplayDropTargets = new SparseArray<>();
     private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
 
     public DragAndDropController(Context context, DisplayController displayController,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger, IconProvider iconProvider, ShellExecutor mainExecutor) {
         mContext = context;
         mDisplayController = displayController;
         mLogger = new DragAndDropEventLogger(uiEventLogger);
+        mIconProvider = iconProvider;
+        mMainExecutor = mainExecutor;
+        mImpl = new DragAndDropImpl();
+    }
+
+    public DragAndDrop asDragAndDrop() {
+        return mImpl;
     }
 
     public void initialize(Optional<SplitScreenController> splitscreen) {
@@ -117,7 +128,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 R.layout.global_drop_target, null);
         rootView.setOnDragListener(this);
         rootView.setVisibility(View.INVISIBLE);
-        DragLayout dragLayout = new DragLayout(context, mSplitScreen);
+        DragLayout dragLayout = new DragLayout(context, mSplitScreen, mIconProvider);
         rootView.addView(dragLayout,
                 new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         try {
@@ -267,6 +278,18 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         return mimeTypes;
     }
 
+    private void onThemeChange() {
+        for (int i = 0; i < mDisplayDropTargets.size(); i++) {
+            mDisplayDropTargets.get(i).dragLayout.onThemeChange();
+        }
+    }
+
+    private void onConfigChanged(Configuration newConfig) {
+        for (int i = 0; i < mDisplayDropTargets.size(); i++) {
+            mDisplayDropTargets.get(i).dragLayout.onConfigChanged(newConfig);
+        }
+    }
+
     private static class PerDisplay {
         final int displayId;
         final Context context;
@@ -285,6 +308,23 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
             wm = w;
             rootView = rv;
             dragLayout = dl;
+        }
+    }
+
+    private class DragAndDropImpl implements DragAndDrop {
+
+        @Override
+        public void onThemeChanged() {
+            mMainExecutor.execute(() -> {
+                DragAndDropController.this.onThemeChange();
+            });
+        }
+
+        @Override
+        public void onConfigChanged(Configuration newConfig) {
+            mMainExecutor.execute(() -> {
+                DragAndDropController.this.onConfigChanged(newConfig);
+            });
         }
     }
 }

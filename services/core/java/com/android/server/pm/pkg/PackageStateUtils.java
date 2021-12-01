@@ -27,7 +27,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 public class PackageStateUtils {
 
-    public static boolean isMatch(PackageState packageState, int flags) {
+    public static boolean isMatch(PackageState packageState, long flags) {
         if ((flags & PackageManager.MATCH_SYSTEM_ONLY) != 0) {
             return packageState.isSystem();
         }
@@ -54,7 +54,7 @@ public class PackageStateUtils {
     }
 
     public static boolean isEnabledAndMatches(@Nullable PackageStateInternal packageState,
-            ComponentInfo componentInfo, int flags, int userId) {
+            ComponentInfo componentInfo, long flags, int userId) {
         if (packageState == null) return false;
 
         final PackageUserState userState = packageState.getUserStateOrDefault(userId);
@@ -62,7 +62,7 @@ public class PackageStateUtils {
     }
 
     public static boolean isEnabledAndMatches(@Nullable PackageStateInternal packageState,
-            @NonNull ParsedMainComponent component, int flags, int userId) {
+            @NonNull ParsedMainComponent component, long flags, int userId) {
         if (packageState == null) {
             return false;
         }

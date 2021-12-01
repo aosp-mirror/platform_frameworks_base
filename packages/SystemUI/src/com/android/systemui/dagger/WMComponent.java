@@ -29,6 +29,7 @@ import com.android.wm.shell.dagger.TvWMShellModule;
 import com.android.wm.shell.dagger.WMShellModule;
 import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
+import com.android.wm.shell.draganddrop.DragAndDrop;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -119,4 +120,7 @@ public interface WMComponent {
 
     @WMSingleton
     SizeCompatUI getSizeCompatUI();
+
+    @WMSingleton
+    DragAndDrop getDragAndDrop();
 }

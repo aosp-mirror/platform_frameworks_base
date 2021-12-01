@@ -267,10 +267,6 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void stopDream();
   }
 
-  public final class GameManager {
-    method @RequiresPermission("android.permission.MANAGE_GAME_MODE") public void setGameMode(@NonNull String, int);
-  }
-
   public abstract class HomeVisibilityListener {
     ctor public HomeVisibilityListener();
     method public abstract void onHomeVisibilityChanged(boolean);
@@ -1835,11 +1831,6 @@ package android.os {
     method public int getAudioUsage();
   }
 
-  public static final class VibrationAttributes.Builder {
-    ctor public VibrationAttributes.Builder(@NonNull android.media.AudioAttributes, @NonNull android.os.VibrationEffect);
-    ctor public VibrationAttributes.Builder(@NonNull android.os.VibrationAttributes, @NonNull android.os.VibrationEffect);
-  }
-
   public abstract class VibrationEffect implements android.os.Parcelable {
     method public static android.os.VibrationEffect get(int);
     method public static android.os.VibrationEffect get(int, boolean);
@@ -1856,13 +1847,9 @@ package android.os {
   }
 
   public static final class VibrationEffect.Composed extends android.os.VibrationEffect {
-    method @NonNull public android.os.VibrationEffect.Composed applyEffectStrength(int);
     method public long getDuration();
     method public int getRepeatIndex();
     method @NonNull public java.util.List<android.os.vibrator.VibrationEffectSegment> getSegments();
-    method @NonNull public android.os.VibrationEffect.Composed resolve(int);
-    method @NonNull public android.os.VibrationEffect.Composed scale(float);
-    method public void validate();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Composed> CREATOR;
   }
@@ -2010,72 +1997,47 @@ package android.os.strictmode {
 package android.os.vibrator {
 
   public final class PrebakedSegment extends android.os.vibrator.VibrationEffectSegment {
-    method @NonNull public android.os.vibrator.PrebakedSegment applyEffectStrength(int);
     method public int describeContents();
     method public long getDuration();
     method public int getEffectId();
     method public int getEffectStrength();
-    method public boolean hasNonZeroAmplitude();
-    method @NonNull public android.os.vibrator.PrebakedSegment resolve(int);
-    method @NonNull public android.os.vibrator.PrebakedSegment scale(float);
     method public boolean shouldFallback();
-    method public void validate();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.PrebakedSegment> CREATOR;
   }
 
   public final class PrimitiveSegment extends android.os.vibrator.VibrationEffectSegment {
-    method @NonNull public android.os.vibrator.PrimitiveSegment applyEffectStrength(int);
     method public int describeContents();
     method public int getDelay();
     method public long getDuration();
     method public int getPrimitiveId();
     method public float getScale();
-    method public boolean hasNonZeroAmplitude();
-    method @NonNull public android.os.vibrator.PrimitiveSegment resolve(int);
-    method @NonNull public android.os.vibrator.PrimitiveSegment scale(float);
-    method public void validate();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.PrimitiveSegment> CREATOR;
   }
 
   public final class RampSegment extends android.os.vibrator.VibrationEffectSegment {
-    method @NonNull public android.os.vibrator.RampSegment applyEffectStrength(int);
     method public int describeContents();
     method public long getDuration();
     method public float getEndAmplitude();
     method public float getEndFrequency();
     method public float getStartAmplitude();
     method public float getStartFrequency();
-    method public boolean hasNonZeroAmplitude();
-    method @NonNull public android.os.vibrator.RampSegment resolve(int);
-    method @NonNull public android.os.vibrator.RampSegment scale(float);
-    method public void validate();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.RampSegment> CREATOR;
   }
 
   public final class StepSegment extends android.os.vibrator.VibrationEffectSegment {
-    method @NonNull public android.os.vibrator.StepSegment applyEffectStrength(int);
     method public int describeContents();
     method public float getAmplitude();
     method public long getDuration();
     method public float getFrequency();
-    method public boolean hasNonZeroAmplitude();
-    method @NonNull public android.os.vibrator.StepSegment resolve(int);
-    method @NonNull public android.os.vibrator.StepSegment scale(float);
-    method public void validate();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.StepSegment> CREATOR;
   }
 
   public abstract class VibrationEffectSegment implements android.os.Parcelable {
-    method @NonNull public abstract <T extends android.os.vibrator.VibrationEffectSegment> T applyEffectStrength(int);
     method public abstract long getDuration();
-    method public abstract boolean hasNonZeroAmplitude();
-    method @NonNull public abstract <T extends android.os.vibrator.VibrationEffectSegment> T resolve(int);
-    method @NonNull public abstract <T extends android.os.vibrator.VibrationEffectSegment> T scale(float);
-    method public abstract void validate();
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.VibrationEffectSegment> CREATOR;
   }
 
@@ -2195,7 +2157,7 @@ package android.provider {
     field public static final String USER_PREFERRED_REFRESH_RATE = "user_preferred_refresh_rate";
     field public static final String USER_PREFERRED_RESOLUTION_HEIGHT = "user_preferred_resolution_height";
     field public static final String USER_PREFERRED_RESOLUTION_WIDTH = "user_preferred_resolution_width";
-    field public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
+    field @Deprecated public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
   }
 
   public static final class Settings.Secure extends android.provider.Settings.NameValueTable {

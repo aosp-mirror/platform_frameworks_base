@@ -73,12 +73,20 @@ public final class StepSegment extends VibrationEffectSegment {
         return mDuration;
     }
 
+    /** @hide */
+    @Override
+    public boolean isHapticFeedbackCandidate() {
+        return true;
+    }
+
+    /** @hide */
     @Override
     public boolean hasNonZeroAmplitude() {
         // DEFAULT_AMPLITUDE == -1 is still a non-zero amplitude that will be resolved later.
         return Float.compare(mAmplitude, 0) != 0;
     }
 
+    /** @hide */
     @Override
     public void validate() {
         Preconditions.checkArgumentNonnegative(mDuration,
@@ -88,6 +96,7 @@ public final class StepSegment extends VibrationEffectSegment {
         }
     }
 
+    /** @hide */
     @NonNull
     @Override
     public StepSegment resolve(int defaultAmplitude) {
@@ -103,6 +112,7 @@ public final class StepSegment extends VibrationEffectSegment {
                 mDuration);
     }
 
+    /** @hide */
     @NonNull
     @Override
     public StepSegment scale(float scaleFactor) {
@@ -113,6 +123,7 @@ public final class StepSegment extends VibrationEffectSegment {
                 mDuration);
     }
 
+    /** @hide */
     @NonNull
     @Override
     public StepSegment applyEffectStrength(int effectStrength) {

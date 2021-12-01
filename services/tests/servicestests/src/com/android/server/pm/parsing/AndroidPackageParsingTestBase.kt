@@ -16,6 +16,7 @@
 
 package com.android.server.pm.parsing
 
+import android.Manifest
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
@@ -34,6 +35,7 @@ import android.os.Environment
 import android.os.Process
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.internal.util.ArrayUtils
 import com.android.server.pm.PackageManagerService
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateInternal
@@ -145,8 +147,8 @@ open class AndroidPackageParsingTestBase {
             flags: Int = 0,
             userId: Int = 0
         ): ApplicationInfo? {
-            return PackageInfoUtils.generateApplicationInfo(pkg, flags, dummyUserState, userId,
-                    mockPkgSetting(pkg))
+            return PackageInfoUtils.generateApplicationInfo(pkg, flags.toLong(), dummyUserState,
+                userId, mockPkgSetting(pkg))
         }
 
         fun newAppInfoWithoutState(
@@ -154,8 +156,8 @@ open class AndroidPackageParsingTestBase {
             flags: Int = 0,
             userId: Int = 0
         ): ApplicationInfo? {
-            return PackageInfoUtils.generateApplicationInfo(pkg, flags, dummyUserState, userId,
-                    mockPkgSetting(pkg))
+            return PackageInfoUtils.generateApplicationInfo(pkg, flags.toLong(), dummyUserState,
+                userId, mockPkgSetting(pkg))
         }
 
         fun oldPackageInfo(pkg: PackageParser.Package, flags: Int = 0): PackageInfo? {
@@ -164,7 +166,7 @@ open class AndroidPackageParsingTestBase {
         }
 
         fun newPackageInfo(pkg: AndroidPackage, flags: Int = 0): PackageInfo? {
-            return PackageInfoUtils.generate(pkg, intArrayOf(), flags, 5, 6, emptySet(),
+            return PackageInfoUtils.generate(pkg, intArrayOf(), flags.toLong(), 5, 6, emptySet(),
                     dummyUserState, 0, mockPkgSetting(pkg))
         }
 
@@ -329,7 +331,10 @@ open class AndroidPackageParsingTestBase {
             .ignored("Update for fixing b/128526493 and the testing is no longer valid")}
             enabled=${this.enabled}
             exported=${this.exported}
-            flags=${Integer.toBinaryString(this.flags)}
+            flags=${Integer.toBinaryString(
+                // Strip flag added in T
+                this.flags and (ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES.inv()))
+            }
             icon=${this.icon}
             labelRes=${this.labelRes}
             launchMode=${this.launchMode}
@@ -501,13 +506,22 @@ open class AndroidPackageParsingTestBase {
             receivers=${this.receivers?.joinToString { it.dumpToString() }
             .ignored("Checked separately in test")}
             reqFeatures=${this.reqFeatures?.joinToString { it.dumpToString() }}
-            requestedPermissions=${this.requestedPermissions?.contentToString()}
+            requestedPermissions=${
+                // Strip compatibility permission added in T
+                this.requestedPermissions?.filter { x ->
+                    x != Manifest.permission.POST_NOTIFICATIONS
+                }?.ifEmpty { null }?.joinToString()
+            }
             requestedPermissionsFlags=${
-                this.requestedPermissionsFlags?.map {
+                // Strip the flag from compatibility permission added in T
+                this.requestedPermissionsFlags?.filterIndexed { index, _ ->
+                    index != ArrayUtils.indexOf(requestedPermissions,
+                                                Manifest.permission.POST_NOTIFICATIONS)
+                }?.map {
                     // Newer flags are stripped
                     it and (PackageInfo.REQUESTED_PERMISSION_REQUIRED
                             or PackageInfo.REQUESTED_PERMISSION_GRANTED)
-                }?.joinToString()
+                }?.ifEmpty { null }?.joinToString()
             }
             requiredAccountType=${this.requiredAccountType}
             requiredForAllUsers=${this.requiredForAllUsers}

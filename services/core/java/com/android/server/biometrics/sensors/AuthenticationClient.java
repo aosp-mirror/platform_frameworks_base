@@ -251,7 +251,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                         "Successful background authentication!");
             }
 
-            mAlreadyDone = true;
+            markAlreadyDone();
 
             if (mTaskStackListener != null) {
                 mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
@@ -327,7 +327,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             final @LockoutTracker.LockoutMode int lockoutMode =
                     handleFailedAttempt(getTargetUserId());
             if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
-                mAlreadyDone = true;
+                markAlreadyDone();
             }
 
             final CoexCoordinator coordinator = CoexCoordinator.getInstance();

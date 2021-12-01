@@ -1735,11 +1735,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         pi.applicationInfo.flags = flags;
         doReturn(pi).when(getServices().ipackageManager).getPackageInfo(
                 eq(packageName),
-                anyInt(),
+                anyLong(),
                 eq(userId));
         doReturn(pi.applicationInfo).when(getServices().ipackageManager).getApplicationInfo(
                 eq(packageName),
-                anyInt(),
+                anyLong(),
                 eq(userId));
         doReturn(true).when(getServices().ipackageManager).isPackageAvailable(packageName, userId);
         // Setup application UID with the PackageManager
@@ -4708,11 +4708,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Ensure packages are *not* flagged as test_only.
         doReturn(new ApplicationInfo()).when(getServices().ipackageManager).getApplicationInfo(
                 eq(admin1.getPackageName()),
-                anyInt(),
+                anyLong(),
                 eq(CALLER_USER_HANDLE));
         doReturn(new ApplicationInfo()).when(getServices().ipackageManager).getApplicationInfo(
                 eq(admin2.getPackageName()),
-                anyInt(),
+                anyLong(),
                 eq(CALLER_USER_HANDLE));
 
         // Initial state is disabled.
@@ -7078,7 +7078,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         doReturn(ai).when(getServices().ipackageManager).getApplicationInfo(
                 eq(admin1.getPackageName()),
-                anyInt(),
+                anyLong(),
                 eq(CALLER_USER_HANDLE));
     }
 

@@ -129,6 +129,7 @@ package android {
     field public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
     field @Deprecated public static final String READ_INPUT_STATE = "android.permission.READ_INPUT_STATE";
     field public static final String READ_LOGS = "android.permission.READ_LOGS";
+    field public static final String READ_NEARBY_STREAMING_POLICY = "android.permission.READ_NEARBY_STREAMING_POLICY";
     field public static final String READ_PHONE_NUMBERS = "android.permission.READ_PHONE_NUMBERS";
     field public static final String READ_PHONE_STATE = "android.permission.READ_PHONE_STATE";
     field public static final String READ_PRECISE_PHONE_STATE = "android.permission.READ_PRECISE_PHONE_STATE";
@@ -7248,8 +7249,8 @@ package android.app.admin {
     method public int getMaximumFailedPasswordsForWipe(@Nullable android.content.ComponentName);
     method public long getMaximumTimeToLock(@Nullable android.content.ComponentName);
     method @NonNull public java.util.List<java.lang.String> getMeteredDataDisabledPackages(@NonNull android.content.ComponentName);
-    method public int getNearbyAppStreamingPolicy();
-    method public int getNearbyNotificationStreamingPolicy();
+    method @RequiresPermission(value=android.Manifest.permission.READ_NEARBY_STREAMING_POLICY, conditional=true) public int getNearbyAppStreamingPolicy();
+    method @RequiresPermission(value=android.Manifest.permission.READ_NEARBY_STREAMING_POLICY, conditional=true) public int getNearbyNotificationStreamingPolicy();
     method @Deprecated @ColorInt public int getOrganizationColor(@NonNull android.content.ComponentName);
     method @Nullable public CharSequence getOrganizationName(@NonNull android.content.ComponentName);
     method public java.util.List<android.telephony.data.ApnSetting> getOverrideApns(@NonNull android.content.ComponentName);
@@ -9037,11 +9038,15 @@ package android.bluetooth {
 
   public final class BluetoothClass implements android.os.Parcelable {
     method public int describeContents();
+    method public boolean doesClassMatch(int);
     method public int getDeviceClass();
     method public int getMajorDeviceClass();
     method public boolean hasService(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothClass> CREATOR;
+    field public static final int PROFILE_A2DP = 1; // 0x1
+    field public static final int PROFILE_HEADSET = 0; // 0x0
+    field public static final int PROFILE_HID = 3; // 0x3
   }
 
   public static class BluetoothClass.Device {

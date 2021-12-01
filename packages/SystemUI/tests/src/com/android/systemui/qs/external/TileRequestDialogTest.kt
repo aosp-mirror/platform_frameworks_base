@@ -60,11 +60,6 @@ class TileRequestDialogTest : SysuiTestCase() {
     }
 
     @Test
-    fun useCorrectTheme() {
-        assertThat(dialog.context.themeResId).isEqualTo(R.style.TileRequestDialog)
-    }
-
-    @Test
     fun setTileData_hasCorrectViews() {
         val icon = Icon.createWithResource(mContext, R.drawable.cloud)
         val tileData = TileRequestDialog.TileData(APP_NAME, LABEL, icon)

@@ -334,7 +334,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     @DataClass.ParcelWith(ForInternedString.class)
     private String backupAgentName;
     private int banner;
-    private int category;
+    private int category = ApplicationInfo.CATEGORY_UNDEFINED;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     private String classLoaderName;

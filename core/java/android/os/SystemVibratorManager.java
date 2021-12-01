@@ -223,9 +223,6 @@ public class SystemVibratorManager extends VibratorManager {
             CombinedVibration combined = CombinedVibration.startParallel()
                     .addVibrator(mVibratorInfo.getId(), vibe)
                     .combine();
-            // TODO(b/185351540): move this into VibratorManagerService once the touch vibration
-            // heuristics is fixed and works for CombinedVibration. Make sure it's always applied.
-            attributes = new VibrationAttributes.Builder(attributes, vibe).build();
             SystemVibratorManager.this.vibrate(uid, opPkg, combined, reason, attributes);
         }
 

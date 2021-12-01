@@ -40,6 +40,14 @@ import static com.android.server.timezonedetector.location.LocationTimeZoneProvi
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_UNCERTAIN;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STOPPED;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_UNKNOWN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_CERTAIN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_DESTROYED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_FAILED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_INITIALIZING;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_PROVIDERS_INITIALIZING;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_STOPPED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_UNCERTAIN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProviderController.STATE_UNKNOWN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -55,6 +63,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.timezonedetector.GeolocationTimeZoneSuggestion;
 import com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.ProviderStateEnum;
+import com.android.server.timezonedetector.location.LocationTimeZoneProviderController.State;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -245,6 +254,7 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
             outputStream.end(lastSuggestionToken);
         }
 
+        writeControllerStates(outputStream, state.getControllerStates());
         writeProviderStates(outputStream, state.getPrimaryProviderStates(),
                 "primary_provider_states",
                 LocationTimeZoneManagerServiceStateProto.PRIMARY_PROVIDER_STATES);
@@ -254,6 +264,37 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         outputStream.flush();
 
         return 0;
+    }
+
+    private static void writeControllerStates(DualDumpOutputStream outputStream,
+            List<@State String> states) {
+        for (@State String state : states) {
+            outputStream.write("controller_states",
+                    LocationTimeZoneManagerServiceStateProto.CONTROLLER_STATES,
+                    convertControllerStateToProtoEnum(state));
+        }
+    }
+
+    private static int convertControllerStateToProtoEnum(@State String state) {
+        switch (state) {
+            case STATE_PROVIDERS_INITIALIZING:
+                return LocationTimeZoneManagerProto.CONTROLLER_STATE_PROVIDERS_INITIALIZING;
+            case STATE_STOPPED:
+                return LocationTimeZoneManagerProto.CONTROLLER_STATE_STOPPED;
+            case STATE_INITIALIZING:
+                return LocationTimeZoneManagerProto.CONTROLLER_STATE_INITIALIZING;
+            case STATE_UNCERTAIN:
+                return LocationTimeZoneManagerProto.CONTROLLER_STATE_UNCERTAIN;
+            case STATE_CERTAIN:
+                return LocationTimeZoneManagerProto.CONTROLLER_STATE_CERTAIN;
+            case STATE_FAILED:
+                return LocationTimeZoneManagerProto.CONTROLLER_STATE_FAILED;
+            case STATE_DESTROYED:
+                return LocationTimeZoneManagerProto.CONTROLLER_STATE_DESTROYED;
+            case STATE_UNKNOWN:
+            default:
+                return LocationTimeZoneManagerProto.CONTROLLER_STATE_UNKNOWN;
+        }
     }
 
     private static void writeProviderStates(DualDumpOutputStream outputStream,

@@ -20,7 +20,6 @@ import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
-import android.app.backup.BackupManager;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.RestoreSet;
 import android.os.Handler;
@@ -52,7 +51,7 @@ import com.android.server.backup.params.RestoreGetSetsParams;
 import com.android.server.backup.params.RestoreParams;
 import com.android.server.backup.restore.PerformAdbRestoreTask;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportConnection;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -148,16 +147,16 @@ public class BackupHandler extends Handler {
                 backupManagerService.setLastBackupPass(System.currentTimeMillis());
 
                 String callerLogString = "BH/MSG_RUN_BACKUP";
-                TransportClient transportClient =
+                TransportConnection transportConnection =
                         transportManager.getCurrentTransportClient(callerLogString);
                 IBackupTransport transport =
-                        transportClient != null
-                                ? transportClient.connect(callerLogString)
+                        transportConnection != null
+                                ? transportConnection.connect(callerLogString)
                                 : null;
                 if (transport == null) {
-                    if (transportClient != null) {
+                    if (transportConnection != null) {
                         transportManager
-                                .disposeOfTransportClient(transportClient, callerLogString);
+                                .disposeOfTransportClient(transportConnection, callerLogString);
                     }
                     Slog.v(TAG, "Backup requested but no transport available");
                     break;
@@ -212,10 +211,11 @@ public class BackupHandler extends Handler {
                         OnTaskFinishedListener listener =
                                 caller ->
                                         transportManager
-                                                .disposeOfTransportClient(transportClient, caller);
+                                                .disposeOfTransportClient(transportConnection,
+                                                        caller);
                         KeyValueBackupTask.start(
                                 backupManagerService,
-                                transportClient,
+                                transportConnection,
                                 transport.transportDirName(),
                                 queue,
                                 oldJournal,
@@ -240,7 +240,7 @@ public class BackupHandler extends Handler {
                 }
 
                 if (!staged) {
-                    transportManager.disposeOfTransportClient(transportClient, callerLogString);
+                    transportManager.disposeOfTransportClient(transportConnection, callerLogString);
                     // if we didn't actually hand off the wakelock, rewind until next time
                     synchronized (backupManagerService.getQueueLock()) {
                         backupManagerService.setBackupRunning(false);
@@ -296,7 +296,7 @@ public class BackupHandler extends Handler {
                 PerformUnifiedRestoreTask task =
                         new PerformUnifiedRestoreTask(
                                 backupManagerService,
-                                params.transportClient,
+                                params.mTransportConnection,
                                 params.observer,
                                 params.monitor,
                                 params.token,
@@ -344,7 +344,7 @@ public class BackupHandler extends Handler {
                 Runnable task =
                         new PerformClearTask(
                                 backupManagerService,
-                                params.transportClient,
+                                params.mTransportConnection,
                                 params.packageInfo,
                                 params.listener);
                 task.run();
@@ -365,7 +365,7 @@ public class BackupHandler extends Handler {
                 String callerLogString = "BH/MSG_RUN_GET_RESTORE_SETS";
                 try {
                     IBackupTransport transport =
-                            params.transportClient.connectOrThrow(callerLogString);
+                            params.mTransportConnection.connectOrThrow(callerLogString);
                     sets = transport.getAvailableRestoreSets();
                     // cache the result in the active session
                     synchronized (params.session) {
@@ -459,7 +459,7 @@ public class BackupHandler extends Handler {
 
                 KeyValueBackupTask.start(
                         backupManagerService,
-                        params.transportClient,
+                        params.mTransportConnection,
                         params.dirName,
                         params.kvPackages,
                         /* dataChangedJournal */ null,

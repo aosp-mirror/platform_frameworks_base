@@ -30,6 +30,7 @@ import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.FileUtils;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -61,6 +62,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DexMetadataHelperTest {

@@ -26,12 +26,19 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.ParcelDuration;
+import android.os.RemoteException;
+import android.util.Log;
+
+import com.android.internal.infra.AndroidFuture;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.time.Duration;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 /**
@@ -42,6 +49,12 @@ import java.util.function.BiConsumer;
  */
 @SystemService(Context.ATTESTATION_VERIFICATION_SERVICE)
 public class AttestationVerificationManager {
+
+    private static final String TAG = "AVF";
+    private static final Duration MAX_TOKEN_AGE = Duration.ofHours(1);
+
+    private final Context mContext;
+    private final IAttestationVerificationManagerService mService;
 
     /**
      * Verifies that {@code attestation} describes a computing environment that meets the
@@ -96,7 +109,21 @@ public class AttestationVerificationManager {
             @NonNull byte[] attestation,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull BiConsumer<@VerificationResult Integer, VerificationToken> callback) {
-        executor.execute(() -> callback.accept(RESULT_UNKNOWN, null));
+        try {
+            AndroidFuture<IVerificationResult> resultCallback = new AndroidFuture<>();
+            resultCallback.thenAccept(result -> {
+                Log.d(TAG, "verifyAttestation result: " + result.resultCode + " / " + result.token);
+                executor.execute(() -> {
+                    callback.accept(result.resultCode, result.token);
+                });
+            });
+
+            mService.verifyAttestation(profile, localBindingType, requirements, attestation,
+                    resultCallback);
+
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -134,12 +161,38 @@ public class AttestationVerificationManager {
             @LocalBindingType int localBindingType,
             @NonNull Bundle requirements,
             @NonNull VerificationToken token,
-            @Nullable java.time.Duration maximumAge) {
-        return RESULT_UNKNOWN;
+            @Nullable Duration maximumAge) {
+        Duration usedMaximumAge;
+        if (maximumAge == null) {
+            usedMaximumAge = MAX_TOKEN_AGE;
+        } else {
+            if (maximumAge.compareTo(MAX_TOKEN_AGE) > 0) {
+                throw new IllegalArgumentException(
+                        "maximumAge cannot be greater than " + MAX_TOKEN_AGE + "; was "
+                                + maximumAge);
+            }
+            usedMaximumAge = maximumAge;
+        }
+
+        try {
+            AndroidFuture<Integer> resultCallback = new AndroidFuture<>();
+            resultCallback.orTimeout(5, TimeUnit.SECONDS);
+
+            mService.verifyToken(token, new ParcelDuration(usedMaximumAge), resultCallback);
+            return resultCallback.get(); // block on result callback
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (Throwable t) {
+            throw new RuntimeException("Error verifying token.", t);
+        }
     }
 
     /** @hide */
-    public AttestationVerificationManager() {
+    public AttestationVerificationManager(
+            @NonNull Context context,
+            @NonNull IAttestationVerificationManagerService service) {
+        this.mContext = context;
+        this.mService = service;
     }
 
     /** @hide */

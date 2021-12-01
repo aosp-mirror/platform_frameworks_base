@@ -454,6 +454,12 @@
         <item name="android:background">@drawable/media_output_dialog_button_background</item>
     </style>
 
+    <style name="MediaOutputRoundedButton" parent="@android:style/Widget.Material.Button">
+        <item name="android:background">@drawable/media_output_dialog_solid_button_background</item>
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
     <style name="TunerSettings" parent="@android:style/Theme.DeviceDefault.Settings">
         <item name="android:windowActionBar">false</item>
         <item name="preferenceTheme">@style/TunerPreferenceTheme</item>
@@ -654,16 +660,6 @@
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
     </style>
 
-    <!-- TileService request dialog -->
-    <style name="TileRequestDialog" parent="Theme.SystemUI.QuickSettings.Dialog">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@drawable/qs_dialog_bg</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:windowCloseOnTouchOutside">true</item>
-        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
-    </style>
-
     <!-- USB Contaminant dialog -->
     <style name ="USBContaminant" />
 
@@ -847,7 +843,6 @@
     <style name="Widget.SliceView.Panel">
         <item name="titleSize">16sp</item>
         <item name="rowStyle">@style/SliceRow</item>
-        <item name="android:background">?android:attr/colorBackgroundFloating</item>
     </style>
 
     <style name="SliceRow">
@@ -984,4 +979,14 @@
 
     <style name="InternetDialog.Divider.Active"/>
 
+    <style name="FgsManagerDialogTitle">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textDirection">locale</item>
+    </style>
+
+    <style name="FgsManagerAppDuration">
+        <item name="android:fontFamily">?android:attr/textAppearanceSmall</item>
+        <item name="android:textDirection">locale</item>
+    </style>
 </resources>

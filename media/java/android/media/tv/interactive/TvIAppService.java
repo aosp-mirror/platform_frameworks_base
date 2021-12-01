@@ -23,6 +23,8 @@ import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.media.tv.BroadcastInfoRequest;
+import android.media.tv.BroadcastInfoResponse;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -185,6 +187,14 @@ public abstract class TvIAppService extends Service {
         }
 
         /**
+         * Called when a broadcast info response is received from TIS.
+         *
+         * @param response response received from TIS.
+         */
+        public void onNotifyBroadcastInfoResponse(BroadcastInfoResponse response) {
+        }
+
+        /**
          * Releases TvIAppService session.
          * @hide
          */
@@ -278,6 +288,26 @@ public abstract class TvIAppService extends Service {
             });
         }
 
+        public void requestBroadcastInfo(@NonNull final BroadcastInfoRequest request) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestBroadcastInfo (requestId="
+                                    + request.getRequestId() + ")");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onBroadcastInfoRequest(request);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestBroadcastInfo", e);
+                    }
+                }
+            });
+        }
+
         void startIApp() {
             onStartIApp();
         }
@@ -356,6 +386,18 @@ public abstract class TvIAppService extends Service {
             onSurfaceChanged(format, width, height);
         }
 
+        /**
+         *
+         * Calls {@link #notifyBroadcastInfoResponse}.
+         */
+        void notifyBroadcastInfoResponse(BroadcastInfoResponse response) {
+            if (DEBUG) {
+                Log.d(TAG, "notifyBroadcastInfoResponse (requestId="
+                        + response.getRequestId() + ")");
+            }
+            onNotifyBroadcastInfoResponse(response);
+        }
+
         private void executeOrPostRunnableOnMainThread(Runnable action) {
             synchronized (mLock) {
                 if (mSessionCallback == null) {
@@ -409,6 +451,11 @@ public abstract class TvIAppService extends Service {
         @Override
         public void dispatchSurfaceChanged(int format, int width, int height) {
             mSessionImpl.dispatchSurfaceChanged(format, width, height);
+        }
+
+        @Override
+        public void notifyBroadcastInfoResponse(BroadcastInfoResponse response) {
+            mSessionImpl.notifyBroadcastInfoResponse(response);
         }
 
         private final class TvIAppEventReceiver extends InputEventReceiver {

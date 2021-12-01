@@ -34,6 +34,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
 import android.content.Context;
 import android.os.RemoteException;
@@ -62,6 +63,19 @@ final class PermissionsUtils {
                 Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION);
 
         DEVICE_PROFILE_TO_PERMISSION = unmodifiableMap(map);
+    }
+
+    static void enforceCallerPermissionsToRequest(@NonNull Context context,
+            @NonNull AssociationRequest request, @NonNull String packageName,
+            @UserIdInt int userId) {
+        enforceCallerCanInteractWithUserId(context, userId);
+        enforceCallerIsSystemOr(userId, packageName);
+
+        enforceRequestDeviceProfilePermissions(context, request.getDeviceProfile());
+
+        if (request.isSelfManaged()) {
+            enforceRequestSelfManagedPermission(context);
+        }
     }
 
     static void enforceRequestDeviceProfilePermissions(
@@ -139,7 +153,7 @@ final class PermissionsUtils {
         }
     }
 
-    static boolean checkCallerCanManagerCompanionDevice(@NonNull Context context) {
+    static boolean checkCallerCanManageCompanionDevice(@NonNull Context context) {
         if (getCallingUserId() == SYSTEM_UID) return true;
 
         return context.checkCallingPermission(MANAGE_COMPANION_DEVICES) == PERMISSION_GRANTED;
@@ -158,7 +172,7 @@ final class PermissionsUtils {
 
         if (!checkCallerCanInteractWithUserId(context, userId)) return false;
 
-        return checkCallerCanManagerCompanionDevice(context);
+        return checkCallerCanManageCompanionDevice(context);
     }
 
     private static boolean checkPackage(@UserIdInt int uid, @NonNull String packageName) {

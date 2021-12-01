@@ -63,6 +63,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -352,7 +353,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         doReturn(null).when(mMockPackageManager).getDefaultHomeActivity(anyInt());
         doReturn(mMockPackageManager).when(mAtm).getPackageManagerInternalLocked();
         doReturn(false).when(mMockPackageManager).isInstantAppInstallerComponent(any());
-        doReturn(null).when(mMockPackageManager).resolveIntent(any(), any(), anyInt(), anyInt(),
+        doReturn(null).when(mMockPackageManager).resolveIntent(any(), any(), anyLong(), anyLong(),
                 anyInt(), anyBoolean(), anyInt());
         doReturn(new ComponentName("", "")).when(mMockPackageManager).getSystemUiServiceComponent();
 

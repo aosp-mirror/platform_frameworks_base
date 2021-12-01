@@ -16,16 +16,12 @@
 
 package com.android.server.timezonedetector;
 
-import static libcore.io.IoUtils.closeQuietly;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
-import android.util.proto.ProtoOutputStream;
 
-import java.io.ByteArrayOutputStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -50,7 +46,7 @@ public final class MetricsTimeZoneDetectorState {
             value = { DETECTION_MODE_MANUAL, DETECTION_MODE_GEO, DETECTION_MODE_TELEPHONY})
     @Retention(RetentionPolicy.SOURCE)
     @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
-    @interface DetectionMode {};
+    public @interface DetectionMode {};
 
     public static final @DetectionMode int DETECTION_MODE_MANUAL = 0;
     public static final @DetectionMode int DETECTION_MODE_GEO = 1;
@@ -89,16 +85,16 @@ public final class MetricsTimeZoneDetectorState {
 
         int deviceTimeZoneIdOrdinal =
                 tzIdOrdinalGenerator.ordinal(Objects.requireNonNull(deviceTimeZoneId));
-        MetricsTimeZoneSuggestion latestObfuscatedManualSuggestion =
+        MetricsTimeZoneSuggestion latestCanonicalManualSuggestion =
                 createMetricsTimeZoneSuggestion(tzIdOrdinalGenerator, latestManualSuggestion);
-        MetricsTimeZoneSuggestion latestObfuscatedTelephonySuggestion =
+        MetricsTimeZoneSuggestion latestCanonicalTelephonySuggestion =
                 createMetricsTimeZoneSuggestion(tzIdOrdinalGenerator, latestTelephonySuggestion);
-        MetricsTimeZoneSuggestion latestObfuscatedGeolocationSuggestion =
+        MetricsTimeZoneSuggestion latestCanonicalGeolocationSuggestion =
                 createMetricsTimeZoneSuggestion(tzIdOrdinalGenerator, latestGeolocationSuggestion);
 
         return new MetricsTimeZoneDetectorState(
-                configurationInternal, deviceTimeZoneIdOrdinal, latestObfuscatedManualSuggestion,
-                latestObfuscatedTelephonySuggestion, latestObfuscatedGeolocationSuggestion);
+                configurationInternal, deviceTimeZoneIdOrdinal, latestCanonicalManualSuggestion,
+                latestCanonicalTelephonySuggestion, latestCanonicalGeolocationSuggestion);
     }
 
     /** Returns true if the device supports telephony time zone detection. */
@@ -154,30 +150,27 @@ public final class MetricsTimeZoneDetectorState {
     }
 
     /**
-     * Returns bytes[] for a {@link MetricsTimeZoneSuggestion} for the last manual
-     * suggestion received.
+     * Returns a canonical form of the last manual suggestion received.
      */
     @Nullable
-    public byte[] getLatestManualSuggestionProtoBytes() {
-        return suggestionProtoBytes(mLatestManualSuggestion);
+    public MetricsTimeZoneSuggestion getLatestManualSuggestion() {
+        return mLatestManualSuggestion;
     }
 
     /**
-     * Returns bytes[] for a {@link MetricsTimeZoneSuggestion} for the last, best
-     * telephony suggestion received.
+     * Returns a canonical form of the last telephony suggestion received.
      */
     @Nullable
-    public byte[] getLatestTelephonySuggestionProtoBytes() {
-        return suggestionProtoBytes(mLatestTelephonySuggestion);
+    public MetricsTimeZoneSuggestion getLatestTelephonySuggestion() {
+        return mLatestTelephonySuggestion;
     }
 
     /**
-     * Returns bytes[] for a {@link MetricsTimeZoneSuggestion} for the last geolocation
-     * suggestion received.
+     * Returns a canonical form of last geolocation suggestion received.
      */
     @Nullable
-    public byte[] getLatestGeolocationSuggestionProtoBytes() {
-        return suggestionProtoBytes(mLatestGeolocationSuggestion);
+    public MetricsTimeZoneSuggestion getLatestGeolocationSuggestion() {
+        return mLatestGeolocationSuggestion;
     }
 
     @Override
@@ -211,14 +204,6 @@ public final class MetricsTimeZoneDetectorState {
                 + ", mLatestTelephonySuggestion=" + mLatestTelephonySuggestion
                 + ", mLatestGeolocationSuggestion=" + mLatestGeolocationSuggestion
                 + '}';
-    }
-
-    private static byte[] suggestionProtoBytes(
-            @Nullable MetricsTimeZoneSuggestion suggestion) {
-        if (suggestion == null) {
-            return null;
-        }
-        return suggestion.toBytes();
     }
 
     @Nullable
@@ -264,10 +249,11 @@ public final class MetricsTimeZoneDetectorState {
     }
 
     /**
-     * A Java class that closely matches the android.app.time.MetricsTimeZoneSuggestion
-     * proto definition.
+     * A Java class that represents a generic time zone suggestion, i.e. one that is independent of
+     * origin-specific information. This closely matches the metrics atoms.proto
+     * MetricsTimeZoneSuggestion proto definition.
      */
-    private static final class MetricsTimeZoneSuggestion {
+    public static final class MetricsTimeZoneSuggestion {
         @Nullable
         private final int[] mZoneIdOrdinals;
 
@@ -281,40 +267,18 @@ public final class MetricsTimeZoneDetectorState {
         }
 
         @NonNull
-        public static MetricsTimeZoneSuggestion createCertain(
+        static MetricsTimeZoneSuggestion createCertain(
                 @NonNull int[] zoneIdOrdinals) {
             return new MetricsTimeZoneSuggestion(zoneIdOrdinals);
         }
 
-        boolean isCertain() {
+        public boolean isCertain() {
             return mZoneIdOrdinals != null;
         }
 
         @Nullable
-        int[] getZoneIdOrdinals() {
+        public int[] getZoneIdOrdinals() {
             return mZoneIdOrdinals;
-        }
-
-        byte[] toBytes() {
-            // We don't get access to the atoms.proto definition for nested proto fields, so we use
-            // an identically specified proto.
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            ProtoOutputStream protoOutputStream = new ProtoOutputStream(byteArrayOutputStream);
-            int typeProtoValue = isCertain()
-                    ? android.app.time.MetricsTimeZoneSuggestion.CERTAIN
-                    : android.app.time.MetricsTimeZoneSuggestion.UNCERTAIN;
-            protoOutputStream.write(android.app.time.MetricsTimeZoneSuggestion.TYPE,
-                    typeProtoValue);
-            if (isCertain()) {
-                for (int zoneIdOrdinal : getZoneIdOrdinals()) {
-                    protoOutputStream.write(
-                            android.app.time.MetricsTimeZoneSuggestion.TIME_ZONE_ORDINALS,
-                            zoneIdOrdinal);
-                }
-            }
-            protoOutputStream.flush();
-            closeQuietly(byteArrayOutputStream);
-            return byteArrayOutputStream.toByteArray();
         }
 
         @Override

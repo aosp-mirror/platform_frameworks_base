@@ -19,6 +19,7 @@ package android.media.tv.interactive;
 import android.media.tv.interactive.ITvIAppClient;
 import android.media.tv.interactive.ITvIAppManagerCallback;
 import android.media.tv.interactive.TvIAppInfo;
+import android.media.tv.BroadcastInfoResponse;
 import android.view.Surface;
 
 /**
@@ -34,6 +35,8 @@ interface ITvIAppManager {
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);
     void dispatchSurfaceChanged(in IBinder sessionToken, int format, int width, int height,
             int userId);
+    void notifyBroadcastInfoResponse(in IBinder sessionToken, in BroadcastInfoResponse response,
+            int UserId);
 
     void registerCallback(in ITvIAppManagerCallback callback, int userId);
     void unregisterCallback(in ITvIAppManagerCallback callback, int userId);

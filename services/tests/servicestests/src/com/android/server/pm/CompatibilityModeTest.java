@@ -32,6 +32,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.os.Build;
+import android.platform.test.annotations.Presubmit;
 
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.pkg.PackageUserStateImpl;
@@ -40,6 +41,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+@Presubmit
 public class CompatibilityModeTest {
 
     private boolean mCompatibilityModeEnabled;;

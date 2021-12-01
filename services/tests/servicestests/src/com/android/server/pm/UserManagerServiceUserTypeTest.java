@@ -39,6 +39,7 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.os.UserManager;
+import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 
 import androidx.test.InstrumentationRegistry;
@@ -58,6 +59,7 @@ import java.util.List;
  *
  * <p>Run with: atest UserManagerServiceUserTypeTest
  */
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 public class UserManagerServiceUserTypeTest {

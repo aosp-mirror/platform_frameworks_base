@@ -2784,8 +2784,8 @@ class ActivityStarter {
         // If it exist, we need to reparent target root task from TDA to launch root task.
         final TaskDisplayArea tda = mTargetRootTask.getDisplayArea();
         final Task launchRootTask = tda.getLaunchRootTask(mTargetRootTask.getWindowingMode(),
-                mTargetRootTask.getActivityType(), null /** options */,
-                mSourceRootTask, 0 /** launchFlags */);
+                mTargetRootTask.getActivityType(), null /** options */, mSourceRootTask,
+                mLaunchFlags);
         // If target root task is created by organizer, let organizer handle reparent itself.
         if (!mTargetRootTask.mCreatedByOrganizer && launchRootTask != null
                 && launchRootTask != mTargetRootTask) {

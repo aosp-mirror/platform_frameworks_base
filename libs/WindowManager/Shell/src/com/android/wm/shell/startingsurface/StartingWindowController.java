@@ -194,6 +194,18 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
     }
 
     /**
+     * Clear all starting window immediately, called this method when releasing the task organizer.
+     */
+    public void clearAllWindows() {
+        mSplashScreenExecutor.execute(() -> {
+            mStartingSurfaceDrawer.clearAllWindows();
+            synchronized (mTaskBackgroundColors) {
+                mTaskBackgroundColors.clear();
+            }
+        });
+    }
+
+    /**
      * The interface for calls from outside the Shell, within the host process.
      */
     private class StartingSurfaceImpl implements StartingSurface {

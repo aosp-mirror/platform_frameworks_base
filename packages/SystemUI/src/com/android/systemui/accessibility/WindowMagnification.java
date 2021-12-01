@@ -158,12 +158,13 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
 
     @MainThread
     void enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
+            float magnificationFrameOffsetRatioX, float magnificationFrameOffsetRatioY,
             @Nullable IRemoteMagnificationAnimationCallback callback) {
         final WindowMagnificationController windowMagnificationController =
                 mMagnificationControllerSupplier.get(displayId);
         if (windowMagnificationController != null) {
-            windowMagnificationController.enableWindowMagnification(scale, centerX,
-                    centerY, callback);
+            windowMagnificationController.enableWindowMagnification(scale, centerX, centerY,
+                    magnificationFrameOffsetRatioX, magnificationFrameOffsetRatioY, callback);
         }
     }
 

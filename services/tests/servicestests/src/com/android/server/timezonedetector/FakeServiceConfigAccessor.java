@@ -151,12 +151,12 @@ class FakeServiceConfigAccessor implements ServiceConfigAccessor {
     }
 
     @Override
-    public void setRecordProviderStateChanges(boolean enabled) {
+    public void setRecordStateChangesForTests(boolean enabled) {
         failUnimplemented();
     }
 
     @Override
-    public boolean getRecordProviderStateChanges() {
+    public boolean getRecordStateChangesForTests() {
         return failUnimplemented();
     }
 

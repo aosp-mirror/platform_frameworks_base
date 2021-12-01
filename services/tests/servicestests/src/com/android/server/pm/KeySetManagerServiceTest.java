@@ -20,6 +20,7 @@ package com.android.server.pm;
 import static android.content.pm.parsing.ParsingPackageUtils.parsePublicKey;
 
 import android.content.pm.Signature;
+import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 
+@Presubmit
 public class KeySetManagerServiceTest extends AndroidTestCase {
 
     private WatchedArrayMap<String, PackageSetting> mPackagesMap;

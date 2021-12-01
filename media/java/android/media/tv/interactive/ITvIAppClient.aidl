@@ -15,6 +15,7 @@
  */
 
 package android.media.tv.interactive;
+import android.media.tv.BroadcastInfoRequest;
 
 import android.view.InputChannel;
 
@@ -27,4 +28,5 @@ oneway interface ITvIAppClient {
     void onSessionCreated(in String iAppServiceId, IBinder token, in InputChannel channel, int seq);
     void onSessionReleased(int seq);
     void onLayoutSurface(int left, int top, int right, int bottom, int seq);
+    void onBroadcastInfoRequest(in BroadcastInfoRequest request, int seq);
 }
