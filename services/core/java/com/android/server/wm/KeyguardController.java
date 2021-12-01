@@ -157,6 +157,11 @@ class KeyguardController {
      * Update the Keyguard showing state.
      */
     void setKeyguardShown(int displayId, boolean keyguardShowing, boolean aodShowing) {
+        if (mRootWindowContainer.getDisplayContent(displayId).isKeyguardAlwaysUnlocked()) {
+            Slog.i(TAG, "setKeyguardShown ignoring always unlocked display " + displayId);
+            return;
+        }
+
         final KeyguardDisplayState state = getDisplayState(displayId);
         final boolean aodChanged = aodShowing != state.mAodShowing;
         // If keyguard is going away, but SystemUI aborted the transition, need to reset state.
