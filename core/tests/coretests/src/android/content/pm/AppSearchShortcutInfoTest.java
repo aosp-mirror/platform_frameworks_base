@@ -21,14 +21,18 @@ import static com.google.common.truth.Truth.assertThat;
 import android.app.Person;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Set;
 
+@Presubmit
 public class AppSearchShortcutInfoTest {
 
+    @Ignore("b/208375334")
     @Test
     public void testBuildShortcutAndGetValue() {
         final String category =

@@ -27,6 +27,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.util.PackageUtils;
 
@@ -38,6 +39,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Set;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SigningDetailsTest {

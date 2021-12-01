@@ -77,17 +77,6 @@
       ]
     },
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.content.pm.PackageManagerTests"
-        },
-        {
-            "exclude-annotation": "androidx.test.filters.Suppress"
-        }
-      ]
-    },
-    {
       "name": "PackageManagerServiceHostTests",
       "options": [
         {
