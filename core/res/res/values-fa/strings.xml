@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"پایش تلاش‌های باز کردن قفل صفحه"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"‏تعداد گذرواژه‎های نادرست تایپ شده را هنگام بازکردن قفل صفحه کنترل می‌کند، و اگر دفعات زیادی گذرواژه نادرست وارد شود رایانهٔ لوحی را قفل می‌کند و همه داده‎های رایانهٔ لوحی را پاک می‌کند."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"‏بر تعداد گذرواژه‎های نادرستی که هنگام بازکردن قفل صفحه تایپ می‌شود، نظارت می‌کند، و اگر گذرواژه‌های نادرست دفعات زیادی تایپ شوند، Android TV را قفل می‌کند یا همه داده‎های آن را پاک می‌کند."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"بر تعداد گذرواژه‌های نادرست تایپ‌شده در زمان باز کردن قفل صفحه نظارت می‌شود و اگر گذرواژه‌های نادرست دفعات خیلی زیادی تایپ شود، سیستم اطلاعات-سرگرمی قفل می‌شود یا همه داده‌های سیستم اطلاعات-سرگرمی پاک می‌شود."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"‏تعداد گذرواژه‎های نادرست تایپ‌شده را هنگام بازکردن قفل صفحه کنترل می‎کند و اگر چندین بار گذرواژه‌های نادرست وارد شود، تلفن را قفل می‌کند یا همه داده‎های تلفن را پاک می‌کند."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ شده، نظارت می‌کند، و اگر تعداد گذرواژه‌های تایپ شده نادرست بیش از حد بود، رایانه لوحی را قفل می‌کند یا کلیه داده‌های کاربر را پاک می‌کند."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"‏بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ می‌شود، نظارت می‌کند، و اگر گذرواژه‌های نادرست دفعات زیادی تایپ شوند، دستگاه Android TV را قفل یا همه داده‌های کاربر را پاک می‌کند."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ شده نظارت می‌شود و اگر گذرواژه‌های نادرست دفعات خیلی زیادی تایپ شود، تلفن قفل می‌شود یا همه داده‌های کاربر پاک می‌شود."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ شده، نظارت می‌کند، و اگر تعداد گذرواژه‌های تایپ شده نادرست بیش از حد بود، تلفن را قفل می‌کند یا کلیه داده‌های کاربر را پاک می‌کند."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"تغییر قفل صفحه"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"قفل صفحه را تغییر می‌دهد."</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"پاک کردن تمام داده‌ها"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"با انجام بازنشانی داده‌های کارخانه، داده‌های رایانهٔ لوحی بدون هشدار پاک می‌شود."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"‏داده‌های دستگاه Android TV شما، بدون نشان داده شدن هشدار و با انجام بازنشانی داده‌های کارخانه، پاک می‌شود."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"داده‌های سیستم اطلاعات-سرگرمی بدون هشدار و با انجام بازنشانی داده‌های کارخانه پاک می‌شود."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"با انجام بازنشانی داده‌های کارخانه، داده‌های تلفن بدون هشدار پاک می‌شود."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"پاک کردن داده‌های کاربر"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"پاک کردن داده‌های نمایه"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"پاک کردن داده‌های کاربر"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"داده‌های این کاربر را در این رایانه لوحی بدون هشدار پاک می‌کند."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"‏بدون نشان داده شدن هشدار، داده‌های این کاربر در این دستگاه Android TV پاک می‌شود."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"داده‌های این نمایه در این سیستم اطلاعات-سرگرمی بدوم هشدار پاک می‌شود."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"داده‌های این کاربر را در این تلفن بدون هشدار پاک می‌کند."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"تنظیم پروکسی جهانی دستگاه"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"پروکسی کلی دستگاه را برای استفاده هنگام فعال بودن این خط‌مشی تنظیم می‌کند. تنها مالک دستگاه می‌تواند پروکسی کلی را تنظیم کند."</string>
@@ -909,7 +914,7 @@
     <string name="emergency_calls_only" msgid="3057351206678279851">"فقط تماس‌های اضطراری"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"شبکه قفل شد"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"‏سیم کارت با PUK قفل شده است."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"لطفاً به راهنمای کاربر مراجعه کرده یا با مرکز پشتیبانی از مشتریان تماس بگیرید."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"لطفاً به «راهنمای کاربر» مراجعه کنید یا با مرکز «مراقبت از مشتریان» تماس بگیرید."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"سیم کارت قفل شد."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"بازگشایی قفل سیم کارت…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"‏الگوی بازگشایی قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎‌اید. \n\nپس‌از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>

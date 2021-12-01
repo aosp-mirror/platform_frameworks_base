@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ეკრანის განბლოკვის მცდელობების მონიტორინგი"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ეკრანის განბლოკვისთვის არასწორად აკრეფილი პაროლების რაოდენობის მონიტორინგი. ტაბლეტის დაბლოკვა ან მასზე არსებული ყველა მონაცემის წაშლა ძალიან ბევრჯერ არასწორი პაროლის შეყვანის შემთხვევაში."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"ეკრანის განბლოკვისას არასწორი პაროლების შეყვანილი რაოდენობის მონიტორინგი და არასწორი პაროლის მეტისმეტად ბევრჯერ შეყვანის შემთხვევაში, Android TV მოწყობილობის დაბლოკვა ან Android TV მოწყობილობის მთელი ინფორმაციის ამოშლა."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ეკრანის განბლოკვისას გააკონტროლეთ პაროლების არასწორად შეყვანის რაოდენობა და დაბლოკეთ გართობის/საინფორმაციო სისტემა ან წაშალეთ მისი ყველა მონაცემი იმ შემთხვევაში, თუ ძალიან ბევრჯერ მოხდა არასწორი პაროლის შეყვანა."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ეკრანის განბლოკვისთვის არასწორად აკრეფილი პაროლების რაოდენობის მონიტორინგი. ტელეფონის დაბლოკვა ან მასზე არსებული ყველა მონაცემის წაშლა ძალიან ბევრჯერ არასწორი პაროლის შეყვანის შემთხვევაში."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ეკრანის განბლოკვისას არასწორი პაროლების შეყვანილი რაოდენობის მონიტორინგი და ტაბლეტის დაბლოკვა ან მრავლალჯერ არასწორი პაროლის შეყვანის შემთხვევაში ამ მომხმარებლის მთელი ინფორმაციის წაშლა."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"ეკრანის განბლოკვისას არასწორი პაროლების შეყვანილი რაოდენობის მონიტორინგი და არასწორი პაროლის მეტისმეტად ბევრჯერ შეყვანის შემთხვევაში, Android TV მოწყობილობის დაბლოკვა ან ამ მომხმარებლის მთელი ინფორმაციის ამოშლა."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ეკრანის განბლოკვისას გააკონტროლეთ პაროლების არასწორად შეყვანის რაოდენობა და დაბლოკეთ გართობის/საინფორმაციო სისტემა ან წაშალეთ ამ პროფილის ყველა მონაცემი იმ შემთხვევაში, თუ ძალიან ბევრჯერ მოხდა არასწორი პაროლის შეყვანა."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"ეკრანის განბლოკვისას არასწორი პაროლების შეყვანილი რაოდენობის მონიტორინგი და ტელეფონის დაბლოკვა ან მრავლალჯერ არასწორი პაროლის შეყვანის შემთხვევაში ამ მომხმარებლის მთელი ინფორმაციის წაშლა."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"ეკრანის დაბლოკვის შეცვლა"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"ეკრანის დაბლოკვის შეცვლა"</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"ყველა მონაცემის წაშლა"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ტაბლეტის მონაცემების გაუფრთხილებლად წაშლა, ქარხნული მონაცემების აღდგენით"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"თქვენი Android TV მოწყობილობის მონაცემების გაუფრთხილებლად ამოშლა ქარხნული მონაცემების აღდგენის გზით."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"ქარხნული მონაცემების აღდგენით წაშალეთ გართობის/საინფორმაციო სისტემის მონაცემები გაფრთხილების გარეშე."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ტელეფონის მონაცემების გაუფრთხილებლად წაშლა, ქარხნული მონაცემების აღდგენით"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"მომხმარებლის მონაცემების წაშლა"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"პროფილის მონაცემების წაშლა"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"მომხმარებლის მონაცემების წაშლა"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"ამ მომხმარებლის მონაცემების გაუფრთხილებელი წაშლა ამ ტაბლეტზე."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"მომხმარებლის მონაცემების გაუფრთხილებლად ამოშლა Android TV მოწყობილობიდან."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"ქარხნული მონაცემების აღდგენით წაშალეთ ამ პროფილის მონაცემები ამ გართობ/საინფორმაციო სისტემაში გაფრთხილების გარეშე."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"ამ მომხმარებლის მონაცემების გაუფრთხილებელი წაშლა ამ ტელეფონზე."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"მოწყობილობის გლობალური პროქსის დაყენება"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"ჩართული პოლიტიკის დროს მოწყობილობის გლობალური პროქსის დაყენება. მხოლოდ მოწყობილობის მფლობელს შეუძლია გლობალური პროქსის დაყენება."</string>

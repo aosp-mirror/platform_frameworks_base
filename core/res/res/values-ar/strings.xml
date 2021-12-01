@@ -741,9 +741,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"مراقبة محاولات فتح قفل الشاشة"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"لمراقبة عدد مرات كتابة كلمات المرور غير الصحيحة عند فتح قفل الشاشة وتأمين الجهاز اللوحي أو مسح جميع بياناته في حالة كتابة الكثير من كلمات المرور غير الصحيحة."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"‏يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وقفل جهاز Android TV أو محو جميع بيانات جهاز Android TV إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وقفل \"نظام الترفيه والمعلومات\" أو محو جميع بياناته إذا تمت كتابة عدد كبير جدًا من كلمات المرور غير الصحيحة."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وتأمين الهاتف ومحو جميع بياناته إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وتأمين الجهاز اللوحي ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"‏يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وقفل جهاز Android TV أو محو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وتأمين \"نظام الترفيه والمعلومات\" ومحو جميع بيانات هذا الملف الشخصي إذا تمت كتابة عدد كبير جدًا من كلمات المرور غير الصحيحة."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وتأمين الهاتف ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"تغيير قفل الشاشة"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"إمكانية تغيير قفل الشاشة"</string>
@@ -752,10 +754,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"محو جميع البيانات"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"يمكنك محو بيانات الجهاز اللوحي بدون تحذير، وذلك عبر إجراء إعادة الضبط على الإعدادات الأصلية."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"‏يمكنك محو بيانات جهاز Android TV بدون تحذير عن طريق تنفيذ إعادة الضبط على الإعدادات الأصلية."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"يمكنك محو بيانات \"نظام الترفيه والمعلومات\" بدون تحذير، وذلك من خلال إعادة الضبط على الإعدادات الأصلية."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"محو بيانات الهاتف بدون تحذير، وذلك من خلال إعادة ضبط البيانات على الإعدادات الأصلية"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"محو بيانات المستخدم"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"محو بيانات الملف الشخصي"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"محو بيانات المستخدم"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"لمحو بيانات هذا المستخدم على هذا الجهاز اللوحي بدون تحذير."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"‏لمحو بيانات هذا المستخدم على جهاز Android TV هذا بدون تحذير."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"يمكنك محو بيانات هذا الملف الشخصي على \"نظام الترفيه والمعلومات\" هذا بدون تحذير."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"لمحو بيانات هذا المستخدم على هذا الهاتف بدون تحذير."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"تعيين الخادم الوكيل العمومي للجهاز"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"لضبط الخادم الوكيل العام في الجهاز على الاستخدام أثناء تفعيل السياسة. ولن يمكن لأحد سوى مالك الجهاز ضبط الخادم الوكيل العام."</string>

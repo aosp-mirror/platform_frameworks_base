@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitor screen unlock attempts"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitor the number of incorrect passwords typed when unlocking the screen and lock the tablet or erase all the tablet\'s data if too many incorrect passwords are typed."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock your Android TV device or delete all of your Android TV device\'s data if too many incorrect passwords are typed."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the infotainment system or erase all the infotainment system\'s data if too many incorrect passwords are typed."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Monitor the number of incorrect passwords typed when unlocking the screen and lock the phone or erase all the phone\'s data if too many incorrect passwords are typed."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the tablet or erase all this user\'s data if too many incorrect passwords are typed."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock your Android TV device or delete all of this user\'s data if too many incorrect passwords are typed."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the infotainment system or erase all this profile\'s data if too many incorrect passwords are typed."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the phone or erase all this user\'s data if too many incorrect passwords are typed."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Change the screen lock"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Change the screen lock."</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Erase all data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Erase the tablet\'s data without warning by performing a factory data reset."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Delete your Android TV device\'s data without warning by performing a factory data reset."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Erase the infotainment system\'s data without warning by performing a factory data reset."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Erase the phone\'s data without warning by performing a factory data reset."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Erase user data"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Erase profile data"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Erase user data"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Erase this user\'s data on this tablet without warning."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Delete this user\'s data on this Android TV device without warning."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Erase this profile\'s data on this infotainment system without warning."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Erase this user\'s data on this phone without warning."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Set the device global proxy"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Set the device global proxy to be used while policy is enabled. Only the device owner can set the global proxy."</string>

@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekranni qulfdan chiqarishga urinishlarni nazorat qilish"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Ekranni qulfini ochishda parolni kiritishga urinishlarni kuzatib boradi va agar parol bir necha marta noto‘g‘ri kiritilsa, planshetni qulflaydi yoki undagi ma’lumotlarni o‘chirib tashlaydi."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Ekran qulfini ochishda kiritilgan xato parollar sonini kuzatib boradi va agar parol juda koʻp marta xato kiritilsa, Android TV qurilmasini qulflaydi yoki undagi barcha maʼlumotlarni oʻchirib tashlaydi."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Ekranni qulfini ochishda parolni kiritishga urinishlarni kuzatib boradi va agar parol bir necha marta xato kiritilsa, axborot-hordiq tizimini qulflaydi yoki undagi maʼlumotlarni oʻchirib tashlaydi."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Ekranni qulfini ochishda parolni kiritishga urinishlarni kuzatib boradi va agar parol bir necha marta noto‘g‘ri kiritilsa, telefonni qulflaydi yoki undagi ma’lumotlarni o‘chirib tashlaydi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Ekran qulfini ochishda kiritilgan noto‘g‘ri parollar sonini kuzatib boradi va agar parol juda ko‘p marta noto‘g‘ri kiritilsa, planshetni qulflaydi yoki undagi barcha ma’lumotlarni o‘chirib tashlaydi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Ekran qulfini ochishda kiritilgan xato parollar sonini kuzatib boradi va agar parol juda koʻp marta xato kiritilsa, Android TV qurilmangizni qulflaydi yoki undagi barcha maʼlumotlarni oʻchirib tashlaydi."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Ekran qulfini ochishda parolni kiritishga urinishlarni kuzatib boradi va agar parol bir necha marta xato kiritilsa, axborot-hordiq tizimini qulflaydi yoki undagi barcha profil maʼlumotlarini oʻchirib tashlaydi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Ekran qulfini ochishda kiritilgan noto‘g‘ri parollar sonini kuzatib boradi va agar parol juda ko‘p marta noto‘g‘ri kiritilsa, telefonni qulflaydi yoki undagi barcha ma’lumotlarni o‘chirib tashlaydi."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Ekran qulfini almashtirish"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ekran qulfini almashtiradi."</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Hamma narsani tozalash"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Planshetdagi hamma narsani tozalab tashlaydi va uning sozlamalarini asliga qaytaradi."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Android TV qurilmangizdagi hamma narsani tozalab tashlaydi va uning sozlamalarini asliga qaytaradi."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Zavod sozlamalarini qayta tiklash orqali axbirot-hordiq tizimi maʼlumotlarini ogohlantirishsiz oʻchirib tashlansin."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Telefondagi hamma narsani tozalab tashlaydi va uning sozlamalarini asliga qaytaradi."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Foydalanuvchi ma’lumotlarini o‘chirish"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Profil maʼlumotlarini tozalash"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Foydalanuvchi ma’lumotlarini o‘chirish"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Ushbu planshetdagi foydalanuvchi ma’lumotlarini ogohlantirishsiz o‘chirib tashlaydi."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Bu Android TV qurilmangizdagi foydalanuvchi maʼlumotlarini ogohlantirishsiz oʻchirib tashlaydi."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Bu profil maʼlumotlari ogohlantirishsiz oʻchirib tashlansin."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Ushbu telefondagi foydalanuvchi ma’lumotlarini ogohlantirishsiz o‘chirib tashlaydi."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Qurilmaga global proksi o‘rnatish"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Qoida faollashtirilgan vaqtda ishlatiladigan qurilmaning global proksi-serverini o‘rnatadi. Faqat qurilma egasi global proksi-serverini o‘rnatishi mumkin."</string>
