@@ -184,6 +184,7 @@ public abstract class PanelViewController {
     protected final LockscreenGestureLogger mLockscreenGestureLogger;
     private final PanelExpansionStateManager mPanelExpansionStateManager;
     private final TouchHandler mTouchHandler;
+    private final InteractionJankMonitor mInteractionJankMonitor;
 
     protected abstract void onExpandingFinished();
 
@@ -222,7 +223,8 @@ public abstract class PanelViewController {
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             LockscreenGestureLogger lockscreenGestureLogger,
             PanelExpansionStateManager panelExpansionStateManager,
-            AmbientState ambientState) {
+            AmbientState ambientState,
+            InteractionJankMonitor interactionJankMonitor) {
         mAmbientState = ambientState;
         mView = view;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
@@ -273,6 +275,7 @@ public abstract class PanelViewController {
         mVibratorHelper = vibratorHelper;
         mVibrateOnOpening = mResources.getBoolean(R.bool.config_vibrateOnIconAnimation);
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
+        mInteractionJankMonitor = interactionJankMonitor;
     }
 
     protected void loadDimens() {
@@ -1411,17 +1414,26 @@ public abstract class PanelViewController {
     }
 
     private void beginJankMonitoring(int cuj) {
+        if (mInteractionJankMonitor == null) {
+            return;
+        }
         InteractionJankMonitor.Configuration.Builder builder =
                 InteractionJankMonitor.Configuration.Builder.withView(cuj, mView)
                         .setTag(isFullyCollapsed() ? "Expand" : "Collapse");
-        InteractionJankMonitor.getInstance().begin(builder);
+        mInteractionJankMonitor.begin(builder);
     }
 
     private void endJankMonitoring(int cuj) {
+        if (mInteractionJankMonitor == null) {
+            return;
+        }
         InteractionJankMonitor.getInstance().end(cuj);
     }
 
     private void cancelJankMonitoring(int cuj) {
+        if (mInteractionJankMonitor == null) {
+            return;
+        }
         InteractionJankMonitor.getInstance().cancel(cuj);
     }
 
