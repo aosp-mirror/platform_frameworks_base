@@ -20,14 +20,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.app.communal.CommunalManager;
-import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.util.settings.FakeSettings;
+import com.android.systemui.communal.conditions.CommunalConditionsMonitor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,15 +41,15 @@ public class CommunalManagerUpdaterTest extends SysuiTestCase {
     private CommunalSourceMonitor mMonitor;
     @Mock
     private CommunalManager mCommunalManager;
+    @Mock
+    private CommunalConditionsMonitor mCommunalConditionsMonitor;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mContext.addMockSystemService(CommunalManager.class, mCommunalManager);
 
-        mMonitor = new CommunalSourceMonitor(
-                Handler.createAsync(TestableLooper.get(this).getLooper()),
-                new FakeSettings());
+        mMonitor = new CommunalSourceMonitor(mCommunalConditionsMonitor);
         final CommunalManagerUpdater updater = new CommunalManagerUpdater(mContext, mMonitor);
         updater.start();
     }
