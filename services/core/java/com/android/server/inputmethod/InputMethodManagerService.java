@@ -305,6 +305,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("mMethodMap")
     private int mMethodMapUpdateCount = 0;
 
+    /**
+     * The display id for which the latest startInput was called.
+     */
+    @GuardedBy("mMethodMap")
+    int getDisplayIdToShowIme() {
+        return mDisplayIdToShowIme;
+    }
+
+    @GuardedBy("mMethodMap")
+    private int mDisplayIdToShowIme = INVALID_DISPLAY;
+
     // Ongoing notification
     private NotificationManager mNotificationManager;
     KeyguardManager mKeyguardManager;
@@ -2340,10 +2351,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         // Compute the final shown display ID with validated cs.selfReportedDisplayId for this
         // session & other conditions.
-        final int displayIdToShowIme = computeImeDisplayIdForTarget(cs.selfReportedDisplayId,
+        mDisplayIdToShowIme = computeImeDisplayIdForTarget(cs.selfReportedDisplayId,
                 mImeDisplayValidator);
 
-        if (displayIdToShowIme == INVALID_DISPLAY) {
+        if (mDisplayIdToShowIme == INVALID_DISPLAY) {
             mImeHiddenByDisplayPolicy = true;
             hideCurrentInputLocked(mCurFocusedWindow, 0, null,
                     SoftInputShowHideReason.HIDE_DISPLAY_IME_POLICY_HIDE);
@@ -2364,7 +2375,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // Check if the input method is changing.
         // We expect the caller has already verified that the client is allowed to access this
         // display ID.
-        if (isSelectedMethodBound(displayIdToShowIme)) {
+        if (isSelectedMethodBound()) {
             if (cs.curSession != null) {
                 // Fast case: if we are already connected to the input method,
                 // then just return it.
@@ -2380,13 +2391,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         mBindingController.unbindCurrentMethodLocked();
 
-        return mBindingController.bindCurrentMethodLocked(displayIdToShowIme);
+        return mBindingController.bindCurrentMethodLocked();
     }
 
-    private boolean isSelectedMethodBound(int displayIdToShowIme) {
+    private boolean isSelectedMethodBound() {
         String curId = getCurId();
         return curId != null && curId.equals(getSelectedMethodId())
-                && displayIdToShowIme == mCurTokenDisplayId;
+                && mDisplayIdToShowIme == mCurTokenDisplayId;
     }
 
     @GuardedBy("mMethodMap")

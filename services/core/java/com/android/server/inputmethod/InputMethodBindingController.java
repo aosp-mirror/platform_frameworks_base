@@ -383,7 +383,7 @@ final class InputMethodBindingController {
 
     @GuardedBy("mMethodMap")
     @NonNull
-    InputBindResult bindCurrentMethodLocked(int displayIdToShowIme) {
+    InputBindResult bindCurrentMethodLocked() {
         InputMethodInfo info = mMethodMap.get(mSelectedMethodId);
         if (info == null) {
             throw new IllegalArgumentException("Unknown id: " + mSelectedMethodId);
@@ -395,7 +395,7 @@ final class InputMethodBindingController {
             mCurId = info.getId();
             mLastBindTime = SystemClock.uptimeMillis();
 
-            addFreshWindowTokenLocked(displayIdToShowIme);
+            addFreshWindowTokenLocked();
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
                     null, null, mCurId, mCurSeq, false);
@@ -420,7 +420,8 @@ final class InputMethodBindingController {
     }
 
     @GuardedBy("mMethodMap")
-    private void addFreshWindowTokenLocked(int displayIdToShowIme) {
+    private void addFreshWindowTokenLocked() {
+        int displayIdToShowIme = mService.getDisplayIdToShowIme();
         mCurToken = new Binder();
 
         mService.setCurTokenDisplayId(displayIdToShowIme);
