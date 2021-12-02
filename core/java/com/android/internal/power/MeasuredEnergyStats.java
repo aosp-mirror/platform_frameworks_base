@@ -328,7 +328,7 @@ public class MeasuredEnergyStats {
                 if (multiStateCounter != null) {
                     if (mAccumulatedMultiStateChargeMicroCoulomb == null) {
                         mAccumulatedMultiStateChargeMicroCoulomb =
-                                new LongMultiStateCounter[numWrittenEntries];
+                                new LongMultiStateCounter[mAccumulatedChargeMicroCoulomb.length];
                     }
                     mAccumulatedMultiStateChargeMicroCoulomb[index] = multiStateCounter;
                 }
