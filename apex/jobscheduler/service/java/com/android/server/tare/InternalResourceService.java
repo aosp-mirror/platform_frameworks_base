@@ -847,15 +847,16 @@ public class InternalResourceService extends SystemService {
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpAndUsageStatsPermission(getContext(), TAG, pw)) return;
 
+            boolean dumpAll = true;
             if (!ArrayUtils.isEmpty(args)) {
                 String arg = args[0];
                 if ("-h".equals(arg) || "--help".equals(arg)) {
                     dumpHelp(pw);
                     return;
                 } else if ("-a".equals(arg)) {
-                    // -a is passed when dumping a bug report so we have to acknowledge the
-                    // argument. However, we currently don't do anything differently for bug
-                    // reports.
+                    // -a is passed when dumping a bug report. Bug reports have a time limit for
+                    // each service dump, so we can't dump everything.
+                    dumpAll = false;
                 } else if (arg.length() > 0 && arg.charAt(0) == '-') {
                     pw.println("Unknown option: " + arg);
                     return;
@@ -864,7 +865,7 @@ public class InternalResourceService extends SystemService {
 
             final long identityToken = Binder.clearCallingIdentity();
             try {
-                dumpInternal(new IndentingPrintWriter(pw, "  "));
+                dumpInternal(new IndentingPrintWriter(pw, "  "), dumpAll);
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
             }
@@ -1098,7 +1099,7 @@ public class InternalResourceService extends SystemService {
         pw.println("  [package] is an optional package name to limit the output to.");
     }
 
-    private void dumpInternal(final IndentingPrintWriter pw) {
+    private void dumpInternal(final IndentingPrintWriter pw, final boolean dumpAll) {
         synchronized (mLock) {
             pw.print("Is enabled: ");
             pw.println(mIsEnabled);
@@ -1127,7 +1128,7 @@ public class InternalResourceService extends SystemService {
             mCompleteEconomicPolicy.dump(pw);
 
             pw.println();
-            mScribe.dumpLocked(pw);
+            mScribe.dumpLocked(pw, dumpAll);
 
             pw.println();
             mAgent.dumpLocked(pw);
