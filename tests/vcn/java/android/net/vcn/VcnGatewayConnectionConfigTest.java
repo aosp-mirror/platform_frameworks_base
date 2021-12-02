@@ -38,6 +38,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
@@ -50,9 +51,17 @@ public class VcnGatewayConnectionConfigTest {
             };
     public static final int[] UNDERLYING_CAPS = new int[] {NetworkCapabilities.NET_CAPABILITY_DUN};
 
+    private static final LinkedHashSet<VcnUnderlyingNetworkPriority> UNDERLYING_NETWORK_PRIORITIES =
+            new LinkedHashSet();
+
     static {
         Arrays.sort(EXPOSED_CAPS);
         Arrays.sort(UNDERLYING_CAPS);
+
+        UNDERLYING_NETWORK_PRIORITIES.add(
+                VcnCellUnderlyingNetworkPriorityTest.getTestNetworkPriority());
+        UNDERLYING_NETWORK_PRIORITIES.add(
+                VcnWifiUnderlyingNetworkPriorityTest.getTestNetworkPriority());
     }
 
     public static final long[] RETRY_INTERVALS_MS =
@@ -82,7 +91,10 @@ public class VcnGatewayConnectionConfigTest {
 
     // Public for use in VcnGatewayConnectionTest
     public static VcnGatewayConnectionConfig buildTestConfig() {
-        return buildTestConfigWithExposedCaps(EXPOSED_CAPS);
+        final VcnGatewayConnectionConfig.Builder builder =
+                newBuilder().setVcnUnderlyingNetworkPriorities(UNDERLYING_NETWORK_PRIORITIES);
+
+        return buildTestConfigWithExposedCaps(builder, EXPOSED_CAPS);
     }
 
     private static VcnGatewayConnectionConfig.Builder newBuilder() {
@@ -159,6 +171,15 @@ public class VcnGatewayConnectionConfigTest {
     }
 
     @Test
+    public void testBuilderRequiresNonNullNetworkPriorities() {
+        try {
+            newBuilder().setVcnUnderlyingNetworkPriorities(null);
+            fail("Expected exception due to invalid underlyingNetworkPriorities");
+        } catch (NullPointerException e) {
+        }
+    }
+
+    @Test
     public void testBuilderRequiresNonNullRetryInterval() {
         try {
             newBuilder().setRetryIntervalsMillis(null);
@@ -195,6 +216,7 @@ public class VcnGatewayConnectionConfigTest {
         Arrays.sort(exposedCaps);
         assertArrayEquals(EXPOSED_CAPS, exposedCaps);
 
+        assertEquals(UNDERLYING_NETWORK_PRIORITIES, config.getVcnUnderlyingNetworkPriorities());
         assertEquals(TUNNEL_CONNECTION_PARAMS, config.getTunnelConnectionParams());
 
         assertArrayEquals(RETRY_INTERVALS_MS, config.getRetryIntervalsMillis());
