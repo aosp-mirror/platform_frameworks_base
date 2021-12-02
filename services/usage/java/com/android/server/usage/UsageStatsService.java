@@ -41,6 +41,7 @@ import android.app.AppOpsManager;
 import android.app.IUidObserver;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.usage.AppLaunchEstimateInfo;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.EventStats;
@@ -1554,6 +1555,52 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
+    private void setEstimatedLaunchTime(int userId, String packageName,
+            @CurrentTimeMillisLong long estimatedLaunchTime) {
+        final long now = System.currentTimeMillis();
+        if (estimatedLaunchTime <= now) {
+            if (DEBUG) {
+                Slog.w(TAG, "Ignoring new estimate for "
+                        + userId + ":" + packageName + " because it's old");
+            }
+            return;
+        }
+        final long oldEstimatedLaunchTime = mAppStandby.getEstimatedLaunchTime(packageName, userId);
+        if (estimatedLaunchTime != oldEstimatedLaunchTime) {
+            mAppStandby.setEstimatedLaunchTime(packageName, userId, estimatedLaunchTime);
+            mHandler.obtainMessage(
+                    MSG_NOTIFY_ESTIMATED_LAUNCH_TIME_CHANGED, userId, 0, packageName)
+                    .sendToTarget();
+        }
+    }
+
+    private void setEstimatedLaunchTimes(int userId, List<AppLaunchEstimateInfo> launchEstimates) {
+        final ArraySet<String> changedTimes = new ArraySet<>();
+        final long now = System.currentTimeMillis();
+        for (int i = launchEstimates.size() - 1; i >= 0; --i) {
+            AppLaunchEstimateInfo estimate = launchEstimates.get(i);
+            if (estimate.estimatedLaunchTime <= now) {
+                if (DEBUG) {
+                    Slog.w(TAG, "Ignoring new estimate for "
+                            + userId + ":" + estimate.packageName + " because it's old");
+                }
+                continue;
+            }
+            final long oldEstimatedLaunchTime =
+                    mAppStandby.getEstimatedLaunchTime(estimate.packageName, userId);
+            if (estimate.estimatedLaunchTime != oldEstimatedLaunchTime) {
+                mAppStandby.setEstimatedLaunchTime(
+                        estimate.packageName, userId, estimate.estimatedLaunchTime);
+                changedTimes.add(estimate.packageName);
+            }
+        }
+        if (changedTimes.size() > 0) {
+            mHandler.obtainMessage(
+                    MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED, userId, 0, changedTimes)
+                    .sendToTarget();
+        }
+    }
+
     /**
      * Called via the local interface.
      */
@@ -2287,6 +2334,37 @@ public class UsageStatsService extends SystemService implements
             try {
                 mAppStandby.setAppStandbyBuckets(appBuckets.getList(), userId,
                         callingUid, callingPid);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void setEstimatedLaunchTime(String packageName, long estimatedLaunchTime,
+                int userId) {
+            getContext().enforceCallingPermission(
+                    Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE,
+                    "No permission to change app launch estimates");
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                UsageStatsService.this
+                        .setEstimatedLaunchTime(userId, packageName, estimatedLaunchTime);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void setEstimatedLaunchTimes(ParceledListSlice estimatedLaunchTimes, int userId) {
+            getContext().enforceCallingPermission(
+                    Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE,
+                    "No permission to change app launch estimates");
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                UsageStatsService.this
+                        .setEstimatedLaunchTimes(userId, estimatedLaunchTimes.getList());
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
