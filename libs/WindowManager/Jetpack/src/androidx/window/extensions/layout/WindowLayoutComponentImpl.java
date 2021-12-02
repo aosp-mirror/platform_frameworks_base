@@ -25,19 +25,23 @@ import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
 
 import android.annotation.Nullable;
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
+import androidx.window.common.EmptyLifecycleCallbacksAdapter;
 import androidx.window.common.SettingsDisplayFeatureProducer;
 import androidx.window.util.DataProducer;
 import androidx.window.util.PriorityDataProducer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,12 +60,14 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private static final String TAG = "SampleExtension";
 
     private final Map<Activity, Consumer<WindowLayoutInfo>> mWindowLayoutChangeListeners =
-            new HashMap<>();
+            new ArrayMap<>();
 
     private final SettingsDisplayFeatureProducer mSettingsDisplayFeatureProducer;
     private final DataProducer<List<CommonFoldingFeature>> mFoldingFeatureProducer;
 
     public WindowLayoutComponentImpl(Context context) {
+        ((Application) context.getApplicationContext())
+                .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
         mSettingsDisplayFeatureProducer = new SettingsDisplayFeatureProducer(context);
         mFoldingFeatureProducer = new PriorityDataProducer<>(List.of(
                 mSettingsDisplayFeatureProducer,
@@ -72,6 +78,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
     /**
      * Adds a listener interested in receiving updates to {@link WindowLayoutInfo}
+     *
      * @param activity hosting a {@link android.view.Window}
      * @param consumer interested in receiving updates to {@link WindowLayoutInfo}
      */
@@ -83,6 +90,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
     /**
      * Removes a listener no longer interested in receiving updates.
+     *
      * @param consumer no longer interested in receiving updates to {@link WindowLayoutInfo}
      */
     public void removeWindowLayoutInfoListener(
@@ -104,6 +112,16 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         return mWindowLayoutChangeListeners.keySet();
     }
 
+    @NonNull
+    private boolean isListeningForLayoutChanges(IBinder token) {
+        for (Activity activity: getActivitiesListeningForLayoutChanges()) {
+            if (token.equals(activity.getWindow().getAttributes().token)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected boolean hasListeners() {
         return !mWindowLayoutChangeListeners.isEmpty();
     }
@@ -115,9 +133,9 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      * possible to translate, then we will return a {@code null} value.
      *
      * @param state if it matches a value in {@link CommonFoldingFeature.State}, {@code null}
-     * otherwise. @return a {@link FoldingFeature.STATE_FLAT} or
-     * {@link FoldingFeature.STATE_HALF_OPENED} if the given state matches a value in
-     * {@link CommonFoldingFeature.State} and {@code null} otherwise.
+     *              otherwise. @return a {@link FoldingFeature.STATE_FLAT} or
+     *              {@link FoldingFeature.STATE_HALF_OPENED} if the given state matches a value in
+     *              {@link CommonFoldingFeature.State} and {@code null} otherwise.
      */
     @Nullable
     private Integer convertToExtensionState(int state) {
@@ -198,7 +216,27 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         } else {
             mSettingsDisplayFeatureProducer.unregisterObserversIfNeeded();
         }
-
         onDisplayFeaturesChanged();
+    }
+
+    private final class NotifyOnConfigurationChanged extends EmptyLifecycleCallbacksAdapter {
+        @Override
+        public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+            super.onActivityCreated(activity, savedInstanceState);
+            onDisplayFeaturesChangedIfListening(activity);
+        }
+
+        @Override
+        public void onActivityConfigurationChanged(Activity activity) {
+            super.onActivityConfigurationChanged(activity);
+            onDisplayFeaturesChangedIfListening(activity);
+        }
+
+        private void onDisplayFeaturesChangedIfListening(Activity activity) {
+            IBinder token = activity.getWindow().getAttributes().token;
+            if (token == null || isListeningForLayoutChanges(token)) {
+                onDisplayFeaturesChanged();
+            }
+        }
     }
 }
