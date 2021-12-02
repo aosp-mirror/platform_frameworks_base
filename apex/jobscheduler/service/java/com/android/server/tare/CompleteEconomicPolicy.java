@@ -33,8 +33,8 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
     /** Lazily populated set of rewards covered by this policy. */
     private final SparseArray<Reward> mRewards = new SparseArray<>();
     private final int[] mCostModifiers;
-    private final long mMaxSatiatedBalance;
-    private final long mMaxSatiatedCirculation;
+    private long mMaxSatiatedBalance;
+    private long mMaxSatiatedCirculation;
 
     CompleteEconomicPolicy(@NonNull InternalResourceService irs) {
         super(irs);
@@ -53,6 +53,19 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
             mCostModifiers[i] = costModifiers.valueAt(i);
         }
 
+        updateMaxBalances();
+    }
+
+    @Override
+    void setup() {
+        super.setup();
+        for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
+            mEnabledEconomicPolicies.valueAt(i).setup();
+        }
+        updateMaxBalances();
+    }
+
+    private void updateMaxBalances() {
         long max = 0;
         for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
             max += mEnabledEconomicPolicies.valueAt(i).getMaxSatiatedBalance();
@@ -64,14 +77,6 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
             max += mEnabledEconomicPolicies.valueAt(i).getMaxSatiatedCirculation();
         }
         mMaxSatiatedCirculation = max;
-    }
-
-    @Override
-    void setup() {
-        super.setup();
-        for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
-            mEnabledEconomicPolicies.valueAt(i).setup();
-        }
     }
 
     @Override
