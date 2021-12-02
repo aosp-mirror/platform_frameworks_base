@@ -9561,6 +9561,20 @@ package android.bluetooth {
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_LE_AUDIO_CONNECTION_STATE_CHANGED = "android.bluetooth.action.LE_AUDIO_CONNECTION_STATE_CHANGED";
   }
 
+  public final class BluetoothLeAudioCodecConfig {
+    method @NonNull public String getCodecName();
+    method public int getCodecType();
+    method public static int getMaxCodecType();
+    field public static final int SOURCE_CODEC_TYPE_INVALID = 1000000; // 0xf4240
+    field public static final int SOURCE_CODEC_TYPE_LC3 = 0; // 0x0
+  }
+
+  public static final class BluetoothLeAudioCodecConfig.Builder {
+    ctor public BluetoothLeAudioCodecConfig.Builder();
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig build();
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setCodecType(int);
+  }
+
   public final class BluetoothManager {
     method public android.bluetooth.BluetoothAdapter getAdapter();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices(int);
