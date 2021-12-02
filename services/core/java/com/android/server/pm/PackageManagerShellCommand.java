@@ -49,7 +49,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
-import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
@@ -668,8 +667,6 @@ class PackageManagerShellCommand extends ShellCommand {
                 return runListPermissions();
             case "staged-sessions":
                 return runListStagedSessions();
-            case "sdks":
-                return runListSdks();
             case "users":
                 ServiceManager.getService("user").shellCommand(
                         getInFileDescriptor(), getOutFileDescriptor(), getErrFileDescriptor(),
@@ -795,15 +792,6 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private int runListPackages(boolean showSourceDir) throws RemoteException {
-        return runListPackages(showSourceDir, false);
-    }
-
-    private int runListSdks() throws RemoteException {
-        return runListPackages(false, true);
-    }
-
-    private int runListPackages(boolean showSourceDir, boolean showSdks) throws RemoteException {
-        final String prefix = showSdks ? "sdk:" : "package:";
         final PrintWriter pw = getOutPrintWriter();
         int getFlags = 0;
         boolean listDisabled = false, listEnabled = false;
@@ -897,61 +885,37 @@ class PackageManagerShellCommand extends ShellCommand {
             }
 
             final boolean isSystem = !isApex &&
-                    (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+                    (info.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0;
             final boolean isEnabled = !isApex && info.applicationInfo.enabled;
-            if ((listDisabled && isEnabled) ||
-                    (listEnabled && !isEnabled) ||
-                    (listSystem && !isSystem) ||
-                    (listThirdParty && isSystem) ||
-                    (listApexOnly && !isApex)) {
-                continue;
-            }
-
-            String name = null;
-            if (showSdks) {
-                final ParceledListSlice<SharedLibraryInfo> libsSlice =
-                        mInterface.getDeclaredSharedLibraries(info.packageName, getFlags, userId);
-                if (libsSlice == null) {
-                    continue;
+            if ((!listDisabled || !isEnabled) &&
+                    (!listEnabled || isEnabled) &&
+                    (!listSystem || isSystem) &&
+                    (!listThirdParty || !isSystem) &&
+                    (!listApexOnly || isApex)) {
+                pw.print("package:");
+                if (showSourceDir) {
+                    pw.print(info.applicationInfo.sourceDir);
+                    pw.print("=");
                 }
-                final List<SharedLibraryInfo> libs = libsSlice.getList();
-                for (int l = 0, lsize = libs.size(); l < lsize; ++l) {
-                    SharedLibraryInfo lib = libs.get(l);
-                    if (lib.getType() == SharedLibraryInfo.TYPE_SDK) {
-                        name = lib.getName() + ":" + lib.getLongVersion();
-                        break;
+                pw.print(info.packageName);
+                if (showVersionCode) {
+                    pw.print(" versionCode:");
+                    if (info.applicationInfo != null) {
+                        pw.print(info.applicationInfo.longVersionCode);
+                    } else {
+                        pw.print(info.getLongVersionCode());
                     }
                 }
-                if (name == null) {
-                    continue;
+                if (listInstaller) {
+                    pw.print("  installer=");
+                    pw.print(mInterface.getInstallerPackageName(info.packageName));
                 }
-            } else {
-                name = info.packageName;
-            }
-
-            pw.print(prefix);
-            if (showSourceDir) {
-                pw.print(info.applicationInfo.sourceDir);
-                pw.print("=");
-            }
-            pw.print(name);
-            if (showVersionCode) {
-                pw.print(" versionCode:");
-                if (info.applicationInfo != null) {
-                    pw.print(info.applicationInfo.longVersionCode);
-                } else {
-                    pw.print(info.getLongVersionCode());
+                if (showUid && !isApex) {
+                    pw.print(" uid:");
+                    pw.print(info.applicationInfo.uid);
                 }
+                pw.println();
             }
-            if (listInstaller) {
-                pw.print("  installer=");
-                pw.print(mInterface.getInstallerPackageName(info.packageName));
-            }
-            if (showUid && !isApex) {
-                pw.print(" uid:");
-                pw.print(info.applicationInfo.uid);
-            }
-            pw.println();
         }
         return 0;
     }
@@ -2096,7 +2060,7 @@ class PackageManagerShellCommand extends ShellCommand {
         } else {
             if ((flags & PackageManager.DELETE_ALL_USERS) == 0) {
                 final PackageInfo info = mInterface.getPackageInfo(packageName,
-                        PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES, translatedUserId);
+                        PackageManager.MATCH_STATIC_SHARED_LIBRARIES, translatedUserId);
                 if (info == null) {
                     pw.println("Failure [not installed for " + translatedUserId + "]");
                     return 1;

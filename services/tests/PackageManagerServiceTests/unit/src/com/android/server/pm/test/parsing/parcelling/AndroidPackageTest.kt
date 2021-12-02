@@ -106,16 +106,6 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         "setSplitCodePaths",
         "setSplitClassLoaderName",
         "setSplitHasCode",
-        // Tested through addUsesSdkLibrary
-        "addUsesSdkLibrary",
-        "getUsesSdkLibraries",
-        "getUsesSdkLibrariesVersionsMajor",
-        "getUsesSdkLibrariesCertDigests",
-        // Tested through addUsesStaticLibrary
-        "addUsesStaticLibrary",
-        "getUsesStaticLibraries",
-        "getUsesStaticLibrariesVersions",
-        "getUsesStaticLibrariesCertDigests"
     )
 
     override val baseParams = listOf(
@@ -167,8 +157,6 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::getSecondaryNativeLibraryDir,
         AndroidPackage::getSharedUserId,
         AndroidPackage::getSharedUserLabel,
-        AndroidPackage::getSdkLibName,
-        AndroidPackage::getSdkLibVersionMajor,
         AndroidPackage::getStaticSharedLibName,
         AndroidPackage::getStaticSharedLibVersion,
         AndroidPackage::getTargetSandboxVersion,
@@ -222,7 +210,6 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::isResizeableActivityViaSdkVersion,
         AndroidPackage::isRestoreAnyVersion,
         AndroidPackage::isSignedWithPlatformKey,
-        AndroidPackage::isSdkLibrary,
         AndroidPackage::isStaticSharedLibrary,
         AndroidPackage::isStub,
         AndroidPackage::isSupportsRtl,
@@ -241,7 +228,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::getMinAspectRatio,
         AndroidPackage::hasPreserveLegacyExternalStorage,
         AndroidPackage::hasRequestForegroundServiceExemption,
-        AndroidPackage::hasRequestRawExternalStorageAccess
+        AndroidPackage::hasRequestRawExternalStorageAccess,
     )
 
     override fun extraParams() = listOf(
@@ -267,6 +254,13 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         adder(AndroidPackage::getUsesNativeLibraries, "testUsesNativeLibrary"),
         adder(AndroidPackage::getUsesOptionalLibraries, "testUsesOptionalLibrary"),
         adder(AndroidPackage::getUsesOptionalNativeLibraries, "testUsesOptionalNativeLibrary"),
+        adder(AndroidPackage::getUsesStaticLibraries, "testUsesStaticLibrary"),
+        getSetByValue(
+            AndroidPackage::getUsesStaticLibrariesVersions,
+            PackageImpl::addUsesStaticLibraryVersion,
+            (testCounter++).toLong(),
+            transformGet = { it?.singleOrNull() }
+        ),
         getSetByValue(
             AndroidPackage::areAttributionsUserVisible,
             ParsingPackage::setAttributionsAreUserVisible,
@@ -296,7 +290,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             AndroidPackage::getKeySetMapping,
             PackageImpl::addKeySet,
             "testKeySetName" to testKey(),
-            transformGet = { "testKeySetName" to it["testKeySetName"]?.singleOrNull() }
+            transformGet = { "testKeySetName" to it["testKeySetName"]?.singleOrNull() },
         ),
         getSetByValue(
             AndroidPackage::getPermissionGroups,
@@ -321,7 +315,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
                     { it.first },
                     { it.second.intentFilter.schemesIterator().asSequence().singleOrNull() },
                     { it.second.intentFilter.authoritiesIterator().asSequence()
-                        .singleOrNull()?.host }
+                        .singleOrNull()?.host },
                 )
             }
         ),
@@ -330,7 +324,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             PackageImpl::addQueriesIntent,
             Intent(Intent.ACTION_VIEW, Uri.parse("https://test.pm.server.android.com")),
             transformGet = { it.singleOrNull() },
-            compare = { first, second -> first?.filterEquals(second) }
+            compare = { first, second -> first?.filterEquals(second) },
         ),
         getSetByValue(
             AndroidPackage::getRestrictUpdateHash,
@@ -351,6 +345,13 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
                     null
                 )
             }
+        ),
+        getSetByValue(
+            AndroidPackage::getUsesStaticLibrariesCertDigests,
+            PackageImpl::addUsesStaticLibraryCertDigests,
+            arrayOf("testCertDigest"),
+            transformGet = { it?.singleOrNull() },
+            compare = Array<String?>?::contentEquals
         ),
         getSetByValue(
             AndroidPackage::getActivities,
@@ -439,7 +440,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
                     first, second,
                     { it.size() },
                     { it.keyAt(0) },
-                    { it.valueAt(0) }
+                    { it.valueAt(0) },
                 )
             }
         ),
@@ -450,7 +451,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             compare = { first, second ->
                 equalBy(
                     first, second,
-                    { it["testProcess"]?.name }
+                    { it["testProcess"]?.name },
                 )
             }
         ),
@@ -470,10 +471,10 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
                     PackageManager.Property::getName,
                     PackageManager.Property::getClassName,
                     PackageManager.Property::getPackageName,
-                    PackageManager.Property::getString
+                    PackageManager.Property::getString,
                 )
             }
-        )
+        ),
     )
 
     override fun initialObject() = PackageImpl.forParsing(
@@ -517,9 +518,6 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         .setSplitClassLoaderName(0, "testSplitClassLoaderNameZero")
         .setSplitClassLoaderName(1, "testSplitClassLoaderNameOne")
 
-        .addUsesSdkLibrary("testSdk", 2L, arrayOf("testCertDigest1"))
-        .addUsesStaticLibrary("testStatic", 3L, arrayOf("testCertDigest2"))
-
     override fun extraAssertions(before: Parcelable, after: Parcelable) {
         super.extraAssertions(before, after)
         after as PackageImpl
@@ -560,18 +558,6 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             expect.that(it.get(0)).asList().containsExactly(-1)
             expect.that(it.get(1)).asList().containsExactly(0)
         }
-
-        expect.that(after.usesSdkLibraries).containsExactly("testSdk")
-        expect.that(after.usesSdkLibrariesVersionsMajor).asList().containsExactly(2L)
-        expect.that(after.usesSdkLibrariesCertDigests!!.size).isEqualTo(1)
-        expect.that(after.usesSdkLibrariesCertDigests!![0]).asList()
-                .containsExactly("testCertDigest1")
-
-        expect.that(after.usesStaticLibraries).containsExactly("testStatic")
-        expect.that(after.usesStaticLibrariesVersions).asList().containsExactly(3L)
-        expect.that(after.usesStaticLibrariesCertDigests!!.size).isEqualTo(1)
-        expect.that(after.usesStaticLibrariesCertDigests!![0]).asList()
-                .containsExactly("testCertDigest2")
     }
 
     private fun testKey() = KeyPairGenerator.getInstance("RSA")
