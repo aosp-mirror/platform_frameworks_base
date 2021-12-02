@@ -83,6 +83,6 @@ public interface MediaModule {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
-        return Optional.of(new MediaTttChipController(context, commandRegistry, windowManager));
+        return Optional.of(new MediaTttChipController(commandRegistry, context, windowManager));
     }
 }

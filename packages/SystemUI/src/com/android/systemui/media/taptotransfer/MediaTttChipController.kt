@@ -19,9 +19,13 @@ package com.android.systemui.media.taptotransfer
 import android.content.Context
 import android.graphics.PixelFormat
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.WindowManager
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
@@ -36,8 +40,8 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class MediaTttChipController @Inject constructor(
-    context: Context,
     commandRegistry: CommandRegistry,
+    private val context: Context,
     private val windowManager: WindowManager,
 ) {
     init {
@@ -46,9 +50,9 @@ class MediaTttChipController @Inject constructor(
     }
 
     private val windowLayoutParams = WindowManager.LayoutParams().apply {
-        width = WindowManager.LayoutParams.MATCH_PARENT
-        height = WindowManager.LayoutParams.MATCH_PARENT
-        gravity = Gravity.CENTER_HORIZONTAL
+        width = WindowManager.LayoutParams.WRAP_CONTENT
+        height = WindowManager.LayoutParams.WRAP_CONTENT
+        gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL)
         type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY
         title = "Media Tap-To-Transfer Chip View"
         flags = (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -57,29 +61,61 @@ class MediaTttChipController @Inject constructor(
         setTrustedOverlay()
     }
 
-    // TODO(b/203800327): Create a layout that matches UX.
-    private val chipView: TextView = TextView(context).apply {
-        text = "Media Tap-To-Transfer Chip"
-    }
+    /** The chip view currently being displayed. Null if the chip is not being displayed. */
+    private var chipView: LinearLayout? = null
 
-    private var chipDisplaying: Boolean = false
+    private fun displayChip(chipType: ChipType, otherDeviceName: String) {
+        val oldChipView = chipView
+        if (chipView == null) {
+            chipView = LayoutInflater
+                .from(context)
+                .inflate(R.layout.media_ttt_chip, null) as LinearLayout
+        }
+        val currentChipView = chipView!!
 
-    private fun addChip() {
-        if (chipDisplaying) { return }
-        windowManager.addView(chipView, windowLayoutParams)
-        chipDisplaying = true
+        // Text
+        currentChipView.requireViewById<TextView>(R.id.text).apply {
+            text = context.getString(chipType.chipText, otherDeviceName)
+        }
+
+        if (oldChipView == null) {
+            windowManager.addView(chipView, windowLayoutParams)
+        }
     }
 
     private fun removeChip() {
-        if (!chipDisplaying) { return }
+        if (chipView == null) { return }
         windowManager.removeView(chipView)
-        chipDisplaying = false
+        chipView = null
+    }
+
+    @VisibleForTesting
+    enum class ChipType(
+        @StringRes internal val chipText: Int
+    ) {
+        MOVE_CLOSER_TO_TRANSFER(R.string.media_move_closer_to_transfer),
+        TRANSFER_INITIATED(R.string.media_transfer_playing),
+        TRANSFER_SUCCEEDED(R.string.media_transfer_playing),
     }
 
     inner class AddChipCommand : Command {
-        override fun execute(pw: PrintWriter, args: List<String>) = addChip()
+        override fun execute(pw: PrintWriter, args: List<String>) {
+            val chipTypeArg = args[1]
+            ChipType.values().forEach {
+                if (it.name == chipTypeArg) {
+                    displayChip(it, otherDeviceName = args[0])
+                    return
+                }
+            }
+
+            pw.println("Chip type must be one of " +
+                    ChipType.values().map { it.name }.reduce { acc, s -> "$acc, $s" })
+        }
+
         override fun help(pw: PrintWriter) {
-            pw.println("Usage: adb shell cmd statusbar $ADD_CHIP_COMMAND_TAG")
+            pw.println(
+                "Usage: adb shell cmd statusbar $ADD_CHIP_COMMAND_TAG <deviceName> <chipType>"
+            )
         }
     }
 
