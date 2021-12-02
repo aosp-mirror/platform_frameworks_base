@@ -91,16 +91,14 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
         }
 
     /**
-     * Checks that the nav bar layer starts visible, becomes invisible during unlocking animation
-     * and becomes visible at the end
+     * Checks that the nav bar layer starts invisible, becomes visible during unlocking animation
+     * and remains visible at the end
      */
-    @FlakyTest
+    @Postsubmit
     @Test
     fun navBarLayerVisibilityChanges() {
         testSpec.assertLayers {
-            this.isVisible(FlickerComponentName.NAV_BAR)
-                .then()
-                .isInvisible(FlickerComponentName.NAV_BAR)
+            this.isInvisible(FlickerComponentName.NAV_BAR)
                 .then()
                 .isVisible(FlickerComponentName.NAV_BAR)
         }
@@ -153,16 +151,14 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     }
 
     /**
-     * Checks that the nav bar starts the transition visible, then becomes invisible during
-     * then unlocking animation and becomes visible at the end of the transition
+     * Checks that the nav bar starts the transition invisible, then becomes visible during
+     * the unlocking animation and remains visible at the end of the transition
      */
-    @FlakyTest
+    @Postsubmit
     @Test
     fun navBarWindowsVisibilityChanges() {
         testSpec.assertWm {
-            this.isAboveAppWindowVisible(FlickerComponentName.NAV_BAR)
-                .then()
-                .isNonAppWindowInvisible(FlickerComponentName.NAV_BAR)
+            this.isNonAppWindowInvisible(FlickerComponentName.NAV_BAR)
                 .then()
                 .isAboveAppWindowVisible(FlickerComponentName.NAV_BAR)
         }
