@@ -338,6 +338,11 @@ public class NotificationShadeWindowViewController {
                     return true;
                 }
 
+                if (mLockIconViewController.onInterceptTouchEvent(ev)) {
+                    // immediately return true; don't send the touch to the drag down helper
+                    return true;
+                }
+
                 boolean intercept = false;
                 if (mNotificationPanelViewController.isFullyExpanded()
                         && mDragDownHelper.isDragDownEnabled()

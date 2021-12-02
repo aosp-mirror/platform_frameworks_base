@@ -40,30 +40,21 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.animation.DialogListener;
-import com.android.systemui.animation.DialogListener.DismissReason;
-import com.android.systemui.animation.ListenableDialog;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 
 /**
  * Base class for dialogs that should appear over panels and keyguard.
  * The SystemUIDialog registers a listener for the screen off / close system dialogs broadcast,
  * and dismisses itself when it receives the broadcast.
  */
-public class SystemUIDialog extends AlertDialog implements ListenableDialog,
-        ViewRootImpl.ConfigChangedCallback {
+public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigChangedCallback {
     // TODO(b/203389579): Remove this once the dialog width on large screens has been agreed on.
     private static final String FLAG_TABLET_DIALOG_WIDTH =
             "persist.systemui.flag_tablet_dialog_width";
 
     private final Context mContext;
     private final DismissReceiver mDismissReceiver;
-    private final Set<DialogListener> mDialogListeners = new LinkedHashSet<>();
     private final Handler mHandler = new Handler();
 
     private int mLastWidth = Integer.MIN_VALUE;
@@ -117,10 +108,6 @@ public class SystemUIDialog extends AlertDialog implements ListenableDialog,
         mLastWidth = width;
         mLastHeight = height;
         getWindow().setLayout(width, height);
-
-        for (DialogListener listener : new LinkedHashSet<>(mDialogListeners)) {
-            listener.onSizeChanged();
-        }
     }
 
     @Override
@@ -195,60 +182,6 @@ public class SystemUIDialog extends AlertDialog implements ListenableDialog,
         }
 
         ViewRootImpl.removeConfigCallback(this);
-    }
-
-    @Override
-    public void addListener(DialogListener listener) {
-        mDialogListeners.add(listener);
-    }
-
-    @Override
-    public void removeListener(DialogListener listener) {
-        mDialogListeners.remove(listener);
-    }
-
-    @Override
-    public void dismiss() {
-        dismiss(DismissReason.UNKNOWN);
-    }
-
-    private void dismiss(DismissReason reason) {
-        super.dismiss();
-
-        for (DialogListener listener : new LinkedHashSet<>(mDialogListeners)) {
-            listener.onDismiss(reason);
-        }
-    }
-
-    /**
-     * Dismiss this dialog. If it was launched from another dialog using
-     * {@link com.android.systemui.animation.DialogLaunchAnimator#showFromView} with a
-     * non-{@code null} {@code parentHostDialog} parameter, also dismisses the stack of dialogs,
-     * animating back to the original touchSurface.
-     */
-    public void dismissStack() {
-        for (DialogListener listener : new LinkedHashSet<>(mDialogListeners)) {
-            listener.prepareForStackDismiss();
-        }
-        dismiss();
-    }
-
-    @Override
-    public void hide() {
-        super.hide();
-
-        for (DialogListener listener : new LinkedHashSet<>(mDialogListeners)) {
-            listener.onHide();
-        }
-    }
-
-    @Override
-    public void show() {
-        super.show();
-
-        for (DialogListener listener : new LinkedHashSet<>(mDialogListeners)) {
-            listener.onShow();
-        }
     }
 
     public void setShowForAllUsers(boolean show) {
@@ -364,11 +297,7 @@ public class SystemUIDialog extends AlertDialog implements ListenableDialog,
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (mDialog instanceof SystemUIDialog) {
-                ((SystemUIDialog) mDialog).dismiss(DismissReason.DEVICE_LOCKED);
-            } else {
-                mDialog.dismiss();
-            }
+            mDialog.dismiss();
         }
     }
 }

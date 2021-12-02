@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"স্ক্রিন আনলক করার প্রচেষ্টাগুলির উপরে নজর রাখুন"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"স্ক্রীণ আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ট্যাবলেট লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ট্যাবলেটের ডেটা মুছে ফেলে৷"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"স্ক্রিন আনলক করার সময় কতবার ভুল পাসওয়ার্ড লেখা হচ্ছে তা মনিটর করুন এবং Android TV ডিভাইস লক করুন অথবা অনেকবার ভুল পাসওয়ার্ড লেখা হলে ডিভাইসের সব ডেটা মুছে ফেলুন।"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ফোনের স্ক্রিন আনলক করার সময় কতবার ভুল পাসওয়ার্ড টাইপ করা হয়েছে তা মনিটর করুন। একাধিকবার ভুল পাসওয়ার্ড টাইপ করা হলে ইনফোটেইনমেন্ট সিস্টেম লক করুন অথবা এর সব ডেটা মুছে ফেলুন।"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"স্ক্রীণ আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ফোন লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ফোনের ডেটা মুছে ফেলে৷"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"স্ক্রিন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ট্যাবলেট লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ব্যবহারকারীর ডেটা মুছে ফেলে৷"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"স্ক্রিন আনলক করার সময় কতবার ভুল পাসওয়ার্ড লেখা হচ্ছে তা মনিটর করুন এবং Android TV ডিভাইস লক করুন অথবা অনেকবার ভুল পাসওয়ার্ড লেখা হলে সব ব্যবহারকারীর ডেটা মুছে ফেলুন।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ফোনের স্ক্রিন আনলক করার সময় কতবার ভুল পাসওয়ার্ড টাইপ করা হয়েছে তা মনিটর করুন। একাধিকবার ভুল পাসওয়ার্ড টাইপ করা হলে ইনফোটেইনমেন্ট সিস্টেম লক করুন অথবা এই প্রোফাইলের সব ডেটা মুছে ফেলুন।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"স্ক্রিন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ফোন লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ব্যবহারকারীর ডেটা মুছে ফেলে৷"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"স্ক্রিন লক পরিবর্তন করে"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"স্ক্রিন লক পরিবর্তন করুন৷"</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"সমস্ত ডেটা মুছে দেয়"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ফ্যাক্টরি ডেটা আবার সেট কার্য সম্পাদনার দ্বারা কোনো রকম সতর্কতা ছাড়াই ট্যাবলেটের ডেটা মোছে৷"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ফ্যাক্টরি ডেটা রিসেট করে কোনও সতর্কতা ছাড়াই আপনার Android TV ডিভাইসের ডেটা মুছে ফেলুন।"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"ফ্যাক্টরি ডেটা রিসেট করে কোনও সতর্কতা মূলক বিজ্ঞপ্তি ছাড়াই আপনার ইনফোটেইনমেন্ট সিস্টেমের ডেটা মুছে ফেলুন।"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ফ্যাক্টরি ডেটা রিসেট করে কোনও সতর্কতা ছাড়াই ফোনের ডেটা মোছে৷"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ব্যবহারকারীর ডেটা মুছুন"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"প্রোফাইল ডেটা মুছে ফেলুন"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"ব্যবহারকারীর ডেটা মুছুন"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"সতর্কীকরণ ছাড়াই এই ট্যাবলেটে থাকা ব্যাবহারকার্রী ডেটা মুছে ফেলে৷"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"কোনও সতর্কতা ছাড়াই এই ব্যবহারকারীর ডেটা Android TV ডিভাইসটি থেকে মুছুন।"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"কোনও সতর্কতা মূলক বিজ্ঞপ্তি ছাড়াই ইনফোটেইনমেন্ট সিস্টেমে থাকা এই প্রোফাইলের ডেটা মুছে ফেলুন।"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"সতর্কীকরণ ছাড়াই এই ফোনে থাকা ব্যাবহারকার্রী ডেটা মুছে ফেলে৷"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"ডিভাইসের বৈশ্বিক প্রক্সী সেট করে"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"নীতিযখন নীতি সক্ষম করা হয় তখন ডিভাইসের বৈশ্বিক প্রক্সী ব্যবহার করা হবে সেই হিসেবে সেট করে৷ শুধুমাত্র ডিভাইসের মালিক বৈশ্বিক প্রক্সী সেট করতে পারেন৷"</string>

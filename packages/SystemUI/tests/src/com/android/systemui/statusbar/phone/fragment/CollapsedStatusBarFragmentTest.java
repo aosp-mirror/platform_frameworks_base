@@ -50,7 +50,6 @@ import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
@@ -68,8 +67,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Optional;
-
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
@@ -85,7 +82,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private NetworkController mNetworkController;
     private KeyguardStateController mKeyguardStateController;
 
-    private final StatusBar mStatusBar = mock(StatusBar.class);
     private final CommandQueue mCommandQueue = mock(CommandQueue.class);
     private OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
     private OperatorNameViewController mOperatorNameViewController;
@@ -328,7 +324,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mMockNotificationAreaController,
                 new PanelExpansionStateManager(),
                 mock(FeatureFlags.class),
-                () -> Optional.of(mStatusBar),
                 mStatusBarIconController,
                 new StatusBarHideIconsForBouncerManager(
                         mCommandQueue, new FakeExecutor(new FakeSystemClock()), new DumpManager()),

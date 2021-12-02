@@ -133,6 +133,7 @@ import com.android.systemui.InitController;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.assist.AssistManager;
@@ -732,6 +733,7 @@ public class StatusBar extends SystemUI implements
             VisualStabilityManager visualStabilityManager,
             DeviceProvisionedController deviceProvisionedController,
             NavigationBarController navigationBarController,
+            AccessibilityFloatingMenuController accessibilityFloatingMenuController,
             Lazy<AssistManager> assistManagerLazy,
             ConfigurationController configurationController,
             NotificationShadeWindowController notificationShadeWindowController,
@@ -834,6 +836,7 @@ public class StatusBar extends SystemUI implements
         mVisualStabilityManager = visualStabilityManager;
         mDeviceProvisionedController = deviceProvisionedController;
         mNavigationBarController = navigationBarController;
+        mAccessibilityFloatingMenuController = accessibilityFloatingMenuController;
         mAssistManagerLazy = assistManagerLazy;
         mConfigurationController = configurationController;
         mNotificationShadeWindowController = notificationShadeWindowController;
@@ -1047,6 +1050,8 @@ public class StatusBar extends SystemUI implements
 
         mBatteryController.observe(mLifecycle, mBatteryStateChangeCallback);
         mLifecycle.setCurrentState(RESUMED);
+
+        mAccessibilityFloatingMenuController.init();
 
         // set the initial view visibility
         int disabledFlags1 = result.mDisabledFlags1;
@@ -1856,10 +1861,6 @@ public class StatusBar extends SystemUI implements
         return mDozeServiceHost.isPulsing();
     }
 
-    public boolean hideStatusBarIconsWhenExpanded() {
-        return mNotificationPanelViewController.hideStatusBarIconsWhenExpanded();
-    }
-
     @Nullable
     public View getAmbientIndicationContainer() {
         return mAmbientIndicationContainer;
@@ -2081,7 +2082,7 @@ public class StatusBar extends SystemUI implements
         mShadeController.runPostCollapseRunnables();
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
         if (!mNotificationActivityStarter.isCollapsingToShowActivityOverLockscreen()) {
-            showBouncerIfKeyguard();
+            showBouncerOrLockScreenIfKeyguard();
         } else if (DEBUG) {
             Log.d(TAG, "Not showing bouncer due to activity showing over lockscreen");
         }
@@ -3287,13 +3288,17 @@ public class StatusBar extends SystemUI implements
         return false;
     }
 
-    private void showBouncerIfKeyguard() {
+    private void showBouncerOrLockScreenIfKeyguard() {
         if (!mKeyguardViewMediator.isHiding()) {
-            if (mState == StatusBarState.KEYGUARD
-                    && !mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing()) {
+            if (mState == StatusBarState.SHADE_LOCKED
+                    && mKeyguardUpdateMonitor.isUdfpsEnrolled()) {
+                // shade is showing while locked on the keyguard, so go back to showing the
+                // lock screen where users can use the UDFPS affordance to enter the device
+                mStatusBarKeyguardViewManager.reset(true);
+            } else if ((mState == StatusBarState.KEYGUARD
+                    && !mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing())
+                    || mState == StatusBarState.SHADE_LOCKED) {
                 mStatusBarKeyguardViewManager.showGenericBouncer(true /* scrimmed */);
-            } else if (mState == StatusBarState.SHADE_LOCKED) {
-                mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
             }
         }
     }
@@ -3426,6 +3431,14 @@ public class StatusBar extends SystemUI implements
     // TODO: Figure out way to remove these.
     public NavigationBarView getNavigationBarView() {
         return mNavigationBarController.getNavigationBarView(mDisplayId);
+    }
+
+    public void showPinningEnterExitToast(boolean entering) {
+        mNavigationBarController.showPinningEnterExitToast(mDisplayId, entering);
+    }
+
+    public void showPinningEscapeToast() {
+        mNavigationBarController.showPinningEscapeToast(mDisplayId);
     }
 
     /**
@@ -3807,6 +3820,7 @@ public class StatusBar extends SystemUI implements
     private final DeviceProvisionedController mDeviceProvisionedController;
 
     private final NavigationBarController mNavigationBarController;
+    private final AccessibilityFloatingMenuController mAccessibilityFloatingMenuController;
 
     // UI-specific methods
 

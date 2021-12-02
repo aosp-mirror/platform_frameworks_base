@@ -217,14 +217,6 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         dismiss();
     }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (!hasFocus && isShowing()) {
-            dismiss();
-        }
-    }
-
     void onHeaderIconClick() {
     }
 

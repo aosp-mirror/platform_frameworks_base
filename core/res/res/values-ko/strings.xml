@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"화면 잠금 해제 시도 모니터링"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"화면 잠금해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고, 잘못된 비밀번호 입력 횟수가 너무 많은 경우 태블릿을 잠그거나 태블릿에 있는 데이터를 모두 지웁니다."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"화면 잠금 해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 Android TV 기기를 잠그거나 Android TV 기기의 데이터를 모두 삭제합니다."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"화면 잠금 해제 시 잘못된 비밀번호를 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 인포테인먼트 시스템을 잠그거나 인포테인먼트 시스템의 데이터를 모두 삭제합니다."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"화면 잠금해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고, 잘못된 비밀번호 입력 횟수가 너무 많은 경우 휴대전화를 잠그거나 휴대전화에 있는 데이터를 모두 지웁니다."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"화면 잠금 해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 태블릿을 잠그거나 이 사용자의 데이터를 모두 삭제합니다."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"화면 잠금 해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 Android TV 기기를 잠그거나 사용자 데이터를 모두 삭제합니다."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"화면 잠금 해제 시 잘못된 비밀번호를 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 인포테인먼트 시스템을 잠그거나 이 프로필의 데이터를 모두 삭제합니다."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"화면 잠금 해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 휴대전화를 잠그거나 이 사용자의 데이터를 모두 삭제합니다."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"화면 잠금 변경"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"화면 잠금을 변경합니다."</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"모든 데이터 삭제"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"초기화를 수행하여 경고 없이 태블릿 데이터를 지웁니다."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"초기화를 실행하여 경고 없이 Android TV 기기의 데이터를 삭제합니다."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"초기화를 실행하여 인포테인먼트 시스템의 데이터를 경고 없이 삭제합니다."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"초기화를 수행하여 경고 없이 휴대전화 데이터를 지웁니다."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"사용자 데이터 삭제"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"프로필 데이터 삭제"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"사용자 데이터 삭제"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"이 태블릿에서 사용자의 데이터를 경고 없이 삭제합니다."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Android TV 기기에서 사용자 데이터를 경고 없이 삭제합니다."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"인포테인먼트 시스템에서 이 프로필의 데이터를 경고 없이 삭제합니다."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"이 휴대전화에서 사용자의 데이터를 경고 없이 삭제합니다."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"기기 전체 프록시 설정"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"정책이 사용 설정되어 있는 동안 사용될 기기 전체 프록시를 설정합니다. 기기 소유자만 전체 프록시를 설정할 수 있습니다."</string>
