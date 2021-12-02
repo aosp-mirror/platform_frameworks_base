@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Pantau percubaan buka kunci skrin"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Memantau bilangan kata laluan yang tersilap ditaip apabila membuka skrin, dan mengunci tablet atau memadam semua data tablet jika terlalu banyak kesilapan menaip kata laluan."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Pantau bilangan kata laluan salah yang ditaip semasa membuka kunci skrin, dan kunci peranti Android TV anda atau padamkan semua data peranti Android TV jika terlalu banyak kata laluan yang salah ditaip."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Memantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan mengunci sistem maklumat hibur atau memadam semua data sistem maklumat hibur jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Memantau bilangan kata laluan salah yang ditaip semasa membuka skrin, dan mengunci telefon atau memadam semua data telefon jika terlalu banyak kata laluan salah ditaip."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Pantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan kunci tablet atau padam semua data pengguna ini jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Pantau bilangan kata laluan salah yang ditaip semasa membuka kunci skrin, dan kunci peranti Android TV anda atau padamkan semua data pengguna ini jika terlalu banyak kata laluan yang salah ditaip."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Memantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan mengunci sistem maklumat hibur atau memadam semua data profil ini jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Pantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan kunci telefon atau padam semua data pengguna ini jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Tukar kunci skrin"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Tukar kunci skrin."</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Padamkan semua data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Memadamkan data tablet tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Padamkan data peranti Android TV anda tanpa amaran dengan melaksanakan tetapan semula data kilang."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Memadam data sistem maklumat hibur tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Padamkan data telefon tanpa amaran dengan melakukan tetapan semula data kilang."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Padam data pengguna"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Padam data profil"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Padam data pengguna"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Padam data pengguna ini pada tablet ini tanpa amaran."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Padamkan data pengguna ini pada peranti Android TV tanpa amaran."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Memadam data profil pada sistem maklumat hibur ini tanpa amaran."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Padam data pengguna ini pada telefon ini tanpa amaran."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Tetapkan proksi global peranti"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Tetapkan proksi global peranti untuk digunakan sementara dasar didayakan. Hanya pemilik peranti boleh menetapkan proksi global."</string>

@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekran kilidini açma denemelerini izle"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Ekran kilidini açarken yapılan yanlış şifre girme denemelerini izler ve çok fazla sayıda yanlış şifre girme denemesi yapılmışsa tableti kilitler veya tabletteki tüm verileri siler."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip eder ve çok fazla sayıda hatalı şifre girildiğinde Android TV cihazınızı kilitler veya Android TV cihazınızın tüm verilerini siler."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Ekran kilidi açılırken girilen hatalı şifre sayısı takip edilir ve çok fazla sayıda hatalı şifre girildiğinde bilgi-eğlence sistemi kilitlenir ya da bilgi-eğlence sistemindeki tüm veriler silinir."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Ekran kilidini açarken yapılan yanlış şifre girişi denemelerini izler ve çok sayıda yanlış şifre girişi denemesi yapılmışsa telefonu kilitler veya telefonun tüm verilerini siler."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde tableti kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde Android TV cihazınızı kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Ekran kilidi açılırken girilen hatalı şifre sayısı takip edilir ve çok fazla sayıda hatalı şifre girildiğinde tablet kilitlenir veya söz konusu kullanıcının tüm verileri silinir."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde telefonu kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Ekran kilidini değiştirme"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ekran kilidini değiştirir."</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Tüm verileri silme"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek tabletteki verileri uyarıda bulunmadan siler."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek Android TV cihazınızdaki verileri uyarıda bulunmadan siler."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek bilgi-eğlence sistemindeki veriler uyarıda bulunmadan silinir."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek telefondaki verileri uyarıda bulunmadan siler."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Kullanıcı verilerini sil"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Profil verilerini silme"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Kullanıcı verilerini sil"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Uyarı yapmadan bu kullanıcının bu tabletteki verilerini silin."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Uyarı yapmadan bu kullanıcının bu Android TV cihazındaki verilerini siler."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Bu bilgi-eğlence sistemindeki bu profilin verileri uyarıda bulunmadan silinir."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Uyarı yapmadan bu kullanıcının bu telefondaki verilerini siler."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Cihaz genelinde geçerli proxy\'i ayarla"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Politika etkin olduğunda kullanılacak cihaz genelinde geçerli proxy\'yi ayarlar. Genel proxy\'yi yalnızca cihaz sahibi ayarlayabilir."</string>

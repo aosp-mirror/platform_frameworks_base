@@ -69,6 +69,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
 import com.android.systemui.SystemUISecondaryUserService;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -133,6 +134,7 @@ public class UserSwitcherController implements Dumpable {
     private final IActivityTaskManager mActivityTaskManager;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final LatencyTracker mLatencyTracker;
+    private final DialogLaunchAnimator mDialogLaunchAnimator;
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     @VisibleForTesting
@@ -180,7 +182,8 @@ public class UserSwitcherController implements Dumpable {
             @Background Executor bgExecutor,
             InteractionJankMonitor interactionJankMonitor,
             LatencyTracker latencyTracker,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            DialogLaunchAnimator dialogLaunchAnimator) {
         mContext = context;
         mActivityManager = activityManager;
         mUserTracker = userTracker;
@@ -208,6 +211,8 @@ public class UserSwitcherController implements Dumpable {
         mHandler = handler;
         mActivityStarter = activityStarter;
         mUserManager = userManager;
+        mDialogLaunchAnimator = dialogLaunchAnimator;
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
@@ -1179,7 +1184,7 @@ public class UserSwitcherController implements Dumpable {
                 cancel();
             } else {
                 mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_REMOVE);
-                dismissStack();
+                mDialogLaunchAnimator.dismissStack(this);
                 removeGuestUser(mGuestId, mTargetId);
             }
         }
@@ -1210,7 +1215,7 @@ public class UserSwitcherController implements Dumpable {
             if (which == BUTTON_NEGATIVE) {
                 cancel();
             } else {
-                dismissStack();
+                mDialogLaunchAnimator.dismissStack(this);
                 if (ActivityManager.isUserAMonkey()) {
                     return;
                 }

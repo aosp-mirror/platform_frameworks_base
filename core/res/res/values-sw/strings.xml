@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Kuhesabu mara ambazo skrini inajaribu kufunguliwa"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Kufuatilia idadi ya manenosiri yasiyo sahihi yatakayoingizwa wakati wa kufungua skrini, na kufunga kompyuta kibao au kufuta data yote iliyomo kama manenosiri mengi yasiyo sahihi yataingizwa."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Fuatilia idadi ya manenosiri yasiyo sahihi yanayowekwa wakati wa kufungua skrini na ufunge kifaa chako cha Android TV au ufute data yake yote ikiwa mtumiaji ataweka manenosiri mengi mno yasiyo sahihi."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Fuatilia idadi ya manenosiri yasiyo sahihi yanayowekwa wakati wa kufungua skrini, na ufunge mfumo wa burudani na habari au ufute data yote kwenye mfumo wa burudani na habari ikiwa manenosiri mengi mno yasiyo sahihi yatawekwa."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Kufuatilia idadi ya manenosiri yasiyo sahihi yatakayoingizwa wakati wa kufungua skrini, na kufunga simu au kufuta data yote iliyomo kama manenosiri mengi sana yasiyo sahihi yataingizwa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Fuatilia idadi ya manenosiri yasiyo sahihi yaliyoingizwa wakati wa kufungua skrini, na ufunge kompyuta kibao au ufute data yote ya mtumiaji huyu kama ameingiza manenosiri yasiyo sahihi mara nyingi kupita kiasi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Fuatilia idadi ya manenosiri yasiyo sahihi yanayowekwa wakati wa kufungua skrini na ufunge kifaa chako cha Android TV au ufute data yote ya mtumiaji huyu ikiwa ataweka manenosiri yasiyo sahihi mara nyingi mno."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Fuatilia idadi ya manenosiri yasiyo sahihi yanayowekwa wakati wa kufungua skrini, na ufunge mfumo wa burudani na habari au ufute data yote kwenye wasifu huu ikiwa manenosiri mengi mno yasiyo sahihi yatawekwa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Fuatilia idadi ya manenosiri yasiyo sahihi yaliyoingizwa wakati wa kufungua skrini, na ufunge simu au ufute data yote ya mtumiaji  huyu kama ameingiza manenosiri yasiyo sahihi mara nyingi kupita kiasi."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Kubadilisha mbinu ya kufunga skrini"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Kubadilisha mbinu ya kufunga skrini."</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Kufuta data yote"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Futa data ya kompyuta kibao bila ilani kwa kurejesha mipangilio ambayo kompyuta ilitoka nayo kiwandani."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Futa data ya kifaa chako cha Android TV bila onyo kwa kurejesha data kiliyotoka nayo kiwandani."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Futa data ya mfumo wa burudani na habari bila onyo kwa kurejesha data iliyotoka nayo kiwandani."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Kufuta data ya simu bila ilani kwa kurejesha mipangilio iliyotoka nayo kiwandani."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Futa data yote ya mtumiaji"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Futa data yote ya wasifu"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Futa data yote ya mtumiaji"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Futa data ya mtumiaji huyu iliyo kwenye kompyuta kibao hii bila ilani."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Futa data ya mtumiaji huyu iliyo kwenye kifaa hiki cha Android TV bila ilani."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Futa data yote ya wasifu kwenye mfumo huu wa burudani na habari bila onyo."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Futa data ya mtumiaji huyu iliyo kwenye simu hii bila ilani."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Weka seva mbadala ya ulimwengu kote ya kifaa"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Weka seva mbadala ya ulimwengu ya kifaa itakayotumika wakati sera imewashwa. Ni mmiliki wa kifaa pekee aneyeweza kuweka seva mbadala ya ulimwengu."</string>

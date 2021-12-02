@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"स्‍क्रीन अनलॉक करने के की कोशिशों पर नज़र रखना"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"स्‍क्रीन को अनलॉक करते समय गलत लिखे गए पासवर्ड की संख्‍या पर निगरानी करें, और बहुत ज़्यादा बार गलत पासवर्ड लिखे जाने पर टैबलेट लॉक करें या टैबलेट का संपूर्ण डेटा मिटाएं."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"स्क्रीन को अनलॉक करते समय ध्यान रखें कि कितनी बार गलत पासवर्ड डाला गया है. अगर बहुत ज़्यादा बार गलत पासवर्ड डाला गया है, तो अपने Android TV डिवाइस को तुरंत लॉक करें या इसका सभी डेटा मिटाएं."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"स्क्रीन को अनलॉक करते समय ध्यान रखें कि कितनी बार गलत पासवर्ड डाला गया है. अगर बहुत ज़्यादा बार गलत पासवर्ड डाला गया है, तो सूचना और मनोरंजन की सुविधा देने वाले डिवाइस को लॉक करें या इस डिवाइस का सारा डेटा मिटाएं."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"स्क्रीन को अनलॉक करते समय जितनी बार गलत पासवर्ड लिखा गया है, उसकी संख्या पर नज़र रखना और अगर बहुत बार गलत पासवर्ड डाले गए हैं, तो फ़ोन को लॉक कर देना या फ़ोन का सारा डेटा मिटा देना."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"स्‍क्रीन का लॉक खोलते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें, और अगर बार-बार ज़्यादा पासवर्ड लिखे जाते हैं तो टैबलेट को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"स्क्रीन को अनलॉक करते समय ध्यान रखें कि कितनी बार गलत पासवर्ड डाला गया है. अगर बहुत ज़्यादा बार गलत पासवर्ड डाला गया है, तो अपने Android TV डिवाइस को तुरंत लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटाएं."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"स्क्रीन को अनलॉक करते समय ध्यान रखें कि कितनी बार गलत पासवर्ड डाला गया है. अगर बहुत ज़्यादा बार गलत पासवर्ड डाला गया है, तो सूचना और मनोरंजन की सुविधा देने वाले डिवाइस को लॉक करें या इस प्रोफ़ाइल का सारा डेटा मिटाएं."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"स्‍क्रीनका लॉक खोलते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें, और अगर बार-बार गलत पासवर्ड लिखा जाता है तो फ़ोन को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"स्‍क्रीन लॉक बदलना"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"इससे स्‍क्रीन लॉक बदला जाता है."</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"सारा डेटा मिटाना"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"फ़ैक्‍टरी डेटा रीसेट करके चेतावनी दिए बिना फ़ोन का डेटा मिटाना."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"फ़ैक्ट्री डेटा रीसेट करके अपने Android TV डिवाइस का डेटा बिना चेतावनी दिए मिटाएं."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"फ़ैक्ट्री डेटा रीसेट करके, बिना किसी चेतावनी के सूचना और मनोरंजन की सुविधा देने वाले डिवाइस में सेव डेटा को हमेशा के लिए मिटाएं."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"इससे फ़ैक्‍टरी डेटा रीसेट करके, चेतावनी दिए बिना फ़ोन का डेटा मिट जाता है."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"उपयोगकर्ता डेटा मिटाएं"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"प्रोफ़ाइल का डेटा मिटाना"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"उपयोगकर्ता डेटा मिटाएं"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"इस टैबलेट पर मौजूद इस उपयोगकर्ता का डेटा बिना चेतावनी के मिटा दें."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"बिना चेतावनी दिए, इस Android TV डिवाइस से उपयोगकर्ता का डेटा मिटाएं."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"बिना किसी चेतावनी के, सूचना और मनोरंजन की सुविधा देने वाले डिवाइस में मौजूद इस प्रोफ़ाइल का डेटा मिटाएं."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"इस फ़ोन पर मौजूद इस उपयोगकर्ता का डेटा बिना चेतावनी के मिटा दें."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"डिवाइस वैश्विक प्रॉक्‍सी सेट करें"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"नीति चालू होने के दौरान इस्तेमाल करने के लिए डिवाइस ग्लोबल प्रॉक्‍सी सेट करें. केवल डिवाइस का मालिक ही ग्लोबल प्रॉक्‍सी सेट कर सकता है."</string>

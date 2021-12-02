@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitoro tentativat e shkyçjes së ekranit"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitoro numrin e fjalëkalimeve të shkruar gabim kur shkyç ekranin. Kyç tabletin ose fshi të gjitha të dhënat e tij, nëse shkruhen shumë fjalëkalime të pasakta."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyç pajisjen tënde Android TV ose spastro të gjitha të dhënat e pajisjes sate Android TV nëse shkruhen gabim shumë fjalëkalime."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyç sistemin info-argëtues ose spastro të gjitha të dhënat e tij nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Monitoro numrin e fjalëkalimeve të shkruar gabim kur shkyç ekranin. Kyç telefonin ose fshi të gjitha të dhënat e tij, nëse shkruhen shumë fjalëkalime të pasakta."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyçe tabletin ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyçe pajisjen tënde Android TV ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyç sistemin info-argëtues ose spastro të gjitha të dhënat e këtij profili nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyçe telefonin ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Ndryshimin e kyçjes së ekranit"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ndryshon kyçjen e ekranit."</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Spastrimin e të gjitha të dhënave"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Fshi të dhënat e tabletit pa paralajmërim duke kryer një rivendosje të të dhënave në gjendje fabrike."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Spastro të dhënat e pajisjes Android TV pa paralajmërim duke kryer një rivendosje të të dhënave në gjendje fabrike."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Spastro të dhënat e sistemit info-argëtues pa paralajmërim kur kryen një rivendosje të të dhënave të fabrikës."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Fshin të dhënat e telefonit pa paralajmërim, duke kryer rivendosje të të dhënave në gjendje fabrike."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Spatro të dhënat e përdoruesit"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Spastro të dhënat e profilit"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Spatro të dhënat e përdoruesit"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Spastroji të dhënat e këtij përdoruesi në këtë tablet pa paralajmërim."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Spastroji të dhënat e këtij përdoruesi në këtë pajisje Android TV pa paralajmërim."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Spastro të dhënat e këtij profili në këtë sistem info-argëtues pa paralajmërim."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Spastroji të dhënat e këtij përdoruesi në këtë telefon pa paralajmërim."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Cakto proxy-in global të pajisjes"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Cakto proxy-in global të pajisjes që të përdoret kur të aktivizohet politika. Vetëm pronari i pajisjes mund ta caktojë proxy-in global."</string>

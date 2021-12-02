@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.user
 
-import android.app.Dialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.provider.Settings
@@ -31,7 +30,6 @@ import com.android.systemui.qs.PseudoGridView
 import com.android.systemui.qs.tiles.UserDetailView
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import org.junit.Before
@@ -42,7 +40,6 @@ import org.mockito.ArgumentMatcher
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.argThat
 import org.mockito.Mockito.never
@@ -65,8 +62,6 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     private lateinit var launchView: View
     @Mock
     private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
-    @Mock
-    private lateinit var hostDialog: Dialog
     @Captor
     private lateinit var clickCaptor: ArgumentCaptor<DialogInterface.OnClickListener>
 
@@ -78,8 +73,6 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
 
         `when`(launchView.context).thenReturn(mContext)
         `when`(dialog.context).thenReturn(mContext)
-        `when`(dialogLaunchAnimator.showFromView(any(), any(), anyBoolean()))
-                .thenReturn(hostDialog)
 
         controller = UserSwitchDialogController(
                 { userDetailViewAdapter },
@@ -149,18 +142,6 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
         clickCaptor.value.onClick(dialog, DialogInterface.BUTTON_NEUTRAL)
 
         verify(activityStarter, never()).postStartActivityDismissingKeyguard(any(), anyInt())
-    }
-
-    @Test
-    fun callbackFromDialogShower_dismissesDialog() {
-        val captor = argumentCaptor<UserSwitchDialogController.DialogShower>()
-
-        controller.showDialog(launchView)
-        verify(userDetailViewAdapter).injectDialogShower(capture(captor))
-
-        captor.value.dismiss()
-
-        verify(hostDialog).dismiss()
     }
 
     private class IntentMatcher(private val action: String) : ArgumentMatcher<Intent> {

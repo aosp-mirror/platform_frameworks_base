@@ -94,24 +94,24 @@ class UserSwitchDialogController @VisibleForTesting constructor(
 
             adapter.linkToViewGroup(gridFrame.findViewById(R.id.grid))
 
-            val hostDialog = dialogLaunchAnimator.showFromView(this, view)
-            adapter.injectDialogShower(DialogShowerImpl(hostDialog, dialogLaunchAnimator))
+            dialogLaunchAnimator.showFromView(this, view)
+            adapter.injectDialogShower(DialogShowerImpl(this, dialogLaunchAnimator))
         }
     }
 
     private class DialogShowerImpl(
-        private val hostDialog: Dialog,
+        private val animateFrom: Dialog,
         private val dialogLaunchAnimator: DialogLaunchAnimator
-    ) : DialogInterface by hostDialog, DialogShower {
-        override fun showDialog(dialog: Dialog): Dialog {
-            return dialogLaunchAnimator.showFromDialog(
+    ) : DialogInterface by animateFrom, DialogShower {
+        override fun showDialog(dialog: Dialog) {
+            dialogLaunchAnimator.showFromDialog(
                 dialog,
-                parentHostDialog = hostDialog
+                animateFrom = animateFrom
             )
         }
     }
 
     interface DialogShower : DialogInterface {
-        fun showDialog(dialog: Dialog): Dialog
+        fun showDialog(dialog: Dialog)
     }
 }

@@ -28,6 +28,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.InitController;
+import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -184,6 +185,7 @@ public interface StatusBarPhoneModule {
             VisualStabilityManager visualStabilityManager,
             DeviceProvisionedController deviceProvisionedController,
             NavigationBarController navigationBarController,
+            AccessibilityFloatingMenuController accessibilityFloatingMenuController,
             Lazy<AssistManager> assistManagerLazy,
             ConfigurationController configurationController,
             NotificationShadeWindowController notificationShadeWindowController,
@@ -285,6 +287,7 @@ public interface StatusBarPhoneModule {
                 visualStabilityManager,
                 deviceProvisionedController,
                 navigationBarController,
+                accessibilityFloatingMenuController,
                 assistManagerLazy,
                 configurationController,
                 notificationShadeWindowController,

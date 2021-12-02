@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"اسکرین غیر مقفل کرنے کی کوششیں مانیٹر کریں"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"اسکرین کو غیر مقفل کرتے وقت ٹائپ کیے گئے غلط پاس ورڈز کی تعداد مانیٹر کریں اور ٹیبلیٹ کو مقفل کریں یا اگر کافی زیادہ غلط پاس ورڈز ٹائپ کیے گئے ہیں تو ٹیبلیٹ کا سبھی ڈیٹا صاف کریں۔"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"‏اسکرین کو غیر مقفل کرتے وقت ٹائپ کردہ غلط پاس ورڈز کی تعداد پر نگاہ رکھیں اور اگر بہت زیادہ غلط پاسورڈز ٹائپ کیے جاتے ہیں تو اپنے Android TV آلہ کو مقفل کردیں یا اپنے Android TV آلہ کے ڈیٹا کو مٹادیں۔"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"اسکرین کو غیر مقفل کرتے وقت ٹائپ کیے گئے غلط پاس ورڈز کی تعداد مانیٹر کریں۔ اور معلوماتی انٹرٹینمنٹ سسٹم کو مقفل کریں یا اگر کافی زیادہ غلط پاس ورڈز ٹائپ کیے گئے ہیں تو معلوماتی انٹرٹینمنٹ سسٹم کا سبھی ڈیٹا صاف کریں۔"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"اسکرین کو غیر مقفل کرتے وقت ٹائپ کیے گئے غلط پاس ورڈز کی تعداد مانیٹر کریں اور فون کو مقفل کریں یا اگر کافی زیادہ غلط پاس ورڈز ٹائپ کیے گئے ہیں تو فون کا سبھی ڈیٹا صاف کریں۔"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"اسکرین کو غیر مقفل کرتے وقت ٹائپ کردہ غلط پاس ورڈز کی تعداد پر نگاہ رکھیں اور اگر بہت زیادہ غلط پاس ورڈز ٹائپ کیے جاتے ہیں تو ٹیبلٹ کو مقفل کریں یا اس صارف کا سبھی ڈیٹا ہٹائیں۔"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"‏اسکرین کو غیر مقفل کرتے وقت ٹائپ کردہ غلط پاس ورڈز کی تعداد پر نگاہ رکھیں اور اگر بہت زیادہ غلط پاس ورڈز ٹائپ کیے جاتے ہیں تو اپنے Android TV آلہ کو مقفل کریں یا اس صارف کا سبھی ڈیٹا ہٹائیں۔"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"اسکرین کو غیر مقفل کرتے وقت ٹائپ کردہ غلط پاس ورڈز کی تعداد مانیٹر کریں اور معلوماتی انٹرٹینمنٹ سسٹم کو مقفل کریں اگر بہت زیادہ غلط پاس ورڈز ٹائپ کیے جاتے ہیں تو اس پروفائل کا سبھی ڈیٹا ہٹائیں۔"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"اسکرین کو غیر مقفل کرتے وقت ٹائپ کردہ غلط پاس ورڈز کی تعداد پر نگاہ رکھیں اور اگر بہت زیادہ غلط پاس ورڈز ٹائپ کیے جاتے ہیں تو فون کو مقفل کریں یا اس صارف کا سبھی ڈیٹا ہٹائیں۔"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"اسکرین لاک تبدیل کریں"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"اسکرین لاک تبدیل کریں۔"</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"سبھی ڈیٹا صاف کریں"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"فیکٹری ڈیٹا ری سیٹ انجام دے کر وارننگ کے بغیر ٹیبلٹ کا ڈیٹا مٹائیں۔"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"‏فیکٹری ڈیٹا ری سیٹ کو انجام دے کر انتباہ کیے بغیر اپنے Android TV آلہ کا ڈیٹا مٹائیں۔"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"فیکٹری ڈیٹا ری سیٹ کو انجام دے کر وارننگ کے بغیر معلوماتی انٹرٹینمنٹ سسٹم کا ڈیٹا صاف کریں۔"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"فیکٹری ڈیٹا ری سیٹ انجام دے کر وارننگ کے بغیر فون کا ڈیٹا مٹائیں۔"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"صارف کا ڈیٹا ہٹائیں"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"پروفائل ڈیٹا صاف کریں"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"صارف کا ڈیٹا ہٹائیں"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"وارننگ کے بغیر اس ٹیبلٹ پر موجود اس صارف کا ڈیٹا ہٹائیں۔"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"‏انتباہ کے بغیر اس Android TV آلہ پر اس صارف کا ڈیٹا ہٹائیں۔"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"وارننگ کے بغیر اس معلوماتی انٹرٹینمنٹ سسٹم پر اس پروفائل کا ڈیٹا صاف کریں۔"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"وارننگ کے بغیر اس فون پر موجود اس صارف کا ڈیٹا ہٹائیں۔"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"آلہ کی عالمی پراکسی سیٹ کریں"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"پالیسی فعال ہونے پر آلہ کی عالمی پراکسی کو استعمال کیے جانے کیلئے سیٹ کریں۔ صرف آلہ کا مالک ہی عالمی پراکسی سیٹ کر سکتا ہے۔"</string>

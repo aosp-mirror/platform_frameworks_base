@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Overvåk forsøk på å låse opp skjermen"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Overvåk antall feil passordforsøk ved opplåsing av skjerm, og lås nettbrettet eller slett alle data fra nettbrettet ved for mange feil passordforsøk."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Følg med på hvor mange ganger feil passord skrives inn når skjermen skal låses opp, og lås Android TV-enheten eller tøm alle dataene når feil passord skrives inn for mange ganger."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Overvåk antall feil passord som er skrevet inn ved opplåsing av skjermen, og lås infotainment-systemet eller tøm alle dataene i infotainment-systemet hvis feil passord skrives inn for mange ganger."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Overvåk antall feil passordforsøk ved opplåsing av skjerm, og lås telefonen eller slett alle data fra telefonen ved for mange feil passordforsøk."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser nettbrettet eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Følg med på hvor mange ganger feil passord skrives inn når skjermen skal låses opp, og lås Android TV-enheten eller tøm alle dataene til denne brukeren hvis feil passord skrives inn for mange ganger."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Overvåk antall feil passord som er skrevet inn ved opplåsing av skjermen, og lås infotainment-systemet eller tøm alle dataene i denne profilen hvis feil passord skrives inn for mange ganger."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser telefonen eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Endring av skjermlåsen"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Kan endre skjermlåsen."</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Sletting av alle data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Tilbakestill nettbrettets data uten advarsel ved å tilbakestille til fabrikkstandard."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Tøm dataene på Android TV-enheten din uten advarsel ved å tilbakestille til fabrikkstandard."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Tøm dataene i infotainment-systemet uten varsel ved å tilbakestille til fabrikkstandard."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Telefonens data kan slettes uten advarsel ved å tilbakestille til fabrikkstandard."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Slett brukerdataene"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Tøm profildata"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Slett brukerdataene"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Sletter denne brukerens data på dette nettbrettet uten advarsel."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Tøm dataene til denne brukeren på denne Android TV-enheten uten advarsel."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Tøm dataene i denne profilen på dette infotainment-systemet uten varsel."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Sletter denne brukerens data på denne telefonen uten advarsel."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Angi enhetens globale proxy-tjener"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Angir den globale proxy-tjeneren på enheten som skal brukes når regelen er aktivert. Bare eieren av enheten kan angi den globale proxy-tjeneren."</string>

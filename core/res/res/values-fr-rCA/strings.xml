@@ -551,10 +551,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Autorise l\'application à apprendre le niveau de complexité de l\'écran de verrouillage (élevé, moyen, faible ou aucun), qui indique la gamme possible de longueur et de type de verrouillage d\'écran. L\'application peut aussi suggérer aux utilisateurs de mettre à jour l\'écran de verrouillage afin d\'utiliser un certain niveau de complexité, mais ils peuvent ignorer la suggestion. Notez que le verrouillage d\'écran n\'est pas stocké en texte brut pour de manière à ce que l\'application n\'ait pas accès au mot de passe exact."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"utiliser le matériel biométrique"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permet à l\'application d\'utiliser du matériel biométrique pour l\'authentification"</string>
-    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"gérer le matériel d\'empreinte digitale"</string>
+    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"gérer le lecteur d\'empreintes digitales"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Permet à l\'application de faire appel à des méthodes d\'ajout et de suppression de modèles d\'empreinte digitale que vous pouvez utiliser."</string>
-    <string name="permlab_useFingerprint" msgid="1001421069766751922">"utiliser le matériel d\'empreinte digitale"</string>
-    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Permet à l\'application d\'utiliser du matériel d\'empreinte digitale pour l\'authentification"</string>
+    <string name="permlab_useFingerprint" msgid="1001421069766751922">"utiliser le lecteur d\'empreintes digitales"</string>
+    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Permet à l\'application d\'utiliser le lecteur d\'empreintes digitales pour l\'authentification"</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"modifier votre collection de musique"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"Autorise l\'application à modifier votre collection de musique."</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"modifier votre collection de vidéos"</string>
@@ -590,7 +590,7 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Empreinte digitale authentifiée"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Visage authentifié"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Visage authentifié, veuillez appuyer sur le bouton Confirmer"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Matériel d\'empreinte digitale numérique indisponible."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Lecteur d\'empreintes digitales indisponible."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Impossible de configurer l\'empreinte digitale"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Le temps attribué pour lire l\'empreinte digitale est écoulé. Veuillez réessayer."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Opération d\'empreinte digitale numérique annulée."</string>
@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Gérer les tentatives de déverrouillage de l\'écran"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller la tablette ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Surveillez le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouillez votre appareil Android TV ou effacez toutes les données qu\'il contient en cas d\'un nombre trop élevé de tentatives."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Surveillez le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouillez le système d\'infodivertissement ou effacez toutes ses données en cas d\'un nombre trop élevé de tentatives."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouille le téléphone ou efface toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Surveille le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouille la tablette ou efface toutes les données de l\'utilisateur en cas d\'un nombre trop élevé de tentatives."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Surveillez le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouillez votre appareil Android TV ou effacez toutes les données de l\'utilisateur en cas d\'un nombre trop élevé de tentatives."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Surveillez le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouillez le système d\'infodivertissement ou effacez toutes les données de ce profil en cas d\'un nombre trop élevé de tentatives."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Surveille le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouille le téléphone ou efface toutes les données de l\'utilisateur en cas d\'un nombre trop élevé de tentatives."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Modifier le verrouillage de l\'écran"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Modifier le verrouillage de l\'écran."</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Effacer toutes les données"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Effacer les données de la tablette sans avertissement, en rétablissant les paramètres par défaut"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Effacez les données de votre appareil Android TV sans avertissement en effectuant une réinitialisation des paramètres d\'usine."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Effacez les données du système d\'infodivertissement sans avertissement en rétablissant les paramètres par défaut."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Effacer les données du téléphone sans avertissement en rétablissant les paramètres par défaut."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Effacer les données de l\'utilisateur"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Effacer les données de profil"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Effacer les données de l\'utilisateur"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Effacer les données de l\'utilisateur sur cette tablette sans avertissement."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Effacez les données de cet utilisateur sur cet appareil Android TV sans avertissement."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Effacez les données de ce profil sur ce système d\'infodivertissement sans avertissement."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Effacer les données de l\'utilisateur sur ce téléphone sans avertissement."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Définir le serveur mandataire global du mobile"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Indiquer le mandataire global à utiliser pour l\'appareil lorsque la politique est activée. Seul le propriétaire de l\'appareil peut définir le mandataire global."</string>

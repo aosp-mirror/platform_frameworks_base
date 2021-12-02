@@ -732,9 +732,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekrāna atbloķēšanas mēģinājumu pārraudzīšana"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Pārrauga nepareizi ievadīto paroļu skaitu, atbloķējot ekrānu, un bloķē planšetdatoru vai dzēš visus planšetdatora datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt Android TV vai dzēst visus Android TV ierīces datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Ekrāna atbloķēšanas laikā pārraudzīt nepareizi ievadīto paroļu skaitu un bloķēt informatīvi izklaidējošo sistēmu vai dzēst visus informatīvi izklaidējošās sistēmas datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Pārrauga nepareizi ievadīto paroļu skaitu, atbloķējot ekrānu, un bloķē tālruni vai dzēš visus tālruņa datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt planšetdatoru vai dzēst visus šī lietotāja datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt Android TV ierīci vai dzēst visus šī lietotāja datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt informatīvi izklaidējošo sistēmu vai dzēst visus šī profila datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt tālruni vai dzēst visus šī lietotāja datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Mainīt ekrāna bloķēšanas iestatījumus"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Maina ekrāna bloķēšanas iestatījumu."</string>
@@ -743,10 +745,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Dzēst visus datus"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Dzēš planšetdatora datus bez brīdinājuma, veicot rūpnīcas datu atiestatīšanu."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Dzēst Android TV ierīces datus bez brīdinājuma, veicot rūpnīcas datu atiestatīšanu."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Bez brīdinājuma dzēst informatīvi izklaidējošās sistēmas datus, veicot rūpnīcas datu atiestatīšanu."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Dzēš tālruņa datus bez brīdinājuma, veicot rūpnīcas datu atiestatīšanu."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Dzēst lietotāja datus"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Profila datu dzēšana"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Dzēst lietotāja datus"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Bez brīdinājuma dzēst šī lietotāja datus no planšetdatora."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Bez brīdinājuma dzēst šī lietotāja datus no Android TV ierīces."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Bez brīdinājuma dzēst šī profila datus no šīs informatīvi izklaidējošās sistēmas."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Bez brīdinājuma dzēst šī lietotāja datus no tālruņa."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Iestatīt ierīces globālo starpniekserveri"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Iestatīt ierīces globālo starpniekserveri, kas jāizmanto, kad politika ir iespējota. Globālo starpniekserveri var iestatīt tikai ierīces īpašnieks."</string>

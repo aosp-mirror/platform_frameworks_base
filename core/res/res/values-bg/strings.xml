@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Наблюдаване на опитите за отключване на екрана"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Наблюдава броя въведени неправилни пароли при отключването на екрана и заключва таблета или изтрива всички данни от него, ако неправилните пароли са твърде много."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Следене на броя на неправилно въведените пароли при отключване на екрана и заключване на устройството ви с Android TV или изтриване на всички данни от него, ако неуспешните опити са твърде много."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Наблюдава броя на неправилно въведените пароли при отключването на екрана и заключва основното устройство или изтрива всички данни от него, ако неуспешните опити са твърде много."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Наблюдава броя въведени неправилни пароли при отключването на екрана и заключва телефона или изтрива всички данни от него, ако неправилните пароли са твърде много."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Наблюдава броя на неправилно въведените пароли при отключване на екрана и заключва таблета или изтрива всички данни на този потребител, ако неуспешните опити са твърде много."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Следене на броя на неправилно въведените пароли при отключване на екрана и заключване на устройството ви с Android TV или изтриване на всички данни на този потребител, ако неуспешните опити са твърде много."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Наблюдава броя на неправилно въведените пароли при отключване на екрана и заключва основното устройство или изтрива всички данни в този потребителски профил, ако неуспешните опити са твърде много."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Наблюдава броя на неправилно въведените пароли при отключване на екрана и заключва телефона или изтрива всички данни на този потребител, ако неуспешните опити са твърде много."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Промяна на заключването на екрана"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Променя заключването на екрана."</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Изтриване на всички данни"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Изтриване на данните в таблета без предупреждение чрез възстановяване на фабричните настройки."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Изтриване на данните от устройството ви с Android TV без предупреждение чрез възстановяване на фабричните настройки."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Изтрива данните на основното устройство без предупреждение чрез възстановяване на фабричните настройки."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Изтрива данните в телефона без предупреждение чрез възстановяване на фабричните настройки."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Изтриване на потребителските данни"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Изтриване на данните в потребителския профил"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Изтриване на потребителските данни"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Изтрива данните на този потребител от таблета без предупреждение."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Изтриване на данните на този потребител от устройството с Android TV без предупреждение."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Изтрива данните в този потребителски профил на основното устройство без предупреждение."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Изтрива данните на този потребител от телефона без предупреждение."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Задаване на глобален прокси сървър за устройството"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Задава глобалния прокси сървър за устройството, който да се използва, когато правилото е активирано. Само собственикът на устройството може да задава такъв сървър."</string>

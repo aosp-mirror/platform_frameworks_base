@@ -729,9 +729,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"मनिटरको स्क्रिन अनलक गर्ने प्रयासहरू"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप भएको संख्या निरीक्षण गर्नुहोस् र यदि निकै धेरै गलत पासवर्डहरू टाइप भएका छन भने ट्याब्लेट लक गर्नुहोस् वा ट्याब्लेटका सबै डेटा मेट्नुहोस्।"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप गरेको सङ्ख्या निरीक्षण गर्नुहोस्, र धेरै पटक गलत पासवर्डहरू टाइप गरिएको खण्डमा आफ्नो Android टिभी यन्त्र लक गर्नुहोस् वा डिभाइसमा भएको सम्पूर्ण डेटा मेटाउनुहोस्।"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"स्क्रिन अनलक गर्दा कति पटक गलत पासवर्ड टाइप गरिन्छ भन्ने कुरा निगरानी गरियोस् र अत्यन्तै धेरै पटक गलत पासवर्ड टाइप गरिएका खण्डमा यो इन्फोटेनमेन्ट प्रणाली लक गरियोस् वा यस इन्फोटेनमेन्ट प्रणालीका सबै डेटा मेटाइयोस्।"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"स्क्रिनअनलक गर्दा गलत पासवर्ड टाइप भएको संख्या निरीक्षण गर्नुहोस् र यदि निकै धेरै गलत पासवर्डहरू टाइप भएका छन भने फोन लक गर्नुहोस् वा फोनका सबै डेटा मेट्नुहोस्।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या अनुगमन गर्नुहोस्, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरिएमा ट्याब्लेट लक गर्नुहोस् वा प्रयोगकर्ताको डेटा मेटाउनुहोस्।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप गरेको सङ्ख्या निरीक्षण गर्नुहोस्, र धेरै पटक गलत पासवर्डहरू टाइप गरिएको खण्डमा आफ्नो Android टिभी यन्त्र लक गर्नुहोस् वा यो प्रयोगकर्ताको सम्पूर्ण डेटा मेटाउनुहोस्।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"स्क्रिन अनलक गर्दा कति पटक गलत पासवर्ड टाइप गरिन्छ भन्ने कुरा निगरानी गरियोस् र अत्यन्तै धेरै पटक गलत पासवर्ड टाइप गरिएका खण्डमा यो इन्फोटेनमेन्ट प्रणाली लक गरियोस् वा यस प्रोफाइलका सबै डेटा मेटाइयोस्।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या अनुगमन गर्नुहोस्, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरिएमा फोन लक गर्नुहोस् वा प्रयोगकर्ताको डेटा मेटाउनुहोस्।"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"स्क्रिन लक परिवर्तन गर्ने"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"स्क्रिन लक परिवर्तन गर्नुहोस्।"</string>
@@ -740,10 +742,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"सबै डेटा मेट्ने"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"एउटा फ्याक्ट्रि डेटा रिसेट गरेर चेतावनी नआउँदै ट्याबल्टको डेटा मेट्नुहोस्।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"फ्याक्ट्री डेटा रिसेट गरेर चेतावनी नदिइकन आफ्नो Android टिभी डिभाइसको डेटा मेटाउनुहोस्।"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"यो इन्फोटेनमेन्ट प्रणालीको डेटा कुनै चेतावनीविनै फ्याक्ट्री डेटा रिसेट गरेर मेटाइयोस्।"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"एउटा फ्याक्ट्रि डेटा रिसेट गरेर चेतावनी नदिइकन फोनको डेटा मेट्न।"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"प्रयोगकर्ता डेटा मेट्नुहोस्"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"प्रोफाइल डेटा मेटाइयोस्"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"प्रयोगकर्ता डेटा मेट्नुहोस्"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"चेतावनी बिना यो ट्याब्लेटमा यस प्रयोगकर्ताको डेटा मेट्नुहोस्।"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"यो Android टिभी डिभाइसमा भएको यस प्रयोगकर्ताको डेटा चेतावनी नदिइकन मेटाउनुहोस्।"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"यो इन्फोटेनमेन्ट प्रणालीमा भएको यस प्रोफाइलको डेटा कुनै चेतावनीविनै मेटाइयोस्।"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"चेतावनी बिना यो फोनमा यस प्रयोगकर्ताको डेटा मेट्नुहोस्।"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"उपकरण विश्वव्यापी प्रोक्सी मिलाउनुहोस्"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"नीति सक्षम हुँदा प्रयोग गरिनको लागि यन्त्र ग्लोवल प्रोक्सी सेट गर्नुहोस्। केवल यन्त्र मालिकले ग्लोवल प्रोक्सी सेट गर्न सक्नुहुन्छ।"</string>
