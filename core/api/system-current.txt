@@ -6699,6 +6699,8 @@ package android.media.tv.tuner.filter {
     method @Nullable public String acquireSharedFilterToken();
     method public void close();
     method public int configure(@NonNull android.media.tv.tuner.filter.FilterConfiguration);
+    method public int delayCallbackUntilBufferFilled(int);
+    method public int delayCallbackUntilTimeMillis(long);
     method public int flush();
     method public void freeSharedFilterToken(@NonNull String);
     method @Deprecated public int getId();

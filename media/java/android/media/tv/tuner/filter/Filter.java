@@ -254,6 +254,8 @@ public class Filter implements AutoCloseable {
     private native int nativeClose();
     private native String nativeAcquireSharedFilterToken();
     private native void nativeFreeSharedFilterToken(String token);
+    private native int nativeSetTimeDelayHint(int timeDelayInMs);
+    private native int nativeSetDataSizeDelayHint(int dataSizeDelayInBytes);
 
     // Called by JNI
     private Filter(long id) {
@@ -597,6 +599,54 @@ public class Filter implements AutoCloseable {
             }
             nativeFreeSharedFilterToken(filterToken);
             mIsShared = false;
+        }
+    }
+
+    /**
+     * Set filter time delay.
+     *
+     * <p> Setting a time delay instructs the filter to delay its event callback invocation until
+     * the specified amount of time has passed. The default value (delay disabled) is {@code 0}.
+     *
+     * <p>This functionality is only available in Tuner version 2.0 and higher and will otherwise
+     * be a no-op. Use {@link TunerVersionChecker#getTunerVersion()} to get the version information.
+     *
+     * @param delayInMs specifies the duration of the delay in milliseconds.
+     */
+    public int delayCallbackUntilTimeMillis(long delayInMs) {
+        if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                  TunerVersionChecker.TUNER_VERSION_2_0, "setTimeDelayHint")) {
+            return Tuner.RESULT_UNAVAILABLE;
+        }
+
+        if (delayInMs >= 0 && delayInMs <= Integer.MAX_VALUE) {
+            synchronized (mLock) {
+                return nativeSetTimeDelayHint((int) delayInMs);
+            }
+        }
+        return Tuner.RESULT_INVALID_ARGUMENT;
+    }
+
+    /**
+     * Set filter data size delay.
+     *
+     * <p> Setting a data size delay instructs the filter to delay its event callback invocation
+     * until a specified amount of data has accumulated. The default value (delay disabled) is
+     * {@code 0}.
+     *
+     * <p>This functionality is only available in Tuner version 2.0 and higher and will otherwise
+     * be a no-op. Use {@link TunerVersionChecker#getTunerVersion()} to get the version information.
+     *
+     * @param delayInBytes specifies the duration of the delay in bytes.
+     */
+    public int delayCallbackUntilBufferFilled(int delayInBytes) {
+        if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                  TunerVersionChecker.TUNER_VERSION_2_0, "setTimeDelayHint")) {
+            return Tuner.RESULT_UNAVAILABLE;
+        }
+
+        synchronized (mLock) {
+            return nativeSetDataSizeDelayHint(delayInBytes);
         }
     }
 }
