@@ -43,6 +43,8 @@ public class BroadcastOptions extends ComponentOptions {
     private int mMaxManifestReceiverApiLevel = Build.VERSION_CODES.CUR_DEVELOPMENT;
     private boolean mDontSendToRestrictedApps = false;
     private boolean mAllowBackgroundActivityStarts;
+    private String[] mRequireAllOfPermissions;
+    private String[] mRequireNoneOfPermissions;
 
     /**
      * How long to temporarily put an app on the power allowlist when executing this broadcast
@@ -83,6 +85,20 @@ public class BroadcastOptions extends ComponentOptions {
      */
     private static final String KEY_ALLOW_BACKGROUND_ACTIVITY_STARTS =
             "android:broadcast.allowBackgroundActivityStarts";
+
+    /**
+     * Corresponds to {@link #setRequireAllOfPermissions}
+     * @hide
+     */
+    public static final String KEY_REQUIRE_ALL_OF_PERMISSIONS =
+            "android:broadcast.requireAllOfPermissions";
+
+    /**
+     * Corresponds to {@link #setRequireNoneOfPermissions}
+     * @hide
+     */
+    public static final String KEY_REQUIRE_NONE_OF_PERMISSIONS =
+            "android:broadcast.requireNoneOfPermissions";
 
     /**
      * @hide
@@ -132,6 +148,8 @@ public class BroadcastOptions extends ComponentOptions {
         mDontSendToRestrictedApps = opts.getBoolean(KEY_DONT_SEND_TO_RESTRICTED_APPS, false);
         mAllowBackgroundActivityStarts = opts.getBoolean(KEY_ALLOW_BACKGROUND_ACTIVITY_STARTS,
                 false);
+        mRequireAllOfPermissions = opts.getStringArray(KEY_REQUIRE_ALL_OF_PERMISSIONS);
+        mRequireNoneOfPermissions = opts.getStringArray(KEY_REQUIRE_NONE_OF_PERMISSIONS);
     }
 
     /**
@@ -323,6 +341,44 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /**
+     * Use this to configure a broadcast to be sent to apps that hold all permissions in
+     * the list. This is only for use with the {@link Context#sendBroadcast(Intent intent,
+     * @Nullable String receiverPermission, @Nullable Bundle options)}.
+     *
+     * <p> If both {@link #setRequireAllOfPermissions(String[])} and
+     * {@link #setRequireNoneOfPermissions(String[])} are used, then receivers must have all of the
+     * permissions set by {@link #setRequireAllOfPermissions(String[])}, and none of the
+     * permissions set by {@link #setRequireNoneOfPermissions(String[])} to get the broadcast.
+     *
+     * @param requiredPermissions a list of Strings of permission the receiver must have, or null
+     *                            to clear any previously set value.
+     * @hide
+     */
+    @SystemApi
+    public void setRequireAllOfPermissions(@Nullable String[] requiredPermissions) {
+        mRequireAllOfPermissions = requiredPermissions;
+    }
+
+    /**
+     * Use this to configure a broadcast to be sent to apps that don't hold any permissions in
+     * list. This is only for use with the {@link Context#sendBroadcast(Intent intent,
+     * @Nullable String receiverPermission, @Nullable Bundle options)}.
+     *
+     * <p> If both {@link #setRequireAllOfPermissions(String[])} and
+     * {@link #setRequireNoneOfPermissions(String[])} are used, then receivers must have all of the
+     * permissions set by {@link #setRequireAllOfPermissions(String[])}, and none of the
+     * permissions set by {@link #setRequireNoneOfPermissions(String[])} to get the broadcast.
+     *
+     * @param excludedPermissions a list of Strings of permission the receiver must not have,
+     *                            or null to clear any previously set value.
+     * @hide
+     */
+    @SystemApi
+    public void setRequireNoneOfPermissions(@Nullable String[] excludedPermissions) {
+        mRequireNoneOfPermissions = excludedPermissions;
+    }
+
+    /**
      * Returns the created options as a Bundle, which can be passed to
      * {@link android.content.Context#sendBroadcast(android.content.Intent)
      * Context.sendBroadcast(Intent)} and related methods.
@@ -350,6 +406,12 @@ public class BroadcastOptions extends ComponentOptions {
         }
         if (mAllowBackgroundActivityStarts) {
             b.putBoolean(KEY_ALLOW_BACKGROUND_ACTIVITY_STARTS, true);
+        }
+        if (mRequireAllOfPermissions != null) {
+            b.putStringArray(KEY_REQUIRE_ALL_OF_PERMISSIONS, mRequireAllOfPermissions);
+        }
+        if (mRequireNoneOfPermissions != null) {
+            b.putStringArray(KEY_REQUIRE_NONE_OF_PERMISSIONS, mRequireNoneOfPermissions);
         }
         return b.isEmpty() ? null : b;
     }
