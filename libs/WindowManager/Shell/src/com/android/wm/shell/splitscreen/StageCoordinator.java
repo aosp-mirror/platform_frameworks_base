@@ -793,7 +793,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mMainStageListener.mHasRootTask && mSideStageListener.mHasRootTask) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             // Make the stages adjacent to each other so they occlude what's behind them.
-            wct.setAdjacentRoots(mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token);
+            wct.setAdjacentRoots(mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token,
+                    true /* moveTogether */);
             wct.setLaunchAdjacentFlagRoot(mSideStage.mRootTaskInfo.token);
             mTaskOrganizer.applyTransaction(wct);
         }
