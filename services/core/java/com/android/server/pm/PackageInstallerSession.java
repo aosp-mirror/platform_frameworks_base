@@ -706,10 +706,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     if (mCommitted.get()) {
                         mStagingManager.abortCommittedSession(this);
                     }
-                    destroy();
+                    destroyInternal();
                     dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
-                    maybeFinishChildSessions(INSTALL_FAILED_ABORTED,
-                            "Session was abandoned because the parent session is abandoned");
+                    maybeCleanUpChildSessions();
                 };
                 if (mStageDirInUse) {
                     // Pre-reboot verification is ongoing, not safe to clean up the session yet.
@@ -2132,7 +2131,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             destroy();
             // Dispatch message to remove session from PackageInstallerService.
             dispatchSessionFinished(error, msg, null);
-            maybeFinishChildSessions(error, msg);
         }
     }
 
@@ -3648,19 +3646,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new SecurityException("Must be sealed to accept permissions");
         }
 
-        PackageInstallerSession root = hasParentSessionId()
-                ? mSessionProvider.getSession(getParentSessionId()) : this;
-
         if (accepted) {
             // Mark and kick off another install pass
             synchronized (mLock) {
                 mPermissionsManuallyAccepted = true;
             }
+
+            PackageInstallerSession root =
+                    (hasParentSessionId())
+                            ? mSessionProvider.getSession(getParentSessionId())
+                            : this;
             root.mHandler.obtainMessage(MSG_INSTALL).sendToTarget();
         } else {
-            root.destroy();
-            root.dispatchSessionFinished(INSTALL_FAILED_ABORTED, "User rejected permissions", null);
-            root.maybeFinishChildSessions(INSTALL_FAILED_ABORTED, "User rejected permissions");
+            destroyInternal();
+            dispatchSessionFinished(INSTALL_FAILED_ABORTED, "User rejected permissions", null);
         }
     }
 
@@ -3711,12 +3710,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     /**
-     * Calls dispatchSessionFinished() on all child sessions with the given error code and
-     * error message to prevent orphaned child sessions.
+     * Cleans up the relevant stored files and information of all child sessions.
+     * <p>Cleaning up the stored files and session information is necessary for
+     * preventing the orphan children sessions.
+     * <ol>
+     *     <li>To call {@link #destroyInternal()} cleans up the stored files.</li>
+     *     <li>To call {@link #dispatchSessionFinished(int, String, Bundle)} to trigger the
+     *     procedure to clean up the information in PackageInstallerService.</li>
+     * </ol></p>
      */
-    private void maybeFinishChildSessions(int returnCode, String msg) {
-        for (PackageInstallerSession child : getChildSessions()) {
-            child.dispatchSessionFinished(returnCode, msg, null);
+    private void maybeCleanUpChildSessions() {
+        if (!isMultiPackage()) {
+            return;
+        }
+
+        final List<PackageInstallerSession> childSessions = getChildSessions();
+        final int size = childSessions.size();
+        for (int i = 0; i < size; ++i) {
+            final PackageInstallerSession session = childSessions.get(i);
+            session.destroyInternal();
+            session.dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned"
+                            + " because the parent session is abandoned", null);
         }
     }
 
@@ -3728,12 +3742,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 if (LOGD) Slog.d(TAG, "Ignoring abandon for staging files are in use");
                 return;
             }
-            mDestroyed = true;
+            destroyInternal();
         }
-        destroy();
         dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
-        maybeFinishChildSessions(INSTALL_FAILED_ABORTED,
-                "Session was abandoned because the parent session is abandoned");
+        maybeCleanUpChildSessions();
     }
 
     private void assertNotChild(String cookie) {
