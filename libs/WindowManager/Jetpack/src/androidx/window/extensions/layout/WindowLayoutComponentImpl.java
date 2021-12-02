@@ -31,9 +31,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.window.common.CommonFoldingFeature;
-import androidx.window.common.DeviceStateManagerPostureProducer;
-import androidx.window.common.ResourceConfigDisplayFeatureProducer;
-import androidx.window.common.SettingsDevicePostureProducer;
+import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.SettingsDisplayFeatureProducer;
 import androidx.window.util.DataProducer;
 import androidx.window.util.PriorityDataProducer;
@@ -60,27 +58,16 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private final Map<Activity, Consumer<WindowLayoutInfo>> mWindowLayoutChangeListeners =
             new HashMap<>();
 
-    private final SettingsDevicePostureProducer mSettingsDevicePostureProducer;
-    private final DataProducer<Integer> mDevicePostureProducer;
-
     private final SettingsDisplayFeatureProducer mSettingsDisplayFeatureProducer;
-    private final DataProducer<List<CommonFoldingFeature>> mDisplayFeatureProducer;
+    private final DataProducer<List<CommonFoldingFeature>> mFoldingFeatureProducer;
 
     public WindowLayoutComponentImpl(Context context) {
-        mSettingsDevicePostureProducer = new SettingsDevicePostureProducer(context);
-        mDevicePostureProducer = new PriorityDataProducer<>(List.of(
-                mSettingsDevicePostureProducer,
-                new DeviceStateManagerPostureProducer(context)
-        ));
-
         mSettingsDisplayFeatureProducer = new SettingsDisplayFeatureProducer(context);
-        mDisplayFeatureProducer = new PriorityDataProducer<>(List.of(
+        mFoldingFeatureProducer = new PriorityDataProducer<>(List.of(
                 mSettingsDisplayFeatureProducer,
-                new ResourceConfigDisplayFeatureProducer(context)
+                new DeviceStateManagerFoldingFeatureProducer(context)
         ));
-
-        mDevicePostureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
-        mDisplayFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
+        mFoldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
     }
 
     /**
@@ -122,25 +109,6 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     }
 
     /**
-     * Calculate the {@link CommonFoldingFeature.State} from the feature or the device posture
-     * producer.
-     * If the given {@link CommonFoldingFeature.State} is not valid then {@code null} will be
-     * returned. The {@link FoldingFeature} should be ignored in the case of an invalid
-     * {@link CommonFoldingFeature.State}.
-     *
-     * @param feature a {@link CommonFoldingFeature} to provide the feature state if present.
-     * @return {@link CommonFoldingFeature.State} of the hinge if present or the state from the
-     * posture produce if present.
-     */
-    @Nullable
-    private Integer getFeatureState(CommonFoldingFeature feature) {
-        Integer featureState = feature.getState();
-        Optional<Integer> posture = mDevicePostureProducer.getData();
-        Integer state = featureState == null ? posture.orElse(null) : featureState;
-        return convertToExtensionState(state);
-    }
-
-    /**
      * A convenience method to translate from the common feature state to the extensions feature
      * state.  More specifically, translates from {@link CommonFoldingFeature.State} to
      * {@link FoldingFeature.STATE_FLAT} or {@link FoldingFeature.STATE_HALF_OPENED}. If it is not
@@ -152,10 +120,8 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      * {@link CommonFoldingFeature.State} and {@code null} otherwise.
      */
     @Nullable
-    private Integer convertToExtensionState(@Nullable Integer state) {
-        if (state == null) { // The null check avoids a NullPointerException.
-            return null;
-        } else if (state == COMMON_STATE_FLAT) {
+    private Integer convertToExtensionState(int state) {
+        if (state == COMMON_STATE_FLAT) {
             return FoldingFeature.STATE_FLAT;
         } else if (state == COMMON_STATE_HALF_OPENED) {
             return FoldingFeature.STATE_HALF_OPENED;
@@ -173,8 +139,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
     @NonNull
     private WindowLayoutInfo getWindowLayoutInfo(@NonNull Activity activity) {
-        List<DisplayFeature> displayFeatures =
-                getDisplayFeatures(activity);
+        List<DisplayFeature> displayFeatures = getDisplayFeatures(activity);
         return new WindowLayoutInfo(displayFeatures);
     }
 
@@ -184,13 +149,12 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      * {@link CommonFoldingFeature} is not valid then it will be omitted.
      *
      * For a {@link FoldingFeature} the bounds are localized into the {@link Activity} window
-     * coordinate space and the state is calculated either from
-     * {@link CommonFoldingFeature#getState()} or {@link #mDisplayFeatureProducer}. The state from
-     * {@link #mDisplayFeatureProducer} may not be valid since {@link #mDisplayFeatureProducer} is
-     * a general state controller. If the state is not valid, the {@link FoldingFeature} is omitted
-     * from the {@link List} of {@link DisplayFeature}. If the bounds are not valid, constructing a
-     * {@link FoldingFeature} will throw an {@link IllegalArgumentException} since this can cause
-     * negative UI effects down stream.
+     * coordinate space and the state is calculated from {@link CommonFoldingFeature#getState()}.
+     * The state from {@link #mFoldingFeatureProducer} may not be valid since
+     * {@link #mFoldingFeatureProducer} is a general state controller. If the state is not valid,
+     * the {@link FoldingFeature} is omitted from the {@link List} of {@link DisplayFeature}. If the
+     * bounds are not valid, constructing a {@link FoldingFeature} will throw an
+     * {@link IllegalArgumentException} since this can cause negative UI effects down stream.
      *
      * @param activity a proxy for the {@link android.view.Window} that contains the
      * {@link DisplayFeature}.
@@ -211,11 +175,10 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             return features;
         }
 
-        Optional<List<CommonFoldingFeature>> storedFeatures = mDisplayFeatureProducer.getData();
+        Optional<List<CommonFoldingFeature>> storedFeatures = mFoldingFeatureProducer.getData();
         if (storedFeatures.isPresent()) {
-
             for (CommonFoldingFeature baseFeature : storedFeatures.get()) {
-                Integer state = getFeatureState(baseFeature);
+                Integer state = convertToExtensionState(baseFeature.getState());
                 if (state == null) {
                     continue;
                 }
@@ -223,8 +186,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 rotateRectToDisplayRotation(displayId, featureRect);
                 transformToWindowSpaceRect(activity, featureRect);
 
-                features.add(new FoldingFeature(featureRect, baseFeature.getType(),
-                        getFeatureState(baseFeature)));
+                features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
             }
         }
         return features;
@@ -232,10 +194,8 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
     private void updateRegistrations() {
         if (hasListeners()) {
-            mSettingsDevicePostureProducer.registerObserversIfNeeded();
             mSettingsDisplayFeatureProducer.registerObserversIfNeeded();
         } else {
-            mSettingsDevicePostureProducer.unregisterObserversIfNeeded();
             mSettingsDisplayFeatureProducer.unregisterObserversIfNeeded();
         }
 
