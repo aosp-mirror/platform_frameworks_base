@@ -808,7 +808,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     };
 
     private final Consumer<WindowState> mPerformLayout = w -> {
-        if (w.mLayoutAttached || w.skipLayout()) {
+        if (w.mLayoutAttached) {
             return;
         }
 
@@ -866,7 +866,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     };
 
     private final Consumer<WindowState> mPerformLayoutAttached = w -> {
-        if (!w.mLayoutAttached || w.skipLayout()) {
+        if (!w.mLayoutAttached) {
             return;
         }
         if (DEBUG_LAYOUT) Slog.v(TAG, "2ND PASS " + w + " mHaveFrame=" + w.mHaveFrame
