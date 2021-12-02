@@ -3242,9 +3242,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void performPolicyVersionUpgrade() {
-        PolicyVersionUpgrader upgrader = new PolicyVersionUpgrader(
-                new DpmsUpgradeDataProvider());
-
+        PolicyVersionUpgrader upgrader = new PolicyVersionUpgrader(new DpmsUpgradeDataProvider());
         upgrader.upgradePolicy(DPMS_VERSION);
     }
 
