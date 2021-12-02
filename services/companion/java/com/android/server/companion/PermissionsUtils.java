@@ -38,13 +38,11 @@ import android.annotation.UserIdInt;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
 import android.content.Context;
-import android.content.pm.PackageManagerInternal;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.ArrayMap;
 
 import com.android.internal.app.IAppOpsService;
-import com.android.server.LocalServices;
 
 import java.util.Map;
 
@@ -69,9 +67,7 @@ final class PermissionsUtils {
     }
 
     static void enforcePermissionsForAssociation(@NonNull Context context,
-            @NonNull AssociationRequest request, @NonNull String packageName,
-            @UserIdInt int userId) {
-        final int packageUid = getPackageUid(userId, packageName);
+            @NonNull AssociationRequest request, int packageUid) {
         enforceRequestDeviceProfilePermissions(context, request.getDeviceProfile(), packageUid);
 
         if (request.isSelfManaged()) {
@@ -205,11 +201,6 @@ final class PermissionsUtils {
             // Can't happen: AppOpsManager is running in the same process.
             return true;
         }
-    }
-
-    private static int getPackageUid(@UserIdInt int userId, @NonNull String packageName) {
-        return LocalServices.getService(PackageManagerInternal.class)
-                .getPackageUid(packageName, 0, userId);
     }
 
     private static IAppOpsService getAppOpsService() {

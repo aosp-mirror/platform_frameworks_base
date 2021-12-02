@@ -406,7 +406,8 @@ public class CompanionDeviceManagerService extends SystemService {
             enforceCallerCanManageAssociationsForPackage(getContext(), userId, packageName,
                     "create associations");
 
-            mAssociationRequestsProcessor.process(request, packageName, userId, callback);
+            mAssociationRequestsProcessor.processNewAssociationRequest(
+                    request, packageName, userId, callback);
         }
 
         @Override
@@ -716,8 +717,6 @@ public class CompanionDeviceManagerService extends SystemService {
                 fout.append("  ").append(device).append(" -> ")
                         .append(sDateFormat.format(time)).append('\n');
             }
-
-            mAssociationRequestsProcessor.dump(fout);
 
             fout.append("Device Listener Services State:").append('\n');
             for (int i = 0, size =  mCompanionDevicePresenceController.mBoundServices.size();
