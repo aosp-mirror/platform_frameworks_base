@@ -1585,8 +1585,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     boolean isSyncFinished() {
-        if (mDisplayRotation.isWaitingForRemoteRotation()) return false;
-        return super.isSyncFinished();
+        // Do not consider children because if they are requested to be synced, they should be
+        // added to sync group explicitly.
+        return !mDisplayRotation.isWaitingForRemoteRotation();
     }
 
     /**
@@ -1876,16 +1877,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
-    /** Shows the given window which may be hidden for screen frozen. */
-    void finishFadeRotationAnimation(WindowState w) {
+    /** Shows the given window which may be hidden for screen rotation. */
+    void finishFadeRotationAnimation(WindowToken windowToken) {
         final FadeRotationAnimationController controller = mFadeRotationAnimationController;
-        if (controller != null && controller.show(w.mToken)) {
+        if (controller != null && controller.show(windowToken)) {
             mFadeRotationAnimationController = null;
         }
     }
 
-    /** Returns {@code true} if the display should wait for the given window to stop freezing. */
-    boolean waitForUnfreeze(WindowState w) {
+    /** Returns {@code true} if the screen rotation animation needs to wait for the window. */
+    boolean shouldSyncRotationChange(WindowState w) {
         if (w.mForceSeamlesslyRotate) {
             // The window should look no different before and after rotation.
             return false;
@@ -3230,6 +3231,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mWmService.mLatencyTracker.onActionStart(ACTION_ROTATE_SCREEN);
                 controller.mTransitionMetricsReporter.associate(t,
                         startTime -> mWmService.mLatencyTracker.onActionEnd(ACTION_ROTATE_SCREEN));
+                startFadeRotationAnimation(false /* shouldDebounce */);
             }
             t.setKnownConfigChanges(this, changes);
         }

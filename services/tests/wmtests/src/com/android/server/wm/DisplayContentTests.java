@@ -1336,7 +1336,6 @@ public class DisplayContentTests extends WindowTestsBase {
         spyOn(rotationAnim);
         // Assume that the display rotation is changed so it is frozen in preparation for animation.
         doReturn(true).when(rotationAnim).hasScreenshot();
-        mWm.mDisplayFrozen = true;
         displayContent.getDisplayRotation().setRotation((displayContent.getRotation() + 1) % 4);
         displayContent.setRotationAnimation(rotationAnim);
         // The fade rotation animation also starts to hide some non-app windows.
@@ -1347,9 +1346,9 @@ public class DisplayContentTests extends WindowTestsBase {
             w.setOrientationChanging(true);
         }
         // The display only waits for the app window to unfreeze.
-        assertFalse(displayContent.waitForUnfreeze(statusBar));
-        assertFalse(displayContent.waitForUnfreeze(navBar));
-        assertTrue(displayContent.waitForUnfreeze(app));
+        assertFalse(displayContent.shouldSyncRotationChange(statusBar));
+        assertFalse(displayContent.shouldSyncRotationChange(navBar));
+        assertTrue(displayContent.shouldSyncRotationChange(app));
         // If all windows animated by fade rotation animation have done the orientation change,
         // the animation controller should be cleared.
         statusBar.setOrientationChanging(false);

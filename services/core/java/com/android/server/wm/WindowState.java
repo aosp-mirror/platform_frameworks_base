@@ -1473,12 +1473,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (changing) {
             mLastFreezeDuration = 0;
             if (mWmService.mRoot.mOrientationChangeComplete
-                    && mDisplayContent.waitForUnfreeze(this)) {
+                    && mDisplayContent.shouldSyncRotationChange(this)) {
                 mWmService.mRoot.mOrientationChangeComplete = false;
             }
         } else {
             // The orientation change is completed. If it was hidden by the animation, reshow it.
-            mDisplayContent.finishFadeRotationAnimation(this);
+            mDisplayContent.finishFadeRotationAnimation(mToken);
         }
     }
 

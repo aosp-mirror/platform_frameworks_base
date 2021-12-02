@@ -19,6 +19,9 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
@@ -32,7 +35,9 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -44,6 +49,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.SurfaceControl;
+import android.view.TransactionCommittedListener;
 import android.window.ITaskOrganizer;
 import android.window.ITransitionPlayer;
 import android.window.TransitionInfo;
@@ -52,6 +58,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -466,6 +473,54 @@ public class TransitionTests extends WindowTestsBase {
             }
         };
         assertTrue(awaitInWmLock(() -> latch.await(3, TimeUnit.SECONDS)));
+    }
+
+    @Test
+    public void testDisplayRotationChange() {
+        final Task task = createActivityRecord(mDisplayContent).getTask();
+        final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, "statusBar");
+        final WindowState navBar = createWindow(null, TYPE_NAVIGATION_BAR, "navBar");
+        final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
+        final WindowState[] windows = { statusBar, navBar, ime };
+        makeWindowVisible(windows);
+        mDisplayContent.getDisplayPolicy().addWindowLw(statusBar, statusBar.mAttrs);
+        mDisplayContent.getDisplayPolicy().addWindowLw(navBar, navBar.mAttrs);
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+
+        mDisplayContent.getDisplayRotation().setRotation(mDisplayContent.getRotation() + 1);
+        mDisplayContent.requestChangeTransitionIfNeeded(1 /* any changes */);
+        final FadeRotationAnimationController fadeController =
+                mDisplayContent.getFadeRotationAnimationController();
+        assertNotNull(fadeController);
+        for (WindowState w : windows) {
+            w.setOrientationChanging(true);
+        }
+        player.startTransition();
+
+        assertFalse(statusBar.mToken.inTransition());
+        assertTrue(ime.mToken.inTransition());
+        assertTrue(task.inTransition());
+
+        // Status bar finishes drawing before the start transaction. Its fade-in animation will be
+        // executed until the transaction is committed, so it is still in target tokens.
+        statusBar.setOrientationChanging(false);
+        assertTrue(fadeController.isTargetToken(statusBar.mToken));
+
+        final SurfaceControl.Transaction startTransaction = mock(SurfaceControl.Transaction.class);
+        final ArgumentCaptor<TransactionCommittedListener> listenerCaptor =
+                ArgumentCaptor.forClass(TransactionCommittedListener.class);
+        player.onTransactionReady(startTransaction);
+
+        verify(startTransaction).addTransactionCommittedListener(any(), listenerCaptor.capture());
+        // The transaction is committed, so fade-in animation for status bar is consumed.
+        listenerCaptor.getValue().onTransactionCommitted();
+        assertFalse(fadeController.isTargetToken(statusBar.mToken));
+
+        // Status bar finishes drawing after the start transaction, so its fade-in animation can
+        // execute directly.
+        navBar.setOrientationChanging(false);
+        assertFalse(fadeController.isTargetToken(navBar.mToken));
+        assertNull(mDisplayContent.getFadeRotationAnimationController());
     }
 
     @Test

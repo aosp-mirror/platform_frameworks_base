@@ -36,10 +36,12 @@ import java.io.PrintWriter;
  * An animation controller to fade-in/out for a window token.
  */
 public class FadeAnimationController {
+    protected final DisplayContent mDisplayContent;
     protected final Context mContext;
     protected final ArrayMap<WindowToken, Runnable> mDeferredFinishCallbacks = new ArrayMap<>();
 
     public FadeAnimationController(DisplayContent displayContent) {
+        mDisplayContent = displayContent;
         mContext = displayContent.mWmService.mContext;
     }
 
@@ -69,7 +71,9 @@ public class FadeAnimationController {
             return;
         }
 
-        final FadeAnimationAdapter animationAdapter = createAdapter(show, windowToken);
+        final Animation animation = show ? getFadeInAnimation() : getFadeOutAnimation();
+        final FadeAnimationAdapter animationAdapter = animation != null
+                ? createAdapter(createAnimationSpec(animation), show, windowToken) : null;
         if (animationAdapter == null) {
             return;
         }
@@ -86,17 +90,10 @@ public class FadeAnimationController {
                 show /* hidden */, animationType, finishedCallback);
     }
 
-    protected FadeAnimationAdapter createAdapter(boolean show, WindowToken windowToken) {
-        final Animation animation = show ? getFadeInAnimation() : getFadeOutAnimation();
-        if (animation == null) {
-            return null;
-        }
-
-        final LocalAnimationAdapter.AnimationSpec windowAnimationSpec =
-                createAnimationSpec(animation);
-
-        return new FadeAnimationAdapter(
-                windowAnimationSpec, windowToken.getSurfaceAnimationRunner(), show, windowToken);
+    protected FadeAnimationAdapter createAdapter(LocalAnimationAdapter.AnimationSpec animationSpec,
+            boolean show, WindowToken windowToken) {
+        return new FadeAnimationAdapter(animationSpec, windowToken.getSurfaceAnimationRunner(),
+                show, windowToken);
     }
 
     protected LocalAnimationAdapter.AnimationSpec createAnimationSpec(
@@ -140,7 +137,7 @@ public class FadeAnimationController {
 
     protected class FadeAnimationAdapter extends LocalAnimationAdapter {
         protected final boolean mShow;
-        private final WindowToken mToken;
+        protected final WindowToken mToken;
 
         FadeAnimationAdapter(AnimationSpec windowAnimationSpec,
                 SurfaceAnimationRunner surfaceAnimationRunner, boolean show,

@@ -566,7 +566,7 @@ class WindowStateAnimator {
 
         if (w.getOrientationChanging()) {
             if (!w.isDrawn()) {
-                if (w.mDisplayContent.waitForUnfreeze(w)) {
+                if (w.mDisplayContent.shouldSyncRotationChange(w)) {
                     w.mWmService.mRoot.mOrientationChangeComplete = false;
                     mAnimator.mLastWindowFreezeSource = w;
                 }
