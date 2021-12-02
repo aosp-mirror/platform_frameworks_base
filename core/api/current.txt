@@ -1314,6 +1314,7 @@ package android {
     field public static final int shouldDisableView = 16843246; // 0x10101ee
     field public static final int shouldUseDefaultUnfoldTransition = 16844364; // 0x101064c
     field public static final int showAsAction = 16843481; // 0x10102d9
+    field public static final int showBackground;
     field public static final int showClockAndComplications;
     field public static final int showDefault = 16843258; // 0x10101fa
     field public static final int showDividers = 16843561; // 0x1010329
@@ -52454,6 +52455,7 @@ package android.view.animation {
     method public int getRepeatCount();
     method public int getRepeatMode();
     method protected float getScaleFactor();
+    method public boolean getShowBackground();
     method public long getStartOffset();
     method public long getStartTime();
     method public boolean getTransformation(long, android.view.animation.Transformation);
@@ -52479,6 +52481,7 @@ package android.view.animation {
     method public void setInterpolator(android.view.animation.Interpolator);
     method public void setRepeatCount(int);
     method public void setRepeatMode(int);
+    method public void setShowBackground(boolean);
     method public void setStartOffset(long);
     method public void setStartTime(long);
     method public void setZAdjustment(int);

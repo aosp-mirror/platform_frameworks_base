@@ -6884,6 +6884,9 @@
         <!-- Special option for window animations: whether window should have rounded corners.
              @see ScreenDecorationsUtils#getWindowCornerRadius(Resources) -->
         <attr name="hasRoundedCorners" format="boolean" />
+        <!-- Special option for window animations: whether the window's background should be used as
+             a background to the animation. -->
+        <attr name="showBackground" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="AnimationSet">

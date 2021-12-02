@@ -209,6 +209,13 @@ public abstract class Animation implements Cloneable {
     private boolean mShowWallpaper;
     private boolean mHasRoundedCorners;
 
+    /**
+     * Whether to show a background behind the windows during the animation.
+     * @see #getShowBackground()
+     * @see #setShowBackground(boolean)
+     */
+    private boolean mShowBackground;
+
     private boolean mMore = true;
     private boolean mOneMoreTime = true;
 
@@ -266,6 +273,8 @@ public abstract class Animation implements Cloneable {
                 a.getBoolean(com.android.internal.R.styleable.Animation_showWallpaper, false));
         setHasRoundedCorners(
                 a.getBoolean(com.android.internal.R.styleable.Animation_hasRoundedCorners, false));
+        setShowBackground(
+                a.getBoolean(com.android.internal.R.styleable.Animation_showBackground, false));
 
         final int resID = a.getResourceId(com.android.internal.R.styleable.Animation_interpolator, 0);
 
@@ -698,6 +707,24 @@ public abstract class Animation implements Cloneable {
     }
 
     /**
+     * If showBackground is {@code true} and this animation is applied on a window, then the windows
+     * in the animation will animate with the background associated with this window behind them.
+     *
+     * The background comes from the {@link android.R.styleable#Theme_colorBackground} that is
+     * applied to this window through its theme.
+     *
+     * If multiple animating windows have showBackground set to {@code true} during an animation,
+     * the top most window with showBackground set to {@code true} and a valid background color
+     * takes precedence.
+     *
+     * @param showBackground Whether to show a background behind the windows during the animation.
+     * @attr ref android.R.styleable#Animation_showBackground
+     */
+    public void setShowBackground(boolean showBackground) {
+        mShowBackground = showBackground;
+    }
+
+    /**
      * Gets the acceleration curve type for this animation.
      *
      * @return the {@link Interpolator} associated to this animation
@@ -835,6 +862,24 @@ public abstract class Animation implements Cloneable {
      */
     public boolean hasRoundedCorners() {
         return mHasRoundedCorners;
+    }
+
+    /**
+     * If showBackground is {@code true} and this animation is applied on a window, then the windows
+     * in the animation will animate with the background associated with this window behind them.
+     *
+     * The background comes from the {@link android.R.styleable#Theme_colorBackground} that is
+     * applied to this window through its theme.
+     *
+     * If multiple animating windows have showBackground set to {@code true} during an animation,
+     * the top most window with showBackground set to {@code true} and a valid background color
+     * takes precedence.
+     *
+     * @return if the background of this window should be shown behind the animating windows.
+     * @attr ref android.R.styleable#Animation_showBackground
+     */
+    public boolean getShowBackground() {
+        return mShowBackground;
     }
 
     /**
