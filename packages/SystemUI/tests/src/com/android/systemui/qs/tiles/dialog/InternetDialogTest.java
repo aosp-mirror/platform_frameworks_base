@@ -80,6 +80,7 @@ public class InternetDialogTest extends SysuiTestCase {
     private RecyclerView mWifiList;
     private LinearLayout mSeeAll;
     private LinearLayout mWifiScanNotify;
+    private TextView mAirplaneModeSummaryText;
 
     @Before
     public void setUp() {
@@ -114,6 +115,7 @@ public class InternetDialogTest extends SysuiTestCase {
         mWifiList = mDialogView.requireViewById(R.id.wifi_list_layout);
         mSeeAll = mDialogView.requireViewById(R.id.see_all_layout);
         mWifiScanNotify = mDialogView.requireViewById(R.id.wifi_scan_notify_layout);
+        mAirplaneModeSummaryText = mDialogView.requireViewById(R.id.airplane_mode_summary);
     }
 
     @After
@@ -191,12 +193,91 @@ public class InternetDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void updateDialog_withApmOn_mobileDataLayoutGone() {
+    public void updateDialog_apmOffAndNotCarrierNetwork_mobileDataLayoutGone() {
+        // Mobile network should be gone if the list of active subscriptionId is null.
+        when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(false);
+        when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(false);
+        when(mInternetDialogController.hasActiveSubId()).thenReturn(false);
+
+        mInternetDialog.updateDialog(true);
+
+        assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void updateDialog_apmOnWithCarrierNetworkAndWifiStatus_mobileDataLayout() {
+        // Carrier network should be gone if airplane mode ON and Wi-Fi is off.
+        when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(true);
+        when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(true);
+        when(mWifiManager.isWifiEnabled()).thenReturn(false);
+
+        mInternetDialog.updateDialog(true);
+
+        assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.GONE);
+
+        // Carrier network should be visible if airplane mode ON and Wi-Fi is ON.
+        when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(true);
+        when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(true);
+        when(mWifiManager.isWifiEnabled()).thenReturn(true);
+
+        mInternetDialog.updateDialog(true);
+
+        assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void updateDialog_apmOnAndNoCarrierNetwork_mobileDataLayoutGone() {
+        when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(false);
         when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(true);
 
         mInternetDialog.updateDialog(true);
 
         assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void updateDialog_apmOnAndWifiOnHasCarrierNetwork_showAirplaneSummary() {
+        when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(true);
+        when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(true);
+        mInternetDialog.mConnectedWifiEntry = null;
+        doReturn(false).when(mInternetDialogController).activeNetworkIsCellular();
+
+        mInternetDialog.updateDialog(true);
+
+        assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mAirplaneModeSummaryText.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void updateDialog_apmOffAndWifiOnHasCarrierNetwork_notShowApmSummary() {
+        when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(true);
+        when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(false);
+        mInternetDialog.mConnectedWifiEntry = null;
+        doReturn(false).when(mInternetDialogController).activeNetworkIsCellular();
+
+        mInternetDialog.updateDialog(true);
+
+        assertThat(mAirplaneModeSummaryText.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void updateDialog_apmOffAndHasCarrierNetwork_notShowApmSummary() {
+        when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(true);
+        when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(false);
+
+        mInternetDialog.updateDialog(true);
+
+        assertThat(mAirplaneModeSummaryText.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void updateDialog_apmOnAndNoCarrierNetwork_notShowApmSummary() {
+        when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(false);
+        when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(true);
+
+        mInternetDialog.updateDialog(true);
+
+        assertThat(mAirplaneModeSummaryText.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
