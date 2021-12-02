@@ -23,17 +23,11 @@
     <!-- The maximum number of rows in the QuickSettings -->
     <integer name="quick_settings_max_rows">4</integer>
 
-    <!-- The number of columns that the top level tiles span in the QuickSettings -->
-    <integer name="quick_settings_user_time_settings_tile_span">1</integer>
-
     <!-- Nav bar button default ordering/layout -->
     <string name="config_navBarLayout" translatable="false">left;back,home,recent;right</string>
 
     <!-- orientation of the dead zone when touches have recently occurred elsewhere on screen -->
     <integer name="navigation_bar_deadzone_orientation">0</integer>
-
-    <!-- Whether wallet view is shown in landscape / seascape orientations -->
-    <bool name="global_actions_show_landscape_wallet_view">true</bool>
 
     <!-- Max number of columns for quick controls area -->
     <integer name="controls_max_columns">4</integer>
