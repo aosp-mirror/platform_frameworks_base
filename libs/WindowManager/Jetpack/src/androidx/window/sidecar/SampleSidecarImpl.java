@@ -23,14 +23,17 @@ import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
 
 import android.app.Activity;
 import android.app.ActivityThread;
+import android.app.Application;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
+import androidx.window.common.EmptyLifecycleCallbacksAdapter;
 import androidx.window.common.SettingsDisplayFeatureProducer;
 import androidx.window.util.DataProducer;
 import androidx.window.util.PriorityDataProducer;
@@ -52,6 +55,8 @@ class SampleSidecarImpl extends StubSidecar {
     private final SettingsDisplayFeatureProducer mSettingsFoldingFeatureProducer;
 
     SampleSidecarImpl(Context context) {
+        ((Application) context.getApplicationContext())
+                .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
         mSettingsFoldingFeatureProducer = new SettingsDisplayFeatureProducer(context);
         mFoldingFeatureProducer = new PriorityDataProducer<>(List.of(
                 mSettingsFoldingFeatureProducer,
@@ -138,8 +143,30 @@ class SampleSidecarImpl extends StubSidecar {
     protected void onListenersChanged() {
         if (hasListeners()) {
             mSettingsFoldingFeatureProducer.registerObserversIfNeeded();
+            onDisplayFeaturesChanged();
         } else {
             mSettingsFoldingFeatureProducer.unregisterObserversIfNeeded();
+        }
+    }
+
+    private final class NotifyOnConfigurationChanged extends EmptyLifecycleCallbacksAdapter {
+        @Override
+        public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+            super.onActivityCreated(activity, savedInstanceState);
+            onDisplayFeaturesChangedForActivity(activity);
+        }
+
+        @Override
+        public void onActivityConfigurationChanged(Activity activity) {
+            super.onActivityConfigurationChanged(activity);
+            onDisplayFeaturesChangedForActivity(activity);
+        }
+
+        private void onDisplayFeaturesChangedForActivity(@NonNull Activity activity) {
+            IBinder token = activity.getWindow().getAttributes().token;
+            if (token == null || mWindowLayoutChangeListenerTokens.contains(token)) {
+                onDisplayFeaturesChanged();
+            }
         }
     }
 }
