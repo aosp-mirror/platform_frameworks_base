@@ -49,7 +49,13 @@ class DialogLaunchAnimator @JvmOverloads constructor(
 ) {
     private companion object {
         private val TIMINGS = ActivityLaunchAnimator.TIMINGS
-        private val INTERPOLATORS = ActivityLaunchAnimator.INTERPOLATORS
+
+        // We use the same interpolator for X and Y axis to make sure the dialog does not move out
+        // of the screen bounds during the animation.
+        private val INTERPOLATORS = ActivityLaunchAnimator.INTERPOLATORS.copy(
+            positionXInterpolator = ActivityLaunchAnimator.INTERPOLATORS.positionInterpolator
+        )
+
         private val TAG_LAUNCH_ANIMATION_RUNNING = R.id.launch_animation_running
     }
 

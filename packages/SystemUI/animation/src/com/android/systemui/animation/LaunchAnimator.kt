@@ -172,7 +172,7 @@ class LaunchAnimator(
     )
 
     /** The interpolators used by this animator. */
-    class Interpolators(
+    data class Interpolators(
         /** The interpolator used for the Y position, width, height and corner radius. */
         val positionInterpolator: Interpolator,
 
