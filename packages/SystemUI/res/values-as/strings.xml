@@ -107,8 +107,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ফ\'ন"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"কণ্ঠধ্বনিৰে সহায়"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"ৱালেট"</string>
-    <!-- no translation found for accessibility_qr_code_scanner_button (7521277927692910795) -->
-    <skip />
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"কিউআৰ ক’ড স্কেনাৰ"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"আনলক কৰক"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"ডিভাইচটো লক হৈ আছে"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"চেহেৰা স্কেন কৰি থকা হৈছে"</string>
@@ -293,6 +292,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"স্ক্ৰীন ৰেকৰ্ড কৰা"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"আৰম্ভ কৰক"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"বন্ধ কৰক"</string>
+    <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"এখন হাতেৰে ব্যৱহাৰ কৰা ম’ড"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ডিভাইচৰ মাইক্ৰ\'ফ\'ন অৱৰোধৰ পৰা আঁতৰাবনে?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ডিভাইচৰ কেমেৰা অৱৰোধৰ পৰা আঁতৰাবনে?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ডিভাইচৰ কেমেৰা আৰু মাইক্ৰ\'ফ\'ন অৱৰোধৰ পৰা আঁতৰাবনে?"</string>
@@ -466,10 +466,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ব্যৱহাৰ কৰিবলৈ আনলক কৰক"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"আপোনাৰ কাৰ্ড লাভ কৰোঁতে এটা সমস্যা হৈছে, অনুগ্ৰহ কৰি পাছত পুনৰ চেষ্টা কৰক"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"লক স্ক্ৰীনৰ ছেটিং"</string>
-    <!-- no translation found for qr_code_scanner_title (1598912458255252498) -->
-    <skip />
-    <!-- no translation found for qr_code_scanner_description (7452098243938659945) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="1598912458255252498">"কিউআৰ স্কেন কৰক"</string>
+    <string name="qr_code_scanner_description" msgid="7452098243938659945">"এটা কিউআৰ ক’ড স্কেন কৰিবলৈ ক্লিক কৰক"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"কৰ্মস্থানৰ প্ৰ\'ফাইল"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"এয়াৰপ্লেইন ম\'ড"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"আপুনি আপোনাৰ পিছৰটো এলাৰ্ম <xliff:g id="WHEN">%1$s</xliff:g> বজাত শুনা নাপাব"</string>

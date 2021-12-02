@@ -737,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Giám sát những lần thử mở khóa màn hình"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Theo dõi số lần nhập mật khẩu không chính xác khi mở khóa màn hình và khóa máy tính bảng hoặc xóa tất cả dữ liệu của máy tính bảng nếu có quá nhiều lần nhập mật khẩu không chính xác."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Giám sát số lần nhập mật khẩu không chính xác khi mở khóa màn hình, đồng thời khóa thiết bị Android TV hoặc xóa tất cả dữ liệu trên thiết bị Android TV nếu bạn nhập mật khẩu sai quá nhiều lần."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Theo dõi số lần nhập sai mật khẩu khi mở khoá màn hình và khoá hệ thống thông tin giải trí hoặc xoá tất cả dữ liệu của hệ thống này nếu có quá nhiều lần nhập sai mật khẩu."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Theo dõi số lần nhập mật khẩu không chính xác khi mở khóa màn hình và khóa điện thoại hoặc xóa tất cả dữ liệu của điện thoại nếu có quá nhiều lần nhập mật khẩu không chính xác."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Giám sát số lần nhập sai mật khẩu khi mở khóa màn hình và khóa máy tính bảng hoặc xóa tất cả dữ liệu của người dùng này nếu nhập sai mật khẩu quá nhiều lần."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Giám sát số lần nhập mật khẩu không chính xác khi mở khóa màn hình, đồng thời khóa thiết bị Android TV hoặc xóa tất cả dữ liệu của người dùng này nếu bạn nhập mật khẩu sai quá nhiều lần."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Theo dõi số lần nhập sai mật khẩu khi mở khoá màn hình và khoá hệ thống thông tin giải trí hoặc xoá tất cả dữ liệu của hồ sơ này nếu có quá nhiều lần nhập sai mật khẩu."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Giám sát số lần nhập sai mật khẩu khi mở khóa màn hình và khóa điện thoại hoặc xóa tất cả dữ liệu của người dùng này nếu nhập sai mật khẩu quá nhiều lần."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Thay đổi phương thức khóa màn hình"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Thay đổi phương thức khóa màn hình."</string>
@@ -748,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Xóa tất cả dữ liệu"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Xóa dữ liệu trên máy tính bảng mà không cần cảnh báo, bằng cách thực hiện thiết lập lại dữ liệu ban đầu."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Xóa dữ liệu trên thiết bị Android TV mà không cảnh báo bằng cách thiết lập lại dữ liệu ban đầu."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Xoá dữ liệu của hệ thống thông tin giải trí mà không cảnh báo bằng cách đặt lại dữ liệu về trạng thái ban đầu."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Xóa dữ liệu trên điện thoại mà không cần cảnh báo, bằng cách thiết lập lại dữ liệu ban đầu."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Xóa dữ liệu người dùng"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Xoá dữ liệu hồ sơ"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Xóa dữ liệu người dùng"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Xóa dữ liệu của người dùng trên máy tính bảng này mà không cảnh báo."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Xóa dữ liệu của người dùng này trên thiết bị Android TV mà không cảnh báo."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Xoá dữ liệu của hồ sơ này trên hệ thống thông tin giải trí này mà không cảnh báo."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Xóa dữ liệu của người dùng trên điện thoại này mà không cảnh báo."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Đặt proxy chung của điện thoại"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Đặt proxy chung của thiết bị được sử dụng trong khi chính sách bật. Chỉ chủ sở hữu thiết bị mới có thể đặt proxy chung."</string>

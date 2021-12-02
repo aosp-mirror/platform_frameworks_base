@@ -4034,7 +4034,13 @@ public class PackageManagerService extends IPackageManager.Stub
         // - Package manager is in a state where package isn't scanned yet. This will
         //   get called again after scanning to fix the dependencies.
         if (AndroidPackageUtils.isLibrary(pkg)) {
-            if (pkg.getStaticSharedLibName() != null) {
+            if (pkg.getSdkLibName() != null) {
+                SharedLibraryInfo definedLibrary = getSharedLibraryInfo(
+                        pkg.getSdkLibName(), pkg.getSdkLibVersionMajor());
+                if (definedLibrary != null) {
+                    action.accept(definedLibrary, libInfo);
+                }
+            } else if (pkg.getStaticSharedLibName() != null) {
                 SharedLibraryInfo definedLibrary = getSharedLibraryInfo(
                         pkg.getStaticSharedLibName(), pkg.getStaticSharedLibVersion());
                 if (definedLibrary != null) {
@@ -4186,7 +4192,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         && !hasString(pkg.getUsesLibraries(), changingPkg.getLibraryNames())
                         && !hasString(pkg.getUsesOptionalLibraries(), changingPkg.getLibraryNames())
                         && !ArrayUtils.contains(pkg.getUsesStaticLibraries(),
-                        changingPkg.getStaticSharedLibName())) {
+                        changingPkg.getStaticSharedLibName())
+                        && !ArrayUtils.contains(pkg.getUsesSdkLibraries(),
+                        changingPkg.getSdkLibName())) {
                     continue;
                 }
                 if (resultList == null) {
@@ -4477,15 +4485,24 @@ public class PackageManagerService extends IPackageManager.Stub
                     Slog.w(TAG, "Cannot hide package: android");
                     return false;
                 }
-                // Cannot hide static shared libs as they are considered
-                // a part of the using app (emulating static linking). Also
-                // static libs are installed always on internal storage.
                 AndroidPackage pkg = mPackages.get(packageName);
-                if (pkg != null && pkg.getStaticSharedLibName() != null) {
-                    Slog.w(TAG, "Cannot hide package: " + packageName
-                            + " providing static shared library: "
-                            + pkg.getStaticSharedLibName());
-                    return false;
+                if (pkg != null) {
+                    // Cannot hide SDK libs as they are controlled by SDK manager.
+                    if (pkg.getSdkLibName() != null) {
+                        Slog.w(TAG, "Cannot hide package: " + packageName
+                                + " providing SDK library: "
+                                + pkg.getSdkLibName());
+                        return false;
+                    }
+                    // Cannot hide static shared libs as they are considered
+                    // a part of the using app (emulating static linking). Also
+                    // static libs are installed always on internal storage.
+                    if (pkg.getStaticSharedLibName() != null) {
+                        Slog.w(TAG, "Cannot hide package: " + packageName
+                                + " providing static shared library: "
+                                + pkg.getStaticSharedLibName());
+                        return false;
+                    }
                 }
                 // Only allow protected packages to hide themselves.
                 if (hidden && !UserHandle.isSameApp(callingUid, pkgSetting.getAppId())
@@ -5154,15 +5171,24 @@ public class PackageManagerService extends IPackageManager.Stub
                         continue;
                     }
 
-                    // Cannot suspend static shared libs as they are considered
-                    // a part of the using app (emulating static linking). Also
-                    // static libs are installed always on internal storage.
                     AndroidPackage pkg = mPackages.get(packageName);
-                    if (pkg != null && pkg.isStaticSharedLibrary()) {
-                        Slog.w(TAG, "Cannot suspend package: " + packageName
-                                + " providing static shared library: "
-                                + pkg.getStaticSharedLibName());
-                        continue;
+                    if (pkg != null) {
+                        // Cannot suspend SDK libs as they are controlled by SDK manager.
+                        if (pkg.isSdkLibrary()) {
+                            Slog.w(TAG, "Cannot suspend package: " + packageName
+                                    + " providing SDK library: "
+                                    + pkg.getSdkLibName());
+                            continue;
+                        }
+                        // Cannot suspend static shared libs as they are considered
+                        // a part of the using app (emulating static linking). Also
+                        // static libs are installed always on internal storage.
+                        if (pkg.isStaticSharedLibrary()) {
+                            Slog.w(TAG, "Cannot suspend package: " + packageName
+                                    + " providing static shared library: "
+                                    + pkg.getStaticSharedLibName());
+                            continue;
+                        }
                     }
                 }
                 if (PLATFORM_PACKAGE_NAME.equals(packageName)) {
@@ -5612,14 +5638,22 @@ public class PackageManagerService extends IPackageManager.Stub
                 android.Manifest.permission.DELETE_PACKAGES, null);
         // TODO (b/157774108): This should fail on non-existent packages.
         synchronized (mLock) {
-            // Cannot block uninstall of static shared libs as they are
-            // considered a part of the using app (emulating static linking).
-            // Also static libs are installed always on internal storage.
             AndroidPackage pkg = mPackages.get(packageName);
-            if (pkg != null && pkg.getStaticSharedLibName() != null) {
-                Slog.w(TAG, "Cannot block uninstall of package: " + packageName
-                        + " providing static shared library: " + pkg.getStaticSharedLibName());
-                return false;
+            if (pkg != null) {
+                // Cannot block uninstall SDK libs as they are controlled by SDK manager.
+                if (pkg.getSdkLibName() != null) {
+                    Slog.w(TAG, "Cannot block uninstall of package: " + packageName
+                            + " providing SDK library: " + pkg.getSdkLibName());
+                    return false;
+                }
+                // Cannot block uninstall of static shared libs as they are
+                // considered a part of the using app (emulating static linking).
+                // Also static libs are installed always on internal storage.
+                if (pkg.getStaticSharedLibName() != null) {
+                    Slog.w(TAG, "Cannot block uninstall of package: " + packageName
+                            + " providing static shared library: " + pkg.getStaticSharedLibName());
+                    return false;
+                }
             }
             mSettings.setBlockUninstallLPw(userId, packageName, blockUninstall);
             mSettings.writePackageRestrictionsLPr(userId);

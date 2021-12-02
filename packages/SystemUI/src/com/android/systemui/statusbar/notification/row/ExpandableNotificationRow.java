@@ -57,7 +57,6 @@ import android.util.FloatProperty;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
-import android.util.Pair;
 import android.util.Property;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -93,6 +92,7 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
+import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -1684,12 +1684,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         setTargetPoint(null);
     }
 
-    public void showFeedbackIcon(boolean show, Pair<Integer, Integer> resIds) {
+    /** Shows the given feedback icon, or hides the icon if null. */
+    public void setFeedbackIcon(@Nullable FeedbackIcon icon) {
         if (mIsSummaryWithChildren) {
-            mChildrenContainer.showFeedbackIcon(show, resIds);
+            mChildrenContainer.setFeedbackIcon(icon);
         }
-        mPrivateLayout.showFeedbackIcon(show, resIds);
-        mPublicLayout.showFeedbackIcon(show, resIds);
+        mPrivateLayout.setFeedbackIcon(icon);
+        mPublicLayout.setFeedbackIcon(icon);
     }
 
     /** Sets the last time the notification being displayed audibly alerted the user. */

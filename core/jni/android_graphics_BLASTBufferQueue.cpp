@@ -61,10 +61,11 @@ static jobject nativeGetSurface(JNIEnv* env, jclass clazz, jlong ptr,
                                                   queue->getSurface(includeSurfaceControlHandle));
 }
 
-static void nativeSetSyncTransaction(JNIEnv* env, jclass clazz, jlong ptr, jlong transactionPtr) {
+static void nativeSetSyncTransaction(JNIEnv* env, jclass clazz, jlong ptr, jlong transactionPtr,
+                                     jboolean acquireSingleBuffer) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionPtr);
-    queue->setSyncTransaction(transaction);
+    queue->setSyncTransaction(transaction, acquireSingleBuffer);
 }
 
 static void nativeUpdate(JNIEnv* env, jclass clazz, jlong ptr, jlong surfaceControl, jlong width,
@@ -98,7 +99,7 @@ static const JNINativeMethod gMethods[] = {
         {"nativeCreate", "(Ljava/lang/String;JJJI)J", (void*)nativeCreate},
         {"nativeGetSurface", "(JZ)Landroid/view/Surface;", (void*)nativeGetSurface},
         {"nativeDestroy", "(J)V", (void*)nativeDestroy},
-        {"nativeSetSyncTransaction", "(JJ)V", (void*)nativeSetSyncTransaction},
+        {"nativeSetSyncTransaction", "(JJZ)V", (void*)nativeSetSyncTransaction},
         {"nativeUpdate", "(JJJJIJ)V", (void*)nativeUpdate},
         {"nativeMergeWithNextTransaction", "(JJJ)V", (void*)nativeMergeWithNextTransaction},
         {"nativeGetLastAcquiredFrameNum", "(J)J", (void*)nativeGetLastAcquiredFrameNum},

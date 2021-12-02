@@ -123,6 +123,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var session: MediaSession
     private val device = MediaDeviceData(true, null, DEVICE_NAME)
     private val disabledDevice = MediaDeviceData(false, null, "Disabled Device")
+    private val clock = FakeSystemClock()
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -134,7 +135,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         player = MediaControlPanel(context, bgExecutor, activityStarter, mediaViewController,
             seekBarViewModel, Lazy { mediaDataManager }, keyguardDismissUtil,
-            mediaOutputDialogFactory, mediaCarouselController, falsingManager)
+            mediaOutputDialogFactory, mediaCarouselController, falsingManager, clock)
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
 
         // Mock out a view holder for the player to attach to.

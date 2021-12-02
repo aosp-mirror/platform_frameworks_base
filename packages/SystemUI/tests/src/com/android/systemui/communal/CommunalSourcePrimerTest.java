@@ -50,6 +50,7 @@ public class CommunalSourcePrimerTest extends SysuiTestCase {
     private static final String TEST_COMPONENT_NAME = "com.google.tests/.CommunalService";
     private static final int MAX_RETRIES = 5;
     private static final int RETRY_DELAY_MS = 1000;
+    private static final int CONNECTION_MIN_DURATION_MS = 5000;
 
     @Mock
     private Context mContext;
@@ -57,7 +58,8 @@ public class CommunalSourcePrimerTest extends SysuiTestCase {
     @Mock
     private Resources mResources;
 
-    private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
+    private FakeSystemClock mFakeClock = new FakeSystemClock();
+    private FakeExecutor mFakeExecutor = new FakeExecutor(mFakeClock);
 
     @Mock
     private CommunalSource mSource;
@@ -80,10 +82,14 @@ public class CommunalSourcePrimerTest extends SysuiTestCase {
                 .thenReturn(MAX_RETRIES);
         when(mResources.getInteger(R.integer.config_communalSourceReconnectBaseDelay))
                 .thenReturn(RETRY_DELAY_MS);
+        when(mResources.getInteger(R.integer.config_communalSourceReconnectBaseDelay))
+                .thenReturn(RETRY_DELAY_MS);
         when(mResources.getString(R.string.config_communalSourceComponent))
                 .thenReturn(TEST_COMPONENT_NAME);
+        when(mResources.getInteger(R.integer.config_connectionMinDuration))
+                .thenReturn(CONNECTION_MIN_DURATION_MS);
 
-        mPrimer = new CommunalSourcePrimer(mContext, mResources, mFakeExecutor,
+        mPrimer = new CommunalSourcePrimer(mContext, mResources, mFakeClock, mFakeExecutor,
                 mCommunalSourceMonitor, Optional.of(mConnector), Optional.of(mObserver));
     }
 
@@ -124,6 +130,36 @@ public class CommunalSourcePrimerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testRetryOnDisconnectFailure() throws Exception {
+        when(mConnector.connect()).thenReturn(
+                CallbackToFutureAdapter.getFuture(completer -> {
+                    completer.set(Optional.of(mSource));
+                    return "test";
+                }));
+
+        mPrimer.onBootCompleted();
+        mFakeExecutor.runAllReady();
+
+        // Verify attempts happen. Note that we account for the retries plus initial attempt, which
+        // is not scheduled.
+        for (int attemptCount = 0; attemptCount < MAX_RETRIES + 1; attemptCount++) {
+            verify(mConnector, times(1)).connect();
+            clearInvocations(mConnector);
+            ArgumentCaptor<CommunalSource.Callback> callbackCaptor =
+                    ArgumentCaptor.forClass(CommunalSource.Callback.class);
+            verify(mSource).addCallback(callbackCaptor.capture());
+            clearInvocations(mSource);
+            verify(mCommunalSourceMonitor).setSource(Mockito.notNull());
+            clearInvocations(mCommunalSourceMonitor);
+            callbackCaptor.getValue().onDisconnected();
+            mFakeExecutor.advanceClockToNext();
+            mFakeExecutor.runAllReady();
+        }
+
+        verify(mConnector, never()).connect();
+    }
+
+    @Test
     public void testAttemptOnPackageChange() {
         when(mConnector.connect()).thenReturn(
                 CallbackToFutureAdapter.getFuture(completer -> {
@@ -161,6 +197,7 @@ public class CommunalSourcePrimerTest extends SysuiTestCase {
         verify(mSource).addCallback(callbackCaptor.capture());
 
         clearInvocations(mConnector);
+        mFakeClock.advanceTime(CONNECTION_MIN_DURATION_MS + 1);
         callbackCaptor.getValue().onDisconnected();
         mFakeExecutor.runAllReady();
 

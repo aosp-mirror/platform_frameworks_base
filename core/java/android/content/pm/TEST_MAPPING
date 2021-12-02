@@ -1,6 +1,9 @@
 {
   "imports": [
     {
+      "path": "frameworks/base/core/tests/coretests/src/android/content/pm"
+    },
+    {
       "path": "frameworks/base/services/tests/PackageManagerServiceTests"
     },
     {

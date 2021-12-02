@@ -737,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"የማሳያ-ክፈት ሙከራዎችን ክትትል ያድርጉባቸው"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ማሳያውን በምትከፍትበት ጊዜ በስህተት የተተየቡ የይለፍ ቃሎችን ቁጥር ተቆጣጠር፤ እና ጡባዊ ተኮውን ቆልፍ  ወይም በጣም ብዙ የተሳሳቱ የይለፍ ቃሎች ከተተየቡ የጡባዊ ተኮን ውሂብ አጥፋ፡፡"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"ማያ ገጹን ሲከፍቱ በትክክል ያልተተየቡ የይለፍ ቃላት ብዛት ተከታተል፣ እና በጣም ብዙ ትክክል ያልሆኑ የይለፍ ቃላት ከተተየቡ የእርስዎን Android TV ን ቆልፍ ወይም ሁሉንም የእርስዎን Android TV ደምስስ።"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ማያ ገጹን ሲያስከፍቱ በትክክል ያልተተየቡ የይለፍ ቃላት ብዛት ተከታተል፣ እና በጣም ብዙ ትክክል ያልሆኑ የይለፍ ቃላት ከተተየቡ የኢንፎቴይንመንት ስርዓቱን ቆልፍ ወይም ሁሉንም የኢንፎቴይንመንት ስርዓት ውሂብ ደምስስ።"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"የተተየቡ ልክ ያልሆኑ የይለፍ ቃሎችን ቁጥር ተቆጣጠር፡፡ማሳያውን በምትከፍትበት ጊዜ፤ እና በጣም ብዙ ልክ ያልሆኑ የይለፍ ቃሎች ከተተየቡ ስልኩን ቆልፈው ወይም ሁሉንም የስልኩን ውሂብ ደምስሰው፡፡"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ማያ ገጹን ሲያስከፍቱ በትክክል ያልተተየቡ የይለፍ ቃላት ብዛት ተከታተል፣ እና በጣም ብዙ ትክክል ያልሆኑ የይለፍ ቃላት ከተተየቡ ጡባዊውን ቆልፍ ወይም ሁሉንም የዚህን ተጠቃሚ ውሂብ ደምስስ።."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"ማያ ገጹን ሲያስከፍቱ በትክክል ያልተተየቡ የይለፍ ቃላት ብዛት ተከታተል፣ እና በጣም ብዙ ትክክል ያልሆኑ የይለፍ ቃላት ከተተየቡ የእርስዎ Android TV መሣሪያን ቆልፍ ወይም ሁሉንም የዚህን ተጠቃሚ ውሂብ ደምስስ።"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ማያ ገጹን ሲያስከፍቱ በትክክል ያልተተየቡ የይለፍ ቃላት ብዛት ተከታተል፣ እና በጣም ብዙ ትክክል ያልሆኑ የይለፍ ቃላት ከተተየቡ የኢንፎቴይንመንት ስርዓቱን ቆልፍ ወይም ሁሉንም የዚህን ተጠቃሚ ውሂብ ደምስስ።"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"ማያ ገጹን ሲያስከፍቱ በትክክል ያልተተየቡ የይለፍ ቃላት ብዛት ተከታተል፣ እና በጣም ብዙ ትክክል ያልሆኑ የይለፍ ቃላት ከተተየቡ ስልኩን ቆልፍ ወይም ሁሉንም የዚህን ተጠቃሚ ውሂብ ደምስስ።"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"የማያ ገጹን መቆለፊያ መለወጥ"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"የማያ ገጽ መቆለፊያውን ለውጥ።"</string>
@@ -748,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"ሁሉንም ውሂብ መሰረዝ"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"የፋብሪካው ውሂብ ዳግም አስጀምርን በማከናወን፣ያለ ማስጠንቀቂያ የጡባዊውን ውሂብ አጥፋ።"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"የፋብሪካ ውሂብ ዳግም ቅንብርን ያለ ማስጠንቀቂያ በማከናወን የእርስዎን Android TV መሣሪያ ውሂብን ደምስስ።"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"የፋብሪካ ውሂብ ዳግም ማስጀመር በማከናወን ያለማስጠንቀቂያ የኢንፎቴይንመንት ስርዓትን ውሂብ ደምስስ።"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"የፋብሪካ ውሂብ ድጋሚ አስጀምር በማከናወን ያለ ማሰጠንቀቂያ የስልኩን ውሂብ ደምስስ።"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"የተጠቃሚ ውሂብ ደምስስ"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"የመገለጫ ውሂብ ደምስስ"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"የተጠቃሚ ውሂብ ደምስስ"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"ያለምንም ማስጠንቀቂያ የዚህን ጡባዊ የተጠቃሚ ውሂብ ደምስስ።"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"በዚህ Android TV መሣሪያ ላይ ያለ ማስጠንቀቂያ የዚህን ተጠቃሚ ውሂብ ደምስስ።"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"በዚህ የኢንፎቴይንመንት ሥርዓት ላይ ያለ ማስጠንቀቂያ የዚህን መገለጫ ውሂብ ደምስስ።"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"ያለምንም ማስጠንቀቂያ የዚህን ስልክ የተጠቃሚ ውሂብ ደምስስ።"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"የመሣሪያውን ሁሉንም ፕሮክሲ አዘጋጅ"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"መመሪያ ነቅቶ እያለ ጥቅም ላይ ሊውል የሚችለውን የመሣሪያውን ሁሉንተናዊ ተኪ አዘጋጅ። የመሣሪያ ባለቤት ብቻ የሁሉንተናዊ ተኪውን ማዘጋጀት ይችላል።"</string>

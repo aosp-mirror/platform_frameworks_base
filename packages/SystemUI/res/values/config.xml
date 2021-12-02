@@ -682,6 +682,9 @@
          attempts. -->
     <integer name="config_communalSourceReconnectBaseDelay">1000</integer>
 
+    <!-- The minimum time in milliseconds for a connection to be considered connected. Any time -->
+    <integer name="config_connectionMinDuration">1000</integer>
+
     <!-- Flag to activate notification to contents feature -->
     <bool name="config_notificationToContents">false</bool>
 

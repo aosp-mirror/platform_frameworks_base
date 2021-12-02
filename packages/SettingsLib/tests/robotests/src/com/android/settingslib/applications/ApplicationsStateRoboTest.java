@@ -23,6 +23,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -203,7 +204,7 @@ public class ApplicationsStateRoboTest {
         infos.add(createApplicationInfo("test.hidden.module.2"));
         infos.add(createApplicationInfo("test.package.3"));
         when(mPackageManagerService.getInstalledApplications(
-            anyInt() /* flags */, anyInt() /* userId */)).thenReturn(new ParceledListSlice(infos));
+            anyLong() /* flags */, anyInt() /* userId */)).thenReturn(new ParceledListSlice(infos));
 
         ApplicationsState.sInstance = null;
         mApplicationsState =

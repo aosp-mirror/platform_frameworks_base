@@ -1,6 +1,6 @@
 # Dialogs in SystemUI
 
-### Creating a dialog
+## Creating a dialog
 
 ### Styling
 

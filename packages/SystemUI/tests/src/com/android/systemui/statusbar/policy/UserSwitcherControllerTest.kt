@@ -40,6 +40,7 @@ import com.android.internal.util.UserIcons
 import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
@@ -94,6 +95,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var dialogShower: UserSwitchDialogController.DialogShower
     @Mock private lateinit var notificationShadeWindowView: NotificationShadeWindowView
     @Mock private lateinit var threadedRenderer: ThreadedRenderer
+    @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
     private lateinit var testableLooper: TestableLooper
     private lateinit var uiBgExecutor: FakeExecutor
     private lateinit var uiEventLogger: UiEventLoggerFake
@@ -148,7 +150,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 uiBgExecutor,
                 interactionJankMonitor,
                 latencyTracker,
-                dumpManager)
+                dumpManager,
+                dialogLaunchAnimator)
         userSwitcherController.mPauseRefreshUsers = true
 
         // Since userSwitcherController involves InteractionJankMonitor.

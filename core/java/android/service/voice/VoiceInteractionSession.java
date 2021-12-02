@@ -1470,10 +1470,10 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * Requests a list of supported actions from an app.
      *
      * @param activityId Ths activity id of the app to get the actions from.
-     * @param resultExecutor The handler to receive the callback
      * @param cancellationSignal A signal to cancel the operation in progress,
      *     or {@code null} if none.
-     * @param callback The callback to receive the response
+     * @param resultExecutor The handler to receive the callback.
+     * @param callback The callback to receive the response.
      */
     public final void requestDirectActions(@NonNull ActivityId activityId,
             @Nullable CancellationSignal cancellationSignal,

@@ -21,11 +21,11 @@ import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENAB
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
@@ -34,6 +34,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
@@ -292,7 +293,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
     }
 
     @Override
-    public void showFeedbackIcon(boolean show, Pair<Integer, Integer> feedbackResources) {
-        mView.showFeedbackIcon(show, feedbackResources);
+    public void setFeedbackIcon(@Nullable FeedbackIcon icon) {
+        mView.setFeedbackIcon(icon);
     }
 }

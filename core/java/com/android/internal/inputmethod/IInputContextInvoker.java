@@ -43,9 +43,11 @@ public final class IInputContextInvoker {
 
     @NonNull
     private final IInputContext mIInputContext;
+    private final int mSessionId;
 
-    private IInputContextInvoker(@NonNull IInputContext inputContext) {
+    private IInputContextInvoker(@NonNull IInputContext inputContext, int sessionId) {
         mIInputContext = inputContext;
+        mSessionId = sessionId;
     }
 
     /**
@@ -56,13 +58,36 @@ public final class IInputContextInvoker {
      */
     public static IInputContextInvoker create(@NonNull IInputContext inputContext) {
         Objects.requireNonNull(inputContext);
-        return new IInputContextInvoker(inputContext);
+        return new IInputContextInvoker(inputContext, 0);
+    }
+
+    /**
+     * Creates a new instance of {@link IInputContextInvoker} with the given {@code sessionId}.
+     *
+     * @param sessionId the new session ID to be used.
+     * @return A new instance of {@link IInputContextInvoker}.
+     */
+    @NonNull
+    public IInputContextInvoker cloneWithSessionId(int sessionId) {
+        return new IInputContextInvoker(mIInputContext, sessionId);
+    }
+
+    /**
+     * @param inputContext {@code IInputContext} to be compared with
+     * @return {@code true} if the underlying {@code IInputContext} is the same. {@code false} if
+     *         {@code inputContext} is {@code null}.
+     */
+    @AnyThread
+    public boolean isSameConnection(@NonNull IInputContext inputContext) {
+        if (inputContext == null) {
+            return false;
+        }
+        return mIInputContext.asBinder() == inputContext.asBinder();
     }
 
     @NonNull
     InputConnectionCommandHeader createHeader() {
-        // TODO(b/203086369): Propagate session ID for interruption
-        return new InputConnectionCommandHeader(0 /* sessionId */);
+        return new InputConnectionCommandHeader(mSessionId);
     }
 
     /**

@@ -38,18 +38,26 @@ public abstract class DisplayWindowPolicyController {
     private int mWindowFlags;
 
     /**
+     * The system window flags that we are interested in.
+     * @see android.view.WindowManager.LayoutParams
+     * @see #keepActivityOnWindowFlagsChanged
+     */
+    private int mSystemWindowFlags;
+
+    /**
      * Returns {@code true} if the given window flags contain the flags that we're interested in.
      */
-    public final boolean isInterestedWindowFlags(int windowFlags) {
-        return (mWindowFlags & windowFlags) != 0;
+    public final boolean isInterestedWindowFlags(int windowFlags, int systemWindowFlags) {
+        return (mWindowFlags & windowFlags) != 0 || (mSystemWindowFlags & systemWindowFlags) != 0;
     }
 
     /**
      * Sets the window flags that we’re interested in and expected
      * #keepActivityOnWindowFlagsChanged to be called if any changes.
      */
-    public final void setInterestedWindowFlags(int windowFlags) {
+    public final void setInterestedWindowFlags(int windowFlags, int systemWindowFlags) {
         mWindowFlags = windowFlags;
+        mSystemWindowFlags = systemWindowFlags;
     }
 
     /**
@@ -64,7 +72,7 @@ public abstract class DisplayWindowPolicyController {
      * be moved back to default display.
      */
     public abstract boolean keepActivityOnWindowFlagsChanged(
-            ActivityInfo activityInfo, int windowFlags);
+            ActivityInfo activityInfo, int windowFlags, int systemWindowFlags);
 
     /**
      * This is called when the top activity of the display is changed.
@@ -80,5 +88,6 @@ public abstract class DisplayWindowPolicyController {
     public void dump(String prefix, final PrintWriter pw) {
         pw.println(prefix + "DisplayWindowPolicyController{" + super.toString() + "}");
         pw.println(prefix + "  mWindowFlags=" + mWindowFlags);
+        pw.println(prefix + "  mSystemWindowFlags=" + mSystemWindowFlags);
     }
 }

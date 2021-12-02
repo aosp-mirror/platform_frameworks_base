@@ -737,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Fylgjast með tilraunum til að taka skjáinn úr lás"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa spjaldtölvunni eða eyða öllum gögnum hennar ef rangt aðgangsorð er fært inn of oft."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa Android TV tækinu eða eyða öllum gögnum tækisins ef rangt aðgangsorð er fært inn of oft."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa upplýsinga- og afþreyingarkerfinu eða eyða öllum gögnum upplýsinga- og afþreyingarkerfisins ef rangt aðgangsorð er fært inn of oft."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa símanum eða eyða öllum gögnum hans ef rangt aðgangsorð er fært inn of oft."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa spjaldtölvunni eða eyða öllum gögnum viðkomandi notanda ef rangt aðgangsorð er fært inn of oft."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa Android TV eða eyða öllum gögnum viðkomandi notanda ef rangt aðgangsorð er fært inn of oft."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa upplýsinga- og afþreyingarkerfinu eða eyða öllum gögnum þessa prófíls ef rangt aðgangsorð er fært inn of oft."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Fylgjast með fjölda rangra innskráningartilrauna með aðgangsorði þegar skjárinn er tekinn úr lás og læsa símanum eða eyða öllum gögnum viðkomandi notanda ef rangt aðgangsorð er fært inn of oft."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Breyta skjálásnum"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Breyta skjálásnum."</string>
@@ -748,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Eyða öllum gögnum"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Eyða gögnum spjaldtölvunnar fyrirvaralaust með núllstillingu."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Eyða gögnum Android TV tækisins án viðvörunar með því að núllstilla það."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Eyða gögnum upplýsinga- og afþreyingarkerfisins án viðvörunar með núllstillingu."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Eyða gögnum símans fyrirvaralaust með núllstillingu."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Eyða gögnum notanda"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Eyða prófílgögnum"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Eyða gögnum notanda"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Eyða gögnum viðkomandi notanda í þessari spjaldtölvu án viðvörunar."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Eyða gögnum þessa notanda úr þessu Android TV tæki án viðvörunar."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Eyða gögnum þessa prófíls í þessu upplýsinga- og afþreyingarkerfi án viðvörunar."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Eyða gögnum viðkomandi notanda í þessum síma án viðvörunar."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Stilla altækan proxy-þjón fyrir tækið"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Velja altækan proxy-þjón tækisins sem nota á þegar stefnan er virk. Aðeins eigandi tækisins getur valið altækan proxy-þjón."</string>

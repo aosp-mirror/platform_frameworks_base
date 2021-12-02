@@ -33,6 +33,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
@@ -46,10 +47,10 @@ import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
+import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.phone.TapAgainView;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
@@ -61,11 +62,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tuner.TunerService;
 
-import java.util.Optional;
-
 import javax.inject.Named;
 
-import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
@@ -174,6 +172,21 @@ public abstract class StatusBarViewModule {
     /** */
     @Provides
     @StatusBarComponent.StatusBarScope
+    public static OngoingPrivacyChip getSplitShadeOngoingPrivacyChip(
+            @Named(SPLIT_SHADE_HEADER) View header) {
+        return header.findViewById(R.id.privacy_chip);
+    }
+
+    /** */
+    @Provides
+    @StatusBarComponent.StatusBarScope
+    static StatusIconContainer providesStatusIconContainer(@Named(SPLIT_SHADE_HEADER) View header) {
+        return header.findViewById(R.id.statusIcons);
+    }
+
+    /** */
+    @Provides
+    @StatusBarComponent.StatusBarScope
     @Named(SPLIT_SHADE_BATTERY_VIEW)
     static BatteryMeterView getBatteryMeterView(@Named(SPLIT_SHADE_HEADER) View view) {
         return view.findViewById(R.id.batteryRemainingIcon);
@@ -243,7 +256,6 @@ public abstract class StatusBarViewModule {
             NotificationPanelViewController notificationPanelViewController,
             NetworkController networkController,
             StatusBarStateController statusBarStateController,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             CommandQueue commandQueue,
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             OperatorNameViewController.Factory operatorNameViewControllerFactory
@@ -261,7 +273,6 @@ public abstract class StatusBarViewModule {
                 notificationPanelViewController,
                 networkController,
                 statusBarStateController,
-                statusBarOptionalLazy,
                 commandQueue,
                 collapsedStatusBarFragmentLogger,
                 operatorNameViewControllerFactory);

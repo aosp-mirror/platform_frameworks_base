@@ -25,6 +25,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.time.SystemClock;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -43,10 +44,12 @@ public class CommunalSourcePrimer extends CoreStartable {
     private static final String TAG = "CommunalSourcePrimer";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    private final SystemClock mSystemClock;
     private final DelayableExecutor mMainExecutor;
     private final CommunalSourceMonitor mMonitor;
     private final int mBaseReconnectDelayMs;
     private final int mMaxReconnectAttempts;
+    private final int mMinConnectionDuration;
 
     private int mReconnectAttempts = 0;
     private Runnable mCurrentReconnectCancelable;
@@ -65,11 +68,13 @@ public class CommunalSourcePrimer extends CoreStartable {
 
     @Inject
     public CommunalSourcePrimer(Context context, @Main Resources resources,
+            SystemClock clock,
             DelayableExecutor mainExecutor,
             CommunalSourceMonitor monitor,
             Optional<CommunalSource.Connector> connector,
             Optional<CommunalSource.Observer> observer) {
         super(context);
+        mSystemClock = clock;
         mMainExecutor = mainExecutor;
         mMonitor = monitor;
         mConnector = connector;
@@ -79,6 +84,8 @@ public class CommunalSourcePrimer extends CoreStartable {
                 R.integer.config_communalSourceMaxReconnectAttempts);
         mBaseReconnectDelayMs = resources.getInteger(
                 R.integer.config_communalSourceReconnectBaseDelay);
+        mMinConnectionDuration = resources.getInteger(
+                R.integer.config_connectionMinDuration);
     }
 
     @Override
@@ -145,10 +152,17 @@ public class CommunalSourcePrimer extends CoreStartable {
         mGetSourceFuture = mConnector.get().connect();
         mGetSourceFuture.addListener(() -> {
             try {
+                final long startTime = mSystemClock.currentTimeMillis();
                 Optional<CommunalSource> result = mGetSourceFuture.get();
                 if (result.isPresent()) {
                     final CommunalSource source = result.get();
-                    source.addCallback(() -> initiateConnectionAttempt());
+                    source.addCallback(() -> {
+                        if (mSystemClock.currentTimeMillis() - startTime > mMinConnectionDuration) {
+                            initiateConnectionAttempt();
+                        } else {
+                            scheduleConnectionAttempt();
+                        }
+                    });
                     mMonitor.setSource(source);
                 } else {
                     scheduleConnectionAttempt();

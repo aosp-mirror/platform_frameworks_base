@@ -96,8 +96,6 @@ class DndTileTest : SysuiTestCase() {
 
         whenever(qsHost.userId).thenReturn(DEFAULT_USER)
         whenever(qsHost.uiEventLogger).thenReturn(uiEventLogger)
-        whenever(dialogLaunchAnimator.showFromView(any(), any(), anyBoolean()))
-                .thenReturn(hostDialog)
 
         val wrappedContext = object : ContextWrapper(context) {
             override fun getSharedPreferences(file: File?, mode: Int): SharedPreferences {

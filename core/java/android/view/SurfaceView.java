@@ -228,6 +228,11 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private final SurfaceControl.Transaction mRtTransaction = new SurfaceControl.Transaction();
 
     /**
+     * Used on the main thread to set the transaction that will be synced with the main window.
+     */
+    private final Transaction mSyncTransaction = new Transaction();
+
+    /**
      * Transaction that should be used whe
      * {@link HardwareRenderer.FrameDrawingCallback#onFrameDraw} is invoked. All
      * frame callbacks can use the same transaction since they will be thread safe
@@ -496,7 +501,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
     }
 
-    private void performDrawFinished() {
+    private void performDrawFinished(Transaction t) {
+        mSyncTransaction.merge(t);
         if (mDeferredDestroySurfaceControl != null) {
             synchronized (mSurfaceControlLock) {
                 mTmpTransaction.remove(mDeferredDestroySurfaceControl).apply();
@@ -521,7 +527,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     void notifyDrawFinished() {
         ViewRootImpl viewRoot = getViewRootImpl();
         if (viewRoot != null) {
-            viewRoot.pendingDrawFinished();
+            viewRoot.pendingDrawFinished(mSyncTransaction);
         }
         mPendingReportDraws--;
     }
@@ -1202,10 +1208,17 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                                 callbacks = getSurfaceCallbacks();
                             }
 
+                            final Transaction t = new Transaction();
+                            if (viewRoot.wasRelayoutRequested()) {
+                                mBlastBufferQueue.setSyncTransaction(t,
+                                        false /* acquireSingleBuffer */);
+                            }
                             mPendingReportDraws++;
                             viewRoot.drawPending();
-                            SurfaceCallbackHelper sch =
-                                    new SurfaceCallbackHelper(this::onDrawFinished);
+                            SurfaceCallbackHelper sch = new SurfaceCallbackHelper(() -> {
+                                mBlastBufferQueue.setSyncTransaction(null);
+                                onDrawFinished(t);
+                            });
                             sch.dispatchSurfaceRedrawNeededAsync(mSurfaceHolder, callbacks);
                         }
                     }
@@ -1367,13 +1380,13 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 mSurfaceHeight, mFormat);
     }
 
-    private void onDrawFinished() {
+    private void onDrawFinished(Transaction t) {
         if (DEBUG) {
             Log.i(TAG, System.identityHashCode(this) + " "
                     + "finishedDrawing");
         }
 
-        runOnUiThread(this::performDrawFinished);
+        runOnUiThread(() -> performDrawFinished(t));
     }
 
     /**

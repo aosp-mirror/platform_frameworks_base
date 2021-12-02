@@ -266,6 +266,7 @@ public class SystemServicesTestRule implements TestRule {
         doNothing().when(amInternal).updateOomLevelsForDisplay(anyInt());
         doNothing().when(amInternal).broadcastGlobalConfigurationChanged(anyInt(), anyBoolean());
         doNothing().when(amInternal).cleanUpServices(anyInt(), any(), any());
+        doNothing().when(amInternal).reportCurKeyguardUsageEvent(anyBoolean());
         doReturn(UserHandle.USER_SYSTEM).when(amInternal).getCurrentUserId();
         doReturn(TEST_USER_PROFILE_IDS).when(amInternal).getCurrentProfileIds();
         doReturn(true).when(amInternal).isUserRunning(anyInt(), anyInt());

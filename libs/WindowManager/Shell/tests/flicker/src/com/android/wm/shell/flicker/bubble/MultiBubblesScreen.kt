@@ -17,7 +17,7 @@
 package com.android.wm.shell.flicker.bubble
 
 import android.os.SystemClock
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
@@ -67,7 +67,7 @@ class MultiBubblesScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(test
             }
         }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun testAppIsAlwaysVisible() {
         testSpec.assertLayers {

@@ -532,6 +532,11 @@ public final class ViewRootImpl implements ViewParent,
     boolean mPerformContentCapture;
 
     boolean mReportNextDraw;
+    /**
+     * Set if the reportDraw was requested from WM. If just a local report draw was invoked, there's
+     * no need to report back to system server and can just apply immediately on the client.
+     */
+    boolean mReportDrawToWm;
     boolean mFullRedrawNeeded;
     boolean mNewSurfaceNeeded;
     boolean mForceNextWindowRelayout;
@@ -753,6 +758,8 @@ public final class ViewRootImpl implements ViewParent,
      * Increment this value when the surface has been replaced.
      */
     private int mSurfaceSequenceId = 0;
+
+    private boolean mRelayoutRequested;
 
     private String mTag = TAG;
 
@@ -3311,6 +3318,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         mIsInTraversal = false;
+        mRelayoutRequested = false;
     }
 
     private void notifyContentCatpureEvents() {
@@ -3941,10 +3949,18 @@ public final class ViewRootImpl implements ViewParent,
         mDrawsNeededToReport++;
     }
 
-    void pendingDrawFinished() {
+    void pendingDrawFinished(Transaction t) {
         if (mDrawsNeededToReport == 0) {
             throw new RuntimeException("Unbalanced drawPending/pendingDrawFinished calls");
         }
+
+        if (t != null) {
+            if (DEBUG_BLAST) {
+                Log.d(mTag, "Merging transaction into main window transaction");
+            }
+            mSurfaceChangedTransaction.merge(t);
+        }
+
         mDrawsNeededToReport--;
         if (mDrawsNeededToReport == 0) {
             reportDrawFinished();
@@ -3954,17 +3970,31 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    void pendingDrawFinished() {
+        pendingDrawFinished(null);
+    }
+
     private void postDrawFinished() {
         mHandler.sendEmptyMessage(MSG_DRAW_FINISHED);
     }
 
     private void reportDrawFinished() {
-        try {
+        if (DEBUG_BLAST) {
+            Log.d(mTag, "reportDrawFinished");
+        }
+        mDrawsNeededToReport = 0;
+
+        if (!mReportDrawToWm) {
             if (DEBUG_BLAST) {
-                Log.d(mTag, "reportDrawFinished");
+                Log.d(mTag, "No need to report finishDrawing. Apply immediately");
             }
-            mDrawsNeededToReport = 0;
+            mSurfaceChangedTransaction.apply();
+            return;
+        }
+
+        try {
             mWindowSession.finishDrawing(mWindow, mSurfaceChangedTransaction);
+            mReportDrawToWm = false;
         } catch (RemoteException e) {
             Log.e(mTag, "Unable to report draw finished", e);
             mSurfaceChangedTransaction.apply();
@@ -7756,6 +7786,7 @@ public final class ViewRootImpl implements ViewParent,
     private int relayoutWindow(WindowManager.LayoutParams params, int viewVisibility,
             boolean insetsPending) throws RemoteException {
 
+        mRelayoutRequested = true;
         float appScale = mAttachInfo.mApplicationScale;
         boolean restore = false;
         if (params != null && mTranslator != null) {
@@ -8291,7 +8322,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mTranslator != null) {
             mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
         }
-        if (insetsState != null && insetsState.getSource(ITYPE_IME).isVisible()) {
+        if (insetsState != null && insetsState.getSourceOrDefaultVisibility(ITYPE_IME)) {
             ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchInsetsChanged",
                     getInsetsController().getHost().getInputMethodManager(), null /* icProto */);
         }
@@ -8316,7 +8347,7 @@ public final class ViewRootImpl implements ViewParent,
             mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
             mTranslator.translateSourceControlsInScreenToAppWindow(activeControls);
         }
-        if (insetsState != null && insetsState.getSource(ITYPE_IME).isVisible()) {
+        if (insetsState != null && insetsState.getSourceOrDefaultVisibility(ITYPE_IME)) {
             ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchInsetsControlChanged",
                     getInsetsController().getHost().getInputMethodManager(), null /* icProto */);
         }
@@ -9573,6 +9604,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mReportNextDraw == false) {
             drawPending();
         }
+        mReportDrawToWm = true;
         mReportNextDraw = true;
     }
 
@@ -10501,4 +10533,8 @@ public final class ViewRootImpl implements ViewParent,
        mBLASTDrawConsumer = consume;
        return true;
    }
+
+    boolean wasRelayoutRequested() {
+        return mRelayoutRequested;
+    }
 }
