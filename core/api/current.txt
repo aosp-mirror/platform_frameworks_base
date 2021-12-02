@@ -31574,7 +31574,7 @@ package android.os {
     method @Nullable public <T> T[] readParcelableArray(@Nullable ClassLoader, @NonNull Class<T>);
     method @Deprecated @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
     method @Nullable public <T> android.os.Parcelable.Creator<T> readParcelableCreator(@Nullable ClassLoader, @NonNull Class<T>);
-    method @NonNull public <T extends android.os.Parcelable> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader);
+    method @Deprecated @NonNull public <T extends android.os.Parcelable> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader);
     method @NonNull public <T> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader, @NonNull Class<T>);
     method @Nullable public android.os.PersistableBundle readPersistableBundle();
     method @Nullable public android.os.PersistableBundle readPersistableBundle(@Nullable ClassLoader);
