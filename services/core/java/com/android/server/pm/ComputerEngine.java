@@ -2232,12 +2232,11 @@ public class ComputerEngine implements Computer {
         return false;
     }
 
-    private boolean filterStaticSharedLibPackage(@Nullable PackageStateInternal ps, int uid,
+    public final boolean filterSharedLibPackage(@Nullable PackageStateInternal ps, int uid,
             int userId, @PackageManager.ComponentInfoFlags long flags) {
-        // Callers can access only the static shared libs they depend on, otherwise they need to
-        // explicitly ask for the static shared libraries given the caller is allowed to access
-        // all static libs.
-        if ((flags & PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES) != 0) {
+        // Callers can access only the libs they depend on, otherwise they need to explicitly
+        // ask for the shared libraries given the caller is allowed to access all static libs.
+        if ((flags & PackageManager.MATCH_STATIC_SHARED_LIBRARIES) != 0) {
             // System/shell/root get to see all static libs
             final int appId = UserHandle.getAppId(uid);
             if (appId == Process.SYSTEM_UID || appId == Process.SHELL_UID
@@ -2286,69 +2285,6 @@ public class ComputerEngine implements Computer {
             }
         }
         return true;
-    }
-
-    private boolean filterSdkLibPackage(@Nullable PackageStateInternal ps, int uid,
-            int userId, @PackageManager.ComponentInfoFlags long flags) {
-        // Callers can access only the SDK libs they depend on, otherwise they need to
-        // explicitly ask for the SDKs given the caller is allowed to access
-        // all shared libs.
-        if ((flags & PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES) != 0) {
-            // System/shell/root get to see all SDK libs.
-            final int appId = UserHandle.getAppId(uid);
-            if (appId == Process.SYSTEM_UID || appId == Process.SHELL_UID
-                    || appId == Process.ROOT_UID) {
-                return false;
-            }
-            // Installer gets to see all SDK libs.
-            if (PackageManager.PERMISSION_GRANTED
-                    == checkUidPermission(Manifest.permission.INSTALL_PACKAGES, uid)) {
-                return false;
-            }
-        }
-
-        // No package means no static lib as it is always on internal storage
-        if (ps == null || ps.getPkg() == null || !ps.getPkg().isSdkLibrary()) {
-            return false;
-        }
-
-        final SharedLibraryInfo libraryInfo = getSharedLibraryInfo(
-                ps.getPkg().getSdkLibName(), ps.getPkg().getSdkLibVersionMajor());
-        if (libraryInfo == null) {
-            return false;
-        }
-
-        final int resolvedUid = UserHandle.getUid(userId, UserHandle.getAppId(uid));
-        final String[] uidPackageNames = getPackagesForUid(resolvedUid);
-        if (uidPackageNames == null) {
-            return true;
-        }
-
-        for (String uidPackageName : uidPackageNames) {
-            if (ps.getPackageName().equals(uidPackageName)) {
-                return false;
-            }
-            PackageStateInternal uidPs = mSettings.getPackage(uidPackageName);
-            if (uidPs != null) {
-                final int index = ArrayUtils.indexOf(uidPs.getUsesSdkLibraries(),
-                        libraryInfo.getName());
-                if (index < 0) {
-                    continue;
-                }
-                if (uidPs.getPkg().getUsesSdkLibrariesVersionsMajor()[index]
-                        == libraryInfo.getLongVersion()) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public final boolean filterSharedLibPackage(@Nullable PackageStateInternal ps, int uid,
-            int userId, @PackageManager.ComponentInfoFlags long flags) {
-        return filterStaticSharedLibPackage(ps, uid, userId, flags) && filterSdkLibPackage(ps, uid,
-                userId, flags);
     }
 
     private boolean hasCrossUserPermission(
@@ -3783,7 +3719,7 @@ public class ComputerEngine implements Computer {
 
         flags = updateFlagsForPackage(flags, userId);
 
-        final boolean canSeeStaticAndSdkLibraries =
+        final boolean canSeeStaticLibraries =
                 mContext.checkCallingOrSelfPermission(INSTALL_PACKAGES)
                         == PERMISSION_GRANTED
                         || mContext.checkCallingOrSelfPermission(DELETE_PACKAGES)
@@ -3808,7 +3744,7 @@ public class ComputerEngine implements Computer {
             final int versionCount = versionedLib.size();
             for (int j = 0; j < versionCount; j++) {
                 SharedLibraryInfo libInfo = versionedLib.valueAt(j);
-                if (!canSeeStaticAndSdkLibraries && (libInfo.isStatic() || libInfo.isSdk())) {
+                if (!canSeeStaticLibraries && libInfo.isStatic()) {
                     break;
                 }
                 final long identity = Binder.clearCallingIdentity();
@@ -3817,7 +3753,7 @@ public class ComputerEngine implements Computer {
                     PackageInfo packageInfo = getPackageInfoInternal(
                             declaringPackage.getPackageName(),
                             declaringPackage.getLongVersionCode(),
-                            flags | PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES,
+                            flags | PackageManager.MATCH_STATIC_SHARED_LIBRARIES,
                             Binder.getCallingUid(), userId);
                     if (packageInfo == null) {
                         continue;
@@ -3917,17 +3853,12 @@ public class ComputerEngine implements Computer {
             }
 
             final String libName = libInfo.getName();
-            if (libInfo.isStatic() || libInfo.isSdk()) {
-                final String[] libs =
-                        libInfo.isStatic() ? ps.getUsesStaticLibraries() : ps.getUsesSdkLibraries();
-                final long[] libsVersions = libInfo.isStatic() ? ps.getUsesStaticLibrariesVersions()
-                        : ps.getUsesSdkLibrariesVersionsMajor();
-
-                final int libIdx = ArrayUtils.indexOf(libs, libName);
+            if (libInfo.isStatic()) {
+                final int libIdx = ArrayUtils.indexOf(ps.getUsesStaticLibraries(), libName);
                 if (libIdx < 0) {
                     continue;
                 }
-                if (libsVersions[libIdx] != libInfo.getLongVersion()) {
+                if (ps.getUsesStaticLibrariesVersions()[libIdx] != libInfo.getLongVersion()) {
                     continue;
                 }
                 if (shouldFilterApplication(ps, callingUid, userId)) {
@@ -4008,7 +3939,7 @@ public class ComputerEngine implements Computer {
                     PackageInfo packageInfo = getPackageInfoInternal(
                             declaringPackage.getPackageName(),
                             declaringPackage.getLongVersionCode(),
-                            flags | PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES,
+                            flags | PackageManager.MATCH_STATIC_SHARED_LIBRARIES,
                             Binder.getCallingUid(), userId);
                     if (packageInfo == null) {
                         continue;
@@ -4103,7 +4034,7 @@ public class ComputerEngine implements Computer {
                         getPackageStateInternal(libraryInfo.getPackageName());
                 if (ps != null && !filterSharedLibPackage(ps, Binder.getCallingUid(),
                         UserHandle.getUserId(Binder.getCallingUid()),
-                        PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES)) {
+                        PackageManager.MATCH_STATIC_SHARED_LIBRARIES)) {
                     if (libs == null) {
                         libs = new ArraySet<>();
                     }

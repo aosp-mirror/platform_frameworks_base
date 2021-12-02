@@ -196,17 +196,6 @@ public interface ParsingPackageRead extends PkgWithoutStateAppInfo, PkgWithoutSt
     int[] getSplitFlags();
 
     /**
-     * @see R.styleable#AndroidManifestSdkLibrary_name
-     */
-    @Nullable
-    String getSdkLibName();
-
-    /**
-     * @see R.styleable#AndroidManifestSdkLibrary_versionMajor
-     */
-    int getSdkLibVersionMajor();
-
-    /**
      * @see R.styleable#AndroidManifestStaticLibrary_name
      */
     @Nullable
@@ -277,26 +266,6 @@ public interface ParsingPackageRead extends PkgWithoutStateAppInfo, PkgWithoutSt
      */
     @Nullable
     long[] getUsesStaticLibrariesVersions();
-
-    /**
-     * TODO(b/135203078): Move SDK library stuff to an inner data class
-     *
-     * @see R.styleable#AndroidManifestUsesSdkLibrary
-     */
-    @NonNull
-    List<String> getUsesSdkLibraries();
-
-    /**
-     * @see R.styleable#AndroidManifestUsesSdkLibrary_certDigest
-     */
-    @Nullable
-    String[][] getUsesSdkLibrariesCertDigests();
-
-    /**
-     * @see R.styleable#AndroidManifestUsesSdkLibrary_versionMajor
-     */
-    @Nullable
-    long[] getUsesSdkLibrariesVersionsMajor();
 
     boolean hasPreserveLegacyExternalStorage();
 

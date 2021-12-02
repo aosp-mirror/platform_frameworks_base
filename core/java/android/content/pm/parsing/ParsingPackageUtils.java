@@ -117,7 +117,6 @@ import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
-import libcore.util.HexEncoding;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -849,8 +848,6 @@ public class ParsingPackageUtils {
                     pkg.addProperty(propertyResult.getResult());
                 }
                 return propertyResult;
-            case "uses-sdk-library":
-                return parseUsesSdkLibrary(input, pkg, res, parser);
             case "uses-static-library":
                 return parseUsesStaticLibrary(input, pkg, res, parser);
             case "uses-library":
@@ -2215,8 +2212,7 @@ public class ParsingPackageUtils {
             }
         }
 
-        if (TextUtils.isEmpty(pkg.getStaticSharedLibName()) && TextUtils.isEmpty(
-                pkg.getSdkLibName())) {
+        if (TextUtils.isEmpty(pkg.getStaticSharedLibName())) {
             // Add a hidden app detail activity to normal apps which forwards user to App Details
             // page.
             ParseResult<ParsedActivity> a = generateAppDetailsHiddenActivity(input, pkg);
@@ -2355,14 +2351,10 @@ public class ParsingPackageUtils {
                     pkg.addProperty(propertyResult.getResult());
                 }
                 return propertyResult;
-            case "sdk-library":
-                return parseSdkLibrary(pkg, res, parser, input);
             case "static-library":
                 return parseStaticLibrary(pkg, res, parser, input);
             case "library":
                 return parseLibrary(pkg, res, parser, input);
-            case "uses-sdk-library":
-                return parseUsesSdkLibrary(input, pkg, res, parser);
             case "uses-static-library":
                 return parseUsesStaticLibrary(input, pkg, res, parser);
             case "uses-library":
@@ -2379,41 +2371,6 @@ public class ParsingPackageUtils {
                 return parseProfileable(input, pkg, res, parser);
             default:
                 return ParsingUtils.unknownTag("<application>", pkg, parser, input);
-        }
-    }
-
-    @NonNull
-    private static ParseResult<ParsingPackage> parseSdkLibrary(
-            ParsingPackage pkg, Resources res,
-            XmlResourceParser parser, ParseInput input) {
-        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestSdkLibrary);
-        try {
-            // Note: don't allow this value to be a reference to a resource that may change.
-            String lname = sa.getNonResourceString(
-                    R.styleable.AndroidManifestSdkLibrary_name);
-            final int versionMajor = sa.getInt(
-                    R.styleable.AndroidManifestSdkLibrary_versionMajor,
-                    -1);
-
-            // Fail if malformed.
-            if (lname == null || versionMajor < 0) {
-                return input.error("Bad sdk-library declaration name: " + lname
-                        + " version: " + versionMajor);
-            } else if (pkg.getSharedUserId() != null) {
-                return input.error(
-                        PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID,
-                        "sharedUserId not allowed in SDK library"
-                );
-            } else if (pkg.getSdkLibName() != null) {
-                return input.error("Multiple SDKs for package "
-                        + pkg.getPackageName());
-            }
-
-            return input.success(pkg.setSdkLibName(lname.intern())
-                    .setSdkLibVersionMajor(versionMajor)
-                    .setSdkLibrary(true));
-        } finally {
-            sa.recycle();
         }
     }
 
@@ -2479,68 +2436,6 @@ public class ParsingPackageUtils {
     }
 
     @NonNull
-    private static ParseResult<ParsingPackage> parseUsesSdkLibrary(ParseInput input,
-            ParsingPackage pkg, Resources res, XmlResourceParser parser)
-            throws XmlPullParserException, IOException {
-        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestUsesSdkLibrary);
-        try {
-            // Note: don't allow this value to be a reference to a resource that may change.
-            String lname = sa.getNonResourceString(
-                    R.styleable.AndroidManifestUsesSdkLibrary_name);
-            final int versionMajor = sa.getInt(
-                    R.styleable.AndroidManifestUsesSdkLibrary_versionMajor, -1);
-            String certSha256Digest = sa.getNonResourceString(R.styleable
-                    .AndroidManifestUsesSdkLibrary_certDigest);
-
-            // Since an APK providing a static shared lib can only provide the lib - fail if
-            // malformed
-            if (lname == null || versionMajor < 0 || certSha256Digest == null) {
-                return input.error("Bad uses-sdk-library declaration name: " + lname
-                        + " version: " + versionMajor + " certDigest" + certSha256Digest);
-            }
-
-            // Can depend only on one version of the same library
-            List<String> usesSdkLibraries = pkg.getUsesSdkLibraries();
-            if (usesSdkLibraries.contains(lname)) {
-                return input.error(
-                        "Depending on multiple versions of SDK library " + lname);
-            }
-
-            lname = lname.intern();
-            // We allow ":" delimiters in the SHA declaration as this is the format
-            // emitted by the certtool making it easy for developers to copy/paste.
-            certSha256Digest = certSha256Digest.replace(":", "").toLowerCase();
-
-            if ("".equals(certSha256Digest)) {
-                // Test-only uses-sdk-library empty certificate digest override.
-                certSha256Digest = SystemProperties.get(
-                        "debug.pm.uses_sdk_library_default_cert_digest", "");
-                // Validate the overridden digest.
-                try {
-                    HexEncoding.decode(certSha256Digest, false);
-                } catch (IllegalArgumentException e) {
-                    certSha256Digest = "";
-                }
-            }
-
-            ParseResult<String[]> certResult = parseAdditionalCertificates(input, res, parser);
-            if (certResult.isError()) {
-                return input.error(certResult);
-            }
-            String[] additionalCertSha256Digests = certResult.getResult();
-
-            final String[] certSha256Digests = new String[additionalCertSha256Digests.length + 1];
-            certSha256Digests[0] = certSha256Digest;
-            System.arraycopy(additionalCertSha256Digests, 0, certSha256Digests,
-                    1, additionalCertSha256Digests.length);
-
-            return input.success(pkg.addUsesSdkLibrary(lname, versionMajor, certSha256Digests));
-        } finally {
-            sa.recycle();
-        }
-    }
-
-    @NonNull
     private static ParseResult<ParsingPackage> parseUsesStaticLibrary(ParseInput input,
             ParsingPackage pkg, Resources res, XmlResourceParser parser)
             throws XmlPullParserException, IOException {
@@ -2588,7 +2483,9 @@ public class ParsingPackageUtils {
             System.arraycopy(additionalCertSha256Digests, 0, certSha256Digests,
                     1, additionalCertSha256Digests.length);
 
-            return input.success(pkg.addUsesStaticLibrary(lname, version, certSha256Digests));
+            return input.success(pkg.addUsesStaticLibrary(lname)
+                    .addUsesStaticLibraryVersion(version)
+                    .addUsesStaticLibraryCertDigests(certSha256Digests));
         } finally {
             sa.recycle();
         }

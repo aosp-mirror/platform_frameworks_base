@@ -2303,36 +2303,6 @@
         <attr name="authorities" />
     </declare-styleable>
 
-    <!-- The <code>sdk-library</code> tag declares that this apk is providing itself
-    as an SDK library for other applications to use. Any app can declare an SDK library and there
-    can be only one SDK library per package. These SDK libraries are updatable, multiple major
-    versions can be installed at the same time, and an app depends on a specific version.
-    Other apks can link to it with the {@link #AndroidManifestUsesSdkLibrary uses-sdk-library} tag.
-
-    <p>This appears as a child tag of the {@link #AndroidManifestApplication application} tag. -->
-    <declare-styleable name="AndroidManifestSdkLibrary" parent="AndroidManifestApplication">
-        <!-- Required public name of the SDK library, which other components and packages will use
-        when referring to this SDK library. This is a string using Java-style scoping to ensure
-        it is unique.
-        Both name and version should typically form the apk's package name: name_versionMajor. -->
-        <attr name="name" />
-        <!-- Required major version of the SDK library. -->
-        <attr name="versionMajor" format="integer" />
-    </declare-styleable>
-
-
-    <!-- The <code>uses-sdk-library</code> specifies a shared <strong>SDK</strong> library that this
-    package requires to be present on the device.
-
-    <p>This appears as a child tag of the {@link #AndroidManifestApplication application} tag. -->
-    <declare-styleable name="AndroidManifestUsesSdkLibrary" parent="AndroidManifestApplication">
-        <!-- Required name of the SDK library you use. -->
-        <attr name="name" />
-        <!-- Specify which major version of the SDK library you use. -->
-        <attr name="versionMajor" format="integer" />
-        <!-- The SHA-256 digest of the SDK library signing certificate. -->
-        <attr name="certDigest" format="string" />
-    </declare-styleable>
 
     <!-- The <code>static-library</code> tag declares that this apk is providing itself
        as a static shared library for other applications to use. Any app can declare such

@@ -294,12 +294,6 @@ final class ScanPackageHelper {
             }
         }
 
-        String[] usesSdkLibraries = null;
-        if (!parsedPackage.getUsesSdkLibraries().isEmpty()) {
-            usesSdkLibraries = new String[parsedPackage.getUsesSdkLibraries().size()];
-            parsedPackage.getUsesSdkLibraries().toArray(usesSdkLibraries);
-        }
-
         String[] usesStaticLibraries = null;
         if (!parsedPackage.getUsesStaticLibraries().isEmpty()) {
             usesStaticLibraries = new String[parsedPackage.getUsesStaticLibraries().size()];
@@ -330,8 +324,7 @@ final class ScanPackageHelper {
                     AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage),
                     parsedPackage.getLongVersionCode(), pkgFlags, pkgPrivateFlags, user,
                     true /*allowInstall*/, instantApp, virtualPreload,
-                    UserManagerService.getInstance(), usesSdkLibraries,
-                    parsedPackage.getUsesSdkLibrariesVersionsMajor(), usesStaticLibraries,
+                    UserManagerService.getInstance(), usesStaticLibraries,
                     parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups(),
                     newDomainSetId);
         } else {
@@ -351,7 +344,6 @@ final class ScanPackageHelper {
                     PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting),
                     PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting),
                     UserManagerService.getInstance(),
-                    usesSdkLibraries, parsedPackage.getUsesSdkLibrariesVersionsMajor(),
                     usesStaticLibraries, parsedPackage.getUsesStaticLibrariesVersions(),
                     parsedPackage.getMimeGroups(), newDomainSetId);
         }
@@ -560,10 +552,6 @@ final class ScanPackageHelper {
             pkgSetting.setVolumeUuid(volumeUuid);
         }
 
-        SharedLibraryInfo sdkLibraryInfo = null;
-        if (!TextUtils.isEmpty(parsedPackage.getSdkLibName())) {
-            sdkLibraryInfo = AndroidPackageUtils.createSharedLibraryForSdk(parsedPackage);
-        }
         SharedLibraryInfo staticSharedLibraryInfo = null;
         if (!TextUtils.isEmpty(parsedPackage.getStaticSharedLibName())) {
             staticSharedLibraryInfo =
@@ -580,7 +568,7 @@ final class ScanPackageHelper {
 
         return new ScanResult(request, true, pkgSetting, changedAbiCodePath,
                 !createNewPackage /* existingSettingCopied */,
-                previousAppId, sdkLibraryInfo, staticSharedLibraryInfo,
+                previousAppId, staticSharedLibraryInfo,
                 dynamicSharedLibraryInfos);
     }
 
