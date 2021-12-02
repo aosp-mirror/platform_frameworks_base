@@ -9981,6 +9981,9 @@ package android.companion {
 
   public final class AssociationRequest implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public String getDeviceProfile();
+    method @Nullable public CharSequence getDisplayName();
+    method public boolean isSingleDevice();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.AssociationRequest> CREATOR;
     field public static final String DEVICE_PROFILE_WATCH = "android.app.role.COMPANION_DEVICE_WATCH";
