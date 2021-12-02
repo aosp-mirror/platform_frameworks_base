@@ -16,15 +16,18 @@
 
 package com.android.internal.widget;
 
+import android.util.Log;
 import android.util.Pools;
+import android.view.View;
 
 /**
  * A trivial wrapper around Pools.SynchronizedPool which allows clearing the pool, as well as
  * disabling the pool class altogether.
  * @param <T> the type of object in the pool
  */
-public class MessagingPool<T> implements Pools.Pool<T> {
+public class MessagingPool<T extends View> implements Pools.Pool<T> {
     private static final boolean ENABLED = false;  // disabled to test b/208508846
+    private static final String TAG = "MessagingPool";
     private final int mMaxPoolSize;
     private Pools.SynchronizedPool<T> mCurrentPool;
 
@@ -37,12 +40,27 @@ public class MessagingPool<T> implements Pools.Pool<T> {
 
     @Override
     public T acquire() {
-        return ENABLED ? mCurrentPool.acquire() : null;
+        if (!ENABLED) {
+            return null;
+        }
+        T instance = mCurrentPool.acquire();
+        if (instance.getParent() != null) {
+            Log.wtf(TAG, "acquired " + instance + " with parent " + instance.getParent());
+            return null;
+        }
+        return instance;
     }
 
     @Override
     public boolean release(T instance) {
-        return ENABLED && mCurrentPool.release(instance);
+        if (instance.getParent() != null) {
+            Log.wtf(TAG, "releasing " + instance + " with parent " + instance.getParent());
+            return false;
+        }
+        if (!ENABLED) {
+            return false;
+        }
+        return mCurrentPool.release(instance);
     }
 
     /** Clear the pool */
