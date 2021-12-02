@@ -19,6 +19,10 @@ package com.android.server.wm;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
@@ -326,5 +330,17 @@ public class ActivityStartInterceptorTest {
 
         assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
         assertEquals("android.test.second", mInterceptor.mIntent.getAction());
+    }
+
+    @Test
+    public void testActivityLaunchedCallback_singleCallback() {
+        addMockInterceptorCallback(null);
+
+        assertEquals(1, mActivityInterceptorCallbacks.size());
+        final ActivityInterceptorCallback callback = mActivityInterceptorCallbacks.valueAt(0);
+        spyOn(callback);
+        mInterceptor.onActivityLaunched(null, null);
+
+        verify(callback, times(1)).onActivityLaunched(any(), any());
     }
 }

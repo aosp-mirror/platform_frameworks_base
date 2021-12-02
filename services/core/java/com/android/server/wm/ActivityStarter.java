@@ -1559,6 +1559,10 @@ class ActivityStarter {
             mService.getTaskChangeNotificationController().notifyActivityRestartAttempt(
                     targetTask.getTaskInfo(), homeTaskVisible, clearedTask, visible);
         }
+
+        if (ActivityManager.isStartResultSuccessful(result)) {
+            mInterceptor.onActivityLaunched(targetTask.getTaskInfo(), r.info);
+        }
     }
 
     /**
