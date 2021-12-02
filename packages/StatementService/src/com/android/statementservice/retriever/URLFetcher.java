@@ -120,6 +120,8 @@ public class URLFetcher {
             return new WebContent(inputStreamToString(
                     connection.getInputStream(), connection.getContentLength(), fileSizeLimit),
                 expireTimeMillis);
+        } catch (IllegalStateException e) {
+            throw new IOException(e);
         } finally {
             if (connection != null) {
                 connection.disconnect();
