@@ -13240,6 +13240,7 @@ package android.content.pm {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.SharedLibraryInfo> CREATOR;
     field public static final int TYPE_BUILTIN = 0; // 0x0
     field public static final int TYPE_DYNAMIC = 1; // 0x1
+    field public static final int TYPE_SDK = 3; // 0x3
     field public static final int TYPE_STATIC = 2; // 0x2
     field public static final int VERSION_UNDEFINED = -1; // 0xffffffff
   }
