@@ -87,17 +87,6 @@ public class AndroidPackageUtils {
         return paths;
     }
 
-    public static SharedLibraryInfo createSharedLibraryForSdk(AndroidPackage pkg) {
-        return new SharedLibraryInfo(null, pkg.getPackageName(),
-                AndroidPackageUtils.getAllCodePaths(pkg),
-                pkg.getSdkLibName(),
-                pkg.getSdkLibVersionMajor(),
-                SharedLibraryInfo.TYPE_SDK,
-                new VersionedPackage(pkg.getManifestPackageName(),
-                        pkg.getLongVersionCode()),
-                null, null, false /* isNative */);
-    }
-
     public static SharedLibraryInfo createSharedLibraryForStatic(AndroidPackage pkg) {
         return new SharedLibraryInfo(null, pkg.getPackageName(),
                 AndroidPackageUtils.getAllCodePaths(pkg),
@@ -229,8 +218,7 @@ public class AndroidPackageUtils {
 
     public static boolean isLibrary(AndroidPackage pkg) {
         // TODO(b/135203078): Can parsing just enforce these always match?
-        return pkg.getSdkLibName() != null || pkg.getStaticSharedLibName() != null
-                || !pkg.getLibraryNames().isEmpty();
+        return pkg.getStaticSharedLibName() != null || !pkg.getLibraryNames().isEmpty();
     }
 
     public static int getHiddenApiEnforcementPolicy(AndroidPackage pkg,

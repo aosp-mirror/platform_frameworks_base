@@ -1328,7 +1328,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         PackageInfo packageInfo = null;
         try {
             packageInfo = AppGlobals.getPackageManager().getPackageInfo(
-                    basePackageName, PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES, userId);
+                    basePackageName, PackageManager.MATCH_STATIC_SHARED_LIBRARIES, userId);
         } catch (RemoteException ignored) {
         }
         if (packageInfo == null || packageInfo.applicationInfo == null) {

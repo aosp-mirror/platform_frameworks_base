@@ -76,15 +76,12 @@ final class SharedLibraryHelper {
             Map<String, WatchedLongSparseArray<SharedLibraryInfo>> existingSharedLibraries) {
         // Let's used the parsed package as scanResult.pkgSetting may be null
         final ParsedPackage parsedPackage = scanResult.mRequest.mParsedPackage;
-        if (scanResult.mSdkSharedLibraryInfo == null && scanResult.mStaticSharedLibraryInfo == null
+        if (scanResult.mStaticSharedLibraryInfo == null
                 && scanResult.mDynamicSharedLibraryInfos == null) {
             return null;
         }
 
-        // Any app can add new SDKs and static shared libraries.
-        if (scanResult.mSdkSharedLibraryInfo != null) {
-            return Collections.singletonList(scanResult.mSdkSharedLibraryInfo);
-        }
+        // Any app can add new static shared libraries
         if (scanResult.mStaticSharedLibraryInfo != null) {
             return Collections.singletonList(scanResult.mStaticSharedLibraryInfo);
         }
@@ -184,40 +181,32 @@ final class SharedLibraryHelper {
         ArrayList<SharedLibraryInfo> usesLibraryInfos = null;
         if (!pkg.getUsesLibraries().isEmpty()) {
             usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesLibraries(), null, null,
-                    pkg.getPackageName(), "shared", true, pkg.getTargetSdkVersion(), null,
+                    pkg.getPackageName(), true, pkg.getTargetSdkVersion(), null,
                     availablePackages, existingLibraries, newLibraries);
         }
         if (!pkg.getUsesStaticLibraries().isEmpty()) {
             usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesStaticLibraries(),
                     pkg.getUsesStaticLibrariesVersions(), pkg.getUsesStaticLibrariesCertDigests(),
-                    pkg.getPackageName(), "static shared", true, pkg.getTargetSdkVersion(),
-                    usesLibraryInfos, availablePackages, existingLibraries, newLibraries);
+                    pkg.getPackageName(), true, pkg.getTargetSdkVersion(), usesLibraryInfos,
+                    availablePackages, existingLibraries, newLibraries);
         }
         if (!pkg.getUsesOptionalLibraries().isEmpty()) {
-            usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesOptionalLibraries(), null, null,
-                    pkg.getPackageName(), "shared", false, pkg.getTargetSdkVersion(),
+            usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesOptionalLibraries(),
+                    null, null, pkg.getPackageName(), false, pkg.getTargetSdkVersion(),
                     usesLibraryInfos, availablePackages, existingLibraries, newLibraries);
         }
         if (platformCompat.isChangeEnabledInternal(ENFORCE_NATIVE_SHARED_LIBRARY_DEPENDENCIES,
                 pkg.getPackageName(), pkg.getTargetSdkVersion())) {
             if (!pkg.getUsesNativeLibraries().isEmpty()) {
                 usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesNativeLibraries(), null,
-                        null, pkg.getPackageName(), "native shared", true,
-                        pkg.getTargetSdkVersion(), usesLibraryInfos, availablePackages,
-                        existingLibraries, newLibraries);
+                        null, pkg.getPackageName(), true, pkg.getTargetSdkVersion(),
+                        usesLibraryInfos, availablePackages, existingLibraries, newLibraries);
             }
             if (!pkg.getUsesOptionalNativeLibraries().isEmpty()) {
                 usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesOptionalNativeLibraries(),
-                        null, null, pkg.getPackageName(), "native shared", false,
-                        pkg.getTargetSdkVersion(), usesLibraryInfos, availablePackages,
-                        existingLibraries, newLibraries);
+                        null, null, pkg.getPackageName(), false, pkg.getTargetSdkVersion(),
+                        usesLibraryInfos, availablePackages, existingLibraries, newLibraries);
             }
-        }
-        if (!pkg.getUsesSdkLibraries().isEmpty()) {
-            usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesSdkLibraries(),
-                    pkg.getUsesSdkLibrariesVersionsMajor(), pkg.getUsesSdkLibrariesCertDigests(),
-                    pkg.getPackageName(), "sdk", true, pkg.getTargetSdkVersion(), usesLibraryInfos,
-                    availablePackages, existingLibraries, newLibraries);
         }
         return usesLibraryInfos;
     }
@@ -225,8 +214,8 @@ final class SharedLibraryHelper {
     public static ArrayList<SharedLibraryInfo> collectSharedLibraryInfos(
             @NonNull List<String> requestedLibraries,
             @Nullable long[] requiredVersions, @Nullable String[][] requiredCertDigests,
-            @NonNull String packageName, @NonNull String libraryType, boolean required,
-            int targetSdk, @Nullable ArrayList<SharedLibraryInfo> outUsedLibraries,
+            @NonNull String packageName, boolean required, int targetSdk,
+            @Nullable ArrayList<SharedLibraryInfo> outUsedLibraries,
             @NonNull final Map<String, AndroidPackage> availablePackages,
             @NonNull final Map<String, WatchedLongSparseArray<SharedLibraryInfo>> existingLibraries,
             @Nullable final Map<String, WatchedLongSparseArray<SharedLibraryInfo>> newLibraries)
@@ -241,17 +230,18 @@ final class SharedLibraryHelper {
             if (libraryInfo == null) {
                 if (required) {
                     throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
-                            "Package " + packageName + " requires unavailable " + libraryType
-                                    + " library " + libName + "; failing!");
+                            "Package " + packageName + " requires unavailable shared library "
+                                    + libName + "; failing!");
                 } else if (DEBUG_SHARED_LIBRARIES) {
-                    Slog.i(TAG, "Package " + packageName + " desires unavailable " + libraryType
-                            + " library " + libName + "; ignoring!");
+                    Slog.i(TAG, "Package " + packageName
+                            + " desires unavailable shared library "
+                            + libName + "; ignoring!");
                 }
             } else {
                 if (requiredVersions != null && requiredCertDigests != null) {
                     if (libraryInfo.getLongVersion() != requiredVersions[i]) {
                         throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
-                                "Package " + packageName + " requires unavailable " + libraryType
+                                "Package " + packageName + " requires unavailable static shared"
                                         + " library " + libName + " version "
                                         + libraryInfo.getLongVersion() + "; failing!");
                     }
@@ -259,7 +249,7 @@ final class SharedLibraryHelper {
                     SigningDetails libPkg = pkg == null ? null : pkg.getSigningDetails();
                     if (libPkg == null) {
                         throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
-                                "Package " + packageName + " requires unavailable " + libraryType
+                                "Package " + packageName + " requires unavailable static shared"
                                         + " library; failing!");
                     }
                     final String[] expectedCertDigests = requiredCertDigests[i];
@@ -277,8 +267,8 @@ final class SharedLibraryHelper {
                         // Therefore, the size check is safe to make.
                         if (expectedCertDigests.length != libCertDigests.length) {
                             throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
-                                    "Package " + packageName + " requires differently signed "
-                                            + libraryType + " library; failing!");
+                                    "Package " + packageName + " requires differently signed"
+                                            + " static shared library; failing!");
                         }
 
                         // Use a predictable order as signature order may vary
@@ -290,8 +280,8 @@ final class SharedLibraryHelper {
                             if (!libCertDigests[j].equalsIgnoreCase(expectedCertDigests[j])) {
                                 throw new PackageManagerException(
                                         INSTALL_FAILED_MISSING_SHARED_LIBRARY,
-                                        "Package " + packageName + " requires differently signed "
-                                                + libraryType + " library; failing!");
+                                        "Package " + packageName + " requires differently signed"
+                                                + " static shared library; failing!");
                             }
                         }
                     } else {
@@ -300,9 +290,10 @@ final class SharedLibraryHelper {
                         byte[] digestBytes = HexEncoding.decode(
                                 expectedCertDigests[0], false /* allowSingleChar */);
                         if (!libPkg.hasSha256Certificate(digestBytes)) {
-                            throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
-                                    "Package " + packageName + " requires differently signed "
-                                            + libraryType + " library; failing!");
+                            throw new PackageManagerException(
+                                    INSTALL_FAILED_MISSING_SHARED_LIBRARY,
+                                    "Package " + packageName + " requires differently signed"
+                                            + " static shared library; failing!");
                         }
                     }
                 }
