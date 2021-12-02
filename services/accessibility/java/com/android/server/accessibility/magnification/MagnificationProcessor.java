@@ -16,9 +16,9 @@
 
 package com.android.server.accessibility.magnification;
 
-import static android.accessibilityservice.MagnificationConfig.DEFAULT_MODE;
-import static android.accessibilityservice.MagnificationConfig.FULLSCREEN_MODE;
-import static android.accessibilityservice.MagnificationConfig.WINDOW_MODE;
+import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_DEFAULT;
+import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_FULLSCREEN;
+import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_WINDOW;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 
@@ -66,14 +66,14 @@ public class MagnificationProcessor {
     public @NonNull MagnificationConfig getMagnificationConfig(int displayId) {
         final int mode = getControllingMode(displayId);
         MagnificationConfig.Builder builder = new MagnificationConfig.Builder();
-        if (mode == FULLSCREEN_MODE) {
+        if (mode == MAGNIFICATION_MODE_FULLSCREEN) {
             final FullScreenMagnificationController fullScreenMagnificationController =
                     mController.getFullScreenMagnificationController();
             builder.setMode(mode)
                     .setScale(fullScreenMagnificationController.getScale(displayId))
                     .setCenterX(fullScreenMagnificationController.getCenterX(displayId))
                     .setCenterY(fullScreenMagnificationController.getCenterY(displayId));
-        } else if (mode == WINDOW_MODE) {
+        } else if (mode == MAGNIFICATION_MODE_WINDOW) {
             final WindowMagnificationManager windowMagnificationManager =
                     mController.getWindowMagnificationMgr();
             builder.setMode(mode)
@@ -103,14 +103,14 @@ public class MagnificationProcessor {
         }
 
         int configMode = config.getMode();
-        if (configMode == DEFAULT_MODE) {
+        if (configMode == MAGNIFICATION_MODE_DEFAULT) {
             configMode = getControllingMode(displayId);
         }
-        if (configMode == FULLSCREEN_MODE) {
+        if (configMode == MAGNIFICATION_MODE_FULLSCREEN) {
             return setScaleAndCenterForFullScreenMagnification(displayId, config.getScale(),
                     config.getCenterX(), config.getCenterY(),
                     animate, id);
-        } else if (configMode == WINDOW_MODE) {
+        } else if (configMode == MAGNIFICATION_MODE_WINDOW) {
             return mController.getWindowMagnificationMgr().enableWindowMagnification(displayId,
                     config.getScale(), config.getCenterX(), config.getCenterY());
         }
@@ -141,9 +141,9 @@ public class MagnificationProcessor {
      */
     public float getScale(int displayId) {
         int mode = getControllingMode(displayId);
-        if (mode == FULLSCREEN_MODE) {
+        if (mode == MAGNIFICATION_MODE_FULLSCREEN) {
             return mController.getFullScreenMagnificationController().getScale(displayId);
-        } else if (mode == WINDOW_MODE) {
+        } else if (mode == MAGNIFICATION_MODE_WINDOW) {
             return mController.getWindowMagnificationMgr().getScale(displayId);
         }
         return 0;
@@ -161,7 +161,7 @@ public class MagnificationProcessor {
      */
     public float getCenterX(int displayId, boolean canControlMagnification) {
         int mode = getControllingMode(displayId);
-        if (mode == FULLSCREEN_MODE) {
+        if (mode == MAGNIFICATION_MODE_FULLSCREEN) {
             boolean registeredJustForThisCall = registerDisplayMagnificationIfNeeded(displayId,
                     canControlMagnification);
             try {
@@ -171,7 +171,7 @@ public class MagnificationProcessor {
                     unregister(displayId);
                 }
             }
-        } else if (mode == WINDOW_MODE) {
+        } else if (mode == MAGNIFICATION_MODE_WINDOW) {
             return mController.getWindowMagnificationMgr().getCenterX(displayId);
         }
         return 0;
@@ -189,7 +189,7 @@ public class MagnificationProcessor {
      */
     public float getCenterY(int displayId, boolean canControlMagnification) {
         int mode = getControllingMode(displayId);
-        if (mode == FULLSCREEN_MODE) {
+        if (mode == MAGNIFICATION_MODE_FULLSCREEN) {
             boolean registeredJustForThisCall = registerDisplayMagnificationIfNeeded(displayId,
                     canControlMagnification);
             try {
@@ -199,7 +199,7 @@ public class MagnificationProcessor {
                     unregister(displayId);
                 }
             }
-        } else if (mode == WINDOW_MODE) {
+        } else if (mode == MAGNIFICATION_MODE_WINDOW) {
             return mController.getWindowMagnificationMgr().getCenterY(displayId);
         }
         return 0;
@@ -221,9 +221,9 @@ public class MagnificationProcessor {
     public Region getMagnificationRegion(int displayId, @NonNull Region outRegion,
             boolean canControlMagnification) {
         int mode = getControllingMode(displayId);
-        if (mode == FULLSCREEN_MODE) {
+        if (mode == MAGNIFICATION_MODE_FULLSCREEN) {
             getFullscreenMagnificationRegion(displayId, outRegion, canControlMagnification);
-        } else if (mode == WINDOW_MODE) {
+        } else if (mode == MAGNIFICATION_MODE_WINDOW) {
             mController.getWindowMagnificationMgr().getMagnificationSourceBounds(displayId,
                     outRegion);
         }
@@ -268,9 +268,9 @@ public class MagnificationProcessor {
      */
     public boolean reset(int displayId, boolean animate) {
         int mode = getControllingMode(displayId);
-        if (mode == FULLSCREEN_MODE) {
+        if (mode == MAGNIFICATION_MODE_FULLSCREEN) {
             return mController.getFullScreenMagnificationController().reset(displayId, animate);
-        } else if (mode == WINDOW_MODE) {
+        } else if (mode == MAGNIFICATION_MODE_WINDOW) {
             return mController.getWindowMagnificationMgr().reset(displayId);
         }
         return false;
@@ -290,9 +290,9 @@ public class MagnificationProcessor {
      */
     public boolean isMagnifying(int displayId) {
         int mode = getControllingMode(displayId);
-        if (mode == FULLSCREEN_MODE) {
+        if (mode == MAGNIFICATION_MODE_FULLSCREEN) {
             return mController.getFullScreenMagnificationController().isMagnifying(displayId);
-        } else if (mode == WINDOW_MODE) {
+        } else if (mode == MAGNIFICATION_MODE_WINDOW) {
             return mController.getWindowMagnificationMgr().isWindowMagnifierEnabled(displayId);
         }
         return false;
@@ -308,14 +308,14 @@ public class MagnificationProcessor {
     public int getControllingMode(int displayId) {
         if (mController.isActivated(displayId,
                 ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW)) {
-            return WINDOW_MODE;
+            return MAGNIFICATION_MODE_WINDOW;
         } else if (mController.isActivated(displayId,
                 ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN)) {
-            return FULLSCREEN_MODE;
+            return MAGNIFICATION_MODE_FULLSCREEN;
         } else {
             return (mController.getLastActivatedMode() == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW)
-                    ? WINDOW_MODE
-                    : FULLSCREEN_MODE;
+                    ? MAGNIFICATION_MODE_WINDOW
+                    : MAGNIFICATION_MODE_FULLSCREEN;
         }
     }
 
