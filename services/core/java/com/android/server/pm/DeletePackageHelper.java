@@ -164,16 +164,9 @@ final class DeletePackageHelper {
 
             allUsers = mUserManagerInternal.getUserIds();
 
-            if (pkg != null) {
-                SharedLibraryInfo libraryInfo = null;
-                if (pkg.getStaticSharedLibName() != null) {
-                    libraryInfo = mPm.getSharedLibraryInfo(pkg.getStaticSharedLibName(),
-                            pkg.getStaticSharedLibVersion());
-                } else if (pkg.getSdkLibName() != null) {
-                    libraryInfo = mPm.getSharedLibraryInfo(pkg.getSdkLibName(),
-                            pkg.getSdkLibVersionMajor());
-                }
-
+            if (pkg != null && pkg.getStaticSharedLibName() != null) {
+                SharedLibraryInfo libraryInfo = mPm.getSharedLibraryInfo(
+                        pkg.getStaticSharedLibName(), pkg.getStaticSharedLibVersion());
                 if (libraryInfo != null) {
                     for (int currUserId : allUsers) {
                         if (removeUser != UserHandle.USER_ALL && removeUser != currUserId) {
@@ -835,10 +828,9 @@ final class DeletePackageHelper {
                 continue;
             }
             final String packageName = ps.getPkg().getPackageName();
-            // Skip over if system app, static shared library or and SDK library.
+            // Skip over if system app or static shared library
             if ((ps.getFlags() & ApplicationInfo.FLAG_SYSTEM) != 0
-                    || !TextUtils.isEmpty(ps.getPkg().getStaticSharedLibName())
-                    || !TextUtils.isEmpty(ps.getPkg().getSdkLibName())) {
+                    || !TextUtils.isEmpty(ps.getPkg().getStaticSharedLibName())) {
                 continue;
             }
             if (DEBUG_CLEAN_APKS) {

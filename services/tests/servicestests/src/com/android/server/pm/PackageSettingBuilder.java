@@ -44,6 +44,8 @@ public class PackageSettingBuilder {
     private SparseArray<PackageUserStateImpl> mUserStates = new SparseArray<>();
     private AndroidPackage mPkg;
     private InstallSource mInstallSource;
+    private String[] mUsesStaticLibraries;
+    private long[] mUsesStaticLibrariesVersions;
     private Map<String, Set<String>> mMimeGroups;
     private SigningDetails mSigningDetails;
     private UUID mDomainSetId = UUID.randomUUID();
@@ -114,6 +116,17 @@ public class PackageSettingBuilder {
         return this;
     }
 
+    public PackageSettingBuilder setUsesStaticLibraries(String[] usesStaticLibraries) {
+        this.mUsesStaticLibraries = usesStaticLibraries;
+        return this;
+    }
+
+    public PackageSettingBuilder setUsesStaticLibrariesVersions(
+            long[] usesStaticLibrariesVersions) {
+        this.mUsesStaticLibrariesVersions = usesStaticLibrariesVersions;
+        return this;
+    }
+
     public PackageSettingBuilder setMimeGroups(Map<String, Set<String>> mimeGroups) {
         this.mMimeGroups = mimeGroups;
         return this;
@@ -160,9 +173,8 @@ public class PackageSettingBuilder {
         final PackageSetting packageSetting = new PackageSetting(mName, mRealName,
                 new File(mCodePath), mLegacyNativeLibraryPathString, mPrimaryCpuAbiString,
                 mSecondaryCpuAbiString, mCpuAbiOverrideString, mPVersionCode, mPkgFlags,
-                mPrivateFlags, mSharedUserId, null /* usesSdkLibraries */,
-                null /* usesSdkLibrariesVersions */, null /* usesStaticLibraries */,
-                null  /* usesStaticLibrariesVersions */, mMimeGroups, mDomainSetId);
+                mPrivateFlags, mSharedUserId, mUsesStaticLibraries, mUsesStaticLibrariesVersions,
+                mMimeGroups, mDomainSetId);
         packageSetting.setSignatures(mSigningDetails != null
                 ? new PackageSignatures(mSigningDetails)
                 : new PackageSignatures());

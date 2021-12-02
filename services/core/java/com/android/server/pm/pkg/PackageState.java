@@ -27,6 +27,7 @@ import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningInfo;
 import android.util.SparseArray;
 
+import com.android.internal.R;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.Settings;
 
@@ -203,18 +204,6 @@ public interface PackageState {
      */
     @NonNull
     List<SharedLibraryInfo> getUsesLibraryInfos();
-
-    /**
-     * @see R.styleable#AndroidManifestUsesSdkLibrary
-     */
-    @NonNull
-    String[] getUsesSdkLibraries();
-
-    /**
-     * @see R.styleable#AndroidManifestUsesSdkLibrary_versionMajor
-     */
-    @NonNull
-    long[] getUsesSdkLibrariesVersionsMajor();
 
     /**
      * @see R.styleable#AndroidManifestUsesStaticLibrary
