@@ -1461,64 +1461,6 @@ class UsesStaticLibrary : public ManifestExtractor::Element {
   }
 };
 
-/** Represents <sdk-library> elements. **/
-class SdkLibrary : public ManifestExtractor::Element {
- public:
-  SdkLibrary() = default;
-  std::string name;
-  int versionMajor;
-
-  void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
-    }
-  }
-
-  void Print(text::Printer* printer) override {
-    printer->Print(
-        StringPrintf("sdk-library: name='%s' versionMajor='%d'\n", name.data(), versionMajor));
-  }
-};
-
-/** Represents <uses-sdk-library> elements. **/
-class UsesSdkLibrary : public ManifestExtractor::Element {
- public:
-  UsesSdkLibrary() = default;
-  std::string name;
-  int versionMajor;
-  std::vector<std::string> certDigests;
-
-  void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
-      AddCertDigest(element);
-    }
-  }
-
-  void AddCertDigest(xml::Element* element) {
-    std::string digest = GetAttributeStringDefault(FindAttribute(element, CERT_DIGEST_ATTR), "");
-    // We allow ":" delimiters in the SHA declaration as this is the format
-    // emitted by the certtool making it easy for developers to copy/paste.
-    digest.erase(std::remove(digest.begin(), digest.end(), ':'), digest.end());
-    if (!digest.empty()) {
-      certDigests.push_back(digest);
-    }
-  }
-
-  void Print(text::Printer* printer) override {
-    printer->Print(
-        StringPrintf("uses-sdk-library: name='%s' versionMajor='%d'", name.data(), versionMajor));
-    for (size_t i = 0; i < certDigests.size(); i++) {
-      printer->Print(StringPrintf(" certDigest='%s'", certDigests[i].data()));
-    }
-    printer->Print("\n");
-  }
-};
-
 /** Represents <uses-native-library> elements. **/
 class UsesNativeLibrary : public ManifestExtractor::Element {
  public:
@@ -2425,7 +2367,6 @@ T* ElementCast(ManifestExtractor::Element* element) {
       {"required-not-feature", std::is_base_of<RequiredNotFeature, T>::value},
       {"screen", std::is_base_of<Screen, T>::value},
       {"service", std::is_base_of<Service, T>::value},
-      {"sdk-library", std::is_base_of<SdkLibrary, T>::value},
       {"static-library", std::is_base_of<StaticLibrary, T>::value},
       {"supports-gl-texture", std::is_base_of<SupportsGlTexture, T>::value},
       {"supports-input", std::is_base_of<SupportsInput, T>::value},
@@ -2438,7 +2379,6 @@ T* ElementCast(ManifestExtractor::Element* element) {
       {"uses-permission", std::is_base_of<UsesPermission, T>::value},
       {"uses-permission-sdk-23", std::is_base_of<UsesPermissionSdk23, T>::value},
       {"uses-sdk", std::is_base_of<UsesSdkBadging, T>::value},
-      {"uses-sdk-library", std::is_base_of<UsesSdkLibrary, T>::value},
       {"uses-static-library", std::is_base_of<UsesStaticLibrary, T>::value},
   };
 
@@ -2481,7 +2421,6 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
           {"required-not-feature", &CreateType<RequiredNotFeature>},
           {"screen", &CreateType<Screen>},
           {"service", &CreateType<Service>},
-          {"sdk-library", &CreateType<SdkLibrary>},
           {"static-library", &CreateType<StaticLibrary>},
           {"supports-gl-texture", &CreateType<SupportsGlTexture>},
           {"supports-input", &CreateType<SupportsInput>},
@@ -2494,7 +2433,6 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
           {"uses-permission", &CreateType<UsesPermission>},
           {"uses-permission-sdk-23", &CreateType<UsesPermissionSdk23>},
           {"uses-sdk", &CreateType<UsesSdkBadging>},
-          {"uses-sdk-library", &CreateType<UsesSdkLibrary>},
           {"uses-static-library", &CreateType<UsesStaticLibrary>},
       };
 

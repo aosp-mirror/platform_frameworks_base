@@ -70,13 +70,6 @@ public final class SharedLibraryInfo implements Parcelable {
     public static final int TYPE_STATIC = 2;
 
     /**
-     * SDK library type: this library is <strong>not</strong> backwards
-     * -compatible, can be updated and updates can be uninstalled. Clients
-     * depend on a specific version of the library.
-     */
-    public static final int TYPE_SDK = 3;
-
-    /**
      * Constant for referring to an undefined version.
      */
     public static final int VERSION_UNDEFINED = -1;
@@ -296,13 +289,6 @@ public final class SharedLibraryInfo implements Parcelable {
     }
 
     /**
-     * @hide
-     */
-    public boolean isSdk() {
-        return mType == TYPE_SDK;
-    }
-
-    /**
      * Gets the package that declares the library.
      *
      * @return The package declaring the library.
@@ -364,9 +350,6 @@ public final class SharedLibraryInfo implements Parcelable {
             }
             case TYPE_STATIC: {
                 return "static";
-            }
-            case TYPE_SDK: {
-                return "sdk";
             }
             default: {
                 return "unknown";
