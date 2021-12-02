@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -106,7 +105,7 @@ class CloseImeWindowToHomeTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun imeWindowBecomesInvisible() = testSpec.imeWindowBecomesInvisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeAppWindowBecomesInvisible() {
         testSpec.assertWm {

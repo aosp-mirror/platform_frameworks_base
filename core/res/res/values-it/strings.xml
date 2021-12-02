@@ -737,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitorare tentativi di sblocco dello schermo"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca il tablet o cancella tutti i dati del tablet se vengono digitate troppe password errate."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Consente di monitorare il numero di password errate digitate durante lo sblocco dello schermo e di bloccare il dispositivo Android TV o cancellare tutti i dati del dispositivo se vengono digitate troppe password errate."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca il sistema di infotainment o cancella tutti i dati del sistema se vengono digitate troppe password errate."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca il telefono o cancella tutti i dati del telefono se vengono digitate troppe password errate."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca il tablet o resetta tutti i dati dell\'utente se è stato raggiunto il limite massimo consentito."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Consente di monitorare il numero di password errate digitate durante lo sblocco dello schermo e di bloccare il dispositivo Android TV o cancellare tutti i dati dell\'utente se vengono digitate troppe password errate."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca il sistema di infotainment o cancella tutti i dati di questo profilo se vengono digitate troppe password errate."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca il telefono o resetta tutti i dati dell\'utente se è stato raggiunto il limite massimo consentito."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Modificare il blocco schermo"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Modifica il blocco schermo."</string>
@@ -748,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Cancellare tutti i dati"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Cancella i dati del tablet senza preavviso eseguendo un ripristino dati di fabbrica."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Consente di cancellare i dati del dispositivo Android TV senza preavviso eseguendo un ripristino dei dati di fabbrica."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Cancella i dati del sistema di infotainment senza preavviso eseguendo un ripristino dei dati di fabbrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Cancella i dati del telefono senza preavviso eseguendo un ripristino dei dati di fabbrica."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Resettare i dati dell\'utente"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Cancella dati del profilo"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Resettare i dati dell\'utente"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Resetta i dati dell\'utente sul tablet senza preavviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Consente di cancellare i dati dell\'utente su questo dispositivo Android TV senza preavviso."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Cancella i dati di questo profilo su questo sistema di infotainment senza preavviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Resetta i dati dell\'utente sul telefono senza preavviso."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Impostare il proxy globale del dispositivo"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Imposta il proxy globale del dispositivo in modo da utilizzarlo mentre la norma è attiva. Il proxy globale può essere impostato solo dal proprietario del dispositivo."</string>

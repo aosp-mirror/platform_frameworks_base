@@ -59,6 +59,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.util.animation.TransitionLayout;
+import com.android.systemui.util.time.SystemClock;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -121,6 +122,9 @@ public class MediaControlPanel {
     private MediaCarouselController mMediaCarouselController;
     private final MediaOutputDialogFactory mMediaOutputDialogFactory;
     private final FalsingManager mFalsingManager;
+    // Used for swipe-to-dismiss logging.
+    protected boolean mIsImpressed = false;
+    private SystemClock mSystemClock;
 
     /**
      * Initialize a new control panel
@@ -134,7 +138,7 @@ public class MediaControlPanel {
             SeekBarViewModel seekBarViewModel, Lazy<MediaDataManager> lazyMediaDataManager,
             KeyguardDismissUtil keyguardDismissUtil, MediaOutputDialogFactory
             mediaOutputDialogFactory, MediaCarouselController mediaCarouselController,
-            FalsingManager falsingManager) {
+            FalsingManager falsingManager, SystemClock systemClock) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
         mActivityStarter = activityStarter;
@@ -145,6 +149,8 @@ public class MediaControlPanel {
         mMediaOutputDialogFactory = mediaOutputDialogFactory;
         mMediaCarouselController = mediaCarouselController;
         mFalsingManager = falsingManager;
+        mSystemClock = systemClock;
+
         loadDimens();
 
         mSeekBarViewModel.setLogSmartspaceClick(() -> {
@@ -291,7 +297,10 @@ public class MediaControlPanel {
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Unable to look up package name", e);
         }
-        mInstanceId = SmallHash.hash(mUid);
+        // Only assigns instance id if it's unassigned.
+        if (mInstanceId == -1) {
+            mInstanceId = SmallHash.hash(mUid + (int) mSystemClock.currentTimeMillis());
+        }
 
         mBackgroundColor = data.getBackgroundColor();
         if (mToken == null || !mToken.equals(token)) {
@@ -885,7 +894,7 @@ public class MediaControlPanel {
                 mInstanceId,
                 mUid,
                 isRecommendationCard,
-                getSurfaceForSmartspaceLogging(),
+                new int[]{getSurfaceForSmartspaceLogging()},
                 interactedSubcardRank,
                 interactedSubcardCardinality);
     }

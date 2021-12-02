@@ -135,6 +135,7 @@ import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
+import com.android.internal.view.IInputContext;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 import java.io.FileDescriptor;
@@ -394,7 +395,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     /**
      * @hide
-     * The IME is visible.
+     * The IME is perceptibly visible to the user.
      */
     public static final int IME_VISIBLE = 0x2;
 
@@ -404,6 +405,15 @@ public class InputMethodService extends AbstractInputMethodService {
      * This flag cannot be combined with {@link #IME_VISIBLE}.
      */
     public static final int IME_INVISIBLE = 0x4;
+
+    /**
+     * @hide
+     * The IME is visible, but not yet perceptible to the user (e.g. fading in)
+     * by {@link android.view.WindowInsetsController}.
+     *
+     * @see InputMethodManager#reportPerceptible
+     */
+    public static final int IME_VISIBLE_IMPERCEPTIBLE = 0x8;
 
     // Min and max values for back disposition.
     private static final int BACK_DISPOSITION_MIN = BACK_DISPOSITION_DEFAULT;
@@ -1063,8 +1073,30 @@ public class InputMethodService extends AbstractInputMethodService {
         public final void removeImeSurface() {
             InputMethodService.this.scheduleImeSurfaceRemoval();
         }
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @Override
+        public final void invalidateInputInternal(@NonNull EditorInfo editorInfo,
+                @NonNull IInputContext inputContext, int sessionId) {
+            if (mStartedInputConnection instanceof RemoteInputConnection) {
+                final RemoteInputConnection ric = (RemoteInputConnection) mStartedInputConnection;
+                if (!ric.isSameConnection(inputContext)) {
+                    // This is not an error, and can be safely ignored.
+                    if (DEBUG) {
+                        Log.d(TAG, "ignoring invalidateInput() due to context mismatch.");
+                    }
+                    return;
+                }
+                editorInfo.makeCompatible(getApplicationInfo().targetSdkVersion);
+                getInputMethodInternal().restartInput(new RemoteInputConnection(ric, sessionId),
+                        editorInfo);
+            }
+        }
     }
-    
+
     /**
      * Information about where interesting parts of the input method UI appear.
      */

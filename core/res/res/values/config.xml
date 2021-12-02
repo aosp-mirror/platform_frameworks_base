@@ -1048,8 +1048,15 @@
             0 - Nothing
             1 - Toggle theater mode setting
             2 - Brightness boost
+            3 - Launch target activity defined by config_doublePressOnPowerTargetActivity
+                if available
     -->
     <integer name="config_doublePressOnPowerBehavior">0</integer>
+
+    <!-- Activity name for the default target activity to be launched. Note that
+            config_doublePressOnPowerBehavior must be set to 3 for this to work. [DO NOT TRANSLATE]
+    -->
+    <string name="config_doublePressOnPowerTargetActivity" translatable="false"></string>
 
     <!-- Control the behavior when the user triple presses the power button.
             0 - Nothing
@@ -1807,7 +1814,7 @@
          latency during some scenarios like air travel. Only useful when both geolocation and
          telephony time zone detection are supported on a device.
          See com.android.server.timezonedetector.TimeZoneDetectorStrategy for more information. -->
-    <bool name="config_supportTelephonyTimeZoneFallback" translatable="false">false</bool>
+    <bool name="config_supportTelephonyTimeZoneFallback" translatable="false">true</bool>
 
     <!-- Whether to enable network location overlay which allows network location provider to be
          replaced by an app at run-time. When disabled, only the
@@ -4940,12 +4947,6 @@
     <!-- Duration in milliseconds for device to vibrate on mash press on power
          button. -->
     <integer name="config_mashPressVibrateTimeOnPowerButton">0</integer>
-
-    <!-- Control the behavior when the user presses the power button 5 times.
-           0 - Nothing
-           1 - Launch panic button gesture
-    -->
-    <integer name="config_mashPressOnPowerBehavior">0</integer>
 
     <!-- Whether or not to enable the binder heavy hitter watcher by default -->
     <bool name="config_defaultBinderHeavyHitterWatcherEnabled">false</bool>

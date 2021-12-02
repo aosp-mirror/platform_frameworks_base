@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -87,7 +86,7 @@ class RotateTwoLaunchedAppsInAppPairsMode(
         testSpec.appPairsPrimaryBoundsIsVisibleAtEnd(testSpec.endRotation,
             primaryApp.component)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun appPairsSecondaryBoundsIsVisibleAtEnd() =
         testSpec.appPairsSecondaryBoundsIsVisibleAtEnd(testSpec.endRotation,

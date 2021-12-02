@@ -35,6 +35,7 @@ import static com.android.server.wm.ActivityRecord.State.STOPPING;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -63,6 +64,8 @@ import android.os.LocaleList;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.IDisplayWindowListener;
 
 import androidx.test.filters.MediumTest;
@@ -218,6 +221,66 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         assertEquals(0, added.size());
         assertEquals(0, changed.size());
         assertEquals(1, removed.size());
+    }
+
+    @Test
+    public void testSetLockScreenShownWithVirtualDisplay() {
+        DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.copyFrom(mDisplayInfo);
+        displayInfo.type = Display.TYPE_VIRTUAL;
+        DisplayContent virtualDisplay = createNewDisplay(displayInfo);
+
+        // Make sure we're starting out with 2 unlocked displays
+        assertEquals(2, mRootWindowContainer.getChildCount());
+        mRootWindowContainer.forAllDisplays(displayContent -> {
+            assertFalse(displayContent.isKeyguardLocked());
+            assertFalse(displayContent.isAodShowing());
+        });
+
+        // Check that setLockScreenShown locks both displays
+        mAtm.setLockScreenShown(true, true);
+        mRootWindowContainer.forAllDisplays(displayContent -> {
+            assertTrue(displayContent.isKeyguardLocked());
+            assertTrue(displayContent.isAodShowing());
+        });
+
+        // Check setLockScreenShown unlocking both displays
+        mAtm.setLockScreenShown(false, false);
+        mRootWindowContainer.forAllDisplays(displayContent -> {
+            assertFalse(displayContent.isKeyguardLocked());
+            assertFalse(displayContent.isAodShowing());
+        });
+    }
+
+    @Test
+    public void testSetLockScreenShownWithAlwaysUnlockedVirtualDisplay() {
+        assertEquals(Display.DEFAULT_DISPLAY, mRootWindowContainer.getChildAt(0).getDisplayId());
+
+        DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.copyFrom(mDisplayInfo);
+        displayInfo.type = Display.TYPE_VIRTUAL;
+        displayInfo.displayGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
+        displayInfo.flags = Display.FLAG_OWN_DISPLAY_GROUP | Display.FLAG_ALWAYS_UNLOCKED;
+        DisplayContent newDisplay = createNewDisplay(displayInfo);
+
+        // Make sure we're starting out with 2 unlocked displays
+        assertEquals(2, mRootWindowContainer.getChildCount());
+        mRootWindowContainer.forAllDisplays(displayContent -> {
+            assertFalse(displayContent.isKeyguardLocked());
+            assertFalse(displayContent.isAodShowing());
+        });
+
+        // setLockScreenShown should only lock the default display, not the virtual one
+        mAtm.setLockScreenShown(true, true);
+
+        assertTrue(mDefaultDisplay.isKeyguardLocked());
+        assertTrue(mDefaultDisplay.isAodShowing());
+
+        DisplayContent virtualDisplay = mRootWindowContainer.getDisplayContent(
+                newDisplay.getDisplayId());
+        assertNotEquals(Display.DEFAULT_DISPLAY, virtualDisplay.getDisplayId());
+        assertFalse(virtualDisplay.isKeyguardLocked());
+        assertFalse(virtualDisplay.isAodShowing());
     }
 
     /*

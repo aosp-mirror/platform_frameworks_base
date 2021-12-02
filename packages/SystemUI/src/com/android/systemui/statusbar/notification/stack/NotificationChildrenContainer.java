@@ -24,7 +24,6 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
-import android.util.Pair;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.NotificationHeaderView;
@@ -33,11 +32,14 @@ import android.view.ViewGroup;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationGroupingUtil;
+import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -1294,15 +1296,13 @@ public class NotificationChildrenContainer extends ViewGroup
         mCurrentHeaderTranslation = (int) ((1.0f - headerVisibleAmount) * mTranslationForHeader);
     }
 
-    /**
-     * Shows or hides feedback icon.
-     */
-    public void showFeedbackIcon(boolean show, Pair<Integer, Integer> resIds) {
+    /** Shows the given feedback icon, or hides the icon if null. */
+    public void setFeedbackIcon(@Nullable FeedbackIcon icon) {
         if (mNotificationHeaderWrapper != null) {
-            mNotificationHeaderWrapper.showFeedbackIcon(show, resIds);
+            mNotificationHeaderWrapper.setFeedbackIcon(icon);
         }
         if (mNotificationHeaderWrapperLowPriority != null) {
-            mNotificationHeaderWrapperLowPriority.showFeedbackIcon(show, resIds);
+            mNotificationHeaderWrapperLowPriority.setFeedbackIcon(icon);
         }
     }
 

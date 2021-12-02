@@ -65,19 +65,19 @@ interface ISplitScreen {
     /**
      * Starts a task in a stage.
      */
-    oneway void startTask(int taskId, int stage, int position, in Bundle options) = 7;
+    oneway void startTask(int taskId, int position, in Bundle options) = 7;
 
     /**
      * Starts a shortcut in a stage.
      */
-    oneway void startShortcut(String packageName, String shortcutId, int stage, int position,
+    oneway void startShortcut(String packageName, String shortcutId, int position,
             in Bundle options, in UserHandle user) = 8;
 
     /**
      * Starts an activity in a stage.
      */
-    oneway void startIntent(in PendingIntent intent, in Intent fillInIntent, int stage,
-            int position, in Bundle options) = 9;
+    oneway void startIntent(in PendingIntent intent, in Intent fillInIntent, int position,
+            in Bundle options) = 9;
 
     /**
      * Starts tasks simultaneously in one transition.

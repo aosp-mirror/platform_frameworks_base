@@ -51,6 +51,8 @@ final class ScanResult {
     /** ABI code paths that have changed in the package scan */
     @Nullable public final List<String> mChangedAbiCodePath;
 
+    public final SharedLibraryInfo mSdkSharedLibraryInfo;
+
     public final SharedLibraryInfo mStaticSharedLibraryInfo;
 
     public final List<SharedLibraryInfo> mDynamicSharedLibraryInfos;
@@ -60,6 +62,7 @@ final class ScanResult {
             @Nullable PackageSetting pkgSetting,
             @Nullable List<String> changedAbiCodePath, boolean existingSettingCopied,
             int previousAppId,
+            SharedLibraryInfo sdkSharedLibraryInfo,
             SharedLibraryInfo staticSharedLibraryInfo,
             List<SharedLibraryInfo> dynamicSharedLibraryInfos) {
         mRequest = request;
@@ -68,6 +71,7 @@ final class ScanResult {
         mChangedAbiCodePath = changedAbiCodePath;
         mExistingSettingCopied = existingSettingCopied;
         mPreviousAppId = previousAppId;
+        mSdkSharedLibraryInfo = sdkSharedLibraryInfo;
         mStaticSharedLibraryInfo = staticSharedLibraryInfo;
         mDynamicSharedLibraryInfos = dynamicSharedLibraryInfos;
     }

@@ -6432,6 +6432,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_ICON) {
                 return false;
             }
+            // Choose the default behavior for Launcher and SystemUI when the SplashScreen style is
+            // not specified in the ActivityOptions.
+            if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME) {
+                return false;
+            } else if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEMUI) {
+                return true;
+            }
         }
         if (sourceRecord == null) {
             sourceRecord = searchCandidateLaunchingActivity();
@@ -6441,11 +6448,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return sourceRecord.mSplashScreenStyleEmpty;
         }
 
-        // If this activity was launched from a system surface for first start, never use an empty
-        // splash screen. Need to check sourceRecord before in case this activity is launched from
-        // service.
-        // Otherwise use empty.
-        return !startActivity || !launchedFromSystemSurface();
+        // If this activity was launched from Launcher or System for first start, never use an
+        // empty splash screen.
+        // Need to check sourceRecord before in case this activity is launched from service.
+        return !startActivity || !(mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEM
+                || mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME);
     }
 
     private int getSplashscreenTheme() {
@@ -7776,9 +7783,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Above coordinates are in "@" space, now place "*" and "#" to screen space.
         final boolean fillContainer = resolvedBounds.equals(containingBounds);
         final int screenPosX = fillContainer ? containerBounds.left : containerAppBounds.left;
-        final int screenPosY = mSizeCompatBounds == null
+        // If the activity is not in size compat mode, calculate vertical centering
+        //     from the container and resolved bounds.
+        // If the activity is in size compat mode, calculate vertical centering
+        //     from the container and size compat bounds.
+        // The container bounds contain the parent bounds offset in the display, for
+        // example when an activity is in the lower split of split screen.
+        final int screenPosY = (mSizeCompatBounds == null
                 ? (containerBounds.height() - resolvedBounds.height()) / 2
-                : (containerBounds.height() - mSizeCompatBounds.height()) / 2;
+                : (containerBounds.height() - mSizeCompatBounds.height()) / 2)
+                + containerBounds.top;
+
         if (screenPosX != 0 || screenPosY != 0) {
             if (mSizeCompatBounds != null) {
                 mSizeCompatBounds.offset(screenPosX, screenPosY);

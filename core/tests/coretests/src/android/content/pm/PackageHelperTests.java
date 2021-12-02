@@ -21,6 +21,7 @@ import static android.os.storage.VolumeInfo.STATE_MOUNTED;
 import android.content.Context;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Presubmit
 public class PackageHelperTests extends AndroidTestCase {
     private static final boolean localLOGV = true;
     public static final String TAG = "PackageHelperTests";

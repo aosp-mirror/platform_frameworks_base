@@ -3004,8 +3004,8 @@ public abstract class Context {
      * {@link android.os.Build.VERSION_CODES#TIRAMISU},
      *              either {@link #RECEIVER_EXPORTED} or
      * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
-     *              for
-     *              <a href="https://developer.android.com/guide/components/broadcasts#system-broadcasts">system broadcasts</a> or an exception will be thrown. If
+     *              for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
+     *              broadcasts</a> or an exception will be thrown. If
      *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
      *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
      *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
@@ -3087,8 +3087,8 @@ public abstract class Context {
      * {@link android.os.Build.VERSION_CODES#TIRAMISU},
      *              either {@link #RECEIVER_EXPORTED} or
      * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
-     *              for
-     *              <a href="https://developer.android.com/guide/components/broadcasts#system-broadcasts">system broadcasts</a> or an exception will be thrown. If
+     *              for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
+     *              broadcasts</a> or an exception will be thrown. If
      *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
      *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
      *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
@@ -3157,8 +3157,8 @@ public abstract class Context {
      * {@link android.os.Build.VERSION_CODES#TIRAMISU},
      *              either {@link #RECEIVER_EXPORTED} or
      * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
-     *              for
-     *              <a href="https://developer.android.com/guide/components/broadcasts#system-broadcasts">system broadcasts</a> or an exception will be thrown. If
+     *              for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
+     *              broadcasts</a> or an exception will be thrown. If
      *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
      *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
      *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
@@ -3232,8 +3232,8 @@ public abstract class Context {
      * {@link android.os.Build.VERSION_CODES#TIRAMISU},
      *              either {@link #RECEIVER_EXPORTED} or
      * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
-     *              for
-     *              <a href="https://developer.android.com/guide/components/broadcasts#system-broadcasts">system broadcasts</a> or an exception will be thrown. If
+     *              for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
+     *              broadcasts</a> or an exception will be thrown. If
      *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
      *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
      *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the

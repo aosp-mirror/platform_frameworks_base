@@ -31,7 +31,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
-import android.view.WindowManager.LayoutParams;
 import android.widget.Button;
 
 import androidx.annotation.Nullable;
@@ -40,6 +39,7 @@ import com.android.internal.app.MediaRouteDialogPresenter;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -76,6 +76,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
     private final CastDetailAdapter mDetailAdapter;
     private final KeyguardStateController mKeyguard;
     private final NetworkController mNetworkController;
+    private final DialogLaunchAnimator mDialogLaunchAnimator;
     private final Callback mCallback = new Callback();
     private Dialog mDialog;
     private boolean mWifiConnected;
@@ -94,7 +95,8 @@ public class CastTile extends QSTileImpl<BooleanState> {
             CastController castController,
             KeyguardStateController keyguardStateController,
             NetworkController networkController,
-            HotspotController hotspotController
+            HotspotController hotspotController,
+            DialogLaunchAnimator dialogLaunchAnimator
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
@@ -102,6 +104,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
         mDetailAdapter = new CastDetailAdapter();
         mKeyguard = keyguardStateController;
         mNetworkController = networkController;
+        mDialogLaunchAnimator = dialogLaunchAnimator;
         mController.observe(this, mCallback);
         mKeyguard.observe(this, mCallback);
         mNetworkController.observe(this, mSignalCallback);
@@ -153,9 +156,15 @@ public class CastTile extends QSTileImpl<BooleanState> {
 
         List<CastDevice> activeDevices = getActiveDevices();
         if (willPopDetail()) {
-            mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                showDetail(true);
-            });
+            if (!mKeyguard.isShowing()) {
+                showDetail(view);
+            } else {
+                mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
+                    // Dismissing the keyguard will collapse the shade, so we don't animate from the
+                    // view here as it would not look good.
+                    showDetail(null /* view */);
+                });
+            }
         } else {
             mController.stopCasting(activeDevices.get(0));
         }
@@ -184,19 +193,29 @@ public class CastTile extends QSTileImpl<BooleanState> {
 
     @Override
     public void showDetail(boolean show) {
+        showDetail(null /* view */);
+    }
+
+    private void showDetail(@Nullable View view) {
         mUiHandler.post(() -> {
             mDialog = MediaRouteDialogPresenter.createDialog(mContext, ROUTE_TYPE_REMOTE_DISPLAY,
                     v -> {
+                        mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
                         mDialog.dismiss();
                         mActivityStarter
                                 .postStartActivityDismissingKeyguard(getLongClickIntent(), 0);
                     });
-            mDialog.getWindow().setType(LayoutParams.TYPE_KEYGUARD_DIALOG);
             SystemUIDialog.setShowForAllUsers(mDialog, true);
             SystemUIDialog.registerDismissListener(mDialog);
             SystemUIDialog.setWindowOnTop(mDialog);
-            mUiHandler.post(() -> mDialog.show());
-            mHost.collapsePanels();
+
+            mUiHandler.post(() -> {
+                if (view != null) {
+                    mDialogLaunchAnimator.showFromView(mDialog, view);
+                } else {
+                    mDialog.show();
+                }
+            });
         });
     }
 

@@ -94,7 +94,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
      * Checks that the nav bar layer starts visible, becomes invisible during unlocking animation
      * and becomes visible at the end
      */
-    @Postsubmit
+    @FlakyTest
     @Test
     fun navBarLayerVisibilityChanges() {
         testSpec.assertLayers {
@@ -156,7 +156,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
      * Checks that the nav bar starts the transition visible, then becomes invisible during
      * then unlocking animation and becomes visible at the end of the transition
      */
-    @Postsubmit
+    @FlakyTest
     @Test
     fun navBarWindowsVisibilityChanges() {
         testSpec.assertWm {
@@ -167,11 +167,6 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
                 .isAboveAppWindowVisible(FlickerComponentName.NAV_BAR)
         }
     }
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
 
     /**
      * Checks that the status bar layer is visible at the end of the trace
@@ -209,12 +204,6 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
                 .coversExactly(WindowUtils.getStatusBarPosition(display))
         }
     }
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     @FlakyTest
     @Test

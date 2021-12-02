@@ -189,7 +189,19 @@ final class RemovePackageHelper {
 
         r = null;
 
-        // Any package can hold static shared libraries.
+        // Any package can hold SDK or static shared libraries.
+        if (pkg.getSdkLibName() != null) {
+            if (removeSharedLibraryLPw(pkg.getSdkLibName(), pkg.getSdkLibVersionMajor())) {
+                if (DEBUG_REMOVE && chatty) {
+                    if (r == null) {
+                        r = new StringBuilder(256);
+                    } else {
+                        r.append(' ');
+                    }
+                    r.append(pkg.getSdkLibName());
+                }
+            }
+        }
         if (pkg.getStaticSharedLibName() != null) {
             if (removeSharedLibraryLPw(pkg.getStaticSharedLibName(),
                     pkg.getStaticSharedLibVersion())) {

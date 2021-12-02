@@ -737,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Képernyőzár-feloldási kísérletek figyelése"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Megfigyeli a képernyő feloldásakor helytelenül beírt jelszavak számát, és túl sok hibásan beírt jelszó esetén lezárja a táblagépet, vagy törli a táblagép összes adatát."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"A képernyő feloldásához megadott helytelen jelszavak számának figyelése, és az Android TV eszköz zárolása vagy az Android TV eszköz összes adatának törlése túl sok helytelen jelszó után."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Megfigyeli a képernyő feloldásakor helytelenül beírt jelszavak számát, és túl sok hibásan beírt jelszó esetén lezárja az infotainmentrendszert, vagy törli az infotainmentrendszer összes adatát."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Megfigyeli a képernyő feloldásakor helytelenül beírt jelszavak számát, és túl sok hibásan beírt jelszó esetén lezárja a telefont, vagy törli a telefon összes adatát."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"A képernyőzárolás során megadott helytelen jelszavak számának figyelése, és a táblagép zárolása vagy a felhasználó összes adatának törlése abban az esetben, ha túl sokszor adtak meg helytelen jelszót."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"A képernyő feloldásához megadott helytelen jelszavak számának figyelése, és az Android TV eszköz zárolása vagy ezen felhasználó összes adatának törlése túl sok helytelen jelszó után."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"A képernyőzárolás során megadott helytelen jelszavak számának figyelése, és az infotainmentrendszer zárolása vagy a profil összes adatának törlése abban az esetben, ha túl sokszor adtak meg helytelen jelszót."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"A képernyőzárolás során megadott helytelen jelszavak számának figyelése, és a telefon zárolása vagy a felhasználó összes adatának törlése abban az esetben, ha túl sokszor adtak meg helytelen jelszót."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"A képernyőzár módosítása"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"A képernyőzár módosítása."</string>
@@ -748,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Minden adat törlése"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Figyelmeztetés nélkül törli a táblagép adatait, visszaállítva a gyári adatokat."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Az Android TV eszköz adatainak figyelmeztetés nélküli törlése a gyári adatok visszaállításával."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Az infotainmentrendszer adatainak törlése a gyári alapbeállítások visszaállításával anélkül, hogy figyelmeztetés jelenne meg erről."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Figyelmeztetés nélkül törli a telefon összes adatát, visszaállítva a gyári adatokat."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"A felhasználói adatok törlése"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Profiladatok törlése"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"A felhasználói adatok törlése"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"A felhasználó összes adatának törlése erről a táblagépről figyelmeztetés nélkül."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"A felhasználó összes adatának figyelmeztetés nélküli törlése erről az Android TV eszközről."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"A profil adatainak törlése erről az infotainmentrendszerről figyelmeztetés nélkül."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"A felhasználó összes adatának törlése erről a telefonról figyelmeztetés nélkül."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Az eszköz globális proxyjának beállítása"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Az eszköz globális proxyja lesz használatban, amíg a házirend engedélyezve van. A globális proxyt csak az eszköz tulajdonosa állíthatja be."</string>

@@ -29,7 +29,6 @@ import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -46,6 +45,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.TransformableView;
+import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -1656,15 +1656,16 @@ public class NotificationContentView extends FrameLayout implements Notification
         return null;
     }
 
-    public void showFeedbackIcon(boolean show, Pair<Integer, Integer> resIds) {
+    /** Shows the given feedback icon, or hides the icon if null. */
+    public void setFeedbackIcon(@Nullable FeedbackIcon icon) {
         if (mContractedChild != null) {
-            mContractedWrapper.showFeedbackIcon(show, resIds);
+            mContractedWrapper.setFeedbackIcon(icon);
         }
         if (mExpandedChild != null) {
-            mExpandedWrapper.showFeedbackIcon(show, resIds);
+            mExpandedWrapper.setFeedbackIcon(icon);
         }
         if (mHeadsUpChild != null) {
-            mHeadsUpWrapper.showFeedbackIcon(show, resIds);
+            mHeadsUpWrapper.setFeedbackIcon(icon);
         }
     }
 

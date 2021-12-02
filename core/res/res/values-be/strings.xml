@@ -743,9 +743,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Сачыць за спробамі разблакіроўкі экрана"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Сачыць за колькасцю няправільных набраных пароляў падчас разблакоўкі экрана і блакаваць планшэт або сціраць усе дадзеныя на ім, калі няправільны пароль набраны занадта шмат разоў."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Сачыць за колькасцю няправільна набраных пароляў падчас разблакіроўкі экрана і заблакіраваць прыладу Android TV або сцерці ўсе даныя на прыладзе, калі няправільны пароль набраны занадта шмат разоў."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Падчас разблакіроўкі экрана сачыць за колькасцю няправільна набраных пароляў і, калі няправільны пароль набраны занадта шмат разоў, заблакіраваць інфармацыйна-забаўляльную сістэму ці сцерці ў ёй усе даныя."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Сачыць за колькасцю няправільных набраных пароляў падчас разблакоўкі экрана і блакаваць тяэлефон або сціраць усе дадзеныя на ім, калі набрана занадта шмат няправільных пароляў."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Сачыць за колькасцю няправільна набраных пароляў падчас разблакіроўкі экрана і блакіраваць планшэт або сцерці ўсе даныя гэтага карыстальніка, калі няправільны пароль набраны занадта шмат разоў."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Сачыць за колькасцю няправільна набраных пароляў падчас разблакіроўкі экрана і заблакіраваць прыладу Android TV або сцерці ўсе даныя карыстальніка, калі няправільны пароль набраны занадта шмат разоў."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Падчас разблакіроўкі экрана сачыць за колькасцю няправільна набраных пароляў і, калі няправільны пароль набраны занадта шмат разоў, заблакіраваць інфармацыйна-забаўляльную сістэму ці сцерці ўсе даныя гэтага профілю."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Сачыць за колькасцю няправільна набраных пароляў падчас разблакіроўкі экрана і блакіраваць тэлефон або сцерці ўсе даныя гэтага карыстальніка, калі няправільны пароль набраны занадта шмат разоў."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Змяніць блакіроўку экрана"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Змяніць блакіроўку экрана."</string>
@@ -754,10 +756,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Сцерці ўсе даныя"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Cцерці даныя з планшэта без папярэджання, выканаўшы скід да заводскіх даных."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Сцерці даныя з прылады Android TV без папярэджання, выканаўшы скід да заводскіх налад."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Падчас скіду да заводскіх налад сцерці даныя ў інфармацыйна-забаўляльнай сістэме без папярэджання."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Сцерці даныя з тэлефона без папярэджання, выканаўшы скід да заводскіх налад."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Сцерці карыстальніцкія даныя"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Сцерці даныя профілю"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Сцерці карыстальніцкія даныя"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Сцерці даныя гэтага карыстальніка на дадзеным планшэце без папярэджання."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Сцерці даныя карыстальніка з гэтай прылады Android TV без папярэджання."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Сцерці даныя гэтага профілю ў гэтай інфармацыйна-забаўляльнай сістэме без папярэджання."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Сцерці даныя гэтага карыстальніка на дадзеным тэлефоне без папярэджання."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Усталяваць глабальны проксі прылады"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Задаць агульны проксі-cервер прылады, які будзе выкарыстоўвацца, калі прылада актыўная. Толькі ўладальнік прылады можа задаць агульны проксі-сервер."</string>

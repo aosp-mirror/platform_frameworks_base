@@ -743,9 +743,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"מעקב אחר ניסיונות לביטול של נעילת המסך"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ניהול מעקב אחר מספר הסיסמאות השגויות שמוקלדות במהלך ביטול נעילת המסך, וביצוע נעילה של הטאבלט, או מחיקה של כל נתוני הטאבלט, אם מוקלדות יותר מדי סיסמאות שגויות."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"‏מעקב אחר מספר הסיסמאות השגויות שהוזנו בעת ביטול נעילת המסך, כמו גם נעילה של מכשיר ה-Android TV או מחיקה של כל נתוני מכשיר ה-Android TV אם הוזנו יותר מדי סיסמאות שגויות."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"מעקב אחר מספר הסיסמאות השגויות שהוזנו במהלך ביטול נעילת המסך, נעילת מערכת המידע והבידור או מחיקה של כל נתוני מערכת המידע והבידור, אם הוזנו יותר מדי סיסמאות שגויות."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"מעקב אחר מספר הסיסמאות השגויות שהוקלדו במהלך ביטול נעילת המסך, וביצוע נעילה של הטלפון או מחיקה של כל נתוני הטלפון אם הוקלדו יותר מדי סיסמאות שגויות."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"מעקב אחר מספר הסיסמאות השגויות שהוזנו בעת ביטול נעילת המסך, כמו גם נעילת הטאבלט או מחיקה של כל נתוני המשתמש הזה אם הוזנו יותר מדי סיסמאות שגויות."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"‏מעקב אחר מספר הסיסמאות השגויות שהוזנו במהלך ביטול נעילת המסך, כמו גם נעילה של מכשיר ה-Android TV או מחיקה של כל נתוני המשתמש הזה אם הוזנו יותר מדי סיסמאות שגויות."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"מעקב אחר מספר הסיסמאות השגויות שהוזנו במהלך ביטול נעילת המסך, נעילת מערכת המידע והבידור או מחיקה של כל נתוני הפרופיל הזה, אם הוזנו יותר מדי סיסמאות שגויות."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"מעקב אחר מספר הסיסמאות השגויות שהוזנו בעת ביטול נעילת המסך, כמו גם נעילת הטלפון או מחיקה של כל נתוני המשתמש הזה אם הוזנו יותר מדי סיסמאות שגויות."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"שינוי נעילת המסך"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"שינוי של נעילת המסך."</string>
@@ -754,10 +756,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"מחיקת כל הנתונים"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"מחיקה של נתוני הטאבלט ללא אזהרה, באמצעות איפוס לנתוני היצרן."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"‏מחיקה ללא אזהרה של נתוני מכשיר ה-Android TV באמצעות איפוס לנתוני היצרן."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"מחיקה של נתוני מערכת המידע והבידור, ללא אזהרה, על ידי ביצוע איפוס לנתוני היצרן."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"מחיקה של נתוני הטלפון, ללא אזהרה, על ידי ביצוע איפוס לנתוני היצרן."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"מחיקת נתוני משתמש"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"מחיקת נתוני הפרופיל"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"מחיקת נתוני משתמש"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"מחיקה של נתוני המשתמש הזה בטאבלט, ללא אזהרה."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"‏מחיקה של נתוני המשתמש הזה במכשיר ה-Android TV, ללא אזהרה."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"מחיקה של נתוני הפרופיל במערכת המידע והבידור הזו, ללא אזהרה."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"מחיקה של נתוני המשתמש הזה בטלפון, ללא אזהרה."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"‏הגדרה של שרת ה-Proxy הכללי של המכשיר"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"‏הגדרה של שרת ה-proxy הגלובלי שבו ייעשה שימוש כשהמדיניות פועלת. רק לבעלים של המכשיר יש אפשרות להגדיר את שרת ה-proxy הגלובלי."</string>

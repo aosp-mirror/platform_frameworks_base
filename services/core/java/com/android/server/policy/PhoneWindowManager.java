@@ -280,6 +280,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int MULTI_PRESS_POWER_NOTHING = 0;
     static final int MULTI_PRESS_POWER_THEATER_MODE = 1;
     static final int MULTI_PRESS_POWER_BRIGHTNESS_BOOST = 2;
+    static final int MULTI_PRESS_POWER_LAUNCH_TARGET_ACTIVITY = 3;
 
     // must match: config_longPressOnBackBehavior in config.xml
     static final int LONG_PRESS_BACK_NOTHING = 0;
@@ -497,6 +498,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     long mLongPressOnPowerAssistantTimeoutMs;
     int mVeryLongPressOnPowerBehavior;
     int mDoublePressOnPowerBehavior;
+    ComponentName mPowerDoublePressTargetActivity;
     int mTriplePressOnPowerBehavior;
     int mLongPressOnBackBehavior;
     int mShortPressOnSleepBehavior;
@@ -952,6 +954,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             powerMultiPressAction(eventTime, interactive, mDoublePressOnPowerBehavior);
         } else if (count == 3) {
             powerMultiPressAction(eventTime, interactive, mTriplePressOnPowerBehavior);
+        } else if (count > 3 && count <= getMaxMultiPressPowerCount()) {
+            Slog.d(TAG, "No behavior defined for power press count " + count);
         } else if (count == 1 && interactive && !beganFromNonInteractive) {
             if (mSideFpsEventHandler.onSinglePressDetected(eventTime)) {
                 Slog.i(TAG, "Suppressing power key because the user is interacting with the "
@@ -1084,6 +1088,30 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 mPowerManager.boostScreenBrightness(eventTime);
                 break;
+            case MULTI_PRESS_POWER_LAUNCH_TARGET_ACTIVITY:
+                if (DEBUG_INPUT) {
+                    Slog.d(TAG, "Executing the double press power action.");
+                }
+                final boolean keyguardActive =
+                        mKeyguardDelegate != null && mKeyguardDelegate.isShowing();
+                if (!keyguardActive) {
+                    Intent intent = new Intent();
+                    if (mPowerDoublePressTargetActivity != null) {
+                        intent.setComponent(mPowerDoublePressTargetActivity);
+                        ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivity(
+                                intent, /* flags= */0);
+                        if (resolveInfo != null) {
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                                    | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                            startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
+                        } else {
+                            Slog.e(TAG, "Could not resolve activity with : "
+                                    + mPowerDoublePressTargetActivity.flattenToString()
+                                    + " name.");
+                        }
+                    }
+                }
+                break;
         }
     }
 
@@ -1098,7 +1126,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // GestureLauncherService.
         // To speed up the handling of single-press of power button inside SingleKeyGestureDetector,
         // however, we limit the max count to the number of button presses actually handled by the
-        // SingleKeyGestureDetector.
+        // SingleKeyGestureDetector except for wearable devices, where we want to de-dup the double
+        // press gesture with the emergency gesture.
+        if (mHasFeatureWatch
+                && GestureLauncherService.isEmergencyGestureSettingEnabled(
+                        mContext, ActivityManager.getCurrentUser())) {
+            return 5;
+        }
         if (mTriplePressOnPowerBehavior != MULTI_PRESS_POWER_NOTHING) {
             return 3;
         }
@@ -1933,6 +1967,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_veryLongPressOnPowerBehavior);
         mDoublePressOnPowerBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_doublePressOnPowerBehavior);
+        mPowerDoublePressTargetActivity = ComponentName.unflattenFromString(
+            mContext.getResources().getString(
+                com.android.internal.R.string.config_doublePressOnPowerTargetActivity));
         mTriplePressOnPowerBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_triplePressOnPowerBehavior);
         mShortPressOnSleepBehavior = mContext.getResources().getInteger(
@@ -5686,6 +5723,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return "MULTI_PRESS_POWER_THEATER_MODE";
             case MULTI_PRESS_POWER_BRIGHTNESS_BOOST:
                 return "MULTI_PRESS_POWER_BRIGHTNESS_BOOST";
+            case MULTI_PRESS_POWER_LAUNCH_TARGET_ACTIVITY:
+                return "MULTI_PRESS_POWER_LAUNCH_TARGET_ACTIVITY";
             default:
                 return Integer.toString(behavior);
         }

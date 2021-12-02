@@ -20,8 +20,9 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -61,7 +62,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
-import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
+import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
 import com.android.wm.shell.transition.LegacyTransitions;
 import com.android.wm.shell.transition.Transitions;
@@ -208,9 +209,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mStageCoordinator.unregisterSplitScreenListener(listener);
     }
 
-    public void startTask(int taskId, @SplitScreen.StageType int stage,
-            @SplitPosition int position, @Nullable Bundle options) {
-        options = mStageCoordinator.resolveStartStage(stage, position, options, null /* wct */);
+    public void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options) {
+        options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options,
+                null /* wct */);
 
         try {
             ActivityTaskManager.getService().startActivityFromRecents(taskId, options);
@@ -219,10 +220,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
     }
 
-    public void startShortcut(String packageName, String shortcutId,
-            @SplitScreen.StageType int stage, @SplitPosition int position,
+    public void startShortcut(String packageName, String shortcutId, @SplitPosition int position,
             @Nullable Bundle options, UserHandle user) {
-        options = mStageCoordinator.resolveStartStage(stage, position, options, null /* wct */);
+        options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options,
+                null /* wct */);
 
         try {
             LauncherApps launcherApps =
@@ -234,20 +235,18 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
     }
 
-    public void startIntent(PendingIntent intent, Intent fillInIntent,
-            @SplitScreen.StageType int stage, @SplitPosition int position,
+    public void startIntent(PendingIntent intent, Intent fillInIntent, @SplitPosition int position,
             @Nullable Bundle options) {
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
-            startIntentLegacy(intent, fillInIntent, stage, position, options);
+            startIntentLegacy(intent, fillInIntent, position, options);
             return;
         }
-        mStageCoordinator.startIntent(intent, fillInIntent, stage, position, options,
+        mStageCoordinator.startIntent(intent, fillInIntent, STAGE_TYPE_UNDEFINED, position, options,
                 null /* remote */);
     }
 
     private void startIntentLegacy(PendingIntent intent, Intent fillInIntent,
-            @SplitScreen.StageType int stage, @SplitPosition int position,
-            @Nullable Bundle options) {
+            @SplitPosition int position, @Nullable Bundle options) {
         LegacyTransitions.ILegacyTransition transition = new LegacyTransitions.ILegacyTransition() {
             @Override
             public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
@@ -275,7 +274,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             }
         };
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        options = mStageCoordinator.resolveStartStage(stage, position, options, wct);
+        options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options, wct);
         wct.sendPendingIntent(intent, fillInIntent, options);
         mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
     }
@@ -539,7 +538,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         public void startTask(int taskId, int stage, int position, @Nullable Bundle options) {
             executeRemoteCallWithTaskPermission(mController, "startTask",
                     (controller) -> {
-                        controller.startTask(taskId, stage, position, options);
+                        controller.startTask(taskId, position, options);
                     });
         }
 
@@ -568,7 +567,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 @Nullable Bundle options, UserHandle user) {
             executeRemoteCallWithTaskPermission(mController, "startShortcut",
                     (controller) -> {
-                        controller.startShortcut(packageName, shortcutId, stage, position,
+                        controller.startShortcut(packageName, shortcutId, position,
                                 options, user);
                     });
         }
@@ -578,7 +577,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 @Nullable Bundle options) {
             executeRemoteCallWithTaskPermission(mController, "startIntent",
                     (controller) -> {
-                        controller.startIntent(intent, fillInIntent, stage, position, options);
+                        controller.startIntent(intent, fillInIntent, position, options);
                     });
         }
 

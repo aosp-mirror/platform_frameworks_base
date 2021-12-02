@@ -14751,6 +14751,10 @@ package android.view.translation {
     ctor public TranslationCapability(int, @NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, boolean, int);
   }
 
+  public final class TranslationContext implements android.os.Parcelable {
+    method @Nullable public android.app.assist.ActivityId getActivityId();
+  }
+
   public final class UiTranslationManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void finishTranslation(@NonNull android.app.assist.ActivityId);
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void pauseTranslation(@NonNull android.app.assist.ActivityId);

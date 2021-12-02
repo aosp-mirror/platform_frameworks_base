@@ -45,6 +45,7 @@ import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.Utils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -72,6 +73,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             new QSPanel.OnConfigurationChangedListener() {
         @Override
         public void onConfigurationChange(Configuration newConfig) {
+            updateMediaExpansion();
             mView.updateResources();
             mQsSecurityFooter.onConfigurationChanged();
             if (mView.isListening()) {
@@ -121,11 +123,15 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     @Override
     public void onInit() {
         super.onInit();
-        mMediaHost.setExpansion(1);
+        updateMediaExpansion();
         mMediaHost.setShowsOnlyActiveMedia(false);
         mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
         mQsCustomizerController.init();
         mBrightnessSliderController.init();
+    }
+
+    private void updateMediaExpansion() {
+        mMediaHost.setExpansion(Utils.shouldUseSplitNotificationShade(getResources()) ? 0 : 1);
     }
 
     @Override

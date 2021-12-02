@@ -10,6 +10,7 @@ import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.qs.HeaderPrivacyIconsController
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -35,6 +36,8 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
     @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var batteryMeterView: BatteryMeterView
     @Mock private lateinit var batteryMeterViewController: BatteryMeterViewController
+    @Mock private lateinit var privacyIconsController: HeaderPrivacyIconsController
+
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
     var viewVisibility = View.GONE
 
@@ -56,8 +59,14 @@ class SplitShadeHeaderControllerTest : SysuiTestCase() {
         }
         whenever(view.visibility).thenAnswer { _ -> viewVisibility }
         whenever(featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)).thenReturn(false)
-        splitShadeHeaderController = SplitShadeHeaderController(view, statusBarIconController,
-        qsCarrierGroupControllerBuilder, featureFlags, batteryMeterViewController)
+        splitShadeHeaderController = SplitShadeHeaderController(
+                view,
+                statusBarIconController,
+                privacyIconsController,
+                qsCarrierGroupControllerBuilder,
+                featureFlags,
+                batteryMeterViewController
+        )
     }
 
     @Test

@@ -17,12 +17,14 @@
 package android.app.communal;
 
 import android.Manifest;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.Overridable;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.RemoteException;
 
 /**
@@ -32,6 +34,7 @@ import android.os.RemoteException;
  * @hide
  */
 @SystemService(Context.COMMUNAL_MANAGER_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_COMMUNAL_MODE)
 public final class CommunalManager {
     private final ICommunalManager mService;
 

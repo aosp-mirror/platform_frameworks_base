@@ -737,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Subaybayan ang bilang ng mga hindi tamang password na na-type kapag ina-unlock ang screen, at i-lock ang tablet o burahin ang lahat ng data ng tablet kung masyadong maraming hindi tamang password ang na-type."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Subaybayan ang dami ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang Android TV device o burahin ang lahat ng data ng Android TV device kung masyadong maraming maling password ang na-type."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Subaybayan ang bilang ng mga maling password kapag ina-unlock ang screen, at i-lock ang infotainment system o burahin ang lahat ng data ng infotainment system kung masyadong maraming maling password ang nata-type."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang telepono o burahin ang lahat ng data ng telepono kung masyadong maraming maling password ang na-type."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang tablet o burahin ang lahat ng data ng user na ito kung masyadong maraming maling password ang nata-type."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Subaybayan ang dami ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang iyong Android TV device o burahin ang lahat ng data ng user na ito kung masyadong maraming maling password ang na-type."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang infotainment system o burahin ang lahat ng data ng profile na ito kung masyadong maraming maling password ang nata-type."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang telepono o burahin ang lahat ng data ng user na ito kung masyadong maraming maling password ang nata-type."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Palitan ang screen lock"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Palitan ang screen lock."</string>
@@ -748,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Burahin ang lahat ng data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Burahin ang data ng tablet nang walang babala sa pamamagitan ng pagsasagawa ng pag-reset ng factory data."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Burahin ang data ng iyong Android TV device nang walang babala sa pamamagitan ng pagsasagawa ng pag-reset ng factory data."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Burahin ang data ng infotainment system nang walang babala sa pamamagitan ng pagsasagawa ng pag-reset ng factory data."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Burahin ang data ng telepono nang walang babala sa pamamagitan ng pagsasagawa ng pag-reset ng factory data."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Burahin ang data ng user"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Burahin ang data ng profile"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Burahin ang data ng user"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Burahin ang data ng user na ito sa tablet na ito nang walang babala."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Burahin ang data ng user na ito sa Android TV device na ito nang walang babala."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Burahin ang data ng profile na ito sa infotainment system na ito nang walang babala."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Burahin ang data ng user na ito sa teleponong ito nang walang babala."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Itakda ang pandaigdigang proxy ng device"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Itakda ang pandaigdigang proxy ng device na gagamitin habang naka-enable ang patakaran. Ang may-ari ng device lang ang makakapagtakda sa pandaigdigang proxy."</string>

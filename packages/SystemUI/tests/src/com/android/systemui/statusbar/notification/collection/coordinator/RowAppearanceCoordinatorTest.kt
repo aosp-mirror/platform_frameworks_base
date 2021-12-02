@@ -17,10 +17,10 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
-import android.util.Pair
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.AssistantFeedbackController
+import com.android.systemui.statusbar.notification.FeedbackIcon
 import com.android.systemui.statusbar.notification.SectionClassifier
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -75,8 +75,7 @@ class RowAppearanceCoordinatorTest : SysuiTestCase() {
         afterRenderEntryListener = withArgCaptor {
             verify(pipeline).addOnAfterRenderEntryListener(capture())
         }
-        whenever(assistantFeedbackController.showFeedbackIndicator(any())).thenReturn(true)
-        whenever(assistantFeedbackController.getFeedbackResources(any())).thenReturn(Pair(1, 2))
+        whenever(assistantFeedbackController.getFeedbackIcon(any())).thenReturn(FeedbackIcon(1, 2))
         entry1 = NotificationEntryBuilder().setSection(section1).setLastAudiblyAlertedMs(17).build()
         entry2 = NotificationEntryBuilder().setSection(section2).build()
     }
@@ -110,8 +109,8 @@ class RowAppearanceCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testShowFeedbackIcon() {
+    fun testSetFeedbackIcon() {
         afterRenderEntryListener.onAfterRenderEntry(entry1, controller1)
-        verify(controller1).showFeedbackIcon(eq(true), eq(Pair(1, 2)))
+        verify(controller1).setFeedbackIcon(eq(FeedbackIcon(1, 2)))
     }
 }

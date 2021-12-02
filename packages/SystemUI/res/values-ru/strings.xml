@@ -69,8 +69,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Не удалось сделать скриншот: нет разрешения от приложения или организации."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Изменить"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Изменить скриншот"</string>
-    <!-- no translation found for screenshot_share_description (2861628935812656612) -->
-    <skip />
+    <string name="screenshot_share_description" msgid="2861628935812656612">"Поделиться скриншотом"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Увеличить площадь скриншота"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Закрыть скриншот"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Предварительный просмотр скриншота"</string>
@@ -108,8 +107,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Телефон."</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Аудиоподсказки"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Кошелек"</string>
-    <!-- no translation found for accessibility_qr_code_scanner_button (7521277927692910795) -->
-    <skip />
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Сканер QR-кодов"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Разблокировать."</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Устройство заблокировано"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Сканирование лица"</string>
@@ -127,7 +125,7 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Подтверждено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Нажмите \"Подтвердить\""</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Аутентификация выполнена"</string>
-    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Использовать PIN-код"</string>
+    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN-код"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Использовать графический ключ"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Использовать пароль"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"Неверный PIN-код."</string>
@@ -298,6 +296,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Запись видео с экрана"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Начать"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Остановить"</string>
+    <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Режим управления одной рукой"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Разблокировать микрофон устройства?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Разблокировать камеру устройства?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Разблокировать камеру и микрофон устройства?"</string>
@@ -473,10 +472,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Разблокировать для использования"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Не удалось получить информацию о картах. Повторите попытку позже."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Настройки заблокированного экрана"</string>
-    <!-- no translation found for qr_code_scanner_title (1598912458255252498) -->
-    <skip />
-    <!-- no translation found for qr_code_scanner_description (7452098243938659945) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="1598912458255252498">"Сканер QR-кодов"</string>
+    <string name="qr_code_scanner_description" msgid="7452098243938659945">"Нажмите, чтобы отсканировать QR-код."</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Рабочий профиль"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Режим полета"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Следующий будильник: <xliff:g id="WHEN">%1$s</xliff:g>. Звук отключен."</string>

@@ -4299,7 +4299,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             didSomething |= mProcessList.killPackageProcessesLSP(packageName, appId, userId,
                     ProcessList.INVALID_ADJ, callerWillRestart, false /* allowRestart */, doit,
-                    evenPersistent, true /* setRemoved */,
+                    evenPersistent, true /* setRemoved */, uninstalling,
                     packageName == null ? ApplicationExitInfo.REASON_USER_STOPPED
                     : ApplicationExitInfo.REASON_USER_REQUESTED,
                     ApplicationExitInfo.SUBREASON_UNKNOWN,
@@ -7382,6 +7382,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             ProcessList.PERSISTENT_PROC_ADJ, false /* callerWillRestart */,
                             true /* callerWillRestart */, true /* doit */,
                             true /* evenPersistent */, false /* setRemoved */,
+                            false /* uninstalling */,
                             ApplicationExitInfo.REASON_OTHER,
                             ApplicationExitInfo.SUBREASON_KILL_UID,
                             reason != null ? reason : "kill uid");
@@ -7403,6 +7404,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             ProcessList.PERSISTENT_PROC_ADJ, false /* callerWillRestart */,
                             true /* callerWillRestart */, true /* doit */,
                             true /* evenPersistent */, false /* setRemoved */,
+                            false /* uninstalling */,
                             ApplicationExitInfo.REASON_PERMISSION_CHANGE,
                             ApplicationExitInfo.SUBREASON_UNKNOWN,
                             reason != null ? reason : "kill uid");

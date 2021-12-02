@@ -107,8 +107,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ទូរសព្ទ"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ជំនួយសំឡេង"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"កាបូប"</string>
-    <!-- no translation found for accessibility_qr_code_scanner_button (7521277927692910795) -->
-    <skip />
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"កម្មវិធីស្កេនកូដ QR"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"ដោះ​​សោ"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"បានចាក់សោ​ឧបករណ៍"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"ការ​ស្កេន​មុខ"</string>
@@ -293,6 +292,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"ការថត​វីដេអូ​អេក្រង់"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ចាប់ផ្ដើម"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ឈប់"</string>
+    <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"មុខងារប្រើដៃម្ខាង"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ឈប់ទប់ស្កាត់​មីក្រូហ្វូន​របស់ឧបករណ៍ឬ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ឈប់ទប់ស្កាត់​កាមេរ៉ា​របស់ឧបករណ៍ឬ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ឈប់ទប់ស្កាត់​កាមេរ៉ា និងមីក្រូហ្វូន​របស់ឧបករណ៍ឬ?"</string>
@@ -466,10 +466,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ដោះសោដើម្បីប្រើប្រាស់"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"មានបញ្ហា​ក្នុងការទាញយក​កាត​របស់អ្នក សូម​ព្យាយាមម្ដងទៀត​នៅពេលក្រោយ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ការកំណត់អេក្រង់ចាក់សោ"</string>
-    <!-- no translation found for qr_code_scanner_title (1598912458255252498) -->
-    <skip />
-    <!-- no translation found for qr_code_scanner_description (7452098243938659945) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="1598912458255252498">"ស្កេនកូដ QR"</string>
+    <string name="qr_code_scanner_description" msgid="7452098243938659945">"ចុចដើម្បីស្កេនកូដ QR"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ប្រវត្តិរូបការងារ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ពេលជិះយន្តហោះ"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"អ្នកនឹងមិនលឺម៉ោងរោទ៍ <xliff:g id="WHEN">%1$s</xliff:g> បន្ទាប់របស់អ្នកទេ"</string>

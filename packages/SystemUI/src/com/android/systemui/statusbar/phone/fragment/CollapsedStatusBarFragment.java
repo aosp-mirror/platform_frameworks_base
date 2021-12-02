@@ -55,7 +55,6 @@ import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
@@ -71,11 +70,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Contains the collapsed status bar and handles hiding/showing based on disable flags
@@ -104,7 +100,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private View mCenteredIconArea;
     private int mDisabled1;
     private int mDisabled2;
-    private Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     private DarkIconManager mDarkIconManager;
     private final StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
     private final CommandQueue mCommandQueue;
@@ -151,7 +146,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             NotificationPanelViewController notificationPanelViewController,
             NetworkController networkController,
             StatusBarStateController statusBarStateController,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             CommandQueue commandQueue,
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             OperatorNameViewController.Factory operatorNameViewControllerFactory
@@ -169,7 +163,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mNotificationPanelViewController = notificationPanelViewController;
         mNetworkController = networkController;
         mStatusBarStateController = statusBarStateController;
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
         mCommandQueue = commandQueue;
         mCollapsedStatusBarFragmentLogger = collapsedStatusBarFragmentLogger;
         mOperatorNameViewControllerFactory = operatorNameViewControllerFactory;
@@ -399,10 +392,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private boolean shouldHideNotificationIcons() {
-        final Optional<StatusBar> statusBarOptional = mStatusBarOptionalLazy.get();
         if (!mPanelExpansionStateManager.isClosed()
-                && statusBarOptional.map(
-                        StatusBar::hideStatusBarIconsWhenExpanded).orElse(false)) {
+                && mNotificationPanelViewController.hideStatusBarIconsWhenExpanded()) {
             return true;
         }
         return mStatusBarHideIconsForBouncerManager.getShouldHideStatusBarIconsForBouncer();

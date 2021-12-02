@@ -94,8 +94,7 @@ public final class NewUserRequest {
     /**
      * Returns the user type.
      *
-     * <p> Supported types are {@link UserManager.USER_TYPE_FULL_SECONDARY} and
-     * {@link USER_TYPE_FULL_GUEST}
+     * <p> Default value is {@link UserManager#USER_TYPE_FULL_SECONDARY}
      */
     @NonNull
     public String getUserType() {
@@ -203,10 +202,8 @@ public final class NewUserRequest {
 
         /**
          * Sets user type.
-         * <p>
-         * Supported types are {@link UserManager.USER_TYPE_FULL_SECONDARY} and
-         * {@link UserManager.USER_TYPE_FULL_GUEST}. Default value is
-         * {@link UserManager.USER_TYPE_FULL_SECONDARY}.
+         *
+         * <p> Default value is {link UserManager#USER_TYPE_FULL_SECONDARY}.
          *
          * @return This object for method chaining.
          */
@@ -277,16 +274,13 @@ public final class NewUserRequest {
         }
 
         private void checkIfPropertiesAreCompatible() {
-            // Conditions which can't be true simultaneously
-            // A guest user can't be admin user
-            if (mAdmin && mUserType == UserManager.USER_TYPE_FULL_GUEST) {
-                throw new IllegalStateException("A guest user can't be admin.");
+            if (mUserType == null) {
+                throw new IllegalStateException("Usertype cannot be null");
             }
 
-            // check for only supported user types
-            if (mUserType != UserManager.USER_TYPE_FULL_SECONDARY
-                    && mUserType != UserManager.USER_TYPE_FULL_GUEST) {
-                throw new IllegalStateException("Unsupported user type: " + mUserType);
+            // Admin user can only be USER_TYPE_FULL_SECONDARY
+            if (mAdmin && !mUserType.equals(UserManager.USER_TYPE_FULL_SECONDARY)) {
+                throw new IllegalStateException("Admin user can't be of type: " + mUserType);
             }
 
             if (TextUtils.isEmpty(mAccountName) != TextUtils.isEmpty(mAccountType)) {
