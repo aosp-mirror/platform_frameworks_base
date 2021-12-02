@@ -43,6 +43,7 @@ filegroup {
     name: "wm_shell_util-sources",
     srcs: [
         "src/com/android/wm/shell/util/**/*.java",
+        "src/com/android/wm/shell/common/split/SplitScreenConstants.java"
     ],
     path: "src",
 }
