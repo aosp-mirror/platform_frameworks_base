@@ -20,6 +20,7 @@ import android.content.Context
 import android.graphics.PixelFormat
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -77,6 +78,11 @@ class MediaTttChipController @Inject constructor(
         currentChipView.requireViewById<TextView>(R.id.text).apply {
             text = context.getString(chipType.chipText, otherDeviceName)
         }
+
+        // Loading
+        val showLoading = chipType == ChipType.TRANSFER_INITIATED
+        currentChipView.requireViewById<View>(R.id.loading).visibility =
+            if (showLoading) { View.VISIBLE } else { View.GONE }
 
         if (oldChipView == null) {
             windowManager.addView(chipView, windowLayoutParams)

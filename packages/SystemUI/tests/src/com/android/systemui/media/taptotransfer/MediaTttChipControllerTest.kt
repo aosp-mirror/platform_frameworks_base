@@ -110,24 +110,46 @@ class MediaTttChipControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun moveCloserToTransfer_chipTextContainsDeviceName() {
+    fun moveCloserToTransfer_chipTextContainsDeviceName_noLoadingIcon() {
         commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
 
-        assertThat(getChipText()).contains(DEVICE_NAME)
+        val chipView = getChipView()
+        assertThat(chipView.getChipText()).contains(DEVICE_NAME)
+        assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
     }
 
     @Test
-    fun transferInitiated_chipTextContainsDeviceName() {
+    fun transferInitiated_chipTextContainsDeviceName_loadingIcon() {
         commandRegistry.onShellCommand(pw, getTransferInitiatedCommand())
 
-        assertThat(getChipText()).contains(DEVICE_NAME)
+        val chipView = getChipView()
+        assertThat(chipView.getChipText()).contains(DEVICE_NAME)
+        assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
     }
 
     @Test
-    fun transferSucceeded_chipTextContainsDeviceName() {
+    fun transferSucceeded_chipTextContainsDeviceName_noLoadingIcon() {
         commandRegistry.onShellCommand(pw, getTransferSucceededCommand())
 
-        assertThat(getChipText()).contains(DEVICE_NAME)
+        val chipView = getChipView()
+        assertThat(chipView.getChipText()).contains(DEVICE_NAME)
+        assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
+    }
+
+    @Test
+    fun changeFromCloserToTransferToTransferInitiated_loadingIconAppears() {
+        commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
+        commandRegistry.onShellCommand(pw, getTransferInitiatedCommand())
+
+        assertThat(getChipView().getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    fun changeFromTransferInitiatedToTransferSucceeded_loadingIconDisappears() {
+        commandRegistry.onShellCommand(pw, getTransferInitiatedCommand())
+        commandRegistry.onShellCommand(pw, getTransferSucceededCommand())
+
+        assertThat(getChipView().getLoadingIconVisibility()).isEqualTo(View.GONE)
     }
 
     private fun getMoveCloserToTransferCommand(): Array<String> =
@@ -151,11 +173,16 @@ class MediaTttChipControllerTest : SysuiTestCase() {
             MediaTttChipController.ChipType.TRANSFER_SUCCEEDED.name
         )
 
-    private fun getChipText(): String {
+    private fun LinearLayout.getChipText(): String =
+        (this.requireViewById<TextView>(R.id.text)).text as String
+
+    private fun LinearLayout.getLoadingIconVisibility(): Int =
+        this.requireViewById<View>(R.id.loading).visibility
+
+    private fun getChipView(): LinearLayout {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
         verify(windowManager).addView(viewCaptor.capture(), any())
-        val chipView = viewCaptor.value as LinearLayout
-        return (chipView.requireViewById(R.id.text) as TextView).text as String
+        return viewCaptor.value as LinearLayout
     }
 
     class EmptyCommand : Command {
