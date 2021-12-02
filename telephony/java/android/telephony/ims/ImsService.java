@@ -140,12 +140,25 @@ public class ImsService extends Service {
     public static final long CAPABILITY_SIP_DELEGATE_CREATION = 1 << 1;
 
     /**
+     * This ImsService supports the terminal based call waiting service.
+     * <p>
+     * In order for the IMS service to support the service, IMS service shall
+     * override {@link MmTelFeature#setTerminalBasedCallWaitingStatus}.
+     * If ImsService has this capability, Android platform will handle the synchronization
+     * between the network based call waiting service over circuit-switched networks and the
+     * terminal based call waiting service of IMS service, and will handle the received
+     * circuit-switched waiting calls. Otherwise, this functionality of Android platform shall
+     * be disabled.
+     */
+    public static final long CAPABILITY_TERMINAL_BASED_CALL_WAITING = 1 << 2;
+
+    /**
      * Used for internal correctness checks of capabilities set by the ImsService implementation and
      * tracks the index of the largest defined flag in the capabilities long.
      * @hide
      */
     public static final long CAPABILITY_MAX_INDEX =
-            Long.numberOfTrailingZeros(CAPABILITY_SIP_DELEGATE_CREATION);
+            Long.numberOfTrailingZeros(CAPABILITY_TERMINAL_BASED_CALL_WAITING);
 
     /**
      * @hide
@@ -156,7 +169,8 @@ public class ImsService extends Service {
                     // CAPABILITY_EMERGENCY_OVER_MMTEL is not included here because it is managed by
                     // whether or not ImsFeature.FEATURE_EMERGENCY_MMTEL feature is set and should
                     // not be set by users of ImsService.
-                    CAPABILITY_SIP_DELEGATE_CREATION
+                    CAPABILITY_SIP_DELEGATE_CREATION,
+                    CAPABILITY_TERMINAL_BASED_CALL_WAITING
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ImsServiceCapability {}

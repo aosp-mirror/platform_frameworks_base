@@ -23,9 +23,11 @@ import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.telecom.TelecomManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSession;
+import android.telephony.ims.ImsException;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsService;
 import android.telephony.ims.RtpHeaderExtensionType;
@@ -333,6 +335,19 @@ public class MmTelFeature extends ImsFeature {
                 Log.w(LOG_TAG, "MmTelFeature Binder - " + errorLogName + " exception: "
                         + e.getMessage());
                 return null;
+            }
+        }
+
+        @Override
+        public void setTerminalBasedCallWaitingStatus(boolean enabled) throws RemoteException {
+            synchronized (mLock) {
+                try {
+                    MmTelFeature.this.setTerminalBasedCallWaitingStatus(enabled);
+                } catch (ServiceSpecificException se) {
+                    throw new ServiceSpecificException(se.errorCode, se.getMessage());
+                } catch (Exception e) {
+                    throw new RemoteException(e.getMessage());
+                }
             }
         }
     };
@@ -934,6 +949,24 @@ public class MmTelFeature extends ImsFeature {
     @SystemApi
     public void setUiTtyMode(int mode, @Nullable Message onCompleteMessage) {
         // Base Implementation - Should be overridden
+    }
+
+    /**
+     * Notifies the MmTelFeature of the enablement status of terminal based call waiting
+     *
+     * If the terminal based call waiting is provisioned,
+     * IMS controls the enablement of terminal based call waiting which is defined
+     * in 3GPP TS 24.615.
+     *
+     * @param enabled user setting controlling whether or not call waiting is enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void setTerminalBasedCallWaitingStatus(boolean enabled) {
+        // Base Implementation - Should be overridden by IMS service
+        throw new ServiceSpecificException(ImsException.CODE_ERROR_UNSUPPORTED_OPERATION,
+                "Not implemented on device.");
     }
 
     private void setSmsListener(IImsSmsListener listener) {
