@@ -18,7 +18,6 @@ package android.bluetooth;
 
 import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.LocalSocket;
@@ -266,7 +265,7 @@ public final class BluetoothSocket implements Closeable {
             throw new IOException("bt socket acept failed");
         }
 
-        as.mPfd = new ParcelFileDescriptor(fds[0]);
+        as.mPfd = ParcelFileDescriptor.dup(fds[0]);
         as.mSocket = LocalSocket.createConnectedLocalSocket(fds[0]);
         as.mSocketIS = as.mSocket.getInputStream();
         as.mSocketOS = as.mSocket.getOutputStream();
