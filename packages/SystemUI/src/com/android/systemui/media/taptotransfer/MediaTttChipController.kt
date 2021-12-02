@@ -84,6 +84,11 @@ class MediaTttChipController @Inject constructor(
         currentChipView.requireViewById<View>(R.id.loading).visibility =
             if (showLoading) { View.VISIBLE } else { View.GONE }
 
+        // Undo
+        val showUndo = chipType == ChipType.TRANSFER_SUCCEEDED
+        currentChipView.requireViewById<View>(R.id.undo).visibility =
+            if (showUndo) { View.VISIBLE } else { View.GONE }
+
         if (oldChipView == null) {
             windowManager.addView(chipView, windowLayoutParams)
         }

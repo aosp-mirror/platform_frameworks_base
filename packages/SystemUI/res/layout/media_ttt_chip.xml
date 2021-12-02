@@ -44,4 +44,21 @@
         style="?android:attr/progressBarStyleSmall"
         />
 
+    <TextView
+        android:id="@+id/undo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/media_transfer_undo"
+        android:textColor="?androidprv:attr/textColorOnAccent"
+        android:layout_marginStart="12dp"
+        android:textSize="@dimen/media_ttt_text_size"
+        android:paddingStart="@dimen/media_ttt_chip_outer_padding"
+        android:paddingEnd="@dimen/media_ttt_chip_outer_padding"
+        android:paddingTop="@dimen/media_ttt_undo_button_vertical_padding"
+        android:paddingBottom="@dimen/media_ttt_undo_button_vertical_padding"
+        android:layout_marginTop="@dimen/media_ttt_undo_button_vertical_negative_margin"
+        android:layout_marginBottom="@dimen/media_ttt_undo_button_vertical_negative_margin"
+        android:background="@drawable/media_ttt_undo_background"
+        />
+
 </LinearLayout>
