@@ -98,6 +98,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final String KEY_WIFI_NEW_CONFIG = "wifi_new_config";
     private static final String KEY_DEVICE_SPECIFIC_CONFIG = "device_specific_config";
     private static final String KEY_SIM_SPECIFIC_SETTINGS = "sim_specific_settings";
+    // Restoring sim-specific data backed up from newer Android version to Android 12 was causing a
+    // fatal crash. Creating a backup with a different key will prevent Android 12 versions from
+    // restoring this data.
+    private static final String KEY_SIM_SPECIFIC_SETTINGS_2 = "sim_specific_settings_2";
 
     // Versioning of the state file.  Increment this version
     // number any time the set of state items is altered.
@@ -253,7 +257,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                         deviceSpecificInformation, data);
         stateChecksums[STATE_SIM_SPECIFIC_SETTINGS] =
                 writeIfChanged(stateChecksums[STATE_SIM_SPECIFIC_SETTINGS],
-                        KEY_SIM_SPECIFIC_SETTINGS, simSpecificSettingsData, data);
+                        KEY_SIM_SPECIFIC_SETTINGS_2, simSpecificSettingsData, data);
 
         writeNewChecksums(stateChecksums, newState);
     }
@@ -395,6 +399,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     break;
 
                 case KEY_SIM_SPECIFIC_SETTINGS:
+                    // Intentional fall through so that sim-specific backups from Android 12 will
+                    // also be restored on newer Android versions.
+                case KEY_SIM_SPECIFIC_SETTINGS_2:
                     byte[] restoredSimSpecificSettings = new byte[size];
                     data.readEntityData(restoredSimSpecificSettings, 0, size);
                     restoreSimSpecificSettings(restoredSimSpecificSettings);
