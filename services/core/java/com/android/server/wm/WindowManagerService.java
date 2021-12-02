@@ -108,7 +108,7 @@ import static com.android.internal.util.LatencyTracker.ACTION_ROTATE_SCREEN;
 import static com.android.server.LockGuard.INDEX_WINDOW;
 import static com.android.server.LockGuard.installLock;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_FREEZE_DISPLAY;
+import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
 import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
@@ -5849,7 +5849,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mScreenFrozenLock.acquire();
         // Apply launch power mode to reduce screen frozen time because orientation change may
         // relaunch activity and redraw windows. This may also help speed up user switching.
-        mAtmService.startLaunchPowerMode(POWER_MODE_REASON_FREEZE_DISPLAY);
+        mAtmService.startLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
 
         mDisplayFrozen = true;
         mDisplayFreezeTime = SystemClock.elapsedRealtime();
@@ -5993,7 +5993,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (configChanged) {
             displayContent.sendNewConfiguration();
         }
-        mAtmService.endLaunchPowerMode(POWER_MODE_REASON_FREEZE_DISPLAY);
+        mAtmService.endLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
         mLatencyTracker.onActionEnd(ACTION_ROTATE_SCREEN);
     }
 

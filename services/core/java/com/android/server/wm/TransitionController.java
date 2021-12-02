@@ -24,6 +24,8 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
+import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -359,6 +361,8 @@ class TransitionController {
     void finishTransition(@NonNull IBinder token) {
         // It is usually a no-op but make sure that the metric consumer is removed.
         mTransitionMetricsReporter.reportAnimationStart(token, 0 /* startTime */);
+        // It is a no-op if the transition did not change the display.
+        mAtm.endLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
         final Transition record = Transition.fromBinder(token);
         if (record == null || !mPlayingTransitions.contains(record)) {
             Slog.e(TAG, "Trying to finish a non-playing transition " + token);
