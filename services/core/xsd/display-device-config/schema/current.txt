@@ -1,24 +1,8 @@
 // Signature format: 2.0
 package com.android.server.display.config {
 
-  public class Density {
-    ctor public Density();
-    method @NonNull public final java.math.BigInteger getDensity();
-    method @NonNull public final java.math.BigInteger getHeight();
-    method @NonNull public final java.math.BigInteger getWidth();
-    method public final void setDensity(@NonNull java.math.BigInteger);
-    method public final void setHeight(@NonNull java.math.BigInteger);
-    method public final void setWidth(@NonNull java.math.BigInteger);
-  }
-
-  public class DensityMap {
-    ctor public DensityMap();
-    method public java.util.List<com.android.server.display.config.Density> getDensity();
-  }
-
   public class DisplayConfiguration {
     ctor public DisplayConfiguration();
-    method @Nullable public final com.android.server.display.config.DensityMap getDensityMap();
     method public com.android.server.display.config.HighBrightnessMode getHighBrightnessMode();
     method public final com.android.server.display.config.SensorDetails getLightSensor();
     method public final com.android.server.display.config.SensorDetails getProxSensor();
@@ -29,7 +13,6 @@ package com.android.server.display.config {
     method public final java.math.BigDecimal getScreenBrightnessRampFastIncrease();
     method public final java.math.BigDecimal getScreenBrightnessRampSlowDecrease();
     method public final java.math.BigDecimal getScreenBrightnessRampSlowIncrease();
-    method public final void setDensityMap(@Nullable com.android.server.display.config.DensityMap);
     method public void setHighBrightnessMode(com.android.server.display.config.HighBrightnessMode);
     method public final void setLightSensor(com.android.server.display.config.SensorDetails);
     method public final void setProxSensor(com.android.server.display.config.SensorDetails);

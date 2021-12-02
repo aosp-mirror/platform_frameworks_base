@@ -681,7 +681,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final int maxWidth = 300;
         final int resultingHeight = (maxWidth * baseHeight) / baseWidth;
-        final int resultingDensity = (baseDensity * maxWidth) / baseWidth;
+        final int resultingDensity = baseDensity;
 
         displayContent.setMaxUiWidth(maxWidth);
         verifySizes(displayContent, maxWidth, resultingHeight, resultingDensity);
@@ -753,33 +753,6 @@ public class DisplayContentTests extends WindowTestsBase {
         // Verify that forcing the size is idempotent.
         displayContent.setForcedSize(forcedWidth, forcedHeight);
         verifySizes(displayContent, baseWidth, baseHeight, baseDensity);
-    }
-
-    @Test
-    public void testSetForcedDensity() {
-        final DisplayContent displayContent = createDisplayNoUpdateDisplayInfo();
-        final int baseWidth = 1280;
-        final int baseHeight = 720;
-        final int baseDensity = 320;
-
-        displayContent.mInitialDisplayWidth = baseWidth;
-        displayContent.mInitialDisplayHeight = baseHeight;
-        displayContent.mInitialDisplayDensity = baseDensity;
-        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
-
-        final int forcedDensity = 600;
-
-        // Verify that forcing the density is honored and the size doesn't change.
-        displayContent.setForcedDensity(forcedDensity, 0 /* userId */);
-        verifySizes(displayContent, baseWidth, baseHeight, forcedDensity);
-
-        // Verify that forcing the density is idempotent.
-        displayContent.setForcedDensity(forcedDensity, 0 /* userId */);
-        verifySizes(displayContent, baseWidth, baseHeight, forcedDensity);
-
-        // Verify that forcing resolution won't affect the already forced density.
-        displayContent.setForcedSize(1800, 1200);
-        verifySizes(displayContent, 1800, 1200, forcedDensity);
     }
 
     @Test

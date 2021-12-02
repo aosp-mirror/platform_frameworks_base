@@ -2432,10 +2432,27 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 break;
         }
 
-        final String uiModeTypeString =
-                getUiModeTypeString(config.uiMode & Configuration.UI_MODE_TYPE_MASK);
-        if (uiModeTypeString != null) {
-            parts.add(uiModeTypeString);
+        switch (config.uiMode & Configuration.UI_MODE_TYPE_MASK) {
+            case Configuration.UI_MODE_TYPE_APPLIANCE:
+                parts.add("appliance");
+                break;
+            case Configuration.UI_MODE_TYPE_DESK:
+                parts.add("desk");
+                break;
+            case Configuration.UI_MODE_TYPE_TELEVISION:
+                parts.add("television");
+                break;
+            case Configuration.UI_MODE_TYPE_CAR:
+                parts.add("car");
+                break;
+            case Configuration.UI_MODE_TYPE_WATCH:
+                parts.add("watch");
+                break;
+            case Configuration.UI_MODE_TYPE_VR_HEADSET:
+                parts.add("vrheadset");
+                break;
+            default:
+                break;
         }
 
         switch (config.uiMode & Configuration.UI_MODE_NIGHT_MASK) {
@@ -2567,28 +2584,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
 
         parts.add("v" + Build.VERSION.RESOURCES_SDK_INT);
         return TextUtils.join("-", parts);
-    }
-
-    /**
-     * @hide
-     */
-    public static String getUiModeTypeString(int uiModeType) {
-        switch (uiModeType) {
-            case Configuration.UI_MODE_TYPE_APPLIANCE:
-                return "appliance";
-            case Configuration.UI_MODE_TYPE_DESK:
-                return "desk";
-            case Configuration.UI_MODE_TYPE_TELEVISION:
-                return "television";
-            case Configuration.UI_MODE_TYPE_CAR:
-                return "car";
-            case Configuration.UI_MODE_TYPE_WATCH:
-                return "watch";
-            case Configuration.UI_MODE_TYPE_VR_HEADSET:
-                return "vrheadset";
-            default:
-                return null;
-        }
     }
 
     /**
