@@ -508,16 +508,6 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   uses_static_library_action.Action(RequiredAndroidAttribute("certDigest"));
   uses_static_library_action["additional-certificate"];
 
-  xml::XmlNodeAction& sdk_library_action = application_action["sdk-library"];
-  sdk_library_action.Action(RequiredNameIsJavaPackage);
-  sdk_library_action.Action(RequiredAndroidAttribute("versionMajor"));
-
-  xml::XmlNodeAction& uses_sdk_library_action = application_action["uses-sdk-library"];
-  uses_sdk_library_action.Action(RequiredNameIsJavaPackage);
-  uses_sdk_library_action.Action(RequiredAndroidAttribute("versionMajor"));
-  uses_sdk_library_action.Action(RequiredAndroidAttribute("certDigest"));
-  uses_sdk_library_action["additional-certificate"];
-
   xml::XmlNodeAction& uses_package_action = application_action["uses-package"];
   uses_package_action.Action(RequiredNameIsJavaPackage);
   uses_package_action["additional-certificate"];
