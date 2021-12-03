@@ -16,6 +16,7 @@
 
 package android.media.tv.interactive;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
@@ -41,6 +42,8 @@ import android.view.View;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,6 +56,36 @@ import java.util.List;
 public final class TvIAppManager {
     // TODO: cleanup and unhide public APIs
     private static final String TAG = "TvIAppManager";
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = false, prefix = "TV_IAPP_RTE_STATE_", value = {
+            TV_IAPP_RTE_STATE_UNREALIZED,
+            TV_IAPP_RTE_STATE_PREPARING,
+            TV_IAPP_RTE_STATE_READY,
+            TV_IAPP_RTE_STATE_ERROR})
+    public @interface TvIAppRteState {}
+
+    /**
+     * Unrealized state of interactive app RTE.
+     * @hide
+     */
+    public static final int TV_IAPP_RTE_STATE_UNREALIZED = 1;
+    /**
+     * Preparing state of interactive app RTE.
+     * @hide
+     */
+    public static final int TV_IAPP_RTE_STATE_PREPARING = 2;
+    /**
+     * Ready state of interactive app RTE.
+     * @hide
+     */
+    public static final int TV_IAPP_RTE_STATE_READY = 3;
+    /**
+     * Error state of interactive app RTE.
+     * @hide
+     */
+    public static final int TV_IAPP_RTE_STATE_ERROR = 4;
 
     private final ITvIAppManager mService;
     private final int mUserId;
@@ -134,9 +167,20 @@ public final class TvIAppManager {
                     record.postBroadcastInfoRequest(request);
                 }
             }
+
+            @Override
+            public void onSessionStateChanged(int state, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postSessionStateChanged(state);
+                }
+            }
         };
         ITvIAppManagerCallback managerCallback = new ITvIAppManagerCallback.Stub() {
-            // TODO: handle IApp service state changes
             @Override
             public void onIAppServiceAdded(String iAppServiceId) {
                 synchronized (mLock) {
@@ -170,6 +214,15 @@ public final class TvIAppManager {
                 synchronized (mLock) {
                     for (TvIAppCallbackRecord record : mCallbackRecords) {
                         record.postTvIAppInfoUpdated(iAppInfo);
+                    }
+                }
+            }
+
+            @Override
+            public void onStateChanged(String iAppServiceId, int type, int state) {
+                synchronized (mLock) {
+                    for (TvIAppCallbackRecord record : mCallbackRecords) {
+                        record.postStateChanged(iAppServiceId, type, state);
                     }
                 }
             }
@@ -233,6 +286,15 @@ public final class TvIAppManager {
          */
         public void onTvIAppInfoUpdated(TvIAppInfo iAppInfo) {
         }
+
+
+        /**
+         * This is called when the state of the interactive app service is changed.
+         * @hide
+         */
+        public void onTvIAppServiceStateChanged(
+                String iAppServiceId, int type, @TvIAppRteState int state) {
+        }
     }
 
     private static final class TvIAppCallbackRecord {
@@ -280,6 +342,15 @@ public final class TvIAppManager {
                 @Override
                 public void run() {
                     mCallback.onTvIAppInfoUpdated(iAppInfo);
+                }
+            });
+        }
+
+        public void postStateChanged(String iAppServiceId, int type, int state) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onTvIAppServiceStateChanged(iAppServiceId, type, state);
                 }
             });
         }
@@ -875,6 +946,15 @@ public final class TvIAppManager {
                 }
             });
         }
+
+        void postSessionStateChanged(int state) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onSessionStateChanged(mSession, state);
+                }
+            });
+        }
     }
 
     /**
@@ -911,6 +991,15 @@ public final class TvIAppManager {
          * @param bottom Bottom position.
          */
         public void onLayoutSurface(Session session, int left, int top, int right, int bottom) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#notifySessionStateChanged} is called.
+         *
+         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param state the current state.
+         */
+        public void onSessionStateChanged(Session session, int state) {
         }
     }
 }

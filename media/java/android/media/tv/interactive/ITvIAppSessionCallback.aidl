@@ -29,4 +29,5 @@ oneway interface ITvIAppSessionCallback {
     void onSessionCreated(in ITvIAppSession session);
     void onLayoutSurface(int left, int top, int right, int bottom);
     void onBroadcastInfoRequest(in BroadcastInfoRequest request);
+    void onSessionStateChanged(int state);
 }
