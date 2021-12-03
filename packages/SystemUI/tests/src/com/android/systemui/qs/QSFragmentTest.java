@@ -185,8 +185,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
         CommandQueue commandQueue = new CommandQueue(context);
         return new QSFragment(
-                new RemoteInputQuickSettingsDisabler(context, mock(ConfigurationController.class),
-                        commandQueue),
+                new RemoteInputQuickSettingsDisabler(context, commandQueue,
+                        mock(ConfigurationController.class)),
                 mock(QSTileHost.class),
                 mock(StatusBarStateController.class),
                 commandQueue,
