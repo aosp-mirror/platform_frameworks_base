@@ -862,8 +862,23 @@ class MediaCarouselController @Inject constructor(
 
 @VisibleForTesting
 internal object MediaPlayerData {
-    private val EMPTY = MediaData(-1, false, 0, null, null, null, null, null,
-            emptyList(), emptyList(), "INVALID", null, null, null, true, null)
+    private val EMPTY = MediaData(
+            userId = -1,
+            initialized = false,
+            backgroundColor = 0,
+            app = null,
+            appIcon = null,
+            artist = null,
+            song = null,
+            artwork = null,
+            actions = emptyList(),
+            actionsToShowInCompact = emptyList(),
+            packageName = "INVALID",
+            token = null,
+            clickIntent = null,
+            device = null,
+            active = true,
+            resumeAction = null)
     // Whether should prioritize Smartspace card.
     internal var shouldPrioritizeSs: Boolean = false
         private set

@@ -102,9 +102,24 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         // Create a media sesssion and notification for testing.
         session = MediaSession(context, SESSION_KEY)
 
-        mediaData = MediaData(USER_ID, true, 0, PACKAGE, null, null, SESSION_TITLE, null,
-            emptyList(), emptyList(), PACKAGE, session.sessionToken, clickIntent = null,
-            device = null, active = true, resumeAction = null)
+        mediaData = MediaData(
+                userId = USER_ID,
+                initialized = true,
+                backgroundColor = 0,
+                app = PACKAGE,
+                appIcon = null,
+                artist = null,
+                song = SESSION_TITLE,
+                artwork = null,
+                actions = emptyList(),
+                actionsToShowInCompact = emptyList(),
+                packageName = PACKAGE,
+                token = session.sessionToken,
+                clickIntent = null,
+                device = null,
+                active = true,
+                resumeAction = null)
+
         whenever(controllerFactory.create(session.sessionToken))
                 .thenReturn(controller)
     }
