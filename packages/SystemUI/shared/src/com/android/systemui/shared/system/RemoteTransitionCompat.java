@@ -270,7 +270,7 @@ public class RemoteTransitionCompat implements Parcelable {
                 mOpeningLeashes.add(openingTasks.get(i).getLeash());
                 // We are receiving new opening tasks, so convert to onTasksAppeared.
                 final RemoteAnimationTargetCompat target = new RemoteAnimationTargetCompat(
-                        openingTasks.get(i), layer, mInfo, t);
+                        openingTasks.get(i), layer, info, t);
                 mLeashMap.put(mOpeningLeashes.get(i), target.leash.mSurfaceControl);
                 t.reparent(target.leash.mSurfaceControl, mInfo.getRootLeash());
                 t.setLayer(target.leash.mSurfaceControl, layer);
