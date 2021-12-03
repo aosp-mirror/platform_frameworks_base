@@ -742,4 +742,8 @@
 
     <!-- Flag to enable dream overlay service and its registration -->
     <bool name="config_dreamOverlayServiceEnabled">false</bool>
+
+    <!-- Class for the communal source connector to be used -->
+    <string name="config_communalSourceConnector" translatable="false"></string>
+
 </resources>

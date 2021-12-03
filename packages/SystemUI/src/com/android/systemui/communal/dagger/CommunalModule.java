@@ -16,26 +16,40 @@
 
 package com.android.systemui.communal.dagger;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.res.Resources;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import androidx.annotation.Nullable;
+
+import com.android.systemui.R;
+import com.android.systemui.communal.CommunalSource;
+import com.android.systemui.communal.PackageObserver;
 import com.android.systemui.communal.conditions.CommunalCondition;
 import com.android.systemui.communal.conditions.CommunalSettingCondition;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.idle.AmbientLightModeMonitor;
 import com.android.systemui.idle.LightSensorEventsDebounceAlgorithm;
 import com.android.systemui.idle.dagger.IdleViewComponent;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Named;
+import javax.inject.Provider;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
+import dagger.multibindings.IntoMap;
+import dagger.multibindings.StringKey;
 
 /**
  * Dagger Module providing Communal-related functionality.
@@ -56,6 +70,20 @@ public interface CommunalModule {
         return view;
     }
 
+    /** */
+    @Provides
+    static Optional<CommunalSource.Observer> provideCommunalSourcePackageObserver(
+            Context context, @Main Resources resources) {
+        final String componentName = resources.getString(R.string.config_communalSourceComponent);
+
+        if (TextUtils.isEmpty(componentName)) {
+            return Optional.empty();
+        }
+
+        return Optional.of(new PackageObserver(context,
+                ComponentName.unflattenFromString(componentName).getPackageName()));
+    }
+
     /**
      * Provides LightSensorEventsDebounceAlgorithm as an instance to DebounceAlgorithm interface.
      * @param algorithm the instance of algorithm that is bound to the interface.
@@ -74,5 +102,37 @@ public interface CommunalModule {
     static Set<CommunalCondition> provideCommunalConditions(
             CommunalSettingCondition communalSettingCondition) {
         return new HashSet<>(Collections.singletonList(communalSettingCondition));
+    }
+
+    /**
+     * TODO(b/205638389): Remove when there is a base implementation of
+     * {@link CommunalSource.Connector}. Currently a place holder to allow a map to be present.
+     */
+    @Provides
+    @IntoMap
+    @Nullable
+    @StringKey("empty")
+    static CommunalSource.Connector provideEmptyCommunalSourceConnector() {
+        return null;
+    }
+
+    /** */
+    @Provides
+    static Optional<CommunalSource.Connector> provideCommunalSourceConnector(
+            @Main Resources resources,
+            Map<Class<?>, Provider<CommunalSource.Connector>> connectorCreators) {
+        final String className = resources.getString(R.string.config_communalSourceConnector);
+
+        if (TextUtils.isEmpty(className)) {
+            return Optional.empty();
+        }
+
+        try {
+            Class<?> clazz = Class.forName(className);
+            Provider<CommunalSource.Connector> provider = connectorCreators.get(clazz);
+            return provider != null ? Optional.of(provider.get()) : Optional.empty();
+        } catch (ClassNotFoundException e) {
+            return Optional.empty();
+        }
     }
 }
