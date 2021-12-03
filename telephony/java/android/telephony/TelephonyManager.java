@@ -1898,9 +1898,10 @@ public class TelephonyManager {
      * the IMEI/SV for GSM phones. Return null if the software version is
      * not available.
      * <p>
-     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}.
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_BASIC_PHONE_STATE})
     @Nullable
     public String getDeviceSoftwareVersion() {
         return getDeviceSoftwareVersion(getSlotIndex());
@@ -2962,7 +2963,9 @@ public class TelephonyManager {
      * when opportunistic network is providing cellular internet connection to the user.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * or {@link android.Manifest.permission#READ_BASIC_PHONE_STATE
+     * READ_BASIC_PHONE_STATE} or that the calling app has carrier privileges
+     * (see {@link #hasCarrierPrivileges}).
      *
      * @return the network type
      *
@@ -2985,7 +2988,9 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_NR
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_BASIC_PHONE_STATE})
     public @NetworkType int getDataNetworkType() {
         return getDataNetworkType(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
     }
@@ -3023,10 +3028,14 @@ public class TelephonyManager {
      * Returns the NETWORK_TYPE_xxxx for voice
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * or {@link android.Manifest.permission#READ_BASIC_PHONE_STATE
+     * READ_BASIC_PHONE_STATE} or that the calling app has carrier privileges
+     * (see {@link #hasCarrierPrivileges}).
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_BASIC_PHONE_STATE})
     public @NetworkType int getVoiceNetworkType() {
         return getVoiceNetworkType(getSubId());
     }
@@ -10188,7 +10197,9 @@ public class TelephonyManager {
      *
      * <p>Requires one of the following permissions:
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE},
-     * {@link android.Manifest.permission#MODIFY_PHONE_STATE}, or that the calling app has carrier
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE}, or
+     * {@link android.Manifest.permission#READ_BASIC_PHONE_STATE
+     * READ_BASIC_PHONE_STATE} or that the calling app has carrier
      * privileges (see {@link #hasCarrierPrivileges}).
      *
      * <p>Note that this does not take into account any data restrictions that may be present on the
@@ -10199,7 +10210,8 @@ public class TelephonyManager {
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_NETWORK_STATE,
             android.Manifest.permission.MODIFY_PHONE_STATE,
-            android.Manifest.permission.READ_PHONE_STATE})
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_BASIC_PHONE_STATE})
     public boolean isDataEnabled() {
         try {
             return isDataEnabledForReason(DATA_ENABLED_REASON_USER);
@@ -10218,14 +10230,17 @@ public class TelephonyManager {
      *
      * <p>Requires one of the following permissions:
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE},
-     * {@link android.Manifest.permission#READ_PHONE_STATE} or that the calling app
+     * {@link android.Manifest.permission#READ_PHONE_STATE} or
+     * {@link android.Manifest.permission#READ_BASIC_PHONE_STATE
+     * READ_BASIC_PHONE_STATE} or that the calling app
      * has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @return {@code true} if the data roaming is enabled on the subscription, otherwise return
      * {@code false}.
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_NETWORK_STATE,
-            android.Manifest.permission.READ_PHONE_STATE})
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_BASIC_PHONE_STATE})
     public boolean isDataRoamingEnabled() {
         boolean isDataRoamingEnabled = false;
         try {
@@ -12627,11 +12642,13 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} or
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} or
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     * {@link android.Manifest.permission#READ_BASIC_PHONE_STATE}
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_NETWORK_STATE,
             android.Manifest.permission.READ_PHONE_STATE,
-            android.Manifest.permission.MODIFY_PHONE_STATE
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+            android.Manifest.permission.READ_BASIC_PHONE_STATE
     })
     public boolean isDataEnabledForReason(@DataEnabledReason int reason) {
         return isDataEnabledForReason(getSubId(), reason);
@@ -12767,14 +12784,11 @@ public class TelephonyManager {
      *   <LI>And possibly others.</LI>
      * </UL>
      * @return {@code true} if the overall data connection is allowed; {@code false} if not.
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} or
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} or
-     * android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_NETWORK_STATE,
             android.Manifest.permission.READ_PHONE_STATE,
-            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE})
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_BASIC_PHONE_STATE})
     public boolean isDataConnectionAllowed() {
         boolean retVal = false;
         try {

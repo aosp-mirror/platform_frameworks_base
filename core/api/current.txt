@@ -123,6 +123,7 @@ package android {
     field public static final String POST_NOTIFICATIONS = "android.permission.POST_NOTIFICATIONS";
     field @Deprecated public static final String PROCESS_OUTGOING_CALLS = "android.permission.PROCESS_OUTGOING_CALLS";
     field public static final String QUERY_ALL_PACKAGES = "android.permission.QUERY_ALL_PACKAGES";
+    field public static final String READ_BASIC_PHONE_STATE = "android.permission.READ_BASIC_PHONE_STATE";
     field public static final String READ_CALENDAR = "android.permission.READ_CALENDAR";
     field public static final String READ_CALL_LOG = "android.permission.READ_CALL_LOG";
     field public static final String READ_CONTACTS = "android.permission.READ_CONTACTS";
@@ -43115,11 +43116,11 @@ package android.telephony {
     method public int getCarrierIdFromSimMccMnc();
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public android.telephony.CellLocation getCellLocation();
     method public int getDataActivity();
-    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int getDataNetworkType();
+    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_BASIC_PHONE_STATE}) public int getDataNetworkType();
     method public int getDataState();
     method @Deprecated @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getDeviceId();
     method @Deprecated @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getDeviceId(int);
-    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getDeviceSoftwareVersion();
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_BASIC_PHONE_STATE}) public String getDeviceSoftwareVersion();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.Map<java.lang.Integer,java.util.List<android.telephony.emergency.EmergencyNumber>> getEmergencyNumberList();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.Map<java.lang.Integer,java.util.List<android.telephony.emergency.EmergencyNumber>> getEmergencyNumberList(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<java.lang.String> getEquivalentHomePlmns();
@@ -43172,7 +43173,7 @@ package android.telephony {
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getVisualVoicemailPackageName();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getVoiceMailAlphaTag();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getVoiceMailNumber();
-    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int getVoiceNetworkType();
+    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_BASIC_PHONE_STATE}) public int getVoiceNetworkType();
     method @Nullable public android.net.Uri getVoicemailRingtoneUri(android.telecom.PhoneAccountHandle);
     method public boolean hasCarrierPrivileges();
     method public boolean hasIccCard();
@@ -43184,10 +43185,10 @@ package android.telephony {
     method @Deprecated public String iccTransmitApduLogicalChannel(int, int, int, int, int, int, String);
     method public boolean isConcurrentVoiceAndDataSupported();
     method public boolean isDataCapable();
-    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public boolean isDataConnectionAllowed();
-    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isDataEnabled();
-    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean isDataEnabledForReason(int);
-    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isDataRoamingEnabled();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_BASIC_PHONE_STATE}) public boolean isDataConnectionAllowed();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_BASIC_PHONE_STATE}) public boolean isDataEnabled();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.READ_BASIC_PHONE_STATE}) public boolean isDataEnabledForReason(int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_BASIC_PHONE_STATE}) public boolean isDataRoamingEnabled();
     method public boolean isEmergencyNumber(@NonNull String);
     method public boolean isHearingAidCompatibilitySupported();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public boolean isManualNetworkSelectionAllowed();
