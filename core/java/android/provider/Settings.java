@@ -5756,7 +5756,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.CONNECTIVITY_CHANGE_DELAY);
             MOVED_TO_GLOBAL.add(Settings.Global.CAPTIVE_PORTAL_DETECTION_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.CAPTIVE_PORTAL_SERVER);
-            MOVED_TO_GLOBAL.add(Settings.Global.NSD_ON);
             MOVED_TO_GLOBAL.add(Settings.Global.SET_INSTALL_LOCATION);
             MOVED_TO_GLOBAL.add(Settings.Global.DEFAULT_INSTALL_LOCATION);
             MOVED_TO_GLOBAL.add(Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY);
@@ -12631,13 +12630,6 @@ public final class Settings {
         @Readable
         public static final String MIN_DURATION_BETWEEN_RECOVERY_STEPS_IN_MS =
                 "min_duration_between_recovery_steps";
-        /**
-         * Whether network service discovery is enabled.
-         *
-         * @hide
-         */
-        @Readable
-        public static final String NSD_ON = "nsd_on";
 
         /**
          * Let user pick default install location.
