@@ -347,6 +347,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native boolean nativeEnableSensor(long ptr, int deviceId, int sensorType,
             int samplingPeriodUs, int maxBatchReportLatencyUs);
     private static native void nativeDisableSensor(long ptr, int deviceId, int sensorType);
+    private static native void nativeCancelCurrentTouch(long ptr);
 
     // Maximum number of milliseconds to wait for input event injection.
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
@@ -2507,6 +2508,16 @@ public class InputManagerService extends IInputManager.Stub
                 setLightStatesInternal(deviceId, nextSession.mLightIds, nextSession.mLightStates);
             }
         }
+    }
+
+    @Override
+    public void cancelCurrentTouch() {
+        if (!checkCallingPermission(android.Manifest.permission.MONITOR_INPUT,
+                "cancelCurrentTouch()")) {
+            throw new SecurityException("Requires MONITOR_INPUT permission");
+        }
+
+        nativeCancelCurrentTouch(mPtr);
     }
 
     @Override
