@@ -107,6 +107,26 @@ public final class TelephonyPermissions {
         }
     }
 
+
+    /**
+     * Check whether the caller (or self, if not processing an IPC) has non dangerous
+     * read phone state permission.
+     * @param context app context
+     * @param message detail message
+     * @return true if permission is granted, else false
+     */
+    public static boolean checkCallingOrSelfReadNonDangerousPhoneStateNoThrow(
+            Context context, String message) {
+        try {
+            context.enforcePermission(
+                    Manifest.permission.READ_BASIC_PHONE_STATE,
+                    Binder.getCallingPid(), Binder.getCallingUid(), message);
+            return true;
+        } catch (SecurityException se) {
+            return false;
+        }
+    }
+
     /**
      * Check whether the app with the given pid/uid can read phone state.
      *
