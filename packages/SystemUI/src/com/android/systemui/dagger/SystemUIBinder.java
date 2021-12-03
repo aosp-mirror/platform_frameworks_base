@@ -23,6 +23,7 @@ import com.android.systemui.SliceBroadcastRelayHandler;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.accessibility.WindowMagnification;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.communal.CommunalManagerUpdater;
 import com.android.systemui.dreams.DreamOverlayRegistrant;
 import com.android.systemui.dreams.appwidgets.AppWidgetOverlayPrimer;
 import com.android.systemui.globalactions.GlobalActionsComponent;
@@ -204,4 +205,11 @@ public abstract class SystemUIBinder {
     @ClassKey(AppWidgetOverlayPrimer.class)
     public abstract CoreStartable bindAppWidgetOverlayPrimer(
             AppWidgetOverlayPrimer appWidgetOverlayPrimer);
+
+    /** Inject into CommunalManagerUpdater. */
+    @Binds
+    @IntoMap
+    @ClassKey(CommunalManagerUpdater.class)
+    public abstract CoreStartable bindCommunalManagerUpdater(
+            CommunalManagerUpdater communalManagerUpdater);
 }

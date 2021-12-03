@@ -489,8 +489,8 @@ public class ZOrderingTests extends WindowTestsBase {
                 createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         final WindowState splitWindow2 =
                 createAppWindow(splitScreenTask2, ACTIVITY_TYPE_STANDARD, "splitWindow2");
-        splitScreenTask1.setAdjacentTaskFragment(splitScreenTask2);
-        splitScreenTask2.setAdjacentTaskFragment(splitScreenTask1);
+        splitScreenTask1.setAdjacentTaskFragment(splitScreenTask2, true /* moveTogether */);
+        splitScreenTask2.setAdjacentTaskFragment(splitScreenTask1, true /* moveTogether */);
 
         final Task aboveTask =
                 createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
@@ -528,8 +528,8 @@ public class ZOrderingTests extends WindowTestsBase {
                 createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         final WindowState splitWindow2 =
                 createAppWindow(splitScreenTask2, ACTIVITY_TYPE_STANDARD, "splitWindow2");
-        splitScreenTask1.setAdjacentTaskFragment(splitScreenTask2);
-        splitScreenTask2.setAdjacentTaskFragment(splitScreenTask1);
+        splitScreenTask1.setAdjacentTaskFragment(splitScreenTask2, true /* moveTogether */);
+        splitScreenTask2.setAdjacentTaskFragment(splitScreenTask1, true /* moveTogether */);
 
         mDisplayContent.assignChildLayers(mTransaction);
 

@@ -51,6 +51,8 @@ interface IUsageStatsManager {
     void setAppStandbyBucket(String packageName, int bucket, int userId);
     ParceledListSlice getAppStandbyBuckets(String callingPackage, int userId);
     void setAppStandbyBuckets(in ParceledListSlice appBuckets, int userId);
+    void setEstimatedLaunchTime(String packageName, long estimatedLaunchTime, int userId);
+    void setEstimatedLaunchTimes(in ParceledListSlice appLaunchTimes, int userId);
     void registerAppUsageObserver(int observerId, in String[] packages, long timeLimitMs,
             in PendingIntent callback, String callingPackage);
     void unregisterAppUsageObserver(int observerId, String callingPackage);

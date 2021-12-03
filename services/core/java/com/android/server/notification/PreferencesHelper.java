@@ -557,7 +557,7 @@ public class PreferencesHelper implements RankingConfig {
             out.attributeBoolean(null, ATT_HIDE_SILENT, mHideSilentStatusBarIcons);
             out.endTag(null, TAG_STATUS_ICONS);
         }
-        ArrayMap<Pair<Integer, String>, Boolean> notifPermissions = new ArrayMap<>();
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> notifPermissions = new ArrayMap<>();
         if (mPermissionHelper.isMigrationEnabled() && forBackup) {
             notifPermissions = mPermissionHelper.getNotificationPermissionValues(userId);
         }
@@ -573,9 +573,8 @@ public class PreferencesHelper implements RankingConfig {
                 out.attribute(null, ATT_NAME, r.pkg);
                 if (!notifPermissions.isEmpty()) {
                     Pair<Integer, String> app = new Pair(r.uid, r.pkg);
-                    out.attributeInt(null, ATT_IMPORTANCE, notifPermissions.get(app)
-                            ? IMPORTANCE_DEFAULT
-                            : IMPORTANCE_NONE);
+                    out.attributeInt(null, ATT_IMPORTANCE,
+                            notifPermissions.get(app).first ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE);
                     notifPermissions.remove(app);
                 } else {
                     if (r.importance != DEFAULT_IMPORTANCE) {
@@ -642,7 +641,7 @@ public class PreferencesHelper implements RankingConfig {
                 out.startTag(null, TAG_PACKAGE);
                 out.attribute(null, ATT_NAME, app.second);
                 out.attributeInt(null, ATT_IMPORTANCE,
-                        notifPermissions.get(app) ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE);
+                        notifPermissions.get(app).first ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE);
                 out.endTag(null, TAG_PACKAGE);
             }
         }
@@ -1932,7 +1931,7 @@ public class PreferencesHelper implements RankingConfig {
 
     public void dump(PrintWriter pw, String prefix,
             @NonNull NotificationManagerService.DumpFilter filter,
-            ArrayMap<Pair<Integer, String>, Boolean> pkgPermissions) {
+            ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> pkgPermissions) {
         pw.print(prefix);
         pw.println("per-package config version: " + XML_VERSION);
 
@@ -1946,7 +1945,7 @@ public class PreferencesHelper implements RankingConfig {
 
     public void dump(ProtoOutputStream proto,
             @NonNull NotificationManagerService.DumpFilter filter,
-            ArrayMap<Pair<Integer, String>, Boolean> pkgPermissions) {
+            ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> pkgPermissions) {
         synchronized (mPackagePreferences) {
             dumpPackagePreferencesLocked(proto, RankingHelperProto.RECORDS, filter,
                     mPackagePreferences, pkgPermissions);
@@ -1958,7 +1957,7 @@ public class PreferencesHelper implements RankingConfig {
     private void dumpPackagePreferencesLocked(PrintWriter pw, String prefix,
             @NonNull NotificationManagerService.DumpFilter filter,
             ArrayMap<String, PackagePreferences> packagePreferences,
-            ArrayMap<Pair<Integer, String>, Boolean> packagePermissions) {
+            ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> packagePermissions) {
         // Used for tracking which package preferences we've seen already for notification
         // permission reasons; after handling packages with local preferences, we'll want to dump
         // the ones with notification permissions set but not local prefs.
@@ -1987,8 +1986,10 @@ public class PreferencesHelper implements RankingConfig {
                     if (packagePermissions != null && pkgsWithPermissionsToHandle.contains(key)) {
                         pw.print(" importance=");
                         pw.print(NotificationListenerService.Ranking.importanceToString(
-                                packagePermissions.get(key)
+                                packagePermissions.get(key).first
                                         ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE));
+                        pw.print(" userSet=");
+                        pw.print(packagePermissions.get(key).second);
                         pkgsWithPermissionsToHandle.remove(key);
                     }
                 }
@@ -2042,7 +2043,10 @@ public class PreferencesHelper implements RankingConfig {
                     pw.print(')');
                     pw.print(" importance=");
                     pw.print(NotificationListenerService.Ranking.importanceToString(
-                            packagePermissions.get(p) ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE));
+                            packagePermissions.get(p).first
+                                    ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE));
+                    pw.print(" userSet=");
+                    pw.print(packagePermissions.get(p).second);
                     pw.println();
                 }
             }
@@ -2052,7 +2056,7 @@ public class PreferencesHelper implements RankingConfig {
     private void dumpPackagePreferencesLocked(ProtoOutputStream proto, long fieldId,
             @NonNull NotificationManagerService.DumpFilter filter,
             ArrayMap<String, PackagePreferences> packagePreferences,
-            ArrayMap<Pair<Integer, String>, Boolean> packagePermissions) {
+            ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> packagePermissions) {
         Set<Pair<Integer, String>> pkgsWithPermissionsToHandle = null;
         if (packagePermissions != null) {
             pkgsWithPermissionsToHandle = packagePermissions.keySet();
@@ -2071,7 +2075,8 @@ public class PreferencesHelper implements RankingConfig {
                     Pair<Integer, String> key = new Pair<>(r.uid, r.pkg);
                     if (packagePermissions != null && pkgsWithPermissionsToHandle.contains(key)) {
                         proto.write(RankingHelperProto.RecordProto.IMPORTANCE,
-                                packagePermissions.get(key) ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE);
+                                packagePermissions.get(key).first
+                                        ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE);
                         pkgsWithPermissionsToHandle.remove(key);
                     }
                 } else {
@@ -2099,7 +2104,8 @@ public class PreferencesHelper implements RankingConfig {
                     proto.write(RankingHelperProto.RecordProto.PACKAGE, p.second);
                     proto.write(RankingHelperProto.RecordProto.UID, p.first);
                     proto.write(RankingHelperProto.RecordProto.IMPORTANCE,
-                            packagePermissions.get(p) ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE);
+                            packagePermissions.get(p).first
+                                    ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE);
                     proto.end(fToken);
                 }
             }
@@ -2110,7 +2116,7 @@ public class PreferencesHelper implements RankingConfig {
      * Fills out {@link PackageNotificationPreferences} proto and wraps it in a {@link StatsEvent}.
      */
     public void pullPackagePreferencesStats(List<StatsEvent> events,
-            ArrayMap<Pair<Integer, String>, Boolean> pkgPermissions) {
+            ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> pkgPermissions) {
         Set<Pair<Integer, String>> pkgsWithPermissionsToHandle = null;
         if (pkgPermissions != null) {
             pkgsWithPermissionsToHandle = pkgPermissions.keySet();
@@ -2134,7 +2140,8 @@ public class PreferencesHelper implements RankingConfig {
                     int importance = IMPORTANCE_NONE;
                     Pair<Integer, String> key = new Pair<>(r.uid, r.pkg);
                     if (pkgPermissions != null && pkgsWithPermissionsToHandle.contains(key)) {
-                        importance = pkgPermissions.get(key) ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE;
+                        importance = pkgPermissions.get(key).first
+                                ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE;
                         pkgsWithPermissionsToHandle.remove(key);
                     }
                     event.writeInt(importance);
@@ -2158,7 +2165,7 @@ public class PreferencesHelper implements RankingConfig {
                         .setAtomId(PACKAGE_NOTIFICATION_PREFERENCES);
                 event.writeInt(p.first);
                 event.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
-                event.writeInt(pkgPermissions.get(p) ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE);
+                event.writeInt(pkgPermissions.get(p).first ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE);
 
                 // fill out the rest of the fields with default values so as not to confuse the
                 // builder
@@ -2236,7 +2243,7 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public JSONObject dumpJson(NotificationManagerService.DumpFilter filter,
-            ArrayMap<Pair<Integer, String>, Boolean> pkgPermissions) {
+            ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> pkgPermissions) {
         JSONObject ranking = new JSONObject();
         JSONArray PackagePreferencess = new JSONArray();
         try {
@@ -2266,7 +2273,7 @@ public class PreferencesHelper implements RankingConfig {
                                     && pkgsWithPermissionsToHandle.contains(key)) {
                                 PackagePreferences.put("importance",
                                         NotificationListenerService.Ranking.importanceToString(
-                                                pkgPermissions.get(key)
+                                                pkgPermissions.get(key).first
                                                         ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE));
                                 pkgsWithPermissionsToHandle.remove(key);
                             }
@@ -2316,7 +2323,7 @@ public class PreferencesHelper implements RankingConfig {
                         PackagePreferences.put("packageName", p.second);
                         PackagePreferences.put("importance",
                                 NotificationListenerService.Ranking.importanceToString(
-                                        pkgPermissions.get(p)
+                                        pkgPermissions.get(p).first
                                                 ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE));
                     } catch (JSONException e) {
                         // pass
@@ -2344,7 +2351,7 @@ public class PreferencesHelper implements RankingConfig {
      * @return
      */
     public JSONArray dumpBansJson(NotificationManagerService.DumpFilter filter,
-            ArrayMap<Pair<Integer, String>, Boolean> pkgPermissions) {
+            ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> pkgPermissions) {
         JSONArray bans = new JSONArray();
         Map<Integer, String> packageBans = mPermissionHelper.isMigrationEnabled()
                 ? getPermissionBasedPackageBans(pkgPermissions) : getPackageBans();
@@ -2383,11 +2390,11 @@ public class PreferencesHelper implements RankingConfig {
     // Same functionality as getPackageBans by extracting the set of packages from the provided
     // map that are disallowed from sending notifications.
     protected Map<Integer, String> getPermissionBasedPackageBans(
-            ArrayMap<Pair<Integer, String>, Boolean> pkgPermissions) {
+            ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> pkgPermissions) {
         ArrayMap<Integer, String> packageBans = new ArrayMap<>();
         if (pkgPermissions != null) {
             for (Pair<Integer, String> p : pkgPermissions.keySet()) {
-                if (!pkgPermissions.get(p)) {
+                if (!pkgPermissions.get(p).first) {
                     packageBans.put(p.first, p.second);
                 }
             }

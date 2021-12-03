@@ -53,11 +53,43 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /** Controls all the system settings related to vibration. */
 final class VibrationSettings {
     private static final String TAG = "VibrationSettings";
+
+    /**
+     * Set of usages allowed for vibrations from background processes.
+     *
+     * <p>Some examples are notification, ringtone or alarm vibrations, that are allowed to vibrate
+     * unexpectedly as they are meant to grab the user's attention. Hardware feedback and physical
+     * emulation are also supported, as the trigger process might still be in the background when
+     * the user interaction wakes the device.
+     */
+    private static final Set<Integer> BACKGROUND_PROCESS_USAGE_ALLOWLIST = new HashSet<>(
+            Arrays.asList(
+                    USAGE_RINGTONE,
+                    USAGE_ALARM,
+                    USAGE_NOTIFICATION,
+                    USAGE_COMMUNICATION_REQUEST,
+                    USAGE_HARDWARE_FEEDBACK,
+                    USAGE_PHYSICAL_EMULATION));
+
+    /**
+     * Set of usages allowed for vibrations in battery saver mode (low power).
+     *
+     * <p>Some examples are ringtone or alarm vibrations, that have high priority and should vibrate
+     * even when the device is saving battery.
+     */
+    private static final Set<Integer> BATTERY_SAVER_USAGE_ALLOWLIST = new HashSet<>(
+            Arrays.asList(
+                    USAGE_RINGTONE,
+                    USAGE_ALARM,
+                    USAGE_COMMUNICATION_REQUEST));
 
     /** Listener for changes on vibration settings. */
     interface OnVibratorSettingsChanged {
@@ -94,8 +126,6 @@ final class VibrationSettings {
     @GuardedBy("mLock")
     private boolean mApplyRampingRinger;
     @GuardedBy("mLock")
-    private int mZenMode;
-    @GuardedBy("mLock")
     private int mHapticFeedbackIntensity;
     @GuardedBy("mLock")
     private int mHardwareFeedbackIntensity;
@@ -104,7 +134,7 @@ final class VibrationSettings {
     @GuardedBy("mLock")
     private int mRingIntensity;
     @GuardedBy("mLock")
-    private boolean mLowPowerMode;
+    private boolean mBatterySaverMode;
 
     VibrationSettings(Context context, Handler handler) {
         this(context, handler,
@@ -172,8 +202,8 @@ final class VibrationSettings {
                     public void onLowPowerModeChanged(PowerSaveState result) {
                         boolean shouldNotifyListeners;
                         synchronized (mLock) {
-                            shouldNotifyListeners = result.batterySaverEnabled != mLowPowerMode;
-                            mLowPowerMode = result.batterySaverEnabled;
+                            shouldNotifyListeners = result.batterySaverEnabled != mBatterySaverMode;
+                            mBatterySaverMode = result.batterySaverEnabled;
                         }
                         if (shouldNotifyListeners) {
                             notifyListeners();
@@ -187,7 +217,6 @@ final class VibrationSettings {
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES));
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_WHEN_RINGING));
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.APPLY_RAMPING_RINGER));
-        registerSettingsObserver(Settings.Global.getUriFor(Settings.Global.ZEN_MODE));
         registerSettingsObserver(
                 Settings.System.getUriFor(Settings.System.HAPTIC_FEEDBACK_INTENSITY));
         registerSettingsObserver(
@@ -299,71 +328,78 @@ final class VibrationSettings {
         return mFallbackEffects.get(effectId);
     }
 
-    /**
-     * Return {@code true} if the device should vibrate for current ringer mode.
-     *
-     * <p>This checks the current {@link AudioManager#getRingerModeInternal()} against user settings
-     * for ringtone usage only. All other usages are allowed independently of ringer mode.
-     */
-    public boolean shouldVibrateForRingerMode(int usageHint) {
-        if (usageHint != USAGE_RINGTONE) {
-            return true;
-        }
-        synchronized (mLock) {
-            if (mAudioManager == null) {
-                return false;
-            }
-            int ringerMode = mAudioManager.getRingerModeInternal();
-            if (mVibrateWhenRinging) {
-                return ringerMode != AudioManager.RINGER_MODE_SILENT;
-            } else if (mApplyRampingRinger) {
-                return ringerMode != AudioManager.RINGER_MODE_SILENT;
-            } else {
-                return ringerMode == AudioManager.RINGER_MODE_VIBRATE;
-            }
-        }
-    }
-
-    /**
-     * Returns {@code true} if this vibration is allowed for given {@code uid}.
-     *
-     * <p>This checks if the user is aware of this foreground process, or if the vibration usage is
-     * allowed to play in the background (i.e. it's a notification, ringtone or alarm vibration).
-     */
-    public boolean shouldVibrateForUid(int uid, int usageHint) {
-        return mUidObserver.isUidForeground(uid) || isClassAlarm(usageHint);
-    }
-
-    /**
-     * Returns {@code true} if this vibration is allowed for current power mode state.
-     *
-     * <p>This checks if the device is in battery saver mode, in which case only alarm, ringtone and
-     * {@link VibrationAttributes#USAGE_COMMUNICATION_REQUEST} usages are allowed to vibrate.
-     */
-    public boolean shouldVibrateForPowerMode(int usageHint) {
-        synchronized (mLock) {
-            return !mLowPowerMode || usageHint == USAGE_RINGTONE || usageHint == USAGE_ALARM
-                    || usageHint == USAGE_COMMUNICATION_REQUEST;
-        }
-    }
-
     /** Return {@code true} if input devices should vibrate instead of this device. */
     public boolean shouldVibrateInputDevices() {
         return mVibrateInputDevices;
     }
 
-    /** Return {@code true} if setting for {@link Settings.Global#ZEN_MODE} is not OFF. */
-    public boolean isInZenMode() {
-        return mZenMode != Settings.Global.ZEN_MODE_OFF;
+    /**
+     * Check if given vibration should be ignored by the service.
+     *
+     * @return One of Vibration.Status.IGNORED_* values if the vibration should be ignored,
+     * null otherwise.
+     */
+    @Nullable
+    public Vibration.Status shouldIgnoreVibration(int uid, VibrationAttributes attrs) {
+        final int usage = attrs.getUsage();
+        synchronized (mLock) {
+            if (!mUidObserver.isUidForeground(uid)
+                    && !BACKGROUND_PROCESS_USAGE_ALLOWLIST.contains(usage)) {
+                return Vibration.Status.IGNORED_BACKGROUND;
+            }
+
+            if (mBatterySaverMode && !BATTERY_SAVER_USAGE_ALLOWLIST.contains(usage)) {
+                return Vibration.Status.IGNORED_FOR_POWER;
+            }
+
+            int intensity = getCurrentIntensity(usage);
+            if (intensity == Vibrator.VIBRATION_INTENSITY_OFF) {
+                return Vibration.Status.IGNORED_FOR_SETTINGS;
+            }
+
+            if (!shouldVibrateForRingerModeLocked(usage)) {
+                return Vibration.Status.IGNORED_FOR_RINGER_MODE;
+            }
+        }
+        return null;
     }
 
-    private static boolean isClassAlarm(int usageHint) {
-        return (usageHint & VibrationAttributes.USAGE_CLASS_MASK)
-                == VibrationAttributes.USAGE_CLASS_ALARM;
+    /**
+     * Return {@code true} if the device should vibrate for current ringer mode.
+     *
+     * <p>This checks the current {@link AudioManager#getRingerModeInternal()} against user settings
+     * for touch and ringtone usages only. All other usages are allowed by this method.
+     */
+    @GuardedBy("mLock")
+    private boolean shouldVibrateForRingerModeLocked(int usageHint) {
+        // If audio manager was not loaded yet then assume most restrictive mode.
+        int ringerMode = (mAudioManager == null)
+                ? AudioManager.RINGER_MODE_SILENT
+                : mAudioManager.getRingerModeInternal();
+
+        switch (usageHint) {
+            case USAGE_TOUCH:
+                // Touch feedback disabled when phone is on silent mode.
+                return ringerMode != AudioManager.RINGER_MODE_SILENT;
+            case USAGE_RINGTONE:
+                switch (ringerMode) {
+                    case AudioManager.RINGER_MODE_SILENT:
+                        return false;
+                    case AudioManager.RINGER_MODE_VIBRATE:
+                        return true;
+                    default:
+                        // Ringtone vibrations also depend on 2 other settings:
+                        return mVibrateWhenRinging || mApplyRampingRinger;
+                }
+            default:
+                // All other usages ignore ringer mode settings.
+                return true;
+        }
     }
 
     /** Updates all vibration settings and triggers registered listeners. */
-    public void updateSettings() {
+    @VisibleForTesting
+    void updateSettings() {
         synchronized (mLock) {
             mVibrateWhenRinging = getSystemSetting(Settings.System.VIBRATE_WHEN_RINGING, 0) != 0;
             mApplyRampingRinger = getSystemSetting(Settings.System.APPLY_RAMPING_RINGER, 0) != 0;
@@ -378,7 +414,6 @@ final class VibrationSettings {
             mRingIntensity = getSystemSetting(Settings.System.RING_VIBRATION_INTENSITY,
                     getDefaultIntensity(USAGE_RINGTONE));
             mVibrateInputDevices = getSystemSetting(Settings.System.VIBRATE_INPUT_DEVICES, 0) > 0;
-            mZenMode = getGlobalSetting(Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
         }
         notifyListeners();
     }
@@ -399,31 +434,33 @@ final class VibrationSettings {
 
     @Override
     public String toString() {
-        return "VibrationSettings{"
-                + "mVibrateInputDevices=" + mVibrateInputDevices
-                + ", mVibrateWhenRinging=" + mVibrateWhenRinging
-                + ", mApplyRampingRinger=" + mApplyRampingRinger
-                + ", mLowPowerMode=" + mLowPowerMode
-                + ", mZenMode=" + Settings.Global.zenModeToString(mZenMode)
-                + ", mProcStatesCache=" + mUidObserver.mProcStatesCache
-                + ", mHapticChannelMaxVibrationAmplitude=" + getHapticChannelMaxVibrationAmplitude()
-                + ", mRampStepDuration=" + mRampStepDuration
-                + ", mRampDownDuration=" + mRampDownDuration
-                + ", mHardwareHapticFeedbackIntensity="
-                + intensityToString(getCurrentIntensity(USAGE_HARDWARE_FEEDBACK))
-                + ", mHapticFeedbackIntensity="
-                + intensityToString(getCurrentIntensity(USAGE_TOUCH))
-                + ", mHapticFeedbackDefaultIntensity="
-                + intensityToString(getDefaultIntensity(USAGE_TOUCH))
-                + ", mNotificationIntensity="
-                + intensityToString(getCurrentIntensity(USAGE_NOTIFICATION))
-                + ", mNotificationDefaultIntensity="
-                + intensityToString(getDefaultIntensity(USAGE_NOTIFICATION))
-                + ", mRingIntensity="
-                + intensityToString(getCurrentIntensity(USAGE_RINGTONE))
-                + ", mRingDefaultIntensity="
-                + intensityToString(getDefaultIntensity(USAGE_RINGTONE))
-                + '}';
+        synchronized (mLock) {
+            return "VibrationSettings{"
+                    + "mVibrateInputDevices=" + mVibrateInputDevices
+                    + ", mVibrateWhenRinging=" + mVibrateWhenRinging
+                    + ", mApplyRampingRinger=" + mApplyRampingRinger
+                    + ", mBatterySaverMode=" + mBatterySaverMode
+                    + ", mProcStatesCache=" + mUidObserver.mProcStatesCache
+                    + ", mHapticChannelMaxVibrationAmplitude="
+                    + getHapticChannelMaxVibrationAmplitude()
+                    + ", mRampStepDuration=" + mRampStepDuration
+                    + ", mRampDownDuration=" + mRampDownDuration
+                    + ", mHardwareHapticFeedbackIntensity="
+                    + intensityToString(getCurrentIntensity(USAGE_HARDWARE_FEEDBACK))
+                    + ", mHapticFeedbackIntensity="
+                    + intensityToString(getCurrentIntensity(USAGE_TOUCH))
+                    + ", mHapticFeedbackDefaultIntensity="
+                    + intensityToString(getDefaultIntensity(USAGE_TOUCH))
+                    + ", mNotificationIntensity="
+                    + intensityToString(getCurrentIntensity(USAGE_NOTIFICATION))
+                    + ", mNotificationDefaultIntensity="
+                    + intensityToString(getDefaultIntensity(USAGE_NOTIFICATION))
+                    + ", mRingIntensity="
+                    + intensityToString(getCurrentIntensity(USAGE_RINGTONE))
+                    + ", mRingDefaultIntensity="
+                    + intensityToString(getDefaultIntensity(USAGE_RINGTONE))
+                    + '}';
+        }
     }
 
     /** Write current settings into given {@link ProtoOutputStream}. */
@@ -478,10 +515,6 @@ final class VibrationSettings {
     private int getSystemSetting(String settingName, int defaultValue) {
         return Settings.System.getIntForUser(mContext.getContentResolver(),
                 settingName, defaultValue, UserHandle.USER_CURRENT);
-    }
-
-    private int getGlobalSetting(String settingName, int defaultValue) {
-        return Settings.Global.getInt(mContext.getContentResolver(), settingName, defaultValue);
     }
 
     private void registerSettingsObserver(Uri settingUri) {

@@ -17,9 +17,12 @@
 package android.media;
 
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
+import android.hardware.DataSpace;
+import android.hardware.DataSpace.NamedDataSpace;
 import android.hardware.HardwareBuffer;
 
 import java.nio.ByteBuffer;
@@ -278,6 +281,31 @@ public abstract class Image implements AutoCloseable {
     public void setTimestamp(long timestamp) {
         throwISEIfImageIsInvalid();
         return;
+    }
+
+    private @NamedDataSpace long mDataSpace = DataSpace.DATASPACE_UNKNOWN;
+
+    /**
+     * Get the dataspace associated with this frame.
+     */
+    @SuppressLint("MethodNameUnits")
+    public @NamedDataSpace long getDataSpace() {
+        throwISEIfImageIsInvalid();
+        return mDataSpace;
+    }
+
+    /**
+     * Set the dataspace associated with this frame.
+     * <p>
+     * If dataspace for an image is not set, dataspace value depends on {@link android.view.Surface}
+     * that is provided in the {@link ImageWriter} constructor.
+     * </p>
+     *
+     * @param dataSpace The Dataspace to be set for this image
+     */
+    public void setDataSpace(@NamedDataSpace long dataSpace) {
+        throwISEIfImageIsInvalid();
+        mDataSpace = dataSpace;
     }
 
     private Rect mCropRect;

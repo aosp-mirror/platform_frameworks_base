@@ -37,7 +37,6 @@ public class NavBarFadeAnimationController extends FadeAnimationController{
     private static final Interpolator FADE_OUT_INTERPOLATOR =
             new PathInterpolator(0.2f, 0f, 1f, 1f);
 
-    private DisplayContent mDisplayContent;
     private final WindowState mNavigationBar;
     private Animation mFadeInAnimation;
     private Animation mFadeOutAnimation;
@@ -47,7 +46,6 @@ public class NavBarFadeAnimationController extends FadeAnimationController{
 
     public NavBarFadeAnimationController(DisplayContent displayContent) {
         super(displayContent);
-        mDisplayContent = displayContent;
         mNavigationBar = displayContent.getDisplayPolicy().getNavigationBar();
         mFadeInAnimation = new AlphaAnimation(0f, 1f);
         mFadeInAnimation.setDuration(FADE_IN_DURATION);
@@ -69,16 +67,10 @@ public class NavBarFadeAnimationController extends FadeAnimationController{
     }
 
     @Override
-    protected FadeAnimationAdapter createAdapter(boolean show, WindowToken windowToken) {
-        final Animation animation = show ? getFadeInAnimation() : getFadeOutAnimation();
-        if (animation == null) {
-            return null;
-        }
-
-        final LocalAnimationAdapter.AnimationSpec windowAnimationSpec =
-                createAnimationSpec(animation);
+    protected FadeAnimationAdapter createAdapter(LocalAnimationAdapter.AnimationSpec animationSpec,
+            boolean show, WindowToken windowToken) {
         return new NavFadeAnimationAdapter(
-                windowAnimationSpec, windowToken.getSurfaceAnimationRunner(), show, windowToken,
+                animationSpec, windowToken.getSurfaceAnimationRunner(), show, windowToken,
                 show ? mFadeInParent : mFadeOutParent);
     }
 

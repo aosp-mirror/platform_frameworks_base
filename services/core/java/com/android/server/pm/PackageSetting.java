@@ -32,12 +32,6 @@ import android.content.pm.SigningInfo;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.overlay.OverlayPaths;
-
-import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.pkg.PackageUserState;
-import com.android.server.pm.pkg.PackageUserStateImpl;
-import com.android.server.pm.pkg.PackageUserStateInternal;
-import com.android.server.pm.pkg.SuspendParams;
 import android.os.PersistableBundle;
 import android.service.pm.PackageProto;
 import android.util.ArrayMap;
@@ -53,7 +47,12 @@ import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.pkg.AndroidPackageApi;
 import com.android.server.pm.pkg.PackageState;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUnserialized;
+import com.android.server.pm.pkg.PackageUserState;
+import com.android.server.pm.pkg.PackageUserStateImpl;
+import com.android.server.pm.pkg.PackageUserStateInternal;
+import com.android.server.pm.pkg.SuspendParams;
 import com.android.server.utils.SnapshotCache;
 
 import libcore.util.EmptyArray;
@@ -92,6 +91,12 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     @Deprecated
     @Nullable
     private Set<String> mOldCodePaths;
+
+    @Nullable
+    private String[] usesSdkLibraries;
+
+    @Nullable
+    private long[] usesSdkLibrariesVersionsMajor;
 
     @Nullable
     private String[] usesStaticLibraries;
@@ -208,12 +213,16 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
             String legacyNativeLibraryPath, String primaryCpuAbi,
             String secondaryCpuAbi, String cpuAbiOverride,
             long longVersionCode, int pkgFlags, int pkgPrivateFlags,
-            int sharedUserId, String[] usesStaticLibraries,
-            long[] usesStaticLibrariesVersions, Map<String, Set<String>> mimeGroups,
+            int sharedUserId,
+            String[] usesSdkLibraries, long[] usesSdkLibrariesVersionsMajor,
+            String[] usesStaticLibraries, long[] usesStaticLibrariesVersions,
+            Map<String, Set<String>> mimeGroups,
             @NonNull UUID domainSetId) {
         super(pkgFlags, pkgPrivateFlags);
         this.mName = name;
         this.mRealName = realName;
+        this.usesSdkLibraries = usesSdkLibraries;
+        this.usesSdkLibrariesVersionsMajor = usesSdkLibrariesVersionsMajor;
         this.usesStaticLibraries = usesStaticLibraries;
         this.usesStaticLibrariesVersions = usesStaticLibrariesVersions;
         this.mPath = path;
@@ -616,6 +625,13 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         updateAvailable = other.updateAvailable;
         forceQueryableOverride = other.forceQueryableOverride;
         mDomainSetId = other.mDomainSetId;
+
+        usesSdkLibraries = other.usesSdkLibraries != null
+                ? Arrays.copyOf(other.usesSdkLibraries,
+                other.usesSdkLibraries.length) : null;
+        usesSdkLibrariesVersionsMajor = other.usesSdkLibrariesVersionsMajor != null
+                ? Arrays.copyOf(other.usesSdkLibrariesVersionsMajor,
+                other.usesSdkLibrariesVersionsMajor.length) : null;
 
         usesStaticLibraries = other.usesStaticLibraries != null
                 ? Arrays.copyOf(other.usesStaticLibraries,
@@ -1225,6 +1241,19 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     @NonNull
     @Override
+    public String[] getUsesSdkLibraries() {
+        return usesSdkLibraries == null ? EmptyArray.STRING : usesSdkLibraries;
+    }
+
+    @NonNull
+    @Override
+    public long[] getUsesSdkLibrariesVersionsMajor() {
+        return usesSdkLibrariesVersionsMajor == null ? EmptyArray.LONG
+                : usesSdkLibrariesVersionsMajor;
+    }
+
+    @NonNull
+    @Override
     public String[] getUsesStaticLibraries() {
         return usesStaticLibraries == null ? EmptyArray.STRING : usesStaticLibraries;
     }
@@ -1296,6 +1325,18 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     public PackageSetting setOldCodePaths(Set<String> oldCodePaths) {
         mOldCodePaths = oldCodePaths;
+        onChanged();
+        return this;
+    }
+
+    public PackageSetting setUsesSdkLibraries(String[] usesSdkLibraries) {
+        this.usesSdkLibraries = usesSdkLibraries;
+        onChanged();
+        return this;
+    }
+
+    public PackageSetting setUsesSdkLibrariesVersionsMajor(long[] usesSdkLibrariesVersions) {
+        this.usesSdkLibrariesVersionsMajor = usesSdkLibrariesVersions;
         onChanged();
         return this;
     }

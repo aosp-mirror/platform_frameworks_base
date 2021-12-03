@@ -1081,6 +1081,10 @@ public abstract class ApexManager {
             } catch (RemoteException e) {
                 throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
                         "apexservice not available");
+            } catch (PackageManagerException e) {
+                // Catching it in order not to fall back to Exception which rethrows the
+                // PackageManagerException with a common error code.
+                throw e;
             } catch (Exception e) {
                 // TODO(b/187864524): is INSTALL_FAILED_INTERNAL_ERROR is the right error code here?
                 throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,

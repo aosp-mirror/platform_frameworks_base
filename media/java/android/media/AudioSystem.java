@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.bluetooth.BluetoothCodecConfig;
+import android.bluetooth.BluetoothLeAudioCodecConfig;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -236,6 +237,9 @@ public class AudioSystem
     public static final int AUDIO_FORMAT_APTX_HD        = 0x21000000;
     /** @hide */
     public static final int AUDIO_FORMAT_LDAC           = 0x23000000;
+    /** @hide */
+    public static final int AUDIO_FORMAT_LC3            = 0x2B000000;
+
 
     /** @hide */
     @IntDef(flag = false, prefix = "AUDIO_FORMAT_", value = {
@@ -245,10 +249,25 @@ public class AudioSystem
             AUDIO_FORMAT_SBC,
             AUDIO_FORMAT_APTX,
             AUDIO_FORMAT_APTX_HD,
-            AUDIO_FORMAT_LDAC }
+            AUDIO_FORMAT_LDAC}
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioFormatNativeEnumForBtCodec {}
+
+    /** @hide */
+    @IntDef(flag = false, prefix = "AUDIO_FORMAT_", value = {
+        AUDIO_FORMAT_LC3}
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioFormatNativeEnumForBtLeAudioCodec {}
+
+    /** @hide */
+    @IntDef(flag = false, prefix = "DEVICE_", value = {
+            DEVICE_OUT_BLUETOOTH_A2DP,
+            DEVICE_OUT_BLE_HEADSET}
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DeviceType {}
 
     /**
      * @hide
@@ -266,6 +285,21 @@ public class AudioSystem
                 Log.e(TAG, "Unknown audio format 0x" + Integer.toHexString(audioFormat)
                         + " for conversion to BT codec");
                 return BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID;
+        }
+    }
+
+    /**
+     * @hide
+     * Convert audio format enum values to Bluetooth LE audio codec values
+     */
+    public static int audioFormatToBluetoothLeAudioSourceCodec(
+            @AudioFormatNativeEnumForBtLeAudioCodec int audioFormat) {
+        switch (audioFormat) {
+            case AUDIO_FORMAT_LC3: return BluetoothLeAudioCodecConfig.SOURCE_CODEC_TYPE_LC3;
+            default:
+                Log.e(TAG, "Unknown audio format 0x" + Integer.toHexString(audioFormat)
+                        + " for conversion to BT LE audio codec");
+                return BluetoothLeAudioCodecConfig.SOURCE_CODEC_TYPE_INVALID;
         }
     }
 
@@ -1761,10 +1795,10 @@ public class AudioSystem
 
     /**
      * @hide
-     * Returns a list of audio formats (codec) supported on the A2DP offload path.
+     * Returns a list of audio formats (codec) supported on the A2DP and LE audio offload path.
      */
-    public static native int getHwOffloadEncodingFormatsSupportedForA2DP(
-            ArrayList<Integer> formatList);
+    public static native int getHwOffloadFormatsSupportedForBluetoothMedia(
+            @DeviceType int deviceType, ArrayList<Integer> formatList);
 
     /** @hide */
     public static native int setSurroundFormatEnabled(int audioFormat, boolean enabled);

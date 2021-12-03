@@ -384,7 +384,16 @@ base::expected<uint32_t, NullOrIOError> LoadedPackage::FindEntryByName(
         return base::unexpected(IOError::PAGES_MISSING);
       }
 
-      auto offset = dtohl(entry_offset_ptr.value());
+      uint32_t offset;
+      uint16_t res_idx;
+      if (type->flags & ResTable_type::FLAG_SPARSE) {
+        auto sparse_entry = entry_offset_ptr.convert<ResTable_sparseTypeEntry>();
+        offset = dtohs(sparse_entry->offset) * 4u;
+        res_idx  = dtohs(sparse_entry->idx);
+      } else {
+        offset = dtohl(entry_offset_ptr.value());
+        res_idx = entry_idx;
+      }
       if (offset != ResTable_type::NO_ENTRY) {
         auto entry = type.offset(dtohl(type->entriesStart) + offset).convert<ResTable_entry>();
         if (!entry) {
@@ -394,7 +403,7 @@ base::expected<uint32_t, NullOrIOError> LoadedPackage::FindEntryByName(
         if (dtohl(entry->key.index) == static_cast<uint32_t>(*key_idx)) {
           // The package ID will be overridden by the caller (due to runtime assignment of package
           // IDs for shared libraries).
-          return make_resid(0x00, *type_idx + type_id_offset_ + 1, entry_idx);
+          return make_resid(0x00, *type_idx + type_id_offset_ + 1, res_idx);
         }
       }
     }

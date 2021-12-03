@@ -179,6 +179,10 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
 
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
+    private String sdkLibName;
+    private int sdkLibVersionMajor;
+    @Nullable
+    @DataClass.ParcelWith(ForInternedString.class)
     private String staticSharedLibName;
     private long staticSharedLibVersion;
     @NonNull
@@ -203,9 +207,16 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     private List<String> usesStaticLibraries = emptyList();
     @Nullable
     private long[] usesStaticLibrariesVersions;
-
     @Nullable
     private String[][] usesStaticLibrariesCertDigests;
+
+    @NonNull
+    @DataClass.ParcelWith(ForInternedStringList.class)
+    private List<String> usesSdkLibraries = emptyList();
+    @Nullable
+    private long[] usesSdkLibrariesVersionsMajor;
+    @Nullable
+    private String[][] usesSdkLibrariesCertDigests;
 
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
@@ -518,6 +529,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         private static final long REQUEST_FOREGROUND_SERVICE_EXEMPTION = 1L << 46;
         private static final long ATTRIBUTIONS_ARE_USER_VISIBLE = 1L << 47;
         private static final long RESET_ENABLED_SETTINGS_ON_APP_DATA_CLEARED = 1L << 48;
+        private static final long SDK_LIBRARY = 1L << 49;
     }
 
     private ParsingPackageImpl setBoolean(@Booleans.Values long flag, boolean value) {
@@ -828,21 +840,24 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     }
 
     @Override
-    public ParsingPackageImpl addUsesStaticLibrary(String libraryName) {
+    public ParsingPackageImpl addUsesSdkLibrary(String libraryName, long versionMajor,
+            String[] certSha256Digests) {
+        this.usesSdkLibraries = CollectionUtils.add(this.usesSdkLibraries,
+                TextUtils.safeIntern(libraryName));
+        this.usesSdkLibrariesVersionsMajor = ArrayUtils.appendLong(
+                this.usesSdkLibrariesVersionsMajor, versionMajor, true);
+        this.usesSdkLibrariesCertDigests = ArrayUtils.appendElement(String[].class,
+                this.usesSdkLibrariesCertDigests, certSha256Digests, true);
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl addUsesStaticLibrary(String libraryName, long version,
+            String[] certSha256Digests) {
         this.usesStaticLibraries = CollectionUtils.add(this.usesStaticLibraries,
                 TextUtils.safeIntern(libraryName));
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl addUsesStaticLibraryVersion(long version) {
         this.usesStaticLibrariesVersions = ArrayUtils.appendLong(this.usesStaticLibrariesVersions,
                 version, true);
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl addUsesStaticLibraryCertDigests(String[] certSha256Digests) {
         this.usesStaticLibrariesCertDigests = ArrayUtils.appendElement(String[].class,
                 this.usesStaticLibrariesCertDigests, certSha256Digests, true);
         return this;
@@ -1136,6 +1151,8 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         dest.writeString(this.overlayCategory);
         dest.writeInt(this.overlayPriority);
         sForInternedStringValueMap.parcel(this.overlayables, dest, flags);
+        sForInternedString.parcel(this.sdkLibName, dest, flags);
+        dest.writeInt(this.sdkLibVersionMajor);
         sForInternedString.parcel(this.staticSharedLibName, dest, flags);
         dest.writeLong(this.staticSharedLibVersion);
         sForInternedStringList.parcel(this.libraryNames, dest, flags);
@@ -1143,15 +1160,26 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         sForInternedStringList.parcel(this.usesOptionalLibraries, dest, flags);
         sForInternedStringList.parcel(this.usesNativeLibraries, dest, flags);
         sForInternedStringList.parcel(this.usesOptionalNativeLibraries, dest, flags);
+
         sForInternedStringList.parcel(this.usesStaticLibraries, dest, flags);
         dest.writeLongArray(this.usesStaticLibrariesVersions);
-
         if (this.usesStaticLibrariesCertDigests == null) {
             dest.writeInt(-1);
         } else {
             dest.writeInt(this.usesStaticLibrariesCertDigests.length);
             for (int index = 0; index < this.usesStaticLibrariesCertDigests.length; index++) {
                 dest.writeStringArray(this.usesStaticLibrariesCertDigests[index]);
+            }
+        }
+
+        sForInternedStringList.parcel(this.usesSdkLibraries, dest, flags);
+        dest.writeLongArray(this.usesSdkLibrariesVersionsMajor);
+        if (this.usesSdkLibrariesCertDigests == null) {
+            dest.writeInt(-1);
+        } else {
+            dest.writeInt(this.usesSdkLibrariesCertDigests.length);
+            for (int index = 0; index < this.usesSdkLibrariesCertDigests.length; index++) {
+                dest.writeStringArray(this.usesSdkLibrariesCertDigests[index]);
             }
         }
 
@@ -1259,6 +1287,8 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         this.overlayCategory = in.readString();
         this.overlayPriority = in.readInt();
         this.overlayables = sForInternedStringValueMap.unparcel(in);
+        this.sdkLibName = sForInternedString.unparcel(in);
+        this.sdkLibVersionMajor = in.readInt();
         this.staticSharedLibName = sForInternedString.unparcel(in);
         this.staticSharedLibVersion = in.readLong();
         this.libraryNames = sForInternedStringList.unparcel(in);
@@ -1266,14 +1296,29 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         this.usesOptionalLibraries = sForInternedStringList.unparcel(in);
         this.usesNativeLibraries = sForInternedStringList.unparcel(in);
         this.usesOptionalNativeLibraries = sForInternedStringList.unparcel(in);
+
         this.usesStaticLibraries = sForInternedStringList.unparcel(in);
         this.usesStaticLibrariesVersions = in.createLongArray();
+        {
+            int digestsSize = in.readInt();
+            if (digestsSize >= 0) {
+                this.usesStaticLibrariesCertDigests = new String[digestsSize][];
+                for (int index = 0; index < digestsSize; index++) {
+                    this.usesStaticLibrariesCertDigests[index] = sForInternedStringArray.unparcel(
+                            in);
+                }
+            }
+        }
 
-        int digestsSize = in.readInt();
-        if (digestsSize >= 0) {
-            this.usesStaticLibrariesCertDigests = new String[digestsSize][];
-            for (int index = 0; index < digestsSize; index++) {
-                this.usesStaticLibrariesCertDigests[index] = sForInternedStringArray.unparcel(in);
+        this.usesSdkLibraries = sForInternedStringList.unparcel(in);
+        this.usesSdkLibrariesVersionsMajor = in.createLongArray();
+        {
+            int digestsSize = in.readInt();
+            if (digestsSize >= 0) {
+                this.usesSdkLibrariesCertDigests = new String[digestsSize][];
+                for (int index = 0; index < digestsSize; index++) {
+                    this.usesSdkLibrariesCertDigests[index] = sForInternedStringArray.unparcel(in);
+                }
             }
         }
 
@@ -1479,6 +1524,17 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
 
     @Nullable
     @Override
+    public String getSdkLibName() {
+        return sdkLibName;
+    }
+
+    @Override
+    public int getSdkLibVersionMajor() {
+        return sdkLibVersionMajor;
+    }
+
+    @Nullable
+    @Override
     public String getStaticSharedLibName() {
         return staticSharedLibName;
     }
@@ -1535,6 +1591,18 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     public String[][] getUsesStaticLibrariesCertDigests() {
         return usesStaticLibrariesCertDigests;
     }
+
+    @NonNull
+    @Override
+    public List<String> getUsesSdkLibraries() { return usesSdkLibraries; }
+
+    @Nullable
+    @Override
+    public long[] getUsesSdkLibrariesVersionsMajor() { return usesSdkLibrariesVersionsMajor; }
+
+    @Nullable
+    @Override
+    public String[][] getUsesSdkLibrariesCertDigests() { return usesSdkLibrariesCertDigests; }
 
     @Nullable
     @Override
@@ -2083,6 +2151,11 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     }
 
     @Override
+    public boolean isSdkLibrary() {
+        return getBoolean(Booleans.SDK_LIBRARY);
+    }
+
+    @Override
     public boolean isOverlay() {
         return getBoolean(Booleans.OVERLAY);
     }
@@ -2555,6 +2628,23 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     public ParsingPackageImpl setResizeableActivity(@Nullable Boolean value) {
         resizeableActivity = value;
         return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setSdkLibName(String sdkLibName) {
+        this.sdkLibName = TextUtils.safeIntern(sdkLibName);
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setSdkLibVersionMajor(int sdkLibVersionMajor) {
+        this.sdkLibVersionMajor = sdkLibVersionMajor;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setSdkLibrary(boolean value) {
+        return setBoolean(Booleans.SDK_LIBRARY, value);
     }
 
     @Override

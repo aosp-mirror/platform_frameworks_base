@@ -48,13 +48,13 @@ public class CommunalStateControllerTest extends SysuiTestCase {
     @Test
     public void testDefaultCommunalViewShowingState() {
         // The state controller should report the communal view as not showing by default.
-        final CommunalStateController stateController = new CommunalStateController(getContext());
+        final CommunalStateController stateController = new CommunalStateController();
         assertThat(stateController.getCommunalViewShowing()).isFalse();
     }
 
     @Test
     public void testNotifyCommunalSurfaceShow() {
-        final CommunalStateController stateController = new CommunalStateController(getContext());
+        final CommunalStateController stateController = new CommunalStateController();
         stateController.addCallback(mCallback);
 
         // Verify setting communal view to showing propagates to callback.
@@ -72,7 +72,7 @@ public class CommunalStateControllerTest extends SysuiTestCase {
 
     @Test
     public void testCallbackRegistration() {
-        final CommunalStateController stateController = new CommunalStateController(getContext());
+        final CommunalStateController stateController = new CommunalStateController();
         stateController.addCallback(mCallback);
 
         // Verify setting communal view to showing propagates to callback.

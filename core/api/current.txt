@@ -3264,9 +3264,9 @@ package android.accessibilityservice {
     method public float getScale();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.accessibilityservice.MagnificationConfig> CREATOR;
-    field public static final int DEFAULT_MODE = 0; // 0x0
-    field public static final int FULLSCREEN_MODE = 1; // 0x1
-    field public static final int WINDOW_MODE = 2; // 0x2
+    field public static final int MAGNIFICATION_MODE_DEFAULT = 0; // 0x0
+    field public static final int MAGNIFICATION_MODE_FULLSCREEN = 1; // 0x1
+    field public static final int MAGNIFICATION_MODE_WINDOW = 2; // 0x2
   }
 
   public static final class MagnificationConfig.Builder {
@@ -3275,7 +3275,7 @@ package android.accessibilityservice {
     method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setCenterX(float);
     method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setCenterY(float);
     method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setMode(int);
-    method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setScale(float);
+    method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setScale(@FloatRange(from=1.0f, to=8.0f) float);
   }
 
   public final class TouchInteractionController {
@@ -9561,6 +9561,20 @@ package android.bluetooth {
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_LE_AUDIO_CONNECTION_STATE_CHANGED = "android.bluetooth.action.LE_AUDIO_CONNECTION_STATE_CHANGED";
   }
 
+  public final class BluetoothLeAudioCodecConfig {
+    method @NonNull public String getCodecName();
+    method public int getCodecType();
+    method public static int getMaxCodecType();
+    field public static final int SOURCE_CODEC_TYPE_INVALID = 1000000; // 0xf4240
+    field public static final int SOURCE_CODEC_TYPE_LC3 = 0; // 0x0
+  }
+
+  public static final class BluetoothLeAudioCodecConfig.Builder {
+    ctor public BluetoothLeAudioCodecConfig.Builder();
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig build();
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setCodecType(int);
+  }
+
   public final class BluetoothManager {
     method public android.bluetooth.BluetoothAdapter getAdapter();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices(int);
@@ -9967,6 +9981,9 @@ package android.companion {
 
   public final class AssociationRequest implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public String getDeviceProfile();
+    method @Nullable public CharSequence getDisplayName();
+    method public boolean isSingleDevice();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.AssociationRequest> CREATOR;
     field public static final String DEVICE_PROFILE_WATCH = "android.app.role.COMPANION_DEVICE_WATCH";
@@ -13223,6 +13240,7 @@ package android.content.pm {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.SharedLibraryInfo> CREATOR;
     field public static final int TYPE_BUILTIN = 0; // 0x0
     field public static final int TYPE_DYNAMIC = 1; // 0x1
+    field public static final int TYPE_SDK = 3; // 0x3
     field public static final int TYPE_STATIC = 2; // 0x2
     field public static final int VERSION_UNDEFINED = -1; // 0xffffffff
   }
@@ -16442,6 +16460,7 @@ package android.graphics {
     ctor public SurfaceTexture(boolean);
     method public void attachToGLContext(int);
     method public void detachFromGLContext();
+    method public long getDataSpace();
     method public long getTimestamp();
     method public void getTransformMatrix(float[]);
     method public boolean isReleased();
@@ -17657,6 +17676,52 @@ package android.hardware {
     ctor public ConsumerIrManager.CarrierFrequencyRange(int, int);
     method public int getMaxFrequency();
     method public int getMinFrequency();
+  }
+
+  public final class DataSpace {
+    method public static long getRange(long);
+    method public static long getStandard(long);
+    method public static long getTransfer(long);
+    method public static long pack(long, long, long);
+    field public static final long DATASPACE_ADOBE_RGB = 151715840L; // 0x90b0000L
+    field public static final long DATASPACE_BT2020 = 147193856L; // 0x8c60000L
+    field public static final long DATASPACE_BT2020_PQ = 163971072L; // 0x9c60000L
+    field public static final long DATASPACE_BT601_525 = 281280512L; // 0x10c40000L
+    field public static final long DATASPACE_BT601_625 = 281149440L; // 0x10c20000L
+    field public static final long DATASPACE_BT709 = 281083904L; // 0x10c10000L
+    field public static final long DATASPACE_DCI_P3 = 155844608L; // 0x94a0000L
+    field public static final long DATASPACE_DISPLAY_P3 = 143261696L; // 0x88a0000L
+    field public static final long DATASPACE_JFIF = 146931712L; // 0x8c20000L
+    field public static final long DATASPACE_SCRGB = 411107328L; // 0x18810000L
+    field public static final long DATASPACE_SCRGB_LINEAR = 406913024L; // 0x18410000L
+    field public static final long DATASPACE_SRGB = 142671872L; // 0x8810000L
+    field public static final long DATASPACE_SRGB_LINEAR = 138477568L; // 0x8410000L
+    field public static final long DATASPACE_UNKNOWN = 0L; // 0x0L
+    field public static final long RANGE_EXTENDED = 402653184L; // 0x18000000L
+    field public static final long RANGE_FULL = 134217728L; // 0x8000000L
+    field public static final long RANGE_LIMITED = 268435456L; // 0x10000000L
+    field public static final long RANGE_UNSPECIFIED = 0L; // 0x0L
+    field public static final long STANDARD_ADOBE_RGB = 720896L; // 0xb0000L
+    field public static final long STANDARD_BT2020 = 393216L; // 0x60000L
+    field public static final long STANDARD_BT2020_CONSTANT_LUMINANCE = 458752L; // 0x70000L
+    field public static final long STANDARD_BT470M = 524288L; // 0x80000L
+    field public static final long STANDARD_BT601_525 = 262144L; // 0x40000L
+    field public static final long STANDARD_BT601_525_UNADJUSTED = 327680L; // 0x50000L
+    field public static final long STANDARD_BT601_625 = 131072L; // 0x20000L
+    field public static final long STANDARD_BT601_625_UNADJUSTED = 196608L; // 0x30000L
+    field public static final long STANDARD_BT709 = 65536L; // 0x10000L
+    field public static final long STANDARD_DCI_P3 = 655360L; // 0xa0000L
+    field public static final long STANDARD_FILM = 589824L; // 0x90000L
+    field public static final long STANDARD_UNSPECIFIED = 0L; // 0x0L
+    field public static final long TRANSFER_GAMMA2_2 = 16777216L; // 0x1000000L
+    field public static final long TRANSFER_GAMMA2_6 = 20971520L; // 0x1400000L
+    field public static final long TRANSFER_GAMMA2_8 = 25165824L; // 0x1800000L
+    field public static final long TRANSFER_HLG = 33554432L; // 0x2000000L
+    field public static final long TRANSFER_LINEAR = 4194304L; // 0x400000L
+    field public static final long TRANSFER_SMPTE_170M = 12582912L; // 0xc00000L
+    field public static final long TRANSFER_SRGB = 8388608L; // 0x800000L
+    field public static final long TRANSFER_ST2084 = 29360128L; // 0x1c00000L
+    field public static final long TRANSFER_UNSPECIFIED = 0L; // 0x0L
   }
 
   public class GeomagneticField {
@@ -21597,6 +21662,7 @@ package android.media {
   public abstract class Image implements java.lang.AutoCloseable {
     method public abstract void close();
     method public android.graphics.Rect getCropRect();
+    method public long getDataSpace();
     method public abstract int getFormat();
     method @Nullable public android.hardware.HardwareBuffer getHardwareBuffer();
     method public abstract int getHeight();
@@ -21604,6 +21670,7 @@ package android.media {
     method public abstract long getTimestamp();
     method public abstract int getWidth();
     method public void setCropRect(android.graphics.Rect);
+    method public void setDataSpace(long);
     method public void setTimestamp(long);
   }
 
@@ -31789,7 +31856,7 @@ package android.os {
     method @Nullable public <T> T[] readParcelableArray(@Nullable ClassLoader, @NonNull Class<T>);
     method @Deprecated @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
     method @Nullable public <T> android.os.Parcelable.Creator<T> readParcelableCreator(@Nullable ClassLoader, @NonNull Class<T>);
-    method @NonNull public <T extends android.os.Parcelable> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader);
+    method @Deprecated @NonNull public <T extends android.os.Parcelable> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader);
     method @NonNull public <T> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader, @NonNull Class<T>);
     method @Nullable public android.os.PersistableBundle readPersistableBundle();
     method @Nullable public android.os.PersistableBundle readPersistableBundle(@Nullable ClassLoader);
@@ -43119,7 +43186,7 @@ package android.telephony {
     method public boolean isDataCapable();
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public boolean isDataConnectionAllowed();
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isDataEnabled();
-    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isDataEnabledForReason(int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean isDataEnabledForReason(int);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isDataRoamingEnabled();
     method public boolean isEmergencyNumber(@NonNull String);
     method public boolean isHearingAidCompatibilitySupported();

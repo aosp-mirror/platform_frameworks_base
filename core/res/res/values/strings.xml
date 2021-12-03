@@ -3505,20 +3505,35 @@
 
     <!-- [CHAR LIMIT=40] Title of dialog shown to confirm device going to sleep if the power button
     is pressed during fingerprint enrollment. -->
-    <string name="fp_enrollment_powerbutton_intent_title">Turn off screen?</string>
+    <string name="fp_power_button_enrollment_title">Continue setup?</string>
 
     <!-- [CHAR LIMIT=NONE] Message of dialog shown to confirm device going to sleep if the power
     button is pressed during fingerprint enrollment. -->
-    <string name="fp_enrollment_powerbutton_intent_message">While setting up your fingerprint, you
-        pressed the Power button.\n\nThis usually turns off your screen.</string>
+    <string name="fp_power_button_enrollment_message">You pressed the power button — this usually turns off the screen.\n\nTry tapping lightly while setting up your fingerprint.</string>
 
     <!-- [CHAR LIMIT=20] Positive button of dialog shown to confirm device going to sleep if the
     power button is pressed during fingerprint enrollment. -->
-    <string name="fp_enrollment_powerbutton_intent_positive_button">Turn off</string>
+    <string name="fp_power_button_enrollment_positive_button">Turn off screen</string>
 
     <!-- [CHAR LIMIT=20] Negative button of dialog shown to confirm device going to sleep if the
     power button is pressed during fingerprint enrollment. -->
-    <string name="fp_enrollment_powerbutton_intent_negative_button">Cancel</string>
+    <string name="fp_power_button_enrollment_negative_button">Continue setup</string>
+
+    <!-- [CHAR LIMIT=40] Title of dialog shown to confirm device going to sleep if the power button
+    is pressed during biometric prompt when a side fingerprint sensor is present. -->
+    <string name="fp_power_button_bp_title">Continue verifying your fingerprint?</string>
+
+    <!-- [CHAR LIMIT=NONE] Message of dialog shown to confirm device going to sleep if the power
+    button is pressed during biometric prompt when a side fingerprint sensor is present. -->
+    <string name="fp_power_button_bp_message">You pressed the power button — this usually turns off the screen.\n\nTry tapping lightly to verify your fingerprint.</string>
+
+    <!-- [CHAR LIMIT=20] Positive button of dialog shown to confirm device going to sleep if the
+    power button is pressed during biometric prompt when a side fingerprint sensor is present. -->
+    <string name="fp_power_button_bp_positive_button">Turn off screen</string>
+
+    <!-- [CHAR LIMIT=20] Negative button of dialog shown to confirm device going to sleep if the
+    power button is pressed during biometric prompt when a side fingerprint sensor is present. -->
+    <string name="fp_power_button_bp_negative_button">Continue</string>
 
     <!-- Notification text to tell the user that a heavy-weight application is running. -->
     <string name="heavy_weight_notification"><xliff:g id="app">%1$s</xliff:g> running</string>

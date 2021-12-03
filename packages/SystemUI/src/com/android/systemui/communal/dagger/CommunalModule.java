@@ -20,15 +20,23 @@ import android.content.Context;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.android.systemui.communal.conditions.CommunalCondition;
+import com.android.systemui.communal.conditions.CommunalSettingCondition;
+import com.android.systemui.communal.conditions.CommunalTrustedNetworkCondition;
 import com.android.systemui.idle.AmbientLightModeMonitor;
 import com.android.systemui.idle.LightSensorEventsDebounceAlgorithm;
 import com.android.systemui.idle.dagger.IdleViewComponent;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.inject.Named;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ElementsIntoSet;
 
 /**
  * Dagger Module providing Communal-related functionality.
@@ -39,6 +47,7 @@ import dagger.Provides;
 })
 public interface CommunalModule {
     String IDLE_VIEW = "idle_view";
+    String COMMUNAL_CONDITIONS = "communal_conditions";
 
     /** */
     @Provides
@@ -56,4 +65,17 @@ public interface CommunalModule {
     @Binds
     AmbientLightModeMonitor.DebounceAlgorithm ambientLightDebounceAlgorithm(
             LightSensorEventsDebounceAlgorithm algorithm);
+
+    /**
+     * Provides a set of conditions that need to be fulfilled in order for Communal Mode to display.
+     */
+    @Provides
+    @ElementsIntoSet
+    @Named(COMMUNAL_CONDITIONS)
+    static Set<CommunalCondition> provideCommunalConditions(
+            CommunalSettingCondition communalSettingCondition,
+            CommunalTrustedNetworkCondition communalTrustedNetworkCondition) {
+        return new HashSet<>(
+                Arrays.asList(communalSettingCondition, communalTrustedNetworkCondition));
+    }
 }

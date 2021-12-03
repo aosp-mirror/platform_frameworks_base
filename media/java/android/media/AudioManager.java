@@ -33,6 +33,7 @@ import android.app.PendingIntent;
 import android.app.compat.CompatChanges;
 import android.bluetooth.BluetoothCodecConfig;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothLeAudioCodecConfig;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -6768,30 +6769,56 @@ public class AudioManager {
 
     /**
      * Returns a list of audio formats that corresponds to encoding formats
-     * supported on offload path for A2DP playback.
+     * supported on offload path for A2DP and LE audio playback.
      *
+     * @param deviceType Indicates the target device type {@link AudioSystem.DeviceType}
      * @return a list of {@link BluetoothCodecConfig} objects containing encoding formats
-     * supported for offload A2DP playback
+     * supported for offload A2DP playback or a list of {@link BluetoothLeAudioCodecConfig}
+     * objects containing encoding formats supported for offload LE Audio playback
      * @hide
      */
-    public List<BluetoothCodecConfig> getHwOffloadEncodingFormatsSupportedForA2DP() {
+    public List<?> getHwOffloadFormatsSupportedForBluetoothMedia(
+            @AudioSystem.DeviceType int deviceType) {
         ArrayList<Integer> formatsList = new ArrayList<Integer>();
-        ArrayList<BluetoothCodecConfig> codecConfigList = new ArrayList<BluetoothCodecConfig>();
+        ArrayList<BluetoothCodecConfig> a2dpCodecConfigList = new ArrayList<BluetoothCodecConfig>();
+        ArrayList<BluetoothLeAudioCodecConfig> leAudioCodecConfigList =
+                new ArrayList<BluetoothLeAudioCodecConfig>();
 
-        int status = AudioSystem.getHwOffloadEncodingFormatsSupportedForA2DP(formatsList);
+        if (deviceType != AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP
+                && deviceType != AudioSystem.DEVICE_OUT_BLE_HEADSET) {
+            throw new IllegalArgumentException(
+                    "Illegal devicetype for the getHwOffloadFormatsSupportedForBluetoothMedia");
+        }
+
+        int status = AudioSystem.getHwOffloadFormatsSupportedForBluetoothMedia(deviceType,
+                                                                                formatsList);
         if (status != AudioManager.SUCCESS) {
-            Log.e(TAG, "getHwOffloadEncodingFormatsSupportedForA2DP failed:" + status);
-            return codecConfigList;
+            Log.e(TAG, "getHwOffloadFormatsSupportedForBluetoothMedia for deviceType "
+                    + deviceType + " failed:" + status);
+            return a2dpCodecConfigList;
         }
 
-        for (Integer format : formatsList) {
-            int btSourceCodec = AudioSystem.audioFormatToBluetoothSourceCodec(format);
-            if (btSourceCodec
-                    != BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
-                codecConfigList.add(new BluetoothCodecConfig(btSourceCodec));
+        if (deviceType == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
+            for (Integer format : formatsList) {
+                int btSourceCodec = AudioSystem.audioFormatToBluetoothSourceCodec(format);
+                if (btSourceCodec != BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
+                    a2dpCodecConfigList.add(new BluetoothCodecConfig(btSourceCodec));
+                }
             }
+            return a2dpCodecConfigList;
+        } else if (deviceType == AudioSystem.DEVICE_OUT_BLE_HEADSET) {
+            for (Integer format : formatsList) {
+                int btLeAudioCodec = AudioSystem.audioFormatToBluetoothLeAudioSourceCodec(format);
+                if (btLeAudioCodec != BluetoothLeAudioCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
+                    leAudioCodecConfigList.add(new BluetoothLeAudioCodecConfig.Builder()
+                                                .setCodecType(btLeAudioCodec)
+                                                .build());
+                }
+            }
+            return leAudioCodecConfigList;
         }
-        return codecConfigList;
+        Log.e(TAG, "Input deviceType " + deviceType + " doesn't support.");
+        return a2dpCodecConfigList;
     }
 
     // Since we need to calculate the changes since THE LAST NOTIFICATION, and not since the

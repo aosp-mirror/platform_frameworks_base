@@ -634,7 +634,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mUseLegacySplit = mContext.getResources().getBoolean(R.bool.config_useLegacySplit);
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             // Make the stages adjacent to each other so they occlude what's behind them.
-            wct.setAdjacentRoots(mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token);
+            wct.setAdjacentRoots(mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token,
+                    true /* moveTogether */);
 
             // Only sets side stage as launch-adjacent-flag-root when the device is not using legacy
             // split to prevent new split behavior confusing users.

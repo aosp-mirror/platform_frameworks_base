@@ -498,6 +498,71 @@ public class PackageManagerSettingsTests {
     }
 
     @Test
+    public void testWriteReadUsesSdkLibraries() {
+        final Settings settingsUnderTest = makeSettings();
+        final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
+        ps1.setAppId(Process.FIRST_APPLICATION_UID);
+        ps1.setPkg(((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed())
+                .setUid(ps1.getAppId())
+                .setSystem(true)
+                .hideAsFinal());
+        final PackageSetting ps2 = createPackageSetting(PACKAGE_NAME_2);
+        ps2.setAppId(Process.FIRST_APPLICATION_UID + 1);
+        ps2.setPkg(((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME_2).hideAsParsed())
+                .setUid(ps2.getAppId())
+                .hideAsFinal());
+
+        ps1.setUsesSdkLibraries(new String[] { "com.example.sdk.one" });
+        ps1.setUsesSdkLibrariesVersionsMajor(new long[] { 12 });
+        ps1.setFlags(ps1.getFlags() | ApplicationInfo.FLAG_SYSTEM);
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
+        assertThat(settingsUnderTest.disableSystemPackageLPw(PACKAGE_NAME_1, false), is(true));
+
+        ps2.setUsesSdkLibraries(new String[] { "com.example.sdk.two" });
+        ps2.setUsesSdkLibrariesVersionsMajor(new long[] { 34 });
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
+
+        settingsUnderTest.writeLPr();
+
+        settingsUnderTest.mPackages.clear();
+        settingsUnderTest.mDisabledSysPackages.clear();
+
+        assertThat(settingsUnderTest.readLPw(createFakeUsers()), is(true));
+
+        PackageSetting readPs1 = settingsUnderTest.getPackageLPr(PACKAGE_NAME_1);
+        PackageSetting readPs2 = settingsUnderTest.getPackageLPr(PACKAGE_NAME_2);
+
+        Truth.assertThat(readPs1).isNotNull();
+        Truth.assertThat(readPs1.getUsesSdkLibraries()).isNotNull();
+        Truth.assertThat(readPs1.getUsesSdkLibrariesVersionsMajor()).isNotNull();
+        Truth.assertThat(readPs2).isNotNull();
+        Truth.assertThat(readPs2.getUsesSdkLibraries()).isNotNull();
+        Truth.assertThat(readPs2.getUsesSdkLibrariesVersionsMajor()).isNotNull();
+
+        List<Long> ps1VersionsAsList = new ArrayList<>();
+        for (long version : ps1.getUsesSdkLibrariesVersionsMajor()) {
+            ps1VersionsAsList.add(version);
+        }
+
+        List<Long> ps2VersionsAsList = new ArrayList<>();
+        for (long version : ps2.getUsesSdkLibrariesVersionsMajor()) {
+            ps2VersionsAsList.add(version);
+        }
+
+        Truth.assertThat(readPs1.getUsesSdkLibraries()).asList()
+                .containsExactlyElementsIn(ps1.getUsesSdkLibraries()).inOrder();
+
+        Truth.assertThat(readPs1.getUsesSdkLibrariesVersionsMajor()).asList()
+                .containsExactlyElementsIn(ps1VersionsAsList).inOrder();
+
+        Truth.assertThat(readPs2.getUsesSdkLibraries()).asList()
+                .containsExactlyElementsIn(ps2.getUsesSdkLibraries()).inOrder();
+
+        Truth.assertThat(readPs2.getUsesSdkLibrariesVersionsMajor()).asList()
+                .containsExactlyElementsIn(ps2VersionsAsList).inOrder();
+    }
+
+    @Test
     public void testPackageRestrictionsDistractionFlagsDefault() {
         final PackageSetting defaultSetting = createPackageSetting(PACKAGE_NAME_1);
         assertThat(defaultSetting.getDistractionFlags(0), is(PackageManager.RESTRICTION_NONE));
@@ -571,6 +636,8 @@ public class PackageManagerSettingsTests {
                 ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_HAS_CODE,
                 ApplicationInfo.PRIVATE_FLAG_PRIVILEGED|ApplicationInfo.PRIVATE_FLAG_HIDDEN,
                 0,
+                null /*usesSdkLibraries*/,
+                null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
@@ -593,6 +660,8 @@ public class PackageManagerSettingsTests {
                 ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_HAS_CODE,
                 ApplicationInfo.PRIVATE_FLAG_PRIVILEGED|ApplicationInfo.PRIVATE_FLAG_HIDDEN,
                 0,
+                null /*usesSdkLibraries*/,
+                null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
@@ -609,6 +678,8 @@ public class PackageManagerSettingsTests {
                 0 /*pkgFlags*/,
                 0 /*pkgPrivateFlags*/,
                 0,
+                null /*usesSdkLibraries*/,
+                null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
@@ -637,6 +708,8 @@ public class PackageManagerSettingsTests {
                 0 /*pkgFlags*/,
                 0 /*pkgPrivateFlags*/,
                 UserManagerService.getInstance(),
+                null /*usesSdkLibraries*/,
+                null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
@@ -671,6 +744,8 @@ public class PackageManagerSettingsTests {
                 ApplicationInfo.FLAG_SYSTEM /*pkgFlags*/,
                 ApplicationInfo.PRIVATE_FLAG_PRIVILEGED /*pkgPrivateFlags*/,
                 UserManagerService.getInstance(),
+                null /*usesSdkLibraries*/,
+                null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
@@ -708,6 +783,8 @@ public class PackageManagerSettingsTests {
                     0 /*pkgFlags*/,
                     0 /*pkgPrivateFlags*/,
                     UserManagerService.getInstance(),
+                    null /*usesSdkLibraries*/,
+                    null /*usesSdkLibrariesVersions*/,
                     null /*usesStaticLibraries*/,
                     null /*usesStaticLibrariesVersions*/,
                     null /*mimeGroups*/,
@@ -741,6 +818,8 @@ public class PackageManagerSettingsTests {
                 false /*instantApp*/,
                 false /*virtualPreload*/,
                 UserManagerService.getInstance(),
+                null /*usesSdkLibraries*/,
+                null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
@@ -780,6 +859,8 @@ public class PackageManagerSettingsTests {
                 false /*instantApp*/,
                 false /*virtualPreload*/,
                 UserManagerService.getInstance(),
+                null /*usesSdkLibraries*/,
+                null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
@@ -822,6 +903,8 @@ public class PackageManagerSettingsTests {
                 false /*instantApp*/,
                 false /*virtualPreload*/,
                 UserManagerService.getInstance(),
+                null /*usesSdkLibraries*/,
+                null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
@@ -864,6 +947,8 @@ public class PackageManagerSettingsTests {
                 false /*instantApp*/,
                 false /*virtualPreload*/,
                 UserManagerService.getInstance(),
+                null /*usesSdkLibraries*/,
+                null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
@@ -969,6 +1054,25 @@ public class PackageManagerSettingsTests {
         packageSetting.setPkgStateLibraryFiles(newUsesLibraryFiles);
 
         assertThat(countDownLatch.getCount(), is(1L));
+    }
+
+    @Test
+    public void testSetPkgStateLibraryFiles_addNewSdks() {
+        final PackageSetting packageSetting = createPackageSetting("com.foo");
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        packageSetting.registerObserver(new Watcher() {
+            @Override
+            public void onChange(Watchable what) {
+                countDownLatch.countDown();
+            }
+        });
+
+        final List<String> files = new ArrayList<>();
+        files.add("com.sdk1_123");
+        files.add("com.sdk9_876");
+        packageSetting.setUsesSdkLibraries(files.toArray(new String[files.size()]));
+
+        assertThat(countDownLatch.getCount(), is(0L));
     }
 
     private <T> void assertArrayEquals(T[] a, T[] b) {
@@ -1090,6 +1194,8 @@ public class PackageManagerSettingsTests {
                 pkgFlags,
                 0 /*privateFlags*/,
                 sharedUserId,
+                null /*usesSdkLibraries*/,
+                null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
@@ -1109,6 +1215,8 @@ public class PackageManagerSettingsTests {
                 0,
                 0 /*privateFlags*/,
                 0,
+                null /*usesSdkLibraries*/,
+                null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
