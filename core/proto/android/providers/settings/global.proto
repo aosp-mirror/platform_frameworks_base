@@ -672,18 +672,31 @@ message GlobalSettingsProto {
     optional SettingProto new_contact_aggregator = 79 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto night_display_forced_auto_mode_available = 80 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
-    message NitzUpdate {
+    message Nitz {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
-        // If the NITZ_UPDATE_DIFF time is exceeded then an automatic adjustment to
-        // SystemClock will be allowed even if NITZ_UPDATE_SPACING has not been
-        // exceeded.
-        optional SettingProto diff = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        // The length of time in milli-seconds that automatic small adjustments to
-        // SystemClock are ignored if NITZ_UPDATE_DIFF is not exceeded.
-        optional SettingProto spacing = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // If UTC time between two NITZ signals is greater than this value then the second signal
+        // cannot be ignored.
+        //
+        // This value is in milliseconds. It is used for telephony-based time and time zone
+        // detection.
+        optional SettingProto update_diff = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        // If the elapsed realtime between two NITZ signals is greater than this value then the
+        // second signal cannot be ignored.
+        //
+        // This value is in milliseconds. It is used for telephony-based time and time zone
+        // detection.
+        optional SettingProto update_spacing = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        // If the device connects to a telephony network and was disconnected from a telephony
+        // network for less than this time, a previously received NITZ signal can be restored.
+        //
+        // This value is in milliseconds. It is used for telephony-based time and time zone
+        // detection.
+        optional SettingProto network_disconnect_retention = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
-    optional NitzUpdate nitz_update = 81;
+    optional Nitz nitz = 81;
 
     message Notification {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
