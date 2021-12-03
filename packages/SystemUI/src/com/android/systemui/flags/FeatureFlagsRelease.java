@@ -48,10 +48,10 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
     }
 
     @Override
-    public void addListener(Listener run) {}
+    public void addListener(@NonNull Flag<?> flag, @NonNull Listener listener) {}
 
     @Override
-    public void removeListener(Listener run) {}
+    public void removeListener(@NonNull Listener listener) {}
 
     @Override
     public boolean isEnabled(BooleanFlag flag) {
@@ -68,8 +68,7 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
         return mFlagCache.valueAt(cacheIndex);
     }
 
-    @Override
-    public boolean isEnabled(int key, boolean defaultValue) {
+    private boolean isEnabled(int key, boolean defaultValue) {
         mFlagCache.append(key, defaultValue);
         return defaultValue;
     }
@@ -79,8 +78,7 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
         pw.println("can override: false");
         int size = mFlagCache.size();
         for (int i = 0; i < size; i++) {
-            pw.println("  sysui_flag_" + mFlagCache.keyAt(i)
-                    + ": " + mFlagCache.valueAt(i));
+            pw.println("  sysui_flag_" + mFlagCache.keyAt(i) + ": " + mFlagCache.valueAt(i));
         }
     }
 }

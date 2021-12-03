@@ -1,0 +1,214 @@
+/*
+ * Copyright (C) 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.systemui.flags
+
+import android.content.Context
+import android.database.ContentObserver
+import android.net.Uri
+import android.os.Handler
+import androidx.test.filters.SmallTest
+import com.android.systemui.SysuiTestCase
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.withArgCaptor
+import com.google.common.truth.Truth.assertThat
+import org.junit.Before
+import org.junit.Test
+import org.mockito.Mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoMoreInteractions
+import org.mockito.MockitoAnnotations
+import java.util.function.Consumer
+
+/**
+ * NOTE: This test is for the version of FeatureFlagManager in src-release, which should not allow
+ * overriding, and should never return any value other than the one provided as the default.
+ */
+@SmallTest
+class FlagManagerTest : SysuiTestCase() {
+    private lateinit var mFlagManager: FlagManager
+
+    @Mock private lateinit var mMockContext: Context
+    @Mock private lateinit var mFlagSettingsHelper: FlagSettingsHelper
+    @Mock private lateinit var mHandler: Handler
+
+    @Before
+    fun setup() {
+        MockitoAnnotations.initMocks(this)
+        mFlagManager = FlagManager(mMockContext, mFlagSettingsHelper, mHandler)
+    }
+
+    @Test
+    fun testContentObserverAddedAndRemoved() {
+        val listener1 = mock<FlagListenable.Listener>()
+        val listener2 = mock<FlagListenable.Listener>()
+
+        // no interactions before adding listener
+        verifyNoMoreInteractions(mFlagSettingsHelper)
+
+        // adding the first listener registers the observer
+        mFlagManager.addListener(BooleanFlag(1, true), listener1)
+        val observer = withArgCaptor<ContentObserver> {
+            verify(mFlagSettingsHelper).registerContentObserver(any(), any(), capture())
+        }
+        verifyNoMoreInteractions(mFlagSettingsHelper)
+
+        // adding another listener does nothing
+        mFlagManager.addListener(BooleanFlag(2, true), listener2)
+        verifyNoMoreInteractions(mFlagSettingsHelper)
+
+        // removing the original listener does nothing with second one still present
+        mFlagManager.removeListener(listener1)
+        verifyNoMoreInteractions(mFlagSettingsHelper)
+
+        // removing the final listener unregisters the observer
+        mFlagManager.removeListener(listener2)
+        verify(mFlagSettingsHelper).unregisterContentObserver(eq(observer))
+        verifyNoMoreInteractions(mFlagSettingsHelper)
+    }
+
+    @Test
+    fun testObserverClearsCache() {
+        val listener = mock<FlagListenable.Listener>()
+        val clearCacheAction = mock<Consumer<Int>>()
+        mFlagManager.clearCacheAction = clearCacheAction
+        mFlagManager.addListener(BooleanFlag(1, true), listener)
+        val observer = withArgCaptor<ContentObserver> {
+            verify(mFlagSettingsHelper).registerContentObserver(any(), any(), capture())
+        }
+        observer.onChange(false, flagUri(1))
+        verify(clearCacheAction).accept(eq(1))
+    }
+
+    @Test
+    fun testObserverInvokesListeners() {
+        val listener1 = mock<FlagListenable.Listener>()
+        val listener10 = mock<FlagListenable.Listener>()
+        mFlagManager.addListener(BooleanFlag(1, true), listener1)
+        mFlagManager.addListener(BooleanFlag(10, true), listener10)
+        val observer = withArgCaptor<ContentObserver> {
+            verify(mFlagSettingsHelper).registerContentObserver(any(), any(), capture())
+        }
+        observer.onChange(false, flagUri(1))
+        val flagEvent1 = withArgCaptor<FlagListenable.FlagEvent> {
+            verify(listener1).onFlagChanged(capture())
+        }
+        assertThat(flagEvent1.flagId).isEqualTo(1)
+        verifyNoMoreInteractions(listener1, listener10)
+
+        observer.onChange(false, flagUri(10))
+        val flagEvent10 = withArgCaptor<FlagListenable.FlagEvent> {
+            verify(listener10).onFlagChanged(capture())
+        }
+        assertThat(flagEvent10.flagId).isEqualTo(10)
+        verifyNoMoreInteractions(listener1, listener10)
+    }
+
+    fun flagUri(id: Int): Uri = Uri.parse("content://settings/system/systemui/flags/$id")
+
+    @Test
+    fun testOnlySpecificFlagListenerIsInvoked() {
+        val listener1 = mock<FlagListenable.Listener>()
+        val listener10 = mock<FlagListenable.Listener>()
+        mFlagManager.addListener(BooleanFlag(1, true), listener1)
+        mFlagManager.addListener(BooleanFlag(10, true), listener10)
+
+        mFlagManager.dispatchListenersAndMaybeRestart(1)
+        val flagEvent1 = withArgCaptor<FlagListenable.FlagEvent> {
+            verify(listener1).onFlagChanged(capture())
+        }
+        assertThat(flagEvent1.flagId).isEqualTo(1)
+        verifyNoMoreInteractions(listener1, listener10)
+
+        mFlagManager.dispatchListenersAndMaybeRestart(10)
+        val flagEvent10 = withArgCaptor<FlagListenable.FlagEvent> {
+            verify(listener10).onFlagChanged(capture())
+        }
+        assertThat(flagEvent10.flagId).isEqualTo(10)
+        verifyNoMoreInteractions(listener1, listener10)
+    }
+
+    @Test
+    fun testSameListenerCanBeUsedForMultipleFlags() {
+        val listener = mock<FlagListenable.Listener>()
+        mFlagManager.addListener(BooleanFlag(1, true), listener)
+        mFlagManager.addListener(BooleanFlag(10, true), listener)
+
+        mFlagManager.dispatchListenersAndMaybeRestart(1)
+        val flagEvent1 = withArgCaptor<FlagListenable.FlagEvent> {
+            verify(listener).onFlagChanged(capture())
+        }
+        assertThat(flagEvent1.flagId).isEqualTo(1)
+        verifyNoMoreInteractions(listener)
+
+        mFlagManager.dispatchListenersAndMaybeRestart(10)
+        val flagEvent10 = withArgCaptor<FlagListenable.FlagEvent> {
+            verify(listener, times(2)).onFlagChanged(capture())
+        }
+        assertThat(flagEvent10.flagId).isEqualTo(10)
+        verifyNoMoreInteractions(listener)
+    }
+
+    @Test
+    fun testRestartWithNoListeners() {
+        val restartAction = mock<Consumer<Boolean>>()
+        mFlagManager.restartAction = restartAction
+        mFlagManager.dispatchListenersAndMaybeRestart(1)
+        verify(restartAction).accept(eq(false))
+        verifyNoMoreInteractions(restartAction)
+    }
+
+    @Test
+    fun testListenerCanSuppressRestart() {
+        val restartAction = mock<Consumer<Boolean>>()
+        mFlagManager.restartAction = restartAction
+        mFlagManager.addListener(BooleanFlag(1, true)) { event ->
+            event.requestNoRestart()
+        }
+        mFlagManager.dispatchListenersAndMaybeRestart(1)
+        verify(restartAction).accept(eq(true))
+        verifyNoMoreInteractions(restartAction)
+    }
+
+    @Test
+    fun testListenerOnlySuppressesRestartForOwnFlag() {
+        val restartAction = mock<Consumer<Boolean>>()
+        mFlagManager.restartAction = restartAction
+        mFlagManager.addListener(BooleanFlag(10, true)) { event ->
+            event.requestNoRestart()
+        }
+        mFlagManager.dispatchListenersAndMaybeRestart(1)
+        verify(restartAction).accept(eq(false))
+        verifyNoMoreInteractions(restartAction)
+    }
+
+    @Test
+    fun testRestartWhenNotAllListenersRequestSuppress() {
+        val restartAction = mock<Consumer<Boolean>>()
+        mFlagManager.restartAction = restartAction
+        mFlagManager.addListener(BooleanFlag(10, true)) { event ->
+            event.requestNoRestart()
+        }
+        mFlagManager.addListener(BooleanFlag(10, true)) {
+            // do not request
+        }
+        mFlagManager.dispatchListenersAndMaybeRestart(1)
+        verify(restartAction).accept(eq(false))
+        verifyNoMoreInteractions(restartAction)
+    }
+}

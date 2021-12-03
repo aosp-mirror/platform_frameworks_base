@@ -81,21 +81,23 @@ public class FeatureFlagsReleaseTest extends SysuiTestCase {
     public void testDump() {
         int flagIdA = 213;
         int flagIdB = 18;
+        int flagIdC = 1;
         int flagResourceId = 3;
         BooleanFlag flagA = new BooleanFlag(flagIdA, true);
         ResourceBooleanFlag flagB = new ResourceBooleanFlag(flagIdB, flagResourceId);
+        BooleanFlag flagC = new BooleanFlag(flagIdC, false);
         when(mResources.getBoolean(flagResourceId)).thenReturn(true);
 
         // WHEN the flags have been accessed
-        assertThat(mFeatureFlagsRelease.isEnabled(1, false)).isFalse();
         assertThat(mFeatureFlagsRelease.isEnabled(flagA)).isTrue();
         assertThat(mFeatureFlagsRelease.isEnabled(flagB)).isTrue();
+        assertThat(mFeatureFlagsRelease.isEnabled(flagC)).isFalse();
 
         // THEN the dump contains the flags and the default values
         String dump = dumpToString();
-        assertThat(dump).contains(" sysui_flag_1: false\n");
         assertThat(dump).contains(" sysui_flag_" + flagIdA + ": true\n");
         assertThat(dump).contains(" sysui_flag_" + flagIdB + ": true\n");
+        assertThat(dump).contains(" sysui_flag_" + flagIdC + ": false\n");
     }
 
     private String dumpToString() {

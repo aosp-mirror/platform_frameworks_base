@@ -24,16 +24,17 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
-import android.provider.Settings
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import com.google.common.util.concurrent.ListenableFuture
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.function.Consumer
 
 class FlagManager constructor(
     private val context: Context,
+    private val settings: FlagSettingsHelper,
     private val handler: Handler
-) : FlagReader {
+) : FlagListenable {
     companion object {
         const val RECEIVING_PACKAGE = "com.android.systemui"
         const val ACTION_SET_FLAG = "com.android.systemui.action.SET_FLAG"
@@ -47,7 +48,19 @@ class FlagManager constructor(
         private const val SETTINGS_PREFIX = "systemui/flags"
     }
 
-    private val listeners: MutableSet<FlagReader.Listener> = mutableSetOf()
+    constructor(context: Context, handler: Handler) : this(
+        context,
+        FlagSettingsHelper(context.contentResolver),
+        handler
+    )
+
+    /**
+     * An action called on restart which takes as an argument whether the listeners requested
+     * that the restart be suppressed
+     */
+    var restartAction: Consumer<Boolean>? = null
+    var clearCacheAction: Consumer<Int>? = null
+    private val listeners: MutableSet<PerFlagListener> = mutableSetOf()
     private val settingsObserver: ContentObserver = SettingsObserver()
 
     fun getFlagsFuture(): ListenableFuture<Collection<Flag<*>>> {
@@ -86,14 +99,9 @@ class FlagManager constructor(
         context.sendBroadcast(intent)
     }
 
-    override fun isEnabled(id: Int, def: Boolean): Boolean {
-        return isEnabled(id) ?: def
-    }
-
     /** Returns the stored value or null if not set.  */
     fun isEnabled(id: Int): Boolean? {
-        val data: String? = Settings.Secure.getString(
-            context.contentResolver, keyToSettingsPrefix(id))
+        val data = settings.getString(keyToSettingsPrefix(id))
         if (data == null || data?.isEmpty()) {
             return null
         }
@@ -108,27 +116,24 @@ class FlagManager constructor(
         }
     }
 
-    override fun isEnabled(flag: ResourceBooleanFlag): Boolean {
-        throw RuntimeException("Not implemented in FlagManager")
-    }
-
-    override fun addListener(listener: FlagReader.Listener) {
+    override fun addListener(flag: Flag<*>, listener: FlagListenable.Listener) {
         synchronized(listeners) {
             val registerNeeded = listeners.isEmpty()
-            listeners.add(listener)
+            listeners.add(PerFlagListener(flag.id, listener))
             if (registerNeeded) {
-                context.contentResolver.registerContentObserver(
-                    Settings.Secure.getUriFor(SETTINGS_PREFIX), true, settingsObserver)
+                settings.registerContentObserver(SETTINGS_PREFIX, true, settingsObserver)
             }
         }
     }
 
-    override fun removeListener(listener: FlagReader.Listener) {
+    override fun removeListener(listener: FlagListenable.Listener) {
         synchronized(listeners) {
-            val isRegistered = !listeners.isEmpty()
-            listeners.remove(listener)
-            if (isRegistered && listeners.isEmpty()) {
-                context.contentResolver.unregisterContentObserver(settingsObserver)
+            if (listeners.isEmpty()) {
+                return
+            }
+            listeners.removeIf { it.listener == listener }
+            if (listeners.isEmpty()) {
+                settings.unregisterContentObserver(settingsObserver)
             }
         }
     }
@@ -142,7 +147,7 @@ class FlagManager constructor(
     }
 
     fun keyToSettingsPrefix(key: Int): String {
-        return SETTINGS_PREFIX + "/" + key
+        return "$SETTINGS_PREFIX/$key"
     }
 
     private fun assertType(json: JSONObject, type: String): Boolean {
@@ -160,14 +165,39 @@ class FlagManager constructor(
             }
             val parts = uri.pathSegments
             val idStr = parts[parts.size - 1]
-            try {
-                val id = idStr.toInt()
-                listeners.forEach { l -> l.onFlagChanged(id) }
-            } catch (e: NumberFormatException) {
-                // no-op
-            }
+            val id = try { idStr.toInt() } catch (e: NumberFormatException) { return }
+            clearCacheAction?.accept(id)
+            dispatchListenersAndMaybeRestart(id)
         }
     }
+
+    fun dispatchListenersAndMaybeRestart(id: Int) {
+        val filteredListeners: List<FlagListenable.Listener> = synchronized(listeners) {
+            listeners.mapNotNull { if (it.id == id) it.listener else null }
+        }
+        // If there are no listeners, there's nothing to dispatch to, and nothing to suppress it.
+        if (filteredListeners.isEmpty()) {
+            restartAction?.accept(false)
+            return
+        }
+        // Dispatch to every listener and save whether each one called requestNoRestart.
+        val suppressRestartList: List<Boolean> = filteredListeners.map { listener ->
+            var didRequestNoRestart = false
+            val event = object : FlagListenable.FlagEvent {
+                override val flagId = id
+                override fun requestNoRestart() {
+                    didRequestNoRestart = true
+                }
+            }
+            listener.onFlagChanged(event)
+            didRequestNoRestart
+        }
+        // Suppress restart only if ALL listeners request it.
+        val suppressRestart = suppressRestartList.all { it }
+        restartAction?.accept(suppressRestart)
+    }
+
+    private data class PerFlagListener(val id: Int, val listener: FlagListenable.Listener)
 }
 
 class InvalidFlagStorageException : Exception("Data found but is invalid")

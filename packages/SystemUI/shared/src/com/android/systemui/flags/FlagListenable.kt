@@ -18,28 +18,24 @@ package com.android.systemui.flags
 /**
  * Plugin for loading flag values
  */
-interface FlagReader {
-    /** Returns a boolean value for the given flag.  */
-    fun isEnabled(flag: BooleanFlag): Boolean {
-        return flag.default
-    }
-
-    fun isEnabled(flag: ResourceBooleanFlag): Boolean
-
-    /** Returns a boolean value for the given flag.  */
-    fun isEnabled(id: Int, def: Boolean): Boolean {
-        return def
-    }
-
-    /** Add a listener to be alerted when any flag changes.  */
-    fun addListener(listener: Listener) {}
+interface FlagListenable {
+    /** Add a listener to be alerted when the given flag changes.  */
+    fun addListener(flag: Flag<*>, listener: Listener)
 
     /** Remove a listener to be alerted when any flag changes.  */
-    fun removeListener(listener: Listener) {}
+    fun removeListener(listener: Listener)
 
     /** A simple listener to be alerted when a flag changes.  */
     fun interface Listener {
-        /**  */
-        fun onFlagChanged(id: Int)
+        /** Called when the flag changes */
+        fun onFlagChanged(event: FlagEvent)
+    }
+
+    /** An event representing the change */
+    interface FlagEvent {
+        /** the id of the flag which changed */
+        val flagId: Int
+        /** if all listeners alerted invoke this method, the restart will be skipped */
+        fun requestNoRestart()
     }
 }

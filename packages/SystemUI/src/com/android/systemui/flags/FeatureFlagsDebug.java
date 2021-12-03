@@ -22,7 +22,6 @@ import static com.android.systemui.flags.FlagManager.FIELD_FLAGS;
 import static com.android.systemui.flags.FlagManager.FIELD_ID;
 import static com.android.systemui.flags.FlagManager.FIELD_VALUE;
 
-import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +31,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
@@ -81,6 +81,8 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_SET_FLAG);
         filter.addAction(ACTION_GET_FLAGS);
+        flagManager.setRestartAction(this::restartSystemUI);
+        flagManager.setClearCacheAction(this::removeFromCache);
         context.registerReceiver(mReceiver, filter, null, null);
         dumpManager.registerDumpable(TAG, this);
     }
@@ -106,9 +108,8 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         return mBooleanFlagCache.get(id);
     }
 
-    /** Return a {@link BooleanFlag}'s value. */
-    @Override
-    public boolean isEnabled(int id, boolean defaultValue) {
+    /** Return a flag's value. */
+    private boolean isEnabled(int id, boolean defaultValue) {
         Boolean result = isEnabledInternal(id);
         return result == null ? defaultValue : result;
     }
@@ -136,17 +137,19 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             json.put(FlagManager.FIELD_TYPE, FlagManager.TYPE_BOOLEAN);
             json.put(FIELD_VALUE, value);
             mSecureSettings.putString(mFlagManager.keyToSettingsPrefix(id), json.toString());
-            Log.i(TAG, "Set id " + id + " to " + value);
-            restartSystemUI();
         } catch (JSONException e) {
-            // no-op
+            return;  // ignore
         }
+        Log.i(TAG, "Set id " + id + " to " + value);
+        removeFromCache(id);
+        mFlagManager.dispatchListenersAndMaybeRestart(id);
     }
 
     /** Erase a flag's overridden value if there is one. */
     public void eraseFlag(int id) {
         eraseInternal(id);
-        restartSystemUI();
+        removeFromCache(id);
+        mFlagManager.dispatchListenersAndMaybeRestart(id);
     }
 
     /** Works just like {@link #eraseFlag(int)} except that it doesn't restart SystemUI. */
@@ -157,16 +160,20 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     }
 
     @Override
-    public void addListener(Listener run) {
-        mFlagManager.addListener(run);
+    public void addListener(@NonNull Flag<?> flag, @NonNull Listener listener) {
+        mFlagManager.addListener(flag, listener);
     }
 
     @Override
-    public void removeListener(Listener run) {
-        mFlagManager.removeListener(run);
+    public void removeListener(@NonNull Listener listener) {
+        mFlagManager.removeListener(listener);
     }
 
-    private void restartSystemUI() {
+    private void restartSystemUI(boolean requestSuppress) {
+        if (requestSuppress) {
+            Log.i(TAG, "SystemUI Restart Suppressed");
+            return;
+        }
         Log.i(TAG, "Restarting SystemUI");
         // SysUI starts back when up exited. Is there a better way to do this?
         System.exit(0);
@@ -202,6 +209,10 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         }
 
         private void handleSetFlag(Bundle extras) {
+            if (extras == null) {
+                Log.w(TAG, "No extras");
+                return;
+            }
             int id = extras.getInt(FIELD_ID);
             if (id <= 0) {
                 Log.w(TAG, "ID not set or less than  or equal to 0: " + id);
@@ -244,6 +255,10 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             return null;
         }
     };
+
+    private void removeFromCache(int id) {
+        mBooleanFlagCache.remove(id);
+    }
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
