@@ -44,6 +44,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.cts.install.lib.Install;
 import com.android.cts.install.lib.InstallUtils;
 import com.android.cts.install.lib.TestApp;
+import com.android.cts.install.lib.Uninstall;
 
 import org.junit.After;
 import org.junit.Before;
@@ -108,6 +109,7 @@ public class StagedInstallInternalTest {
     @Test
     public void cleanUp() throws Exception {
         Files.deleteIfExists(mTestStateFile.toPath());
+        Uninstall.packages(TestApp.A, TestApp.B);
     }
 
     @Test
