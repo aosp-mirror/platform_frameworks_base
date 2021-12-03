@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.testing.TestableContext;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,9 +35,9 @@ import java.util.ArrayList;
  *
  * Instead, it keeps a list of the registrations for querying.
  */
-class NoBroadcastContextWrapper extends ContextWrapper {
+class NoBroadcastContextWrapper extends TestableContext {
 
-    private ArrayList<BroadcastReceiverRegistration> mRegistrationList =
+    ArrayList<BroadcastReceiverRegistration> mRegistrationList =
             new ArrayList<>();
 
     NoBroadcastContextWrapper(Context context) {

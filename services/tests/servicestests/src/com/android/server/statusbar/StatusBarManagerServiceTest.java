@@ -28,6 +28,7 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -82,8 +83,7 @@ public class StatusBarManagerServiceTest {
 
     @Rule
     public final TestableContext mContext =
-            new TestableContext(
-                    new NoBroadcastContextWrapper(InstrumentationRegistry.getContext()), null);
+            new NoBroadcastContextWrapper(InstrumentationRegistry.getContext());
 
     @Mock
     private ActivityTaskManagerInternal mActivityTaskManagerInternal;
@@ -517,6 +517,62 @@ public class StatusBarManagerServiceTest {
         // This gets translated to TILE_NOT_ADDED
         assertEquals(StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED,
                 callback.mUserResponse);
+    }
+
+    @Test
+    public void testInstaDenialAfterManyDenials() throws RemoteException {
+        int user = 10;
+        mockEverything(user);
+
+        for (int i = 0; i < TileRequestTracker.MAX_NUM_DENIALS; i++) {
+            mStatusBarManagerService.requestAddTile(TEST_COMPONENT, TILE_LABEL, mIcon, user,
+                    new Callback());
+
+            verify(mMockStatusBar, times(i + 1)).requestAddTile(
+                    eq(TEST_COMPONENT),
+                    eq(APP_NAME),
+                    eq(TILE_LABEL),
+                    eq(mIcon),
+                    mAddTileResultCallbackCaptor.capture()
+            );
+            mAddTileResultCallbackCaptor.getValue().onTileRequest(
+                    StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED);
+        }
+
+        Callback callback = new Callback();
+        mStatusBarManagerService.requestAddTile(TEST_COMPONENT, TILE_LABEL, mIcon, user, callback);
+
+        // Only called MAX_NUM_DENIALS times
+        verify(mMockStatusBar, times(TileRequestTracker.MAX_NUM_DENIALS)).requestAddTile(
+                any(),
+                any(),
+                any(),
+                any(),
+                mAddTileResultCallbackCaptor.capture()
+        );
+        assertEquals(StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED,
+                callback.mUserResponse);
+    }
+
+    @Test
+    public void testDialogDismissalNotCountingAgainstDenials() throws RemoteException {
+        int user = 10;
+        mockEverything(user);
+
+        for (int i = 0; i < TileRequestTracker.MAX_NUM_DENIALS * 2; i++) {
+            mStatusBarManagerService.requestAddTile(TEST_COMPONENT, TILE_LABEL, mIcon, user,
+                    new Callback());
+
+            verify(mMockStatusBar, times(i + 1)).requestAddTile(
+                    eq(TEST_COMPONENT),
+                    eq(APP_NAME),
+                    eq(TILE_LABEL),
+                    eq(mIcon),
+                    mAddTileResultCallbackCaptor.capture()
+            );
+            mAddTileResultCallbackCaptor.getValue().onTileRequest(
+                    StatusBarManager.TILE_ADD_REQUEST_RESULT_DIALOG_DISMISSED);
+        }
     }
 
     private void mockUidCheck() {

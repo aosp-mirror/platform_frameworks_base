@@ -626,6 +626,9 @@ public class StatusBarManager {
      * foreground ({@link ActivityManager.RunningAppProcessInfo#IMPORTANCE_FOREGROUND}
      * and the {@link android.service.quicksettings.TileService} must be exported.
      *
+     * Note: the system can choose to auto-deny a request if the user has denied that specific
+     * request (user, ComponentName) enough times before.
+     *
      * @param tileServiceComponentName {@link ComponentName} of the
      *        {@link android.service.quicksettings.TileService} for the request.
      * @param tileLabel label of the tile to show to the user.

@@ -64,6 +64,7 @@ import android.service.quicksettings.TileService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -138,6 +139,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     private final PackageManagerInternal mPackageManagerInternal;
     private int mCurrentUserId;
     private boolean mTracingEnabled;
+
+    private final TileRequestTracker mTileRequestTracker;
 
     private final SparseArray<UiState> mDisplayUiState = new SparseArray<>();
     @GuardedBy("mLock")
@@ -245,6 +248,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         mActivityTaskManager = LocalServices.getService(ActivityTaskManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+
+        mTileRequestTracker = new TileRequestTracker(mContext);
     }
 
     @Override
@@ -1765,11 +1770,26 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             mCurrentRequestAddTilePackages.put(packageName, currentTime);
         }
 
+        if (mTileRequestTracker.shouldBeDenied(userId, componentName)) {
+            if (clearTileAddRequest(packageName)) {
+                try {
+                    callback.onTileRequest(StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "requestAddTile - callback", e);
+                }
+            }
+            return;
+        }
+
         IAddTileResultCallback proxyCallback = new IAddTileResultCallback.Stub() {
             @Override
             public void onTileRequest(int i) {
                 if (i == StatusBarManager.TILE_ADD_REQUEST_RESULT_DIALOG_DISMISSED) {
                     i = StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED;
+                } else if (i == StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED) {
+                    mTileRequestTracker.addDenial(userId, componentName);
+                } else if (i == StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED) {
+                    mTileRequestTracker.resetRequests(userId, componentName);
                 }
                 if (clearTileAddRequest(packageName)) {
                     try {
@@ -1961,6 +1981,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 pw.println("    " + requests.get(i) + ",");
             }
             pw.println("  ]");
+            IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+            mTileRequestTracker.dump(fd, ipw.increaseIndent(), args);
         }
     }
 
