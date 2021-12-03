@@ -4142,28 +4142,28 @@ public class TelephonyManager {
      * 0) or
      * second physical slot(value 1), port (index 0), while the other physical slot remains unmapped
      * and inactive.
-     * slotMapping[0] = UiccSlotMapping{0 //logical slot, 0 //physical slot//, 0 //port//}
-     * slotMapping[0] = UiccSlotMapping{1 // logical slot, 1 //physical slot//, 0 //port//}
+     * slotMapping[0] = UiccSlotMapping{0 //port index, 0 //physical slot, 0 //logical slot} or
+     * slotMapping[0] = UiccSlotMapping{0 //port index, 1 //physical slot, 0 //logical slot}
      *
      * Example no. of logical slots 2 and physical slots 2 supports MEP with 2 ports available:
      * Each logical slot must be mapped to a port (physical slot and port combination).
      * First logical slot (index 0) can be mapped to physical slot 1 and the second logical slot
      * can be mapped to either port from physical slot 2.
      *
-     * slotMapping[0] = UiccSlotMapping{0, 0, 0} and slotMapping[1] = UiccSlotMapping{1, 0, 0} or
+     * slotMapping[0] = UiccSlotMapping{0, 0, 0} and slotMapping[1] = UiccSlotMapping{0, 1, 1} or
      * slotMapping[0] = UiccSlotMapping{0, 0, 0} and slotMapping[1] = UiccSlotMapping{1, 1, 1}
      *
      * or the other way around, the second logical slot(index 1) can be mapped to physical slot 1
      * and the first logical slot can be mapped to either port from physical slot 2.
      *
-     * slotMapping[1] = UiccSlotMapping{0, 0, 0} and slotMapping[0] = UiccSlotMapping{1, 0, 0} or
+     * slotMapping[1] = UiccSlotMapping{0, 0, 0} and slotMapping[0] = UiccSlotMapping{0, 1, 1} or
      * slotMapping[1] = UiccSlotMapping{0, 0, 0} and slotMapping[0] = UiccSlotMapping{1, 1, 1}
      *
      * another possible mapping is each logical slot maps to each port of physical slot 2 and there
      * is no active logical modem mapped to physical slot 1.
      *
-     * slotMapping[0] = UiccSlotMapping{1, 0, 0} and slotMapping[1] = UiccSlotMapping{1, 1, 1} or
-     * slotMapping[0] = UiccSlotMapping{1, 1, 1} and slotMapping[1] = UiccSlotMapping{1, 0, 0}
+     * slotMapping[0] = UiccSlotMapping{0, 1, 0} and slotMapping[1] = UiccSlotMapping{1, 1, 1} or
+     * slotMapping[0] = UiccSlotMapping{1, 1, 0} and slotMapping[1] = UiccSlotMapping{0, 1, 1}
      *
      * @param slotMapping Logical to physical slot and port mapping.
      * @throws IllegalStateException if telephony service is null or slot mapping was sent when the
@@ -4240,7 +4240,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @NonNull
     public Collection<UiccSlotMapping> getSimSlotMapping() {
-        List<UiccSlotMapping> slotMap = new ArrayList<>();
+        List<UiccSlotMapping> slotMap;
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
