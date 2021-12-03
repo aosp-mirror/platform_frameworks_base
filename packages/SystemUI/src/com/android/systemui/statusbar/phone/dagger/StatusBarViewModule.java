@@ -73,6 +73,7 @@ public abstract class StatusBarViewModule {
     public static final String SPLIT_SHADE_HEADER = "split_shade_header";
     private static final String SPLIT_SHADE_BATTERY_VIEW = "split_shade_battery_view";
     public static final String SPLIT_SHADE_BATTERY_CONTROLLER = "split_shade_battery_controller";
+    public static final String STATUS_BAR_FRAGMENT = "status_bar_fragment";
 
     /** */
     @Provides
@@ -238,10 +239,11 @@ public abstract class StatusBarViewModule {
      * time this method is called. This is intentional because we need fragments to re-created in
      * certain lifecycle scenarios.
      *
-     * **IMPORTANT**: This method also intentionally does not have a {@link Provides} annotation. If
-     * you need to get access to a {@link CollapsedStatusBarFragment}, go through
-     * {@link StatusBarFragmentComponent} instead.
+     * This provider is {@link Named} such that it does not conflict with the provider inside of
+     * {@link StatusBarFragmentComponent}.
      */
+    @Provides
+    @Named(STATUS_BAR_FRAGMENT)
     public static CollapsedStatusBarFragment createCollapsedStatusBarFragment(
             StatusBarFragmentComponent.Factory statusBarFragmentComponentFactory,
             OngoingCallController ongoingCallController,
