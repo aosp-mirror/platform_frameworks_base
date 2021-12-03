@@ -153,6 +153,16 @@ public abstract class TvIAppService extends Service {
     }
 
     /**
+     * Notifies the system when the state of the interactive app has been changed.
+     * @param state the current state
+     * @hide
+     */
+    public final void notifyStateChanged(int type, @TvIAppManager.TvIAppRteState int state) {
+        mServiceHandler.obtainMessage(ServiceHandler.DO_NOTIFY_RTE_STATE_CHANGED,
+                type, state).sendToTarget();
+    }
+
+    /**
      * Base class for derived classes to implement to provide a TV interactive app session.
      * @hide
      */
@@ -384,7 +394,7 @@ public abstract class TvIAppService extends Service {
 
         /**
          * Requests broadcast related information from the related TV input.
-         * @param request
+         * @param request the request for broadcast info
          */
         public void requestBroadcastInfo(@NonNull final BroadcastInfoRequest request) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -442,6 +452,30 @@ public abstract class TvIAppService extends Service {
                         + response.getRequestId() + ")");
             }
             onBroadcastInfoResponse(response);
+        }
+
+        /**
+         * Notifies when the session state is changed.
+         * @param state the current state.
+         */
+        public void notifySessionStateChanged(@TvIAppManager.TvIAppRteState int state) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "notifySessionStateChanged (state="
+                                    + state + ")");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onSessionStateChanged(state);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifySessionStateChanged", e);
+                    }
+                }
+            });
         }
 
         /**
@@ -747,6 +781,19 @@ public abstract class TvIAppService extends Service {
     private final class ServiceHandler extends Handler {
         private static final int DO_CREATE_SESSION = 1;
         private static final int DO_NOTIFY_SESSION_CREATED = 2;
+        private static final int DO_NOTIFY_RTE_STATE_CHANGED = 3;
+
+        private void broadcastRteStateChanged(int type, int state) {
+            int n = mCallbacks.beginBroadcast();
+            for (int i = 0; i < n; ++i) {
+                try {
+                    mCallbacks.getBroadcastItem(i).onStateChanged(type, state);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "error in broadcastRteStateChanged", e);
+                }
+            }
+            mCallbacks.finishBroadcast();
+        }
 
         @Override
         public void handleMessage(Message msg) {
@@ -793,6 +840,12 @@ public abstract class TvIAppService extends Service {
                         sessionImpl.initialize(cb);
                     }
                     args.recycle();
+                    return;
+                }
+                case DO_NOTIFY_RTE_STATE_CHANGED: {
+                    int type = msg.arg1;
+                    int state = msg.arg2;
+                    broadcastRteStateChanged(type, state);
                     return;
                 }
                 default: {

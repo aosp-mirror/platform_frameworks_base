@@ -30,4 +30,5 @@ oneway interface ITvIAppClient {
     void onSessionReleased(int seq);
     void onLayoutSurface(int left, int top, int right, int bottom, int seq);
     void onBroadcastInfoRequest(in BroadcastInfoRequest request, int seq);
+    void onSessionStateChanged(int state, int seq);
 }

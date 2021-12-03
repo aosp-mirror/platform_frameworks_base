@@ -239,6 +239,24 @@ public class TvIAppManagerService extends SystemService {
         userState.mCallbacks.finishBroadcast();
     }
 
+    @GuardedBy("mLock")
+    private void notifyStateChangedLocked(
+            UserState userState, String iAppServiceId, int type, int state) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyRteStateChanged(iAppServiceId="
+                    + iAppServiceId + ", type=" + type + ", state=" + state + ")");
+        }
+        int n = userState.mCallbacks.beginBroadcast();
+        for (int i = 0; i < n; ++i) {
+            try {
+                userState.mCallbacks.getBroadcastItem(i).onStateChanged(iAppServiceId, type, state);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "failed to report RTE state changed", e);
+            }
+        }
+        userState.mCallbacks.finishBroadcast();
+    }
+
     private int getIAppUid(TvIAppInfo info) {
         try {
             return getContext().getPackageManager().getApplicationInfo(
@@ -546,6 +564,17 @@ public class TvIAppManagerService extends SystemService {
     }
 
     @GuardedBy("mLock")
+    private ServiceState getServiceStateLocked(ComponentName component, int userId) {
+        UserState userState = getOrCreateUserStateLocked(userId);
+        ServiceState serviceState = userState.mServiceStateMap.get(component);
+        if (serviceState == null) {
+            throw new IllegalStateException("Service state not found for " + component + " (userId="
+                    + userId + ")");
+        }
+        return serviceState;
+    }
+
+    @GuardedBy("mLock")
     private SessionState getSessionStateLocked(IBinder sessionToken, int callingUid, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         return getSessionStateLocked(sessionToken, callingUid, userState);
@@ -617,7 +646,11 @@ public class TvIAppManagerService extends SystemService {
                     }
                     ComponentName componentName = iAppState.mInfo.getComponent();
                     ServiceState serviceState = userState.mServiceStateMap.get(componentName);
-                    if (serviceState != null) {
+                    if (serviceState == null) {
+                        serviceState = new ServiceState(
+                                componentName, tiasId, resolvedUserId, true, type);
+                        userState.mServiceStateMap.put(componentName, serviceState);
+                    } else if (serviceState.mService != null) {
                         serviceState.mService.prepare(type);
                     }
                 }
@@ -657,7 +690,8 @@ public class TvIAppManagerService extends SystemService {
                     if (serviceState == null) {
                         int tiasUid = PackageManager.getApplicationInfoAsUserCached(
                                 iAppState.mComponentName.getPackageName(), 0, resolvedUserId).uid;
-                        serviceState = new ServiceState(iAppState.mComponentName, resolvedUserId);
+                        serviceState = new ServiceState(
+                                iAppState.mComponentName, iAppServiceId, resolvedUserId);
                         userState.mServiceStateMap.put(iAppState.mComponentName, serviceState);
                     }
                     // Send a null token immediately while reconnecting.
@@ -1202,15 +1236,26 @@ public class TvIAppManagerService extends SystemService {
         private final List<IBinder> mSessionTokens = new ArrayList<>();
         private final ServiceConnection mConnection;
         private final ComponentName mComponent;
+        private final String mIAppSeriviceId;
 
+        private boolean mPendingPrepare = false;
+        private Integer mPendingPrepareType = null;
         private ITvIAppService mService;
         private ServiceCallback mCallback;
         private boolean mBound;
         private boolean mReconnecting;
 
-        private ServiceState(ComponentName component, int userId) {
+        private ServiceState(ComponentName component, String tias, int userId) {
+            this(component, tias, userId, false, null);
+        }
+
+        private ServiceState(ComponentName component, String tias, int userId,
+                boolean pendingPrepare, Integer prepareType) {
             mComponent = component;
+            mPendingPrepare = pendingPrepare;
+            mPendingPrepareType = prepareType;
             mConnection = new IAppServiceConnection(component, userId);
+            mIAppSeriviceId = tias;
         }
     }
 
@@ -1237,6 +1282,19 @@ public class TvIAppManagerService extends SystemService {
                 }
                 ServiceState serviceState = userState.mServiceStateMap.get(mComponent);
                 serviceState.mService = ITvIAppService.Stub.asInterface(service);
+
+                if (serviceState.mPendingPrepare) {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        serviceState.mService.prepare(serviceState.mPendingPrepareType);
+                        serviceState.mPendingPrepare = false;
+                        serviceState.mPendingPrepareType = null;
+                    } catch (RemoteException e) {
+                        Slogf.e(TAG, "error in prepare when onServiceConnected", e);
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                }
 
                 List<IBinder> tokensToBeRemoved = new ArrayList<>();
 
@@ -1285,6 +1343,21 @@ public class TvIAppManagerService extends SystemService {
         ServiceCallback(ComponentName component, int userId) {
             mComponent = component;
             mUserId = userId;
+        }
+
+        @Override
+        public void onStateChanged(int type, int state) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    ServiceState serviceState = getServiceStateLocked(mComponent, mUserId);
+                    String iAppServiceId = serviceState.mIAppSeriviceId;
+                    UserState userState = getUserStateLocked(mUserId);
+                    notifyStateChangedLocked(userState, iAppServiceId, type, state);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -1354,6 +1427,23 @@ public class TvIAppManagerService extends SystemService {
                     mSessionState.mClient.onBroadcastInfoRequest(request, mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onBroadcastInfoRequest", e);
+                }
+            }
+        }
+
+        @Override
+        public void onSessionStateChanged(int state) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onSessionStateChanged (state=" + state + ")");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onSessionStateChanged(state, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onSessionStateChanged", e);
                 }
             }
         }
