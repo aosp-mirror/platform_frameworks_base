@@ -6807,12 +6807,7 @@ public class TelephonyManager {
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @param p2 P2 parameter (described in ISO 7816-4).
      * @return an IccOpenLogicalChannelResponse object.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openLogicalChannel(byte[], byte)}.
      */
-    @Deprecated
     public IccOpenLogicalChannelResponse iccOpenLogicalChannel(String AID, int p2) {
         return iccOpenLogicalChannel(getSubId(), AID, p2);
     }
@@ -6843,12 +6838,7 @@ public class TelephonyManager {
      * @param p2 P2 parameter (described in ISO 7816-4).
      * @return an IccOpenLogicalChannelResponse object.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openLogicalChannel(byte[], byte)}.
      */
-    @Deprecated
     public IccOpenLogicalChannelResponse iccOpenLogicalChannel(int subId, String AID, int p2) {
         try {
             ITelephony telephony = getITelephony();
@@ -6876,10 +6866,7 @@ public class TelephonyManager {
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.Channel#close()}.
      */
-    @Deprecated
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     public boolean iccCloseLogicalChannelBySlot(int slotIndex, int channel) {
@@ -6906,10 +6893,7 @@ public class TelephonyManager {
      * @param channel is the channel id to be closed as returned by a successful
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.Channel#close()}.
      */
-    @Deprecated
     public boolean iccCloseLogicalChannel(int channel) {
         return iccCloseLogicalChannel(getSubId(), channel);
     }
@@ -6928,10 +6912,7 @@ public class TelephonyManager {
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.Channel#close()}.
      */
-    @Deprecated
     public boolean iccCloseLogicalChannel(int subId, int channel) {
         try {
             ITelephony telephony = getITelephony();
@@ -6967,10 +6948,7 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at the end, or null if
      * there is an issue connecting to the Telephony service.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     @Nullable
@@ -7008,10 +6986,7 @@ public class TelephonyManager {
      * @param data Data to be sent with the APDU.
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public String iccTransmitApduLogicalChannel(int channel, int cla,
             int instruction, int p1, int p2, int p3, String data) {
         return iccTransmitApduLogicalChannel(getSubId(), channel, cla,
@@ -7040,10 +7015,7 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public String iccTransmitApduLogicalChannel(int subId, int channel, int cla,
             int instruction, int p1, int p2, int p3, String data) {
         try {
@@ -7079,13 +7051,7 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     @NonNull
@@ -7121,13 +7087,7 @@ public class TelephonyManager {
      * @param data Data to be sent with the APDU.
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public String iccTransmitApduBasicChannel(int cla,
             int instruction, int p1, int p2, int p3, String data) {
         return iccTransmitApduBasicChannel(getSubId(), cla,
@@ -7154,13 +7114,7 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public String iccTransmitApduBasicChannel(int subId, int cla,
             int instruction, int p1, int p2, int p3, String data) {
         try {
@@ -7188,13 +7142,7 @@ public class TelephonyManager {
      * @param p3 P3 value of the APDU command.
      * @param filePath
      * @return The APDU response.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public byte[] iccExchangeSimIO(int fileID, int command, int p1, int p2, int p3,
             String filePath) {
         return iccExchangeSimIO(getSubId(), fileID, command, p1, p2, p3, filePath);
@@ -7216,13 +7164,7 @@ public class TelephonyManager {
      * @param filePath
      * @return The APDU response.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public byte[] iccExchangeSimIO(int subId, int fileID, int command, int p1, int p2,
             int p3, String filePath) {
         try {
@@ -7248,13 +7190,7 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card in hexadecimal format
      *         with the last 4 bytes being the status word. If the command fails,
      *         returns an empty string.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public String sendEnvelopeWithStatus(String content) {
         return sendEnvelopeWithStatus(getSubId(), content);
     }
@@ -7274,13 +7210,7 @@ public class TelephonyManager {
      *         with the last 4 bytes being the status word. If the command fails,
      *         returns an empty string.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
-     *             {@link android.se.omapi.SEService#getUiccReader(int)},
-     *             {@link android.se.omapi.Reader#openSession()},
-     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
-     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    @Deprecated
     public String sendEnvelopeWithStatus(int subId, String content) {
         try {
             ITelephony telephony = getITelephony();
