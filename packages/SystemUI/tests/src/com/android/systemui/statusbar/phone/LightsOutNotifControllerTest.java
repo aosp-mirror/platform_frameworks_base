@@ -81,9 +81,10 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
         when(mWindowManager.getDefaultDisplay()).thenReturn(mDisplay);
         when(mDisplay.getDisplayId()).thenReturn(mDisplayId);
 
-        mLightsOutNotifController = new LightsOutNotifController(mWindowManager, mEntryManager,
-                mCommandQueue);
-        mLightsOutNotifController.setLightsOutNotifView(mLightsOutView);
+        mLightsOutNotifController = new LightsOutNotifController(
+                mLightsOutView, mWindowManager, mEntryManager, mCommandQueue);
+        mLightsOutNotifController.init();
+        mLightsOutNotifController.onViewAttached();
 
         // Capture the entry listener object so we can simulate events in tests below
         verify(mEntryManager).addNotificationEntryListener(mListenerCaptor.capture());

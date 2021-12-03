@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone.fragment.dagger;
 
+import android.view.View;
+
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
@@ -24,12 +26,17 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 
+import javax.inject.Named;
+
 import dagger.Module;
 import dagger.Provides;
 
 /** Dagger module for {@link StatusBarFragmentComponent}. */
 @Module
 public interface StatusBarFragmentModule {
+
+    String LIGHTS_OUT_NOTIF_VIEW = "lights_out_notif_view";
+
     /** */
     @Provides
     @RootView
@@ -44,6 +51,14 @@ public interface StatusBarFragmentModule {
     @StatusBarFragmentScope
     static BatteryMeterView provideBatteryMeterView(@RootView PhoneStatusBarView view) {
         return view.findViewById(R.id.battery);
+    }
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
+    @Named(LIGHTS_OUT_NOTIF_VIEW)
+    static View provideLightsOutNotifView(@RootView PhoneStatusBarView view) {
+        return view.findViewById(R.id.notification_lights_out);
     }
 
     /** */
