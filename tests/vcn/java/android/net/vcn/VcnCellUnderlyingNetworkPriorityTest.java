@@ -36,7 +36,7 @@ public class VcnCellUnderlyingNetworkPriorityTest {
         return new VcnCellUnderlyingNetworkPriority.Builder()
                 .setNetworkQuality(NETWORK_QUALITY_OK)
                 .setAllowMetered(true /* allowMetered */)
-                .setAllowedPlmnIds(ALLOWED_PLMN_IDS)
+                .setAllowedOperatorPlmnIds(ALLOWED_PLMN_IDS)
                 .setAllowedSpecificCarrierIds(ALLOWED_CARRIER_IDS)
                 .setAllowRoaming(true /* allowRoaming */)
                 .setRequireOpportunistic(true /* requireOpportunistic */)
@@ -48,7 +48,7 @@ public class VcnCellUnderlyingNetworkPriorityTest {
         final VcnCellUnderlyingNetworkPriority networkPriority = getTestNetworkPriority();
         assertEquals(NETWORK_QUALITY_OK, networkPriority.getNetworkQuality());
         assertTrue(networkPriority.allowMetered());
-        assertEquals(ALLOWED_PLMN_IDS, networkPriority.getAllowedPlmnIds());
+        assertEquals(ALLOWED_PLMN_IDS, networkPriority.getAllowedOperatorPlmnIds());
         assertEquals(ALLOWED_CARRIER_IDS, networkPriority.getAllowedSpecificCarrierIds());
         assertTrue(networkPriority.allowRoaming());
         assertTrue(networkPriority.requireOpportunistic());
@@ -60,7 +60,7 @@ public class VcnCellUnderlyingNetworkPriorityTest {
                 new VcnCellUnderlyingNetworkPriority.Builder().build();
         assertEquals(NETWORK_QUALITY_ANY, networkPriority.getNetworkQuality());
         assertFalse(networkPriority.allowMetered());
-        assertEquals(new HashSet<String>(), networkPriority.getAllowedPlmnIds());
+        assertEquals(new HashSet<String>(), networkPriority.getAllowedOperatorPlmnIds());
         assertEquals(new HashSet<Integer>(), networkPriority.getAllowedSpecificCarrierIds());
         assertFalse(networkPriority.allowRoaming());
         assertFalse(networkPriority.requireOpportunistic());

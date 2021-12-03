@@ -271,4 +271,40 @@ public class VcnGatewayConnectionConfigTest {
         assertNotEquals(tunnelParams, anotherTunnelParams);
         assertNotEquals(config, anotherConfig);
     }
+
+    private static VcnGatewayConnectionConfig buildTestConfigWithVcnUnderlyingNetworkPriorities(
+            LinkedHashSet<VcnUnderlyingNetworkPriority> networkPriorities) {
+        return buildTestConfigWithExposedCaps(
+                new VcnGatewayConnectionConfig.Builder(
+                                "buildTestConfigWithVcnUnderlyingNetworkPriorities",
+                                TUNNEL_CONNECTION_PARAMS)
+                        .setVcnUnderlyingNetworkPriorities(networkPriorities),
+                EXPOSED_CAPS);
+    }
+
+    @Test
+    public void testVcnUnderlyingNetworkPrioritiesEquality() throws Exception {
+        final VcnGatewayConnectionConfig config =
+                buildTestConfigWithVcnUnderlyingNetworkPriorities(UNDERLYING_NETWORK_PRIORITIES);
+
+        final LinkedHashSet<VcnUnderlyingNetworkPriority> networkPrioritiesEqual =
+                new LinkedHashSet();
+        networkPrioritiesEqual.add(VcnCellUnderlyingNetworkPriorityTest.getTestNetworkPriority());
+        networkPrioritiesEqual.add(VcnWifiUnderlyingNetworkPriorityTest.getTestNetworkPriority());
+        final VcnGatewayConnectionConfig configEqual =
+                buildTestConfigWithVcnUnderlyingNetworkPriorities(networkPrioritiesEqual);
+
+        final LinkedHashSet<VcnUnderlyingNetworkPriority> networkPrioritiesNotEqual =
+                new LinkedHashSet();
+        networkPrioritiesNotEqual.add(
+                VcnWifiUnderlyingNetworkPriorityTest.getTestNetworkPriority());
+        final VcnGatewayConnectionConfig configNotEqual =
+                buildTestConfigWithVcnUnderlyingNetworkPriorities(networkPrioritiesNotEqual);
+
+        assertEquals(UNDERLYING_NETWORK_PRIORITIES, networkPrioritiesEqual);
+        assertEquals(config, configEqual);
+
+        assertNotEquals(UNDERLYING_NETWORK_PRIORITIES, networkPrioritiesNotEqual);
+        assertNotEquals(config, configNotEqual);
+    }
 }
