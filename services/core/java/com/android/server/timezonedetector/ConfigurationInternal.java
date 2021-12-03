@@ -40,6 +40,7 @@ public final class ConfigurationInternal {
     private final boolean mTelephonyDetectionSupported;
     private final boolean mGeoDetectionSupported;
     private final boolean mTelephonyFallbackSupported;
+    private final boolean mEnhancedMetricsCollectionEnabled;
     private final boolean mAutoDetectionEnabledSetting;
     private final @UserIdInt int mUserId;
     private final boolean mUserConfigAllowed;
@@ -50,6 +51,7 @@ public final class ConfigurationInternal {
         mTelephonyDetectionSupported = builder.mTelephonyDetectionSupported;
         mGeoDetectionSupported = builder.mGeoDetectionSupported;
         mTelephonyFallbackSupported = builder.mTelephonyFallbackSupported;
+        mEnhancedMetricsCollectionEnabled = builder.mEnhancedMetricsCollectionEnabled;
         mAutoDetectionEnabledSetting = builder.mAutoDetectionEnabledSetting;
 
         mUserId = builder.mUserId;
@@ -79,6 +81,15 @@ public final class ConfigurationInternal {
      */
     public boolean isTelephonyFallbackSupported() {
         return mTelephonyFallbackSupported;
+    }
+
+    /**
+     * Returns {@code true} if the device can collect / report extra metrics information for QA
+     * / testers. These metrics might involve logging more expensive or more revealing data that
+     * would not be collected from the set of public users.
+     */
+    public boolean isEnhancedMetricsCollectionEnabled() {
+        return mEnhancedMetricsCollectionEnabled;
     }
 
     /** Returns the value of the auto time zone detection enabled setting. */
@@ -227,6 +238,7 @@ public final class ConfigurationInternal {
                 && mTelephonyDetectionSupported == that.mTelephonyDetectionSupported
                 && mGeoDetectionSupported == that.mGeoDetectionSupported
                 && mTelephonyFallbackSupported == that.mTelephonyFallbackSupported
+                && mEnhancedMetricsCollectionEnabled == that.mEnhancedMetricsCollectionEnabled
                 && mAutoDetectionEnabledSetting == that.mAutoDetectionEnabledSetting
                 && mLocationEnabledSetting == that.mLocationEnabledSetting
                 && mGeoDetectionEnabledSetting == that.mGeoDetectionEnabledSetting;
@@ -235,7 +247,8 @@ public final class ConfigurationInternal {
     @Override
     public int hashCode() {
         return Objects.hash(mUserId, mUserConfigAllowed, mTelephonyDetectionSupported,
-                mGeoDetectionSupported, mTelephonyFallbackSupported, mAutoDetectionEnabledSetting,
+                mGeoDetectionSupported, mTelephonyFallbackSupported,
+                mEnhancedMetricsCollectionEnabled, mAutoDetectionEnabledSetting,
                 mLocationEnabledSetting, mGeoDetectionEnabledSetting);
     }
 
@@ -247,6 +260,7 @@ public final class ConfigurationInternal {
                 + ", mTelephonyDetectionSupported=" + mTelephonyDetectionSupported
                 + ", mGeoDetectionSupported=" + mGeoDetectionSupported
                 + ", mTelephonyFallbackSupported=" + mTelephonyFallbackSupported
+                + ", mEnhancedMetricsCollectionEnabled=" + mEnhancedMetricsCollectionEnabled
                 + ", mAutoDetectionEnabledSetting=" + mAutoDetectionEnabledSetting
                 + ", mLocationEnabledSetting=" + mLocationEnabledSetting
                 + ", mGeoDetectionEnabledSetting=" + mGeoDetectionEnabledSetting
@@ -264,6 +278,7 @@ public final class ConfigurationInternal {
         private boolean mTelephonyDetectionSupported;
         private boolean mGeoDetectionSupported;
         private boolean mTelephonyFallbackSupported;
+        private boolean mEnhancedMetricsCollectionEnabled;
         private boolean mAutoDetectionEnabledSetting;
         private boolean mLocationEnabledSetting;
         private boolean mGeoDetectionEnabledSetting;
@@ -284,6 +299,7 @@ public final class ConfigurationInternal {
             this.mTelephonyDetectionSupported = toCopy.mTelephonyDetectionSupported;
             this.mTelephonyFallbackSupported = toCopy.mTelephonyFallbackSupported;
             this.mGeoDetectionSupported = toCopy.mGeoDetectionSupported;
+            this.mEnhancedMetricsCollectionEnabled = toCopy.mEnhancedMetricsCollectionEnabled;
             this.mAutoDetectionEnabledSetting = toCopy.mAutoDetectionEnabledSetting;
             this.mLocationEnabledSetting = toCopy.mLocationEnabledSetting;
             this.mGeoDetectionEnabledSetting = toCopy.mGeoDetectionEnabledSetting;
@@ -319,6 +335,14 @@ public final class ConfigurationInternal {
          */
         public Builder setTelephonyFallbackSupported(boolean supported) {
             mTelephonyFallbackSupported = supported;
+            return this;
+        }
+
+        /**
+         * Sets the value for enhanced metrics collection.
+         */
+        public Builder setEnhancedMetricsCollectionEnabled(boolean enabled) {
+            mEnhancedMetricsCollectionEnabled = enabled;
             return this;
         }
 
