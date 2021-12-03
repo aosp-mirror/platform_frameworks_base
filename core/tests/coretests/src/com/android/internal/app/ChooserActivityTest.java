@@ -269,7 +269,7 @@ public class ChooserActivityTest {
         onView(withId(R.id.content_preview_thumbnail)).check(matches(isDisplayed()));
     }
 
-    @Test
+    @Test @Ignore
     public void twoOptionsAndUserSelectsOne() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -298,7 +298,7 @@ public class ChooserActivityTest {
         assertThat(chosen[0], is(toChoose));
     }
 
-    @Test
+    @Test @Ignore
     public void fourOptionsStackedIntoOneTarget() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
 
@@ -351,7 +351,7 @@ public class ChooserActivityTest {
         }
     }
 
-    @Test
+    @Test @Ignore
     public void updateChooserCountsAndModelAfterUserSelection() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -461,7 +461,7 @@ public class ChooserActivityTest {
         assertThat(chosen[0], is(toChoose));
     }
 
-    @Test
+    @Test @Ignore
     public void hasOtherProfileTwoOptionsAndUserSelectsOne() throws Exception {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
@@ -500,7 +500,7 @@ public class ChooserActivityTest {
         assertThat(chosen[0], is(toChoose));
     }
 
-    @Test
+    @Test @Ignore
     public void hasLastChosenActivityAndOtherProfile() throws Exception {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
@@ -1549,7 +1549,7 @@ public class ChooserActivityTest {
         assertThat(activity.getWorkListAdapter().getCount(), is(workProfileTargets));
     }
 
-    @Test
+    @Test @Ignore
     public void testWorkTab_selectingWorkTabAppOpensAppInWorkProfile() throws InterruptedException {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
@@ -1947,7 +1947,7 @@ public class ChooserActivityTest {
                         .SharesheetTargetSelectedEvent.SHARESHEET_COPY_TARGET_SELECTED.getId()));
     }
 
-    @Test
+    @Test @Ignore
     public void testSwitchProfileLogging() throws InterruptedException {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
