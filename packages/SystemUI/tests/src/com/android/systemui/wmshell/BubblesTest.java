@@ -125,6 +125,7 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.onehanded.OneHandedController;
 
 import com.google.common.collect.ImmutableList;
 
@@ -138,6 +139,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Tests the NotificationEntryManager setup with BubbleController.
@@ -249,6 +251,8 @@ public class BubblesTest extends SysuiTestCase {
     private AuthController mAuthController;
     @Mock
     private TaskViewTransitions mTaskViewTransitions;
+    @Mock
+    private Optional<OneHandedController> mOneHandedOptional;
 
     private TestableBubblePositioner mPositioner;
 
@@ -345,6 +349,7 @@ public class BubblesTest extends SysuiTestCase {
                 mShellTaskOrganizer,
                 mPositioner,
                 mock(DisplayController.class),
+                mOneHandedOptional,
                 syncExecutor,
                 mock(Handler.class),
                 mTaskViewTransitions,

@@ -19,8 +19,11 @@ package com.android.systemui.wmshell;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -105,6 +108,7 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.onehanded.OneHandedController;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -116,6 +120,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Tests the NotifPipeline setup with BubbleController.
@@ -220,6 +225,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock
     private TaskViewTransitions mTaskViewTransitions;
+    @Mock
+    private Optional<OneHandedController> mOneHandedOptional;
 
     private TestableBubblePositioner mPositioner;
 
@@ -307,6 +314,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mShellTaskOrganizer,
                 mPositioner,
                 mock(DisplayController.class),
+                mOneHandedOptional,
                 syncExecutor,
                 mock(Handler.class),
                 mTaskViewTransitions,
