@@ -432,10 +432,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mAodFp.setAlpha(255 * mInterpolatedDarkAmount);
         }
 
-        if (mShowAodLockIcon) {
-            mView.setTranslationX(offsetX);
-            mView.setTranslationY(offsetY);
-        }
+        mView.setTranslationX(offsetX);
+        mView.setTranslationY(offsetY);
     }
 
     private void updateIsUdfpsEnrolled() {
