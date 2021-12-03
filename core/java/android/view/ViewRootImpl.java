@@ -8586,13 +8586,13 @@ public final class ViewRootImpl implements ViewParent,
             MotionEvent me = (MotionEvent) event;
             if (me.getAction() == MotionEvent.ACTION_CANCEL) {
                 EventLog.writeEvent(EventLogTags.VIEW_ENQUEUE_INPUT_EVENT, "Motion - Cancel",
-                        getTitle());
+                        getTitle().toString());
             }
         } else if (event instanceof KeyEvent) {
             KeyEvent ke = (KeyEvent) event;
             if (ke.isCanceled()) {
                 EventLog.writeEvent(EventLogTags.VIEW_ENQUEUE_INPUT_EVENT, "Key - Cancel",
-                        getTitle());
+                        getTitle().toString());
             }
         }
         // Always enqueue the input event in order, regardless of its time stamp.
