@@ -401,7 +401,7 @@ public class UnderlyingNetworkController {
                     new TreeSet<>(
                             UnderlyingNetworkRecord.getComparator(
                                     mVcnContext,
-                                    mConnectionConfig.getVcnUnderlyingNetworkPriorities(),
+                                    mConnectionConfig.getVcnUnderlyingNetworkTemplates(),
                                     mSubscriptionGroup,
                                     mLastSnapshot,
                                     mCurrentRecord,
@@ -502,7 +502,7 @@ public class UnderlyingNetworkController {
         pw.increaseIndent();
         int index = 0;
         for (VcnUnderlyingNetworkTemplate priority :
-                mConnectionConfig.getVcnUnderlyingNetworkPriorities()) {
+                mConnectionConfig.getVcnUnderlyingNetworkTemplates()) {
             pw.println("Priority index: " + index);
             priority.dump(pw);
             index++;
@@ -518,7 +518,7 @@ public class UnderlyingNetworkController {
                 record.dump(
                         mVcnContext,
                         pw,
-                        mConnectionConfig.getVcnUnderlyingNetworkPriorities(),
+                        mConnectionConfig.getVcnUnderlyingNetworkTemplates(),
                         mSubscriptionGroup,
                         mLastSnapshot,
                         mCurrentRecord,

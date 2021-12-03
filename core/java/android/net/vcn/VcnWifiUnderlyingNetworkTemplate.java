@@ -16,28 +16,58 @@
 package android.net.vcn;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
+import static com.android.server.vcn.util.PersistableBundleUtils.STRING_DESERIALIZER;
+import static com.android.server.vcn.util.PersistableBundleUtils.STRING_SERIALIZER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.net.NetworkCapabilities;
 import android.os.PersistableBundle;
+import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.vcn.util.PersistableBundleUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
 
-// TODO: Add documents
-/** @hide */
+/**
+ * This class represents a configuration for a network template class of underlying Carrier WiFi
+ * networks.
+ *
+ * <p>See {@link VcnUnderlyingNetworkTemplate}
+ *
+ * @hide
+ */
 public final class VcnWifiUnderlyingNetworkTemplate extends VcnUnderlyingNetworkTemplate {
-    private static final String SSID_KEY = "mSsid";
-    @Nullable private final String mSsid;
+    private static final String SSIDS_KEY = "mSsids";
+    @Nullable private final Set<String> mSsids;
 
     private VcnWifiUnderlyingNetworkTemplate(
-            int networkQuality, boolean allowMetered, String ssid) {
-        super(NETWORK_PRIORITY_TYPE_WIFI, networkQuality, allowMetered);
-        mSsid = ssid;
+            int networkQuality, int meteredMatchCriteria, Set<String> ssids) {
+        super(NETWORK_PRIORITY_TYPE_WIFI, networkQuality, meteredMatchCriteria);
+        mSsids = new ArraySet<>(ssids);
 
         validate();
+    }
+
+    /** @hide */
+    @Override
+    protected void validate() {
+        super.validate();
+        validateSsids(mSsids);
+    }
+
+    private static void validateSsids(Set<String> ssids) {
+        Objects.requireNonNull(ssids, "ssids is null");
+
+        for (String ssid : ssids) {
+            Objects.requireNonNull(ssid, "found null value ssid");
+        }
     }
 
     /** @hide */
@@ -48,9 +78,14 @@ public final class VcnWifiUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
         Objects.requireNonNull(in, "PersistableBundle is null");
 
         final int networkQuality = in.getInt(NETWORK_QUALITY_KEY);
-        final boolean allowMetered = in.getBoolean(ALLOW_METERED_KEY);
-        final String ssid = in.getString(SSID_KEY);
-        return new VcnWifiUnderlyingNetworkTemplate(networkQuality, allowMetered, ssid);
+        final int meteredMatchCriteria = in.getInt(METERED_MATCH_KEY);
+
+        final PersistableBundle ssidsBundle = in.getPersistableBundle(SSIDS_KEY);
+        Objects.requireNonNull(ssidsBundle, "ssidsBundle is null");
+        final Set<String> ssids =
+                new ArraySet<String>(
+                        PersistableBundleUtils.toList(ssidsBundle, STRING_DESERIALIZER));
+        return new VcnWifiUnderlyingNetworkTemplate(networkQuality, meteredMatchCriteria, ssids);
     }
 
     /** @hide */
@@ -59,13 +94,17 @@ public final class VcnWifiUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
     @VisibleForTesting(visibility = Visibility.PROTECTED)
     public PersistableBundle toPersistableBundle() {
         final PersistableBundle result = super.toPersistableBundle();
-        result.putString(SSID_KEY, mSsid);
+
+        final PersistableBundle ssidsBundle =
+                PersistableBundleUtils.fromList(new ArrayList<>(mSsids), STRING_SERIALIZER);
+        result.putPersistableBundle(SSIDS_KEY, ssidsBundle);
+
         return result;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), mSsid);
+        return Objects.hash(super.hashCode(), mSsids);
     }
 
     @Override
@@ -79,49 +118,90 @@ public final class VcnWifiUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
         }
 
         final VcnWifiUnderlyingNetworkTemplate rhs = (VcnWifiUnderlyingNetworkTemplate) other;
-        return mSsid.equals(rhs.mSsid);
+        return mSsids.equals(rhs.mSsids);
     }
 
     /** @hide */
     @Override
     void dumpTransportSpecificFields(IndentingPrintWriter pw) {
-        pw.println("mSsid: " + mSsid);
+        pw.println("mSsids: " + mSsids);
     }
 
-    /** Retrieve the required SSID, or {@code null} if there is no requirement on SSID. */
-    @Nullable
-    public String getSsid() {
-        return mSsid;
+    /**
+     * Retrieve the matching SSIDs, or an empty set if any SSID is acceptable.
+     *
+     * @see Builder#setSsids(Set)
+     */
+    @NonNull
+    public Set<String> getSsids() {
+        return Collections.unmodifiableSet(mSsids);
     }
 
     /** This class is used to incrementally build VcnWifiUnderlyingNetworkTemplate objects. */
-    public static class Builder extends VcnUnderlyingNetworkTemplate.Builder<Builder> {
-        @Nullable private String mSsid;
+    public static final class Builder {
+        private int mNetworkQuality = NETWORK_QUALITY_ANY;
+        private int mMeteredMatchCriteria = MATCH_ANY;
+        @NonNull private final Set<String> mSsids = new ArraySet<>();
 
         /** Construct a Builder object. */
         public Builder() {}
 
         /**
-         * Set the required SSID.
+         * Set the required network quality to match this template.
          *
-         * @param ssid the required SSID, or {@code null} if any SSID is acceptable.
+         * <p>Network quality is a aggregation of multiple signals that reflect the network link
+         * metrics. For example, the network validation bit (see {@link
+         * NetworkCapabilities#NET_CAPABILITY_VALIDATED}), estimated first hop transport bandwidth
+         * and signal strength.
+         *
+         * @param networkQuality the required network quality. Defaults to NETWORK_QUALITY_ANY
+         * @hide
          */
         @NonNull
-        public Builder setSsid(@Nullable String ssid) {
-            mSsid = ssid;
+        public Builder setNetworkQuality(@NetworkQuality int networkQuality) {
+            validateNetworkQuality(networkQuality);
+
+            mNetworkQuality = networkQuality;
+            return this;
+        }
+
+        /**
+         * Set the matching criteria for metered networks.
+         *
+         * @param matchCriteria the matching criteria for metered networks. Defaults to {@link
+         *     #MATCH_ANY}. See {@link NetworkCapabilities#NET_CAPABILITY_NOT_METERED}
+         */
+        // The matching getter is defined in the super class. Please see {@link
+        // VcnUnderlyingNetworkTemplate#getMetered()}
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @NonNull
+        public Builder setMetered(@MatchCriteria int matchCriteria) {
+            validateMatchCriteria(matchCriteria, "setMetered");
+
+            mMeteredMatchCriteria = matchCriteria;
+            return this;
+        }
+
+        /**
+         * Set the SSIDs with which a network can match this priority rule.
+         *
+         * @param ssids the matching SSIDs. Network with one of the matching SSIDs can match this
+         *     priority rule. Defaults to an empty set, allowing ANY SSID.
+         */
+        @NonNull
+        public Builder setSsids(@NonNull Set<String> ssids) {
+            validateSsids(ssids);
+
+            mSsids.clear();
+            mSsids.addAll(ssids);
             return this;
         }
 
         /** Build the VcnWifiUnderlyingNetworkTemplate. */
         @NonNull
         public VcnWifiUnderlyingNetworkTemplate build() {
-            return new VcnWifiUnderlyingNetworkTemplate(mNetworkQuality, mAllowMetered, mSsid);
-        }
-
-        /** @hide */
-        @Override
-        Builder self() {
-            return this;
+            return new VcnWifiUnderlyingNetworkTemplate(
+                    mNetworkQuality, mMeteredMatchCriteria, mSsids);
         }
     }
 }

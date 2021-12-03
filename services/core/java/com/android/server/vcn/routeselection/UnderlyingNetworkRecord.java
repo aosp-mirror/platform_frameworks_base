@@ -32,7 +32,7 @@ import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscription
 import com.android.server.vcn.VcnContext;
 
 import java.util.Comparator;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -77,7 +77,7 @@ public class UnderlyingNetworkRecord {
 
     static Comparator<UnderlyingNetworkRecord> getComparator(
             VcnContext vcnContext,
-            LinkedHashSet<VcnUnderlyingNetworkTemplate> underlyingNetworkPriorities,
+            List<VcnUnderlyingNetworkTemplate> underlyingNetworkTemplates,
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
@@ -87,7 +87,7 @@ public class UnderlyingNetworkRecord {
                     NetworkPriorityClassifier.calculatePriorityClass(
                             vcnContext,
                             left,
-                            underlyingNetworkPriorities,
+                            underlyingNetworkTemplates,
                             subscriptionGroup,
                             snapshot,
                             currentlySelected,
@@ -96,7 +96,7 @@ public class UnderlyingNetworkRecord {
                     NetworkPriorityClassifier.calculatePriorityClass(
                             vcnContext,
                             right,
-                            underlyingNetworkPriorities,
+                            underlyingNetworkTemplates,
                             subscriptionGroup,
                             snapshot,
                             currentlySelected,
@@ -133,7 +133,7 @@ public class UnderlyingNetworkRecord {
     void dump(
             VcnContext vcnContext,
             IndentingPrintWriter pw,
-            LinkedHashSet<VcnUnderlyingNetworkTemplate> underlyingNetworkPriorities,
+            List<VcnUnderlyingNetworkTemplate> underlyingNetworkTemplates,
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
@@ -145,7 +145,7 @@ public class UnderlyingNetworkRecord {
                 NetworkPriorityClassifier.calculatePriorityClass(
                         vcnContext,
                         this,
-                        underlyingNetworkPriorities,
+                        underlyingNetworkTemplates,
                         subscriptionGroup,
                         snapshot,
                         currentlySelected,
