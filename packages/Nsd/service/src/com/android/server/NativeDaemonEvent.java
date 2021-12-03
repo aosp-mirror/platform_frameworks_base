@@ -16,8 +16,7 @@
 
 package com.android.server;
 
-import android.util.Slog;
-import com.google.android.collect.Lists;
+import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.util.ArrayList;
@@ -179,7 +178,7 @@ public class NativeDaemonEvent {
      * {@link #getMessage()} for any events matching the requested code.
      */
     public static String[] filterMessageList(NativeDaemonEvent[] events, int matchCode) {
-        final ArrayList<String> result = Lists.newArrayList();
+        final ArrayList<String> result = new ArrayList<>();
         for (NativeDaemonEvent event : events) {
             if (event.getCode() == matchCode) {
                 result.add(event.getMessage());
@@ -212,7 +211,7 @@ public class NativeDaemonEvent {
         int wordEnd = -1;
         boolean quoted = false;
 
-        if (DEBUG_ROUTINE) Slog.e(LOGTAG, "parsing '" + rawEvent + "'");
+        if (DEBUG_ROUTINE) Log.e(LOGTAG, "parsing '" + rawEvent + "'");
         if (rawEvent.charAt(current) == '\"') {
             quoted = true;
             current++;
@@ -240,14 +239,14 @@ public class NativeDaemonEvent {
             word = word.replace("\\\\", "\\");
             word = word.replace("\\\"", "\"");
 
-            if (DEBUG_ROUTINE) Slog.e(LOGTAG, "found '" + word + "'");
+            if (DEBUG_ROUTINE) Log.e(LOGTAG, "found '" + word + "'");
             parsed.add(word);
 
             // find the beginning of the next word - either of these options
             int nextSpace = rawEvent.indexOf(' ', current);
             int nextQuote = rawEvent.indexOf(" \"", current);
             if (DEBUG_ROUTINE) {
-                Slog.e(LOGTAG, "nextSpace=" + nextSpace + ", nextQuote=" + nextQuote);
+                Log.e(LOGTAG, "nextSpace=" + nextSpace + ", nextQuote=" + nextQuote);
             }
             if (nextQuote > -1 && nextQuote <= nextSpace) {
                 quoted = true;
@@ -259,8 +258,8 @@ public class NativeDaemonEvent {
                 }
             } // else we just start the next word after the current and read til the end
             if (DEBUG_ROUTINE) {
-                Slog.e(LOGTAG, "next loop - current=" + current +
-                        ", length=" + length + ", quoted=" + quoted);
+                Log.e(LOGTAG, "next loop - current=" + current
+                        + ", length=" + length + ", quoted=" + quoted);
             }
         }
         return parsed.toArray(new String[parsed.size()]);
