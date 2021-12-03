@@ -928,7 +928,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final long BROADCAST_DELAY_DURING_STARTUP = 10 * 1000L; // 10 seconds (in millis)
     private static final long BROADCAST_DELAY = 1 * 1000L; // 1 second (in millis)
 
-    private static final long PRUNE_UNUSED_STATIC_SHARED_LIBRARIES_DELAY =
+    private static final long PRUNE_UNUSED_SHARED_LIBRARIES_DELAY =
             TimeUnit.MINUTES.toMillis(3); // 3 minutes
 
     // When the service constructor finished plus a delay (used for broadcast delay computation)
@@ -1259,7 +1259,12 @@ public class PackageManagerService extends IPackageManager.Stub
     void schedulePruneUnusedStaticSharedLibraries(boolean delay) {
         mHandler.removeMessages(PRUNE_UNUSED_STATIC_SHARED_LIBRARIES);
         mHandler.sendEmptyMessageDelayed(PRUNE_UNUSED_STATIC_SHARED_LIBRARIES,
-                delay ? PRUNE_UNUSED_STATIC_SHARED_LIBRARIES_DELAY : 0);
+                delay ? getPruneUnusedSharedLibrariesDelay() : 0);
+    }
+
+    private static long getPruneUnusedSharedLibrariesDelay() {
+        return SystemProperties.getLong("debug.pm.prune_unused_shared_libraries_delay",
+                PRUNE_UNUSED_SHARED_LIBRARIES_DELAY);
     }
 
     @Override
@@ -2881,6 +2886,21 @@ public class PackageManagerService extends IPackageManager.Stub
         throw new IOException("Failed to free " + bytes + " on storage device at " + file);
     }
 
+    private PackageSetting getLibraryPackage(SharedLibraryInfo libInfo) {
+        final VersionedPackage declaringPackage = libInfo.getDeclaringPackage();
+        if (libInfo.isStatic()) {
+            // Resolve the package name - we use synthetic package names internally
+            final String internalPackageName = resolveInternalPackageNameLPr(
+                    declaringPackage.getPackageName(),
+                    declaringPackage.getLongVersionCode());
+            return mSettings.getPackageLPr(internalPackageName);
+        }
+        if (libInfo.isSdk()) {
+            return mSettings.getPackageLPr(declaringPackage.getPackageName());
+        }
+        return null;
+    }
+
     boolean pruneUnusedStaticSharedLibraries(long neededSpace, long maxCachePeriod)
             throws IOException {
         final StorageManager storage = mInjector.getSystemService(StorageManager.class);
@@ -2889,6 +2909,9 @@ public class PackageManagerService extends IPackageManager.Stub
         List<VersionedPackage> packagesToDelete = null;
         final long now = System.currentTimeMillis();
 
+        // Important: We skip shared libs used for some user since
+        // in such a case we need to keep the APK on the device. The check for
+        // a lib being used for any user is performed by the uninstall call.
         synchronized (mLock) {
             final int libCount = mSharedLibraries.size();
             for (int i = 0; i < libCount; i++) {
@@ -2900,22 +2923,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 final int versionCount = versionedLib.size();
                 for (int j = 0; j < versionCount; j++) {
                     SharedLibraryInfo libInfo = versionedLib.valueAt(j);
-                    // Skip packages that are not static shared libs.
-                    if (!libInfo.isStatic()) {
-                        break;
+                    final PackageSetting ps = getLibraryPackage(libInfo);
+                    if (ps == null) {
+                        continue;
                     }
-                    // Important: We skip static shared libs used for some user since
-                    // in such a case we need to keep the APK on the device. The check for
-                    // a lib being used for any user is performed by the uninstall call.
-                    final VersionedPackage declaringPackage = libInfo.getDeclaringPackage();
-                    // Resolve the package name - we use synthetic package names internally
-                    final String internalPackageName = resolveInternalPackageNameLPr(
-                            declaringPackage.getPackageName(),
-                            declaringPackage.getLongVersionCode());
-                    final PackageSetting ps = mSettings.getPackageLPr(internalPackageName);
-                    // Skip unused static shared libs cached less than the min period
-                    // to prevent pruning a lib needed by a subsequently installed package.
-                    if (ps == null || now - ps.getLastUpdateTime() < maxCachePeriod) {
+                    // Skip unused libs cached less than the min period to prevent pruning a lib
+                    // needed by a subsequently installed package.
+                    if (now - ps.getLastUpdateTime() < maxCachePeriod) {
                         continue;
                     }
 
@@ -2926,8 +2940,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (packagesToDelete == null) {
                         packagesToDelete = new ArrayList<>();
                     }
-                    packagesToDelete.add(new VersionedPackage(internalPackageName,
-                            declaringPackage.getLongVersionCode()));
+                    packagesToDelete.add(new VersionedPackage(ps.getPkg().getPackageName(),
+                            libInfo.getDeclaringPackage().getLongVersionCode()));
                 }
             }
         }
