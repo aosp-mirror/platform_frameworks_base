@@ -1350,6 +1350,12 @@
       phone number and device IDs, whether a call is active, and the remote number
       connected by a call.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=80]-->
+    <string name="permlab_readBasicPhoneState">read basic telephony status and identity </string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permdesc_readBasicPhoneState">Allows the app to access the basic telephony
+        features of the device.</string>
+
     <!-- Title of an application permission.  When granted the user is giving access to a third
          party app to route its calls through the system. -->
     <string name="permlab_manageOwnCalls">route calls through the system</string>
