@@ -406,9 +406,8 @@ public class CompanionDeviceManagerService extends SystemService {
 
         @Override
         public List<AssociationInfo> getAssociations(String packageName, int userId) {
-            final int callingUid = getCallingUserId();
             if (!checkCallerCanManageAssociationsForPackage(getContext(), userId, packageName)) {
-                throw new SecurityException("Caller (uid=" + callingUid + ") does not have "
+                throw new SecurityException("Caller (uid=" + getCallingUid() + ") does not have "
                         + "permissions to get associations for u" + userId + "/" + packageName);
             }
 
