@@ -12105,6 +12105,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (canCut()) {
                 info.addAction(AccessibilityNodeInfo.ACTION_CUT);
             }
+            if (canReplace()) {
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SHOW_SUGGESTIONS);
+            }
             if (canShare()) {
                 info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
                         ACCESSIBILITY_ACTION_SHARE,
@@ -12419,6 +12422,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             return false;
             default: {
+                // New ids have static blocks to assign values, so they can't be used in a case
+                // block.
+                if (action == R.id.accessibilityActionShowSuggestions) {
+                    return isFocused() && canReplace() && onTextContextMenuItem(ID_REPLACE);
+                }
                 return super.performAccessibilityActionInternal(action, arguments);
             }
         }
@@ -13003,6 +13011,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return false;
+    }
+
+    boolean canReplace() {
+        if (hasPasswordTransformationMethod()) {
+            return false;
+        }
+
+        return (mText.length() > 0) && (mText instanceof Editable) && (mEditor != null)
+                && isSuggestionsEnabled() && mEditor.shouldOfferToShowSuggestions();
     }
 
     boolean canShare() {
