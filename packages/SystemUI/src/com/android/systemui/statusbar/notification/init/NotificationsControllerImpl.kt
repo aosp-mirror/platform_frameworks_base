@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.notification.collection.inflation.Notifica
 import com.android.systemui.statusbar.notification.collection.init.NotifPipelineInitializer
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
+import com.android.systemui.statusbar.notification.collection.provider.DebugModeFilterProvider
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.interruption.HeadsUpController
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
@@ -65,6 +66,7 @@ class NotificationsControllerImpl @Inject constructor(
     private val notifPipelineFlags: NotifPipelineFlags,
     private val notificationListener: NotificationListener,
     private val entryManager: NotificationEntryManager,
+    private val debugModeFilterProvider: DebugModeFilterProvider,
     private val legacyRanker: NotificationRankingManager,
     private val commonNotifCollection: Lazy<CommonNotifCollection>,
     private val notifPipeline: Lazy<NotifPipeline>,
@@ -134,6 +136,9 @@ class NotificationsControllerImpl @Inject constructor(
             headsUpController.attach(entryManager, headsUpManager)
             groupManagerLegacy.get().setHeadsUpManager(headsUpManager)
             groupAlertTransferHelper.setHeadsUpManager(headsUpManager)
+            debugModeFilterProvider.registerInvalidationListener {
+                entryManager.updateNotifications("debug mode filter changed")
+            }
 
             entryManager.initialize(notificationListener, legacyRanker)
         }
