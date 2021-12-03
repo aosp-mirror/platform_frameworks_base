@@ -26,6 +26,7 @@ import com.android.systemui.unfold.config.ResourceUnfoldTransitionConfig
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.progress.FixedTimingTransitionProgressProvider
 import com.android.systemui.unfold.progress.PhysicsBasedUnfoldTransitionProgressProvider
+import com.android.systemui.unfold.util.ScaleAwareTransitionProgressProvider
 import com.android.systemui.unfold.updates.DeviceFoldStateProvider
 import com.android.systemui.unfold.updates.hinge.EmptyHingeAngleProvider
 import com.android.systemui.unfold.updates.hinge.HingeSensorAngleProvider
@@ -62,7 +63,7 @@ fun createUnfoldTransitionProgressProvider(
         mainExecutor
     )
 
-    return if (config.isHingeAngleEnabled) {
+    val unfoldTransitionProgressProvider = if (config.isHingeAngleEnabled) {
         PhysicsBasedUnfoldTransitionProgressProvider(
             mainHandler,
             foldStateProvider
@@ -70,6 +71,10 @@ fun createUnfoldTransitionProgressProvider(
     } else {
         FixedTimingTransitionProgressProvider(foldStateProvider)
     }
+    return ScaleAwareTransitionProgressProvider(
+            unfoldTransitionProgressProvider,
+            context.contentResolver
+    )
 }
 
 fun createConfig(context: Context): UnfoldTransitionConfig =

@@ -2,7 +2,6 @@ package com.android.systemui.unfold.util
 
 import android.content.Context
 import android.os.RemoteException
-import android.util.Log
 import android.view.IRotationWatcher
 import android.view.IWindowManager
 import android.view.Surface
