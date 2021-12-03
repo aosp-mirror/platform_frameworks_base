@@ -108,7 +108,11 @@ class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParame
         testSpec.assertWm {
             isAppWindowVisible(imeTestApp.component)
                 .then()
+                .isAppSnapshotStartingWindowVisibleFor(testApp.component, isOptional = true)
+                .then()
                 .isAppWindowVisible(testApp.component)
+                .then()
+                .isAppSnapshotStartingWindowVisibleFor(imeTestApp.component, isOptional = true)
                 .then()
                 .isAppWindowVisible(imeTestApp.component)
         }
