@@ -16,12 +16,14 @@
 
 package com.android.systemui.communal;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.app.communal.CommunalManager;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
@@ -36,7 +38,6 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class CommunalManagerUpdaterTest extends SysuiTestCase {
     private CommunalSourceMonitor mMonitor;
     @Mock
@@ -49,9 +50,16 @@ public class CommunalManagerUpdaterTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mContext.addMockSystemService(CommunalManager.class, mCommunalManager);
 
+        doAnswer(invocation -> {
+            final CommunalConditionsMonitor.Callback callback = invocation.getArgument(0);
+            callback.onConditionsChanged(true);
+            return null;
+        }).when(mCommunalConditionsMonitor).addCallback(any());
+
         mMonitor = new CommunalSourceMonitor(mCommunalConditionsMonitor);
         final CommunalManagerUpdater updater = new CommunalManagerUpdater(mContext, mMonitor);
         updater.start();
+        clearInvocations(mCommunalManager);
     }
 
     @Test
