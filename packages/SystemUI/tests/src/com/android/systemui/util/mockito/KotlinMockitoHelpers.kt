@@ -44,6 +44,11 @@ fun <T> any(type: Class<T>): T = Mockito.any<T>(type)
 inline fun <reified T> any(): T = any(T::class.java)
 
 /**
+ * Kotlin type-inferred version of Mockito.nullable()
+ */
+inline fun <reified T> nullable(): T? = Mockito.nullable(T::class.java)
+
+/**
  * Returns ArgumentCaptor.capture() as nullable type to avoid java.lang.IllegalStateException
  * when null is returned.
  *

@@ -27,4 +27,10 @@ interface FeatureFlags : FlagListenable {
 
     /** Returns a boolean value for the given flag.  */
     fun isEnabled(flag: ResourceBooleanFlag): Boolean
+
+    /** Returns a string value for the given flag.  */
+    fun getString(flag: StringFlag): String
+
+    /** Returns a string value for the given flag.  */
+    fun getString(flag: ResourceStringFlag): String
 }

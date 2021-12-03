@@ -26,6 +26,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -34,6 +35,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 import java.util.function.Consumer
+import org.mockito.Mockito.`when` as whenever
 
 /**
  * NOTE: This test is for the version of FeatureFlagManager in src-release, which should not allow
@@ -210,5 +212,91 @@ class FlagManagerTest : SysuiTestCase() {
         mFlagManager.dispatchListenersAndMaybeRestart(1)
         verify(restartAction).accept(eq(false))
         verifyNoMoreInteractions(restartAction)
+    }
+
+    @Test
+    fun testReadBooleanFlag() {
+        // test that null string returns null
+        whenever(mFlagSettingsHelper.getString(any())).thenReturn(null)
+        assertThat(mFlagManager.readFlagValue(1, BooleanFlagSerializer)).isNull()
+
+        // test that empty string returns null
+        whenever(mFlagSettingsHelper.getString(any())).thenReturn("")
+        assertThat(mFlagManager.readFlagValue(1, BooleanFlagSerializer)).isNull()
+
+        // test false
+        whenever(mFlagSettingsHelper.getString(any()))
+            .thenReturn("{\"type\":\"boolean\",\"value\":false}")
+        assertThat(mFlagManager.readFlagValue(1, BooleanFlagSerializer)).isFalse()
+
+        // test true
+        whenever(mFlagSettingsHelper.getString(any()))
+            .thenReturn("{\"type\":\"boolean\",\"value\":true}")
+        assertThat(mFlagManager.readFlagValue(1, BooleanFlagSerializer)).isTrue()
+
+        // Reading a value of a different type should just return null
+        whenever(mFlagSettingsHelper.getString(any()))
+            .thenReturn("{\"type\":\"string\",\"value\":\"foo\"}")
+        assertThat(mFlagManager.readFlagValue(1, BooleanFlagSerializer)).isNull()
+
+        // Reading a value that isn't json should throw an exception
+        assertThrows(InvalidFlagStorageException::class.java) {
+            whenever(mFlagSettingsHelper.getString(any())).thenReturn("1")
+            mFlagManager.readFlagValue(1, BooleanFlagSerializer)
+        }
+    }
+
+    @Test
+    fun testSerializeBooleanFlag() {
+        // test false
+        assertThat(BooleanFlagSerializer.toSettingsData(false))
+            .isEqualTo("{\"type\":\"boolean\",\"value\":false}")
+
+        // test true
+        assertThat(BooleanFlagSerializer.toSettingsData(true))
+            .isEqualTo("{\"type\":\"boolean\",\"value\":true}")
+    }
+
+    @Test
+    fun testReadStringFlag() {
+        // test that null string returns null
+        whenever(mFlagSettingsHelper.getString(any())).thenReturn(null)
+        assertThat(mFlagManager.readFlagValue(1, StringFlagSerializer)).isNull()
+
+        // test that empty string returns null
+        whenever(mFlagSettingsHelper.getString(any())).thenReturn("")
+        assertThat(mFlagManager.readFlagValue(1, StringFlagSerializer)).isNull()
+
+        // test json with the empty string value returns empty string
+        whenever(mFlagSettingsHelper.getString(any()))
+            .thenReturn("{\"type\":\"string\",\"value\":\"\"}")
+        assertThat(mFlagManager.readFlagValue(1, StringFlagSerializer)).isEqualTo("")
+
+        // test string with value is returned
+        whenever(mFlagSettingsHelper.getString(any()))
+            .thenReturn("{\"type\":\"string\",\"value\":\"foo\"}")
+        assertThat(mFlagManager.readFlagValue(1, StringFlagSerializer)).isEqualTo("foo")
+
+        // Reading a value of a different type should just return null
+        whenever(mFlagSettingsHelper.getString(any()))
+            .thenReturn("{\"type\":\"boolean\",\"value\":false}")
+        assertThat(mFlagManager.readFlagValue(1, StringFlagSerializer)).isNull()
+
+        // Reading a value that isn't json should throw an exception
+        assertThrows(InvalidFlagStorageException::class.java) {
+            whenever(mFlagSettingsHelper.getString(any())).thenReturn("1")
+            mFlagManager.readFlagValue(1, StringFlagSerializer)
+        }
+    }
+
+    @Test
+    fun testSerializeStringFlag() {
+        // test empty string
+        assertThat(StringFlagSerializer.toSettingsData(""))
+            .isEqualTo("{\"type\":\"string\",\"value\":\"\"}")
+
+        // test string "foo"
+        assertThat(StringFlagSerializer.toSettingsData("foo"))
+            .isEqualTo("{\"type\":\"string\",\"value\":\"foo\"}")
     }
 }

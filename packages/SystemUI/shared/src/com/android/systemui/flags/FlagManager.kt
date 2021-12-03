@@ -26,8 +26,6 @@ import android.os.Bundle
 import android.os.Handler
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import com.google.common.util.concurrent.ListenableFuture
-import org.json.JSONException
-import org.json.JSONObject
 import java.util.function.Consumer
 
 class FlagManager constructor(
@@ -40,11 +38,9 @@ class FlagManager constructor(
         const val ACTION_SET_FLAG = "com.android.systemui.action.SET_FLAG"
         const val ACTION_GET_FLAGS = "com.android.systemui.action.GET_FLAGS"
         const val FLAGS_PERMISSION = "com.android.systemui.permission.FLAGS"
-        const val FIELD_ID = "id"
-        const val FIELD_VALUE = "value"
-        const val FIELD_TYPE = "type"
-        const val FIELD_FLAGS = "flags"
-        const val TYPE_BOOLEAN = "boolean"
+        const val EXTRA_ID = "id"
+        const val EXTRA_VALUE = "value"
+        const val EXTRA_FLAGS = "flags"
         private const val SETTINGS_PREFIX = "systemui/flags"
     }
 
@@ -74,7 +70,7 @@ class FlagManager constructor(
                         override fun onReceive(context: Context, intent: Intent) {
                             val extras: Bundle? = getResultExtras(false)
                             val listOfFlags: java.util.ArrayList<ParcelableFlag<*>>? =
-                                extras?.getParcelableArrayList(FIELD_FLAGS)
+                                extras?.getParcelableArrayList(EXTRA_FLAGS)
                             if (listOfFlags != null) {
                                 completer.set(listOfFlags)
                             } else {
@@ -86,9 +82,19 @@ class FlagManager constructor(
         } as ListenableFuture<Collection<Flag<*>>>
     }
 
+    /**
+     * Returns the stored value or null if not set.
+     * This API is used by TheFlippinApp.
+     */
+    fun isEnabled(id: Int): Boolean? = readFlagValue(id, BooleanFlagSerializer)
+
+    /**
+     * Sets the value of a boolean flag.
+     * This API is used by TheFlippinApp.
+     */
     fun setFlagValue(id: Int, enabled: Boolean) {
         val intent = createIntent(id)
-        intent.putExtra(FIELD_VALUE, enabled)
+        intent.putExtra(EXTRA_VALUE, enabled)
 
         context.sendBroadcast(intent)
     }
@@ -100,20 +106,9 @@ class FlagManager constructor(
     }
 
     /** Returns the stored value or null if not set.  */
-    fun isEnabled(id: Int): Boolean? {
-        val data = settings.getString(keyToSettingsPrefix(id))
-        if (data == null || data?.isEmpty()) {
-            return null
-        }
-        val json: JSONObject
-        try {
-            json = JSONObject(data)
-            return if (!assertType(json, TYPE_BOOLEAN)) {
-                null
-            } else json.getBoolean(FIELD_VALUE)
-        } catch (e: JSONException) {
-            throw InvalidFlagStorageException()
-        }
+    fun <T> readFlagValue(id: Int, serializer: FlagSerializer<T>): T? {
+        val data = settings.getString(idToSettingsKey(id))
+        return serializer.fromSettingsData(data)
     }
 
     override fun addListener(flag: Flag<*>, listener: FlagListenable.Listener) {
@@ -141,21 +136,13 @@ class FlagManager constructor(
     private fun createIntent(id: Int): Intent {
         val intent = Intent(ACTION_SET_FLAG)
         intent.setPackage(RECEIVING_PACKAGE)
-        intent.putExtra(FIELD_ID, id)
+        intent.putExtra(EXTRA_ID, id)
 
         return intent
     }
 
-    fun keyToSettingsPrefix(key: Int): String {
-        return "$SETTINGS_PREFIX/$key"
-    }
-
-    private fun assertType(json: JSONObject, type: String): Boolean {
-        return try {
-            json.getString(FIELD_TYPE) == TYPE_BOOLEAN
-        } catch (e: JSONException) {
-            false
-        }
+    fun idToSettingsKey(id: Int): String {
+        return "$SETTINGS_PREFIX/$id"
     }
 
     inner class SettingsObserver : ContentObserver(handler) {
@@ -199,8 +186,6 @@ class FlagManager constructor(
 
     private data class PerFlagListener(val id: Int, val listener: FlagListenable.Listener)
 }
-
-class InvalidFlagStorageException : Exception("Data found but is invalid")
 
 class NoFlagResultsException : Exception(
     "SystemUI failed to communicate its flags back successfully")
