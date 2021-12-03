@@ -102,7 +102,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         verify(view.viewTreeObserver).addOnPreDrawListener(argumentCaptor.capture())
         argumentCaptor.value.onPreDraw()
 
-        verify(moveFromCenterAnimation).onViewsReady(any(), any())
+        verify(moveFromCenterAnimation).onViewsReady(any())
     }
 
     private fun createViewMock(): PhoneStatusBarView {

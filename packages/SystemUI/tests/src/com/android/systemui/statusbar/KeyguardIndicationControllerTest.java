@@ -22,6 +22,7 @@ import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_DISCLOSURE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_OWNER_INFO;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_RESTING;
@@ -111,6 +112,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     private static final ComponentName DEVICE_OWNER_COMPONENT = new ComponentName("com.android.foo",
             "bar");
+
+    private static final int TEST_STRING_RES = R.string.keyguard_indication_trust_unlocked;
 
     private String mKeyguardTryFingerprintMsg;
     private String mDisclosureWithOrganization;
@@ -419,7 +422,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // WHEN transient text is shown
         mStatusBarStateListener.onDozingChanged(true);
-        mController.showTransientIndication("Test");
+        mController.showTransientIndication(TEST_STRING_RES);
 
         // THEN wake lock is held while the animation is running
         assertTrue("WakeLock expected: HELD, was: RELEASED", mWakeLock.isHeld());
@@ -434,7 +437,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // WHEN we show the transient indication
         mStatusBarStateListener.onDozingChanged(true);
-        mController.showTransientIndication("Test");
+        mController.showTransientIndication(TEST_STRING_RES);
 
         // THEN wake lock is RELEASED, not held
         assertFalse("WakeLock expected: RELEASED, was: HELD", mWakeLock.isHeld());
@@ -445,10 +448,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         createController();
 
         mController.setVisible(true);
-        mController.showTransientIndication("Test");
+        mController.showTransientIndication(TEST_STRING_RES);
         mStatusBarStateListener.onDozingChanged(true);
 
-        assertThat(mTextView.getText()).isEqualTo("Test");
+        assertThat(mTextView.getText()).isEqualTo(
+                mContext.getResources().getString(TEST_STRING_RES));
         assertThat(mTextView.getCurrentTextColor()).isEqualTo(Color.WHITE);
         assertThat(mTextView.getAlpha()).isEqualTo(1f);
     }
@@ -462,11 +466,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.getKeyguardCallback().onBiometricHelp(
                 KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED, message,
                 BiometricSourceType.FACE);
-        verifyTransientMessage(message);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, message);
         reset(mRotateTextViewController);
         mStatusBarStateListener.onDozingChanged(true);
 
-        verifyHideIndication(INDICATION_TYPE_TRANSIENT);
+        verifyHideIndication(INDICATION_TYPE_BIOMETRIC_MESSAGE);
     }
 
     @Test
@@ -478,7 +482,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.getKeyguardCallback().onBiometricError(FaceManager.FACE_ERROR_TIMEOUT,
                 "A message", BiometricSourceType.FACE);
 
-        verifyTransientMessage(message);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, message);
         mStatusBarStateListener.onDozingChanged(true);
 
         assertThat(mTextView.getText()).isNotEqualTo(message);
@@ -497,7 +501,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 FingerprintManager.FINGERPRINT_ERROR_CANCELED, "bar",
                 BiometricSourceType.FINGERPRINT);
 
-        verifyNoTransientMessage();
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+        verifyNoMessage(INDICATION_TYPE_TRANSIENT);
     }
 
     @Test
@@ -757,7 +762,12 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         verify(mRotateTextViewController).showTransient(eq(message));
     }
 
-    private void verifyNoTransientMessage() {
-        verify(mRotateTextViewController, never()).showTransient(any());
+    private void verifyNoMessage(int type) {
+        if (type == INDICATION_TYPE_TRANSIENT) {
+            verify(mRotateTextViewController, never()).showTransient(anyString());
+        } else {
+            verify(mRotateTextViewController, never()).updateIndication(eq(type),
+                    anyObject(), anyBoolean());
+        }
     }
 }

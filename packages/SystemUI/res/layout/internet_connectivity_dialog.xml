@@ -34,6 +34,7 @@
 
         <TextView
             android:id="@+id/internet_dialog_title"
+            android:ellipsize="end"
             android:gravity="center_vertical|center_horizontal"
             android:layout_width="wrap_content"
             android:layout_height="32dp"
@@ -154,12 +155,18 @@
                         <TextView
                             android:id="@+id/mobile_summary"
                             style="@style/InternetDialog.NetworkSummary"/>
+                        <TextView
+                            android:id="@+id/airplane_mode_summary"
+                            android:text="@string/airplane_mode"
+                            android:visibility="gone"
+                            style="@style/InternetDialog.NetworkSummary"/>
                     </LinearLayout>
 
                     <View
                         android:id="@+id/mobile_toggle_divider"
                         android:layout_width="1dp"
                         android:layout_height="28dp"
+                        android:layout_marginStart="7dp"
                         android:layout_marginEnd="16dp"
                         android:layout_gravity="center_vertical"
                         android:background="?android:attr/textColorSecondary"/>
@@ -370,27 +377,60 @@
                         android:clickable="true"/>
                 </LinearLayout>
             </LinearLayout>
-
             <FrameLayout
-                android:id="@+id/done_layout"
-                android:layout_width="67dp"
+                android:id="@+id/button_layout"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="34dp"
-                android:layout_gravity="end|center_vertical"
-                android:clickable="true"
-                android:focusable="true">
-                <Button
-                    android:text="@string/inline_done_button"
-                    style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
-                    android:layout_width="match_parent"
-                    android:layout_height="36dp"
-                    android:layout_gravity="center"
-                    android:textAppearance="@style/TextAppearance.InternetDialog"
-                    android:textSize="14sp"
-                    android:background="@drawable/internet_dialog_footer_background"
-                    android:clickable="false"/>
+                android:clickable="false"
+                android:focusable="false">
+
+                <FrameLayout
+                    android:id="@+id/apm_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_gravity="start|center_vertical"
+                    android:orientation="vertical">
+                    <Button
+                        android:text="@string/turn_off_airplane_mode"
+                        android:ellipsize="end"
+                        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_gravity="start|center_vertical"
+                        android:textAppearance="@style/TextAppearance.InternetDialog"
+                        android:textSize="14sp"
+                        android:background="@drawable/internet_dialog_footer_background"
+                        android:clickable="false"/>
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/done_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="16dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_gravity="end|center_vertical"
+                    android:orientation="vertical">
+                    <Button
+                        android:text="@string/inline_done_button"
+                        android:ellipsize="end"
+                        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+                        android:layout_width="67dp"
+                        android:layout_height="36dp"
+                        android:layout_gravity="end|center_vertical"
+                        android:textAppearance="@style/TextAppearance.InternetDialog"
+                        android:textSize="14sp"
+                        android:background="@drawable/internet_dialog_footer_background"
+                        android:clickable="false"/>
+                </FrameLayout>
             </FrameLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
