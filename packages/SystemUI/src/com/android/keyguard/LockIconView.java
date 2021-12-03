@@ -218,11 +218,14 @@ public class LockIconView extends FrameLayout implements Dumpable {
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
-        pw.println("Center in px (x, y)= (" + mLockIconCenter.x + ", " + mLockIconCenter.y + ")");
-        pw.println("Radius in pixels: " + mRadius);
-        pw.println("topLeft= (" + getX() + ", " + getY() + ")");
-        pw.println("topLeft= (" + getX() + ", " + getY() + ")");
-        pw.println("mIconType=" + typeToString(mIconType));
-        pw.println("mAod=" + mAod);
+        pw.println("Lock Icon View Parameters:");
+        pw.println("    Center in px (x, y)= ("
+                + mLockIconCenter.x + ", " + mLockIconCenter.y + ")");
+        pw.println("    Radius in pixels: " + mRadius);
+        pw.println("    mIconType=" + typeToString(mIconType));
+        pw.println("    mAod=" + mAod);
+        pw.println("Lock Icon View actual measurements:");
+        pw.println("    topLeft= (" + getX() + ", " + getY() + ")");
+        pw.println("    width=" + getWidth() + " height=" + getHeight());
     }
 }
