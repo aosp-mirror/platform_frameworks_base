@@ -508,10 +508,10 @@ public class DisplayRotation {
         mDisplayContent.setLayoutNeeded();
 
         if (useShellTransitions) {
-            final boolean wasInTransition = mDisplayContent.inTransition();
+            final boolean wasCollecting = mDisplayContent.mTransitionController.isCollecting();
             mDisplayContent.requestChangeTransitionIfNeeded(
                     ActivityInfo.CONFIG_WINDOW_CONFIGURATION);
-            if (wasInTransition) {
+            if (wasCollecting) {
                 // Use remote-rotation infra since the transition has already been requested
                 // TODO(shell-transitions): Remove this once lifecycle management can cover all
                 //                          rotation cases.
