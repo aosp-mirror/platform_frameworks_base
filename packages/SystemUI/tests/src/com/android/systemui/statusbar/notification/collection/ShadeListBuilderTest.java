@@ -114,6 +114,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     private List<NotificationEntry> mEntrySet = new ArrayList<>();
     private List<ListEntry> mBuiltList;
     private TestableStabilityManager mStabilityManager;
+    private TestableNotifFilter mFinalizeFilter;
 
     private Map<String, Integer> mNextIdMap = new ArrayMap<>();
     private int mNextRank = 0;
@@ -136,6 +137,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         mStabilityManager = spy(new TestableStabilityManager());
         mListBuilder.setNotifStabilityManager(mStabilityManager);
+        mFinalizeFilter = spy(new TestableNotifFilter());
+        mListBuilder.addFinalizeFilter(mFinalizeFilter);
 
         Mockito.verify(mNotifCollection).setBuildListener(mBuildListenerCaptor.capture());
         mReadyForBuildListener = Objects.requireNonNull(mBuildListenerCaptor.getValue());
@@ -408,7 +411,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         // THEN the summary has a null parent and an unset firstAddedIteration
         assertNull(mEntrySet.get(1).getParent());
-        assertEquals(-1, mEntrySet.get(1).mFirstAddedIteration);
     }
 
     @Test
@@ -1037,7 +1039,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
-    public void testStabilizeGroupsDoesNotAllowGrouping() {
+    public void testStabilizeGroupsDoesNotAllowGroupingExistingNotifications() {
         // GIVEN one group child without a summary yet
         addGroupChild(0, PACKAGE_1, GROUP_1);
 
@@ -1056,7 +1058,10 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // because group changes aren't allowed by the stability manager
         verifyBuiltList(
                 notif(0),
-                notif(2)
+                group(
+                        summary(1),
+                        child(2)
+                )
         );
     }
 
@@ -1110,11 +1115,13 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         dispatchBuild();
 
-        // THEN all notifications are top-level and the summary doesn't show yet
-        // because group changes aren't allowed by the stability manager
+        // THEN first notification stays top-level but the other notifications are grouped.
         verifyBuiltList(
                 notif(0),
-                notif(2),
+                group(
+                        summary(1),
+                        child(2)
+                ),
                 group(
                         summary(3),
                         child(4),
@@ -1209,6 +1216,140 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testStabilityIsolationAllowsGroupToHaveSingleChild() {
+        // GIVEN a group with only one child was already drawn
+        addGroupSummary(0, PACKAGE_1, GROUP_1);
+        addGroupChild(1, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+        // NOTICE that the group is pruned and the child is moved to the top level
+        verifyBuiltList(
+                notif(1)  // group with only one child is promoted
+        );
+
+        // WHEN another child is added while group changes are disabled.
+        mStabilityManager.setAllowGroupChanges(false);
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+
+        // THEN the new child should be added to the group
+        verifyBuiltList(
+                group(
+                        summary(0),
+                        child(2)
+                ),
+                notif(1)
+        );
+    }
+
+    @Test
+    public void testStabilityIsolationExemptsGroupWithFinalizeFilteredChildFromShowingSummary() {
+        // GIVEN a group with only one child was already drawn
+        addGroupSummary(0, PACKAGE_1, GROUP_1);
+        addGroupChild(1, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+        // NOTICE that the group is pruned and the child is moved to the top level
+        verifyBuiltList(
+                notif(1)  // group with only one child is promoted
+        );
+
+        // WHEN another child is added but still filtered while group changes are disabled.
+        mStabilityManager.setAllowGroupChanges(false);
+        mFinalizeFilter.mIndicesToFilter.add(2);
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+
+        // THEN the new child should be shown without the summary
+        verifyBuiltList(
+                notif(1)  // previously promoted child
+        );
+    }
+
+    @Test
+    public void testStabilityIsolationOfRemovedChildDoesNotExemptGroupFromPrune() {
+        // GIVEN a group with only one child was already drawn
+        addGroupSummary(0, PACKAGE_1, GROUP_1);
+        addGroupChild(1, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+        // NOTICE that the group is pruned and the child is moved to the top level
+        verifyBuiltList(
+                notif(1)  // group with only one child is promoted
+        );
+
+        // WHEN a new child is added and the old one gets filtered while group changes are disabled.
+        mStabilityManager.setAllowGroupChanges(false);
+        mFinalizeFilter.mIndicesToFilter.add(1);
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+
+        // THEN the new child should be shown without a group
+        verifyBuiltList(
+                notif(2)  // previously promoted child
+        );
+    }
+
+    @Test
+    public void testFinalizeFilteredSummaryPromotesChildren() {
+        // GIVEN a group with only one child was already drawn
+        addGroupSummary(0, PACKAGE_1, GROUP_1);
+        addGroupChild(1, PACKAGE_1, GROUP_1);
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+
+        // WHEN the parent is filtered out at the finalize step
+        mFinalizeFilter.mIndicesToFilter.add(0);
+
+        dispatchBuild();
+
+        // THEN the children should be promoted to the top level
+        verifyBuiltList(
+                notif(1),
+                notif(2)
+        );
+    }
+
+    @Test
+    public void testFinalizeFilteredChildrenPromotesSummary() {
+        // GIVEN a group with only one child was already drawn
+        addGroupSummary(0, PACKAGE_1, GROUP_1);
+        addGroupChild(1, PACKAGE_1, GROUP_1);
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+
+        // WHEN the parent is filtered out at the finalize step
+        mFinalizeFilter.mIndicesToFilter.add(1);
+        mFinalizeFilter.mIndicesToFilter.add(2);
+
+        dispatchBuild();
+
+        // THEN the children should be promoted to the top level
+        verifyBuiltList(
+                notif(0)
+        );
+    }
+
+    @Test
+    public void testFinalizeFilteredChildPromotesSibling() {
+        // GIVEN a group with only one child was already drawn
+        addGroupSummary(0, PACKAGE_1, GROUP_1);
+        addGroupChild(1, PACKAGE_1, GROUP_1);
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+
+        // WHEN the parent is filtered out at the finalize step
+        mFinalizeFilter.mIndicesToFilter.add(1);
+
+        dispatchBuild();
+
+        // THEN the children should be promoted to the top level
+        verifyBuiltList(
+                notif(2)
+        );
+    }
+
+    @Test
     public void testBrokenGroupNotificationOrdering() {
         // GIVEN two group children with different sections & without a summary yet
         addGroupChild(0, PACKAGE_2, GROUP_1);
@@ -1224,30 +1365,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
                 notif(1),
                 notif(2),
                 notif(3)
-        );
-    }
-
-    @Test
-    public void testStabilizeGroupsHidesGroupSummary() {
-        // GIVEN one group child with a summary
-        addGroupChild(0, PACKAGE_1, GROUP_1);
-        addGroupSummary(1, PACKAGE_1, GROUP_1);
-
-        dispatchBuild(); // group summary is hidden because it needs at least 2 children to group
-
-        // GIVEN visual stability manager doesn't allow any group changes
-        mStabilityManager.setAllowGroupChanges(false);
-
-        // WHEN we run the pipeline with the addition of a child
-        addGroupChild(2, PACKAGE_1, GROUP_1);
-
-        dispatchBuild();
-
-        // THEN the children notifications are top-level and the summary still doesn't show yet
-        // because group changes aren't allowed by the stability manager
-        verifyBuiltList(
-                notif(0),
-                notif(2)
         );
     }
 
@@ -1269,13 +1386,12 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         dispatchBuild();
 
-        // THEN all entries are top-level since group changes aren't allowed
+        // THEN all entries are top-level, but summary is suppressed
         verifyBuiltList(
                 notif(0),
                 notif(1),
                 notif(2),
-                notif(3),
-                notif(4)
+                notif(3)
         );
 
         // WHEN visual stability manager allows group changes again
@@ -1907,6 +2023,19 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         }
     }
 
+    private class TestableNotifFilter extends NotifFilter {
+        ArrayList<Integer> mIndicesToFilter = new ArrayList<>();
+
+        protected TestableNotifFilter() {
+            super("TestFilter");
+        }
+
+        @Override
+        public boolean shouldFilterOut(@NonNull NotificationEntry entry, long now) {
+            return mIndicesToFilter.stream().anyMatch(i -> notif(i).entry == entry);
+        }
+    }
+
     private static class TestableStabilityManager extends NotifStabilityManager {
         boolean mAllowGroupChanges = true;
         boolean mAllowSectionChanges = true;
@@ -1937,17 +2066,17 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         }
 
         @Override
-        public boolean isGroupChangeAllowed(NotificationEntry entry) {
+        public boolean isGroupChangeAllowed(@NonNull NotificationEntry entry) {
             return mAllowGroupChanges;
         }
 
         @Override
-        public boolean isSectionChangeAllowed(NotificationEntry entry) {
+        public boolean isSectionChangeAllowed(@NonNull NotificationEntry entry) {
             return mAllowSectionChanges;
         }
 
         @Override
-        public boolean isEntryReorderingAllowed(ListEntry entry) {
+        public boolean isEntryReorderingAllowed(@NonNull ListEntry entry) {
             return mAllowEntryReodering;
         }
 
