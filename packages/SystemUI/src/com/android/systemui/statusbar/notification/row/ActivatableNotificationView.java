@@ -579,13 +579,23 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         if (contentView.hasOverlappingRendering()) {
             int layerType = contentAlpha == 0.0f || contentAlpha == 1.0f ? LAYER_TYPE_NONE
                     : LAYER_TYPE_HARDWARE;
-            int currentLayerType = contentView.getLayerType();
-            if (currentLayerType != layerType) {
-                contentView.setLayerType(layerType, null);
-            }
+            contentView.setLayerType(layerType, null);
         }
         contentView.setAlpha(contentAlpha);
+        // After updating the current view, reset all views.
+        if (contentAlpha == 1f) {
+            resetAllContentAlphas();
+        }
     }
+
+    /**
+     * If a subclass's {@link #getContentView()} returns different views depending on state,
+     * this method is an opportunity to reset the alpha of ALL content views, not just the
+     * current one, which may prevent a content view that is temporarily hidden from being reset.
+     *
+     * This should setAlpha(1.0f) and setLayerType(LAYER_TYPE_NONE) for all content views.
+     */
+    protected void resetAllContentAlphas() {}
 
     @Override
     protected void applyRoundness() {
