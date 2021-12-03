@@ -249,16 +249,6 @@ class InsetsStateController {
         return result;
     }
 
-    public void addProvidersToTransition() {
-        for (int i = mProviders.size() - 1; i >= 0; --i) {
-            final InsetsSourceProvider p = mProviders.valueAt(i);
-            if (p == null) continue;
-            final WindowContainer wc = p.mWin;
-            if (wc == null) continue;
-            mDisplayContent.mTransitionController.collect(wc);
-        }
-    }
-
     /**
      * @return The provider of a specific type.
      */

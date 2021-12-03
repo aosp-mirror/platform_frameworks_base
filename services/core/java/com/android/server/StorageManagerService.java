@@ -1598,6 +1598,8 @@ class StorageManagerService extends IStorageManager.Stub
         } else if (vol.type == VolumeInfo.TYPE_STUB) {
             if (vol.disk.isStubVisible()) {
                 vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE_FOR_WRITE;
+            } else {
+                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE_FOR_READ;
             }
             vol.mountUserId = mCurrentUserId;
             mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();

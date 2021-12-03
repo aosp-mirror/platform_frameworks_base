@@ -109,6 +109,7 @@ public final class NavBarHelper implements
             UserTracker userTracker,
             DumpManager dumpManager) {
         mContext = context;
+        mContentResolver = mContext.getContentResolver();
         mAccessibilityManager = accessibilityManager;
         mAssistManagerLazy = assistManagerLazy;
         mStatusBarOptionalLazy = statusBarOptionalLazy;
@@ -124,7 +125,6 @@ public final class NavBarHelper implements
     }
 
     public void init() {
-        mContentResolver = mContext.getContentResolver();
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSISTANT),
                 false /* notifyForDescendants */, mAssistContentObserver, UserHandle.USER_ALL);

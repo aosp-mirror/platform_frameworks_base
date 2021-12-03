@@ -55,6 +55,7 @@
 #include "gnss/GnssAntennaInfoCallback.h"
 #include "gnss/GnssBatching.h"
 #include "gnss/GnssConfiguration.h"
+#include "gnss/GnssGeofence.h"
 #include "gnss/GnssMeasurement.h"
 #include "gnss/GnssNavigationMessage.h"
 #include "gnss/Utils.h"
@@ -79,12 +80,6 @@ static jmethodID method_requestLocation;
 static jmethodID method_requestRefLocation;
 static jmethodID method_requestSetID;
 static jmethodID method_requestUtcTime;
-static jmethodID method_reportGeofenceTransition;
-static jmethodID method_reportGeofenceStatus;
-static jmethodID method_reportGeofenceAddStatus;
-static jmethodID method_reportGeofenceRemoveStatus;
-static jmethodID method_reportGeofencePauseStatus;
-static jmethodID method_reportGeofenceResumeStatus;
 static jmethodID method_reportGnssServiceDied;
 static jmethodID method_reportGnssPowerStats;
 static jmethodID method_setSubHalMeasurementCorrectionsCapabilities;
@@ -133,8 +128,6 @@ using android::hardware::hidl_death_recipient;
 
 using android::hardware::gnss::V1_0::GnssLocationFlags;
 using android::hardware::gnss::V1_0::IAGnssRilCallback;
-using android::hardware::gnss::V1_0::IGnssGeofenceCallback;
-using android::hardware::gnss::V1_0::IGnssGeofencing;
 using android::hardware::gnss::V1_0::IGnssNavigationMessage;
 using android::hardware::gnss::V1_0::IGnssNavigationMessageCallback;
 using android::hardware::gnss::V1_0::IGnssNi;
@@ -192,8 +185,6 @@ using android::hardware::gnss::PsdsType;
 using IGnssAidl = android::hardware::gnss::IGnss;
 using IGnssCallbackAidl = android::hardware::gnss::IGnssCallback;
 using IGnssBatchingAidl = android::hardware::gnss::IGnssBatching;
-using IGnssGeofenceAidl = android::hardware::gnss::IGnssGeofence;
-using IGnssGeofenceCallbackAidl = android::hardware::gnss::IGnssGeofenceCallback;
 using IGnssPsdsAidl = android::hardware::gnss::IGnssPsds;
 using IGnssPsdsCallbackAidl = android::hardware::gnss::IGnssPsdsCallback;
 using IGnssConfigurationAidl = android::hardware::gnss::IGnssConfiguration;
@@ -220,12 +211,10 @@ sp<IGnss_V2_0> gnssHal_V2_0 = nullptr;
 sp<IGnss_V2_1> gnssHal_V2_1 = nullptr;
 sp<IGnssAidl> gnssHalAidl = nullptr;
 sp<IGnssBatchingAidl> gnssBatchingAidlIface = nullptr;
-sp<IGnssGeofenceAidl> gnssGeofenceAidlIface = nullptr;
 sp<IGnssPsdsAidl> gnssPsdsAidlIface = nullptr;
 sp<IGnssXtra> gnssXtraIface = nullptr;
 sp<IAGnssRil_V1_0> agnssRilIface = nullptr;
 sp<IAGnssRil_V2_0> agnssRilIface_V2_0 = nullptr;
-sp<IGnssGeofencing> gnssGeofencingIface = nullptr;
 sp<IAGnss_V1_0> agnssIface = nullptr;
 sp<IAGnss_V2_0> agnssIface_V2_0 = nullptr;
 sp<IGnssDebug_V1_0> gnssDebugIface = nullptr;
@@ -241,6 +230,7 @@ std::unique_ptr<GnssConfigurationInterface> gnssConfigurationIface = nullptr;
 std::unique_ptr<android::gnss::GnssMeasurementInterface> gnssMeasurementIface = nullptr;
 std::unique_ptr<android::gnss::GnssNavigationMessageInterface> gnssNavigationMessageIface = nullptr;
 std::unique_ptr<android::gnss::GnssBatchingInterface> gnssBatchingIface = nullptr;
+std::unique_ptr<android::gnss::GnssGeofenceInterface> gnssGeofencingIface = nullptr;
 
 #define WAKE_LOCK_NAME  "GPS"
 
@@ -714,199 +704,6 @@ Return<void> GnssXtraCallback::downloadRequestCb() {
     return Void();
 }
 
-/** Util class for GnssGeofenceCallback methods. */
-struct GnssGeofenceCallbackUtil {
-    template <class T>
-    static void gnssGeofenceTransitionCb(int geofenceId, const T& location, int transition,
-                                         int64_t timestampMillis);
-    template <class T>
-    static void gnssGeofenceStatusCb(int availability, const T& lastLocation);
-    static void gnssGeofenceAddCb(int geofenceId, int status);
-    static void gnssGeofenceRemoveCb(int geofenceId, int status);
-    static void gnssGeofencePauseCb(int geofenceId, int status);
-    static void gnssGeofenceResumeCb(int geofenceId, int status);
-
-private:
-    GnssGeofenceCallbackUtil() = delete;
-};
-
-template <class T>
-void GnssGeofenceCallbackUtil::gnssGeofenceTransitionCb(int geofenceId, const T& location,
-                                                        int transition, int64_t timestamp) {
-    JNIEnv* env = getJniEnv();
-
-    jobject jLocation = translateGnssLocation(env, location);
-
-    env->CallVoidMethod(mCallbacksObj,
-                        method_reportGeofenceTransition,
-                        geofenceId,
-                        jLocation,
-                        transition,
-                        timestamp);
-
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-    env->DeleteLocalRef(jLocation);
-}
-
-template <class T>
-void GnssGeofenceCallbackUtil::gnssGeofenceStatusCb(int availability, const T& lastLocation) {
-    JNIEnv* env = getJniEnv();
-
-    jobject jLocation = translateGnssLocation(env, lastLocation);
-
-    env->CallVoidMethod(mCallbacksObj, method_reportGeofenceStatus, availability, jLocation);
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-    env->DeleteLocalRef(jLocation);
-}
-
-void GnssGeofenceCallbackUtil::gnssGeofenceAddCb(int geofenceId, int status) {
-    JNIEnv* env = getJniEnv();
-    if (status != IGnssGeofenceCallbackAidl::OPERATION_SUCCESS) {
-        ALOGE("%s: Error in adding a Geofence: %d\n", __func__, status);
-    }
-
-    env->CallVoidMethod(mCallbacksObj,
-                        method_reportGeofenceAddStatus,
-                        geofenceId,
-                        status);
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-}
-
-void GnssGeofenceCallbackUtil::gnssGeofenceRemoveCb(int geofenceId, int status) {
-    JNIEnv* env = getJniEnv();
-    if (status != IGnssGeofenceCallbackAidl::OPERATION_SUCCESS) {
-        ALOGE("%s: Error in removing a Geofence: %d\n", __func__, status);
-    }
-
-    env->CallVoidMethod(mCallbacksObj,
-                        method_reportGeofenceRemoveStatus,
-                        geofenceId, status);
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-}
-
-void GnssGeofenceCallbackUtil::gnssGeofencePauseCb(int geofenceId, int status) {
-    JNIEnv* env = getJniEnv();
-    if (status != IGnssGeofenceCallbackAidl::OPERATION_SUCCESS) {
-        ALOGE("%s: Error in pausing Geofence: %d\n", __func__, status);
-    }
-
-    env->CallVoidMethod(mCallbacksObj,
-                        method_reportGeofencePauseStatus,
-                        geofenceId, status);
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-}
-
-void GnssGeofenceCallbackUtil::gnssGeofenceResumeCb(int geofenceId, int status) {
-    JNIEnv* env = getJniEnv();
-    if (status != IGnssGeofenceCallbackAidl::OPERATION_SUCCESS) {
-        ALOGE("%s: Error in resuming Geofence: %d\n", __func__, status);
-    }
-
-    env->CallVoidMethod(mCallbacksObj,
-                        method_reportGeofenceResumeStatus,
-                        geofenceId, status);
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-}
-
-/*
- * GnssGeofenceCallbackAidl class implements the callback methods for the IGnssGeofence AIDL
- * interface.
- */
-struct GnssGeofenceCallbackAidl : public android::hardware::gnss::BnGnssGeofenceCallback {
-    Status gnssGeofenceTransitionCb(int geofenceId, const GnssLocationAidl& location,
-                                    int transition, int64_t timestampMillis) override;
-    Status gnssGeofenceStatusCb(int availability, const GnssLocationAidl& lastLocation) override;
-    Status gnssGeofenceAddCb(int geofenceId, int status) override;
-    Status gnssGeofenceRemoveCb(int geofenceId, int status) override;
-    Status gnssGeofencePauseCb(int geofenceId, int status) override;
-    Status gnssGeofenceResumeCb(int geofenceId, int status) override;
-};
-
-Status GnssGeofenceCallbackAidl::gnssGeofenceTransitionCb(int geofenceId,
-                                                          const GnssLocationAidl& location,
-                                                          int transition, int64_t timestampMillis) {
-    GnssGeofenceCallbackUtil::gnssGeofenceTransitionCb(geofenceId, location, transition,
-                                                       timestampMillis);
-    return Status::ok();
-}
-
-Status GnssGeofenceCallbackAidl::gnssGeofenceStatusCb(int availability,
-                                                      const GnssLocationAidl& lastLocation) {
-    GnssGeofenceCallbackUtil::gnssGeofenceStatusCb(availability, lastLocation);
-    return Status::ok();
-}
-
-Status GnssGeofenceCallbackAidl::gnssGeofenceAddCb(int geofenceId, int status) {
-    GnssGeofenceCallbackUtil::gnssGeofenceAddCb(geofenceId, status);
-    return Status::ok();
-}
-
-Status GnssGeofenceCallbackAidl::gnssGeofenceRemoveCb(int geofenceId, int status) {
-    GnssGeofenceCallbackUtil::gnssGeofenceRemoveCb(geofenceId, status);
-    return Status::ok();
-}
-
-Status GnssGeofenceCallbackAidl::gnssGeofencePauseCb(int geofenceId, int status) {
-    GnssGeofenceCallbackUtil::gnssGeofencePauseCb(geofenceId, status);
-    return Status::ok();
-}
-
-Status GnssGeofenceCallbackAidl::gnssGeofenceResumeCb(int geofenceId, int status) {
-    GnssGeofenceCallbackUtil::gnssGeofenceResumeCb(geofenceId, status);
-    return Status::ok();
-}
-
-/*
- * GnssGeofenceCallback class implements the callback methods for the
- * IGnssGeofence HIDL interface.
- */
-struct GnssGeofenceCallback : public IGnssGeofenceCallback {
-    // Methods from ::android::hardware::gps::V1_0::IGnssGeofenceCallback follow.
-    Return<void> gnssGeofenceTransitionCb(int32_t geofenceId, const GnssLocation_V1_0& location,
-                                          GeofenceTransition transition,
-                                          hardware::gnss::V1_0::GnssUtcTime timestamp) override;
-    Return<void> gnssGeofenceStatusCb(GeofenceAvailability status,
-                                      const GnssLocation_V1_0& location) override;
-    Return<void> gnssGeofenceAddCb(int32_t geofenceId, GeofenceStatus status) override;
-    Return<void> gnssGeofenceRemoveCb(int32_t geofenceId, GeofenceStatus status) override;
-    Return<void> gnssGeofencePauseCb(int32_t geofenceId, GeofenceStatus status) override;
-    Return<void> gnssGeofenceResumeCb(int32_t geofenceId, GeofenceStatus status) override;
-};
-
-Return<void> GnssGeofenceCallback::gnssGeofenceTransitionCb(
-        int32_t geofenceId, const GnssLocation_V1_0& location, GeofenceTransition transition,
-        hardware::gnss::V1_0::GnssUtcTime timestamp) {
-    GnssGeofenceCallbackUtil::gnssGeofenceTransitionCb(geofenceId, location, (int)transition,
-                                                       (int64_t)timestamp);
-    return Void();
-}
-
-Return<void> GnssGeofenceCallback::gnssGeofenceStatusCb(GeofenceAvailability availability,
-                                                        const GnssLocation_V1_0& location) {
-    GnssGeofenceCallbackUtil::gnssGeofenceStatusCb((int)availability, location);
-    return Void();
-}
-
-Return<void> GnssGeofenceCallback::gnssGeofenceAddCb(int32_t geofenceId, GeofenceStatus status) {
-    GnssGeofenceCallbackUtil::gnssGeofenceAddCb(geofenceId, (int)status);
-    return Void();
-}
-
-Return<void> GnssGeofenceCallback::gnssGeofenceRemoveCb(int32_t geofenceId, GeofenceStatus status) {
-    GnssGeofenceCallbackUtil::gnssGeofenceRemoveCb(geofenceId, (int)status);
-    return Void();
-}
-
-Return<void> GnssGeofenceCallback::gnssGeofencePauseCb(int32_t geofenceId, GeofenceStatus status) {
-    GnssGeofenceCallbackUtil::gnssGeofencePauseCb(geofenceId, (int)status);
-    return Void();
-}
-
-Return<void> GnssGeofenceCallback::gnssGeofenceResumeCb(int32_t geofenceId, GeofenceStatus status) {
-    GnssGeofenceCallbackUtil::gnssGeofenceResumeCb(geofenceId, (int)status);
-    return Void();
-}
-
 /*
  * MeasurementCorrectionsCallback implements callback methods of interface
  * IMeasurementCorrectionsCallback.hal.
@@ -1206,18 +1003,6 @@ static void android_location_gnss_hal_GnssNative_class_init_once(JNIEnv* env, jc
     method_requestRefLocation = env->GetMethodID(clazz, "requestRefLocation", "()V");
     method_requestSetID = env->GetMethodID(clazz, "requestSetID", "(I)V");
     method_requestUtcTime = env->GetMethodID(clazz, "requestUtcTime", "()V");
-    method_reportGeofenceTransition = env->GetMethodID(clazz, "reportGeofenceTransition",
-            "(ILandroid/location/Location;IJ)V");
-    method_reportGeofenceStatus = env->GetMethodID(clazz, "reportGeofenceStatus",
-            "(ILandroid/location/Location;)V");
-    method_reportGeofenceAddStatus = env->GetMethodID(clazz, "reportGeofenceAddStatus",
-            "(II)V");
-    method_reportGeofenceRemoveStatus = env->GetMethodID(clazz, "reportGeofenceRemoveStatus",
-            "(II)V");
-    method_reportGeofenceResumeStatus = env->GetMethodID(clazz, "reportGeofenceResumeStatus",
-            "(II)V");
-    method_reportGeofencePauseStatus = env->GetMethodID(clazz, "reportGeofencePauseStatus",
-            "(II)V");
     method_reportGnssServiceDied = env->GetMethodID(clazz, "reportGnssServiceDied", "()V");
     method_reportNfwNotification = env->GetMethodID(clazz, "reportNfwNotification",
             "(Ljava/lang/String;BLjava/lang/String;BLjava/lang/String;BZZ)V");
@@ -1522,27 +1307,27 @@ static void android_location_gnss_hal_GnssNative_init_once(JNIEnv* env, jobject 
         if (checkHidlReturn(gnssConfiguration,
                             "Unable to get a handle to GnssConfiguration_V1_1")) {
             gnssConfigurationIface =
-                    std::make_unique<android::gnss::GnssConfiguration_V1_1>(gnssConfiguration);
+                    std::make_unique<gnss::GnssConfiguration_V1_1>(gnssConfiguration);
         }
     } else {
         auto gnssConfiguration = gnssHal->getExtensionGnssConfiguration();
         if (checkHidlReturn(gnssConfiguration,
                             "Unable to get a handle to GnssConfiguration_V1_0")) {
             gnssConfigurationIface =
-                    std::make_unique<android::gnss::GnssConfiguration_V1_0>(gnssConfiguration);
+                    std::make_unique<gnss::GnssConfiguration_V1_0>(gnssConfiguration);
         }
     }
 
     if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() >= 2) {
-        sp<IGnssGeofenceAidl> gnssGeofenceAidl;
-        auto status = gnssHalAidl->getExtensionGnssGeofence(&gnssGeofenceAidl);
-        if (checkAidlStatus(status, "Unable to get a handle to GnssGeofence interface.")) {
-            gnssGeofenceAidlIface = gnssGeofenceAidl;
+        sp<hardware::gnss::IGnssGeofence> gnssGeofence;
+        auto status = gnssHalAidl->getExtensionGnssGeofence(&gnssGeofence);
+        if (checkAidlStatus(status, "Unable to get a handle to GnssGeofence AIDL interface.")) {
+            gnssGeofencingIface = std::make_unique<gnss::GnssGeofenceAidl>(gnssGeofence);
         }
     } else if (gnssHal != nullptr) {
         auto gnssGeofencing = gnssHal->getExtensionGnssGeofencing();
         if (checkHidlReturn(gnssGeofencing, "Unable to get a handle to GnssGeofencing")) {
-            gnssGeofencingIface = gnssGeofencing;
+            gnssGeofencingIface = std::make_unique<gnss::GnssGeofenceHidl>(gnssGeofencing);
         }
     }
 
@@ -1680,19 +1465,9 @@ static jboolean android_location_gnss_hal_GnssNative_init(JNIEnv* /* env */, jcl
         ALOGI("Unable to initialize IAGnss interface.");
     }
 
-    // Set IGnssGeofencing.hal callback.
-    if (gnssGeofenceAidlIface != nullptr) {
-        sp<IGnssGeofenceCallbackAidl> gnssGeofenceCallbackAidl = new GnssGeofenceCallbackAidl();
-        auto status = gnssGeofenceAidlIface->setCallback(gnssGeofenceCallbackAidl);
-        if (!checkAidlStatus(status, "IGnssGeofenceAidl setCallback() failed.")) {
-            gnssGeofenceAidlIface = nullptr;
-        }
-    } else if (gnssGeofencingIface != nullptr) {
-        sp<IGnssGeofenceCallback> gnssGeofencingCbIface = new GnssGeofenceCallback();
-        auto status = gnssGeofencingIface->setCallback(gnssGeofencingCbIface);
-        if (!checkHidlReturn(status, "IGnssGeofencing setCallback() failed.")) {
-            gnssGeofencingIface = nullptr;
-        }
+    // Set GnssGeofence callback.
+    if (gnssGeofencingIface != nullptr) {
+        gnssGeofencingIface->setCallback(std::make_unique<gnss::GnssGeofenceCallback>());
     } else {
         ALOGI("Unable to initialize IGnssGeofencing interface.");
     }
@@ -2239,7 +2014,7 @@ static void android_location_GnssNetworkConnectivityHandler_update_network_state
 
 static jboolean android_location_gnss_hal_GnssNative_is_geofence_supported(JNIEnv* /* env */,
                                                                            jclass) {
-    if (gnssGeofencingIface == nullptr && gnssGeofenceAidlIface == nullptr) {
+    if (gnssGeofencingIface == nullptr) {
         return JNI_FALSE;
     }
     return JNI_TRUE;
@@ -2249,75 +2024,41 @@ static jboolean android_location_gnss_hal_GnssNative_add_geofence(
         JNIEnv* /* env */, jclass, jint geofenceId, jdouble latitude, jdouble longitude,
         jdouble radius, jint last_transition, jint monitor_transition,
         jint notification_responsiveness, jint unknown_timer) {
-    if (gnssGeofenceAidlIface != nullptr) {
-        auto status =
-                gnssGeofenceAidlIface->addGeofence(geofenceId, latitude, longitude, radius,
-                                                   last_transition, monitor_transition,
-                                                   notification_responsiveness, unknown_timer);
-        return checkAidlStatus(status, "IGnssGeofenceAidl addGeofence() failed.");
+    if (gnssGeofencingIface == nullptr) {
+        ALOGE("%s: IGnssGeofencing interface not available.", __func__);
+        return JNI_FALSE;
     }
-
-    if (gnssGeofencingIface != nullptr) {
-        auto result = gnssGeofencingIface
-                              ->addGeofence(geofenceId, latitude, longitude, radius,
-                                            static_cast<IGnssGeofenceCallback::GeofenceTransition>(
-                                                    last_transition),
-                                            monitor_transition, notification_responsiveness,
-                                            unknown_timer);
-        return checkHidlReturn(result, "IGnssGeofencing addGeofence() failed.");
-    }
-
-    ALOGE("%s: IGnssGeofencing interface not available.", __func__);
-    return JNI_FALSE;
+    return gnssGeofencingIface->addGeofence(geofenceId, latitude, longitude, radius,
+                                            last_transition, monitor_transition,
+                                            notification_responsiveness, unknown_timer);
 }
 
 static jboolean android_location_gnss_hal_GnssNative_remove_geofence(JNIEnv* /* env */, jclass,
                                                                      jint geofenceId) {
-    if (gnssGeofenceAidlIface != nullptr) {
-        auto status = gnssGeofenceAidlIface->removeGeofence(geofenceId);
-        return checkAidlStatus(status, "IGnssGeofenceAidl removeGeofence() failed.");
+    if (gnssGeofencingIface == nullptr) {
+        ALOGE("%s: IGnssGeofencing interface not available.", __func__);
+        return JNI_FALSE;
     }
-
-    if (gnssGeofencingIface != nullptr) {
-        auto result = gnssGeofencingIface->removeGeofence(geofenceId);
-        return checkHidlReturn(result, "IGnssGeofencing removeGeofence() failed.");
-    }
-
-    ALOGE("%s: IGnssGeofencing interface not available.", __func__);
-    return JNI_FALSE;
+    return gnssGeofencingIface->removeGeofence(geofenceId);
 }
 
 static jboolean android_location_gnss_hal_GnssNative_pause_geofence(JNIEnv* /* env */, jclass,
                                                                     jint geofenceId) {
-    if (gnssGeofenceAidlIface != nullptr) {
-        auto status = gnssGeofenceAidlIface->pauseGeofence(geofenceId);
-        return checkAidlStatus(status, "IGnssGeofenceAidl pauseGeofence() failed.");
+    if (gnssGeofencingIface == nullptr) {
+        ALOGE("%s: IGnssGeofencing interface not available.", __func__);
+        return JNI_FALSE;
     }
-
-    if (gnssGeofencingIface != nullptr) {
-        auto result = gnssGeofencingIface->pauseGeofence(geofenceId);
-        return checkHidlReturn(result, "IGnssGeofencing pauseGeofence() failed.");
-    }
-
-    ALOGE("%s: IGnssGeofencing interface not available.", __func__);
-    return JNI_FALSE;
+    return gnssGeofencingIface->pauseGeofence(geofenceId);
 }
 
 static jboolean android_location_gnss_hal_GnssNative_resume_geofence(JNIEnv* /* env */, jclass,
                                                                      jint geofenceId,
                                                                      jint monitor_transition) {
-    if (gnssGeofenceAidlIface != nullptr) {
-        auto status = gnssGeofenceAidlIface->resumeGeofence(geofenceId, monitor_transition);
-        return checkAidlStatus(status, "IGnssGeofenceAidl resumeGeofence() failed.");
+    if (gnssGeofencingIface == nullptr) {
+        ALOGE("%s: IGnssGeofencing interface not available.", __func__);
+        return JNI_FALSE;
     }
-
-    if (gnssGeofencingIface != nullptr) {
-        auto result = gnssGeofencingIface->resumeGeofence(geofenceId, monitor_transition);
-        return checkHidlReturn(result, "IGnssGeofencing resumeGeofence() failed.");
-    }
-
-    ALOGE("%s: IGnssGeofencing interface not available.", __func__);
-    return JNI_FALSE;
+    return gnssGeofencingIface->resumeGeofence(geofenceId, monitor_transition);
 }
 
 static jboolean android_location_gnss_hal_GnssNative_is_antenna_info_supported(JNIEnv* env,

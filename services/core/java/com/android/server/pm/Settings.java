@@ -276,6 +276,7 @@ public final class Settings implements Watchable, Snappable {
     private static final String TAG_RUNTIME_PERMISSIONS = "runtime-permissions";
     private static final String TAG_PERMISSIONS = "perms";
     private static final String TAG_CHILD_PACKAGE = "child-package";
+    private static final String TAG_USES_SDK_LIB = "uses-sdk-lib";
     private static final String TAG_USES_STATIC_LIB = "uses-static-lib";
     private static final String TAG_BLOCK_UNINSTALL_PACKAGES = "block-uninstall-packages";
     private static final String TAG_BLOCK_UNINSTALL = "block-uninstall";
@@ -826,6 +827,7 @@ public final class Settings implements Watchable, Snappable {
                 p.getLegacyNativeLibraryPath(), p.getPrimaryCpuAbi(),
                 p.getSecondaryCpuAbi(), p.getCpuAbiOverride(),
                 p.getAppId(), p.getVersionCode(), p.getFlags(), p.getPrivateFlags(),
+                p.getUsesSdkLibraries(), p.getUsesSdkLibrariesVersionsMajor(),
                 p.getUsesStaticLibraries(), p.getUsesStaticLibrariesVersions(), p.getMimeGroups(),
                 mDomainVerificationManager.generateNewId());
         if (ret != null) {
@@ -849,9 +851,10 @@ public final class Settings implements Watchable, Snappable {
 
     PackageSetting addPackageLPw(String name, String realName, File codePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
-            String secondaryCpuAbiString, String cpuAbiOverrideString, int uid, long vc, int
-            pkgFlags, int pkgPrivateFlags, String[] usesStaticLibraries,
-            long[] usesStaticLibraryNames, Map<String, Set<String>> mimeGroups,
+            String secondaryCpuAbiString, String cpuAbiOverrideString, int uid, long vc,
+            int pkgFlags, int pkgPrivateFlags, String[] usesSdkLibraries,
+            long[] usesSdkLibrariesVersions, String[] usesStaticLibraries,
+            long[] usesStaticLibrariesVersions, Map<String, Set<String>> mimeGroups,
             @NonNull UUID domainSetId) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
@@ -864,8 +867,8 @@ public final class Settings implements Watchable, Snappable {
         }
         p = new PackageSetting(name, realName, codePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString, vc, pkgFlags,
-                pkgPrivateFlags, 0 /*userId*/, usesStaticLibraries, usesStaticLibraryNames,
-                mimeGroups, domainSetId);
+                pkgPrivateFlags, 0 /*userId*/, usesSdkLibraries, usesSdkLibrariesVersions,
+                usesStaticLibraries, usesStaticLibrariesVersions, mimeGroups, domainSetId);
         p.setAppId(uid);
         if (registerExistingAppIdLPw(uid, p, name)) {
             mPackages.put(name, p);
@@ -925,6 +928,7 @@ public final class Settings implements Watchable, Snappable {
             String secondaryCpuAbi, long versionCode, int pkgFlags, int pkgPrivateFlags,
             UserHandle installUser, boolean allowInstall, boolean instantApp,
             boolean virtualPreload, UserManagerService userManager,
+            String[] usesSdkLibraries, long[] usesSdkLibrariesVersions,
             String[] usesStaticLibraries, long[] usesStaticLibrariesVersions,
             Set<String> mimeGroupNames, @NonNull UUID domainSetId) {
         final PackageSetting pkgSetting;
@@ -940,6 +944,8 @@ public final class Settings implements Watchable, Snappable {
                     // overwrite the signatures in the original package setting.
                     .setSignatures(new PackageSignatures())
                     .setLongVersionCode(versionCode)
+                    .setUsesSdkLibraries(usesSdkLibraries)
+                    .setUsesSdkLibrariesVersionsMajor(usesSdkLibrariesVersions)
                     .setUsesStaticLibraries(usesStaticLibraries)
                     .setUsesStaticLibrariesVersions(usesStaticLibrariesVersions)
                     // Update new package state.
@@ -951,8 +957,9 @@ public final class Settings implements Watchable, Snappable {
             pkgSetting = new PackageSetting(pkgName, realPkgName, codePath,
                     legacyNativeLibraryPath, primaryCpuAbi, secondaryCpuAbi,
                     null /*cpuAbiOverrideString*/, versionCode, pkgFlags, pkgPrivateFlags,
-                    0 /*sharedUserId*/, usesStaticLibraries,
-                    usesStaticLibrariesVersions, createMimeGroups(mimeGroupNames), domainSetId);
+                    0 /*sharedUserId*/, usesSdkLibraries, usesSdkLibrariesVersions,
+                    usesStaticLibraries, usesStaticLibrariesVersions,
+                    createMimeGroups(mimeGroupNames), domainSetId);
             pkgSetting.setLastModifiedTime(codePath.lastModified());
             pkgSetting.setSharedUser(sharedUser);
             // If this is not a system app, it starts out stopped.
@@ -1046,6 +1053,7 @@ public final class Settings implements Watchable, Snappable {
             @NonNull File codePath, @Nullable String legacyNativeLibraryPath,
             @Nullable String primaryCpuAbi, @Nullable String secondaryCpuAbi, int pkgFlags,
             int pkgPrivateFlags, @NonNull UserManagerService userManager,
+            @Nullable String[] usesSdkLibraries, @Nullable long[] usesSdkLibrariesVersions,
             @Nullable String[] usesStaticLibraries, @Nullable long[] usesStaticLibrariesVersions,
             @Nullable Set<String> mimeGroupNames, @NonNull UUID domainSetId)
                     throws PackageManagerException {
@@ -1095,7 +1103,17 @@ public final class Settings implements Watchable, Snappable {
                 .setSecondaryCpuAbi(secondaryCpuAbi)
                 .updateMimeGroups(mimeGroupNames)
                 .setDomainSetId(domainSetId);
-        // Update static shared library dependencies if needed
+        // Update SDK library dependencies if needed.
+        if (usesSdkLibraries != null && usesSdkLibrariesVersions != null
+                && usesSdkLibraries.length == usesSdkLibrariesVersions.length) {
+            pkgSetting.setUsesSdkLibraries(usesSdkLibraries)
+                    .setUsesSdkLibrariesVersionsMajor(usesSdkLibrariesVersions);
+        } else {
+            pkgSetting.setUsesSdkLibraries(null)
+                    .setUsesSdkLibrariesVersionsMajor(null);
+        }
+
+        // Update static shared library dependencies if needed.
         if (usesStaticLibraries != null && usesStaticLibrariesVersions != null
                 && usesStaticLibraries.length == usesStaticLibrariesVersions.length) {
             pkgSetting.setUsesStaticLibraries(usesStaticLibraries)
@@ -2167,6 +2185,21 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
+    void readUsesSdkLibLPw(TypedXmlPullParser parser, PackageSetting outPs)
+            throws IOException, XmlPullParserException {
+        String libName = parser.getAttributeValue(null, ATTR_NAME);
+        long libVersion = parser.getAttributeLong(null, ATTR_VERSION, -1);
+
+        if (libName != null && libVersion >= 0) {
+            outPs.setUsesSdkLibraries(ArrayUtils.appendElement(String.class,
+                    outPs.getUsesSdkLibraries(), libName));
+            outPs.setUsesSdkLibrariesVersionsMajor(ArrayUtils.appendLong(
+                    outPs.getUsesSdkLibrariesVersionsMajor(), libVersion));
+        }
+
+        XmlUtils.skipCurrentTag(parser);
+    }
+
     void readUsesStaticLibLPw(TypedXmlPullParser parser, PackageSetting outPs)
             throws IOException, XmlPullParserException {
         String libName = parser.getAttributeValue(null, ATTR_NAME);
@@ -2180,6 +2213,23 @@ public final class Settings implements Watchable, Snappable {
         }
 
         XmlUtils.skipCurrentTag(parser);
+    }
+
+    void writeUsesSdkLibLPw(TypedXmlSerializer serializer, String[] usesSdkLibraries,
+            long[] usesSdkLibraryVersions) throws IOException {
+        if (ArrayUtils.isEmpty(usesSdkLibraries) || ArrayUtils.isEmpty(usesSdkLibraryVersions)
+                || usesSdkLibraries.length != usesSdkLibraryVersions.length) {
+            return;
+        }
+        final int libCount = usesSdkLibraries.length;
+        for (int i = 0; i < libCount; i++) {
+            final String libName = usesSdkLibraries[i];
+            final long libVersion = usesSdkLibraryVersions[i];
+            serializer.startTag(null, TAG_USES_SDK_LIB);
+            serializer.attribute(null, ATTR_NAME, libName);
+            serializer.attributeLong(null, ATTR_VERSION, libVersion);
+            serializer.endTag(null, TAG_USES_SDK_LIB);
+        }
     }
 
     void writeUsesStaticLibLPw(TypedXmlSerializer serializer, String[] usesStaticLibraries,
@@ -2707,6 +2757,9 @@ public final class Settings implements Watchable, Snappable {
         }
         serializer.attributeFloat(null, "loadingProgress", pkg.getLoadingProgress());
 
+        writeUsesSdkLibLPw(serializer, pkg.getUsesSdkLibraries(),
+                pkg.getUsesSdkLibrariesVersionsMajor());
+
         writeUsesStaticLibLPw(serializer, pkg.getUsesStaticLibraries(),
                 pkg.getUsesStaticLibrariesVersions());
 
@@ -2784,6 +2837,9 @@ public final class Settings implements Watchable, Snappable {
         serializer.attributeFloat(null, "loadingProgress", pkg.getLoadingProgress());
 
         serializer.attribute(null, "domainSetId", pkg.getDomainSetId().toString());
+
+        writeUsesSdkLibLPw(serializer, pkg.getUsesSdkLibraries(),
+                pkg.getUsesSdkLibrariesVersionsMajor());
 
         writeUsesStaticLibLPw(serializer, pkg.getUsesStaticLibraries(),
                 pkg.getUsesStaticLibrariesVersions());
@@ -3455,8 +3511,8 @@ public final class Settings implements Watchable, Snappable {
         UUID domainSetId = DomainVerificationManagerInternal.DISABLED_ID;
         PackageSetting ps = new PackageSetting(name, realName, new File(codePathStr),
                 legacyNativeLibraryPathStr, primaryCpuAbiStr, secondaryCpuAbiStr, cpuAbiOverrideStr,
-                versionCode, pkgFlags, pkgPrivateFlags, 0 /*sharedUserId*/, null, null, null,
-                domainSetId);
+                versionCode, pkgFlags, pkgPrivateFlags, 0 /*sharedUserId*/, null, null, null, null,
+                null, domainSetId);
         long timeStamp = parser.getAttributeLongHex(null, "ft", 0);
         if (timeStamp == 0) {
             timeStamp = parser.getAttributeLong(null, "ts", 0);
@@ -3484,6 +3540,8 @@ public final class Settings implements Watchable, Snappable {
                 readInstallPermissionsLPr(parser, ps.getLegacyPermissionState(), users);
             } else if (parser.getName().equals(TAG_USES_STATIC_LIB)) {
                 readUsesStaticLibLPw(parser, ps);
+            } else if (parser.getName().equals(TAG_USES_SDK_LIB)) {
+                readUsesSdkLibLPw(parser, ps);
             } else {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Unknown element under <updated-package>: " + parser.getName());
@@ -3642,8 +3700,9 @@ public final class Settings implements Watchable, Snappable {
                 packageSetting = addPackageLPw(name.intern(), realName, new File(codePathStr),
                         legacyNativeLibraryPathStr, primaryCpuAbiString, secondaryCpuAbiString,
                         cpuAbiOverrideString, userId, versionCode, pkgFlags, pkgPrivateFlags,
-                        null /*usesStaticLibraries*/, null /*usesStaticLibraryVersions*/,
-                        null /*mimeGroups*/, domainSetId);
+                        null /* usesSdkLibraries */, null /* usesSdkLibraryVersions */,
+                        null /* usesStaticLibraries */, null /* usesStaticLibraryVersions */,
+                        null /* mimeGroups */, domainSetId);
                 if (PackageManagerService.DEBUG_SETTINGS)
                     Log.i(PackageManagerService.TAG, "Reading package " + name + ": userId="
                             + userId + " pkg=" + packageSetting);
@@ -3662,9 +3721,11 @@ public final class Settings implements Watchable, Snappable {
                             new File(codePathStr), legacyNativeLibraryPathStr,
                             primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
                             versionCode, pkgFlags, pkgPrivateFlags, sharedUserId,
-                            null /*usesStaticLibraries*/,
-                            null /*usesStaticLibraryVersions*/,
-                            null /*mimeGroups*/, domainSetId);
+                            null /* usesSdkLibraries */,
+                            null /* usesSdkLibrariesVersions */,
+                            null /* usesStaticLibraries */,
+                            null /* usesStaticLibraryVersions */,
+                            null /* mimeGroups */, domainSetId);
                     packageSetting.setLastModifiedTime(timeStamp);
                     packageSetting.setFirstInstallTime(firstInstallTime);
                     packageSetting.setLastUpdateTime(lastUpdateTime);
@@ -3793,6 +3854,8 @@ public final class Settings implements Watchable, Snappable {
                     }
                 } else if (tagName.equals(TAG_USES_STATIC_LIB)) {
                     readUsesStaticLibLPw(parser, packageSetting);
+                } else if (tagName.equals(TAG_USES_SDK_LIB)) {
+                    readUsesSdkLibLPw(parser, packageSetting);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unknown element under <package>: " + parser.getName());
@@ -4581,6 +4644,13 @@ public final class Settings implements Watchable, Snappable {
                 pw.print(" version:"); pw.println(pkg.getStaticSharedLibVersion());
             }
 
+            if (pkg.getSdkLibName() != null) {
+                pw.print(prefix); pw.println("  SDK library:");
+                pw.print(prefix); pw.print("    ");
+                pw.print("name:"); pw.print(pkg.getSdkLibName());
+                pw.print(" versionMajor:"); pw.println(pkg.getSdkLibVersionMajor());
+            }
+
             List<String> usesLibraries = pkg.getUsesLibraries();
             if (usesLibraries.size() > 0) {
                 pw.print(prefix); pw.println("  usesLibraries:");
@@ -4597,6 +4667,17 @@ public final class Settings implements Watchable, Snappable {
                     pw.print(prefix); pw.print("    ");
                     pw.print(usesStaticLibraries.get(i)); pw.print(" version:");
                             pw.println(usesStaticLibrariesVersions[i]);
+                }
+            }
+
+            List<String> usesSdkLibraries = pkg.getUsesSdkLibraries();
+            long[] usesSdkLibrariesVersionsMajor = pkg.getUsesSdkLibrariesVersionsMajor();
+            if (usesSdkLibraries.size() > 0) {
+                pw.print(prefix); pw.println("  usesSdkLibraries:");
+                for (int i = 0, size = usesSdkLibraries.size(); i < size; ++i) {
+                    pw.print(prefix); pw.print("    ");
+                    pw.print(usesSdkLibraries.get(i)); pw.print(" version:");
+                    pw.println(usesSdkLibrariesVersionsMajor[i]);
                 }
             }
 

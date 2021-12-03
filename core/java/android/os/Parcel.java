@@ -3646,7 +3646,14 @@ public final class Parcel {
      * list was {@code null}, {@code list} is cleared.
      *
      * @see #writeParcelableList(List, int)
+     *
+     * @deprecated Use the type-safer version {@link #readParcelableList(List, ClassLoader, Class)}
+     *      starting from Android {@link Build.VERSION_CODES#TIRAMISU}. Also consider changing the
+     *      format to use {@link #readTypedList(List, Parcelable.Creator)} if possible (eg. if the
+     *      items' class is final) since this is also more performant. Note that changing to the
+     *      latter also requires changing the writes.
      */
+    @Deprecated
     @NonNull
     public final <T extends Parcelable> List<T> readParcelableList(@NonNull List<T> list,
             @Nullable ClassLoader cl) {

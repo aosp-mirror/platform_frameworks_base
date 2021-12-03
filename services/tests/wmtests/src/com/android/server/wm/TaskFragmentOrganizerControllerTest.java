@@ -330,7 +330,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Throw exception if the transaction is trying to change a window that is not organized by
         // the organizer.
-        mTransaction.setAdjacentRoots(mFragmentWindowToken, token2);
+        mTransaction.setAdjacentRoots(mFragmentWindowToken, token2, false /* moveTogether */);
 
         assertThrows(SecurityException.class, () -> {
             try {

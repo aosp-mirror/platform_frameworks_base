@@ -1494,6 +1494,9 @@ public class DisplayPolicy {
      * @param displayFrames The display frames.
      */
     public void layoutWindowLw(WindowState win, WindowState attached, DisplayFrames displayFrames) {
+        if (win.skipLayout()) {
+            return;
+        }
 
         // This window might be in the simulated environment.
         // We invoke this to get the proper DisplayFrames.

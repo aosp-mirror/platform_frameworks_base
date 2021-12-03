@@ -136,7 +136,7 @@ public final class VibrationAttributes implements Parcelable {
     /**
      * @hide
      */
-    @IntDef(prefix = { "FLAG_" }, value = {
+    @IntDef(prefix = { "FLAG_" }, flag = true, value = {
             FLAG_BYPASS_INTERRUPTION_POLICY,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -162,7 +162,8 @@ public final class VibrationAttributes implements Parcelable {
     private final int mFlags;
     private final int mOriginalAudioUsage;
 
-    private VibrationAttributes(int usage, int audioUsage, int flags) {
+    private VibrationAttributes(@Usage int usage, @AudioAttributes.AttributeUsage int audioUsage,
+            @Flag int flags) {
         mUsage = usage;
         mOriginalAudioUsage = audioUsage;
         mFlags = flags & FLAG_ALL_SUPPORTED;
@@ -172,6 +173,7 @@ public final class VibrationAttributes implements Parcelable {
      * Return the vibration usage class.
      * @return USAGE_CLASS_ALARM, USAGE_CLASS_FEEDBACK or USAGE_CLASS_UNKNOWN
      */
+    @UsageClass
     public int getUsageClass() {
         return mUsage & USAGE_CLASS_MASK;
     }
@@ -180,6 +182,7 @@ public final class VibrationAttributes implements Parcelable {
      * Return the vibration usage.
      * @return one of the values that can be set in {@link Builder#setUsage(int)}
      */
+    @Usage
     public int getUsage() {
         return mUsage;
     }
@@ -188,6 +191,7 @@ public final class VibrationAttributes implements Parcelable {
      * Return the flags.
      * @return a combined mask of all flags
      */
+    @Flag
     public int getFlags() {
         return mFlags;
     }
@@ -196,7 +200,7 @@ public final class VibrationAttributes implements Parcelable {
      * Check whether a flag is set
      * @return true if a flag is set and false otherwise
      */
-    public boolean isFlagSet(int flag) {
+    public boolean isFlagSet(@Flag int flag) {
         return (mFlags & flag) > 0;
     }
 
@@ -206,6 +210,7 @@ public final class VibrationAttributes implements Parcelable {
      * @hide
      */
     @TestApi
+    @AudioAttributes.AttributeUsage
     public int getAudioUsage() {
         if (mOriginalAudioUsage != AudioAttributes.USAGE_UNKNOWN) {
             // Return same audio usage set in the Builder.
@@ -292,7 +297,7 @@ public final class VibrationAttributes implements Parcelable {
     }
 
     /** @hide */
-    public static String usageToString(int usage) {
+    public static String usageToString(@Usage int usage) {
         switch (usage) {
             case USAGE_UNKNOWN:
                 return "UNKNOWN";
@@ -419,7 +424,7 @@ public final class VibrationAttributes implements Parcelable {
          * {@link VibrationAttributes#USAGE_MEDIA}.
          * @return the same Builder instance.
          */
-        public @NonNull Builder setUsage(int usage) {
+        public @NonNull Builder setUsage(@Usage int usage) {
             mOriginalAudioUsage = AudioAttributes.USAGE_UNKNOWN;
             mUsage = usage;
             return this;
@@ -431,7 +436,7 @@ public final class VibrationAttributes implements Parcelable {
          * @param mask Bit range that should be changed.
          * @return the same Builder instance.
          */
-        public @NonNull Builder setFlags(int flags, int mask) {
+        public @NonNull Builder setFlags(@Flag int flags, int mask) {
             mask &= FLAG_ALL_SUPPORTED;
             mFlags = (mFlags & ~mask) | (flags & mask);
             return this;

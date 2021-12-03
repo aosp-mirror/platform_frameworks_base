@@ -4600,23 +4600,14 @@ class Task extends TaskFragment {
         moveToFront(reason, null);
     }
 
-    /**
-     * @param reason The reason for moving the root task to the front.
-     * @param task If non-null, the task will be moved to the top of the root task.
-     */
     void moveToFront(String reason, Task task) {
-        if (!isAttached()) {
-            return;
-        }
-
-        final TaskDisplayArea taskDisplayArea = getDisplayArea();
-
         if (inSplitScreenSecondaryWindowingMode()) {
             // If the root task is in split-screen secondary mode, we need to make sure we move the
             // primary split-screen root task forward in the case it is currently behind a
             // fullscreen root task so both halves of the split-screen appear on-top and the
             // fullscreen root task isn't cutting between them.
             // TODO(b/70677280): This is a workaround until we can fix as part of b/70677280.
+            final TaskDisplayArea taskDisplayArea = getDisplayArea();
             final Task topFullScreenRootTask =
                     taskDisplayArea.getTopRootTaskInWindowingMode(WINDOWING_MODE_FULLSCREEN);
             if (topFullScreenRootTask != null) {
@@ -4624,10 +4615,30 @@ class Task extends TaskFragment {
                         taskDisplayArea.getRootSplitScreenPrimaryTask();
                 if (primarySplitScreenRootTask != null
                         && topFullScreenRootTask.compareTo(primarySplitScreenRootTask) > 0) {
-                    primarySplitScreenRootTask.moveToFront(reason + " splitScreenToTop");
+                    primarySplitScreenRootTask.moveToFrontInner(reason + " splitScreenToTop",
+                            null /* task */);
                 }
             }
+        } else if (mMoveAdjacentTogether && getAdjacentTaskFragment() != null) {
+            final Task adjacentTask = getAdjacentTaskFragment().asTask();
+            if (adjacentTask != null) {
+                adjacentTask.moveToFrontInner(reason + " adjacentTaskToTop", null /* task */);
+            }
         }
+        moveToFrontInner(reason, task);
+    }
+
+    /**
+     * @param reason The reason for moving the root task to the front.
+     * @param task If non-null, the task will be moved to the top of the root task.
+     */
+    @VisibleForTesting
+    void moveToFrontInner(String reason, Task task) {
+        if (!isAttached()) {
+            return;
+        }
+
+        final TaskDisplayArea taskDisplayArea = getDisplayArea();
 
         if (!isActivityTypeHome() && returnsToHomeRootTask()) {
             // Make sure the root home task is behind this root task since that is where we

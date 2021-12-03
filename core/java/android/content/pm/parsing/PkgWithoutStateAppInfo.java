@@ -21,8 +21,6 @@ import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.util.SparseArray;
 
-import com.android.internal.R;
-
 /**
  * Container for fields that are eventually exposed through {@link ApplicationInfo}.
  * <p>
@@ -574,6 +572,11 @@ public interface PkgWithoutStateAppInfo {
      * @see ApplicationInfo#PRIVATE_FLAG_STATIC_SHARED_LIBRARY
      */
     boolean isStaticSharedLibrary();
+
+    /**
+     * True means that this package/app contains an SDK library.
+     */
+    boolean isSdkLibrary();
 
     /**
      * If omitted from manifest, returns true if {@link #getTargetSdkVersion()} >= {@link

@@ -36,10 +36,8 @@ import android.util.Slog;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -139,15 +137,17 @@ public final class PermissionHelper {
         return granted;
     }
 
+    // Key: (uid, package name); Value: (granted, user set)
     public @NonNull
-    ArrayMap<Pair<Integer, String>, Boolean> getNotificationPermissionValues(
-            int userId) {
+            ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>>
+                    getNotificationPermissionValues(int userId) {
         assertFlag();
-        ArrayMap<Pair<Integer, String>, Boolean> notifPermissions = new ArrayMap<>();
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> notifPermissions = new ArrayMap<>();
         Set<Pair<Integer, String>> allRequestingUids = getAppsRequestingPermission(userId);
         Set<Pair<Integer, String>> allApprovedUids = getAppsGrantedPermission(userId);
         for (Pair<Integer, String> pair : allRequestingUids) {
-            notifPermissions.put(pair, allApprovedUids.contains(pair));
+            notifPermissions.put(pair, new Pair(allApprovedUids.contains(pair),
+                    isPermissionUserSet(pair.second /* package name */, userId)));
         }
         return notifPermissions;
     }
@@ -190,6 +190,18 @@ public final class PermissionHelper {
                     userId);
             return (flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0
                     || (flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0;
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Could not reach system server", e);
+        }
+        return false;
+    }
+
+    boolean isPermissionUserSet(String packageName, @UserIdInt int userId) {
+        assertFlag();
+        try {
+            int flags = mPermManager.getPermissionFlags(packageName, NOTIFICATION_PERMISSION,
+                    userId);
+            return (flags & PackageManager.FLAG_PERMISSION_USER_SET) != 0;
         } catch (RemoteException e) {
             Slog.e(TAG, "Could not reach system server", e);
         }

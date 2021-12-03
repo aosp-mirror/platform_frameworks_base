@@ -46,7 +46,6 @@ import android.os.ShellCommand;
 import android.os.Trace;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.VibrationEffectSegment;
@@ -394,13 +393,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 if (DEBUG) {
                     Slog.d(TAG, "Starting vibrate for vibration  " + vib.id);
                 }
-                Vibration.Status ignoreStatus = shouldIgnoreVibrationLocked(vib);
-                if (ignoreStatus != null) {
-                    endVibrationLocked(vib, ignoreStatus);
-                    return vib;
+                Vibration.Status ignoreStatus = shouldIgnoreVibrationLocked(
+                        vib.uid, vib.opPkg, vib.attrs);
+
+                if (ignoreStatus == null) {
+                    ignoreStatus = shouldIgnoreVibrationForOngoingLocked(vib);
                 }
 
-                ignoreStatus = shouldIgnoreVibrationForCurrentLocked(vib);
                 if (ignoreStatus != null) {
                     endVibrationLocked(vib, ignoreStatus);
                     return vib;
@@ -453,8 +452,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                             && shouldCancelVibration(
                             mCurrentExternalVibration.externalVibration.getVibrationAttributes(),
                             usageFilter)) {
-                        mCurrentExternalVibration.end(Vibration.Status.CANCELLED);
-                        mVibratorManagerRecords.record(mCurrentExternalVibration);
+                        endVibrationLocked(mCurrentExternalVibration, Vibration.Status.CANCELLED);
                         mCurrentExternalVibration.externalVibration.mute();
                         mCurrentExternalVibration = null;
                         setExternalControl(false);
@@ -482,13 +480,74 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
         try {
             if (isDumpProto) {
-                mVibratorManagerRecords.dumpProto(fd);
+                dumpProto(fd);
             } else {
-                mVibratorManagerRecords.dumpText(pw);
+                dumpText(pw);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    private void dumpText(PrintWriter pw) {
+        if (DEBUG) {
+            Slog.d(TAG, "Dumping vibrator manager service to text...");
+        }
+        synchronized (mLock) {
+            pw.println("Vibrator Manager Service:");
+            pw.println("  mVibrationSettings:");
+            pw.println("    " + mVibrationSettings);
+            pw.println();
+            pw.println("  mVibratorControllers:");
+            for (int i = 0; i < mVibrators.size(); i++) {
+                pw.println("    " + mVibrators.valueAt(i));
+            }
+            pw.println();
+            pw.println("  mCurrentVibration:");
+            pw.println("    " + (mCurrentVibration == null
+                    ? null : mCurrentVibration.getVibration().getDebugInfo()));
+            pw.println();
+            pw.println("  mNextVibration:");
+            pw.println("    " + (mNextVibration == null
+                    ? null : mNextVibration.getVibration().getDebugInfo()));
+            pw.println();
+            pw.println("  mCurrentExternalVibration:");
+            pw.println("    " + (mCurrentExternalVibration == null
+                    ? null : mCurrentExternalVibration.getDebugInfo()));
+            pw.println();
+        }
+        mVibratorManagerRecords.dumpText(pw);
+    }
+
+    synchronized void dumpProto(FileDescriptor fd) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+        if (DEBUG) {
+            Slog.d(TAG, "Dumping vibrator manager service to proto...");
+        }
+        synchronized (mLock) {
+            mVibrationSettings.dumpProto(proto);
+            if (mCurrentVibration != null) {
+                mCurrentVibration.getVibration().getDebugInfo().dumpProto(proto,
+                        VibratorManagerServiceDumpProto.CURRENT_VIBRATION);
+            }
+            if (mCurrentExternalVibration != null) {
+                mCurrentExternalVibration.getDebugInfo().dumpProto(proto,
+                        VibratorManagerServiceDumpProto.CURRENT_EXTERNAL_VIBRATION);
+            }
+
+            boolean isVibrating = false;
+            boolean isUnderExternalControl = false;
+            for (int i = 0; i < mVibrators.size(); i++) {
+                proto.write(VibratorManagerServiceDumpProto.VIBRATOR_IDS, mVibrators.keyAt(i));
+                isVibrating |= mVibrators.valueAt(i).isVibrating();
+                isUnderExternalControl |= mVibrators.valueAt(i).isUnderExternalControl();
+            }
+            proto.write(VibratorManagerServiceDumpProto.IS_VIBRATING, isVibrating);
+            proto.write(VibratorManagerServiceDumpProto.VIBRATOR_UNDER_EXTERNAL_CONTROL,
+                    isUnderExternalControl);
+        }
+        mVibratorManagerRecords.dumpProto(proto);
+        proto.flush();
     }
 
     @Override
@@ -515,8 +574,15 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 return;
             }
 
-            if (inputDevicesChanged || !mVibrationSettings.shouldVibrateForPowerMode(
-                    mCurrentVibration.getVibration().attrs.getUsage())) {
+            Vibration vib = mCurrentVibration.getVibration();
+            Vibration.Status ignoreStatus = shouldIgnoreVibrationLocked(
+                    vib.uid, vib.opPkg, vib.attrs);
+
+            if (inputDevicesChanged || (ignoreStatus != null)) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Canceling vibration because settings changed: "
+                            + (inputDevicesChanged ? "input devices changed" : ignoreStatus));
+                }
                 mCurrentVibration.cancel();
             }
         }
@@ -602,13 +668,54 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     @GuardedBy("mLock")
     private void endVibrationLocked(Vibration vib, Vibration.Status status) {
         vib.end(status);
+        logVibrationStatus(vib.uid, vib.attrs, status);
         mVibratorManagerRecords.record(vib);
     }
 
     @GuardedBy("mLock")
     private void endVibrationLocked(ExternalVibrationHolder vib, Vibration.Status status) {
         vib.end(status);
+        logVibrationStatus(vib.externalVibration.getUid(),
+                vib.externalVibration.getVibrationAttributes(), status);
         mVibratorManagerRecords.record(vib);
+    }
+
+    private void logVibrationStatus(int uid, VibrationAttributes attrs, Vibration.Status status) {
+        switch (status) {
+            case IGNORED_BACKGROUND:
+                Slog.e(TAG, "Ignoring incoming vibration as process with"
+                        + " uid= " + uid + " is background," + " attrs= " + attrs);
+                break;
+            case IGNORED_ERROR_APP_OPS:
+                Slog.w(TAG, "Would be an error: vibrate from uid " + uid);
+                break;
+            case IGNORED_FOR_ALARM:
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignoring incoming vibration in favor of alarm vibration");
+                }
+                break;
+            case IGNORED_FOR_EXTERNAL:
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignoring incoming vibration for current external vibration");
+                }
+                break;
+            case IGNORED_FOR_ONGOING:
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignoring incoming vibration in favor of repeating vibration");
+                }
+                break;
+            case IGNORED_FOR_RINGER_MODE:
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignoring incoming vibration because of ringer mode, attrs="
+                            + attrs);
+                }
+                break;
+            default:
+                if (DEBUG) {
+                    Slog.d(TAG, "Vibration for uid=" + uid + " and with attrs=" + attrs
+                            + " ended with status " + status);
+                }
+        }
     }
 
     @GuardedBy("mLock")
@@ -651,32 +758,36 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     /**
-     * Check if given vibration should be ignored in favour of one of the vibrations currently
-     * running on the same vibrators.
+     * Check if given vibration should be ignored by this service because of the ongoing vibration.
      *
-     * @return One of Vibration.Status.IGNORED_* values if the vibration should be ignored.
+     * @return One of Vibration.Status.IGNORED_* values if the vibration should be ignored, null
+     * otherwise.
      */
     @GuardedBy("mLock")
     @Nullable
-    private Vibration.Status shouldIgnoreVibrationForCurrentLocked(Vibration vibration) {
-        if (vibration.isRepeating()) {
-            // Repeating vibrations always take precedence.
+    private Vibration.Status shouldIgnoreVibrationForOngoingLocked(Vibration vib) {
+        if (mCurrentExternalVibration != null) {
+            // If something has external control of the vibrator, assume that it's more important.
+            return Vibration.Status.IGNORED_FOR_EXTERNAL;
+        }
+
+        if (mCurrentVibration == null || vib.isRepeating()) {
+            // Incoming repeating vibrations always take precedence over ongoing vibrations.
             return null;
         }
-        if (mCurrentVibration != null && !mCurrentVibration.getVibration().hasEnded()) {
-            if (mCurrentVibration.getVibration().attrs.getUsage()
-                    == VibrationAttributes.USAGE_ALARM) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Ignoring incoming vibration in favor of alarm vibration");
-                }
-                return Vibration.Status.IGNORED_FOR_ALARM;
-            }
-            if (mCurrentVibration.getVibration().isRepeating()) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Ignoring incoming vibration in favor of repeating vibration");
-                }
-                return Vibration.Status.IGNORED_FOR_ONGOING;
-            }
+
+        Vibration currentVibration = mCurrentVibration.getVibration();
+        if (currentVibration.hasEnded()) {
+            // Current vibration is finishing up, it should not block incoming vibrations.
+            return null;
+        }
+
+        if (currentVibration.attrs.getUsage() == VibrationAttributes.USAGE_ALARM) {
+            return Vibration.Status.IGNORED_FOR_ALARM;
+        }
+
+        if (currentVibration.isRepeating()) {
+            return Vibration.Status.IGNORED_FOR_ONGOING;
         }
         return null;
     }
@@ -684,57 +795,16 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     /**
      * Check if given vibration should be ignored by this service.
      *
-     * @return One of Vibration.Status.IGNORED_* values if the vibration should be ignored.
-     * @see #shouldIgnoreVibrationLocked(int, String, VibrationAttributes)
-     */
-    @GuardedBy("mLock")
-    @Nullable
-    private Vibration.Status shouldIgnoreVibrationLocked(Vibration vib) {
-        // If something has external control of the vibrator, assume that it's more important.
-        if (mCurrentExternalVibration != null) {
-            if (DEBUG) {
-                Slog.d(TAG, "Ignoring incoming vibration for current external vibration");
-            }
-            return Vibration.Status.IGNORED_FOR_EXTERNAL;
-        }
-
-        if (!mVibrationSettings.shouldVibrateForUid(vib.uid, vib.attrs.getUsage())) {
-            Slog.e(TAG, "Ignoring incoming vibration as process with"
-                    + " uid= " + vib.uid + " is background,"
-                    + " attrs= " + vib.attrs);
-            return Vibration.Status.IGNORED_BACKGROUND;
-        }
-
-        return shouldIgnoreVibrationLocked(vib.uid, vib.opPkg, vib.attrs);
-    }
-
-    /**
-     * Check if a vibration with given {@code uid}, {@code opPkg} and {@code attrs} should be
-     * ignored by this service.
-     *
-     * @param uid   The user id of this vibration
-     * @param opPkg The package name of this vibration
-     * @param attrs The attributes of this vibration
-     * @return One of Vibration.Status.IGNORED_* values if the vibration should be ignored.
+     * @return One of Vibration.Status.IGNORED_* values if the vibration should be ignored, null
+     * otherwise.
      */
     @GuardedBy("mLock")
     @Nullable
     private Vibration.Status shouldIgnoreVibrationLocked(int uid, String opPkg,
             VibrationAttributes attrs) {
-        if (!mVibrationSettings.shouldVibrateForPowerMode(attrs.getUsage())) {
-            return Vibration.Status.IGNORED_FOR_POWER;
-        }
-
-        int intensity = mVibrationSettings.getCurrentIntensity(attrs.getUsage());
-        if (intensity == Vibrator.VIBRATION_INTENSITY_OFF) {
-            return Vibration.Status.IGNORED_FOR_SETTINGS;
-        }
-
-        if (!mVibrationSettings.shouldVibrateForRingerMode(attrs.getUsage())) {
-            if (DEBUG) {
-                Slog.e(TAG, "Vibrate ignored, not vibrating for ringtones");
-            }
-            return Vibration.Status.IGNORED_RINGTONE;
+        Vibration.Status statusFromSettings = mVibrationSettings.shouldIgnoreVibration(uid, attrs);
+        if (statusFromSettings != null) {
+            return statusFromSettings;
         }
 
         int mode = checkAppOpModeLocked(uid, opPkg, attrs);
@@ -742,7 +812,6 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             if (mode == AppOpsManager.MODE_ERRORED) {
                 // We might be getting calls from within system_server, so we don't actually
                 // want to throw a SecurityException here.
-                Slog.w(TAG, "Would be an error: vibrate from uid " + uid);
                 return Vibration.Status.IGNORED_ERROR_APP_OPS;
             } else {
                 return Vibration.Status.IGNORED_APP_OPS;
@@ -1236,21 +1305,18 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     /** Keep records of vibrations played and provide debug information for this service. */
-    private final class VibratorManagerRecords {
-        @GuardedBy("mLock")
+    private static final class VibratorManagerRecords {
         private final SparseArray<LinkedList<Vibration.DebugInfo>> mPreviousVibrations =
                 new SparseArray<>();
-        @GuardedBy("mLock")
         private final LinkedList<Vibration.DebugInfo> mPreviousExternalVibrations =
                 new LinkedList<>();
         private final int mPreviousVibrationsLimit;
 
-        private VibratorManagerRecords(int limit) {
+        VibratorManagerRecords(int limit) {
             mPreviousVibrationsLimit = limit;
         }
 
-        @GuardedBy("mLock")
-        void record(Vibration vib) {
+        synchronized void record(Vibration vib) {
             int usage = vib.attrs.getUsage();
             if (!mPreviousVibrations.contains(usage)) {
                 mPreviousVibrations.put(usage, new LinkedList<>());
@@ -1258,122 +1324,67 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             record(mPreviousVibrations.get(usage), vib.getDebugInfo());
         }
 
-        @GuardedBy("mLock")
-        void record(ExternalVibrationHolder vib) {
+        synchronized void record(ExternalVibrationHolder vib) {
             record(mPreviousExternalVibrations, vib.getDebugInfo());
         }
 
-        @GuardedBy("mLock")
-        void record(LinkedList<Vibration.DebugInfo> records, Vibration.DebugInfo info) {
+        synchronized void record(LinkedList<Vibration.DebugInfo> records,
+                Vibration.DebugInfo info) {
             if (records.size() > mPreviousVibrationsLimit) {
                 records.removeFirst();
             }
             records.addLast(info);
         }
 
-        void dumpText(PrintWriter pw) {
-            pw.println("Vibrator Manager Service:");
-            synchronized (mLock) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Dumping vibrator manager service to text...");
-                }
-                pw.println("  mVibrationSettings:");
-                pw.println("    " + mVibrationSettings);
+        synchronized void dumpText(PrintWriter pw) {
+            for (int i = 0; i < mPreviousVibrations.size(); i++) {
                 pw.println();
-                pw.println("  mVibratorControllers:");
-                for (int i = 0; i < mVibrators.size(); i++) {
-                    pw.println("    " + mVibrators.valueAt(i));
-                }
-                pw.println();
-                pw.println("  mCurrentVibration:");
-                pw.println("    " + (mCurrentVibration == null
-                        ? null : mCurrentVibration.getVibration().getDebugInfo()));
-                pw.println();
-                pw.println("  mNextVibration:");
-                pw.println("    " + (mNextVibration == null
-                        ? null : mNextVibration.getVibration().getDebugInfo()));
-                pw.println();
-                pw.println("  mCurrentExternalVibration:");
-                pw.println("    " + (mCurrentExternalVibration == null
-                        ? null : mCurrentExternalVibration.getDebugInfo()));
-                pw.println();
-                for (int i = 0; i < mPreviousVibrations.size(); i++) {
-                    pw.println();
-                    pw.print("  Previous vibrations for usage ");
-                    pw.print(VibrationAttributes.usageToString(mPreviousVibrations.keyAt(i)));
-                    pw.println(":");
-                    for (Vibration.DebugInfo info : mPreviousVibrations.valueAt(i)) {
-                        pw.println("    " + info);
-                    }
-                }
-
-                pw.println();
-                pw.println("  Previous external vibrations:");
-                for (Vibration.DebugInfo info : mPreviousExternalVibrations) {
+                pw.print("  Previous vibrations for usage ");
+                pw.print(VibrationAttributes.usageToString(mPreviousVibrations.keyAt(i)));
+                pw.println(":");
+                for (Vibration.DebugInfo info : mPreviousVibrations.valueAt(i)) {
                     pw.println("    " + info);
                 }
             }
+
+            pw.println();
+            pw.println("  Previous external vibrations:");
+            for (Vibration.DebugInfo info : mPreviousExternalVibrations) {
+                pw.println("    " + info);
+            }
         }
 
-        synchronized void dumpProto(FileDescriptor fd) {
-            final ProtoOutputStream proto = new ProtoOutputStream(fd);
-
-            synchronized (mLock) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Dumping vibrator manager service to proto...");
+        synchronized void dumpProto(ProtoOutputStream proto) {
+            for (int i = 0; i < mPreviousVibrations.size(); i++) {
+                long fieldId;
+                switch (mPreviousVibrations.keyAt(i)) {
+                    case VibrationAttributes.USAGE_RINGTONE:
+                        fieldId = VibratorManagerServiceDumpProto.PREVIOUS_RING_VIBRATIONS;
+                        break;
+                    case VibrationAttributes.USAGE_NOTIFICATION:
+                        fieldId = VibratorManagerServiceDumpProto
+                                .PREVIOUS_NOTIFICATION_VIBRATIONS;
+                        break;
+                    case VibrationAttributes.USAGE_ALARM:
+                        fieldId = VibratorManagerServiceDumpProto.PREVIOUS_ALARM_VIBRATIONS;
+                        break;
+                    default:
+                        fieldId = VibratorManagerServiceDumpProto.PREVIOUS_VIBRATIONS;
                 }
-                mVibrationSettings.dumpProto(proto);
-                if (mCurrentVibration != null) {
-                    mCurrentVibration.getVibration().getDebugInfo().dumpProto(proto,
-                            VibratorManagerServiceDumpProto.CURRENT_VIBRATION);
-                }
-                if (mCurrentExternalVibration != null) {
-                    mCurrentExternalVibration.getDebugInfo().dumpProto(proto,
-                            VibratorManagerServiceDumpProto.CURRENT_EXTERNAL_VIBRATION);
-                }
-
-                boolean isVibrating = false;
-                boolean isUnderExternalControl = false;
-                for (int i = 0; i < mVibrators.size(); i++) {
-                    proto.write(VibratorManagerServiceDumpProto.VIBRATOR_IDS, mVibrators.keyAt(i));
-                    isVibrating |= mVibrators.valueAt(i).isVibrating();
-                    isUnderExternalControl |= mVibrators.valueAt(i).isUnderExternalControl();
-                }
-                proto.write(VibratorManagerServiceDumpProto.IS_VIBRATING, isVibrating);
-                proto.write(VibratorManagerServiceDumpProto.VIBRATOR_UNDER_EXTERNAL_CONTROL,
-                        isUnderExternalControl);
-
-                for (int i = 0; i < mPreviousVibrations.size(); i++) {
-                    long fieldId;
-                    switch (mPreviousVibrations.keyAt(i)) {
-                        case VibrationAttributes.USAGE_RINGTONE:
-                            fieldId = VibratorManagerServiceDumpProto.PREVIOUS_RING_VIBRATIONS;
-                            break;
-                        case VibrationAttributes.USAGE_NOTIFICATION:
-                            fieldId = VibratorManagerServiceDumpProto
-                                    .PREVIOUS_NOTIFICATION_VIBRATIONS;
-                            break;
-                        case VibrationAttributes.USAGE_ALARM:
-                            fieldId = VibratorManagerServiceDumpProto.PREVIOUS_ALARM_VIBRATIONS;
-                            break;
-                        default:
-                            fieldId = VibratorManagerServiceDumpProto.PREVIOUS_VIBRATIONS;
-                    }
-                    for (Vibration.DebugInfo info : mPreviousVibrations.valueAt(i)) {
-                        info.dumpProto(proto, fieldId);
-                    }
-                }
-
-                for (Vibration.DebugInfo info : mPreviousExternalVibrations) {
-                    info.dumpProto(proto,
-                            VibratorManagerServiceDumpProto.PREVIOUS_EXTERNAL_VIBRATIONS);
+                for (Vibration.DebugInfo info : mPreviousVibrations.valueAt(i)) {
+                    info.dumpProto(proto, fieldId);
                 }
             }
-            proto.flush();
+
+            for (Vibration.DebugInfo info : mPreviousExternalVibrations) {
+                info.dumpProto(proto,
+                        VibratorManagerServiceDumpProto.PREVIOUS_EXTERNAL_VIBRATIONS);
+            }
         }
     }
 
     /** Clears mNextVibration if set, ending it cleanly */
+    @GuardedBy("mLock")
     private void clearNextVibrationLocked(Vibration.Status endStatus) {
         if (mNextVibration != null) {
             endVibrationLocked(mNextVibration.getVibration(), endStatus);
@@ -1482,6 +1493,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             }
         }
 
+        @GuardedBy("mLock")
         private void stopExternalVibrateLocked(Vibration.Status status) {
             Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "stopExternalVibrateLocked");
             try {

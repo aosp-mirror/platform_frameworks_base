@@ -357,7 +357,7 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
         pw.print("Other", narcToString(mMinSatiatedBalanceOther)).println();
         pw.decreaseIndent();
         pw.print("Max satiated balance", narcToString(mMaxSatiatedBalance)).println();
-        pw.print("Min satiated circulation", narcToString(mMaxSatiatedCirculation)).println();
+        pw.print("Max satiated circulation", narcToString(mMaxSatiatedCirculation)).println();
 
         pw.println();
         pw.println("Actions:");
