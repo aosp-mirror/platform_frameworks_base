@@ -1082,14 +1082,17 @@ class SettingsProtoDumpUtil {
                 Settings.Global.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE,
                 GlobalSettingsProto.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE);
 
-        final long nitzUpdateToken = p.start(GlobalSettingsProto.NITZ_UPDATE);
+        final long nitzToken = p.start(GlobalSettingsProto.NITZ);
         dumpSetting(s, p,
                 Settings.Global.NITZ_UPDATE_DIFF,
-                GlobalSettingsProto.NitzUpdate.DIFF);
+                GlobalSettingsProto.Nitz.UPDATE_DIFF);
         dumpSetting(s, p,
                 Settings.Global.NITZ_UPDATE_SPACING,
-                GlobalSettingsProto.NitzUpdate.SPACING);
-        p.end(nitzUpdateToken);
+                GlobalSettingsProto.Nitz.UPDATE_SPACING);
+        dumpSetting(s, p,
+                Settings.Global.NITZ_NETWORK_DISCONNECT_RETENTION,
+                GlobalSettingsProto.Nitz.NETWORK_DISCONNECT_RETENTION);
+        p.end(nitzToken);
 
         final long notificationToken = p.start(GlobalSettingsProto.NOTIFICATION);
         dumpSetting(s, p,
