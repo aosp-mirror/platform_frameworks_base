@@ -72,6 +72,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -709,7 +710,8 @@ public class ContextHubService extends IContextHubService.Stub {
             long now = SystemClock.elapsedRealtimeNanos();
             long lastRestartTimeNs = mLastRestartTimestampMap.get(contextHubId).getAndSet(now);
             ContextHubStatsLog.write(
-                    ContextHubStatsLog.CONTEXT_HUB_RESTARTED, now - lastRestartTimeNs,
+                    ContextHubStatsLog.CONTEXT_HUB_RESTARTED,
+                    TimeUnit.NANOSECONDS.toMillis(now - lastRestartTimeNs),
                     contextHubId);
 
             sendLocationSettingUpdate();
