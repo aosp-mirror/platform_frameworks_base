@@ -3720,7 +3720,7 @@ final class InstallPackageHelper {
     }
 
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
-    public void installSystemPackagesFromDir(File scanDir, int parseFlags, int scanFlags,
+    public void installPackagesFromDir(File scanDir, int parseFlags, int scanFlags,
             long currentTime, PackageParser2 packageParser, ExecutorService executorService) {
         final File[] files = scanDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {

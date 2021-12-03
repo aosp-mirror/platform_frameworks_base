@@ -1975,7 +1975,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     mIsEngBuild, mIsUserDebugBuild, mIncrementalVersion);
 
             final int[] userIds = mUserManager.getUserIds();
-            mOverlayConfig = mInitAndSystemPackageHelper.setUpSystemPackages(packageSettings,
+            mOverlayConfig = mInitAndSystemPackageHelper.initPackages(packageSettings,
                     userIds, startTime);
 
             // Resolve the storage manager.

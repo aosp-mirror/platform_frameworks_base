@@ -126,13 +126,13 @@ final class InitAndSystemPackageHelper {
         return null;
     }
 
-    public OverlayConfig setUpSystemPackages(
+    public OverlayConfig initPackages(
             WatchedArrayMap<String, PackageSetting> packageSettings, int[] userIds,
             long startTime) {
         PackageParser2 packageParser = mPm.mInjector.getScanningCachingPackageParser();
 
         ExecutorService executorService = ParallelPackageParser.makeExecutorService();
-        // Prepare apex package info before scanning APKs, these information are needed when
+        // Prepare apex package info before scanning APKs, this information is needed when
         // scanning apk in apex.
         mPm.mApexManager.scanApexPackagesTraced(packageParser, executorService);
 
@@ -289,7 +289,7 @@ final class InitAndSystemPackageHelper {
             long currentTime, PackageParser2 packageParser, ExecutorService executorService) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanDir [" + scanDir.getAbsolutePath() + "]");
         try {
-            mInstallPackageHelper.installSystemPackagesFromDir(scanDir, parseFlags, scanFlags,
+            mInstallPackageHelper.installPackagesFromDir(scanDir, parseFlags, scanFlags,
                     currentTime, packageParser, executorService);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
