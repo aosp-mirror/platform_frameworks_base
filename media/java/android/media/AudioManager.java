@@ -5776,6 +5776,23 @@ public class AudioManager {
     }
 
     /**
+     * Indicate wired accessory connection state change.
+     * @param device {@link AudioDeviceAttributes} of the device to "fake-connect"
+     * @param connected true for connected, false for disconnected
+     * {@hide}
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void setTestDeviceConnectionState(@NonNull AudioDeviceAttributes device,
+            boolean connected) {
+        try {
+            getService().setTestDeviceConnectionState(device, connected);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Indicate Bluetooth profile connection state change.
      * Configuration changes for A2DP are indicated by having the same <code>newDevice</code> and
      * <code>previousDevice</code>

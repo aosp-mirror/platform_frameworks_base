@@ -508,6 +508,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
     }
 
+    /*package*/ void setTestDeviceConnectionState(@NonNull AudioDeviceAttributes device,
+            @AudioService.ConnectionState int state) {
+        synchronized (mDeviceStateLock) {
+            mDeviceInventory.setTestDeviceConnectionState(device, state);
+        }
+    }
+
     /*package*/ static final class BleVolumeInfo {
         final int mIndex;
         final int mMaxIndex;
@@ -1008,7 +1015,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
     /*package*/ boolean handleDeviceConnection(boolean connect, int device, String address,
                                                        String deviceName) {
         synchronized (mDeviceStateLock) {
-            return mDeviceInventory.handleDeviceConnection(connect, device, address, deviceName);
+            return mDeviceInventory.handleDeviceConnection(connect, device, address, deviceName,
+                    false /*for test*/);
         }
     }
 

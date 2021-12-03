@@ -6364,6 +6364,20 @@ public class AudioService extends IAudioService.Stub
         mDeviceBroker.setWiredDeviceConnectionState(type, state, address, name, caller);
     }
 
+    /** @see AudioManager#setTestDeviceConnectionState(AudioDeviceAttributes, boolean) */
+    public void setTestDeviceConnectionState(@NonNull AudioDeviceAttributes device,
+            boolean connected) {
+        Objects.requireNonNull(device);
+        enforceModifyAudioRoutingPermission();
+        mDeviceBroker.setTestDeviceConnectionState(device,
+                connected ? CONNECTION_STATE_CONNECTED : CONNECTION_STATE_DISCONNECTED);
+        // simulate a routing update from native
+        sendMsg(mAudioHandler,
+                MSG_ROUTING_UPDATED,
+                SENDMSG_REPLACE, 0, 0, null,
+                /*delay*/ 0);
+    }
+
     /**
      * @hide
      * The states that can be used with AudioService.setBluetoothHearingAidDeviceConnectionState()

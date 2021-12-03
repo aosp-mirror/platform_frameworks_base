@@ -458,4 +458,6 @@ interface IAudioService {
 
     void registerMuteAwaitConnectionDispatcher(in IMuteAwaitConnectionCallback cb,
             boolean register);
+
+    void setTestDeviceConnectionState(in AudioDeviceAttributes device, boolean connected);
 }
