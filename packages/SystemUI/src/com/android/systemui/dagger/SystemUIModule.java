@@ -52,6 +52,7 @@ import com.android.systemui.shared.system.smartspace.SmartspaceTransitionControl
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.QsFrameTranslateModule;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -112,6 +113,7 @@ import dagger.Provides;
             LogModule.class,
             PeopleHubModule.class,
             PluginModule.class,
+            QsFrameTranslateModule.class,
             ScreenshotModule.class,
             SensorModule.class,
             SettingsModule.class,

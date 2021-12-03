@@ -120,6 +120,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
+import com.android.systemui.statusbar.QsFrameTranslateController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -354,6 +355,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private InteractionJankMonitor mInteractionJankMonitor;
     @Mock
     private NotificationsQSContainerController mNotificationsQSContainerController;
+    @Mock
+    private QsFrameTranslateController mQsFrameTranslateController;
     private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -530,7 +533,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mNotificationRemoteInputManager,
                 mSysUIUnfoldComponent,
                 mControlsComponent,
-                mInteractionJankMonitor);
+                mInteractionJankMonitor,
+                mQsFrameTranslateController);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 () -> {},
