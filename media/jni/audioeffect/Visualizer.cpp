@@ -49,7 +49,7 @@ Visualizer::~Visualizer()
 }
 
 status_t Visualizer::set(int32_t priority,
-                         effect_callback_t cbf,
+                         legacy_callback_t cbf,
                          void* user,
                          audio_session_t sessionId,
                          audio_io_handle_t io,
