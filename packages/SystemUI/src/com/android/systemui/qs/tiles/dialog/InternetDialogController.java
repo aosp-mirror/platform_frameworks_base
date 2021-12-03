@@ -316,15 +316,11 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     }
 
     CharSequence getSubtitleText(boolean isProgressBarVisible) {
-        if (isAirplaneModeEnabled()) {
-            return null;
-        }
-
         if (mCanConfigWifi && !mWifiManager.isWifiEnabled()) {
-            // When the airplane mode is off and Wi-Fi is disabled.
+            // When Wi-Fi is disabled.
             //   Sub-Title: Wi-Fi is off
             if (DEBUG) {
-                Log.d(TAG, "Airplane mode off + Wi-Fi off.");
+                Log.d(TAG, "Wi-Fi off.");
             }
             return mContext.getText(SUBTITLE_TEXT_WIFI_IS_OFF);
         }

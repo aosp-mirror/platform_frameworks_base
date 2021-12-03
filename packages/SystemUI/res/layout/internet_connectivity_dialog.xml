@@ -37,7 +37,7 @@
             android:ellipsize="end"
             android:gravity="center_vertical|center_horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
+            android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.InternetDialog"
             android:textSize="24sp"/>
 
@@ -45,7 +45,7 @@
             android:id="@+id/internet_dialog_subtitle"
             android:gravity="center_vertical|center_horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="20dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:ellipsize="end"
             android:maxLines="1"
@@ -150,6 +150,7 @@
                         android:gravity="start|center_vertical">
                         <TextView
                             android:id="@+id/mobile_title"
+                            android:maxLines="1"
                             style="@style/InternetDialog.NetworkTitle"/>
                         <TextView
                             android:id="@+id/mobile_summary"
