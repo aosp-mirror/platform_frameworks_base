@@ -352,7 +352,13 @@ public class ContentProviderHelper {
                 checkTime(startTime, "getContentProviderImpl: before getProviderByClass");
                 cpr = mProviderMap.getProviderByClass(comp, userId);
                 checkTime(startTime, "getContentProviderImpl: after getProviderByClass");
-                boolean firstClass = cpr == null;
+
+                // The old stable connection's client should be killed during proc cleaning up,
+                // so do not re-use the old ContentProviderRecord, otherwise the new clients
+                // could get killed unexpectedly. Meanwhile, we should retrieve the latest
+                // application info from package manager instead of reusing the info from
+                // the dying one, as the package could have been updated.
+                boolean firstClass = cpr == null || (dyingProc == cpr.proc && dyingProc != null);
                 if (firstClass) {
                     final long ident = Binder.clearCallingIdentity();
 
@@ -381,13 +387,6 @@ public class ContentProviderHelper {
                     } finally {
                         Binder.restoreCallingIdentity(ident);
                     }
-                } else if (dyingProc == cpr.proc && dyingProc != null) {
-                    // The old stable connection's client should be killed during proc cleaning up,
-                    // so do not re-use the old ContentProviderRecord, otherwise the new clients
-                    // could get killed unexpectedly.
-                    cpr = new ContentProviderRecord(cpr);
-                    // This is sort of "firstClass"
-                    firstClass = true;
                 }
 
                 checkTime(startTime, "getContentProviderImpl: now have ContentProviderRecord");
