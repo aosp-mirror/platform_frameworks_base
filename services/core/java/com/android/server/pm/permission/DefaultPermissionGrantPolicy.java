@@ -810,7 +810,7 @@ final class DefaultPermissionGrantPolicy {
             } else {
                 grantPermissionsToSystemPackage(pm,
                     getDefaultSystemHandlerActivityPackage(pm, ACTION_TRACK, userId), userId,
-                    SENSORS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS);
+                    SENSORS_PERMISSIONS);
             }
         }
 
