@@ -22,6 +22,7 @@ import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.LightsOutNotifController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
+import com.android.systemui.statusbar.phone.StatusBarDemoMode;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 
 import dagger.BindsInstance;
@@ -62,6 +63,7 @@ public interface StatusBarFragmentComponent {
         getHeadsUpAppearanceController().init();
         getPhoneStatusBarViewController().init();
         getLightsOutNotifController().init();
+        getStatusBarDemoMode().init();
     }
 
     /** */
@@ -84,4 +86,8 @@ public interface StatusBarFragmentComponent {
     /** */
     @StatusBarFragmentScope
     LightsOutNotifController getLightsOutNotifController();
+
+    /** */
+    @StatusBarFragmentScope
+    StatusBarDemoMode getStatusBarDemoMode();
 }
