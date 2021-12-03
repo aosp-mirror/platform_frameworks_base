@@ -169,6 +169,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     private TaskFragment mAdjacentTaskFragment;
 
     /**
+     * Whether to move adjacent task fragment together when re-positioning.
+     *
+     * @see #mAdjacentTaskFragment
+     */
+    // TODO(b/207185041): Remove this once having a single-top root for split screen.
+    boolean mMoveAdjacentTogether;
+
+    /**
      * Prevents duplicate calls to onTaskAppeared.
      */
     boolean mTaskFragmentAppearedSent;
@@ -313,14 +321,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return service.mWindowOrganizerController.getTaskFragment(token);
     }
 
-    void setAdjacentTaskFragment(@Nullable TaskFragment taskFragment) {
+    void setAdjacentTaskFragment(@Nullable TaskFragment taskFragment, boolean moveTogether) {
         if (mAdjacentTaskFragment == taskFragment) {
             return;
         }
         resetAdjacentTaskFragment();
         if (taskFragment != null) {
             mAdjacentTaskFragment = taskFragment;
-            taskFragment.setAdjacentTaskFragment(this);
+            mMoveAdjacentTogether = moveTogether;
+            taskFragment.setAdjacentTaskFragment(this, moveTogether);
         }
     }
 
@@ -329,9 +338,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (mAdjacentTaskFragment != null && mAdjacentTaskFragment.mAdjacentTaskFragment == this) {
             mAdjacentTaskFragment.mAdjacentTaskFragment = null;
             mAdjacentTaskFragment.mDelayLastActivityRemoval = false;
+            mAdjacentTaskFragment.mMoveAdjacentTogether = false;
         }
         mAdjacentTaskFragment = null;
         mDelayLastActivityRemoval = false;
+        mMoveAdjacentTogether = false;
     }
 
     void setTaskFragmentOrganizer(@NonNull TaskFragmentOrganizerToken organizer, int uid,
@@ -1946,7 +1957,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
             if (inOutConfig.smallestScreenWidthDp
                     == Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
-                if (WindowConfiguration.isFloating(windowingMode)) {
+                // When entering to or exiting from Pip, the PipTaskOrganizer will set the
+                // windowing mode of the activity in the task to WINDOWING_MODE_FULLSCREEN and
+                // temporarily set the bounds of the task to fullscreen size for transitioning.
+                // It will get the wrong value if the calculation is based on this temporary
+                // fullscreen bounds.
+                // We should just inherit the value from parent for this temporary state.
+                final boolean inPipTransition = windowingMode == WINDOWING_MODE_PINNED
+                        && !mTmpFullBounds.isEmpty() && mTmpFullBounds.equals(parentBounds);
+                if (WindowConfiguration.isFloating(windowingMode) && !inPipTransition) {
                     // For floating tasks, calculate the smallest width from the bounds of the task
                     inOutConfig.smallestScreenWidthDp = (int) (
                             Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);

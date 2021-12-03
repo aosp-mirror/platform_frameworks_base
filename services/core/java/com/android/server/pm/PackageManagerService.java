@@ -28825,8 +28825,12 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void setSplashScreenTheme(@NonNull String packageName, @Nullable String themeId,
             int userId) {
-        int callingUid = Binder.getCallingUid();
-        PackageSetting packageSetting = getPackageSettingForUser(packageName, callingUid, userId);
+        final int callingUid = Binder.getCallingUid();
+        enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
+                false /* checkShell */, "setSplashScreenTheme");
+        enforceOwnerRights(packageName, callingUid);
+        final PackageSetting packageSetting = getPackageSettingForUser(packageName, callingUid,
+                userId);
         if (packageSetting != null) {
             packageSetting.setSplashScreenTheme(userId, themeId);
         }

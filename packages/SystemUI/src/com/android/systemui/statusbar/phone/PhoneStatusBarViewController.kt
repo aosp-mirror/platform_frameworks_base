@@ -43,7 +43,6 @@ class PhoneStatusBarViewController private constructor(
             val statusBarLeftSide: View = mView.findViewById(R.id.status_bar_left_side)
             val systemIconArea: ViewGroup = mView.findViewById(R.id.system_icon_area)
 
-            val viewCenterProvider = StatusBarViewsCenterProvider()
             val viewsToAnimate = arrayOf(
                 statusBarLeftSide,
                 systemIconArea
@@ -52,7 +51,7 @@ class PhoneStatusBarViewController private constructor(
             mView.viewTreeObserver.addOnPreDrawListener(object :
                 ViewTreeObserver.OnPreDrawListener {
                 override fun onPreDraw(): Boolean {
-                    animationController.onViewsReady(viewsToAnimate, viewCenterProvider)
+                    animationController.onViewsReady(viewsToAnimate)
                     mView.viewTreeObserver.removeOnPreDrawListener(this)
                     return true
                 }
@@ -82,7 +81,7 @@ class PhoneStatusBarViewController private constructor(
         mView.importantForAccessibility = mode
     }
 
-    private class StatusBarViewsCenterProvider : UnfoldMoveFromCenterAnimator.ViewCenterProvider {
+    class StatusBarViewsCenterProvider : UnfoldMoveFromCenterAnimator.ViewCenterProvider {
         override fun getViewCenter(view: View, outPoint: Point) =
             when (view.id) {
                 R.id.status_bar_left_side -> {
