@@ -157,6 +157,7 @@ public final class BatteryStatsManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface WifiSupplState {}
 
+
     private final IBatteryStats mBatteryStats;
 
     /** @hide */
@@ -348,6 +349,21 @@ public final class BatteryStatsManager {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return null;
+        }
+    }
+
+    /**
+     * Retrieves accumulate wake lock stats.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BATTERY_STATS)
+    @NonNull
+    public WakeLockStats getWakeLockStats() {
+        try {
+            return mBatteryStats.getWakeLockStats();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

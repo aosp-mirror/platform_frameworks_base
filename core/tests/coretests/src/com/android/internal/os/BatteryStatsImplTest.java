@@ -22,6 +22,8 @@ import static android.os.BatteryStats.Uid.PROCESS_STATE_CACHED;
 import static android.os.BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.os.BatteryStats.Uid.PROCESS_STATE_TOP;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -36,6 +38,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.os.BatteryStats;
+import android.os.WakeLockStats;
 import android.util.SparseArray;
 import android.view.Display;
 
@@ -49,6 +52,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.List;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -506,5 +511,52 @@ public class BatteryStatsImplTest {
     private void addIsolatedUid(int parentUid, int childUid) {
         final BatteryStatsImpl.Uid u = mBatteryStatsImpl.getUidStatsLocked(parentUid);
         u.addIsolatedUid(childUid);
+    }
+
+    @Test
+    public void testGetWakeLockStats() {
+        mBatteryStatsImpl.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+
+        // First wakelock, acquired once, not currently held
+        mMockClock.realtime = 1000;
+        mBatteryStatsImpl.noteStartWakeLocked(10100, 100, null, "wakeLock1", null,
+                BatteryStats.WAKE_TYPE_PARTIAL, false);
+
+        mMockClock.realtime = 3000;
+        mBatteryStatsImpl.noteStopWakeLocked(10100, 100, null, "wakeLock1", null,
+                BatteryStats.WAKE_TYPE_PARTIAL);
+
+        // Second wakelock, acquired twice, still held
+        mMockClock.realtime = 4000;
+        mBatteryStatsImpl.noteStartWakeLocked(10200, 101, null, "wakeLock2", null,
+                BatteryStats.WAKE_TYPE_PARTIAL, false);
+
+        mMockClock.realtime = 5000;
+        mBatteryStatsImpl.noteStopWakeLocked(10200, 101, null, "wakeLock2", null,
+                BatteryStats.WAKE_TYPE_PARTIAL);
+
+        mMockClock.realtime = 6000;
+        mBatteryStatsImpl.noteStartWakeLocked(10200, 101, null, "wakeLock2", null,
+                BatteryStats.WAKE_TYPE_PARTIAL, false);
+
+        mMockClock.realtime = 9000;
+
+        List<WakeLockStats.WakeLock> wakeLockStats =
+                mBatteryStatsImpl.getWakeLockStats().getWakeLocks();
+        assertThat(wakeLockStats).hasSize(2);
+
+        WakeLockStats.WakeLock wakeLock1 = wakeLockStats.stream()
+                .filter(wl -> wl.uid == 10100 && wl.name.equals("wakeLock1")).findFirst().get();
+
+        assertThat(wakeLock1.timesAcquired).isEqualTo(1);
+        assertThat(wakeLock1.timeHeldMs).isEqualTo(0);  // Not currently held
+        assertThat(wakeLock1.totalTimeHeldMs).isEqualTo(2000); // 3000-1000
+
+        WakeLockStats.WakeLock wakeLock2 = wakeLockStats.stream()
+                .filter(wl -> wl.uid == 10200 && wl.name.equals("wakeLock2")).findFirst().get();
+
+        assertThat(wakeLock2.timesAcquired).isEqualTo(2);
+        assertThat(wakeLock2.timeHeldMs).isEqualTo(3000);  // 9000-6000
+        assertThat(wakeLock2.totalTimeHeldMs).isEqualTo(4000); // (5000-4000) + (9000-6000)
     }
 }

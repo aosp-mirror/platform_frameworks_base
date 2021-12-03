@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.ParcelFileDescriptor;
+import android.os.WakeLockStats;
 import android.os.WorkSource;
 import android.os.connectivity.CellularBatteryStats;
 import android.os.connectivity.WifiActivityEnergyInfo;
@@ -156,6 +157,10 @@ interface IBatteryStats {
 
     /** {@hide} */
     GpsBatteryStats getGpsBatteryStats();
+
+    /** {@hide} */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.BATTERY_STATS)")
+    WakeLockStats getWakeLockStats();
 
     HealthStatsParceler takeUidSnapshot(int uid);
     HealthStatsParceler[] takeUidSnapshots(in int[] uid);
