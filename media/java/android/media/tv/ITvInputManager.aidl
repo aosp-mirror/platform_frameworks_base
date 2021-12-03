@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.media.PlaybackParams;
+import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.DvbDeviceInfo;
 import android.media.tv.ITvInputClient;
 import android.media.tv.ITvInputHardware;
@@ -35,7 +36,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.view.Surface;
-import android.media.tv.BroadcastInfoRequest;
 
 /**
  * Interface to the TV input manager service.
@@ -72,6 +72,8 @@ interface ITvInputManager {
     void tune(in IBinder sessionToken, in Uri channelUri, in Bundle params, int userId);
     void setCaptionEnabled(in IBinder sessionToken, boolean enabled, int userId);
     void selectTrack(in IBinder sessionToken, int type, in String trackId, int userId);
+
+    void setIAppNotificationEnabled(in IBinder sessionToken, boolean enabled, int userId);
 
     void sendAppPrivateCommand(in IBinder sessionToken, in String action, in Bundle data,
             int userId);

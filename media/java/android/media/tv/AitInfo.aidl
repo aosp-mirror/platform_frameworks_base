@@ -14,19 +14,6 @@
  * limitations under the License.
  */
 
-package android.media.tv.interactive;
+package android.media.tv;
 
-import android.media.tv.BroadcastInfoRequest;
-import android.media.tv.interactive.ITvIAppSession;
-import android.media.tv.BroadcastInfoRequest;
-
-/**
- * Helper interface for ITvIAppSession to allow TvIAppService to notify the system service when
- * there is a related event.
- * @hide
- */
-oneway interface ITvIAppSessionCallback {
-    void onSessionCreated(in ITvIAppSession session);
-    void onLayoutSurface(int left, int top, int right, int bottom);
-    void onBroadcastInfoRequest(in BroadcastInfoRequest request);
-}
+parcelable AitInfo;

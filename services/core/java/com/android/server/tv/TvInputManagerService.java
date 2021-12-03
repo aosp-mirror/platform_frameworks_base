@@ -44,6 +44,7 @@ import android.graphics.Rect;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.PlaybackParams;
+import android.media.tv.AitInfo;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.DvbDeviceInfo;
@@ -1761,6 +1762,26 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void setIAppNotificationEnabled(IBinder sessionToken, boolean enabled, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "setIAppNotificationEnabled");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .setIAppNotificationEnabled(enabled);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in setIAppNotificationEnabled", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void sendAppPrivateCommand(IBinder sessionToken, String command, Bundle data,
                 int userId) {
             final int callingUid = Binder.getCallingUid();
@@ -3341,7 +3362,23 @@ public final class TvInputManagerService extends SystemService {
             }
         }
 
-        // For the recording session only
+        @Override
+        public void onAitInfoUpdated(AitInfo aitInfo) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onAitInfoUpdated(" + aitInfo + ")");
+                }
+                if (mSessionState.session == null || mSessionState.client == null) {
+                    return;
+                }
+                try {
+                    mSessionState.client.onAitInfoUpdated(aitInfo, mSessionState.seq);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onAitInfoUpdated", e);
+                }
+            }
+        }
+
         @Override
         public void onTuned(Uri channelUri) {
             synchronized (mLock) {
@@ -3352,7 +3389,7 @@ public final class TvInputManagerService extends SystemService {
                     return;
                 }
                 try {
-                    mSessionState.client.onTuned(mSessionState.seq, channelUri);
+                    mSessionState.client.onTuned(channelUri, mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onTuned", e);
                 }

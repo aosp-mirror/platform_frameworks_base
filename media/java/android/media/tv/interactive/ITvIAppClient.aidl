@@ -17,6 +17,7 @@
 package android.media.tv.interactive;
 import android.media.tv.BroadcastInfoRequest;
 
+import android.media.tv.BroadcastInfoRequest;
 import android.view.InputChannel;
 
 /**

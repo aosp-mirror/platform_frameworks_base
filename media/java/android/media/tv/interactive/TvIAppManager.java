@@ -20,9 +20,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.graphics.Rect;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvInputManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -35,6 +37,7 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventSender;
 import android.view.Surface;
+import android.view.View;
 
 import com.android.internal.util.Preconditions;
 
@@ -332,6 +335,18 @@ public final class TvIAppManager {
     }
 
     /**
+     * Prepares TV IApp service for the given type.
+     * @hide
+     */
+    public void prepare(String tvIAppServiceId, int type) {
+        try {
+            mService.prepare(tvIAppServiceId, type, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Registers a {@link TvIAppManager.TvIAppCallback}.
      *
      * @param callback A callback used to monitor status of the TV IApp services.
@@ -443,6 +458,67 @@ public final class TvIAppManager {
         }
 
         /**
+         * Creates a media view. Once the media view is created, {@link #relayoutMediaView}
+         * should be called whenever the layout of its containing view is changed.
+         * {@link #removeMediaView()} should be called to remove the media view.
+         * Since a session can have only one media view, this method should be called only once
+         * or it can be called again after calling {@link #removeMediaView()}.
+         *
+         * @param view A view for interactive app.
+         * @param frame A position of the media view.
+         * @throws IllegalStateException if {@code view} is not attached to a window.
+         */
+        void createMediaView(@NonNull View view, @NonNull Rect frame) {
+            Preconditions.checkNotNull(view);
+            Preconditions.checkNotNull(frame);
+            if (view.getWindowToken() == null) {
+                throw new IllegalStateException("view must be attached to a window");
+            }
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.createMediaView(mToken, view.getWindowToken(), frame, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Relayouts the current media view.
+         *
+         * @param frame A new position of the media view.
+         */
+        void relayoutMediaView(@NonNull Rect frame) {
+            Preconditions.checkNotNull(frame);
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.relayoutMediaView(mToken, frame, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Removes the current media view.
+         */
+        void removeMediaView() {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.removeMediaView(mToken, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Notifies of any structural changes (format or size) of the surface passed in
          * {@link #setSurface}.
          *
@@ -531,6 +607,21 @@ public final class TvIAppManager {
             }
 
             releaseInternal();
+        }
+
+        /**
+         * Notifies IAPP session when a channels is tuned.
+         */
+        public void notifyTuned(Uri channelUri) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyTuned(mToken, channelUri, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         private void flushPendingEventsLocked() {
