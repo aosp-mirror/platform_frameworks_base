@@ -50,6 +50,10 @@ import static android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID;
 import static android.util.MathUtils.constrain;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_GESTURE;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__UNKNOWN_TYPE;
 import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__NOT_OPPORTUNISTIC;
 import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__OPPORTUNISTIC;
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__GEO;
@@ -4388,8 +4392,9 @@ public class StatsPullAtomService extends SystemService {
                 final int userId = userInfo.getUserHandle().getIdentifier();
 
                 if (isAccessibilityShortcutUser(mContext, userId)) {
-                    final int software_shortcut_type = Settings.Secure.getIntForUser(resolver,
-                            Settings.Secure.ACCESSIBILITY_BUTTON_MODE, 0, userId);
+                    final int software_shortcut_type = convertToAccessibilityShortcutType(
+                            Settings.Secure.getIntForUser(resolver,
+                                    Settings.Secure.ACCESSIBILITY_BUTTON_MODE, 0, userId));
                     final String software_shortcut_list = Settings.Secure.getStringForUser(resolver,
                             Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, userId);
                     final int software_shortcut_service_num = countAccessibilityServices(
@@ -4508,6 +4513,19 @@ public class StatsPullAtomService extends SystemService {
 
         return (mode == Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU)
                 && !TextUtils.isEmpty(software_string);
+    }
+
+    private int convertToAccessibilityShortcutType(int shortcutType) {
+        switch (shortcutType) {
+            case Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR:
+                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
+            case Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU:
+                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU;
+            case Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE:
+                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_GESTURE;
+            default:
+                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__UNKNOWN_TYPE;
+        }
     }
 
     // Thermal event received from vendor thermal management subsystem
