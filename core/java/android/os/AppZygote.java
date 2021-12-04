@@ -45,6 +45,8 @@ public class AppZygote {
     // Last UID/GID of the range the AppZygote can setuid()/setgid() to
     private final int mZygoteUidGidMax;
 
+    private final int mZygoteRuntimeFlags;
+
     private final Object mLock = new Object();
 
     /**
@@ -56,11 +58,13 @@ public class AppZygote {
 
     private final ApplicationInfo mAppInfo;
 
-    public AppZygote(ApplicationInfo appInfo, int zygoteUid, int uidGidMin, int uidGidMax) {
+    public AppZygote(ApplicationInfo appInfo, int zygoteUid, int uidGidMin, int uidGidMax,
+            int runtimeFlags) {
         mAppInfo = appInfo;
         mZygoteUid = zygoteUid;
         mZygoteUidGidMin = uidGidMin;
         mZygoteUidGidMax = uidGidMax;
+        mZygoteRuntimeFlags = runtimeFlags;
     }
 
     /**
@@ -110,7 +114,7 @@ public class AppZygote {
                     mZygoteUid,
                     mZygoteUid,
                     null,  // gids
-                    0,  // runtimeFlags
+                    mZygoteRuntimeFlags,  // runtimeFlags
                     "app_zygote",  // seInfo
                     abi,  // abi
                     abi, // acceptedAbiList
