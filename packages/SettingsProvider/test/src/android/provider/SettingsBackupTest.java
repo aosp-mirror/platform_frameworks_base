@@ -625,7 +625,6 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.STEM_3_DEFAULT_DATA,
                     Settings.Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED,
                     Settings.Global.Wearable.WEAR_OS_VERSION_STRING,
-                    Settings.Global.Wearable.ALTERNATE_LAUNCHER_ENABLED,
                     Settings.Global.Wearable.CORNER_ROUNDNESS,
                     Settings.Global.Wearable.BUTTON_SET,
                     Settings.Global.Wearable.SIDE_BUTTON,
