@@ -31532,6 +31532,7 @@ package android.os {
     method public int dataPosition();
     method public int dataSize();
     method public void enforceInterface(@NonNull String);
+    method public void enforceNoDataAvail();
     method public boolean hasFileDescriptors();
     method public boolean hasFileDescriptors(int, int);
     method public byte[] marshall();
