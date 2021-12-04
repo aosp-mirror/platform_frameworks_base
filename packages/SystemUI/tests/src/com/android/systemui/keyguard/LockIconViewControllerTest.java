@@ -16,12 +16,14 @@
 
 package com.android.systemui.keyguard;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.keyguard.LockIconView.ICON_LOCK;
 import static com.android.keyguard.LockIconView.ICON_UNLOCK;
 
 import static junit.framework.Assert.assertEquals;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
@@ -57,6 +59,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.AuthRippleController;
+import com.android.systemui.doze.util.BurnInHelperKt;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -68,6 +71,7 @@ import com.android.systemui.util.time.FakeSystemClock;
 
 import com.airbnb.lottie.LottieAnimationView;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,6 +80,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +91,8 @@ import java.util.List;
 @TestableLooper.RunWithLooper
 public class LockIconViewControllerTest extends SysuiTestCase {
     private static final String UNLOCKED_LABEL = "unlocked";
+
+    private MockitoSession mStaticMockSession;
 
     private @Mock LockIconView mLockIconView;
     private @Mock AnimatedStateListDrawable mIconDrawable;
@@ -133,6 +141,10 @@ public class LockIconViewControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        mStaticMockSession = mockitoSession()
+                .mockStatic(BurnInHelperKt.class)
+                .strictness(Strictness.LENIENT)
+                .startMocking();
         MockitoAnnotations.initMocks(this);
 
         when(mLockIconView.getResources()).thenReturn(mResources);
@@ -167,6 +179,11 @@ public class LockIconViewControllerTest extends SysuiTestCase {
                 mResources,
                 mLayoutInflater
         );
+    }
+
+    @After
+    public void tearDown() {
+        mStaticMockSession.finishMocking();
     }
 
     @Test
@@ -369,6 +386,42 @@ public class LockIconViewControllerTest extends SysuiTestCase {
         verify(mLockIconView).updateIcon(ICON_LOCK, true);
     }
 
+    @Test
+    public void testBurnInOffsetsUpdated_onDozeAmountChanged() {
+        // GIVEN udfps enrolled
+        setupUdfps();
+        when(mKeyguardUpdateMonitor.isUdfpsEnrolled()).thenReturn(true);
+
+        // GIVEN burn-in offset = 5
+        int burnInOffset = 5;
+        when(BurnInHelperKt.getBurnInOffset(anyInt(), anyBoolean())).thenReturn(burnInOffset);
+
+        // GIVEN starting state for the lock icon (keyguard)
+        setupShowLockIcon();
+        mLockIconViewController.init();
+        captureAttachListener();
+        mAttachListener.onViewAttachedToWindow(mLockIconView);
+        captureStatusBarStateListener();
+        reset(mLockIconView);
+
+        // WHEN dozing updates
+        mStatusBarStateListener.onDozingChanged(true /* isDozing */);
+        mStatusBarStateListener.onDozeAmountChanged(1f, 1f);
+
+        // THEN the view's translation is updated to use the AoD burn-in offsets
+        verify(mLockIconView).setTranslationY(burnInOffset);
+        verify(mLockIconView).setTranslationX(burnInOffset);
+        reset(mLockIconView);
+
+        // WHEN the device is no longer dozing
+        mStatusBarStateListener.onDozingChanged(false /* isDozing */);
+        mStatusBarStateListener.onDozeAmountChanged(0f, 0f);
+
+        // THEN the view is updated to NO translation (no burn-in offsets anymore)
+        verify(mLockIconView).setTranslationY(0);
+        verify(mLockIconView).setTranslationX(0);
+
+    }
     private Pair<Integer, PointF> setupUdfps() {
         when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(true);
         final PointF udfpsLocation = new PointF(50, 75);
