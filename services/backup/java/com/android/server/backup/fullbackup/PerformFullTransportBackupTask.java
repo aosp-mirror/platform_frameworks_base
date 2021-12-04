@@ -41,7 +41,6 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 
-import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
@@ -51,6 +50,7 @@ import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.internal.Operation;
 import com.android.server.backup.remote.RemoteCall;
+import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.utils.BackupEligibilityRules;
@@ -300,7 +300,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 mUserBackupManagerService.handleCancel(mBackupRunnerOpToken, cancelAll);
                 try {
                     // If we're running a backup we should be connected to a transport
-                    IBackupTransport transport =
+                    BackupTransportClient transport =
                             mTransportConnection.getConnectedTransport("PFTBT.handleCancel()");
                     transport.cancelFullBackup();
                 } catch (RemoteException | TransportNotAvailableException e) {
@@ -353,7 +353,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 return;
             }
 
-            IBackupTransport transport = mTransportConnection.connect("PFTBT.run()");
+            BackupTransportClient transport = mTransportConnection.connect("PFTBT.run()");
             if (transport == null) {
                 Slog.w(TAG, "Transport not present; full data backup not performed");
                 backupRunStatus = BackupManager.ERROR_TRANSPORT_ABORTED;
@@ -745,7 +745,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     Slog.v(TAG, "Got preflight response; size=" + totalSize);
                 }
 
-                IBackupTransport transport =
+                BackupTransportClient transport =
                         mTransportConnection.connectOrThrow("PFTBT$SPBP.preflightFullBackup()");
                 result = transport.checkFullBackupSize(totalSize);
                 if (result == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {

@@ -54,7 +54,6 @@ import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.backup.IBackupTransport;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -66,6 +65,7 @@ import com.android.server.backup.PackageManagerBackupAgent.Metadata;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
+import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
@@ -397,7 +397,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
             PackageInfo[] packages = mAcceptSet.toArray(new PackageInfo[0]);
 
-            IBackupTransport transport =
+            BackupTransportClient transport =
                     mTransportConnection.connectOrThrow("PerformUnifiedRestoreTask.startRestore()");
 
             mStatus = transport.startRestore(mToken, packages);
@@ -495,7 +495,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     private void dispatchNextRestore() {
         UnifiedRestoreState nextState = UnifiedRestoreState.FINAL;
         try {
-            IBackupTransport transport =
+            BackupTransportClient transport =
                     mTransportConnection.connectOrThrow(
                             "PerformUnifiedRestoreTask.dispatchNextRestore()");
             mRestoreDescription = transport.nextRestorePackage();
@@ -709,7 +709,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         boolean startedAgentRestore = false;
 
         try {
-            IBackupTransport transport =
+            BackupTransportClient transport =
                     mTransportConnection.connectOrThrow(
                             "PerformUnifiedRestoreTask.initiateOneRestore()");
 
@@ -940,7 +940,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
             String callerLogString = "PerformUnifiedRestoreTask$StreamFeederThread.run()";
             try {
-                IBackupTransport transport = mTransportConnection.connectOrThrow(callerLogString);
+                BackupTransportClient transport = mTransportConnection.connectOrThrow(
+                        callerLogString);
                 while (status == BackupTransport.TRANSPORT_OK) {
                     // have the transport write some of the restoring data to us
                     int result = transport.getNextFullRestoreDataChunk(tWriteEnd);
@@ -1032,7 +1033,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     // Something went wrong somewhere.  Whether it was at the transport
                     // level is immaterial; we need to tell the transport to bail
                     try {
-                        IBackupTransport transport =
+                        BackupTransportClient transport =
                                 mTransportConnection.connectOrThrow(callerLogString);
                         transport.abortFullRestore();
                     } catch (Exception e) {
@@ -1095,7 +1096,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
         String callerLogString = "PerformUnifiedRestoreTask.finalizeRestore()";
         try {
-            IBackupTransport transport =
+            BackupTransportClient transport =
                     mTransportConnection.connectOrThrow(callerLogString);
             transport.finishRestore();
         } catch (Exception e) {

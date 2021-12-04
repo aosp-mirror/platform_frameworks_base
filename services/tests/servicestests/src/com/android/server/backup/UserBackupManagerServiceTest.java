@@ -31,13 +31,13 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import com.android.internal.backup.IBackupTransport;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.params.BackupParams;
+import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.utils.BackupEligibilityRules;
 
@@ -57,9 +57,8 @@ public class UserBackupManagerServiceTest {
     @Mock IBackupManagerMonitor mBackupManagerMonitor;
     @Mock IBackupObserver mBackupObserver;
     @Mock PackageManager mPackageManager;
-    @Mock
-    TransportConnection mTransportConnection;
-    @Mock IBackupTransport mBackupTransport;
+    @Mock TransportConnection mTransportConnection;
+    @Mock BackupTransportClient mBackupTransport;
     @Mock BackupEligibilityRules mBackupEligibilityRules;
 
 
