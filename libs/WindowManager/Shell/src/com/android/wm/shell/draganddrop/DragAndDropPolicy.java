@@ -29,9 +29,9 @@ import static android.content.Intent.EXTRA_SHORTCUT_ID;
 import static android.content.Intent.EXTRA_TASK_ID;
 import static android.content.Intent.EXTRA_USER;
 
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_FULLSCREEN;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_BOTTOM;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_LEFT;
@@ -63,7 +63,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.InstanceId;
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
+import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.lang.annotation.Retention;
