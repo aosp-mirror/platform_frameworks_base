@@ -374,6 +374,16 @@ public final class ProcessList {
     private static final long NATIVE_HEAP_POINTER_TAGGING = 135754954; // This is a bug id.
 
     /**
+     * Native heap allocations in AppZygote process and its descendants will now have a
+     * non-zero tag in the most significant byte.
+     * @see <a href="https://source.android.com/devices/tech/debug/tagged-pointers">Tagged
+     * Pointers</a>
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S)
+    private static final long NATIVE_HEAP_POINTER_TAGGING_APP_ZYGOTE = 207557677;
+
+    /**
      * Enable asynchronous (ASYNC) memory tag checking in this process. This
      * flag will only have an effect on hardware supporting the ARM Memory
      * Tagging Extension (MTE).
@@ -1738,6 +1748,16 @@ public final class ProcessList {
         return level;
     }
 
+    private int decideTaggingLevelForAppZygote(ProcessRecord app) {
+        int level = decideTaggingLevel(app);
+        // TBI ("fake" pointer tagging) in AppZygote is controlled by a separate compat feature.
+        if (!mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING_APP_ZYGOTE, app.info)
+                && level == Zygote.MEMORY_TAG_LEVEL_TBI) {
+            level = Zygote.MEMORY_TAG_LEVEL_NONE;
+        }
+        return level;
+    }
+
     private int decideGwpAsanLevel(ProcessRecord app) {
         // Look at the process attribute first.
        if (app.processInfo != null
@@ -2238,7 +2258,8 @@ public final class ProcessList {
                 // not the calling one.
                 appInfo.packageName = app.getHostingRecord().getDefiningPackageName();
                 appInfo.uid = uid;
-                appZygote = new AppZygote(appInfo, uid, firstUid, lastUid);
+                int runtimeFlags = decideTaggingLevelForAppZygote(app);
+                appZygote = new AppZygote(appInfo, uid, firstUid, lastUid, runtimeFlags);
                 mAppZygotes.put(app.info.processName, uid, appZygote);
                 zygoteProcessList = new ArrayList<ProcessRecord>();
                 mAppZygoteProcesses.put(appZygote, zygoteProcessList);
