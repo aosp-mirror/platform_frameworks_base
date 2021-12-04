@@ -19,7 +19,6 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.media.AudioManager;
@@ -44,6 +43,7 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
+import com.android.launcher3.icons.BaseIconFactory.IconOptions;
 import com.android.launcher3.icons.IconFactory;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.settingslib.fuelgauge.BatteryStatus;
@@ -525,9 +525,9 @@ public class Utils {
     /** Get the corresponding adaptive icon drawable. */
     public static Drawable getBadgedIcon(Context context, Drawable icon, UserHandle user) {
         try (IconFactory iconFactory = IconFactory.obtain(context)) {
-            final Bitmap iconBmp = iconFactory.createBadgedIconBitmap(icon, user,
-                    true /* shrinkNonAdaptiveIcons */).icon;
-            return new BitmapDrawable(context.getResources(), iconBmp);
+            return iconFactory
+                    .createBadgedIconBitmap(icon, new IconOptions().setUser(user))
+                    .newIcon(context);
         }
     }
 

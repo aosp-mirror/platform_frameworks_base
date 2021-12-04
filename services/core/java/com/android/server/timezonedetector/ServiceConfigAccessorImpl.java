@@ -62,6 +62,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     private static final Set<String> CONFIGURATION_INTERNAL_SERVER_FLAGS_KEYS_TO_WATCH =
             Collections.unmodifiableSet(new ArraySet<>(new String[] {
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
+                    ServerFlags.KEY_ENHANCED_METRICS_COLLECTION_ENABLED,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
                     ServerFlags.KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED,
@@ -296,6 +297,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
                         isTelephonyTimeZoneDetectionFeatureSupported())
                 .setGeoDetectionFeatureSupported(isGeoTimeZoneDetectionFeatureSupported())
                 .setTelephonyFallbackSupported(isTelephonyFallbackSupported())
+                .setEnhancedMetricsCollectionEnabled(isEnhancedMetricsCollectionEnabled())
                 .setAutoDetectionEnabledSetting(getAutoDetectionEnabledSetting())
                 .setUserConfigAllowed(isUserConfigAllowed(userId))
                 .setLocationEnabledSetting(getLocationEnabledSetting(userId))
@@ -397,6 +399,17 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         final boolean defaultEnabled = true;
         return mServerFlags.getBoolean(
                 ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
+                defaultEnabled);
+    }
+
+    /**
+     * Returns {@code true} if extra metrics / telemetry information can be collected. Used for
+     * internal testers.
+     */
+    private boolean isEnhancedMetricsCollectionEnabled() {
+        final boolean defaultEnabled = false;
+        return mServerFlags.getBoolean(
+                ServerFlags.KEY_ENHANCED_METRICS_COLLECTION_ENABLED,
                 defaultEnabled);
     }
 

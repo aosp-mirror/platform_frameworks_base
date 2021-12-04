@@ -81,6 +81,7 @@ cc_library_static {
 
     header_libs: [
         "bionic_libc_platform_headers",
+        "bpf_connectivity_headers",
     ],
 }
 

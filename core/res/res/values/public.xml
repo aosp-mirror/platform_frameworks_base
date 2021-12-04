@@ -3256,6 +3256,7 @@
     <public name="accessibilityActionSwipeRight" />
     <public name="accessibilityActionSwipeUp" />
     <public name="accessibilityActionSwipeDown" />
+    <public name="accessibilityActionShowSuggestions" />
   </staging-public-group>
 
   <staging-public-group type="style" first-id="0x01dd0000">

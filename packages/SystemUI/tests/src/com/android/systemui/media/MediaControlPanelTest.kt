@@ -19,6 +19,7 @@ package com.android.systemui.media
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.Icon
 import android.graphics.drawable.RippleDrawable
 import android.media.MediaMetadata
 import android.media.session.MediaSession
@@ -97,6 +98,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var mediaOutputDialogFactory: MediaOutputDialogFactory
     @Mock private lateinit var mediaCarouselController: MediaCarouselController
     @Mock private lateinit var falsingManager: FalsingManager
+    @Mock private lateinit var mediaFlags: MediaFlags
     private lateinit var appIcon: ImageView
     private lateinit var albumView: ImageView
     private lateinit var titleText: TextView
@@ -123,6 +125,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var session: MediaSession
     private val device = MediaDeviceData(true, null, DEVICE_NAME)
     private val disabledDevice = MediaDeviceData(false, null, "Disabled Device")
+    private lateinit var mediaData: MediaData
     private val clock = FakeSystemClock()
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
@@ -135,7 +138,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         player = MediaControlPanel(context, bgExecutor, activityStarter, mediaViewController,
             seekBarViewModel, Lazy { mediaDataManager }, keyguardDismissUtil,
-            mediaOutputDialogFactory, mediaCarouselController, falsingManager, clock)
+            mediaOutputDialogFactory, mediaCarouselController, falsingManager, mediaFlags, clock)
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
 
         // Mock out a view holder for the player to attach to.
@@ -165,14 +168,19 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(holder.totalTimeView).thenReturn(totalTimeView)
         action0 = ImageButton(context)
         whenever(holder.action0).thenReturn(action0)
+        whenever(holder.getAction(R.id.action0)).thenReturn(action0)
         action1 = ImageButton(context)
         whenever(holder.action1).thenReturn(action1)
+        whenever(holder.getAction(R.id.action1)).thenReturn(action1)
         action2 = ImageButton(context)
         whenever(holder.action2).thenReturn(action2)
+        whenever(holder.getAction(R.id.action2)).thenReturn(action2)
         action3 = ImageButton(context)
         whenever(holder.action3).thenReturn(action3)
+        whenever(holder.getAction(R.id.action3)).thenReturn(action3)
         action4 = ImageButton(context)
         whenever(holder.action4).thenReturn(action4)
+        whenever(holder.getAction(R.id.action4)).thenReturn(action4)
         whenever(holder.longPressText).thenReturn(longPressText)
         whenever(longPressText.handler).thenReturn(handler)
         settings = View(context)
@@ -200,6 +208,26 @@ public class MediaControlPanelTest : SysuiTestCase() {
             setPlaybackState(playbackBuilder.build())
         }
         session.setActive(true)
+
+        mediaData = MediaData(
+                userId = USER_ID,
+                initialized = true,
+                backgroundColor = BG_COLOR,
+                app = APP,
+                appIcon = null,
+                artist = ARTIST,
+                song = TITLE,
+                artwork = null,
+                actions = emptyList(),
+                actionsToShowInCompact = emptyList(),
+                packageName = PACKAGE,
+                token = session.sessionToken,
+                clickIntent = null,
+                device = device,
+                active = true,
+                resumeAction = null)
+
+        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(false)
     }
 
     @After
@@ -210,18 +238,50 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun bindWhenUnattached() {
-        val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, null, null, device, true, null)
+        val state = mediaData.copy(token = null)
         player.bindPlayer(state, PACKAGE)
         assertThat(player.isPlaying()).isFalse()
     }
 
     @Test
+    fun bindSemanticActions() {
+        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
+        val icon = Icon.createWithResource(context, android.R.drawable.ic_media_play)
+        val semanticActions = MediaButton(
+                playOrPause = MediaAction(icon, Runnable {}, "play"),
+                nextOrCustom = MediaAction(icon, Runnable {}, "next"),
+                startCustom = MediaAction(icon, null, "custom 1"),
+                endCustom = MediaAction(icon, null, "custom 2")
+        )
+        val state = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(holder)
+        player.bindPlayer(state, PACKAGE)
+
+        verify(expandedSet).setVisibility(R.id.action0, ConstraintSet.VISIBLE)
+        assertThat(action0.contentDescription).isEqualTo("custom 1")
+        assertThat(action0.isEnabled()).isFalse()
+
+        verify(expandedSet).setVisibility(R.id.action1, ConstraintSet.INVISIBLE)
+        assertThat(action1.isEnabled()).isFalse()
+
+        verify(expandedSet).setVisibility(R.id.action2, ConstraintSet.VISIBLE)
+        assertThat(action2.isEnabled()).isTrue()
+        assertThat(action2.contentDescription).isEqualTo("play")
+
+        verify(expandedSet).setVisibility(R.id.action3, ConstraintSet.VISIBLE)
+        assertThat(action3.isEnabled()).isTrue()
+        assertThat(action3.contentDescription).isEqualTo("next")
+
+        verify(expandedSet).setVisibility(R.id.action4, ConstraintSet.VISIBLE)
+        assertThat(action4.contentDescription).isEqualTo("custom 2")
+        assertThat(action4.isEnabled()).isFalse()
+    }
+
+    @Test
     fun bindText() {
         player.attachPlayer(holder)
-        val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null, device, true, null)
-        player.bindPlayer(state, PACKAGE)
+        player.bindPlayer(mediaData, PACKAGE)
         assertThat(titleText.getText()).isEqualTo(TITLE)
         assertThat(artistText.getText()).isEqualTo(ARTIST)
     }
@@ -229,9 +289,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bindDevice() {
         player.attachPlayer(holder)
-        val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null, device, true, null)
-        player.bindPlayer(state, PACKAGE)
+        player.bindPlayer(mediaData, PACKAGE)
         assertThat(seamlessText.getText()).isEqualTo(DEVICE_NAME)
         assertThat(seamless.contentDescription).isEqualTo(DEVICE_NAME)
         assertThat(seamless.isEnabled()).isTrue()
@@ -242,8 +300,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         seamless.id = 1
         val fallbackString = context.getString(R.string.media_seamless_other_device)
         player.attachPlayer(holder)
-        val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null, disabledDevice, true, null)
+        val state = mediaData.copy(device = disabledDevice)
         player.bindPlayer(state, PACKAGE)
         assertThat(seamless.isEnabled()).isFalse()
         assertThat(seamlessText.getText()).isEqualTo(fallbackString)
@@ -254,8 +311,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindNullDevice() {
         val fallbackString = context.getResources().getString(R.string.media_seamless_other_device)
         player.attachPlayer(holder)
-        val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null, null, true, null)
+        val state = mediaData.copy(device = null)
         player.bindPlayer(state, PACKAGE)
         assertThat(seamless.isEnabled()).isTrue()
         assertThat(seamlessText.getText()).isEqualTo(fallbackString)
@@ -265,9 +321,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bindDeviceResumptionPlayer() {
         player.attachPlayer(holder)
-        val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null, device, true, null,
-                resumption = true)
+        val state = mediaData.copy(resumption = true)
         player.bindPlayer(state, PACKAGE)
         assertThat(seamlessText.getText()).isEqualTo(DEVICE_NAME)
         assertThat(seamless.isEnabled()).isFalse()
@@ -323,9 +377,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun dismissButtonClick() {
         val mediaKey = "key for dismissal"
         player.attachPlayer(holder)
-        val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null, null, true, null,
-                notificationKey = KEY)
+        val state = mediaData.copy(notificationKey = KEY)
         player.bindPlayer(state, mediaKey)
 
         assertThat(dismiss.isEnabled).isEqualTo(true)
@@ -337,9 +389,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun dismissButtonDisabled() {
         val mediaKey = "key for dismissal"
         player.attachPlayer(holder)
-        val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null, null, true, null,
-                isClearable = false, notificationKey = KEY)
+        val state = mediaData.copy(isClearable = false, notificationKey = KEY)
         player.bindPlayer(state, mediaKey)
 
         assertThat(dismiss.isEnabled).isEqualTo(false)
@@ -351,9 +401,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(mediaDataManager.dismissMediaData(eq(mediaKey), anyLong())).thenReturn(false)
 
         player.attachPlayer(holder)
-        val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null, null, true, null,
-                notificationKey = KEY)
+        val state = mediaData.copy(notificationKey = KEY)
         player.bindPlayer(state, mediaKey)
 
         assertThat(dismiss.isEnabled).isEqualTo(true)

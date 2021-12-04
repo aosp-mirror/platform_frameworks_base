@@ -31,3 +31,6 @@ per-file res/xml/config_user_types.xml = file:/MULTIUSER_OWNERS
 
 # Car
 per-file res/values/dimens_car.xml = file:/platform/packages/services/Car:/OWNERS
+
+# Wear
+per-file res/*-watch/* = file:/platform/frameworks/opt/wear:/OWNERS

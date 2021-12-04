@@ -30,4 +30,5 @@ oneway interface ITvIAppService {
     void unregisterCallback(in ITvIAppServiceCallback callback);
     void createSession(in InputChannel channel, in ITvIAppSessionCallback callback,
             in String iAppServiceId, int type);
+    void prepare(int type);
 }

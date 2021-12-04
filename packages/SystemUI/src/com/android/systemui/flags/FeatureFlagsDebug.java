@@ -22,6 +22,7 @@ import static com.android.systemui.flags.FlagManager.FIELD_FLAGS;
 import static com.android.systemui.flags.FlagManager.FIELD_ID;
 import static com.android.systemui.flags.FlagManager.FIELD_VALUE;
 
+import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,7 +31,6 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.annotation.BoolRes;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
@@ -89,16 +89,18 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     public boolean isEnabled(BooleanFlag flag) {
         int id = flag.getId();
         if (!mBooleanFlagCache.containsKey(id)) {
-            boolean def = flag.getDefault();
-            if (flag.hasResourceOverride()) {
-                try {
-                    def = isEnabledInOverlay(flag.getResourceOverride());
-                } catch (Resources.NotFoundException e) {
-                    // no-op
-                }
-            }
+            mBooleanFlagCache.put(id, isEnabled(id, flag.getDefault()));
+        }
 
-            mBooleanFlagCache.put(id, isEnabled(id, def));
+        return mBooleanFlagCache.get(id);
+    }
+
+    @Override
+    public boolean isEnabled(ResourceBooleanFlag flag) {
+        int id = flag.getId();
+        if (!mBooleanFlagCache.containsKey(id)) {
+            mBooleanFlagCache.put(
+                    id, isEnabled(id, mResources.getBoolean(flag.getResourceId())));
         }
 
         return mBooleanFlagCache.get(id);
@@ -111,6 +113,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         return result == null ? defaultValue : result;
     }
 
+
     /** Returns the stored value or null if not set. */
     private Boolean isEnabledInternal(int id) {
         try {
@@ -119,10 +122,6 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             eraseInternal(id);
         }
         return null;
-    }
-
-    private boolean isEnabledInOverlay(@BoolRes int resId) {
-        return mResources.getBoolean(resId);
     }
 
     /** Set whether a given {@link BooleanFlag} is enabled or not. */
@@ -185,9 +184,19 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             } else if (ACTION_GET_FLAGS.equals(action)) {
                 Map<Integer, Flag<?>> knownFlagMap = Flags.collectFlags();
                 ArrayList<Flag<?>> flags = new ArrayList<>(knownFlagMap.values());
+
+                // Convert all flags to parcelable flags.
+                ArrayList<ParcelableFlag<?>> pFlags = new ArrayList<>();
+                for (Flag<?> f : flags) {
+                    ParcelableFlag<?> pf = toParcelableFlag(f);
+                    if (pf != null) {
+                        pFlags.add(pf);
+                    }
+                }
+
                 Bundle extras =  getResultExtras(true);
                 if (extras != null) {
-                    extras.putParcelableArrayList(FIELD_FLAGS, flags);
+                    extras.putParcelableArrayList(FIELD_FLAGS, pFlags);
                 }
             }
         }
@@ -214,6 +223,25 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             if (flag instanceof BooleanFlag) {
                 setEnabled(id, extras.getBoolean(FIELD_VALUE));
             }
+        }
+
+        /**
+         * Ensures that the data we send to the app reflects the current state of the flags.
+         *
+         * Also converts an non-parcelable versions of the flags to their parcelable versions.
+         */
+        @Nullable
+        private ParcelableFlag<?> toParcelableFlag(Flag<?> f) {
+            if (f instanceof BooleanFlag) {
+                return new BooleanFlag(f.getId(), isEnabled((BooleanFlag) f));
+            }
+            if (f instanceof ResourceBooleanFlag) {
+                return new BooleanFlag(f.getId(), isEnabled((ResourceBooleanFlag) f));
+            }
+
+            // TODO: add support for other flag types.
+            Log.w(TAG, "Unsupported Flag Type. Please file a bug.");
+            return null;
         }
     };
 

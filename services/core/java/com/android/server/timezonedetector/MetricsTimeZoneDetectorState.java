@@ -34,11 +34,13 @@ import java.util.Objects;
  * A class that provides time zone detector state information for metrics.
  *
  * <p>
- * Regarding time zone ID ordinals:
+ * Regarding the use of time zone ID ordinals in metrics / telemetry:
  * <p>
- * We don't want to leak user location information by reporting time zone IDs. Instead, time zone
- * IDs are consistently identified within a given instance of this class by a numeric ID. This
- * allows comparison of IDs without revealing what those IDs are.
+ * For general metrics, we don't want to leak user location information by reporting time zone
+ * IDs. Instead, time zone IDs are consistently identified within a given instance of this class by
+ * a numeric ID (ordinal). This allows comparison of IDs without revealing what those IDs are.
+ * See {@link #isEnhancedMetricsCollectionEnabled()} for the setting that enables actual IDs to be
+ * collected.
  */
 public final class MetricsTimeZoneDetectorState {
 
@@ -54,6 +56,7 @@ public final class MetricsTimeZoneDetectorState {
 
     @NonNull private final ConfigurationInternal mConfigurationInternal;
     private final int mDeviceTimeZoneIdOrdinal;
+    @Nullable private final String mDeviceTimeZoneId;
     @Nullable private final MetricsTimeZoneSuggestion mLatestManualSuggestion;
     @Nullable private final MetricsTimeZoneSuggestion mLatestTelephonySuggestion;
     @Nullable private final MetricsTimeZoneSuggestion mLatestGeolocationSuggestion;
@@ -61,11 +64,13 @@ public final class MetricsTimeZoneDetectorState {
     private MetricsTimeZoneDetectorState(
             @NonNull ConfigurationInternal configurationInternal,
             int deviceTimeZoneIdOrdinal,
+            @Nullable String deviceTimeZoneId,
             @Nullable MetricsTimeZoneSuggestion latestManualSuggestion,
             @Nullable MetricsTimeZoneSuggestion latestTelephonySuggestion,
             @Nullable MetricsTimeZoneSuggestion latestGeolocationSuggestion) {
         mConfigurationInternal = Objects.requireNonNull(configurationInternal);
         mDeviceTimeZoneIdOrdinal = deviceTimeZoneIdOrdinal;
+        mDeviceTimeZoneId = deviceTimeZoneId;
         mLatestManualSuggestion = latestManualSuggestion;
         mLatestTelephonySuggestion = latestTelephonySuggestion;
         mLatestGeolocationSuggestion = latestGeolocationSuggestion;
@@ -83,18 +88,24 @@ public final class MetricsTimeZoneDetectorState {
             @Nullable TelephonyTimeZoneSuggestion latestTelephonySuggestion,
             @Nullable GeolocationTimeZoneSuggestion latestGeolocationSuggestion) {
 
+        boolean includeZoneIds = configurationInternal.isEnhancedMetricsCollectionEnabled();
+        String metricDeviceTimeZoneId = includeZoneIds ? deviceTimeZoneId : null;
         int deviceTimeZoneIdOrdinal =
                 tzIdOrdinalGenerator.ordinal(Objects.requireNonNull(deviceTimeZoneId));
         MetricsTimeZoneSuggestion latestCanonicalManualSuggestion =
-                createMetricsTimeZoneSuggestion(tzIdOrdinalGenerator, latestManualSuggestion);
+                createMetricsTimeZoneSuggestion(
+                        tzIdOrdinalGenerator, latestManualSuggestion, includeZoneIds);
         MetricsTimeZoneSuggestion latestCanonicalTelephonySuggestion =
-                createMetricsTimeZoneSuggestion(tzIdOrdinalGenerator, latestTelephonySuggestion);
+                createMetricsTimeZoneSuggestion(
+                        tzIdOrdinalGenerator, latestTelephonySuggestion, includeZoneIds);
         MetricsTimeZoneSuggestion latestCanonicalGeolocationSuggestion =
-                createMetricsTimeZoneSuggestion(tzIdOrdinalGenerator, latestGeolocationSuggestion);
+                createMetricsTimeZoneSuggestion(
+                        tzIdOrdinalGenerator, latestGeolocationSuggestion, includeZoneIds);
 
         return new MetricsTimeZoneDetectorState(
-                configurationInternal, deviceTimeZoneIdOrdinal, latestCanonicalManualSuggestion,
-                latestCanonicalTelephonySuggestion, latestCanonicalGeolocationSuggestion);
+                configurationInternal, deviceTimeZoneIdOrdinal, metricDeviceTimeZoneId,
+                latestCanonicalManualSuggestion, latestCanonicalTelephonySuggestion,
+                latestCanonicalGeolocationSuggestion);
     }
 
     /** Returns true if the device supports telephony time zone detection. */
@@ -110,6 +121,11 @@ public final class MetricsTimeZoneDetectorState {
     /** Returns true if the device supports telephony time zone detection fallback. */
     public boolean isTelephonyTimeZoneFallbackSupported() {
         return mConfigurationInternal.isTelephonyFallbackSupported();
+    }
+
+    /** Returns true if enhanced metric collection is enabled. */
+    public boolean isEnhancedMetricsCollectionEnabled() {
+        return mConfigurationInternal.isEnhancedMetricsCollectionEnabled();
     }
 
     /** Returns true if user's location can be used generally. */
@@ -142,11 +158,21 @@ public final class MetricsTimeZoneDetectorState {
     }
 
     /**
-     * Returns the ordinal for the device's currently set time zone ID.
+     * Returns the ordinal for the device's current time zone ID.
      * See {@link MetricsTimeZoneDetectorState} for information about ordinals.
      */
     public int getDeviceTimeZoneIdOrdinal() {
         return mDeviceTimeZoneIdOrdinal;
+    }
+
+    /**
+     * Returns the device's current time zone ID. This will only be populated if {@link
+     * #isEnhancedMetricsCollectionEnabled()} is {@code true}. See {@link
+     * MetricsTimeZoneDetectorState} for details.
+     */
+    @Nullable
+    public String getDeviceTimeZoneId() {
+        return mDeviceTimeZoneId;
     }
 
     /**
@@ -183,6 +209,7 @@ public final class MetricsTimeZoneDetectorState {
         }
         MetricsTimeZoneDetectorState that = (MetricsTimeZoneDetectorState) o;
         return mDeviceTimeZoneIdOrdinal == that.mDeviceTimeZoneIdOrdinal
+                && Objects.equals(mDeviceTimeZoneId, that.mDeviceTimeZoneId)
                 && mConfigurationInternal.equals(that.mConfigurationInternal)
                 && Objects.equals(mLatestManualSuggestion, that.mLatestManualSuggestion)
                 && Objects.equals(mLatestTelephonySuggestion, that.mLatestTelephonySuggestion)
@@ -191,7 +218,7 @@ public final class MetricsTimeZoneDetectorState {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mConfigurationInternal, mDeviceTimeZoneIdOrdinal,
+        return Objects.hash(mConfigurationInternal, mDeviceTimeZoneIdOrdinal, mDeviceTimeZoneId,
                 mLatestManualSuggestion, mLatestTelephonySuggestion, mLatestGeolocationSuggestion);
     }
 
@@ -200,6 +227,7 @@ public final class MetricsTimeZoneDetectorState {
         return "MetricsTimeZoneDetectorState{"
                 + "mConfigurationInternal=" + mConfigurationInternal
                 + ", mDeviceTimeZoneIdOrdinal=" + mDeviceTimeZoneIdOrdinal
+                + ", mDeviceTimeZoneId=" + mDeviceTimeZoneId
                 + ", mLatestManualSuggestion=" + mLatestManualSuggestion
                 + ", mLatestTelephonySuggestion=" + mLatestTelephonySuggestion
                 + ", mLatestGeolocationSuggestion=" + mLatestGeolocationSuggestion
@@ -209,34 +237,40 @@ public final class MetricsTimeZoneDetectorState {
     @Nullable
     private static MetricsTimeZoneSuggestion createMetricsTimeZoneSuggestion(
             @NonNull OrdinalGenerator<String> zoneIdOrdinalGenerator,
-            @NonNull ManualTimeZoneSuggestion manualSuggestion) {
+            @NonNull ManualTimeZoneSuggestion manualSuggestion,
+            boolean includeFullZoneIds) {
         if (manualSuggestion == null) {
             return null;
         }
 
-        int zoneIdOrdinal = zoneIdOrdinalGenerator.ordinal(manualSuggestion.getZoneId());
-        return MetricsTimeZoneSuggestion.createCertain(
-                new int[] { zoneIdOrdinal });
+        String suggestionZoneId = manualSuggestion.getZoneId();
+        String[] metricZoneIds = includeFullZoneIds ? new String[] { suggestionZoneId } : null;
+        int[] zoneIdOrdinals = new int[] { zoneIdOrdinalGenerator.ordinal(suggestionZoneId) };
+        return MetricsTimeZoneSuggestion.createCertain(metricZoneIds, zoneIdOrdinals);
     }
 
     @Nullable
     private static MetricsTimeZoneSuggestion createMetricsTimeZoneSuggestion(
             @NonNull OrdinalGenerator<String> zoneIdOrdinalGenerator,
-            @NonNull TelephonyTimeZoneSuggestion telephonySuggestion) {
+            @NonNull TelephonyTimeZoneSuggestion telephonySuggestion,
+            boolean includeFullZoneIds) {
         if (telephonySuggestion == null) {
             return null;
         }
-        if (telephonySuggestion.getZoneId() == null) {
+        String suggestionZoneId = telephonySuggestion.getZoneId();
+        if (suggestionZoneId == null) {
             return MetricsTimeZoneSuggestion.createUncertain();
         }
-        int zoneIdOrdinal = zoneIdOrdinalGenerator.ordinal(telephonySuggestion.getZoneId());
-        return MetricsTimeZoneSuggestion.createCertain(new int[] { zoneIdOrdinal });
+        String[] metricZoneIds = includeFullZoneIds ? new String[] { suggestionZoneId } : null;
+        int[] zoneIdOrdinals = new int[] { zoneIdOrdinalGenerator.ordinal(suggestionZoneId) };
+        return MetricsTimeZoneSuggestion.createCertain(metricZoneIds, zoneIdOrdinals);
     }
 
     @Nullable
     private static MetricsTimeZoneSuggestion createMetricsTimeZoneSuggestion(
             @NonNull OrdinalGenerator<String> zoneIdOrdinalGenerator,
-            @Nullable GeolocationTimeZoneSuggestion geolocationSuggestion) {
+            @Nullable GeolocationTimeZoneSuggestion geolocationSuggestion,
+            boolean includeFullZoneIds) {
         if (geolocationSuggestion == null) {
             return null;
         }
@@ -245,7 +279,9 @@ public final class MetricsTimeZoneDetectorState {
         if (zoneIds == null) {
             return MetricsTimeZoneSuggestion.createUncertain();
         }
-        return MetricsTimeZoneSuggestion.createCertain(zoneIdOrdinalGenerator.ordinals(zoneIds));
+        String[] metricZoneIds = includeFullZoneIds ? zoneIds.toArray(new String[0]) : null;
+        int[] zoneIdOrdinals = zoneIdOrdinalGenerator.ordinals(zoneIds);
+        return MetricsTimeZoneSuggestion.createCertain(metricZoneIds, zoneIdOrdinals);
     }
 
     /**
@@ -254,31 +290,47 @@ public final class MetricsTimeZoneDetectorState {
      * MetricsTimeZoneSuggestion proto definition.
      */
     public static final class MetricsTimeZoneSuggestion {
-        @Nullable
-        private final int[] mZoneIdOrdinals;
+        @Nullable private final String[] mZoneIds;
+        @Nullable private final int[] mZoneIdOrdinals;
 
-        MetricsTimeZoneSuggestion(@Nullable int[] zoneIdOrdinals) {
+        private MetricsTimeZoneSuggestion(
+                @Nullable String[] zoneIds, @Nullable int[] zoneIdOrdinals) {
+            mZoneIds = zoneIds;
             mZoneIdOrdinals = zoneIdOrdinals;
         }
 
         @NonNull
         static MetricsTimeZoneSuggestion createUncertain() {
-            return new MetricsTimeZoneSuggestion(null);
+            return new MetricsTimeZoneSuggestion(null, null);
         }
 
         @NonNull
         static MetricsTimeZoneSuggestion createCertain(
-                @NonNull int[] zoneIdOrdinals) {
-            return new MetricsTimeZoneSuggestion(zoneIdOrdinals);
+                @Nullable String[] zoneIds, @NonNull int[] zoneIdOrdinals) {
+            return new MetricsTimeZoneSuggestion(zoneIds, zoneIdOrdinals);
         }
 
         public boolean isCertain() {
             return mZoneIdOrdinals != null;
         }
 
+        /**
+         * Returns ordinals for the time zone IDs contained in the suggestion.
+         * See {@link MetricsTimeZoneDetectorState} for information about ordinals.
+         */
         @Nullable
         public int[] getZoneIdOrdinals() {
             return mZoneIdOrdinals;
+        }
+
+        /**
+         * Returns the time zone IDs contained in the suggestion. This will only be populated if
+         * {@link #isEnhancedMetricsCollectionEnabled()} is {@code true}. See {@link
+         * MetricsTimeZoneDetectorState} for details.
+         */
+        @Nullable
+        public String[] getZoneIds() {
+            return mZoneIds;
         }
 
         @Override
@@ -290,18 +342,22 @@ public final class MetricsTimeZoneDetectorState {
                 return false;
             }
             MetricsTimeZoneSuggestion that = (MetricsTimeZoneSuggestion) o;
-            return Arrays.equals(mZoneIdOrdinals, that.mZoneIdOrdinals);
+            return Arrays.equals(mZoneIdOrdinals, that.mZoneIdOrdinals)
+                    && Arrays.equals(mZoneIds, that.mZoneIds);
         }
 
         @Override
         public int hashCode() {
-            return Arrays.hashCode(mZoneIdOrdinals);
+            int result = Arrays.hashCode(mZoneIds);
+            result = 31 * result + Arrays.hashCode(mZoneIdOrdinals);
+            return result;
         }
 
         @Override
         public String toString() {
             return "MetricsTimeZoneSuggestion{"
                     + "mZoneIdOrdinals=" + Arrays.toString(mZoneIdOrdinals)
+                    + ", mZoneIds=" + Arrays.toString(mZoneIds)
                     + '}';
         }
     }

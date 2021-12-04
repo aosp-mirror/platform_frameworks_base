@@ -16,12 +16,14 @@
 
 package com.android.systemui.flags;
 
+import android.content.res.Resources;
 import android.util.SparseBooleanArray;
 
 import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
@@ -37,9 +39,11 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
-    SparseBooleanArray mAccessedFlags = new SparseBooleanArray();
+    private final Resources mResources;
+    SparseBooleanArray mFlagCache = new SparseBooleanArray();
     @Inject
-    public FeatureFlagsRelease(DumpManager dumpManager) {
+    public FeatureFlagsRelease(@Main Resources resources, DumpManager dumpManager) {
+        mResources = resources;
         dumpManager.registerDumpable("SysUIFlags", this);
     }
 
@@ -55,18 +59,28 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
     }
 
     @Override
+    public boolean isEnabled(ResourceBooleanFlag flag) {
+        int cacheIndex = mFlagCache.indexOfKey(flag.getId());
+        if (cacheIndex < 0) {
+            return isEnabled(flag.getId(), mResources.getBoolean(flag.getResourceId()));
+        }
+
+        return mFlagCache.valueAt(cacheIndex);
+    }
+
+    @Override
     public boolean isEnabled(int key, boolean defaultValue) {
-        mAccessedFlags.append(key, defaultValue);
+        mFlagCache.append(key, defaultValue);
         return defaultValue;
     }
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("can override: false");
-        int size = mAccessedFlags.size();
+        int size = mFlagCache.size();
         for (int i = 0; i < size; i++) {
-            pw.println("  sysui_flag_" + mAccessedFlags.keyAt(i)
-                    + ": " + mAccessedFlags.valueAt(i));
+            pw.println("  sysui_flag_" + mFlagCache.keyAt(i)
+                    + ": " + mFlagCache.valueAt(i));
         }
     }
 }

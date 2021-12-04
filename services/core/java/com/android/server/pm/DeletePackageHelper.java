@@ -251,20 +251,29 @@ final class DeletePackageHelper {
 
             if (priorUserStates != null) {
                 synchronized (mPm.mLock) {
-                    for (int i = 0; i < allUsers.length; i++) {
-                        TempUserState priorUserState = priorUserStates.get(allUsers[i]);
-                        int enabledState = priorUserState.enabledState;
-                        PackageSetting pkgSetting = mPm.getPackageSettingForMutation(packageName);
-                        pkgSetting.setEnabled(enabledState, allUsers[i],
-                                priorUserState.lastDisableAppCaller);
-
+                    PackageSetting pkgSetting = mPm.getPackageSettingForMutation(packageName);
+                    if (pkgSetting != null) {
                         AndroidPackage aPkg = pkgSetting.getPkg();
                         boolean pkgEnabled = aPkg != null && aPkg.isEnabled();
-                        if (!reEnableStub && priorUserState.installed
-                                && ((enabledState == COMPONENT_ENABLED_STATE_DEFAULT && pkgEnabled)
-                                || enabledState == COMPONENT_ENABLED_STATE_ENABLED)) {
-                            reEnableStub = true;
+                        for (int i = 0; i < allUsers.length; i++) {
+                            TempUserState priorUserState = priorUserStates.get(allUsers[i]);
+                            int enabledState = priorUserState.enabledState;
+                            pkgSetting.setEnabled(enabledState, allUsers[i],
+                                    priorUserState.lastDisableAppCaller);
+                            if (!reEnableStub && priorUserState.installed
+                                    && (
+                                    (enabledState == COMPONENT_ENABLED_STATE_DEFAULT && pkgEnabled)
+                                            || enabledState == COMPONENT_ENABLED_STATE_ENABLED)) {
+                                reEnableStub = true;
+                            }
                         }
+                    } else {
+                        // This should not happen. If priorUserStates != null, we are uninstalling
+                        // an update of a system app. In that case, mPm.mSettings.getPackageLpr()
+                        // should return a non-null value for the target packageName because
+                        // restoreDisabledSystemPackageLIF() is called during deletePackageLIF().
+                        Slog.w(TAG, "Missing PackageSetting after uninstalling the update for"
+                                + " system app: " + packageName + ". This should not happen.");
                     }
                     mPm.mSettings.writeAllUsersPackageRestrictionsLPr();
                 }

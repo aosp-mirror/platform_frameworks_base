@@ -101,6 +101,25 @@ public final class TelephonyUtils {
         }
     }
 
+    /**
+     * Convenience method for running the provided action in the provided
+     * executor enclosed in
+     * {@link Binder#clearCallingIdentity}/{@link Binder#restoreCallingIdentity}
+     *
+     * Any exception thrown by the given action will need to be handled by caller.
+     *
+     */
+    public static void runWithCleanCallingIdentity(
+            @NonNull Runnable action, @NonNull Executor executor) {
+        if (action != null) {
+            if (executor != null) {
+                executor.execute(() -> runWithCleanCallingIdentity(action));
+            } else {
+                runWithCleanCallingIdentity(action);
+            }
+        }
+    }
+
 
     /**
      * Convenience method for running the provided action enclosed in

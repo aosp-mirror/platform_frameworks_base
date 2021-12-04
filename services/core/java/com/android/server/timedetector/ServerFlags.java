@@ -66,6 +66,7 @@ public final class ServerFlags {
             KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE,
             KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE,
             KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED,
+            KEY_ENHANCED_METRICS_COLLECTION_ENABLED,
     })
     @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
     @Retention(RetentionPolicy.SOURCE)
@@ -156,11 +157,17 @@ public final class ServerFlags {
             "time_detector_origin_priorities_override";
 
     /**
-     * The key to override the time detector lower bound configuration. The values is the number of
+     * The key to override the time detector lower bound configuration. The value is the number of
      * milliseconds since the beginning of the Unix epoch.
      */
     public static final @DeviceConfigKey String KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE =
             "time_detector_lower_bound_millis_override";
+
+    /**
+     * The key to allow extra metrics / telemetry information to be collected from internal testers.
+     */
+    public static final @DeviceConfigKey String KEY_ENHANCED_METRICS_COLLECTION_ENABLED =
+            "enhanced_metrics_collection_enabled";
 
     @GuardedBy("mListeners")
     private final ArrayMap<ConfigurationChangeListener, Set<String>> mListeners = new ArrayMap<>();

@@ -86,6 +86,7 @@ import com.android.systemui.util.settings.GlobalSettings;
 import com.android.wifitrackerlib.MergedCarrierEntry;
 import com.android.wifitrackerlib.WifiEntry;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -98,8 +99,10 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
-public class InternetDialogController implements WifiEntry.DisconnectCallback,
-        AccessPointController.AccessPointCallback {
+/**
+ * Controller for Internet Dialog.
+ */
+public class InternetDialogController implements AccessPointController.AccessPointCallback {
 
     private static final String TAG = "InternetDialogController";
     private static final String ACTION_NETWORK_PROVIDER_SETTINGS =
@@ -881,20 +884,6 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             return;
         }
 
-        boolean hasConnectedWifi = false;
-        final int accessPointSize = accessPoints.size();
-        for (int i = 0; i < accessPointSize; i++) {
-            WifiEntry wifiEntry = accessPoints.get(i);
-            if (wifiEntry.isDefaultNetwork() && wifiEntry.hasInternetAccess()) {
-                mConnectedEntry = wifiEntry;
-                hasConnectedWifi = true;
-                break;
-            }
-        }
-        if (!hasConnectedWifi) {
-            mConnectedEntry = null;
-        }
-
         int count = MAX_WIFI_ENTRY_COUNT;
         if (mHasEthernet) {
             count -= 1;
@@ -902,15 +891,22 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         if (hasActiveSubId()) {
             count -= 1;
         }
-        if (hasConnectedWifi) {
-            count -= 1;
+        if (count > accessPoints.size()) {
+            count = accessPoints.size();
         }
-        final List<WifiEntry> wifiEntries = accessPoints.stream()
-                .filter(wifiEntry -> (!wifiEntry.isDefaultNetwork()
-                        || !wifiEntry.hasInternetAccess()))
-                .limit(count)
-                .collect(Collectors.toList());
-        mWifiEntriesCount = wifiEntries == null ? 0 : wifiEntries.size();
+
+        WifiEntry connectedEntry = null;
+        final List<WifiEntry> wifiEntries = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            WifiEntry entry = accessPoints.get(i);
+            if (connectedEntry == null && entry.isDefaultNetwork() && entry.hasInternetAccess()) {
+                connectedEntry = entry;
+            } else {
+                wifiEntries.add(entry);
+            }
+        }
+        mConnectedEntry = connectedEntry;
+        mWifiEntriesCount = wifiEntries.size();
 
         if (mCallback != null) {
             mCallback.onAccessPointsChanged(wifiEntries, mConnectedEntry);
@@ -919,10 +915,6 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
 
     @Override
     public void onSettingsActivityTriggered(Intent settingsIntent) {
-    }
-
-    @Override
-    public void onDisconnectResult(int status) {
     }
 
     private class InternetTelephonyCallback extends TelephonyCallback implements

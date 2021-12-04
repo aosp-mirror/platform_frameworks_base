@@ -11427,21 +11427,37 @@ public final class Settings {
                 "night_display_forced_auto_mode_available";
 
         /**
-        * If the NITZ_UPDATE_DIFF time is exceeded then an automatic adjustment
-        * to SystemClock will be allowed even if NITZ_UPDATE_SPACING has not been
-        * exceeded.
-        * @hide
-        */
+         * If UTC time between two NITZ signals is greater than this value then the second signal
+         * cannot be ignored.
+         *
+         * <p>This value is in milliseconds. It is used for telephony-based time and time zone
+         * detection.
+         * @hide
+         */
         @Readable
         public static final String NITZ_UPDATE_DIFF = "nitz_update_diff";
 
         /**
-        * The length of time in milli-seconds that automatic small adjustments to
-        * SystemClock are ignored if NITZ_UPDATE_DIFF is not exceeded.
-        * @hide
-        */
+         * If the elapsed realtime between two NITZ signals is greater than this value then the
+         * second signal cannot be ignored.
+         *
+         * <p>This value is in milliseconds. It is used for telephony-based time and time zone
+         * detection.
+         * @hide
+         */
         @Readable
         public static final String NITZ_UPDATE_SPACING = "nitz_update_spacing";
+
+        /**
+         * If the device connects to a telephony network and was disconnected from a telephony
+         * network for less than this time, a previously received NITZ signal can be restored.
+         *
+         * <p>This value is in milliseconds. It is used for telephony-based time and time zone
+         * detection.
+         * @hide
+         */
+        public static final String NITZ_NETWORK_DISCONNECT_RETENTION =
+                "nitz_network_disconnect_retention";
 
         /** Preferred NTP server. {@hide} */
         @Readable
@@ -16726,12 +16742,6 @@ public final class Settings {
              * @hide
              */
             public static final String WEAR_OS_VERSION_STRING = "wear_os_version_string";
-
-            /**
-             * If an alternate launcher is enabled.
-             * @hide
-             */
-            public static final String ALTERNATE_LAUNCHER_ENABLED = "alternate_launcher_enabled";
 
             /**
              * How round the corners of square screens are.

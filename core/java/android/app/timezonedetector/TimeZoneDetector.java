@@ -103,6 +103,14 @@ public interface TimeZoneDetector {
     String SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK = "enable_telephony_fallback";
 
     /**
+     * A shell command that dumps a {@link
+     * com.android.server.timezonedetector.MetricsTimeZoneDetectorState} object to stdout for
+     * debugging.
+     * @hide
+     */
+    String SHELL_COMMAND_DUMP_METRICS = "dump_metrics";
+
+    /**
      * A shared utility method to create a {@link ManualTimeZoneSuggestion}.
      *
      * @hide

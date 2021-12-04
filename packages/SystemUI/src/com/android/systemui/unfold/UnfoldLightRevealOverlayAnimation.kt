@@ -15,6 +15,7 @@
  */
 package com.android.systemui.unfold
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.PixelFormat
 import android.hardware.devicestate.DeviceStateManager
@@ -111,7 +112,7 @@ class UnfoldLightRevealOverlayAnimation @Inject constructor(
         Trace.beginSection("UnfoldLightRevealOverlayAnimation#onScreenTurningOn")
         try {
             // Add the view only if we are unfolding and this is the first screen on
-            if (!isFolded && !isUnfoldHandled) {
+            if (!isFolded && !isUnfoldHandled && ValueAnimator.areAnimatorsEnabled()) {
                 addView(onOverlayReady)
                 isUnfoldHandled = true
             } else {

@@ -60,7 +60,7 @@ class FlagManager constructor(
                     object : BroadcastReceiver() {
                         override fun onReceive(context: Context, intent: Intent) {
                             val extras: Bundle? = getResultExtras(false)
-                            val listOfFlags: java.util.ArrayList<Flag<*>>? =
+                            val listOfFlags: java.util.ArrayList<ParcelableFlag<*>>? =
                                 extras?.getParcelableArrayList(FIELD_FLAGS)
                             if (listOfFlags != null) {
                                 completer.set(listOfFlags)
@@ -106,6 +106,10 @@ class FlagManager constructor(
         } catch (e: JSONException) {
             throw InvalidFlagStorageException()
         }
+    }
+
+    override fun isEnabled(flag: ResourceBooleanFlag): Boolean {
+        throw RuntimeException("Not implemented in FlagManager")
     }
 
     override fun addListener(listener: FlagReader.Listener) {

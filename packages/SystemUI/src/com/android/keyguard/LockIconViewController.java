@@ -35,13 +35,14 @@ import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Process;
 import android.os.VibrationAttributes;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.MathUtils;
-import android.view.GestureDetector;
-import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -83,11 +84,13 @@ import javax.inject.Inject;
  */
 @StatusBarComponent.StatusBarScope
 public class LockIconViewController extends ViewController<LockIconView> implements Dumpable {
+    private static final String TAG = "LockIconViewController";
     private static final float sDefaultDensity =
             (float) DisplayMetrics.DENSITY_DEVICE_STABLE / (float) DisplayMetrics.DENSITY_DEFAULT;
     private static final int sLockIconRadiusPx = (int) (sDefaultDensity * 36);
     private static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH);
+    private static final long LONG_PRESS_TIMEOUT = 150L; // milliseconds
 
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final KeyguardViewController mKeyguardViewController;
@@ -109,6 +112,12 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @Nullable private final Vibrator mVibrator;
     @Nullable private final AuthRippleController mAuthRippleController;
 
+    // Tracks the velocity of a touch to help filter out the touches that move too fast.
+    private VelocityTracker mVelocityTracker;
+    // The ID of the pointer for which ACTION_DOWN has occurred. -1 means no pointer is active.
+    private int mActivePointerId = -1;
+    private VibrationEffect mTick;
+
     private boolean mIsDozing;
     private boolean mIsBouncerShowing;
     private boolean mRunningFPS;
@@ -119,6 +128,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean mUserUnlockedWithBiometric;
     private Runnable mCancelDelayedUpdateVisibilityRunnable;
     private Runnable mOnGestureDetectedRunnable;
+    private Runnable mLongPressCancelRunnable;
 
     private boolean mUdfpsSupported;
     private float mHeightPixels;
@@ -178,7 +188,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mView.setImageDrawable(mIcon);
         mUnlockedLabel = resources.getString(R.string.accessibility_unlock_button);
         mLockedLabel = resources.getString(R.string.accessibility_lock_icon);
-        dumpManager.registerDumpable("LockIconViewController", this);
+        dumpManager.registerDumpable(TAG, this);
     }
 
     @Override
@@ -317,7 +327,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                         getResources().getString(R.string.accessibility_enter_hint));
         public void onInitializeAccessibilityNodeInfo(View v, AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(v, info);
-            if (isClickable()) {
+            if (isActionable()) {
                 if (mShowLockIcon) {
                     info.addAction(mAccessibilityAuthenticateHint);
                 } else if (mShowUnlockIcon) {
@@ -422,10 +432,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mAodFp.setAlpha(255 * mInterpolatedDarkAmount);
         }
 
-        if (mShowAodLockIcon) {
-            mView.setTranslationX(offsetX);
-            mView.setTranslationY(offsetY);
-        }
+        mView.setTranslationX(offsetX);
+        mView.setTranslationY(offsetY);
     }
 
     private void updateIsUdfpsEnrolled() {
@@ -474,7 +482,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 @Override
                 public void onKeyguardVisibilityChanged(boolean showing) {
                     // reset mIsBouncerShowing state in case it was preemptively set
-                    // onAffordanceClick
+                    // onLongPress
                     mIsBouncerShowing = mKeyguardViewController.isBouncerShowing();
                     updateVisibility();
                 }
@@ -568,104 +576,79 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         }
     };
 
-    private final GestureDetector mGestureDetector =
-            new GestureDetector(new SimpleOnGestureListener() {
-                public boolean onDown(MotionEvent e) {
-                    if (!isClickable()) {
-                        mDownDetected = false;
-                        return false;
-                    }
-
-                    // intercept all following touches until we see MotionEvent.ACTION_CANCEL UP or
-                    // MotionEvent.ACTION_UP (see #onTouchEvent)
-                    if (mVibrator != null && !mDownDetected) {
-                        mVibrator.vibrate(
-                                Process.myUid(),
-                                getContext().getOpPackageName(),
-                                UdfpsController.EFFECT_CLICK,
-                                "lockIcon-onDown",
-                                TOUCH_VIBRATION_ATTRIBUTES);
-                    }
-
-                    mDownDetected = true;
-                    return true;
-                }
-
-                public void onLongPress(MotionEvent e) {
-                    if (!wasClickableOnDownEvent()) {
-                        return;
-                    }
-
-                    if (onAffordanceClick() && mVibrator != null) {
-                        // only vibrate if the click went through and wasn't intercepted by falsing
-                        mVibrator.vibrate(
-                                Process.myUid(),
-                                getContext().getOpPackageName(),
-                                UdfpsController.EFFECT_CLICK,
-                                "lockIcon-onLongPress",
-                                TOUCH_VIBRATION_ATTRIBUTES);
-                    }
-                }
-
-                public boolean onSingleTapUp(MotionEvent e) {
-                    if (!wasClickableOnDownEvent()) {
-                        return false;
-                    }
-                    onAffordanceClick();
-                    return true;
-                }
-
-                public boolean onFling(MotionEvent e1, MotionEvent e2,
-                        float velocityX, float velocityY) {
-                    if (!wasClickableOnDownEvent()) {
-                        return false;
-                    }
-                    onAffordanceClick();
-                    return true;
-                }
-
-                private boolean wasClickableOnDownEvent() {
-                    return mDownDetected;
-                }
-
-                /**
-                 * Whether we tried to launch the affordance.
-                 *
-                 * If falsing intercepts the click, returns false.
-                 */
-                private boolean onAffordanceClick() {
-                    if (mFalsingManager.isFalseTouch(LOCK_ICON)) {
-                        return false;
-                    }
-
-                    // pre-emptively set to true to hide view
-                    mIsBouncerShowing = true;
-                    if (mUdfpsSupported && mShowUnlockIcon && mAuthRippleController != null) {
-                        mAuthRippleController.showRipple(FINGERPRINT);
-                    }
-                    updateVisibility();
-                    if (mOnGestureDetectedRunnable != null) {
-                        mOnGestureDetectedRunnable.run();
-                    }
-                    mKeyguardViewController.showBouncer(/* scrim */ true);
-                    return true;
-                }
-            });
-
     /**
-     * Send touch events to this view and handles it if the touch is within this view and we are
-     * in a 'clickable' state
-     * @return whether to intercept the touch event
+     * Handles the touch if it is within the lock icon view and {@link #isActionable()} is true.
+     * Subsequently, will trigger {@link #onLongPress()} if a touch is continuously in the lock icon
+     * area for {@link #LONG_PRESS_TIMEOUT} ms.
+     *
+     * Touch speed debouncing mimics logic from the velocity tracker in {@link UdfpsController}.
      */
     public boolean onTouchEvent(MotionEvent event, Runnable onGestureDetectedRunnable) {
-        if (onInterceptTouchEvent(event)) {
-            mOnGestureDetectedRunnable = onGestureDetectedRunnable;
-            mGestureDetector.onTouchEvent(event);
-            return true;
+        if (!onInterceptTouchEvent(event)) {
+            cancelTouches();
+            return false;
         }
 
-        mDownDetected = false;
-        return false;
+        mOnGestureDetectedRunnable = onGestureDetectedRunnable;
+        switch(event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_HOVER_ENTER:
+                if (mVibrator != null && !mDownDetected) {
+                    if (mTick == null) {
+                        mTick = UdfpsController.lowTick(getContext(), true,
+                                LONG_PRESS_TIMEOUT);
+                    }
+                    mVibrator.vibrate(
+                            Process.myUid(),
+                            getContext().getOpPackageName(),
+                            mTick,
+                            "lock-icon-tick",
+                            TOUCH_VIBRATION_ATTRIBUTES);
+                }
+
+                // The pointer that causes ACTION_DOWN is always at index 0.
+                // We need to persist its ID to track it during ACTION_MOVE that could include
+                // data for many other pointers because of multi-touch support.
+                mActivePointerId = event.getPointerId(0);
+                if (mVelocityTracker == null) {
+                    // To simplify the lifecycle of the velocity tracker, make sure it's never null
+                    // after ACTION_DOWN, and always null after ACTION_CANCEL or ACTION_UP.
+                    mVelocityTracker = VelocityTracker.obtain();
+                } else {
+                    // ACTION_UP or ACTION_CANCEL is not guaranteed to be called before a new
+                    // ACTION_DOWN, in that case we should just reuse the old instance.
+                    mVelocityTracker.clear();
+                }
+                mVelocityTracker.addMovement(event);
+
+                mDownDetected = true;
+                mLongPressCancelRunnable = mExecutor.executeDelayed(
+                        this::onLongPress, LONG_PRESS_TIMEOUT);
+                break;
+            case MotionEvent.ACTION_MOVE:
+            case MotionEvent.ACTION_HOVER_MOVE:
+                mVelocityTracker.addMovement(event);
+                // Compute pointer velocity in pixels per second.
+                mVelocityTracker.computeCurrentVelocity(1000);
+                float velocity = UdfpsController.computePointerSpeed(mVelocityTracker,
+                        mActivePointerId);
+                if (event.getClassification() != MotionEvent.CLASSIFICATION_DEEP_PRESS
+                        && UdfpsController.exceedsVelocityThreshold(velocity)) {
+                    Log.v(TAG, "lock icon long-press rescheduled due to "
+                            + "high pointer velocity=" + velocity);
+                    mLongPressCancelRunnable.run();
+                    mLongPressCancelRunnable = mExecutor.executeDelayed(
+                            this::onLongPress, LONG_PRESS_TIMEOUT);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_HOVER_EXIT:
+                cancelTouches();
+                break;
+        }
+
+        return true;
     }
 
     /**
@@ -673,7 +656,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
      * bounds.
      */
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (!inLockIconArea(event) || !isClickable()) {
+        if (!inLockIconArea(event) || !isActionable()) {
             return false;
         }
 
@@ -684,13 +667,48 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         return mDownDetected;
     }
 
+    private void onLongPress() {
+        cancelTouches();
+        if (mFalsingManager.isFalseTouch(LOCK_ICON)) {
+            Log.v(TAG, "lock icon long-press rejected by the falsing manager.");
+            return;
+        }
+
+        // pre-emptively set to true to hide view
+        mIsBouncerShowing = true;
+        if (mUdfpsSupported && mShowUnlockIcon && mAuthRippleController != null) {
+            mAuthRippleController.showRipple(FINGERPRINT);
+        }
+        updateVisibility();
+        if (mOnGestureDetectedRunnable != null) {
+            mOnGestureDetectedRunnable.run();
+        }
+        mKeyguardViewController.showBouncer(/* scrim */ true);
+    }
+
+
+    private void cancelTouches() {
+        mDownDetected = false;
+        if (mLongPressCancelRunnable != null) {
+            mLongPressCancelRunnable.run();
+        }
+        if (mVelocityTracker != null) {
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+        }
+        if (mVibrator != null) {
+            mVibrator.cancel();
+        }
+    }
+
+
     private boolean inLockIconArea(MotionEvent event) {
         return mSensorTouchLocation.contains((int) event.getX(), (int) event.getY())
                 && (mView.getVisibility() == View.VISIBLE
                 || (mAodFp != null && mAodFp.getVisibility() == View.VISIBLE));
     }
 
-    private boolean isClickable() {
+    private boolean isActionable() {
         return mUdfpsSupported || mShowUnlockIcon;
     }
 
