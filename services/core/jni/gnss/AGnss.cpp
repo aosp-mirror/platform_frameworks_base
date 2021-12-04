@@ -43,7 +43,7 @@ jboolean AGnss::setCallback(const std::unique_ptr<AGnssCallback>& callback) {
 
 jboolean AGnss::dataConnOpen(JNIEnv* env, jlong networkHandle, jstring apn, jint apnIpType) {
     ScopedJniString jniApn{env, apn};
-    auto status = mIAGnss->dataConnOpen(networkHandle, String16(jniApn.c_str()),
+    auto status = mIAGnss->dataConnOpen(networkHandle, std::string(jniApn.c_str()),
                                         static_cast<IAGnss::ApnIpType>(apnIpType));
     return checkAidlStatus(status,
                            "IAGnssAidl dataConnOpen() failed. APN and its IP type not set.");
@@ -61,8 +61,8 @@ jboolean AGnss::dataConnFailed() {
 
 jboolean AGnss::setServer(JNIEnv* env, jint type, jstring hostname, jint port) {
     ScopedJniString jniHostName{env, hostname};
-    auto status =
-            mIAGnss->setServer(static_cast<AGnssType>(type), String16(jniHostName.c_str()), port);
+    auto status = mIAGnss->setServer(static_cast<AGnssType>(type), std::string(jniHostName.c_str()),
+                                     port);
     return checkAidlStatus(status, "IAGnssAidl setServer() failed. Host name and port not set.");
 }
 
