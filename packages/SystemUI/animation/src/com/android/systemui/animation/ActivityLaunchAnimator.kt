@@ -436,7 +436,6 @@ class ActivityLaunchAnimator(private val launchAnimator: LaunchAnimator) {
                 .withAlpha(1f)
                 .withMatrix(matrix)
                 .withWindowCrop(windowCrop)
-                .withLayer(window.prefixOrderIndex)
                 .withCornerRadius(cornerRadius)
                 .withVisibility(true)
                 .build()
