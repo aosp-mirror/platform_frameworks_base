@@ -97,7 +97,24 @@ public final class DelegateRegistrationState implements Parcelable {
      */
     public static final int DEREGISTERING_REASON_DESTROY_PENDING = 6;
 
-    /** @hide */
+    /**
+     * This feature tag is deregistering because the PDN that the IMS registration is on
+     * is being torn down.
+     * <p>
+     * All open SIP Dialogs associated with this feature tag must be  closed
+     * using {@link SipDelegateConnection#cleanupSession(String)} before this operation can proceed.
+     */
+    public static final int DEREGISTERING_REASON_LOSING_PDN = 7;
+
+    /**
+     * This feature tag is deregistering because of an unspecified reason.
+     * <p>
+     * All open SIP Dialogs associated with this feature tag must be  closed
+     * using {@link SipDelegateConnection#cleanupSession(String)} before this operation can proceed.
+     */
+    public static final int DEREGISTERING_REASON_UNSPECIFIED = 8;
+
+/** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "DEREGISTERED_REASON_", value = {
             DEREGISTERED_REASON_UNKNOWN,
@@ -113,7 +130,9 @@ public final class DelegateRegistrationState implements Parcelable {
             DEREGISTERING_REASON_PDN_CHANGE,
             DEREGISTERING_REASON_PROVISIONING_CHANGE,
             DEREGISTERING_REASON_FEATURE_TAGS_CHANGING,
-            DEREGISTERING_REASON_DESTROY_PENDING
+            DEREGISTERING_REASON_DESTROY_PENDING,
+            DEREGISTERING_REASON_LOSING_PDN,
+            DEREGISTERING_REASON_UNSPECIFIED
     })
     public @interface DeregisteringReason {}
 

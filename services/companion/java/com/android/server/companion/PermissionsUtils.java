@@ -154,14 +154,14 @@ final class PermissionsUtils {
     }
 
     static boolean checkCallerCanManageCompanionDevice(@NonNull Context context) {
-        if (getCallingUserId() == SYSTEM_UID) return true;
+        if (getCallingUid() == SYSTEM_UID) return true;
 
         return context.checkCallingPermission(MANAGE_COMPANION_DEVICES) == PERMISSION_GRANTED;
     }
 
     static void enforceCallerCanManagerCompanionDevice(@NonNull Context context,
             @Nullable String message) {
-        if (getCallingUserId() == SYSTEM_UID) return;
+        if (getCallingUid() == SYSTEM_UID) return;
 
         context.enforceCallingPermission(MANAGE_COMPANION_DEVICES, message);
     }

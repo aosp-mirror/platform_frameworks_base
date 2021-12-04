@@ -16,6 +16,7 @@
 
 package android.media.tv.interactive;
 
+import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.interactive.ITvIAppSession;
 import android.media.tv.BroadcastInfoRequest;
 
@@ -28,4 +29,5 @@ oneway interface ITvIAppSessionCallback {
     void onSessionCreated(in ITvIAppSession session);
     void onLayoutSurface(int left, int top, int right, int bottom);
     void onBroadcastInfoRequest(in BroadcastInfoRequest request);
+    void onSessionStateChanged(int state);
 }

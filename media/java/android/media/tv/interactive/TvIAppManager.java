@@ -16,13 +16,16 @@
 
 package android.media.tv.interactive;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.graphics.Rect;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvInputManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -35,9 +38,12 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventSender;
 import android.view.Surface;
+import android.view.View;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,6 +56,36 @@ import java.util.List;
 public final class TvIAppManager {
     // TODO: cleanup and unhide public APIs
     private static final String TAG = "TvIAppManager";
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = false, prefix = "TV_IAPP_RTE_STATE_", value = {
+            TV_IAPP_RTE_STATE_UNREALIZED,
+            TV_IAPP_RTE_STATE_PREPARING,
+            TV_IAPP_RTE_STATE_READY,
+            TV_IAPP_RTE_STATE_ERROR})
+    public @interface TvIAppRteState {}
+
+    /**
+     * Unrealized state of interactive app RTE.
+     * @hide
+     */
+    public static final int TV_IAPP_RTE_STATE_UNREALIZED = 1;
+    /**
+     * Preparing state of interactive app RTE.
+     * @hide
+     */
+    public static final int TV_IAPP_RTE_STATE_PREPARING = 2;
+    /**
+     * Ready state of interactive app RTE.
+     * @hide
+     */
+    public static final int TV_IAPP_RTE_STATE_READY = 3;
+    /**
+     * Error state of interactive app RTE.
+     * @hide
+     */
+    public static final int TV_IAPP_RTE_STATE_ERROR = 4;
 
     private final ITvIAppManager mService;
     private final int mUserId;
@@ -131,9 +167,20 @@ public final class TvIAppManager {
                     record.postBroadcastInfoRequest(request);
                 }
             }
+
+            @Override
+            public void onSessionStateChanged(int state, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postSessionStateChanged(state);
+                }
+            }
         };
         ITvIAppManagerCallback managerCallback = new ITvIAppManagerCallback.Stub() {
-            // TODO: handle IApp service state changes
             @Override
             public void onIAppServiceAdded(String iAppServiceId) {
                 synchronized (mLock) {
@@ -167,6 +214,15 @@ public final class TvIAppManager {
                 synchronized (mLock) {
                     for (TvIAppCallbackRecord record : mCallbackRecords) {
                         record.postTvIAppInfoUpdated(iAppInfo);
+                    }
+                }
+            }
+
+            @Override
+            public void onStateChanged(String iAppServiceId, int type, int state) {
+                synchronized (mLock) {
+                    for (TvIAppCallbackRecord record : mCallbackRecords) {
+                        record.postStateChanged(iAppServiceId, type, state);
                     }
                 }
             }
@@ -230,6 +286,15 @@ public final class TvIAppManager {
          */
         public void onTvIAppInfoUpdated(TvIAppInfo iAppInfo) {
         }
+
+
+        /**
+         * This is called when the state of the interactive app service is changed.
+         * @hide
+         */
+        public void onTvIAppServiceStateChanged(
+                String iAppServiceId, int type, @TvIAppRteState int state) {
+        }
     }
 
     private static final class TvIAppCallbackRecord {
@@ -280,6 +345,15 @@ public final class TvIAppManager {
                 }
             });
         }
+
+        public void postStateChanged(String iAppServiceId, int type, int state) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onTvIAppServiceStateChanged(iAppServiceId, type, state);
+                }
+            });
+        }
     }
 
     /**
@@ -326,6 +400,18 @@ public final class TvIAppManager {
     public List<TvIAppInfo> getTvIAppServiceList() {
         try {
             return mService.getTvIAppServiceList(mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Prepares TV IApp service for the given type.
+     * @hide
+     */
+    public void prepare(String tvIAppServiceId, int type) {
+        try {
+            mService.prepare(tvIAppServiceId, type, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -443,6 +529,67 @@ public final class TvIAppManager {
         }
 
         /**
+         * Creates a media view. Once the media view is created, {@link #relayoutMediaView}
+         * should be called whenever the layout of its containing view is changed.
+         * {@link #removeMediaView()} should be called to remove the media view.
+         * Since a session can have only one media view, this method should be called only once
+         * or it can be called again after calling {@link #removeMediaView()}.
+         *
+         * @param view A view for interactive app.
+         * @param frame A position of the media view.
+         * @throws IllegalStateException if {@code view} is not attached to a window.
+         */
+        void createMediaView(@NonNull View view, @NonNull Rect frame) {
+            Preconditions.checkNotNull(view);
+            Preconditions.checkNotNull(frame);
+            if (view.getWindowToken() == null) {
+                throw new IllegalStateException("view must be attached to a window");
+            }
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.createMediaView(mToken, view.getWindowToken(), frame, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Relayouts the current media view.
+         *
+         * @param frame A new position of the media view.
+         */
+        void relayoutMediaView(@NonNull Rect frame) {
+            Preconditions.checkNotNull(frame);
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.relayoutMediaView(mToken, frame, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Removes the current media view.
+         */
+        void removeMediaView() {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.removeMediaView(mToken, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Notifies of any structural changes (format or size) of the surface passed in
          * {@link #setSurface}.
          *
@@ -531,6 +678,21 @@ public final class TvIAppManager {
             }
 
             releaseInternal();
+        }
+
+        /**
+         * Notifies IAPP session when a channels is tuned.
+         */
+        public void notifyTuned(Uri channelUri) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyTuned(mToken, channelUri, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         private void flushPendingEventsLocked() {
@@ -784,6 +946,15 @@ public final class TvIAppManager {
                 }
             });
         }
+
+        void postSessionStateChanged(int state) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onSessionStateChanged(mSession, state);
+                }
+            });
+        }
     }
 
     /**
@@ -820,6 +991,15 @@ public final class TvIAppManager {
          * @param bottom Bottom position.
          */
         public void onLayoutSurface(Session session, int left, int top, int right, int bottom) {
+        }
+
+        /**
+         * This is called when {@link TvIAppService.Session#notifySessionStateChanged} is called.
+         *
+         * @param session A {@link TvIAppManager.Session} associated with this callback.
+         * @param state the current state.
+         */
+        public void onSessionStateChanged(Session session, int state) {
         }
     }
 }

@@ -379,6 +379,7 @@ public class TimeZoneDetectorServiceTest {
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
                 .setTelephonyFallbackSupported(false)
+                .setEnhancedMetricsCollectionEnabled(false)
                 .setUserConfigAllowed(true)
                 .setAutoDetectionEnabledSetting(autoDetectionEnabled)
                 .setLocationEnabledSetting(geoDetectionEnabled)

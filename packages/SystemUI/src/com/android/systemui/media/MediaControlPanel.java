@@ -62,6 +62,7 @@ import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.time.SystemClock;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -122,6 +123,8 @@ public class MediaControlPanel {
     private MediaCarouselController mMediaCarouselController;
     private final MediaOutputDialogFactory mMediaOutputDialogFactory;
     private final FalsingManager mFalsingManager;
+    private final MediaFlags mMediaFlags;
+
     // Used for swipe-to-dismiss logging.
     protected boolean mIsImpressed = false;
     private SystemClock mSystemClock;
@@ -138,7 +141,7 @@ public class MediaControlPanel {
             SeekBarViewModel seekBarViewModel, Lazy<MediaDataManager> lazyMediaDataManager,
             KeyguardDismissUtil keyguardDismissUtil, MediaOutputDialogFactory
             mediaOutputDialogFactory, MediaCarouselController mediaCarouselController,
-            FalsingManager falsingManager, SystemClock systemClock) {
+            FalsingManager falsingManager, MediaFlags mediaFlags, SystemClock systemClock) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
         mActivityStarter = activityStarter;
@@ -149,8 +152,8 @@ public class MediaControlPanel {
         mMediaOutputDialogFactory = mediaOutputDialogFactory;
         mMediaCarouselController = mediaCarouselController;
         mFalsingManager = falsingManager;
+        mMediaFlags = mediaFlags;
         mSystemClock = systemClock;
-
         loadDimens();
 
         mSeekBarViewModel.setLogSmartspaceClick(() -> {
@@ -426,33 +429,61 @@ public class MediaControlPanel {
         deviceName.setText(deviceString);
         seamlessView.setContentDescription(deviceString);
 
-        List<Integer> actionsWhenCollapsed = data.getActionsToShowInCompact();
-        // Media controls
-        int i = 0;
+        // Media action buttons
         List<MediaAction> actionIcons = data.getActions();
+        List<Integer> actionsWhenCollapsed = data.getActionsToShowInCompact();
+
+        if (mMediaFlags.areMediaSessionActionsEnabled() && data.getSemanticActions() != null) {
+            // Use PlaybackState actions instead
+            MediaButton semanticActions = data.getSemanticActions();
+
+            actionIcons = new ArrayList<MediaAction>();
+            actionIcons.add(semanticActions.getStartCustom());
+            actionIcons.add(semanticActions.getPrevOrCustom());
+            actionIcons.add(semanticActions.getPlayOrPause());
+            actionIcons.add(semanticActions.getNextOrCustom());
+            actionIcons.add(semanticActions.getEndCustom());
+
+            actionsWhenCollapsed = new ArrayList<Integer>();
+            actionsWhenCollapsed.add(1);
+            actionsWhenCollapsed.add(2);
+            actionsWhenCollapsed.add(3);
+        }
+
+        int i = 0;
         for (; i < actionIcons.size() && i < ACTION_IDS.length; i++) {
             int actionId = ACTION_IDS[i];
+            boolean visibleInCompat = actionsWhenCollapsed.contains(i);
             final ImageButton button = mPlayerViewHolder.getAction(actionId);
             MediaAction mediaAction = actionIcons.get(i);
-            button.setImageIcon(mediaAction.getIcon());
-            button.setContentDescription(mediaAction.getContentDescription());
-            Runnable action = mediaAction.getAction();
+            if (mediaAction != null) {
+                button.setImageIcon(mediaAction.getIcon());
+                button.setContentDescription(mediaAction.getContentDescription());
+                Runnable action = mediaAction.getAction();
 
-            if (action == null) {
-                button.setEnabled(false);
+                if (action == null) {
+                    button.setEnabled(false);
+                } else {
+                    button.setEnabled(true);
+                    button.setOnClickListener(v -> {
+                        if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                            logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
+                                    /* isRecommendationCard */ false);
+                            action.run();
+                        }
+                    });
+                }
+                setVisibleAndAlpha(collapsedSet, actionId, visibleInCompat);
+                setVisibleAndAlpha(expandedSet, actionId, true /*visible */);
             } else {
-                button.setEnabled(true);
-                button.setOnClickListener(v -> {
-                    if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                        logSmartspaceCardReported(760, // SMARTSPACE_CARD_CLICK
-                                /* isRecommendationCard */ false);
-                        action.run();
-                    }
-                });
+                button.setImageIcon(null);
+                button.setContentDescription(null);
+                button.setEnabled(false);
+                setVisibleAndAlpha(collapsedSet, actionId, visibleInCompat);
+                // for expanded layout, set as INVISIBLE so that we still reserve space in the UI
+                expandedSet.setVisibility(actionId, ConstraintSet.INVISIBLE);
+                expandedSet.setAlpha(actionId, 0.0f);
             }
-            boolean visibleInCompat = actionsWhenCollapsed.contains(i);
-            setVisibleAndAlpha(collapsedSet, actionId, visibleInCompat);
-            setVisibleAndAlpha(expandedSet, actionId, true /*visible */);
         }
 
         // Hide any unused buttons

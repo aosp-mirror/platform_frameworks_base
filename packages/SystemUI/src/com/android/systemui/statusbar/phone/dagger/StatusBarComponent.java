@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
+import static com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.STATUS_BAR_FRAGMENT;
+
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.android.keyguard.LockIconViewController;
@@ -34,6 +36,7 @@ import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
+import javax.inject.Named;
 import javax.inject.Scope;
 
 import dagger.Subcomponent;
@@ -133,5 +136,6 @@ public interface StatusBarComponent {
      * Creates a new {@link CollapsedStatusBarFragment} each time it's called. See
      * {@link StatusBarViewModule#createCollapsedStatusBarFragment}.
      */
+    @Named(STATUS_BAR_FRAGMENT)
     CollapsedStatusBarFragment createCollapsedStatusBarFragment();
 }

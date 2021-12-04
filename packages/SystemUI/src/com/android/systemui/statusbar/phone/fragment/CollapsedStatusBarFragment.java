@@ -66,12 +66,8 @@ import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManage
 import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 /**
  * Contains the collapsed status bar and handles hiding/showing based on disable flags
@@ -131,7 +127,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     };
     private OperatorNameViewController mOperatorNameViewController;
 
-    @Inject
     public CollapsedStatusBarFragment(
             StatusBarFragmentComponent.Factory statusBarFragmentComponentFactory,
             OngoingCallController ongoingCallController,
@@ -582,7 +577,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     @Override
-    public void onSystemChromeAnimationUpdate(@NotNull ValueAnimator animator) {
+    public void onSystemChromeAnimationUpdate(@NonNull ValueAnimator animator) {
         mSystemIconArea.setAlpha((float) animator.getAnimatedValue());
     }
 

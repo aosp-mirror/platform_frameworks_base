@@ -5104,6 +5104,12 @@ public class AccessibilityNodeInfo implements Parcelable {
         @NonNull public static final AccessibilityAction ACTION_SWIPE_DOWN =
             new AccessibilityAction(R.id.accessibilityActionSwipeDown);
 
+        /**
+         * Action to show suggestions for editable text.
+         */
+        @NonNull public static final AccessibilityAction ACTION_SHOW_SUGGESTIONS =
+                new AccessibilityAction(R.id.accessibilityActionShowSuggestions);
+
         private final int mActionId;
         private final CharSequence mLabel;
 

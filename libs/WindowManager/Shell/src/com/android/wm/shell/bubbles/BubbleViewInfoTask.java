@@ -189,9 +189,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             BitmapInfo badgeBitmapInfo = iconFactory.getBadgeBitmap(badgedIcon,
                     b.isImportantConversation());
             info.badgeBitmap = badgeBitmapInfo.icon;
-            info.bubbleBitmap = iconFactory.createBadgedIconBitmap(bubbleDrawable,
-                    null /* user */,
-                    true /* shrinkNonAdaptiveIcons */).icon;
+            info.bubbleBitmap = iconFactory.createBadgedIconBitmap(bubbleDrawable).icon;
 
             // Dot color & placement
             Path iconPath = PathParser.createPathFromPathData(

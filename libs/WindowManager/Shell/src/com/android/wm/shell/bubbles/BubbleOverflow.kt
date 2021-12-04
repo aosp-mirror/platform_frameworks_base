@@ -95,9 +95,8 @@ class BubbleOverflow(
 
         // Update bitmap
         val fg = InsetDrawable(overflowBtn?.drawable, overflowIconInset)
-        bitmap = iconFactory.createBadgedIconBitmap(AdaptiveIconDrawable(
-                ColorDrawable(colorAccent), fg),
-            null /* user */, true /* shrinkNonAdaptiveIcons */).icon
+        bitmap = iconFactory.createBadgedIconBitmap(
+                AdaptiveIconDrawable(ColorDrawable(colorAccent), fg)).icon
 
         // Update dot path
         dotPath = PathParser.createPathFromPathData(

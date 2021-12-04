@@ -364,6 +364,13 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         }
     }
 
+    @NonNull
+    MetricsTimeZoneDetectorState generateMetricsState() {
+        enforceManageTimeZoneDetectorPermission();
+
+        return mTimeZoneDetectorStrategy.generateMetricsState();
+    }
+
     @Override
     protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
             @Nullable String[] args) {

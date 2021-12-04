@@ -2513,7 +2513,7 @@ public class Editor {
      * the current cursor position or selection range. This method is consistent with the
      * method to show suggestions {@link SuggestionsPopupWindow#updateSuggestions}.
      */
-    private boolean shouldOfferToShowSuggestions() {
+    boolean shouldOfferToShowSuggestions() {
         CharSequence text = mTextView.getText();
         if (!(text instanceof Spannable)) return false;
 

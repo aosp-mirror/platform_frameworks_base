@@ -11,12 +11,15 @@ import android.media.MediaDescription
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSession
+import android.media.session.PlaybackState
 import android.os.Bundle
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.media.utils.MediaConstants
 import androidx.test.filters.SmallTest
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dump.DumpManager
@@ -67,6 +70,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @JvmField @Rule val mockito = MockitoJUnit.rule()
     @Mock lateinit var mediaControllerFactory: MediaControllerFactory
     @Mock lateinit var controller: MediaController
+    @Mock lateinit var transportControls: MediaController.TransportControls
     @Mock lateinit var playbackInfo: MediaController.PlaybackInfo
     lateinit var session: MediaSession
     lateinit var metadataBuilder: MediaMetadata.Builder
@@ -87,6 +91,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Mock lateinit var mediaSmartspaceTarget: SmartspaceTarget
     @Mock private lateinit var mediaRecommendationItem: SmartspaceAction
     @Mock private lateinit var mediaSmartspaceBaseAction: SmartspaceAction
+    @Mock private lateinit var mediaFlags: MediaFlags
     lateinit var mediaDataManager: MediaDataManager
     lateinit var mediaNotification: StatusBarNotification
     @Captor lateinit var mediaDataCaptor: ArgumentCaptor<MediaData>
@@ -122,7 +127,8 @@ class MediaDataManagerTest : SysuiTestCase() {
             useMediaResumption = true,
             useQsMediaPlayer = true,
             systemClock = clock,
-            tunerService = tunerService
+            tunerService = tunerService,
+            mediaFlags = mediaFlags
         )
         verify(tunerService).addTunable(capture(tunableCaptor),
                 eq(Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION))
@@ -140,6 +146,7 @@ class MediaDataManagerTest : SysuiTestCase() {
             putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
         }
         whenever(mediaControllerFactory.create(eq(session.sessionToken))).thenReturn(controller)
+        whenever(controller.transportControls).thenReturn(transportControls)
         whenever(controller.playbackInfo).thenReturn(playbackInfo)
         whenever(playbackInfo.playbackType).thenReturn(
                 MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL)
@@ -161,6 +168,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         whenever(mediaSmartspaceTarget.featureType).thenReturn(SmartspaceTarget.FEATURE_MEDIA)
         whenever(mediaSmartspaceTarget.iconGrid).thenReturn(listOf(mediaRecommendationItem))
         whenever(mediaSmartspaceTarget.creationTimeMillis).thenReturn(1234L)
+        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(false)
     }
 
     @After
@@ -582,5 +590,158 @@ class MediaDataManagerTest : SysuiTestCase() {
                 eq(0))
         assertThat(mediaDataCaptor.value.actionsToShowInCompact.size).isEqualTo(
                 MediaDataManager.MAX_COMPACT_ACTIONS)
+    }
+
+    @Test
+    fun testPlaybackActions_noState_usesNotification() {
+        val desc = "Notification Action"
+        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
+        whenever(controller.playbackState).thenReturn(null)
+
+        val notifWithAction = SbnBuilder().run {
+            setPkg(PACKAGE_NAME)
+            modifyNotification(context).also {
+                it.setSmallIcon(android.R.drawable.ic_media_pause)
+                it.setStyle(MediaStyle().apply { setMediaSession(session.sessionToken) })
+                it.addAction(android.R.drawable.ic_media_play, desc, null)
+            }
+            build()
+        }
+        mediaDataManager.onNotificationAdded(KEY, notifWithAction)
+
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor), eq(true),
+                eq(0))
+
+        assertThat(mediaDataCaptor.value!!.semanticActions).isNull()
+        assertThat(mediaDataCaptor.value!!.actions).hasSize(1)
+        assertThat(mediaDataCaptor.value!!.actions[0]!!.contentDescription).isEqualTo(desc)
+    }
+
+    @Test
+    fun testPlaybackActions_hasPrevNext() {
+        val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
+        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
+        val stateActions = PlaybackState.ACTION_PLAY or
+                PlaybackState.ACTION_SKIP_TO_PREVIOUS or
+                PlaybackState.ACTION_SKIP_TO_NEXT
+        val stateBuilder = PlaybackState.Builder()
+                .setActions(stateActions)
+        customDesc.forEach {
+            stateBuilder.addCustomAction("action: $it", it, android.R.drawable.ic_media_pause)
+        }
+        whenever(controller.playbackState).thenReturn(stateBuilder.build())
+
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor), eq(true),
+                eq(0))
+
+        assertThat(mediaDataCaptor.value!!.semanticActions).isNotNull()
+        val actions = mediaDataCaptor.value!!.semanticActions!!
+
+        assertThat(actions.playOrPause).isNotNull()
+        assertThat(actions.playOrPause!!.contentDescription).isEqualTo(
+                context.getString(R.string.controls_media_button_play))
+        actions.playOrPause!!.action!!.run()
+        verify(transportControls).play()
+
+        assertThat(actions.prevOrCustom).isNotNull()
+        assertThat(actions.prevOrCustom!!.contentDescription).isEqualTo(
+                context.getString(R.string.controls_media_button_prev))
+        actions.prevOrCustom!!.action!!.run()
+        verify(transportControls).skipToPrevious()
+
+        assertThat(actions.nextOrCustom).isNotNull()
+        assertThat(actions.nextOrCustom!!.contentDescription).isEqualTo(
+                context.getString(R.string.controls_media_button_next))
+        actions.nextOrCustom!!.action!!.run()
+        verify(transportControls).skipToNext()
+
+        assertThat(actions.startCustom).isNotNull()
+        assertThat(actions.startCustom!!.contentDescription).isEqualTo(customDesc[0])
+
+        assertThat(actions.endCustom).isNotNull()
+        assertThat(actions.endCustom!!.contentDescription).isEqualTo(customDesc[1])
+    }
+
+    @Test
+    fun testPlaybackActions_noPrevNext_usesCustom() {
+        val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
+        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
+        val stateActions = PlaybackState.ACTION_PLAY
+        val stateBuilder = PlaybackState.Builder()
+                .setActions(stateActions)
+        customDesc.forEach {
+            stateBuilder.addCustomAction("action: $it", it, android.R.drawable.ic_media_pause)
+        }
+        whenever(controller.playbackState).thenReturn(stateBuilder.build())
+
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor), eq(true),
+                eq(0))
+
+        assertThat(mediaDataCaptor.value!!.semanticActions).isNotNull()
+        val actions = mediaDataCaptor.value!!.semanticActions!!
+
+        assertThat(actions.playOrPause).isNotNull()
+        assertThat(actions.playOrPause!!.contentDescription).isEqualTo(
+                context.getString(R.string.controls_media_button_play))
+
+        assertThat(actions.prevOrCustom).isNotNull()
+        assertThat(actions.prevOrCustom!!.contentDescription).isEqualTo(customDesc[0])
+
+        assertThat(actions.nextOrCustom).isNotNull()
+        assertThat(actions.nextOrCustom!!.contentDescription).isEqualTo(customDesc[1])
+
+        assertThat(actions.startCustom).isNotNull()
+        assertThat(actions.startCustom!!.contentDescription).isEqualTo(customDesc[2])
+
+        assertThat(actions.endCustom).isNotNull()
+        assertThat(actions.endCustom!!.contentDescription).isEqualTo(customDesc[3])
+    }
+
+    @Test
+    fun testPlaybackActions_reservedSpace() {
+        val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
+        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
+        val stateActions = PlaybackState.ACTION_PLAY
+        val stateBuilder = PlaybackState.Builder()
+                .setActions(stateActions)
+        customDesc.forEach {
+            stateBuilder.addCustomAction("action: $it", it, android.R.drawable.ic_media_pause)
+        }
+        val extras = Bundle().apply {
+            putBoolean(MediaConstants.SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_PREV, true)
+            putBoolean(MediaConstants.SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_NEXT, true)
+        }
+        whenever(controller.playbackState).thenReturn(stateBuilder.build())
+        whenever(controller.extras).thenReturn(extras)
+
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor), eq(true),
+                eq(0))
+
+        assertThat(mediaDataCaptor.value!!.semanticActions).isNotNull()
+        val actions = mediaDataCaptor.value!!.semanticActions!!
+
+        assertThat(actions.playOrPause).isNotNull()
+        assertThat(actions.playOrPause!!.contentDescription).isEqualTo(
+                context.getString(R.string.controls_media_button_play))
+
+        assertThat(actions.prevOrCustom).isNull()
+        assertThat(actions.nextOrCustom).isNull()
+
+        assertThat(actions.startCustom).isNotNull()
+        assertThat(actions.startCustom!!.contentDescription).isEqualTo(customDesc[0])
+
+        assertThat(actions.endCustom).isNotNull()
+        assertThat(actions.endCustom!!.contentDescription).isEqualTo(customDesc[1])
     }
 }

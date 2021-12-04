@@ -163,8 +163,27 @@ public class MediaPlayerDataTest : SysuiTestCase() {
         isPlaying: Boolean?,
         location: Int,
         resumption: Boolean
-    ) =
-        MediaData(0, false, 0, app, null, null, null, null, emptyList(), emptyList<Int>(),
-            "package:" + app, null, null, null, true, null, location, resumption, "key:" + app,
-            false, isPlaying)
+    ) = MediaData(
+        userId = 0,
+        initialized = false,
+        backgroundColor = 0,
+        app = app,
+        appIcon = null,
+        artist = null,
+        song = null,
+        artwork = null,
+        actions = emptyList(),
+        actionsToShowInCompact = emptyList(),
+        packageName = "package: $app",
+        token = null,
+        clickIntent = null,
+        device = null,
+        active = true,
+        resumeAction = null,
+        playbackLocation = location,
+        resumption = resumption,
+        notificationKey = "key: $app",
+        hasCheckedForResume = false,
+        isPlaying = isPlaying
+    )
 }

@@ -385,7 +385,7 @@ public class PreparationCoordinator implements Coordinator {
     }
 
     private boolean shouldWaitForGroupToInflate(GroupEntry group, long now) {
-        if (group == GroupEntry.ROOT_ENTRY || group.hasBeenAttachedBefore()) {
+        if (group == GroupEntry.ROOT_ENTRY || group.wasAttachedInPreviousPass()) {
             return false;
         }
         if (isBeyondGroupInitializationWindow(group, now)) {
@@ -397,11 +397,12 @@ public class PreparationCoordinator implements Coordinator {
             return true;
         }
         for (NotificationEntry child : group.getChildren()) {
-            if (mInflatingNotifs.contains(child) && !child.hasBeenAttachedBefore()) {
+            if (mInflatingNotifs.contains(child) && !child.wasAttachedInPreviousPass()) {
                 mLogger.logDelayingGroupRelease(group.getKey(), child.getKey());
                 return true;
             }
         }
+        mLogger.logDoneWaitingForGroupInflation(group.getKey());
         return false;
     }
 

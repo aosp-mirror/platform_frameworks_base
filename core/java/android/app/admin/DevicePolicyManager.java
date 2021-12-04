@@ -470,6 +470,105 @@ public class DevicePolicyManager {
             = "android.app.action.PROVISION_FINALIZATION";
 
     /**
+     * Activity action: starts the managed profile provisioning flow inside the device management
+     * role holder.
+     *
+     * <p>During the managed profile provisioning flow, the platform-provided provisioning handler
+     * will delegate provisioning to the device management role holder, by firing this intent.
+     * Third-party mobile device management applications attempting to fire this intent will
+     * receive a {@link SecurityException}.
+     *
+     * <p>Device management role holders are required to have a handler for this intent action.
+     *
+     * <p>A result code of {@link Activity#RESULT_OK} implies that managed profile provisioning
+     * finished successfully. If it did not, a result code of {@link Activity#RESULT_CANCELED}
+     * is used instead.
+     *
+     * @see #ACTION_PROVISION_MANAGED_PROFILE
+     *
+     * @hide
+     */
+    // TODO(b/208628038): Uncomment when the permission is in place
+    //  @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_ROLE_HOLDER)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE =
+            "android.app.action.ROLE_HOLDER_PROVISION_MANAGED_PROFILE";
+
+    /**
+     * Result code that can be returned by the {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} or {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent handlers if a work
+     * profile has been created.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int RESULT_WORK_PROFILE_CREATED = 122;
+
+    /**
+     * Result code that can be returned by the {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} or {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent handlers if the
+     * device owner was set.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int RESULT_DEVICE_OWNER_SET = 123;
+
+    /**
+     * Activity action: starts the trusted source provisioning flow inside the device management
+     * role holder.
+     *
+     * <p>During the trusted source provisioning flow, the platform-provided provisioning handler
+     * will delegate provisioning to the device management role holder, by firing this intent.
+     * Third-party mobile device management applications attempting to fire this intent will
+     * receive a {@link SecurityException}.
+     *
+     * <p>Device management role holders are required to have a handler for this intent action.
+     *
+     * <p>The result codes can be either {@link #RESULT_WORK_PROFILE_CREATED}, {@link
+     * #RESULT_DEVICE_OWNER_SET} or {@link Activity#RESULT_CANCELED} if provisioning failed.
+     *
+     * @see #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE
+     *
+     * @hide
+     */
+    // TODO(b/208628038): Uncomment when the permission is in place
+    //  @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_ROLE_HOLDER)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE =
+            "android.app.action.ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE";
+
+    /**
+     * Activity action: starts the provisioning finalization flow inside the device management
+     * role holder.
+     *
+     * <p>During the provisioning finalization flow, the platform-provided provisioning handler
+     * will delegate provisioning to the device management role holder, by firing this intent.
+     * Third-party mobile device management applications attempting to fire this intent will
+     * receive a {@link SecurityException}.
+     *
+     * <p>Device management role holders are required to have a handler for this intent action.
+     *
+     * <p>This handler forwards the result from the admin app's {@link
+     * #ACTION_ADMIN_POLICY_COMPLIANCE} handler. Result code {@link Activity#RESULT_CANCELED}
+     * implies the provisioning finalization flow has failed.
+     *
+     * @see #ACTION_PROVISION_FINALIZATION
+     *
+     * @hide
+     */
+    // TODO(b/208628038): Uncomment when the permission is in place
+    //  @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_ROLE_HOLDER)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_ROLE_HOLDER_PROVISION_FINALIZATION =
+            "android.app.action.ROLE_HOLDER_PROVISION_FINALIZATION";
+
+    /**
      * Action: Bugreport sharing with device owner has been accepted by the user.
      *
      * @hide
@@ -2819,6 +2918,43 @@ public class DevicePolicyManager {
      */
     public static final String ACTION_ADMIN_POLICY_COMPLIANCE =
             "android.app.action.ADMIN_POLICY_COMPLIANCE";
+
+    /**
+     * Activity action: Starts the device management role holder updater.
+     *
+     * <p>The activity must handle the device management role holder update and set the intent
+     * result to either {@link Activity#RESULT_OK} if the update was successful, {@link
+     * #RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if it encounters a problem
+     * that may be solved by relaunching it again, or {@link
+     * #RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if it encounters a problem
+     * that will not be solved by relaunching it again.
+     *
+     * @hide
+     */
+    // TODO(b/208628038): Uncomment when the permission is in place
+    //  @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_ROLE_HOLDER)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER =
+            "android.app.action.UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER";
+
+    /**
+     * Result code that can be returned by the {@link #ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER}
+     * handler if it encounters a problem that may be solved by relaunching it again.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR = 1;
+
+    /**
+     * Result code that can be returned by the {@link #ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER}
+     * handler if it encounters a problem that will not be solved by relaunching it again.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR = 2;
 
     /**
      * Maximum supported password length. Kind-of arbitrary.
