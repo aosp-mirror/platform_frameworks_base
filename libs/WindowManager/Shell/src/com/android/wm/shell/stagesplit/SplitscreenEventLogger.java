@@ -17,13 +17,13 @@
 package com.android.wm.shell.stagesplit;
 
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__ENTER_REASON__OVERVIEW;
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
+import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 
 /**
  * Helper class that to log Drag & Drop UIEvents for a single session, see also go/uievent

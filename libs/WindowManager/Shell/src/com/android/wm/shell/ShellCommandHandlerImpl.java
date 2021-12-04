@@ -16,7 +16,7 @@
 
 package com.android.wm.shell;
 
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 
 import com.android.wm.shell.apppairs.AppPairsController;
 import com.android.wm.shell.common.ShellExecutor;

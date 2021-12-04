@@ -26,9 +26,9 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
 import static android.view.WindowManagerPolicyConstants.SPLIT_DIVIDER_LAYER;
 
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
@@ -89,10 +89,11 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
-import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
+import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.common.split.SplitWindowManager;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.splitscreen.SplitScreenController.ExitReason;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.util.StagedSplitBounds;
@@ -157,11 +158,11 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private boolean mKeyguardOccluded;
     private boolean mDeviceSleep;
 
-    @SplitScreen.StageType
+    @StageType
     private int mDismissTop = NO_DISMISS;
 
     /** The target stage to dismiss to when unlock after folded. */
-    @SplitScreen.StageType
+    @StageType
     private int mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
 
     private final Runnable mOnTransitionAnimationComplete = () -> {
@@ -274,7 +275,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return mSideStageListener.mVisible && mMainStageListener.mVisible;
     }
 
-    @SplitScreen.StageType
+    @StageType
     int getStageOfTask(int taskId) {
         if (mMainStage.containsTask(taskId)) {
             return STAGE_TYPE_MAIN;
@@ -285,7 +286,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return STAGE_TYPE_UNDEFINED;
     }
 
-    boolean moveToStage(ActivityManager.RunningTaskInfo task, @SplitScreen.StageType int stageType,
+    boolean moveToStage(ActivityManager.RunningTaskInfo task, @StageType int stageType,
             @SplitPosition int stagePosition, WindowContainerTransaction wct) {
         StageTaskListener targetStage;
         int sideStagePosition;
@@ -435,7 +436,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     public void startIntent(PendingIntent intent, Intent fillInIntent,
-            @SplitScreen.StageType int stage, @SplitPosition int position,
+            @StageType int stage, @SplitPosition int position,
             @androidx.annotation.Nullable Bundle options,
             @Nullable RemoteTransition remoteTransition) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -457,7 +458,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
-    Bundle resolveStartStage(@SplitScreen.StageType int stage,
+    Bundle resolveStartStage(@StageType int stage,
             @SplitPosition int position, @androidx.annotation.Nullable Bundle options,
             @androidx.annotation.Nullable WindowContainerTransaction wct) {
         switch (stage) {
@@ -510,12 +511,12 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return options;
     }
 
-    @SplitLayout.SplitPosition
+    @SplitPosition
     int getSideStagePosition() {
         return mSideStagePosition;
     }
 
-    @SplitLayout.SplitPosition
+    @SplitPosition
     int getMainStagePosition() {
         return SplitLayout.reversePosition(mSideStagePosition);
     }
@@ -670,7 +671,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
      * an existing WindowContainerTransaction (rather than applying immediately). This is intended
      * to be used when exiting split might be bundled with other window operations.
      */
-    void prepareExitSplitScreen(@SplitScreen.StageType int stageToTop,
+    void prepareExitSplitScreen(@StageType int stageToTop,
             @NonNull WindowContainerTransaction wct) {
         mSideStage.removeAllTasks(wct, stageToTop == STAGE_TYPE_SIDE);
         mMainStage.deactivate(wct, stageToTop == STAGE_TYPE_MAIN);
@@ -1086,7 +1087,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return null;
     }
 
-    @SplitScreen.StageType
+    @StageType
     private int getStageType(StageTaskListener stage) {
         return stage == mMainStage ? STAGE_TYPE_MAIN : STAGE_TYPE_SIDE;
     }
@@ -1213,7 +1214,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 final TransitionInfo.Change change = info.getChanges().get(iC);
                 final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
                 if (taskInfo == null || !taskInfo.hasParentTask()) continue;
-                final @SplitScreen.StageType int stageType = getStageType(getStageOfTask(taskInfo));
+                final @StageType int stageType = getStageType(getStageOfTask(taskInfo));
                 if (stageType == STAGE_TYPE_MAIN) {
                     mainChild = change;
                 } else if (stageType == STAGE_TYPE_SIDE) {

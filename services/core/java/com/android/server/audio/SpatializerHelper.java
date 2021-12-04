@@ -551,9 +551,9 @@ public class SpatializerHelper {
                 logd("canBeSpatialized false due to usage:" + attributes.getUsage());
                 return false;
         }
-        AudioDeviceAttributes[] devices =
-                // going through adapter to take advantage of routing cache
-                (AudioDeviceAttributes[]) mASA.getDevicesForAttributes(attributes).toArray();
+        AudioDeviceAttributes[] devices = new AudioDeviceAttributes[1];
+        // going through adapter to take advantage of routing cache
+        mASA.getDevicesForAttributes(attributes).toArray(devices);
         final boolean able = AudioSystem.canBeSpatialized(attributes, format, devices);
         logd("canBeSpatialized returning " + able);
         return able;
