@@ -129,7 +129,11 @@ public class RemoteAnimationTarget implements Parcelable {
      * The index of the element in the tree in prefix order. This should be used for z-layering
      * to preserve original z-layer order in the hierarchy tree assuming no "boosting" needs to
      * happen.
+     * @deprecated WindowManager may set a z-order different from the prefix order, and has set the
+     *             correct layer for the animation leash already, so this should not be used for
+     *             layer any more.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public final int prefixOrderIndex;
 
