@@ -37,6 +37,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
+import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
@@ -78,16 +79,41 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     @Mock
     DreamOverlayStateController mDreamOverlayStateController;
 
+    @Mock
+    DreamOverlayComponent.Factory mDreamOverlayStatusBarViewComponentFactory;
+
+    @Mock
+    DreamOverlayComponent mDreamOverlayComponent;
+
+    @Mock
+    DreamOverlayStatusBarViewController mDreamOverlayStatusBarViewController;
+
+    @Mock
+    DreamOverlayContainerView mDreamOverlayContainerView;
+
+    @Mock
+    ViewGroup mDreamOverlayContentView;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mContext.addMockSystemService(WindowManager.class, mWindowManager);
+
+        when(mDreamOverlayComponent.getDreamOverlayContentView())
+                .thenReturn(mDreamOverlayContentView);
+        when(mDreamOverlayComponent.getDreamOverlayContainerView())
+                .thenReturn(mDreamOverlayContainerView);
+        when(mDreamOverlayComponent.getDreamOverlayStatusBarViewController())
+                .thenReturn(mDreamOverlayStatusBarViewController);
+        when(mDreamOverlayStatusBarViewComponentFactory.create())
+                .thenReturn(mDreamOverlayComponent);
+
     }
 
     @Test
     public void testInteraction() throws Exception {
         final DreamOverlayService service = new DreamOverlayService(mContext, mMainExecutor,
-                mDreamOverlayStateController);
+                mDreamOverlayStateController, mDreamOverlayStatusBarViewComponentFactory);
         final IBinder proxy = service.onBind(new Intent());
         final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
         clearInvocations(mWindowManager);
@@ -128,7 +154,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     @Test
     public void testListening() throws Exception {
         final DreamOverlayService service = new DreamOverlayService(mContext, mMainExecutor,
-                mDreamOverlayStateController);
+                mDreamOverlayStateController, mDreamOverlayStatusBarViewComponentFactory);
 
         final IBinder proxy = service.onBind(new Intent());
         final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
@@ -149,5 +175,20 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
         // Verify provider is asked to create overlay.
         verify(mProvider).onCreateOverlay(any(), any(), any());
+    }
+
+    @Test
+    public void testDreamOverlayStatusBarViewControllerInitialized() throws Exception {
+        final DreamOverlayService service = new DreamOverlayService(mContext, mMainExecutor,
+                mDreamOverlayStateController, mDreamOverlayStatusBarViewComponentFactory);
+
+        final IBinder proxy = service.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+
+        // Inform the overlay service of dream starting.
+        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        mMainExecutor.runAllReady();
+
+        verify(mDreamOverlayStatusBarViewController).init();
     }
 }
