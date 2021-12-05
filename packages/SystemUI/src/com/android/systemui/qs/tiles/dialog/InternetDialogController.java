@@ -348,6 +348,10 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             return mContext.getText(SUBTITLE_TEXT_SEARCHING_FOR_NETWORKS);
         }
 
+        if (isCarrierNetworkActive()) {
+            return mContext.getText(SUBTITLE_TEXT_NON_CARRIER_NETWORK_UNAVAILABLE);
+        }
+
         // Sub-Title:
         // show non_carrier_network_unavailable
         //   - while Wi-Fi on + no Wi-Fi item
