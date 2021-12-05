@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 -->
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
     <drawable name="notification_number_text_color">#ffffffff</drawable>
     <drawable name="system_bar_background">@color/system_bar_background_opaque</drawable>
     <color name="system_bar_background_opaque">#ff000000</color>
@@ -172,6 +171,17 @@
 
     <!-- media -->
     <color name="media_seamless_border">?android:attr/colorAccent</color>
+
+    <!-- media output dialog-->
+    <color name="media_dialog_background" android:lstar="98">@android:color/system_neutral1_100</color>
+    <color name="media_dialog_solid_button_background">@android:color/system_accent1_600</color>
+    <color name="media_dialog_solid_button_text">@android:color/system_neutral1_50</color>
+    <color name="media_dialog_outlined_button">@android:color/system_accent1_600</color>
+    <color name="media_dialog_outlined_button_text">@android:color/system_neutral1_900</color>
+    <color name="media_dialog_active_item_main_content">@android:color/system_accent1_900</color>
+    <color name="media_dialog_inactive_item_main_content">@android:color/system_accent1_600</color>
+    <color name="media_dialog_item_status">@android:color/system_accent1_900</color>
+    <color name="media_dialog_item_background">@android:color/system_accent2_50</color>
 
     <!-- controls -->
     <color name="control_primary_text">#E6FFFFFF</color>

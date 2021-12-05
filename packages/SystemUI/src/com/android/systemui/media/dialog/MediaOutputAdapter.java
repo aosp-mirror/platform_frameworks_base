@@ -113,6 +113,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             }
             mCheckBox.setVisibility(View.GONE);
             mStatusIcon.setVisibility(View.GONE);
+            mTitleText.setTextColor(Utils.getColorStateListDefaultColor(mContext,
+                    R.color.media_dialog_inactive_item_main_content));
             if (currentlyConnected && mController.isActiveRemoteDevice(device)
                     && mController.getSelectableMediaDevice().size() > 0) {
                 // Init active device layout
@@ -147,6 +149,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             } else {
                 // Set different layout for each device
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING_FAILED) {
+                    mTitleText.setAlpha(DEVICE_CONNECTED_ALPHA);
+                    mTitleIcon.setAlpha(DEVICE_CONNECTED_ALPHA);
                     mStatusIcon.setImageDrawable(
                             mContext.getDrawable(R.drawable.media_output_status_failed));
                     setTwoLineLayout(device, false /* bFocused */,
@@ -157,6 +161,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 } else if (!mController.hasAdjustVolumeUserRestriction() && currentlyConnected) {
                     mStatusIcon.setImageDrawable(
                             mContext.getDrawable(R.drawable.media_output_status_check));
+                    mTitleText.setTextColor(Utils.getColorStateListDefaultColor(mContext,
+                            R.color.media_dialog_active_item_main_content));
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             true /* showSeekBar */,
                             false /* showProgressBar */, true /* showStatus */);
@@ -172,6 +178,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         @Override
         void onBind(int customizedItem, boolean topMargin, boolean bottomMargin) {
             if (customizedItem == CUSTOMIZED_ITEM_PAIR_NEW) {
+                mTitleText.setTextColor(Utils.getColorStateListDefaultColor(mContext,
+                        R.color.media_dialog_inactive_item_main_content));
                 mCheckBox.setVisibility(View.GONE);
                 mAddIcon.setVisibility(View.GONE);
                 setSingleLineLayout(mContext.getText(R.string.media_output_dialog_pairing_new),
@@ -182,6 +190,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 mTitleIcon.setImageDrawable(d);
                 mContainerLayout.setOnClickListener(v -> onItemClick(CUSTOMIZED_ITEM_PAIR_NEW));
             } else if (customizedItem == CUSTOMIZED_ITEM_DYNAMIC_GROUP) {
+                mTitleText.setTextColor(Utils.getColorStateListDefaultColor(mContext,
+                        R.color.media_dialog_active_item_main_content));
                 mConnectedItem = mContainerLayout;
                 mCheckBox.setVisibility(View.GONE);
                 if (mController.getSelectableMediaDevice().size() > 0) {

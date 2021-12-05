@@ -84,7 +84,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     };
 
     public MediaOutputBaseDialog(Context context, MediaOutputController mediaOutputController) {
-        super(context);
+        super(context, R.style.Theme_SystemUI_Dialog_Media);
         mContext = context;
         mMediaOutputController = mediaOutputController;
         mLayoutManager = new LinearLayoutManager(mContext);
