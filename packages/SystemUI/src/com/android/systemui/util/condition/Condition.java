@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.conditions;
+package com.android.systemui.util.condition;
 
 import android.util.Log;
 
@@ -27,9 +27,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- * Base class for a condition that needs to be fulfilled in order for Communal Mode to display.
+ * Base class for a condition that needs to be fulfilled in order for {@link Monitor} to inform
+ * its callbacks.
  */
-public abstract class CommunalCondition implements CallbackController<CommunalCondition.Callback> {
+public abstract class Condition implements CallbackController<Condition.Callback> {
     private final String mTag = getClass().getSimpleName();
 
     private final ArrayList<WeakReference<Callback>> mCallbacks = new ArrayList<>();
@@ -125,6 +126,6 @@ public abstract class CommunalCondition implements CallbackController<CommunalCo
          * @param condition The condition in question.
          * @param isConditionMet True if the condition has been fulfilled. False otherwise.
          */
-        void onConditionChanged(CommunalCondition condition, boolean isConditionMet);
+        void onConditionChanged(Condition condition, boolean isConditionMet);
     }
 }
