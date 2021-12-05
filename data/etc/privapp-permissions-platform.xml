@@ -503,6 +503,8 @@ applications that come with the platform
         <permission name="android.permission.UPDATE_DEVICE_STATS" />
         <!-- Permission required for GTS test - PendingSystemUpdateTest -->
         <permission name="android.permission.NOTIFY_PENDING_SYSTEM_UPDATE" />
+        <!-- Permission required for ATS test - CarDevicePolicyManagerTest -->
+        <permission name="android.permission.LOCK_DEVICE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

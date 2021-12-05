@@ -5107,7 +5107,6 @@ final public class MediaCodec {
         public MediaImage(
                 @NonNull ByteBuffer buffer, @NonNull ByteBuffer info, boolean readOnly,
                 long timestamp, int xOffset, int yOffset, @Nullable Rect cropRect) {
-            mFormat = ImageFormat.YUV_420_888;
             mTimestamp = timestamp;
             mIsImageValid = true;
             mIsReadOnly = buffer.isReadOnly();
@@ -5119,6 +5118,11 @@ final public class MediaCodec {
             mInfo = info;
 
             mBufferContext = 0;
+
+            int cbPlaneOffset = -1;
+            int crPlaneOffset = -1;
+            int planeOffsetInc = -1;
+            int pixelStride = -1;
 
             // read media-info.  See MediaImage2
             if (info.remaining() == 104) {
@@ -5137,14 +5141,27 @@ final public class MediaCodec {
                             "unsupported size: " + mWidth + "x" + mHeight);
                 }
                 int bitDepth = info.getInt();
-                if (bitDepth != 8) {
+                if (bitDepth != 8 && bitDepth != 10) {
                     throw new UnsupportedOperationException("unsupported bit depth: " + bitDepth);
                 }
                 int bitDepthAllocated = info.getInt();
-                if (bitDepthAllocated != 8) {
+                if (bitDepthAllocated != 8 && bitDepthAllocated != 16) {
                     throw new UnsupportedOperationException(
                             "unsupported allocated bit depth: " + bitDepthAllocated);
                 }
+                if (bitDepth == 8 && bitDepthAllocated == 8) {
+                    mFormat = ImageFormat.YUV_420_888;
+                    planeOffsetInc = 1;
+                    pixelStride = 2;
+                } else if (bitDepth == 10 && bitDepthAllocated == 16) {
+                    mFormat = ImageFormat.YCBCR_P010;
+                    planeOffsetInc = 2;
+                    pixelStride = 4;
+                } else {
+                    throw new UnsupportedOperationException("couldn't infer ImageFormat"
+                      + " bitDepth: " + bitDepth + " bitDepthAllocated: " + bitDepthAllocated);
+                }
+
                 mPlanes = new MediaPlane[numPlanes];
                 for (int ix = 0; ix < numPlanes; ix++) {
                     int planeOffset = info.getInt();
@@ -5166,10 +5183,29 @@ final public class MediaCodec {
                     buffer.limit(buffer.position() + Utils.divUp(bitDepth, 8)
                             + (mHeight / vert - 1) * rowInc + (mWidth / horiz - 1) * colInc);
                     mPlanes[ix] = new MediaPlane(buffer.slice(), rowInc, colInc);
+                    if ((mFormat == ImageFormat.YUV_420_888 || mFormat == ImageFormat.YCBCR_P010)
+                            && ix == 1) {
+                        cbPlaneOffset = planeOffset;
+                    } else if ((mFormat == ImageFormat.YUV_420_888
+                            || mFormat == ImageFormat.YCBCR_P010) && ix == 2) {
+                        crPlaneOffset = planeOffset;
+                    }
                 }
             } else {
                 throw new UnsupportedOperationException(
                         "unsupported info length: " + info.remaining());
+            }
+
+            // Validate chroma semiplanerness.
+            if (mFormat == ImageFormat.YCBCR_P010) {
+                if (crPlaneOffset != cbPlaneOffset + planeOffsetInc) {
+                    throw new UnsupportedOperationException("Invalid plane offsets"
+                    + " cbPlaneOffset: " + cbPlaneOffset + " crPlaneOffset: " + crPlaneOffset);
+                }
+                if (mPlanes[1].getPixelStride() != pixelStride
+                        || mPlanes[2].getPixelStride() != pixelStride) {
+                    throw new UnsupportedOperationException("Invalid pixelStride");
+                }
             }
 
             if (cropRect == null) {
