@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  * Information identifying a Wi-Fi network.
  * @see NetworkKey
  *
- * @deprecated as part of the {@link NetworkScore} deprecation.
+ * @deprecated as part of the {@link NetworkScoreManager} deprecation.
  * @hide
  */
 @Deprecated

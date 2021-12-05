@@ -22769,7 +22769,7 @@ package android.media {
     method public void setDataSource(@NonNull java.io.FileDescriptor) throws java.io.IOException;
     method public void setDataSource(@NonNull java.io.FileDescriptor, long, long) throws java.io.IOException;
     method public void setLogSessionId(@NonNull android.media.metrics.LogSessionId);
-    method public void setMediaCas(@NonNull android.media.MediaCas);
+    method @Deprecated public void setMediaCas(@NonNull android.media.MediaCas);
     method public void unselectTrack(int);
     field public static final int SAMPLE_FLAG_ENCRYPTED = 2; // 0x2
     field public static final int SAMPLE_FLAG_PARTIAL_FRAME = 4; // 0x4
