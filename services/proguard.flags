@@ -1,0 +1,11 @@
+# TODO(b/196084106): Refine and optimize this configuration. Note that this
+# configuration is only used when `SOONG_CONFIG_ANDROID_SYSTEM_OPTIMIZE_JAVA=true`.
+-keep,allowoptimization,allowaccessmodification class ** {
+  *;
+}
+
+# Various classes subclassed in ethernet-service (avoid marking final).
+-keep public class android.net.** { *; }
+
+# Referenced via CarServiceHelperService in car-frameworks-service (avoid removing).
+-keep public class com.android.server.utils.Slogf { *; }

@@ -26,12 +26,10 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.LocalLog;
-import android.util.Slog;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 import com.android.server.power.ShutdownThread;
-import com.google.android.collect.Lists;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -40,19 +38,19 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.LinkedList;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.LinkedList;
-import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Generic connector class for interfacing with a native daemon which uses the
  * {@code libsysutils} FrameworkListener protocol.
  */
-final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdog.Monitor {
+final class NativeDaemonConnector implements Runnable, Handler.Callback {
     private final static boolean VDBG = false;
 
     private final String TAG;
@@ -107,7 +105,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
     /**
      * Enable Set debugging mode, which causes messages to also be written to both
-     * {@link Slog} in addition to internal log.
+     * {@link Log} in addition to internal log.
      */
     public void setDebug(boolean debug) {
         mDebug = debug;
@@ -126,7 +124,9 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
      * calls while holding a lock on the given object.
      */
     public void setWarnIfHeld(Object warnIfHeld) {
-        Preconditions.checkState(mWarnIfHeld == null);
+        if (mWarnIfHeld != null) {
+            throw new IllegalStateException("warnIfHeld is already set.");
+        }
         mWarnIfHeld = Objects.requireNonNull(warnIfHeld);
     }
 
@@ -183,7 +183,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
         // In order to ensure that unprivileged apps aren't able to impersonate native daemons on
         // production devices, even if said native daemons ill-advisedly pick a socket name that
         // starts with __test__, only allow this on debug builds.
-        if (mSocket.startsWith("__test__") && Build.IS_DEBUGGABLE) {
+        if (mSocket.startsWith("__test__") && Build.isDebuggable()) {
             return new LocalSocketAddress(mSocket);
         } else {
             return new LocalSocketAddress(mSocket, LocalSocketAddress.Namespace.RESERVED);
@@ -375,7 +375,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
         try {
             latch.await();
         } catch (InterruptedException e) {
-            Slog.wtf(TAG, "Interrupted while waiting for unsolicited response handling", e);
+            Log.wtf(TAG, "Interrupted while waiting for unsolicited response handling", e);
         }
     }
 
@@ -462,13 +462,13 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     public NativeDaemonEvent[] executeForList(long timeoutMs, String cmd, Object... args)
             throws NativeDaemonConnectorException {
         if (mWarnIfHeld != null && Thread.holdsLock(mWarnIfHeld)) {
-            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName() + " is holding 0x"
+            Log.wtf(TAG, "Calling thread " + Thread.currentThread().getName() + " is holding 0x"
                     + Integer.toHexString(System.identityHashCode(mWarnIfHeld)), new Throwable());
         }
 
         final long startTime = SystemClock.elapsedRealtime();
 
-        final ArrayList<NativeDaemonEvent> events = Lists.newArrayList();
+        final ArrayList<NativeDaemonEvent> events = new ArrayList<>();
 
         final StringBuilder rawBuilder = new StringBuilder();
         final StringBuilder logBuilder = new StringBuilder();
@@ -571,7 +571,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
      */
     public static class Command {
         private String mCmd;
-        private ArrayList<Object> mArguments = Lists.newArrayList();
+        private ArrayList<Object> mArguments = new ArrayList<>();
 
         public Command(String cmd, Object... args) {
             mCmd = cmd;
@@ -586,11 +586,6 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
         }
     }
 
-    /** {@inheritDoc} */
-    public void monitor() {
-        synchronized (mDaemonLock) { }
-    }
-
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mLocalLog.dump(fd, pw, args);
         pw.println();
@@ -598,12 +593,12 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     }
 
     private void log(String logstring) {
-        if (mDebug) Slog.d(TAG, logstring);
+        if (mDebug) Log.d(TAG, logstring);
         mLocalLog.log(logstring);
     }
 
     private void loge(String logstring) {
-        Slog.e(TAG, logstring);
+        Log.e(TAG, logstring);
         mLocalLog.log(logstring);
     }
 
@@ -659,12 +654,12 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                 if (found == null) {
                     // didn't find it - make sure our queue isn't too big before adding
                     while (mPendingCmds.size() >= mMaxCount) {
-                        Slog.e("NativeDaemonConnector.ResponseQueue",
+                        Log.e("NativeDaemonConnector.ResponseQueue",
                                 "more buffered than allowed: " + mPendingCmds.size() +
                                 " >= " + mMaxCount);
                         // let any waiter timeout waiting for this
                         PendingCmd pendingCmd = mPendingCmds.remove();
-                        Slog.e("NativeDaemonConnector.ResponseQueue",
+                        Log.e("NativeDaemonConnector.ResponseQueue",
                                 "Removing request: " + pendingCmd.logCmd + " (" +
                                 pendingCmd.cmdNum + ")");
                     }
@@ -706,7 +701,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                 result = found.responses.poll(timeoutMs, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {}
             if (result == null) {
-                Slog.e("NativeDaemonConnector.ResponseQueue", "Timeout waiting for response");
+                Log.e("NativeDaemonConnector.ResponseQueue", "Timeout waiting for response");
             }
             return result;
         }

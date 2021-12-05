@@ -436,6 +436,8 @@ public interface BluetoothProfile {
                 return "OPP";
             case HEARING_AID:
                 return "HEARING_AID";
+            case LE_AUDIO:
+                return "LE_AUDIO";
             default:
                 return "UNKNOWN_PROFILE";
         }

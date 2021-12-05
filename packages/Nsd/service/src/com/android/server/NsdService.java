@@ -19,6 +19,7 @@ package com.android.server;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.net.nsd.INsdManager;
@@ -36,12 +37,10 @@ import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.DumpUtils;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.net.module.util.DnsSdTxtRecord;
@@ -228,7 +227,7 @@ public class NsdService extends INsdManager.Stub {
                         break;
                     case NsdManager.NATIVE_DAEMON_EVENT:
                     default:
-                        Slog.e(TAG, "Unhandled " + msg);
+                        Log.e(TAG, "Unhandled " + msg);
                         return NOT_HANDLED;
                 }
                 return HANDLED;
@@ -274,7 +273,7 @@ public class NsdService extends INsdManager.Stub {
 
             private boolean requestLimitReached(ClientInfo clientInfo) {
                 if (clientInfo.mClientIds.size() >= ClientInfo.MAX_LIMIT) {
-                    if (DBG) Slog.d(TAG, "Exceeded max outstanding requests " + clientInfo);
+                    if (DBG) Log.d(TAG, "Exceeded max outstanding requests " + clientInfo);
                     return true;
                 }
                 return false;
@@ -307,7 +306,7 @@ public class NsdService extends INsdManager.Stub {
                         transitionTo(mDisabledState);
                         break;
                     case NsdManager.DISCOVER_SERVICES:
-                        if (DBG) Slog.d(TAG, "Discover services");
+                        if (DBG) Log.d(TAG, "Discover services");
                         args = (ListenerArgs) msg.obj;
                         clientInfo = mClients.get(args.connector);
 
@@ -321,8 +320,8 @@ public class NsdService extends INsdManager.Stub {
                         id = getUniqueId();
                         if (discoverServices(id, args.serviceInfo.getServiceType())) {
                             if (DBG) {
-                                Slog.d(TAG, "Discover " + msg.arg2 + " " + id +
-                                        args.serviceInfo.getServiceType());
+                                Log.d(TAG, "Discover " + msg.arg2 + " " + id
+                                        + args.serviceInfo.getServiceType());
                             }
                             storeRequestMap(clientId, id, clientInfo, msg.what);
                             clientInfo.onDiscoverServicesStarted(clientId, args.serviceInfo);
@@ -333,7 +332,7 @@ public class NsdService extends INsdManager.Stub {
                         }
                         break;
                     case NsdManager.STOP_DISCOVERY:
-                        if (DBG) Slog.d(TAG, "Stop service discovery");
+                        if (DBG) Log.d(TAG, "Stop service discovery");
                         args = (ListenerArgs) msg.obj;
                         clientInfo = mClients.get(args.connector);
 
@@ -353,7 +352,7 @@ public class NsdService extends INsdManager.Stub {
                         }
                         break;
                     case NsdManager.REGISTER_SERVICE:
-                        if (DBG) Slog.d(TAG, "Register service");
+                        if (DBG) Log.d(TAG, "Register service");
                         args = (ListenerArgs) msg.obj;
                         clientInfo = mClients.get(args.connector);
                         if (requestLimitReached(clientInfo)) {
@@ -365,7 +364,7 @@ public class NsdService extends INsdManager.Stub {
                         maybeStartDaemon();
                         id = getUniqueId();
                         if (registerService(id, args.serviceInfo)) {
-                            if (DBG) Slog.d(TAG, "Register " + clientId + " " + id);
+                            if (DBG) Log.d(TAG, "Register " + clientId + " " + id);
                             storeRequestMap(clientId, id, clientInfo, msg.what);
                             // Return success after mDns reports success
                         } else {
@@ -375,11 +374,11 @@ public class NsdService extends INsdManager.Stub {
                         }
                         break;
                     case NsdManager.UNREGISTER_SERVICE:
-                        if (DBG) Slog.d(TAG, "unregister service");
+                        if (DBG) Log.d(TAG, "unregister service");
                         args = (ListenerArgs) msg.obj;
                         clientInfo = mClients.get(args.connector);
                         if (clientInfo == null) {
-                            Slog.e(TAG, "Unknown connector in unregistration");
+                            Log.e(TAG, "Unknown connector in unregistration");
                             break;
                         }
                         id = clientInfo.mClientIds.get(clientId);
@@ -392,7 +391,7 @@ public class NsdService extends INsdManager.Stub {
                         }
                         break;
                     case NsdManager.RESOLVE_SERVICE:
-                        if (DBG) Slog.d(TAG, "Resolve service");
+                        if (DBG) Log.d(TAG, "Resolve service");
                         args = (ListenerArgs) msg.obj;
                         clientInfo = mClients.get(args.connector);
 
@@ -430,7 +429,7 @@ public class NsdService extends INsdManager.Stub {
                 ClientInfo clientInfo = mIdToClientInfoMap.get(id);
                 if (clientInfo == null) {
                     String name = NativeResponseCode.nameOf(code);
-                    Slog.e(TAG, String.format("id %d for %s has no client mapping", id, name));
+                    Log.e(TAG, String.format("id %d for %s has no client mapping", id, name));
                     return false;
                 }
 
@@ -441,14 +440,14 @@ public class NsdService extends INsdManager.Stub {
                     // SERVICE_FOUND may race with STOP_SERVICE_DISCOVERY,
                     // and we may get in this situation.
                     String name = NativeResponseCode.nameOf(code);
-                    Slog.d(TAG, String.format(
+                    Log.d(TAG, String.format(
                             "Notification %s for listener id %d that is no longer active",
                             name, id));
                     return false;
                 }
                 if (DBG) {
                     String name = NativeResponseCode.nameOf(code);
-                    Slog.d(TAG, String.format("Native daemon message %s: %s", name, raw));
+                    Log.d(TAG, String.format("Native daemon message %s: %s", name, raw));
                 }
                 switch (code) {
                     case NativeResponseCode.SERVICE_FOUND:
@@ -492,7 +491,7 @@ public class NsdService extends INsdManager.Stub {
                             ++index;
                         }
                         if (index >= cooked[2].length()) {
-                            Slog.e(TAG, "Invalid service found " + raw);
+                            Log.e(TAG, "Invalid service found " + raw);
                             break;
                         }
                         String name = cooked[2].substring(0, index);
@@ -562,13 +561,13 @@ public class NsdService extends INsdManager.Stub {
             char c = s.charAt(i);
             if (c == '\\') {
                 if (++i >= s.length()) {
-                    Slog.e(TAG, "Unexpected end of escape sequence in: " + s);
+                    Log.e(TAG, "Unexpected end of escape sequence in: " + s);
                     break;
                 }
                 c = s.charAt(i);
                 if (c != '.' && c != '\\') {
                     if (i + 2 >= s.length()) {
-                        Slog.e(TAG, "Unexpected end of escape sequence in: " + s);
+                        Log.e(TAG, "Unexpected end of escape sequence in: " + s);
                         break;
                     }
                     c = (char) ((c-'0') * 100 + (s.charAt(i+1)-'0') * 10 + (s.charAt(i+2)-'0'));
@@ -685,7 +684,7 @@ public class NsdService extends INsdManager.Stub {
     private boolean isNsdEnabled() {
         boolean ret = mNsdSettings.isEnabled();
         if (DBG) {
-            Slog.d(TAG, "Network service discovery is " + (ret ? "enabled" : "disabled"));
+            Log.d(TAG, "Network service discovery is " + (ret ? "enabled" : "disabled"));
         }
         return ret;
     }
@@ -795,12 +794,12 @@ public class NsdService extends INsdManager.Stub {
          */
         public boolean execute(Object... args) {
             if (DBG) {
-                Slog.d(TAG, "mdnssd " + Arrays.toString(args));
+                Log.d(TAG, "mdnssd " + Arrays.toString(args));
             }
             try {
                 mNativeConnector.execute("mdnssd", args);
             } catch (NativeDaemonConnectorException e) {
-                Slog.e(TAG, "Failed to execute mdnssd " + Arrays.toString(args), e);
+                Log.e(TAG, "Failed to execute mdnssd " + Arrays.toString(args), e);
                 return false;
             }
             return true;
@@ -831,7 +830,7 @@ public class NsdService extends INsdManager.Stub {
 
     private boolean registerService(int regId, NsdServiceInfo service) {
         if (DBG) {
-            Slog.d(TAG, "registerService: " + regId + " " + service);
+            Log.d(TAG, "registerService: " + regId + " " + service);
         }
         String name = service.getServiceName();
         String type = service.getServiceType();
@@ -880,7 +879,12 @@ public class NsdService extends INsdManager.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump " + TAG
+                    + " due to missing android.permission.DUMP permission");
+            return;
+        }
 
         for (ClientInfo client : mClients.values()) {
             pw.println("Client Info");
@@ -909,7 +913,7 @@ public class NsdService extends INsdManager.Stub {
 
         private ClientInfo(INsdManagerCallback cb) {
             mCb = cb;
-            if (DBG) Slog.d(TAG, "New client");
+            if (DBG) Log.d(TAG, "New client");
         }
 
         @Override
@@ -943,8 +947,10 @@ public class NsdService extends INsdManager.Stub {
                 clientId = mClientIds.keyAt(i);
                 globalId = mClientIds.valueAt(i);
                 mIdToClientInfoMap.remove(globalId);
-                if (DBG) Slog.d(TAG, "Terminating client-ID " + clientId +
-                        " global-ID " + globalId + " type " + mClientRequests.get(clientId));
+                if (DBG) {
+                    Log.d(TAG, "Terminating client-ID " + clientId
+                            + " global-ID " + globalId + " type " + mClientRequests.get(clientId));
+                }
                 switch (mClientRequests.get(clientId)) {
                     case NsdManager.DISCOVER_SERVICES:
                         stopServiceDiscovery(globalId);

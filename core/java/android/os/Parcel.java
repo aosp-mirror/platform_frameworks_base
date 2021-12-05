@@ -846,6 +846,19 @@ public final class Parcel {
     }
 
     /**
+     * Verify there are no bytes left to be read on the Parcel.
+     *
+     * @throws BadParcelableException If the current position hasn't reached the end of the Parcel.
+     * When used over binder, this exception should propagate to the caller.
+     */
+    public void enforceNoDataAvail() {
+        final int n = dataAvail();
+        if (n > 0) {
+            throw new BadParcelableException("Parcel data not fully consumed, unread size: " + n);
+        }
+    }
+
+    /**
      * Writes the work source uid to the request headers.
      *
      * <p>It requires the headers to have been written/read already to replace the work source.
@@ -3646,26 +3659,58 @@ public final class Parcel {
      * list was {@code null}, {@code list} is cleared.
      *
      * @see #writeParcelableList(List, int)
+     *
+     * @deprecated Use the type-safer version {@link #readParcelableList(List, ClassLoader, Class)}
+     *      starting from Android {@link Build.VERSION_CODES#TIRAMISU}. Also consider changing the
+     *      format to use {@link #readTypedList(List, Parcelable.Creator)} if possible (eg. if the
+     *      items' class is final) since this is also more performant. Note that changing to the
+     *      latter also requires changing the writes.
      */
+    @Deprecated
     @NonNull
     public final <T extends Parcelable> List<T> readParcelableList(@NonNull List<T> list,
             @Nullable ClassLoader cl) {
-        final int N = readInt();
-        if (N == -1) {
+        return readParcelableListInternal(list, cl, /*clazz*/ null);
+    }
+
+    /**
+     * Same as {@link #readParcelableList(List, ClassLoader)} but accepts {@code clazz} parameter as
+     * the type required for each item.
+     *
+     * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
+     * is not an instance of that class or any of its children classes or there was an error
+     * trying to instantiate an element.
+     */
+    @NonNull
+    public <T> List<T> readParcelableList(@NonNull List<T> list,
+            @Nullable ClassLoader cl, @NonNull Class<T> clazz) {
+        Objects.requireNonNull(list);
+        Objects.requireNonNull(clazz);
+        return readParcelableListInternal(list, cl, clazz);
+    }
+
+    /**
+     * @param clazz The type of the object expected or {@code null} for performing no checks.
+     */
+    @NonNull
+    private <T> List<T> readParcelableListInternal(@NonNull List<T> list,
+            @Nullable ClassLoader cl, @Nullable Class<T> clazz) {
+        final int n = readInt();
+        if (n == -1) {
             list.clear();
             return list;
         }
 
-        final int M = list.size();
+        final int m = list.size();
         int i = 0;
-        for (; i < M && i < N; i++) {
-            list.set(i, (T) readParcelable(cl));
+        for (; i < m && i < n; i++) {
+            list.set(i, (T) readParcelableInternal(cl, clazz));
         }
-        for (; i<N; i++) {
-            list.add((T) readParcelable(cl));
+        for (; i < n; i++) {
+            list.add((T) readParcelableInternal(cl, clazz));
         }
-        for (; i<M; i++) {
-            list.remove(N);
+        for (; i < m; i++) {
+            list.remove(n);
         }
         return list;
     }
