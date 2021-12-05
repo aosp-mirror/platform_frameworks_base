@@ -5506,4 +5506,10 @@
     <string name="config_work_badge_path_24" translatable="false">
         M20,6h-4L16,4c0,-1.11 -0.89,-2 -2,-2h-4c-1.11,0 -2,0.89 -2,2v2L4,6c-1.11,0 -1.99,0.89 -1.99,2L2,19c0,1.11 0.89,2 2,2h16c1.11,0 2,-0.89 2,-2L22,8c0,-1.11 -0.89,-2 -2,-2zM14,6h-4L10,4h4v2z
     </string>
+
+    <!-- GNSS configurations to override carrier config. Empty by default-->
+    <string-array name="config_gnssParameters" translatable="false">
+        <!-- Add configurations here, example: -->
+        <!-- <item>SUPL_HOST=supl.google.com</item> -->
+    </string-array>
 </resources>

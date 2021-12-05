@@ -52,7 +52,7 @@ import java.util.concurrent.Executor;
  * </ul>
  *
  * @deprecated No longer functional on {@link android.os.Build.VERSION_CODES#TIRAMISU} and above.
- * See https://developer.android.com/guide/topics/connectivity/wifi-suggest for
+ * See <a href="{@docRoot}guide/topics/connectivity/wifi-suggest">Wi-Fi Suggestion API</a> for
  * alternative APIs to suggest/configure Wi-Fi networks.
  * @hide
  */
