@@ -335,7 +335,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                         () -> mSplitLayoutHandler.onSnappedToDismiss(true /* bottomOrRight */));
                 break;
             default:
-                flingDividePosition(currentPosition, snapTarget.position, null);
+                flingDividePosition(currentPosition, snapTarget.position,
+                        () -> setDividePosition(snapTarget.position));
                 break;
         }
     }
@@ -381,7 +382,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                setDividePosition(to);
                 if (flingFinishedCallback != null) {
                     flingFinishedCallback.run();
                 }
