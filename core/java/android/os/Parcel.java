@@ -4343,9 +4343,16 @@ public final class Parcel {
      * The given class loader will be used to load any enclosed
      * Parcelables.
      * @return the Parcelable array, or null if the array is null
+     *
+     * @deprecated Use the type-safer version {@link #readParcelableArray(ClassLoader, Class)}
+     *      starting from Android {@link Build.VERSION_CODES#TIRAMISU}. Also consider changing the
+     *      format to use {@link #createTypedArray(Parcelable.Creator)} if possible (eg. if the
+     *      items' class is final) since this is also more performant. Note that changing to the
+     *      latter also requires changing the writes.
      */
+    @Deprecated
     @Nullable
-    public final Parcelable[] readParcelableArray(@Nullable ClassLoader loader) {
+    public Parcelable[] readParcelableArray(@Nullable ClassLoader loader) {
         int N = readInt();
         if (N < 0) {
             return null;
