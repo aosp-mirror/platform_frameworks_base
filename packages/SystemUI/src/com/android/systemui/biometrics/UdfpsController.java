@@ -103,6 +103,7 @@ import kotlin.Unit;
 public class UdfpsController implements DozeReceiver {
     private static final String TAG = "UdfpsController";
     private static final long AOD_INTERRUPT_TIMEOUT_MILLIS = 1000;
+    private static final long DEFAULT_VIBRATION_DURATION = 1000; // milliseconds
 
     // Minimum required delay between consecutive touch logs in milliseconds.
     private static final long MIN_TOUCH_LOG_INTERVAL = 50;
@@ -164,8 +165,7 @@ public class UdfpsController implements DozeReceiver {
     private boolean mAttemptedToDismissKeyguard;
     private Set<Callback> mCallbacks = new HashSet<>();
 
-    // by default, use low tick
-    private int mPrimitiveTick = VibrationEffect.Composition.PRIMITIVE_LOW_TICK;
+    private static final int DEFAULT_TICK = VibrationEffect.Composition.PRIMITIVE_LOW_TICK;
     private final VibrationEffect mTick;
 
     @VisibleForTesting
@@ -327,10 +327,21 @@ public class UdfpsController implements DozeReceiver {
         }
     }
 
-    private static float computePointerSpeed(@NonNull VelocityTracker tracker, int pointerId) {
+    /**
+     * Calculate the pointer speed given a velocity tracker and the pointer id.
+     * This assumes that the velocity tracker has already been passed all relevant motion events.
+     */
+    public static float computePointerSpeed(@NonNull VelocityTracker tracker, int pointerId) {
         final float vx = tracker.getXVelocity(pointerId);
         final float vy = tracker.getYVelocity(pointerId);
         return (float) Math.sqrt(Math.pow(vx, 2.0) + Math.pow(vy, 2.0));
+    }
+
+    /**
+     * Whether the velocity exceeds the acceptable UDFPS debouncing threshold.
+     */
+    public static boolean exceedsVelocityThreshold(float velocity) {
+        return velocity > 750f;
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -467,7 +478,7 @@ public class UdfpsController implements DozeReceiver {
                         final float v = computePointerSpeed(mVelocityTracker, mActivePointerId);
                         final float minor = event.getTouchMinor(idx);
                         final float major = event.getTouchMajor(idx);
-                        final boolean exceedsVelocityThreshold = v > 750f;
+                        final boolean exceedsVelocityThreshold = exceedsVelocityThreshold(v);
                         final String touchInfo = String.format(
                                 "minor: %.1f, major: %.1f, v: %.1f, exceedsVelocityThreshold: %b",
                                 minor, major, v, exceedsVelocityThreshold);
@@ -575,7 +586,7 @@ public class UdfpsController implements DozeReceiver {
         mConfigurationController = configurationController;
         mSystemClock = systemClock;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
-        mTick = lowTick();
+        mTick = lowTick(context, false /* useShortRampup */, DEFAULT_VIBRATION_DURATION);
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -610,32 +621,43 @@ public class UdfpsController implements DozeReceiver {
         udfpsHapticsSimulator.setUdfpsController(this);
     }
 
-    private VibrationEffect lowTick() {
-        boolean useLowTickDefault = mContext.getResources()
+    /**
+     * Returns the continuous low tick effect that starts playing on the udfps finger-down event.
+     */
+    public static VibrationEffect lowTick(
+            Context context,
+            boolean useShortRampUp,
+            long duration
+    ) {
+        boolean useLowTickDefault = context.getResources()
                 .getBoolean(R.bool.config_udfpsUseLowTick);
+        int primitiveTick = DEFAULT_TICK;
         if (Settings.Global.getFloat(
-                mContext.getContentResolver(),
+                context.getContentResolver(),
                 "tick-low", useLowTickDefault ? 1 : 0) == 0) {
-            mPrimitiveTick = VibrationEffect.Composition.PRIMITIVE_TICK;
+            primitiveTick = VibrationEffect.Composition.PRIMITIVE_TICK;
         }
         float tickIntensity = Settings.Global.getFloat(
-                mContext.getContentResolver(),
+                context.getContentResolver(),
                 "tick-intensity",
-                mContext.getResources().getFloat(R.dimen.config_udfpsTickIntensity));
+                context.getResources().getFloat(R.dimen.config_udfpsTickIntensity));
         int tickDelay = Settings.Global.getInt(
-                mContext.getContentResolver(),
+                context.getContentResolver(),
                 "tick-delay",
-                mContext.getResources().getInteger(R.integer.config_udfpsTickDelay));
+                context.getResources().getInteger(R.integer.config_udfpsTickDelay));
 
         VibrationEffect.Composition composition = VibrationEffect.startComposition();
-        composition.addPrimitive(mPrimitiveTick, tickIntensity, 0);
-        int primitives = 1000 / tickDelay;
+        composition.addPrimitive(primitiveTick, tickIntensity, 0);
+        int primitives = (int) (duration / tickDelay);
         float[] rampUp = new float[]{.48f, .58f, .69f, .83f};
+        if (useShortRampUp) {
+            rampUp = new float[]{.5f, .7f};
+        }
         for (int i = 0; i < rampUp.length; i++) {
-            composition.addPrimitive(mPrimitiveTick, tickIntensity * rampUp[i], tickDelay);
+            composition.addPrimitive(primitiveTick, tickIntensity * rampUp[i], tickDelay);
         }
         for (int i = rampUp.length; i < primitives; i++) {
-            composition.addPrimitive(mPrimitiveTick, tickIntensity, tickDelay);
+            composition.addPrimitive(primitiveTick, tickIntensity, tickDelay);
         }
         return composition.compose();
     }
