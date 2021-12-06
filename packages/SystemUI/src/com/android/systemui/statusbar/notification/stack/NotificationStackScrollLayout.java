@@ -120,6 +120,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -727,36 +728,57 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
 
         if (DEBUG) {
-            int y = mTopPadding;
-            mDebugPaint.setColor(Color.RED);
-            canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
-
-            y = getLayoutHeight();
-            mDebugPaint.setColor(Color.YELLOW);
-            canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
-
-            y = (int) mMaxLayoutHeight;
-            mDebugPaint.setColor(Color.MAGENTA);
-            canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
-
-            if (mKeyguardBottomPadding >= 0) {
-                y = getHeight() - (int) mKeyguardBottomPadding;
-                mDebugPaint.setColor(Color.GRAY);
-                canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
-            }
-
-            y = getHeight() - getEmptyBottomMargin();
-            mDebugPaint.setColor(Color.GREEN);
-            canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
-
-            y = (int) (mAmbientState.getStackY());
-            mDebugPaint.setColor(Color.CYAN);
-            canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
-
-            y = (int) (mAmbientState.getStackY() + mAmbientState.getStackHeight());
-            mDebugPaint.setColor(Color.BLUE);
-            canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
+            onDrawDebug(canvas);
         }
+    }
+
+    /** Used to track the Y positions that were already used to draw debug text labels. */
+    private static final Set<Integer> DEBUG_TEXT_USED_Y_POSITIONS =
+            DEBUG ? new HashSet<>() : Collections.emptySet();
+
+    private void onDrawDebug(Canvas canvas) {
+        DEBUG_TEXT_USED_Y_POSITIONS.clear();
+
+        int y = mTopPadding;
+        drawDebugInfo(canvas, y, Color.RED, /* label= */ "mTopPadding");
+
+        y = getLayoutHeight();
+        drawDebugInfo(canvas, y, Color.YELLOW, /* label= */ "getLayoutHeight()");
+
+        y = (int) mMaxLayoutHeight;
+        drawDebugInfo(canvas, y, Color.MAGENTA, /* label= */ "mMaxLayoutHeight");
+
+        if (mKeyguardBottomPadding >= 0) {
+            y = getHeight() - (int) mKeyguardBottomPadding;
+            drawDebugInfo(canvas, y, Color.GRAY,
+                    /* label= */ "getHeight() - mKeyguardBottomPadding");
+        }
+
+        y = getHeight() - getEmptyBottomMargin();
+        drawDebugInfo(canvas, y, Color.GREEN, /* label= */ "getHeight() - getEmptyBottomMargin()");
+
+        y = (int) (mAmbientState.getStackY());
+        drawDebugInfo(canvas, y, Color.CYAN, /* label= */ "mAmbientState.getStackY()");
+
+        y = (int) (mAmbientState.getStackY() + mAmbientState.getStackHeight());
+        drawDebugInfo(canvas, y, Color.BLUE,
+                /* label= */ "mAmbientState.getStackY() + mAmbientState.getStackHeight()");
+    }
+
+    private void drawDebugInfo(Canvas canvas, int y, int color, String label) {
+        mDebugPaint.setColor(color);
+        canvas.drawLine(/* startX= */ 0, /* startY= */ y, /* stopX= */ getWidth(), /* stopY= */ y,
+                mDebugPaint);
+        canvas.drawText(label, /* x= */ 0, /* y= */ computeDebugYTextPosition(y), mDebugPaint);
+    }
+
+    private int computeDebugYTextPosition(int lineY) {
+        int textY = lineY;
+        while (DEBUG_TEXT_USED_Y_POSITIONS.contains(textY)) {
+            textY = (int) (textY + mDebugPaint.getTextSize());
+        }
+        DEBUG_TEXT_USED_Y_POSITIONS.add(textY);
+        return textY;
     }
 
     @ShadeViewRefactor(RefactorComponent.DECORATOR)
