@@ -498,6 +498,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
      */
     public static class Lifecycle extends SystemService {
         private GameManagerService mService;
+        @Nullable
+        private GameServiceController mGameServiceController;
 
         public Lifecycle(Context context) {
             super(context);
@@ -505,32 +507,49 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
         @Override
         public void onStart() {
-            mService = new GameManagerService(getContext());
+            final Context context = getContext();
+            mService = new GameManagerService(context);
             publishBinderService(Context.GAME_SERVICE, mService);
             mService.registerDeviceConfigListener();
             mService.registerPackageReceiver();
+
+            if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_GAME_SERVICE)) {
+                mGameServiceController = new GameServiceController(context);
+            }
         }
 
         @Override
         public void onBootPhase(int phase) {
             if (phase == PHASE_BOOT_COMPLETED) {
                 mService.onBootCompleted();
+                if (mGameServiceController != null) {
+                    mGameServiceController.onBootComplete();
+                }
             }
         }
 
         @Override
         public void onUserStarting(@NonNull TargetUser user) {
             mService.onUserStarting(user.getUserIdentifier());
+            if (mGameServiceController != null) {
+                mGameServiceController.notifyUserStarted(user);
+            }
         }
 
         @Override
         public void onUserStopping(@NonNull TargetUser user) {
             mService.onUserStopping(user.getUserIdentifier());
+            if (mGameServiceController != null) {
+                mGameServiceController.notifyUserStopped(user);
+            }
         }
 
         @Override
         public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
             mService.onUserSwitching(from, to.getUserIdentifier());
+            if (mGameServiceController != null) {
+                mGameServiceController.notifyNewForegroundUser(to);
+            }
         }
     }
 

@@ -2110,6 +2110,8 @@
     <string name="config_systemWifiCoexManager" translatable="false"></string>
     <!-- The name of the package that will hold the wellbeing role. -->
     <string name="config_systemWellbeing" translatable="false"></string>
+    <!-- The name of the package that will hold the game service role. -->
+    <string name="config_systemGameService" translatable="false"></string>
     <!-- The name of the package that will hold the television notification handler role -->
     <string name="config_systemTelevisionNotificationHandler" translatable="false"></string>
     <!-- The name of the package that will hold the system activity recognizer role. -->

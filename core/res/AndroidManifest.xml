@@ -3922,6 +3922,15 @@
     <permission android:name="android.permission.BIND_WALLPAPER"
         android:protectionLevel="signature|privileged" />
 
+
+    <!-- Must be required by a game service to ensure that only the
+         system can bind to it.
+         <p>Protection level: signature
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_GAME_SERVICE"
+                android:protectionLevel="signature" />
+
     <!-- Must be required by a {@link android.service.voice.VoiceInteractionService},
          to ensure that only the system can bind to it.
          <p>Protection level: signature
