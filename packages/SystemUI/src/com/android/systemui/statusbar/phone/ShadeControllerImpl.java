@@ -218,10 +218,6 @@ public class ShadeControllerImpl implements ShadeController {
         return getStatusBar().getNotificationShadeWindowView();
     }
 
-    protected PhoneStatusBarView getStatusBarView() {
-        return (PhoneStatusBarView) getStatusBar().getStatusBarView();
-    }
-
     private NotificationPanelViewController getNotificationPanelViewController() {
         return getStatusBar().getPanelController();
     }
