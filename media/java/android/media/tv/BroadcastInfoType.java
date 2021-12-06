@@ -16,4 +16,17 @@
 
 package android.media.tv;
 
-parcelable TsRequest;
+/** @hide */
+public final class BroadcastInfoType {
+    // todo: change const declaration to intdef in TvInputManager
+    public static final int TS = 1;
+    public static final int TABLE = 2;
+    public static final int SECTION = 3;
+    public static final int PES = 4;
+    public static final int STREAM_EVENT = 5;
+    public static final int DSMCC = 6;
+    public static final int TV_PROPRIETARY_FUNCTION = 7;
+
+    private BroadcastInfoType() {
+    }
+}
