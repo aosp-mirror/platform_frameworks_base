@@ -485,7 +485,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
 
     private void showBouncer() {
         if (mMode == MODE_SHOW_BOUNCER) {
-            mKeyguardViewController.showBouncer(false);
+            mKeyguardViewController.showBouncer(true);
         }
         mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */,
                 false /* delayed */, BIOMETRIC_COLLAPSE_SPEEDUP_FACTOR);
