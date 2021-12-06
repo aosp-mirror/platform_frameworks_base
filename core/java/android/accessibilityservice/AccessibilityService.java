@@ -16,6 +16,7 @@
 
 package android.accessibilityservice;
 
+import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 
 import android.accessibilityservice.GestureDescription.MotionEventGenerator;
@@ -1359,6 +1360,32 @@ public abstract class AccessibilityService extends Service {
         }
 
         /**
+         * Gets the {@link MagnificationConfig} of the controlling magnifier on the display.
+         * <p>
+         * <strong>Note:</strong> If the service is not yet connected (e.g.
+         * {@link AccessibilityService#onServiceConnected()} has not yet been
+         * called) or the service has been disconnected, this method will
+         * return null.
+         * </p>
+         *
+         * @return the magnification config that the service controls
+         */
+        public @Nullable MagnificationConfig getMagnificationConfig() {
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance(mService).getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    return connection.getMagnificationConfig(mDisplayId);
+                } catch (RemoteException re) {
+                    Log.w(LOG_TAG, "Failed to obtain magnification config", re);
+                    re.rethrowFromSystemServer();
+                }
+            }
+            return null;
+        }
+
+        /**
          * Returns the current magnification scale.
          * <p>
          * <strong>Note:</strong> If the service is not yet connected (e.g.
@@ -1505,6 +1532,37 @@ public abstract class AccessibilityService extends Service {
         }
 
         /**
+         * Sets the {@link MagnificationConfig}. The service controls the magnification by
+         * setting the config.
+         * <p>
+         * <strong>Note:</strong> If the service is not yet connected (e.g.
+         * {@link AccessibilityService#onServiceConnected()} has not yet been
+         * called) or the service has been disconnected, this method will have
+         * no effect and return {@code false}.
+         * </p>
+         *
+         * @param config the magnification config
+         * @param animate {@code true} to animate from the current spec or
+         *                {@code false} to set the spec immediately
+         * @return {@code true} on success, {@code false} on failure
+         */
+        public boolean setMagnificationConfig(@NonNull MagnificationConfig config,
+                boolean animate) {
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance(mService).getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    return connection.setMagnificationConfig(mDisplayId, config, animate);
+                } catch (RemoteException re) {
+                    Log.w(LOG_TAG, "Failed to set magnification config", re);
+                    re.rethrowFromSystemServer();
+                }
+            }
+            return false;
+        }
+
+        /**
          * Sets the magnification scale.
          * <p>
          * <strong>Note:</strong> If the service is not yet connected (e.g.
@@ -1523,8 +1581,10 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.setMagnificationScaleAndCenter(mDisplayId,
-                            scale, Float.NaN, Float.NaN, animate);
+                    final MagnificationConfig config = new MagnificationConfig.Builder()
+                            .setMode(MAGNIFICATION_MODE_FULLSCREEN)
+                            .setScale(scale).build();
+                    return connection.setMagnificationConfig(mDisplayId, config, animate);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to set scale", re);
                     re.rethrowFromSystemServer();
@@ -1555,8 +1615,10 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.setMagnificationScaleAndCenter(mDisplayId,
-                            Float.NaN, centerX, centerY, animate);
+                    final MagnificationConfig config = new MagnificationConfig.Builder()
+                            .setMode(MAGNIFICATION_MODE_FULLSCREEN)
+                            .setCenterX(centerX).setCenterY(centerY).build();
+                    return connection.setMagnificationConfig(mDisplayId, config, animate);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to set center", re);
                     re.rethrowFromSystemServer();
