@@ -353,6 +353,7 @@ package android {
     field public static final int config_showDefaultAssistant = 17891329; // 0x1110001
     field public static final int config_showDefaultEmergency = 17891330; // 0x1110002
     field public static final int config_showDefaultHome = 17891331; // 0x1110003
+    field public static final int config_systemCaptionsServiceCallsEnabled;
   }
 
   public static final class R.color {
