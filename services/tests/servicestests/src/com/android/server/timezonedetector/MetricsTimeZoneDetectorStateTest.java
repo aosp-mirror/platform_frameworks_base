@@ -143,6 +143,8 @@ public class MetricsTimeZoneDetectorStateTest {
                 metricsTimeZoneDetectorState.isTelephonyDetectionSupported());
         assertEquals(configurationInternal.isGeoDetectionSupported(),
                 metricsTimeZoneDetectorState.isGeoDetectionSupported());
+        assertEquals(configurationInternal.isTelephonyFallbackSupported(),
+                metricsTimeZoneDetectorState.isTelephonyTimeZoneFallbackSupported());
         assertEquals(configurationInternal.getGeoDetectionRunInBackgroundEnabled(),
                 metricsTimeZoneDetectorState.getGeoDetectionRunInBackgroundEnabled());
         assertEquals(configurationInternal.isEnhancedMetricsCollectionEnabled(),
@@ -163,6 +165,7 @@ public class MetricsTimeZoneDetectorStateTest {
                 .setUserConfigAllowed(true)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
+                .setTelephonyFallbackSupported(false)
                 .setGeoDetectionRunInBackgroundEnabled(false)
                 .setEnhancedMetricsCollectionEnabled(enhancedMetricsCollectionEnabled)
                 .setAutoDetectionEnabledSetting(true)
