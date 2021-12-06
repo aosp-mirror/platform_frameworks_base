@@ -12482,13 +12482,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         @Override
-        public @Nullable ComponentName getProfileOwnerOrDeviceOwnerSupervisionComponent(
-                @NonNull UserHandle userHandle) {
-            return DevicePolicyManagerService.this.getProfileOwnerOrDeviceOwnerSupervisionComponent(
-                    userHandle);
-        }
-
-        @Override
         public boolean isActiveAdminWithPolicy(int uid, int reqPolicy) {
             synchronized (getLockObject()) {
                 return getActiveAdminWithPolicyForUidLocked(null, reqPolicy, uid) != null;
