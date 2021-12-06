@@ -90,7 +90,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private static final int sLockIconRadiusPx = (int) (sDefaultDensity * 36);
     private static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH);
-    private static final long LONG_PRESS_TIMEOUT = 150L; // milliseconds
+    private static final long LONG_PRESS_TIMEOUT = 200L; // milliseconds
 
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final KeyguardViewController mKeyguardViewController;
@@ -683,6 +683,17 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         if (mOnGestureDetectedRunnable != null) {
             mOnGestureDetectedRunnable.run();
         }
+
+        if (mVibrator != null) {
+            // play device entry haptic (same as biometric success haptic)
+            mVibrator.vibrate(
+                    Process.myUid(),
+                    getContext().getOpPackageName(),
+                    UdfpsController.EFFECT_CLICK,
+                    "lock-icon-device-entry",
+                    TOUCH_VIBRATION_ATTRIBUTES);
+        }
+
         mKeyguardViewController.showBouncer(/* scrim */ true);
     }
 
