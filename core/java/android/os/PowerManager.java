@@ -2215,6 +2215,26 @@ public final class PowerManager {
     }
 
     /**
+     * Force Low Power Standby restrictions to be active.
+     * Does nothing if Low Power Standby is not supported.
+     *
+     * @see #isLowPowerStandbySupported()
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+            android.Manifest.permission.DEVICE_POWER
+    })
+    public void forceLowPowerStandbyActive(boolean active) {
+        try {
+            mService.forceLowPowerStandbyActive(active);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return whether the given application package name is on the device's power allowlist.
      * Apps can be placed on the allowlist through the settings UI invoked by
      * {@link android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}.

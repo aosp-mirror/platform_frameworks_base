@@ -68,6 +68,7 @@ interface IPowerManager
     boolean isLowPowerStandbySupported();
     boolean isLowPowerStandbyEnabled();
     void setLowPowerStandbyEnabled(boolean enabled);
+    void forceLowPowerStandbyActive(boolean active);
 
     @UnsupportedAppUsage
     void reboot(boolean confirm, String reason, boolean wait);

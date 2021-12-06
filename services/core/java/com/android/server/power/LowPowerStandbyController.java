@@ -149,6 +149,10 @@ public final class LowPowerStandbyController {
     @GuardedBy("mLock")
     private boolean mIdleSinceNonInteractive;
 
+    /** Force Low Power Standby to be active. */
+    @GuardedBy("mLock")
+    private boolean mForceActive;
+
     /** Functional interface for providing time. */
     @VisibleForTesting
     interface Clock {
@@ -211,12 +215,14 @@ public final class LowPowerStandbyController {
                 (now - mLastInteractiveTimeElapsed) >= mStandbyTimeoutConfig;
         final boolean maintenanceMode = mIdleSinceNonInteractive && !mIsDeviceIdle;
         final boolean newActive =
-                mIsEnabled && !mIsInteractive && standbyTimeoutExpired && !maintenanceMode;
+                mForceActive || (mIsEnabled && !mIsInteractive && standbyTimeoutExpired
+                        && !maintenanceMode);
         if (DEBUG) {
             Slog.d(TAG, "updateActiveLocked: mIsEnabled=" + mIsEnabled + ", mIsInteractive="
                     + mIsInteractive + ", standbyTimeoutExpired=" + standbyTimeoutExpired
                     + ", mIdleSinceNonInteractive=" + mIdleSinceNonInteractive + ", mIsDeviceIdle="
-                    + mIsDeviceIdle + ", mIsActive=" + mIsActive + ", newActive=" + newActive);
+                    + mIsDeviceIdle + ", mForceActive=" + mForceActive + ", mIsActive=" + mIsActive
+                    + ", newActive=" + newActive);
         }
         if (mIsActive != newActive) {
             mIsActive = newActive;
@@ -410,6 +416,13 @@ public final class LowPowerStandbyController {
         }
     }
 
+    void forceActive(boolean active) {
+        synchronized (mLock) {
+            mForceActive = active;
+            updateActiveLocked();
+        }
+    }
+
     void dump(PrintWriter pw) {
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
 
@@ -428,7 +441,7 @@ public final class LowPowerStandbyController {
             ipw.print("mStandbyTimeoutConfig=");
             ipw.println(mStandbyTimeoutConfig);
 
-            if (mIsEnabled) {
+            if (mIsActive || mIsEnabled) {
                 ipw.print("mIsInteractive=");
                 ipw.println(mIsInteractive);
                 ipw.print("mLastInteractiveTime=");

@@ -338,6 +338,24 @@ public class LowPowerStandbyControllerTest {
         verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[] {});
     }
 
+    @Test
+    public void testForceActive() throws Exception {
+        setLowPowerStandbySupportedConfig(false);
+        mController.systemReady();
+
+        mController.forceActive(true);
+        mTestLooper.dispatchAll();
+
+        assertThat(mController.isActive()).isTrue();
+        verify(mPowerManagerInternalMock).setLowPowerStandbyActive(true);
+
+        mController.forceActive(false);
+        mTestLooper.dispatchAll();
+
+        assertThat(mController.isActive()).isFalse();
+        verify(mPowerManagerInternalMock).setLowPowerStandbyActive(false);
+    }
+
     private void setLowPowerStandbySupportedConfig(boolean supported) {
         when(mResourcesSpy.getBoolean(
                 com.android.internal.R.bool.config_lowPowerStandbySupported))
