@@ -119,6 +119,31 @@ public final class GameManager {
     }
 
     /**
+     * Returns the {@link GameModeInfo} associated with the game associated with
+     * the given {@code packageName}. If the given package is not a game, {@code null} is
+     * always returned.
+     * <p>
+     * An application can use <code>android:isGame="true"</code> or
+     * <code>android:appCategory="game"</code> to indicate that the application is a game.
+     * If the manifest doesn't define a category, the category can also be
+     * provided by the installer via
+     * {@link android.content.pm.PackageManager#setApplicationCategoryHint(String, int)}.
+     * <p>
+     *
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public @Nullable GameModeInfo getGameModeInfo(@NonNull String packageName) {
+        try {
+            return mService.getGameModeInfo(packageName, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Sets the game mode for the given package.
      * <p>
      * The caller must have {@link android.Manifest.permission#MANAGE_GAME_MODE}.
