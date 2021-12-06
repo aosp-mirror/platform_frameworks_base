@@ -5242,11 +5242,6 @@ public class SettingsProvider extends ContentProvider {
                     initGlobalSettingsDefaultValForWearLocked(
                             Global.Wearable.ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS, 0L);
                     initGlobalSettingsDefaultValForWearLocked(
-                            Global.Wearable.UPDOWN_GESTURES_ENABLED,
-                            getContext()
-                                    .getResources()
-                                    .getBoolean(R.bool.def_wearable_upDownGesturesEnabled));
-                    initGlobalSettingsDefaultValForWearLocked(
                             Global.Wearable.SETUP_SKIPPED, Global.Wearable.SETUP_SKIPPED_UNKNOWN);
                     initGlobalSettingsDefaultValForWearLocked(
                             Global.Wearable.LAST_CALL_FORWARD_ACTION,

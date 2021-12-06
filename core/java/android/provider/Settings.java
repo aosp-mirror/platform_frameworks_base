@@ -16670,12 +16670,6 @@ public final class Settings {
                     "alt_bypass_wifi_requirement_time_millis";
 
             /**
-             * Whether or not Up/Down Gestures are enabled.
-             * @hide
-             */
-            public static final String UPDOWN_GESTURES_ENABLED = "updown_gestures_enabled";
-
-            /**
              * Whether the setup was skipped.
              * @hide
              */

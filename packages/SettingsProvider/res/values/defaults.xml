@@ -272,9 +272,6 @@
 
     <integer name="def_wearable_offChargerWifiUsageLimitMinutes">120</integer>
 
-    <!-- Default enabled state of accelerometer-based up/down gestures. -->
-    <bool name="def_wearable_upDownGesturesEnabled">false</bool>
-
     <!-- Whether to enable mute when off body by default. -->
     <bool name="def_wearable_muteWhenOffBodyEnabled">true</bool>
 
