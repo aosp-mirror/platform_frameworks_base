@@ -47,6 +47,7 @@ final class TestSupport {
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
                 .setTelephonyFallbackSupported(false)
+                .setGeoDetectionRunInBackgroundEnabled(false)
                 .setEnhancedMetricsCollectionEnabled(false)
                 .setAutoDetectionEnabledSetting(true)
                 .setLocationEnabledSetting(true)

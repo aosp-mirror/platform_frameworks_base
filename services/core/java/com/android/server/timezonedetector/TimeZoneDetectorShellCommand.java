@@ -31,6 +31,7 @@ import static android.provider.DeviceConfig.NAMESPACE_SYSTEM_TIME;
 
 import static com.android.server.timedetector.ServerFlags.KEY_ENHANCED_METRICS_COLLECTION_ENABLED;
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED;
+import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_RUN_IN_BACKGROUND_ENABLED;
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT;
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE;
 import static com.android.server.timedetector.ServerFlags.KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED;
@@ -237,6 +238,9 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         pw.printf("    Only observed if the geolocation time zone detection feature is enabled in"
                 + " config.\n");
         pw.printf("    Set this to false to disable the feature.\n");
+        pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_DETECTION_RUN_IN_BACKGROUND_ENABLED);
+        pw.printf("    Runs geolocation time zone detection even when it not enabled by the user."
+                + " The result is not used to set the device's time zone [*]\n");
         pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT);
         pw.printf("    Only used if the device does not have an explicit 'geolocation time zone"
                 + " detection enabled' setting stored [*].\n");

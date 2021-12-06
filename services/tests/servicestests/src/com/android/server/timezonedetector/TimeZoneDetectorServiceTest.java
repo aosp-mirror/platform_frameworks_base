@@ -372,13 +372,14 @@ public class TimeZoneDetectorServiceTest {
     }
 
     private static ConfigurationInternal createConfigurationInternal(boolean autoDetectionEnabled) {
-        // Default geo detection settings from the auto detection setting - they are not important
-        // to the tests.
+        // Default geo detection settings from auto detection settings - they are not important to
+        // the tests.
         final boolean geoDetectionEnabled = autoDetectionEnabled;
         return new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
                 .setTelephonyFallbackSupported(false)
+                .setGeoDetectionRunInBackgroundEnabled(false)
                 .setEnhancedMetricsCollectionEnabled(false)
                 .setUserConfigAllowed(true)
                 .setAutoDetectionEnabledSetting(autoDetectionEnabled)
