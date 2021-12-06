@@ -531,6 +531,36 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onAccessPointsChanged_oneCarrierWifiAndFourOthers_callbackCutMore() {
+        reset(mInternetDialogCallback);
+        fakeAirplaneModeEnabled(true);
+        when(mMergedCarrierEntry.isDefaultNetwork()).thenReturn(true);
+        mAccessPoints.clear();
+        mAccessPoints.add(mWifiEntry1);
+        mAccessPoints.add(mWifiEntry2);
+        mAccessPoints.add(mWifiEntry3);
+        mAccessPoints.add(mWifiEntry4);
+
+        mInternetDialogController.onAccessPointsChanged(mAccessPoints);
+
+        mWifiEntries.clear();
+        mWifiEntries.add(mWifiEntry1);
+        mWifiEntries.add(mWifiEntry2);
+        mWifiEntries.add(mWifiEntry3);
+        verify(mInternetDialogCallback)
+                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+
+        // Turn off airplane mode to has carrier WiFi, then Wi-Fi entries will keep the same.
+        reset(mInternetDialogCallback);
+        fakeAirplaneModeEnabled(false);
+
+        mInternetDialogController.onAccessPointsChanged(mAccessPoints);
+
+        verify(mInternetDialogCallback)
+                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+    }
+
+    @Test
     public void onAccessPointsChanged_fourWifiEntries_callbackCutMore() {
         reset(mInternetDialogCallback);
         fakeAirplaneModeEnabled(true);

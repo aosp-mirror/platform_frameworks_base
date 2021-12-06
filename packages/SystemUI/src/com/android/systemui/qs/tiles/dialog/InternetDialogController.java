@@ -888,7 +888,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         if (mHasEthernet) {
             count -= 1;
         }
-        if (hasActiveSubId()) {
+        if (hasActiveSubId() || isCarrierNetworkActive()) {
             count -= 1;
         }
         if (count > accessPoints.size()) {
