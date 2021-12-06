@@ -25,6 +25,7 @@ import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
+import com.android.systemui.statusbar.policy.Clock;
 
 import javax.inject.Named;
 
@@ -36,6 +37,7 @@ import dagger.Provides;
 public interface StatusBarFragmentModule {
 
     String LIGHTS_OUT_NOTIF_VIEW = "lights_out_notif_view";
+    String OPERATOR_NAME_VIEW = "operator_name_view";
 
     /** */
     @Provides
@@ -59,6 +61,21 @@ public interface StatusBarFragmentModule {
     @Named(LIGHTS_OUT_NOTIF_VIEW)
     static View provideLightsOutNotifView(@RootView PhoneStatusBarView view) {
         return view.findViewById(R.id.notification_lights_out);
+    }
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
+    @Named(OPERATOR_NAME_VIEW)
+    static View provideOperatorNameView(@RootView PhoneStatusBarView view) {
+        return view.findViewById(R.id.operator_name);
+    }
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
+    static Clock provideClock(@RootView PhoneStatusBarView view) {
+        return view.findViewById(R.id.clock);
     }
 
     /** */

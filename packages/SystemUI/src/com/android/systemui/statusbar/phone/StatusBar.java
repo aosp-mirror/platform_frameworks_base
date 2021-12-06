@@ -146,6 +146,7 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.emergency.EmergencyGesture;
@@ -1549,7 +1550,7 @@ public class StatusBar extends CoreStartable implements
         mHeadsUpManager.addListener(mStatusBarComponent.getStatusBarHeadsUpChangeListener());
 
         // Listen for demo mode changes
-        mDemoModeController.addCallback(mStatusBarComponent.getStatusBarDemoMode());
+        mDemoModeController.addCallback(mDemoModeCallback);
 
         if (mCommandQueueCallbacks != null) {
             mCommandQueue.removeCallback(mCommandQueueCallbacks);
@@ -4430,4 +4431,14 @@ public class StatusBar extends CoreStartable implements
                     return mStartingSurfaceOptional.get().getBackgroundColor(task);
                 }
             };
+
+    private final DemoMode mDemoModeCallback = new DemoMode() {
+        @Override
+        public void onDemoModeFinished() {
+            checkBarModes();
+        }
+
+        @Override
+        public void dispatchDemoCommand(String command, Bundle args) { }
+    };
 }
