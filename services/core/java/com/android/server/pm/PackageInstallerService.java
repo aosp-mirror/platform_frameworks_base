@@ -286,6 +286,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         synchronized (mSessions) {
             readSessionsLocked();
+            expireSessionsLocked();
 
             reconcileStagesLocked(StorageManager.UUID_PRIVATE_INTERNAL);
 
@@ -462,34 +463,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                             Slog.e(TAG, "Could not read session", e);
                             continue;
                         }
-
-                        final long age = System.currentTimeMillis() - session.createdMillis;
-                        final long timeSinceUpdate =
-                                System.currentTimeMillis() - session.getUpdatedMillis();
-                        final boolean valid;
-                        if (session.isStaged()) {
-                            if (timeSinceUpdate >= MAX_TIME_SINCE_UPDATE_MILLIS
-                                    && session.isStagedAndInTerminalState()) {
-                                valid = false;
-                            } else {
-                                valid = true;
-                            }
-                        } else if (age >= MAX_AGE_MILLIS) {
-                            Slog.w(TAG, "Abandoning old session created at "
-                                        + session.createdMillis);
-                            valid = false;
-                        } else {
-                            valid = true;
-                        }
-
-                        if (valid) {
-                            mSessions.put(session.sessionId, session);
-                        } else {
-                            // Since this is early during boot we don't send
-                            // any observer events about the session, but we
-                            // keep details around for dumpsys.
-                            addHistoricalSessionLocked(session);
-                        }
+                        mSessions.put(session.sessionId, session);
                         mAllocatedSessions.put(session.sessionId, true);
                     }
                 }
@@ -505,6 +479,44 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         for (int i = 0; i < mSessions.size(); ++i) {
             PackageInstallerSession session = mSessions.valueAt(i);
             session.onAfterSessionRead(mSessions);
+        }
+    }
+
+    @GuardedBy("mSessions")
+    private void expireSessionsLocked() {
+        SparseArray<PackageInstallerSession> tmp = mSessions.clone();
+        final int n = tmp.size();
+        for (int i = 0; i < n; ++i) {
+            PackageInstallerSession session = tmp.valueAt(i);
+            if (session.hasParentSessionId()) {
+                // Child sessions will be expired when handling parent sessions
+                continue;
+            }
+            final long age = System.currentTimeMillis() - session.createdMillis;
+            final long timeSinceUpdate = System.currentTimeMillis() - session.getUpdatedMillis();
+            final boolean valid;
+            if (session.isStaged()) {
+                valid = !session.isStagedAndInTerminalState()
+                        || timeSinceUpdate < MAX_TIME_SINCE_UPDATE_MILLIS;
+            } else if (age >= MAX_AGE_MILLIS) {
+                Slog.w(TAG, "Abandoning old session created at "
+                        + session.createdMillis);
+                valid = false;
+            } else {
+                valid = true;
+            }
+            if (!valid) {
+                // Remove expired sessions as well as child sessions if any
+                mSessions.remove(session.sessionId);
+                // Since this is early during boot we don't send
+                // any observer events about the session, but we
+                // keep details around for dumpsys.
+                addHistoricalSessionLocked(session);
+                for (PackageInstallerSession child : session.getChildSessions()) {
+                    mSessions.remove(child.sessionId);
+                    addHistoricalSessionLocked(child);
+                }
+            }
         }
     }
 
