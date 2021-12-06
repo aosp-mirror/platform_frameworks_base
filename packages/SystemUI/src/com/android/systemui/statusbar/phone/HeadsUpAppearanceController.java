@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.View;
 
@@ -59,9 +58,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     private final NotificationIconAreaController mNotificationIconAreaController;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotificationStackScrollLayoutController mStackScrollerController;
-    private final View mCenteredIconView;
-    private final View mClockView;
-    private final View mOperatorNameView;
+
     private final DarkIconDispatcher mDarkIconDispatcher;
     private final NotificationPanelViewController mNotificationPanelViewController;
     private final Consumer<ExpandableNotificationRow>
@@ -71,6 +68,11 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     private final StatusBarStateController mStatusBarStateController;
     private final CommandQueue mCommandQueue;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
+
+    private View mCenteredIconView;
+    private View mClockView;
+    private View mOperatorNameView;
+
     @VisibleForTesting
     float mExpandedHeight;
     @VisibleForTesting
@@ -85,7 +87,6 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
                 }
             };
     private boolean mAnimationsEnabled = true;
-    Point mPoint;
     private KeyguardStateController mKeyguardStateController;
 
     @Inject

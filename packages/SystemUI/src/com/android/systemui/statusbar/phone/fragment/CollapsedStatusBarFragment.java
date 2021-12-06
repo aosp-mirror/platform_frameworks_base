@@ -28,6 +28,7 @@ import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedul
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -74,6 +75,7 @@ import java.util.List;
  * and keyguard state. Also manages lifecycle to make sure the views it contains are being
  * updated by the StatusBarIconController and DarkIconManager while it is attached.
  */
+@SuppressLint("ValidFragment")
 public class CollapsedStatusBarFragment extends Fragment implements CommandQueue.Callbacks,
         StatusBarStateController.StateListener,
         SystemStatusAnimationCallback {
@@ -127,6 +129,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     };
     private OperatorNameViewController mOperatorNameViewController;
 
+    @SuppressLint("ValidFragment")
     public CollapsedStatusBarFragment(
             StatusBarFragmentComponent.Factory statusBarFragmentComponentFactory,
             OngoingCallController ongoingCallController,
