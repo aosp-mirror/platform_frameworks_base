@@ -53,6 +53,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         MediaOutputController.Callback, Window.Callback {
 
     private static final String TAG = "MediaOutputDialog";
+    private static final String EMPTY_TITLE = " ";
 
     private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private final RecyclerView.LayoutManager mLayoutManager;
@@ -109,6 +110,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         lp.setFitInsetsIgnoringVisibility(true);
         window.setAttributes(lp);
         window.setContentView(mDialogView);
+        // Sets window to a blank string to avoid talkback announce app label first when pop up,
+        // which doesn't make sense.
+        window.setTitle(EMPTY_TITLE);
 
         mHeaderTitle = mDialogView.requireViewById(R.id.header_title);
         mHeaderSubtitle = mDialogView.requireViewById(R.id.header_subtitle);
