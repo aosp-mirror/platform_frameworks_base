@@ -35,7 +35,6 @@ import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.media.AudioAttributes;
 import android.os.Process;
-import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -119,7 +118,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private VelocityTracker mVelocityTracker;
     // The ID of the pointer for which ACTION_DOWN has occurred. -1 means no pointer is active.
     private int mActivePointerId = -1;
-    private VibrationEffect mTick;
 
     private boolean mIsDozing;
     private boolean mIsBouncerShowing;
@@ -597,15 +595,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_HOVER_ENTER:
                 if (mVibrator != null && !mDownDetected) {
-                    if (mTick == null) {
-                        mTick = UdfpsController.lowTick(getContext(), true,
-                                LONG_PRESS_TIMEOUT);
-                    }
                     mVibrator.vibrate(
                             Process.myUid(),
                             getContext().getOpPackageName(),
-                            mTick,
-                            "lock-icon-tick",
+                            UdfpsController.EFFECT_CLICK,
+                            "lock-icon-down",
                             VIBRATION_SONIFICATION_ATTRIBUTES);
                 }
 
