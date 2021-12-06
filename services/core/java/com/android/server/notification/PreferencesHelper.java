@@ -225,7 +225,8 @@ public class PreferencesHelper implements RankingConfig {
 
         final int xmlVersion = parser.getAttributeInt(null, ATT_VERSION, -1);
         boolean upgradeForBubbles = xmlVersion == XML_VERSION_BUBBLES_UPGRADE;
-        boolean migrateToPermission = (xmlVersion < XML_VERSION);
+        boolean migrateToPermission =
+                (xmlVersion < XML_VERSION) && mPermissionHelper.isMigrationEnabled();
         ArrayList<PermissionHelper.PackagePermission> pkgPerms = new ArrayList<>();
         synchronized (mPackagePreferences) {
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
@@ -398,8 +399,10 @@ public class PreferencesHelper implements RankingConfig {
                 }
             }
         }
-        for (PackagePermission p : pkgPerms) {
-            mPermissionHelper.setNotificationPermission(p);
+        if (migrateToPermission) {
+            for (PackagePermission p : pkgPerms) {
+                mPermissionHelper.setNotificationPermission(p);
+            }
         }
     }
 
