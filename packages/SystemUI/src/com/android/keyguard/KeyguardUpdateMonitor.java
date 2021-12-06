@@ -2254,11 +2254,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 !(mFingerprintLockedOut && mBouncer && mCredentialAttempted);
 
         final boolean isEncryptedOrLockdownForUser = isEncryptedOrLockdown(user);
-        final boolean userNeedsStrongAuth = userNeedsStrongAuth();
         final boolean shouldListenUdfpsState = !isUdfps
                 || (!userCanSkipBouncer
                     && !isEncryptedOrLockdownForUser
-                    && !userNeedsStrongAuth
                     && userDoesNotHaveTrust
                     && !mFingerprintLockedOut);
 
@@ -2289,8 +2287,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         shouldListenForFingerprintAssistant,
                         mSwitchingUser,
                         isUdfps,
-                        userDoesNotHaveTrust,
-                        userNeedsStrongAuth));
+                        userDoesNotHaveTrust));
         }
 
         return shouldListen;
@@ -2394,7 +2391,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 || (DEBUG_FINGERPRINT
                     && model instanceof KeyguardFingerprintListenModel
                     && mFingerprintRunningState != BIOMETRIC_STATE_RUNNING);
-        if (notYetRunning && model.getListening()) {
+        final boolean running =
+                (DEBUG_FACE
+                        && model instanceof KeyguardFaceListenModel
+                        && mFaceRunningState == BIOMETRIC_STATE_RUNNING)
+                        || (DEBUG_FINGERPRINT
+                        && model instanceof KeyguardFingerprintListenModel
+                        && mFingerprintRunningState == BIOMETRIC_STATE_RUNNING);
+        if (notYetRunning && model.getListening()
+                || running && !model.getListening()) {
             mListenModels.add(model);
         }
     }
