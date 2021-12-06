@@ -588,11 +588,7 @@
             android:theme="@style/Theme.SystemUI.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.android.intent.action.REQUEST_SLICE_PERMISSION" />
-            </intent-filter>
-        </activity>
+            android:exported="true" />
 
         <!-- platform logo easter egg activity -->
         <activity
