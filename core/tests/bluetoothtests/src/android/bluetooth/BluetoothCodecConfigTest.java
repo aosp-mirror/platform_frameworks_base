@@ -17,7 +17,6 @@
 package android.bluetooth;
 
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
 
 import junit.framework.TestCase;
 
@@ -34,7 +33,6 @@ public class BluetoothCodecConfigTest extends TestCase {
         BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX,
         BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD,
         BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC,
-        BluetoothCodecConfig.SOURCE_CODEC_TYPE_MAX,
         BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID,
     };
     private static final int[] kCodecPriorityArray = new int[] {
@@ -168,20 +166,11 @@ public class BluetoothCodecConfigTest extends TestCase {
             long codec_specific3 = selectCodecSpecific3(config_id);
             long codec_specific4 = selectCodecSpecific4(config_id);
 
-            BluetoothCodecConfig bcc = new BluetoothCodecConfig(codec_type, codec_priority,
+            BluetoothCodecConfig bcc = buildBluetoothCodecConfig(codec_type, codec_priority,
                                                                 sample_rate, bits_per_sample,
                                                                 channel_mode, codec_specific1,
                                                                 codec_specific2, codec_specific3,
                                                                 codec_specific4);
-            if (sample_rate == BluetoothCodecConfig.SAMPLE_RATE_NONE) {
-                assertFalse(bcc.isValid());
-            } else if (bits_per_sample == BluetoothCodecConfig.BITS_PER_SAMPLE_NONE) {
-                assertFalse(bcc.isValid());
-            } else if (channel_mode == BluetoothCodecConfig.CHANNEL_MODE_NONE) {
-                assertFalse(bcc.isValid());
-            } else {
-                assertTrue(bcc.isValid());
-            }
 
             if (codec_type == BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC) {
                 assertTrue(bcc.isMandatoryCodec());
@@ -204,10 +193,6 @@ public class BluetoothCodecConfigTest extends TestCase {
             if (codec_type == BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC) {
                 assertEquals("LDAC", bcc.getCodecName());
             }
-            if (codec_type == BluetoothCodecConfig.SOURCE_CODEC_TYPE_MAX) {
-                assertEquals("UNKNOWN CODEC(" + BluetoothCodecConfig.SOURCE_CODEC_TYPE_MAX + ")",
-                             bcc.getCodecName());
-            }
             if (codec_type == BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
                 assertEquals("INVALID CODEC", bcc.getCodecName());
             }
@@ -227,7 +212,7 @@ public class BluetoothCodecConfigTest extends TestCase {
     @SmallTest
     public void testBluetoothCodecConfig_equals() {
         BluetoothCodecConfig bcc1 =
-            new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+                buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                      BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                      BluetoothCodecConfig.SAMPLE_RATE_44100,
                                      BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -235,7 +220,7 @@ public class BluetoothCodecConfigTest extends TestCase {
                                      1000, 2000, 3000, 4000);
 
         BluetoothCodecConfig bcc2_same =
-            new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+                buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                      BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                      BluetoothCodecConfig.SAMPLE_RATE_44100,
                                      BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -244,7 +229,7 @@ public class BluetoothCodecConfigTest extends TestCase {
         assertTrue(bcc1.equals(bcc2_same));
 
         BluetoothCodecConfig bcc3_codec_type =
-            new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
+                buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
                                      BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                      BluetoothCodecConfig.SAMPLE_RATE_44100,
                                      BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -253,7 +238,7 @@ public class BluetoothCodecConfigTest extends TestCase {
         assertFalse(bcc1.equals(bcc3_codec_type));
 
         BluetoothCodecConfig bcc4_codec_priority =
-            new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+                buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                      BluetoothCodecConfig.CODEC_PRIORITY_HIGHEST,
                                      BluetoothCodecConfig.SAMPLE_RATE_44100,
                                      BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -262,7 +247,7 @@ public class BluetoothCodecConfigTest extends TestCase {
         assertFalse(bcc1.equals(bcc4_codec_priority));
 
         BluetoothCodecConfig bcc5_sample_rate =
-            new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+                buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                      BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                      BluetoothCodecConfig.SAMPLE_RATE_48000,
                                      BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -271,7 +256,7 @@ public class BluetoothCodecConfigTest extends TestCase {
         assertFalse(bcc1.equals(bcc5_sample_rate));
 
         BluetoothCodecConfig bcc6_bits_per_sample =
-            new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+                buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                      BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                      BluetoothCodecConfig.SAMPLE_RATE_44100,
                                      BluetoothCodecConfig.BITS_PER_SAMPLE_24,
@@ -280,7 +265,7 @@ public class BluetoothCodecConfigTest extends TestCase {
         assertFalse(bcc1.equals(bcc6_bits_per_sample));
 
         BluetoothCodecConfig bcc7_channel_mode =
-            new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+                buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                      BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                      BluetoothCodecConfig.SAMPLE_RATE_44100,
                                      BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -289,7 +274,7 @@ public class BluetoothCodecConfigTest extends TestCase {
         assertFalse(bcc1.equals(bcc7_channel_mode));
 
         BluetoothCodecConfig bcc8_codec_specific1 =
-            new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+                buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                      BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                      BluetoothCodecConfig.SAMPLE_RATE_44100,
                                      BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -298,7 +283,7 @@ public class BluetoothCodecConfigTest extends TestCase {
         assertFalse(bcc1.equals(bcc8_codec_specific1));
 
         BluetoothCodecConfig bcc9_codec_specific2 =
-            new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+                buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                      BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                      BluetoothCodecConfig.SAMPLE_RATE_44100,
                                      BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -307,7 +292,7 @@ public class BluetoothCodecConfigTest extends TestCase {
         assertFalse(bcc1.equals(bcc9_codec_specific2));
 
         BluetoothCodecConfig bcc10_codec_specific3 =
-            new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+                buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                      BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                      BluetoothCodecConfig.SAMPLE_RATE_44100,
                                      BluetoothCodecConfig.BITS_PER_SAMPLE_16,
@@ -316,12 +301,29 @@ public class BluetoothCodecConfigTest extends TestCase {
         assertFalse(bcc1.equals(bcc10_codec_specific3));
 
         BluetoothCodecConfig bcc11_codec_specific4 =
-            new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+                buildBluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
                                      BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT,
                                      BluetoothCodecConfig.SAMPLE_RATE_44100,
                                      BluetoothCodecConfig.BITS_PER_SAMPLE_16,
                                      BluetoothCodecConfig.CHANNEL_MODE_STEREO,
                                      1000, 2000, 3000, 4004);
         assertFalse(bcc1.equals(bcc11_codec_specific4));
+    }
+
+    private BluetoothCodecConfig buildBluetoothCodecConfig(int sourceCodecType,
+            int codecPriority, int sampleRate, int bitsPerSample, int channelMode,
+            long codecSpecific1, long codecSpecific2, long codecSpecific3, long codecSpecific4) {
+        return new BluetoothCodecConfig.Builder()
+                    .setCodecType(sourceCodecType)
+                    .setCodecPriority(codecPriority)
+                    .setSampleRate(sampleRate)
+                    .setBitsPerSample(bitsPerSample)
+                    .setChannelMode(channelMode)
+                    .setCodecSpecific1(codecSpecific1)
+                    .setCodecSpecific2(codecSpecific2)
+                    .setCodecSpecific3(codecSpecific3)
+                    .setCodecSpecific4(codecSpecific4)
+                    .build();
+
     }
 }

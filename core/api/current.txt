@@ -9024,6 +9024,72 @@ package android.bluetooth {
     field public static final int TELEPHONY = 4194304; // 0x400000
   }
 
+  public final class BluetoothCodecConfig implements android.os.Parcelable {
+    ctor public BluetoothCodecConfig(int);
+    method public int describeContents();
+    method public int getBitsPerSample();
+    method public int getChannelMode();
+    method public int getCodecPriority();
+    method public long getCodecSpecific1();
+    method public long getCodecSpecific2();
+    method public long getCodecSpecific3();
+    method public long getCodecSpecific4();
+    method public int getCodecType();
+    method public static int getMaxCodecType();
+    method public int getSampleRate();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int BITS_PER_SAMPLE_16 = 1; // 0x1
+    field public static final int BITS_PER_SAMPLE_24 = 2; // 0x2
+    field public static final int BITS_PER_SAMPLE_32 = 4; // 0x4
+    field public static final int BITS_PER_SAMPLE_NONE = 0; // 0x0
+    field public static final int CHANNEL_MODE_MONO = 1; // 0x1
+    field public static final int CHANNEL_MODE_NONE = 0; // 0x0
+    field public static final int CHANNEL_MODE_STEREO = 2; // 0x2
+    field public static final int CODEC_PRIORITY_DEFAULT = 0; // 0x0
+    field public static final int CODEC_PRIORITY_DISABLED = -1; // 0xffffffff
+    field public static final int CODEC_PRIORITY_HIGHEST = 1000000; // 0xf4240
+    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothCodecConfig> CREATOR;
+    field public static final int SAMPLE_RATE_176400 = 16; // 0x10
+    field public static final int SAMPLE_RATE_192000 = 32; // 0x20
+    field public static final int SAMPLE_RATE_44100 = 1; // 0x1
+    field public static final int SAMPLE_RATE_48000 = 2; // 0x2
+    field public static final int SAMPLE_RATE_88200 = 4; // 0x4
+    field public static final int SAMPLE_RATE_96000 = 8; // 0x8
+    field public static final int SAMPLE_RATE_NONE = 0; // 0x0
+    field public static final int SOURCE_CODEC_TYPE_AAC = 1; // 0x1
+    field public static final int SOURCE_CODEC_TYPE_APTX = 2; // 0x2
+    field public static final int SOURCE_CODEC_TYPE_APTX_HD = 3; // 0x3
+    field public static final int SOURCE_CODEC_TYPE_INVALID = 1000000; // 0xf4240
+    field public static final int SOURCE_CODEC_TYPE_LDAC = 4; // 0x4
+    field public static final int SOURCE_CODEC_TYPE_SBC = 0; // 0x0
+  }
+
+  public static final class BluetoothCodecConfig.Builder {
+    ctor public BluetoothCodecConfig.Builder();
+    method @NonNull public android.bluetooth.BluetoothCodecConfig build();
+    method @NonNull public android.bluetooth.BluetoothCodecConfig.Builder setBitsPerSample(int);
+    method @NonNull public android.bluetooth.BluetoothCodecConfig.Builder setChannelMode(int);
+    method @NonNull public android.bluetooth.BluetoothCodecConfig.Builder setCodecPriority(int);
+    method @NonNull public android.bluetooth.BluetoothCodecConfig.Builder setCodecSpecific1(long);
+    method @NonNull public android.bluetooth.BluetoothCodecConfig.Builder setCodecSpecific2(long);
+    method @NonNull public android.bluetooth.BluetoothCodecConfig.Builder setCodecSpecific3(long);
+    method @NonNull public android.bluetooth.BluetoothCodecConfig.Builder setCodecSpecific4(long);
+    method @NonNull public android.bluetooth.BluetoothCodecConfig.Builder setCodecType(int);
+    method @NonNull public android.bluetooth.BluetoothCodecConfig.Builder setSampleRate(int);
+  }
+
+  public final class BluetoothCodecStatus implements android.os.Parcelable {
+    ctor public BluetoothCodecStatus(@Nullable android.bluetooth.BluetoothCodecConfig, @Nullable java.util.List<android.bluetooth.BluetoothCodecConfig>, @Nullable java.util.List<android.bluetooth.BluetoothCodecConfig>);
+    method public int describeContents();
+    method @Nullable public android.bluetooth.BluetoothCodecConfig getCodecConfig();
+    method @NonNull public java.util.List<android.bluetooth.BluetoothCodecConfig> getCodecsLocalCapabilities();
+    method @NonNull public java.util.List<android.bluetooth.BluetoothCodecConfig> getCodecsSelectableCapabilities();
+    method public boolean isCodecConfigSelectable(@Nullable android.bluetooth.BluetoothCodecConfig);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothCodecStatus> CREATOR;
+    field public static final String EXTRA_CODEC_STATUS = "android.bluetooth.extra.CODEC_STATUS";
+  }
+
   public final class BluetoothCsipSetCoordinator implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
     method public void close();
     method protected void finalize();
