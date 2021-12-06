@@ -17,7 +17,6 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/device_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -65,7 +64,7 @@
             android:layout_marginStart="56dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textColor="?androidprv:attr/colorAccentPrimaryVariant"
+            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
             android:textSize="16sp"/>
 
         <RelativeLayout
@@ -81,7 +80,8 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="?androidprv:attr/colorAccentPrimaryVariant"
+                android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+                android:textColor="@color/media_dialog_inactive_item_main_content"
                 android:textSize="16sp"/>
             <TextView
                 android:id="@+id/subtitle"
@@ -92,9 +92,9 @@
                 android:layout_alignParentBottom="true"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="?androidprv:attr/colorAccentPrimaryVariant"
+                android:textColor="@color/media_dialog_inactive_item_main_content"
                 android:textSize="14sp"
-                android:fontFamily="roboto-regular"
+                android:fontFamily="@*android:string/config_bodyFontFamily"
                 android:visibility="gone"/>
             <ImageView
                 android:id="@+id/add_icon"
