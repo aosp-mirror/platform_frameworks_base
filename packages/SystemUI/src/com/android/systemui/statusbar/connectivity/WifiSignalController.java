@@ -83,7 +83,7 @@ public class WifiSignalController extends SignalController<WifiState, IconGroup>
     @Override
     public void notifyListeners(SignalCallback callback) {
         if (mCurrentState.isCarrierMerged) {
-            if (mCurrentState.isDefault) {
+            if (mCurrentState.isDefault || !mNetworkController.isRadioOn()) {
                 notifyListenersForCarrierWifi(callback);
             }
         } else {
