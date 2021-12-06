@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.taptotransfer
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
 import android.view.Gravity
@@ -27,6 +28,8 @@ import android.widget.TextView
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
+
+const val TAG = "MediaTapToTransfer"
 
 /**
  * A controller to display and hide the Media Tap-To-Transfer chip. This chip is shown when a user
@@ -40,14 +43,14 @@ class MediaTttChipController @Inject constructor(
     private val windowManager: WindowManager,
 ) {
 
+    @SuppressLint("WrongConstant") // We're allowed to use TYPE_VOLUME_OVERLAY
     private val windowLayoutParams = WindowManager.LayoutParams().apply {
         width = WindowManager.LayoutParams.WRAP_CONTENT
         height = WindowManager.LayoutParams.WRAP_CONTENT
         gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL)
         type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY
+        flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
         title = "Media Tap-To-Transfer Chip View"
-        flags = (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
         format = PixelFormat.TRANSLUCENT
         setTrustedOverlay()
     }
@@ -76,10 +79,20 @@ class MediaTttChipController @Inject constructor(
             if (showLoading) { View.VISIBLE } else { View.GONE }
 
         // Undo
-        val showUndo = chipState is TransferSucceeded
-        currentChipView.requireViewById<View>(R.id.undo).visibility =
-            if (showUndo) { View.VISIBLE } else { View.GONE }
+        val undoClickListener: View.OnClickListener? =
+            if (chipState is TransferSucceeded && chipState.undoRunnable != null)
+                View.OnClickListener { chipState.undoRunnable.run() }
+            else
+                null
+        val undoView = currentChipView.requireViewById<View>(R.id.undo)
+        undoView.visibility = if (undoClickListener != null) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        undoView.setOnClickListener(undoClickListener)
 
+        // Add view if necessary
         if (oldChipView == null) {
             windowManager.addView(chipView, windowLayoutParams)
         }
