@@ -114,6 +114,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
         when(mSplitLayout.getBounds2()).thenReturn(mBounds2);
+        when(mSplitLayout.isLandscape()).thenReturn(false);
     }
 
     @Test
@@ -168,8 +169,9 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mStageCoordinator.onLayoutSizeChanged(mSplitLayout);
 
-        verify(mMainUnfoldController).onLayoutChanged(mBounds2);
-        verify(mSideUnfoldController).onLayoutChanged(mBounds1);
+        verify(mMainUnfoldController).onLayoutChanged(mBounds2, SPLIT_POSITION_BOTTOM_OR_RIGHT,
+                false);
+        verify(mSideUnfoldController).onLayoutChanged(mBounds1, SPLIT_POSITION_TOP_OR_LEFT, false);
     }
 
     @Test
@@ -180,8 +182,10 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mStageCoordinator.onLayoutSizeChanged(mSplitLayout);
 
-        verify(mMainUnfoldController).onLayoutChanged(mBounds1);
-        verify(mSideUnfoldController).onLayoutChanged(mBounds2);
+        verify(mMainUnfoldController).onLayoutChanged(mBounds1, SPLIT_POSITION_TOP_OR_LEFT,
+                false);
+        verify(mSideUnfoldController).onLayoutChanged(mBounds2, SPLIT_POSITION_BOTTOM_OR_RIGHT,
+                false);
     }
 
     @Test
