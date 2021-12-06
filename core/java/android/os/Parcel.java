@@ -4430,6 +4430,9 @@ public final class Parcel {
      * @return the Serializable object, or null if the Serializable name
      * wasn't found in the parcel.
      *
+     * Unlike {@link #readSerializable(ClassLoader, Class)}, it uses the nearest valid class loader
+     * up the execution stack to instantiate the Serializable object.
+     *
      * @deprecated Use the type-safer version {@link #readSerializable(ClassLoader, Class)} starting
      *       from Android {@link Build.VERSION_CODES#TIRAMISU}.
      */
@@ -4440,9 +4443,11 @@ public final class Parcel {
     }
 
     /**
-     * Same as {@link #readSerializable()} but accepts {@code loader} parameter
-     * as the primary classLoader for resolving the Serializable class; and {@code clazz} parameter
-     * as the required type.
+     * Same as {@link #readSerializable()} but accepts {@code loader} and {@code clazz} parameters.
+     *
+     * @param loader A ClassLoader from which to instantiate the Serializable object,
+     * or null for the default class loader.
+     * @param clazz The type of the object expected.
      *
      * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
      * is not an instance of that class or any of its children class or there there was an error
@@ -4452,7 +4457,8 @@ public final class Parcel {
     public <T extends Serializable> T readSerializable(@Nullable ClassLoader loader,
             @NonNull Class<T> clazz) {
         Objects.requireNonNull(clazz);
-        return readSerializableInternal(loader, clazz);
+        return readSerializableInternal(
+                loader == null ? getClass().getClassLoader() : loader, clazz);
     }
 
     /**
