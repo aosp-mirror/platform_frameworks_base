@@ -41,7 +41,6 @@ import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.doze.dagger.WrappedService;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 
@@ -99,8 +98,6 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
      */
     private int mDebugBrightnessBucket = -1;
 
-    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
-
     @Inject
     public DozeScreenBrightness(
             Context context,
@@ -112,8 +109,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
             WakefulnessLifecycle wakefulnessLifecycle,
             DozeParameters dozeParameters,
             DevicePostureController devicePostureController,
-            DozeLog dozeLog,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            DozeLog dozeLog) {
         mContext = context;
         mDozeService = service;
         mSensorManager = sensorManager;
@@ -125,7 +121,6 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
         mDozeHost = host;
         mHandler = handler;
         mDozeLog = dozeLog;
-        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
 
         mScreenBrightnessMinimumDimAmountFloat = context.getResources().getFloat(
                 R.dimen.config_screenBrightnessMinimumDimAmountFloat);
@@ -267,7 +262,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
      */
     private int clampToDimBrightnessForScreenOff(int brightness) {
         final boolean screenTurningOff =
-                mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
+                mDozeParameters.shouldClampToDimBrightness()
                         || mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_GOING_TO_SLEEP;
         if (screenTurningOff
                 && mWakefulnessLifecycle.getLastSleepReason() == GO_TO_SLEEP_REASON_TIMEOUT) {

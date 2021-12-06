@@ -542,11 +542,11 @@ public class StatusBar extends CoreStartable implements
     private final BrightnessSliderController.Factory mBrightnessSliderFactory;
     private final FeatureFlags mFeatureFlags;
     private final FragmentService mFragmentService;
+    private final ScreenOffAnimationController mScreenOffAnimationController;
     private final WallpaperController mWallpaperController;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final MessageRouter mMessageRouter;
     private final WallpaperManager mWallpaperManager;
-    private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private final TunerService mTunerService;
 
     private StatusBarComponent mStatusBarComponent;
@@ -776,6 +776,7 @@ public class StatusBar extends CoreStartable implements
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             NotificationIconAreaController notificationIconAreaController,
             BrightnessSliderController.Factory brightnessSliderFactory,
+            ScreenOffAnimationController screenOffAnimationController,
             WallpaperController wallpaperController,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
@@ -789,7 +790,6 @@ public class StatusBar extends CoreStartable implements
             @Main DelayableExecutor delayableExecutor,
             @Main MessageRouter messageRouter,
             WallpaperManager wallpaperManager,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             Optional<StartingSurface> startingSurfaceOptional,
             TunerService tunerService,
             DumpManager dumpManager,
@@ -888,13 +888,14 @@ public class StatusBar extends CoreStartable implements
         mMainExecutor = delayableExecutor;
         mMessageRouter = messageRouter;
         mWallpaperManager = wallpaperManager;
-        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         mTunerService = tunerService;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
         mNotifPipelineFlags = notifPipelineFlags;
         lockscreenShadeTransitionController.setStatusbar(this);
+
+        mScreenOffAnimationController = screenOffAnimationController;
 
         mPanelExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged);
 
@@ -1242,7 +1243,8 @@ public class StatusBar extends CoreStartable implements
                 updateOpaqueness.run();
             }
         });
-        mUnlockedScreenOffAnimationController.initialize(this, mLightRevealScrim);
+
+        mScreenOffAnimationController.initialize(this, mLightRevealScrim);
         updateLightRevealScrimVisibility();
 
         mNotificationPanelViewController.initDependencies(
@@ -1493,7 +1495,7 @@ public class StatusBar extends CoreStartable implements
      * @param why the reason for the wake up
      */
     public void wakeUpIfDozing(long time, View where, String why) {
-        if (mDozing && !mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()) {
+        if (mDozing && mScreenOffAnimationController.allowWakeUpIfDozing()) {
             mPowerManager.wakeUp(
                     time, PowerManager.WAKE_REASON_GESTURE, "com.android.systemui:" + why);
             mWakeUpComingFromTouch = true;
@@ -2945,7 +2947,7 @@ public class StatusBar extends CoreStartable implements
             updatePanelExpansionForKeyguard();
         }
         if (shouldBeKeyguard) {
-            if (mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
+            if (mScreenOffAnimationController.isKeyguardShowDelayed()
                     || (isGoingToSleep()
                     && mScreenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_TURNING_OFF)) {
                 // Delay showing the keyguard until screen turned off.
@@ -3191,7 +3193,7 @@ public class StatusBar extends CoreStartable implements
         // If we're dozing and we'll be animating the screen off, the keyguard isn't currently
         // visible but will be shortly for the animation, so we should proceed as if it's visible.
         boolean visibleNotOccludedOrWillBe =
-                visibleNotOccluded || (mDozing && mDozeParameters.shouldControlUnlockedScreenOff());
+                visibleNotOccluded || (mDozing && mDozeParameters.shouldDelayKeyguardShow());
 
         boolean wakeAndUnlock = mBiometricUnlockController.getMode()
                 == BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
@@ -3546,9 +3548,9 @@ public class StatusBar extends CoreStartable implements
             mBypassHeadsUpNotifier.setFullyAwake(false);
             mKeyguardBypassController.onStartedGoingToSleep();
 
-            // The screen off animation uses our LightRevealScrim - we need to be expanded for it to
-            // be visible.
-            if (mDozeParameters.shouldControlUnlockedScreenOff()) {
+            // The unlocked screen off and fold to aod animations might use our LightRevealScrim -
+            // we need to be expanded for it to be visible.
+            if (mDozeParameters.shouldShowLightRevealScrim()) {
                 makeExpandedVisible(true);
             }
 
@@ -3576,7 +3578,7 @@ public class StatusBar extends CoreStartable implements
 
             // If we are waking up during the screen off animation, we should undo making the
             // expanded visible (we did that so the LightRevealScrim would be visible).
-            if (mUnlockedScreenOffAnimationController.isScreenOffLightRevealAnimationPlaying()) {
+            if (mScreenOffAnimationController.shouldHideLightRevealScrimOnWakeUp()) {
                 makeExpandedInvisible();
             }
 
@@ -3795,7 +3797,7 @@ public class StatusBar extends CoreStartable implements
     public boolean shouldIgnoreTouch() {
         return (mStatusBarStateController.isDozing()
                 && mDozeServiceHost.getIgnoreTouchWhilePulsing())
-                || mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying();
+                || mScreenOffAnimationController.shouldIgnoreKeyguardTouches();
     }
 
     // Begin Extra BaseStatusBar methods.

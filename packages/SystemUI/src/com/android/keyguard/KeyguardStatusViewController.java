@@ -28,7 +28,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
@@ -70,7 +70,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             DozeParameters dozeParameters,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             SmartspaceTransitionController smartspaceTransitionController,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            ScreenOffAnimationController screenOffAnimationController) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
         mKeyguardClockSwitchController = keyguardClockSwitchController;
@@ -79,7 +79,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mDozeParameters = dozeParameters;
         mKeyguardStateController = keyguardStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, communalStateController,
-                keyguardStateController, dozeParameters, unlockedScreenOffAnimationController,
+                keyguardStateController, dozeParameters, screenOffAnimationController,
                 /* animateYPos= */ true, /* visibleOnCommunal= */ false);
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mSmartspaceTransitionController = smartspaceTransitionController;

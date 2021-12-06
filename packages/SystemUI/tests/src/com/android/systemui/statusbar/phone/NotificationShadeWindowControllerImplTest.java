@@ -73,7 +73,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock ColorExtractor.GradientColors mGradientColors;
     @Mock private DumpManager mDumpManager;
     @Mock private KeyguardStateController mKeyguardStateController;
-    @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    @Mock private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock private AuthController mAuthController;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
 
@@ -89,7 +89,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager, mKeyguardStateController,
-                mUnlockedScreenOffAnimationController, mAuthController);
+                mScreenOffAnimationController, mAuthController);
         mNotificationShadeWindowController.setScrimsVisibilityListener((visibility) -> {});
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
 
