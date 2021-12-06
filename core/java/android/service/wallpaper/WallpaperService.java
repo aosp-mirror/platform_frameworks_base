@@ -609,6 +609,18 @@ public abstract class WallpaperService extends Service {
             }
         }
 
+        /** @hide */
+        public void setShowForAllUsers(boolean show) {
+            mWindowPrivateFlags = show
+                    ? (mWindowPrivateFlags
+                        | WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS)
+                    : (mWindowPrivateFlags
+                        & ~WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS);
+            if (mCreated) {
+                updateSurface(false, false, false);
+            }
+        }
+
         /** {@hide} */
         @UnsupportedAppUsage
         public void setFixedSizeAllowed(boolean allowed) {
