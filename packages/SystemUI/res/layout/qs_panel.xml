@@ -56,17 +56,4 @@
         layout="@layout/qs_customize_panel"
         android:visibility="gone" />
 
-    <ImageView
-        android:id="@+id/qs_drag_handle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="24dp"
-        android:elevation="4dp"
-        android:importantForAccessibility="no"
-        android:scaleType="center"
-        android:src="@drawable/ic_qs_drag_handle"
-        android:tint="@color/qs_detail_button_white"
-        tools:ignore="UseAppTint" />
-
 </com.android.systemui.qs.QSContainerImpl>
