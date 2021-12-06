@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal;
-
-import com.android.systemui.communal.conditions.CommunalCondition;
+package com.android.systemui.util.condition;
 
 /**
- * Fake implementation of {@link CommunalCondition}, and provides a way for tests to update
+ * Fake implementation of {@link Condition}, and provides a way for tests to update
  * condition fulfillment.
  */
-public class FakeCommunalCondition extends CommunalCondition {
+public class FakeCondition extends Condition {
     @Override
     public void start() {}
 

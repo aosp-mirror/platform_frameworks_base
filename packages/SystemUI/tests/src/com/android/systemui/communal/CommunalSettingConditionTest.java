@@ -31,8 +31,8 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.communal.conditions.CommunalCondition;
 import com.android.systemui.communal.conditions.CommunalSettingCondition;
+import com.android.systemui.util.condition.Condition;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.utils.os.FakeHandler;
 
@@ -57,7 +57,7 @@ public class CommunalSettingConditionTest extends SysuiTestCase {
     public void addCallback_communalSettingEnabled_immediatelyReportsTrue() {
         updateCommunalSetting(true);
 
-        final CommunalCondition.Callback callback = mock(CommunalCondition.Callback.class);
+        final Condition.Callback callback = mock(Condition.Callback.class);
         mCondition.addCallback(callback);
         verify(callback).onConditionChanged(mCondition, true);
     }
@@ -66,7 +66,7 @@ public class CommunalSettingConditionTest extends SysuiTestCase {
     public void addCallback_communalSettingDisabled_noReport() {
         updateCommunalSetting(false);
 
-        final CommunalCondition.Callback callback = mock(CommunalCondition.Callback.class);
+        final Condition.Callback callback = mock(Condition.Callback.class);
         mCondition.addCallback(callback);
         verify(callback, never()).onConditionChanged(eq(mCondition), anyBoolean());
     }
@@ -75,7 +75,7 @@ public class CommunalSettingConditionTest extends SysuiTestCase {
     public void updateCallback_communalSettingEnabled_reportsTrue() {
         updateCommunalSetting(false);
 
-        final CommunalCondition.Callback callback = mock(CommunalCondition.Callback.class);
+        final Condition.Callback callback = mock(Condition.Callback.class);
         mCondition.addCallback(callback);
         clearInvocations(callback);
 
@@ -87,7 +87,7 @@ public class CommunalSettingConditionTest extends SysuiTestCase {
     public void updateCallback_communalSettingDisabled_reportsFalse() {
         updateCommunalSetting(true);
 
-        final CommunalCondition.Callback callback = mock(CommunalCondition.Callback.class);
+        final Condition.Callback callback = mock(Condition.Callback.class);
         mCondition.addCallback(callback);
         clearInvocations(callback);
 
@@ -99,7 +99,7 @@ public class CommunalSettingConditionTest extends SysuiTestCase {
     public void updateCallback_communalSettingDidNotChange_neverReportDup() {
         updateCommunalSetting(true);
 
-        final CommunalCondition.Callback callback = mock(CommunalCondition.Callback.class);
+        final Condition.Callback callback = mock(Condition.Callback.class);
         mCondition.addCallback(callback);
         clearInvocations(callback);
 

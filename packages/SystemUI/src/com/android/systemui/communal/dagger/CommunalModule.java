@@ -28,12 +28,12 @@ import androidx.annotation.Nullable;
 import com.android.systemui.R;
 import com.android.systemui.communal.CommunalSource;
 import com.android.systemui.communal.PackageObserver;
-import com.android.systemui.communal.conditions.CommunalCondition;
 import com.android.systemui.communal.conditions.CommunalSettingCondition;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.idle.AmbientLightModeMonitor;
 import com.android.systemui.idle.LightSensorEventsDebounceAlgorithm;
 import com.android.systemui.idle.dagger.IdleViewComponent;
+import com.android.systemui.util.condition.Condition;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -99,7 +99,7 @@ public interface CommunalModule {
     @Provides
     @ElementsIntoSet
     @Named(COMMUNAL_CONDITIONS)
-    static Set<CommunalCondition> provideCommunalConditions(
+    static Set<Condition> provideCommunalConditions(
             CommunalSettingCondition communalSettingCondition) {
         return new HashSet<>(Collections.singletonList(communalSettingCondition));
     }
