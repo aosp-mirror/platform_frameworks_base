@@ -780,6 +780,7 @@ public class NotificationPanelViewController extends PanelViewController {
             InteractionJankMonitor interactionJankMonitor,
             QsFrameTranslateController qsFrameTranslateController) {
         super(view,
+                featureFlags,
                 falsingManager,
                 dozeLog,
                 keyguardStateController,

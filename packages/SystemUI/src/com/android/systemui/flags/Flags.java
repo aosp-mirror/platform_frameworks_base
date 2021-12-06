@@ -49,6 +49,8 @@ public class Flags {
     public static final BooleanFlag NOTIFICATION_PIPELINE_DEVELOPER_LOGGING =
             new BooleanFlag(103, false);
 
+    public static final ResourceBooleanFlag NOTIFICATION_SHADE_DRAG =
+            new ResourceBooleanFlag(104, R.bool.config_enableNotificationShadeDrag);
 
     /***************************************/
     // 200 - keyguard/lockscreen
