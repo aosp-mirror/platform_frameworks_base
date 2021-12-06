@@ -23,8 +23,6 @@ import android.widget.TextView
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.commandline.Command
-import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -35,18 +33,11 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import java.io.PrintWriter
-import java.io.StringWriter
-import java.util.concurrent.Executor
 
 @SmallTest
 class MediaTttChipControllerTest : SysuiTestCase() {
 
     private lateinit var mediaTttChipController: MediaTttChipController
-
-    private val inlineExecutor = Executor { command -> command.run() }
-    private val commandRegistry = CommandRegistry(context, inlineExecutor)
-    private val pw = PrintWriter(StringWriter())
 
     @Mock
     private lateinit var windowManager: WindowManager
@@ -54,64 +45,46 @@ class MediaTttChipControllerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        mediaTttChipController = MediaTttChipController(commandRegistry, context, windowManager)
-    }
-
-    @Test(expected = IllegalStateException::class)
-    fun constructor_addCommmandAlreadyRegistered() {
-        // Since creating the chip controller should automatically register the add command, it
-        // should throw when registering it again.
-        commandRegistry.registerCommand(
-            MediaTttChipController.ADD_CHIP_COMMAND_TAG
-        ) { EmptyCommand() }
-    }
-
-    @Test(expected = IllegalStateException::class)
-    fun constructor_removeCommmandAlreadyRegistered() {
-        // Since creating the chip controller should automatically register the remove command, it
-        // should throw when registering it again.
-        commandRegistry.registerCommand(
-            MediaTttChipController.REMOVE_CHIP_COMMAND_TAG
-        ) { EmptyCommand() }
+        mediaTttChipController = MediaTttChipController(context, windowManager)
     }
 
     @Test
-    fun addChipCommand_chipAdded() {
-        commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
+    fun displayChip_chipAdded() {
+        mediaTttChipController.displayChip(MoveCloserToTransfer(DEVICE_NAME))
 
         verify(windowManager).addView(any(), any())
     }
 
     @Test
-    fun addChipCommand_twice_chipNotAddedTwice() {
-        commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
+    fun displayChip_twice_chipNotAddedTwice() {
+        mediaTttChipController.displayChip(MoveCloserToTransfer(DEVICE_NAME))
         reset(windowManager)
 
-        commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
+        mediaTttChipController.displayChip(MoveCloserToTransfer(DEVICE_NAME))
         verify(windowManager, never()).addView(any(), any())
     }
 
     @Test
-    fun removeChipCommand_chipRemoved() {
+    fun removeChip_chipRemoved() {
         // First, add the chip
-        commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
+        mediaTttChipController.displayChip(MoveCloserToTransfer(DEVICE_NAME))
 
         // Then, remove it
-        commandRegistry.onShellCommand(pw, arrayOf(MediaTttChipController.REMOVE_CHIP_COMMAND_TAG))
+        mediaTttChipController.removeChip()
 
         verify(windowManager).removeView(any())
     }
 
     @Test
-    fun removeChipCommand_noAdd_viewNotRemoved() {
-        commandRegistry.onShellCommand(pw, arrayOf(MediaTttChipController.REMOVE_CHIP_COMMAND_TAG))
+    fun removeChip_noAdd_viewNotRemoved() {
+        mediaTttChipController.removeChip()
 
         verify(windowManager, never()).removeView(any())
     }
 
     @Test
     fun moveCloserToTransfer_chipTextContainsDeviceName_noLoadingIcon_noUndo() {
-        commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
+        mediaTttChipController.displayChip(MoveCloserToTransfer(DEVICE_NAME))
 
         val chipView = getChipView()
         assertThat(chipView.getChipText()).contains(DEVICE_NAME)
@@ -121,7 +94,7 @@ class MediaTttChipControllerTest : SysuiTestCase() {
 
     @Test
     fun transferInitiated_chipTextContainsDeviceName_loadingIcon_noUndo() {
-        commandRegistry.onShellCommand(pw, getTransferInitiatedCommand())
+        mediaTttChipController.displayChip(TransferInitiated(DEVICE_NAME))
 
         val chipView = getChipView()
         assertThat(chipView.getChipText()).contains(DEVICE_NAME)
@@ -131,7 +104,7 @@ class MediaTttChipControllerTest : SysuiTestCase() {
 
     @Test
     fun transferSucceeded_chipTextContainsDeviceName_noLoadingIcon_undo() {
-        commandRegistry.onShellCommand(pw, getTransferSucceededCommand())
+        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME))
 
         val chipView = getChipView()
         assertThat(chipView.getChipText()).contains(DEVICE_NAME)
@@ -141,56 +114,35 @@ class MediaTttChipControllerTest : SysuiTestCase() {
 
     @Test
     fun changeFromCloserToTransferToTransferInitiated_loadingIconAppears() {
-        commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
-        commandRegistry.onShellCommand(pw, getTransferInitiatedCommand())
+        mediaTttChipController.displayChip(MoveCloserToTransfer(DEVICE_NAME))
+        mediaTttChipController.displayChip(TransferInitiated(DEVICE_NAME))
 
         assertThat(getChipView().getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
     }
 
     @Test
     fun changeFromTransferInitiatedToTransferSucceeded_loadingIconDisappears() {
-        commandRegistry.onShellCommand(pw, getTransferInitiatedCommand())
-        commandRegistry.onShellCommand(pw, getTransferSucceededCommand())
+        mediaTttChipController.displayChip(TransferInitiated(DEVICE_NAME))
+        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME))
 
         assertThat(getChipView().getLoadingIconVisibility()).isEqualTo(View.GONE)
     }
 
     @Test
     fun changeFromTransferInitiatedToTransferSucceeded_undoButtonAppears() {
-        commandRegistry.onShellCommand(pw, getTransferInitiatedCommand())
-        commandRegistry.onShellCommand(pw, getTransferSucceededCommand())
+        mediaTttChipController.displayChip(TransferInitiated(DEVICE_NAME))
+        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME))
 
         assertThat(getChipView().getUndoButtonVisibility()).isEqualTo(View.VISIBLE)
     }
 
     @Test
     fun changeFromTransferSucceededToMoveCloser_undoButtonDisappears() {
-        commandRegistry.onShellCommand(pw, getTransferSucceededCommand())
-        commandRegistry.onShellCommand(pw, getMoveCloserToTransferCommand())
+        mediaTttChipController.displayChip(TransferSucceeded(DEVICE_NAME))
+        mediaTttChipController.displayChip(MoveCloserToTransfer(DEVICE_NAME))
 
         assertThat(getChipView().getUndoButtonVisibility()).isEqualTo(View.GONE)
     }
-
-    private fun getMoveCloserToTransferCommand(): Array<String> =
-        arrayOf(
-            MediaTttChipController.ADD_CHIP_COMMAND_TAG,
-            DEVICE_NAME,
-            MediaTttChipController.ChipType.MOVE_CLOSER_TO_TRANSFER.name
-        )
-
-    private fun getTransferInitiatedCommand(): Array<String> =
-        arrayOf(
-            MediaTttChipController.ADD_CHIP_COMMAND_TAG,
-            DEVICE_NAME,
-            MediaTttChipController.ChipType.TRANSFER_INITIATED.name
-        )
-
-    private fun getTransferSucceededCommand(): Array<String> =
-        arrayOf(
-            MediaTttChipController.ADD_CHIP_COMMAND_TAG,
-            DEVICE_NAME,
-            MediaTttChipController.ChipType.TRANSFER_SUCCEEDED.name
-        )
 
     private fun LinearLayout.getChipText(): String =
         (this.requireViewById<TextView>(R.id.text)).text as String
@@ -205,14 +157,6 @@ class MediaTttChipControllerTest : SysuiTestCase() {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
         verify(windowManager).addView(viewCaptor.capture(), any())
         return viewCaptor.value as LinearLayout
-    }
-
-    class EmptyCommand : Command {
-        override fun execute(pw: PrintWriter, args: List<String>) {
-        }
-
-        override fun help(pw: PrintWriter) {
-        }
     }
 }
 

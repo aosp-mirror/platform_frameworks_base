@@ -24,6 +24,7 @@ import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.media.taptotransfer.MediaTttChipController;
+import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.people.PeopleProvider;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
@@ -133,6 +134,7 @@ public interface SysUIComponent {
         getNaturalRotationUnfoldProgressProvider().ifPresent(o -> o.init());
         // No init method needed, just needs to be gotten so that it's created.
         getMediaTttChipController();
+        getMediaTttCommandLineHelper();
     }
 
     /**
@@ -181,6 +183,9 @@ public interface SysUIComponent {
 
     /** */
     Optional<MediaTttChipController> getMediaTttChipController();
+
+    /** */
+    Optional<MediaTttCommandLineHelper> getMediaTttCommandLineHelper();
 
     /**
      * Member injection into the supplied argument.
