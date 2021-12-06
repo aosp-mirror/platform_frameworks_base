@@ -1346,6 +1346,13 @@ public class SettingsProvider extends ContentProvider {
             // Anyone can get the global settings, so no security checks.
             for (int i = 0; i < nameCount; i++) {
                 String name = names.get(i);
+                try {
+                    enforceSettingReadable(name, SETTINGS_TYPE_GLOBAL,
+                            UserHandle.getCallingUserId());
+                } catch (SecurityException e) {
+                    // Caller doesn't have permission to read this setting
+                    continue;
+                }
                 Setting setting = settingsState.getSettingLocked(name);
                 appendSettingToCursor(result, setting);
             }
@@ -1520,6 +1527,13 @@ public class SettingsProvider extends ContentProvider {
                 if (!isSecureSettingAccessible(name)) {
                     // This caller is not permitted to access this setting. Pretend the setting
                     // doesn't exist.
+                    continue;
+                }
+
+                try {
+                    enforceSettingReadable(name, SETTINGS_TYPE_SECURE, callingUserId);
+                } catch (SecurityException e) {
+                    // Caller doesn't have permission to read this setting
                     continue;
                 }
 
@@ -1785,7 +1799,12 @@ public class SettingsProvider extends ContentProvider {
 
             for (int i = 0; i < nameCount; i++) {
                 String name = names.get(i);
-
+                try {
+                    enforceSettingReadable(name, SETTINGS_TYPE_SYSTEM, callingUserId);
+                } catch (SecurityException e) {
+                    // Caller doesn't have permission to read this setting
+                    continue;
+                }
                 // Determine the owning user as some profile settings are cloned from the parent.
                 final int owningUserId = resolveOwningUserIdForSystemSettingLocked(callingUserId,
                         name);
