@@ -28,6 +28,7 @@ import static android.content.pm.Checksum.TYPE_WHOLE_SHA256;
 import static android.content.pm.Checksum.TYPE_WHOLE_SHA512;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -1354,6 +1355,7 @@ public class PackageInstaller {
          *                          {@link PackageManager#TRUST_NONE} disables optimized
          *                          installer-enforced checksums, otherwise the list has to be
          *                          a non-empty list of certificates.
+         * @param executor the {@link Executor} on which to invoke the callback
          * @param onChecksumsReadyListener called once when the results are available.
          * @throws CertificateEncodingException if an encoding error occurs for trustedInstallers.
          * @throws FileNotFoundException if the file does not exist.
@@ -1361,11 +1363,13 @@ public class PackageInstaller {
          */
         public void requestChecksums(@NonNull String name, @Checksum.TypeMask int required,
                 @NonNull List<Certificate> trustedInstallers,
+                @NonNull @CallbackExecutor Executor executor,
                 @NonNull PackageManager.OnChecksumsReadyListener onChecksumsReadyListener)
                 throws CertificateEncodingException, FileNotFoundException {
             Objects.requireNonNull(name);
-            Objects.requireNonNull(onChecksumsReadyListener);
             Objects.requireNonNull(trustedInstallers);
+            Objects.requireNonNull(executor);
+            Objects.requireNonNull(onChecksumsReadyListener);
             if (trustedInstallers == PackageManager.TRUST_ALL) {
                 trustedInstallers = null;
             } else if (trustedInstallers == PackageManager.TRUST_NONE) {
@@ -1381,7 +1385,8 @@ public class PackageInstaller {
                             @Override
                             public void onChecksumsReady(List<ApkChecksum> checksums)
                                     throws RemoteException {
-                                onChecksumsReadyListener.onChecksumsReady(checksums);
+                                executor.execute(
+                                        () -> onChecksumsReadyListener.onChecksumsReady(checksums));
                             }
                         };
                 mSession.requestChecksums(name, DEFAULT_CHECKSUMS, required,
