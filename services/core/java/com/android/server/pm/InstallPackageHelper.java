@@ -2322,12 +2322,19 @@ final class InstallPackageHelper {
                     }
                 }
 
-                // It's implied that when a user requests installation, they want the app to be
-                // installed and enabled. (This does not apply to USER_ALL, which here means only
-                // install on users for which the app is already installed).
                 if (userId != UserHandle.USER_ALL) {
+                    // It's implied that when a user requests installation, they want the app to
+                    // be installed and enabled.
                     ps.setInstalled(true, userId);
                     ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId, installerPackageName);
+                } else if (allUsers != null) {
+                    // The caller explicitly specified INSTALL_ALL_USERS flag.
+                    // Thus, updating the settings to install the app for all users.
+                    for (int currentUserId : allUsers) {
+                        ps.setInstalled(true, currentUserId);
+                        ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId,
+                                installerPackageName);
+                    }
                 }
 
                 mPm.mSettings.addInstallerPackageNames(ps.getInstallSource());
