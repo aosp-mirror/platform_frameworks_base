@@ -110,6 +110,16 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     @Override
+    public int getTilesHeight() {
+        // Use the first page as that is the maximum height we need to show.
+        TileLayout tileLayout = mPages.get(0);
+        if (tileLayout == null) {
+            return 0;
+        }
+        return tileLayout.getTilesHeight();
+    }
+
+    @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         // Pass configuration change to non-attached pages as well. Some config changes will cause
