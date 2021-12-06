@@ -14,6 +14,7 @@ EMOJI_VS = 0xFE0F
 
 LANG_TO_SCRIPT = {
     'as': 'Beng',
+    'am': 'Latn',
     'be': 'Cyrl',
     'bg': 'Cyrl',
     'bn': 'Beng',
@@ -27,15 +28,18 @@ LANG_TO_SCRIPT = {
     'eu': 'Latn',
     'fr': 'Latn',
     'ga': 'Latn',
+    'gl': 'Latn',
     'gu': 'Gujr',
     'hi': 'Deva',
     'hr': 'Latn',
     'hu': 'Latn',
     'hy': 'Armn',
+    'it': 'Latn',
     'ja': 'Jpan',
     'kn': 'Knda',
     'ko': 'Kore',
     'la': 'Latn',
+    'lt': 'Latn',
     'ml': 'Mlym',
     'mn': 'Cyrl',
     'mr': 'Deva',
@@ -48,6 +52,7 @@ LANG_TO_SCRIPT = {
     'ta': 'Taml',
     'te': 'Telu',
     'tk': 'Latn',
+    'uk': 'Latn',
 }
 
 def lang_to_script(lang_code):
