@@ -93,7 +93,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
                 .build();
-    private static final long LONG_PRESS_TIMEOUT = 150L; // milliseconds
+    private static final long LONG_PRESS_TIMEOUT = 200L; // milliseconds
 
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final KeyguardViewController mKeyguardViewController;
@@ -686,6 +686,17 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         if (mOnGestureDetectedRunnable != null) {
             mOnGestureDetectedRunnable.run();
         }
+
+        if (mVibrator != null) {
+            // play device entry haptic (same as biometric success haptic)
+            mVibrator.vibrate(
+                    Process.myUid(),
+                    getContext().getOpPackageName(),
+                    UdfpsController.EFFECT_CLICK,
+                    "lock-icon-device-entry",
+                    VIBRATION_SONIFICATION_ATTRIBUTES);
+        }
+
         mKeyguardViewController.showBouncer(/* scrim */ true);
     }
 
