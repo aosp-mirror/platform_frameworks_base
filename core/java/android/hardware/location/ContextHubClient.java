@@ -60,6 +60,8 @@ public class ContextHubClient implements Closeable {
      */
     private final boolean mPersistent;
 
+    private Integer mId = null;
+
     /* package */ ContextHubClient(ContextHubInfo hubInfo, boolean persistent) {
         mAttachedHub = hubInfo;
         mPersistent = persistent;
@@ -85,6 +87,11 @@ public class ContextHubClient implements Closeable {
         }
 
         mClientProxy = clientProxy;
+        try {
+            mId = Integer.valueOf(mClientProxy.getId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -95,6 +102,31 @@ public class ContextHubClient implements Closeable {
     @NonNull
     public ContextHubInfo getAttachedHub() {
         return mAttachedHub;
+    }
+
+    /**
+     * Returns the system-wide unique identifier for this ContextHubClient.
+     *
+     * This value can be used as an identifier for the messaging channel between a
+     * ContextHubClient and the Context Hub. This may be used as a routing mechanism
+     * between various ContextHubClient objects within an application.
+     *
+     * The value returned by this method will remain the same if it is associated with
+     * the same client reference at the ContextHubService (for instance, the ID of a
+     * PendingIntent ContextHubClient will remain the same even if the local object
+     * has been regenerated with the equivalent PendingIntent). If the ContextHubClient
+     * is newly generated (e.g. any regeneration of a callback client, or generation
+     * of a non-equal PendingIntent client), the ID will not be the same.
+     *
+     * @return The ID of this ContextHubClient.
+     *
+     * @throws IllegalStateException if the ID was not set internally.
+     */
+    public int getId() {
+        if (mId == null) {
+            throw new IllegalStateException("ID was not set");
+        }
+        return mId;
     }
 
     /**

@@ -3893,6 +3893,7 @@ package android.hardware.location {
   public class ContextHubClient implements java.io.Closeable {
     method public void close();
     method @NonNull public android.hardware.location.ContextHubInfo getAttachedHub();
+    method public int getId();
     method @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int sendMessageToNanoApp(@NonNull android.hardware.location.NanoAppMessage);
   }
 
