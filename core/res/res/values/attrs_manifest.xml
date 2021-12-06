@@ -550,7 +550,7 @@
     <attr name="allowTaskReparenting" format="boolean" />
 
     <!-- Declare that this application may use cleartext traffic, such as HTTP rather than HTTPS;
-         WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP without STARTTLS or TLS.
+         WebSockets rather than WebSockets Secure; XMPP, IMAP, SMTP without STARTTLS or TLS.
          Defaults to true. If set to false {@code false}, the application declares that it does not
          intend to use cleartext network traffic, in which case platform components (e.g. HTTP
          stacks, {@code DownloadManager}, {@code MediaPlayer}) will refuse applications's requests
@@ -1785,7 +1785,7 @@
         <!-- @deprecated replaced by setting appCategory attribute to "game" -->
         <attr name="isGame" />
         <!-- Declare that this application may use cleartext traffic, such as HTTP rather than
-             HTTPS; WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP without STARTTLS or
+             HTTPS; WebSockets rather than WebSockets Secure; XMPP, IMAP, SMTP without STARTTLS or
              TLS). Defaults to true. If set to false {@code false}, the application declares that it
              does not intend to use cleartext network traffic, in which case platform components
              (e.g. HTTP stacks, {@code DownloadManager}, {@code MediaPlayer}) will refuse
