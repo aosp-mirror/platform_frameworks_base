@@ -2452,7 +2452,6 @@ package android.content {
     method @NonNull public static java.io.File encodeToFile(@NonNull android.net.Uri);
     method @Nullable @RequiresPermission("android.permission.CACHE_CONTENT") public android.os.Bundle getCache(@NonNull android.net.Uri);
     method @RequiresPermission("android.permission.CACHE_CONTENT") public void putCache(@NonNull android.net.Uri, @Nullable android.os.Bundle);
-    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public final void registerContentObserverForAllUsers(@NonNull android.net.Uri, boolean, @NonNull android.database.ContentObserver);
   }
 
   public abstract class Context {

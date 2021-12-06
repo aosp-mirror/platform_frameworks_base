@@ -2666,7 +2666,7 @@ public abstract class ContentResolver implements ContentInterface {
 
     /**
      * Same as {@link #registerContentObserver(Uri, boolean, ContentObserver)}, but the observer
-     * registered will get content change notifications from all users.
+     * registered will get content change notifications for the specified user.
      * {@link ContentObserver#onChange(boolean, Collection, int, UserHandle)} should be
      * overwritten to get the corresponding {@link UserHandle} for that notification.
      *
@@ -2679,21 +2679,25 @@ public abstract class ContentResolver implements ContentInterface {
      *                             whenever a change occurs to the URI's descendants in the path
      *                             hierarchy.
      * @param observer             The object that receives callbacks when changes occur.
+     * @param userHandle           The UserHandle of the user the content change notifications are
+     *                             for.
      * @hide
      * @see #unregisterContentObserver
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-    @SystemApi
-    public final void registerContentObserverForAllUsers(@NonNull Uri uri,
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public final void registerContentObserverAsUser(@NonNull Uri uri,
             boolean notifyForDescendants,
-            @NonNull ContentObserver observer) {
+            @NonNull ContentObserver observer,
+            @NonNull UserHandle userHandle) {
         Objects.requireNonNull(uri, "uri");
         Objects.requireNonNull(observer, "observer");
+        Objects.requireNonNull(userHandle, "userHandle");
         registerContentObserver(
                 ContentProvider.getUriWithoutUserId(uri),
                 notifyForDescendants,
                 observer,
-                UserHandle.USER_ALL);
+                userHandle.getIdentifier());
     }
 
     /** @hide - designated user version */
