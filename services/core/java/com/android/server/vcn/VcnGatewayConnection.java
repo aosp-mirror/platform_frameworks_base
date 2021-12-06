@@ -77,6 +77,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.Process;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -782,8 +783,19 @@ public class VcnGatewayConnection extends StateMachine {
             // TODO(b/179091925): Move the delayed-message handling to BaseState
 
             // If underlying is null, all underlying networks have been lost. Disconnect VCN after a
-            // timeout.
+            // timeout (or immediately if in airplane mode, since the device user has indicated that
+            // the radios should all be turned off).
             if (underlying == null) {
+                if (mDeps.isAirplaneModeOn(mVcnContext)) {
+                    sendMessageAndAcquireWakeLock(
+                            EVENT_UNDERLYING_NETWORK_CHANGED,
+                            TOKEN_ALL,
+                            new EventUnderlyingNetworkChangedInfo(null));
+                    sendDisconnectRequestedAndAcquireWakelock(
+                            DISCONNECT_REASON_UNDERLYING_NETWORK_LOST, false /* shouldQuit */);
+                    return;
+                }
+
                 setDisconnectRequestAlarm();
             } else {
                 // Received a new Network so any previous alarm is irrelevant - cancel + clear it,
@@ -2412,6 +2424,12 @@ public class VcnGatewayConnection extends StateMachine {
                     provider,
                     networkUnwantedCallback,
                     validationStatusCallback);
+        }
+
+        /** Checks if airplane mode is enabled. */
+        public boolean isAirplaneModeOn(@NonNull VcnContext vcnContext) {
+            return Settings.Global.getInt(vcnContext.getContext().getContentResolver(),
+                    Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
         }
 
         /** Gets the elapsed real time since boot, in millis. */
