@@ -29,6 +29,7 @@ import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.NanoAppBinary;
 import android.hardware.location.NanoAppMessage;
+import android.hardware.location.NanoAppRpcService;
 import android.hardware.location.NanoAppState;
 import android.util.Log;
 
@@ -211,9 +212,14 @@ import java.util.List;
             android.hardware.contexthub.NanoappInfo[] nanoAppInfoList) {
         ArrayList<NanoAppState> nanoAppStateList = new ArrayList<>();
         for (android.hardware.contexthub.NanoappInfo appInfo : nanoAppInfoList) {
+            ArrayList<NanoAppRpcService> rpcServiceList = new ArrayList<>();
+            for (android.hardware.contexthub.NanoappRpcService service : appInfo.rpcServices) {
+                rpcServiceList.add(new NanoAppRpcService(service.id, service.version));
+            }
             nanoAppStateList.add(
                     new NanoAppState(appInfo.nanoappId, appInfo.nanoappVersion,
-                            appInfo.enabled, new ArrayList<>(Arrays.asList(appInfo.permissions))));
+                            appInfo.enabled, new ArrayList<>(Arrays.asList(appInfo.permissions)),
+                            rpcServiceList));
         }
 
         return nanoAppStateList;

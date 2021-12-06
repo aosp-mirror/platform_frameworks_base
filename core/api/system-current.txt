@@ -4363,13 +4363,24 @@ package android.hardware.location {
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppMessage> CREATOR;
   }
 
+  public final class NanoAppRpcService implements android.os.Parcelable {
+    ctor public NanoAppRpcService(long, int);
+    method public int describeContents();
+    method public long getId();
+    method public int getVersion();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppRpcService> CREATOR;
+  }
+
   public final class NanoAppState implements android.os.Parcelable {
     ctor public NanoAppState(long, int, boolean);
     ctor public NanoAppState(long, int, boolean, @NonNull java.util.List<java.lang.String>);
+    ctor public NanoAppState(long, int, boolean, @NonNull java.util.List<java.lang.String>, @NonNull java.util.List<android.hardware.location.NanoAppRpcService>);
     method public int describeContents();
     method public long getNanoAppId();
     method @NonNull public java.util.List<java.lang.String> getNanoAppPermissions();
     method public long getNanoAppVersion();
+    method @NonNull public java.util.List<android.hardware.location.NanoAppRpcService> getRpcServices();
     method public boolean isEnabled();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppState> CREATOR;
