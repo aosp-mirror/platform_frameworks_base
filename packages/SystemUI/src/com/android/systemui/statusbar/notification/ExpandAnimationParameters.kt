@@ -2,6 +2,7 @@ package com.android.systemui.statusbar.notification
 
 import android.util.MathUtils
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.LaunchAnimator
 import kotlin.math.min
@@ -55,6 +56,7 @@ class ExpandAnimationParameters(
         }
 
     fun getProgress(delay: Long, duration: Long): Float {
-        return LaunchAnimator.getProgress(linearProgress, delay, duration)
+        return LaunchAnimator.getProgress(ActivityLaunchAnimator.TIMINGS, linearProgress, delay,
+            duration)
     }
 }
