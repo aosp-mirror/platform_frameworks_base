@@ -179,7 +179,7 @@ public class VcnGatewayConnectionTestBase {
 
         doReturn(mUnderlyingNetworkController)
                 .when(mDeps)
-                .newUnderlyingNetworkController(any(), any(), any(), any());
+                .newUnderlyingNetworkController(any(), any(), any(), any(), any());
         doReturn(mWakeLock)
                 .when(mDeps)
                 .newWakeLock(eq(mContext), eq(PowerManager.PARTIAL_WAKE_LOCK), any());
