@@ -45818,8 +45818,10 @@ package android.text.style {
 
   public class StyleSpan extends android.text.style.MetricAffectingSpan implements android.text.ParcelableSpan {
     ctor public StyleSpan(int);
+    ctor public StyleSpan(int, int);
     ctor public StyleSpan(@NonNull android.os.Parcel);
     method public int describeContents();
+    method public int getFontWeightAdjustment();
     method public int getSpanTypeId();
     method public int getStyle();
     method public void updateDrawState(android.text.TextPaint);
