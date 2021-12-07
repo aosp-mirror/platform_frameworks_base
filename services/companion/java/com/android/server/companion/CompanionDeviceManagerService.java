@@ -39,7 +39,8 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainRunna
 import static com.android.server.companion.PermissionsUtils.checkCallerCanManageAssociationsForPackage;
 import static com.android.server.companion.PermissionsUtils.checkCallerCanManageCompanionDevice;
 import static com.android.server.companion.PermissionsUtils.enforceCallerCanInteractWithUserId;
-import static com.android.server.companion.PermissionsUtils.enforceCallerCanManagerCompanionDevice;
+import static com.android.server.companion.PermissionsUtils.enforceCallerCanManageAssociationsForPackage;
+import static com.android.server.companion.PermissionsUtils.enforceCallerCanManageCompanionDevice;
 import static com.android.server.companion.PermissionsUtils.enforceCallerIsSystemOr;
 import static com.android.server.companion.RolesUtils.addRoleHolderForAssociation;
 import static com.android.server.companion.RolesUtils.removeRoleHolderForAssociation;
@@ -401,15 +402,16 @@ public class CompanionDeviceManagerService extends SystemService {
             Slog.i(LOG_TAG, "associate() "
                     + "request=" + request + ", "
                     + "package=u" + userId + "/" + packageName);
+            enforceCallerCanManageAssociationsForPackage(getContext(), userId, packageName,
+                    "create associations");
+
             mAssociationRequestsProcessor.process(request, packageName, userId, callback);
         }
 
         @Override
         public List<AssociationInfo> getAssociations(String packageName, int userId) {
-            if (!checkCallerCanManageAssociationsForPackage(getContext(), userId, packageName)) {
-                throw new SecurityException("Caller (uid=" + getCallingUid() + ") does not have "
-                        + "permissions to get associations for u" + userId + "/" + packageName);
-            }
+            enforceCallerCanManageAssociationsForPackage(getContext(), userId, packageName,
+                    "get associations");
 
             if (!checkCallerCanManageCompanionDevice(getContext())) {
                 // If the caller neither is system nor holds MANAGE_COMPANION_DEVICES: it needs to
@@ -424,7 +426,7 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public List<AssociationInfo> getAllAssociationsForUser(int userId) throws RemoteException {
             enforceCallerCanInteractWithUserId(getContext(), userId);
-            enforceCallerCanManagerCompanionDevice(getContext(), "getAllAssociationsForUser");
+            enforceCallerCanManageCompanionDevice(getContext(), "getAllAssociationsForUser");
 
             return new ArrayList<>(
                     CompanionDeviceManagerService.this.getAllAssociationsForUser(userId));
@@ -434,7 +436,7 @@ public class CompanionDeviceManagerService extends SystemService {
         public void addOnAssociationsChangedListener(IOnAssociationsChangedListener listener,
                 int userId) {
             enforceCallerCanInteractWithUserId(getContext(), userId);
-            enforceCallerCanManagerCompanionDevice(getContext(),
+            enforceCallerCanManageCompanionDevice(getContext(),
                     "addOnAssociationsChangedListener");
 
             //TODO: Implement.
@@ -621,7 +623,7 @@ public class CompanionDeviceManagerService extends SystemService {
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
-            enforceCallerCanManagerCompanionDevice(getContext(), "onShellCommand");
+            enforceCallerCanManageCompanionDevice(getContext(), "onShellCommand");
             new CompanionDeviceShellCommand(CompanionDeviceManagerService.this)
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }

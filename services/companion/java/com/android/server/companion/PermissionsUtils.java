@@ -24,6 +24,7 @@ import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Binder.getCallingPid;
 import static android.os.Binder.getCallingUid;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.UserHandle.getCallingUserId;
@@ -37,11 +38,13 @@ import android.annotation.UserIdInt;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
 import android.content.Context;
+import android.content.pm.PackageManagerInternal;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.ArrayMap;
 
 import com.android.internal.app.IAppOpsService;
+import com.android.server.LocalServices;
 
 import java.util.Map;
 
@@ -65,21 +68,19 @@ final class PermissionsUtils {
         DEVICE_PROFILE_TO_PERMISSION = unmodifiableMap(map);
     }
 
-    static void enforceCallerPermissionsToRequest(@NonNull Context context,
+    static void enforcePermissionsForAssociation(@NonNull Context context,
             @NonNull AssociationRequest request, @NonNull String packageName,
             @UserIdInt int userId) {
-        enforceCallerCanInteractWithUserId(context, userId);
-        enforceCallerIsSystemOr(userId, packageName);
-
-        enforceRequestDeviceProfilePermissions(context, request.getDeviceProfile());
+        final int packageUid = getPackageUid(userId, packageName);
+        enforceRequestDeviceProfilePermissions(context, request.getDeviceProfile(), packageUid);
 
         if (request.isSelfManaged()) {
-            enforceRequestSelfManagedPermission(context);
+            enforceRequestSelfManagedPermission(context, packageUid);
         }
     }
 
     static void enforceRequestDeviceProfilePermissions(
-            @NonNull Context context, @Nullable String deviceProfile) {
+            @NonNull Context context, @Nullable String deviceProfile, int packageUid) {
         // Device profile can be null.
         if (deviceProfile == null) return;
 
@@ -100,14 +101,15 @@ final class PermissionsUtils {
         }
 
         final String permission = DEVICE_PROFILE_TO_PERMISSION.get(deviceProfile);
-        if (context.checkCallingOrSelfPermission(permission) != PERMISSION_GRANTED) {
+        if (context.checkPermission(permission, getCallingPid(), packageUid)
+                != PERMISSION_GRANTED) {
             throw new SecurityException("Application must hold " + permission + " to associate "
                     + "with a device with " + deviceProfile + " profile.");
         }
     }
 
-    static void enforceRequestSelfManagedPermission(@NonNull Context context) {
-        if (context.checkCallingOrSelfPermission(REQUEST_COMPANION_SELF_MANAGED)
+    static void enforceRequestSelfManagedPermission(@NonNull Context context, int packageUid) {
+        if (context.checkPermission(REQUEST_COMPANION_SELF_MANAGED, getCallingPid(), packageUid)
                 != PERMISSION_GRANTED) {
             throw new SecurityException("Application does not hold "
                     + REQUEST_COMPANION_SELF_MANAGED);
@@ -159,13 +161,34 @@ final class PermissionsUtils {
         return context.checkCallingPermission(MANAGE_COMPANION_DEVICES) == PERMISSION_GRANTED;
     }
 
-    static void enforceCallerCanManagerCompanionDevice(@NonNull Context context,
+    static void enforceCallerCanManageCompanionDevice(@NonNull Context context,
             @Nullable String message) {
         if (getCallingUid() == SYSTEM_UID) return;
 
         context.enforceCallingPermission(MANAGE_COMPANION_DEVICES, message);
     }
 
+    static void enforceCallerCanManageAssociationsForPackage(@NonNull Context context,
+            @UserIdInt int userId, @NonNull String packageName,
+            @Nullable String actionDescription) {
+        if (checkCallerCanManageAssociationsForPackage(context, userId, packageName)) return;
+
+        throw new SecurityException("Caller (uid=" + getCallingUid() + ") does not have "
+                + "permissions to "
+                + (actionDescription != null ? actionDescription : "manage associations")
+                + " for u" + userId + "/" + packageName);
+    }
+
+    /**
+     * Check if the caller is either:
+     * <ul>
+     * <li> the package itself
+     * <li> the System ({@link android.os.Process#SYSTEM_UID})
+     * <li> holds {@link Manifest.permission#MANAGE_COMPANION_DEVICES} and, if belongs to a
+     * different user, also holds {@link Manifest.permission#INTERACT_ACROSS_USERS}.
+     * </ul>
+     * @return whether the caller is one of the above.
+     */
     static boolean checkCallerCanManageAssociationsForPackage(@NonNull Context context,
             @UserIdInt int userId, @NonNull String packageName) {
         if (checkCallerIsSystemOr(userId, packageName)) return true;
@@ -182,6 +205,11 @@ final class PermissionsUtils {
             // Can't happen: AppOpsManager is running in the same process.
             return true;
         }
+    }
+
+    private static int getPackageUid(@UserIdInt int userId, @NonNull String packageName) {
+        return LocalServices.getService(PackageManagerInternal.class)
+                .getPackageUid(packageName, 0, userId);
     }
 
     private static IAppOpsService getAppOpsService() {
