@@ -76,6 +76,10 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return setUserDisabledHdrTypes();
             case "get-user-disabled-hdr-types":
                 return getUserDisabledHdrTypes();
+            case "dock":
+                return setDockedAndIdle();
+            case "undock":
+                return unsetDockedAndIdle();
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -124,6 +128,10 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("    Sets the user disabled HDR types as TYPES");
         pw.println("  get-user-disabled-hdr-types");
         pw.println("    Returns the user disabled HDR types");
+        pw.println("  dock");
+        pw.println("    Sets brightness to docked + idle screen brightness mode");
+        pw.println("  undock");
+        pw.println("    Sets brightness to active (normal) screen brightness mode");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }
@@ -344,5 +352,15 @@ class DisplayManagerShellCommand extends ShellCommand {
                         + "matchContentFrameRate type.");
                 return -1;
         }
+    }
+
+    private int setDockedAndIdle() {
+        mService.setDockedAndIdleEnabled(true, Display.DEFAULT_DISPLAY);
+        return 0;
+    }
+
+    private int unsetDockedAndIdle() {
+        mService.setDockedAndIdleEnabled(false, Display.DEFAULT_DISPLAY);
+        return 0;
     }
 }

@@ -395,11 +395,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     @Nullable
     private BrightnessMappingStrategy mIdleModeBrightnessMapper;
 
-    // If these are both true, and mIdleModeBrightnessMapper != null,
-    // then we are in idle screen brightness mode.
-    private boolean mIsDreaming;
-    private boolean mIsDocked;
-
     // The current brightness configuration.
     @Nullable
     private BrightnessConfiguration mBrightnessConfiguration;
