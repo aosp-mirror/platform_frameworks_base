@@ -51,6 +51,7 @@ import android.platform.test.annotations.Presubmit;
 
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
+import com.android.server.backup.OperationStorage;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.BackupHandler;
@@ -98,6 +99,7 @@ public class ActiveRestoreSessionTest {
     @Mock private IRestoreObserver mObserver;
     @Mock private IBackupManagerMonitor mMonitor;
     @Mock private BackupEligibilityRules mBackupEligibilityRules;
+    @Mock private OperationStorage mOperationStorage;
     private ShadowLooper mShadowBackupLooper;
     private ShadowApplication mShadowApplication;
     private UserBackupManagerService.BackupWakeLock mWakeLock;
@@ -132,7 +134,9 @@ public class ActiveRestoreSessionTest {
         // We need to mock BMS timeout parameters before initializing the BackupHandler since
         // the constructor of BackupHandler relies on it.
         when(mBackupManagerService.getAgentTimeoutParameters()).thenReturn(agentTimeoutParameters);
-        BackupHandler backupHandler = new BackupHandler(mBackupManagerService, handlerThread);
+
+        BackupHandler backupHandler =
+                new BackupHandler(mBackupManagerService, mOperationStorage, handlerThread);
 
         mWakeLock = createBackupWakeLock(application);
 
