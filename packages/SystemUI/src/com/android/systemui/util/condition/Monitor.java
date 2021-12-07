@@ -81,6 +81,12 @@ public class Monitor implements CallbackController<Monitor.Callback> {
     public Monitor(Set<Condition> conditions) {
         mConditions = conditions;
 
+        // If there is no condition, give green pass.
+        if (mConditions.isEmpty()) {
+            mAllConditionsMet = true;
+            return;
+        }
+
         // Initializes the conditions map and registers a callback for each condition.
         mConditions.forEach((condition -> mConditionsMap.put(condition, false)));
     }
