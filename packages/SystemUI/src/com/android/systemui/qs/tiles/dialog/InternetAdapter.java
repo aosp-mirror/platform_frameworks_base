@@ -53,7 +53,10 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
 
     private final InternetDialogController mInternetDialogController;
     private List<WifiEntry> mWifiEntries;
-    private int mWifiEntriesCount;
+    @VisibleForTesting
+    protected int mWifiEntriesCount;
+    @VisibleForTesting
+    protected int mMaxEntriesCount = InternetDialogController.MAX_WIFI_ENTRY_COUNT;
 
     protected View mHolderView;
     protected Context mContext;
@@ -87,7 +90,8 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
      */
     public void setWifiEntries(@Nullable List<WifiEntry> wifiEntries, int wifiEntriesCount) {
         mWifiEntries = wifiEntries;
-        mWifiEntriesCount = wifiEntriesCount;
+        mWifiEntriesCount =
+                (wifiEntriesCount < mMaxEntriesCount) ? wifiEntriesCount : mMaxEntriesCount;
     }
 
     /**
@@ -98,6 +102,20 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
     @Override
     public int getItemCount() {
         return mWifiEntriesCount;
+    }
+
+    /**
+     * Sets the maximum number of Wi-Fi networks.
+     */
+    public void setMaxEntriesCount(int count) {
+        if (count < 0 || mMaxEntriesCount == count) {
+            return;
+        }
+        mMaxEntriesCount = count;
+        if (mWifiEntriesCount > count) {
+            mWifiEntriesCount = count;
+            notifyDataSetChanged();
+        }
     }
 
     /**

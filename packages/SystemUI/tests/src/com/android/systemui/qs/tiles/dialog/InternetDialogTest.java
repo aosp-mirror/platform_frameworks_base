@@ -347,7 +347,7 @@ public class InternetDialogTest extends SysuiTestCase {
         // The preconditions WiFi ON and WiFi entries are already in setUp()
         mInternetDialog.mConnectedWifiEntry = null;
         mInternetDialog.mWifiEntriesCount = MAX_WIFI_ENTRY_COUNT;
-        mInternetDialog.mHasMoreEntry = true;
+        mInternetDialog.mHasMoreWifiEntries = true;
 
         mInternetDialog.updateDialog(false);
 
@@ -360,7 +360,7 @@ public class InternetDialogTest extends SysuiTestCase {
     public void updateDialog_wifiOnAndHasBothWifiEntry_showBothWifiEntryAndSeeAll() {
         // The preconditions WiFi ON and WiFi entries are already in setUp()
         mInternetDialog.mWifiEntriesCount = MAX_WIFI_ENTRY_COUNT - 1;
-        mInternetDialog.mHasMoreEntry = true;
+        mInternetDialog.mHasMoreWifiEntries = true;
 
         mInternetDialog.updateDialog(false);
 

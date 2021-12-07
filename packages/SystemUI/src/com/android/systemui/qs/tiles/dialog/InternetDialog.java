@@ -138,7 +138,7 @@ public class InternetDialog extends SystemUIDialog implements
     @VisibleForTesting
     protected int mWifiEntriesCount;
     @VisibleForTesting
-    protected boolean mHasMoreEntry;
+    protected boolean mHasMoreWifiEntries;
 
     // Wi-Fi scanning progress bar
     protected boolean mIsProgressBarVisible;
@@ -462,9 +462,17 @@ public class InternetDialog extends SystemUIDialog implements
             mSeeAllLayout.setVisibility(View.GONE);
             return;
         }
-        mWifiRecyclerView.setMinimumHeight(mWifiNetworkHeight * getWifiListMaxCount());
+        final int wifiListMaxCount = getWifiListMaxCount();
+        if (mAdapter.getItemCount() > wifiListMaxCount) {
+            mAdapter.setMaxEntriesCount(wifiListMaxCount);
+            mHasMoreWifiEntries = true;
+        }
+        final int wifiListMinHeight = mWifiNetworkHeight * wifiListMaxCount;
+        if (mWifiRecyclerView.getMinimumHeight() != wifiListMinHeight) {
+            mWifiRecyclerView.setMinimumHeight(wifiListMinHeight);
+        }
         mWifiRecyclerView.setVisibility(View.VISIBLE);
-        mSeeAllLayout.setVisibility(mHasMoreEntry ? View.VISIBLE : View.INVISIBLE);
+        mSeeAllLayout.setVisibility(mHasMoreWifiEntries ? View.VISIBLE : View.INVISIBLE);
     }
 
     @VisibleForTesting
@@ -654,14 +662,14 @@ public class InternetDialog extends SystemUIDialog implements
     @Override
     @WorkerThread
     public void onAccessPointsChanged(@Nullable List<WifiEntry> wifiEntries,
-            @Nullable WifiEntry connectedEntry, boolean hasMoreEntry) {
+            @Nullable WifiEntry connectedEntry, boolean hasMoreWifiEntries) {
         // Should update the carrier network layout when it is connected under airplane mode ON.
         boolean shouldUpdateCarrierNetwork = mMobileNetworkLayout.getVisibility() == View.VISIBLE
                 && mInternetDialogController.isAirplaneModeEnabled();
         mHandler.post(() -> {
             mConnectedWifiEntry = connectedEntry;
             mWifiEntriesCount = wifiEntries == null ? 0 : wifiEntries.size();
-            mHasMoreEntry = hasMoreEntry;
+            mHasMoreWifiEntries = hasMoreWifiEntries;
             updateDialog(shouldUpdateCarrierNetwork /* shouldUpdateMobileNetwork */);
             mAdapter.setWifiEntries(wifiEntries, mWifiEntriesCount);
             mAdapter.notifyDataSetChanged();

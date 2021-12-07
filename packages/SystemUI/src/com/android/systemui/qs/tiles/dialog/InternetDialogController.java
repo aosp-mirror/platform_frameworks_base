@@ -883,8 +883,11 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             return;
         }
 
-        boolean hasMoreEntry = false;
+        boolean hasMoreWifiEntries = false;
         int count = MAX_WIFI_ENTRY_COUNT;
+        // TODO: (b/206807144) Plan to remove the design of calculating WiFi list here, and
+        //  calculate the number of WiFi list by referring to the Visibility of each network in
+        //  InternetDialog.
         if (mHasEthernet) {
             count -= 1;
         }
@@ -895,7 +898,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         if (count > wifiTotalCount) {
             count = wifiTotalCount;
         } else if (count < wifiTotalCount) {
-            hasMoreEntry = true;
+            hasMoreWifiEntries = true;
         }
 
         WifiEntry connectedEntry = null;
@@ -911,7 +914,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mConnectedEntry = connectedEntry;
         mWifiEntriesCount = wifiEntries.size();
 
-        mCallback.onAccessPointsChanged(wifiEntries, mConnectedEntry, hasMoreEntry);
+        mCallback.onAccessPointsChanged(wifiEntries, mConnectedEntry, hasMoreWifiEntries);
     }
 
     @Override
@@ -1061,7 +1064,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         void dismissDialog();
 
         void onAccessPointsChanged(@Nullable List<WifiEntry> wifiEntries,
-                @Nullable WifiEntry connectedEntry, boolean hasMoreEntry);
+                @Nullable WifiEntry connectedEntry, boolean hasMoreWifiEntries);
     }
 
     void makeOverlayToast(int stringId) {
