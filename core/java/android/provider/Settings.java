@@ -16988,6 +16988,14 @@ public final class Settings {
                     "wear_activity_auto_resume_timeout_ms";
 
             /**
+             * If the current {@code WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS} value is set by user.
+             * 1 for true, 0 for false.
+             * @hide
+             */
+            public static final String WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_SET_BY_USER =
+                    "wear_activity_auto_resume_timeout_set_by_user";
+
+            /**
              * If burn in protection is enabled.
              * @hide
              */
