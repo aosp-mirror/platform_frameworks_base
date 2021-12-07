@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 
 import androidx.core.graphics.drawable.IconCompat;
 
@@ -73,6 +74,15 @@ public class MediaOutputGroupDialog extends MediaOutputBaseDialog {
             return mContext.getText(R.string.media_output_dialog_single_device);
         }
         return mContext.getString(R.string.media_output_dialog_multiple_devices, size);
+    }
+
+    @Override
+    void refresh() {
+        super.refresh();
+        final int size = getHeaderIconSize();
+        final int padding = mContext.getResources().getDimensionPixelSize(
+                R.dimen.media_output_dialog_header_icon_padding);
+        mHeaderIcon.setLayoutParams(new LinearLayout.LayoutParams(size + padding, size));
     }
 
     @Override
