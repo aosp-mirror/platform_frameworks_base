@@ -3454,10 +3454,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return true;
         }
         final String permissionName = permission.getName();
-        if (isInSystemConfigPrivAppPermissions(pkg, permissionName)) {
+        final ApexManager apexManager = ApexManager.getInstance();
+        final String containingApexPackageName =
+                apexManager.getActiveApexPackageNameContainingPackage(packageName);
+        if (isInSystemConfigPrivAppPermissions(pkg, permissionName,
+                containingApexPackageName)) {
             return true;
         }
-        if (isInSystemConfigPrivAppDenyPermissions(pkg, permissionName)) {
+        if (isInSystemConfigPrivAppDenyPermissions(pkg, permissionName,
+                containingApexPackageName)) {
             return false;
         }
         // Updated system apps do not need to be allowlisted
@@ -3474,9 +3479,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
         // Only enforce the allowlist on boot
         if (!mSystemReady) {
-            final ApexManager apexManager = ApexManager.getInstance();
-            final String containingApexPackageName =
-                    apexManager.getActiveApexPackageNameContainingPackage(packageName);
             final boolean isInUpdatedApex = containingApexPackageName != null
                     && !apexManager.isFactory(apexManager.getPackageInfo(containingApexPackageName,
                     MATCH_ACTIVE_PACKAGE));
@@ -3500,7 +3502,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private boolean isInSystemConfigPrivAppPermissions(@NonNull AndroidPackage pkg,
-            @NonNull String permission) {
+            @NonNull String permission, String containingApexPackageName) {
         final SystemConfig systemConfig = SystemConfig.getInstance();
         final Set<String> permissions;
         if (pkg.isVendor()) {
@@ -3509,6 +3511,26 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             permissions = systemConfig.getProductPrivAppPermissions(pkg.getPackageName());
         } else if (pkg.isSystemExt()) {
             permissions = systemConfig.getSystemExtPrivAppPermissions(pkg.getPackageName());
+        } else if (containingApexPackageName != null) {
+            final Set<String> privAppPermissions = systemConfig.getPrivAppPermissions(
+                    pkg.getPackageName());
+            final Set<String> apexPermissions = systemConfig.getApexPrivAppPermissions(
+                    containingApexPackageName, pkg.getPackageName());
+            if (privAppPermissions != null) {
+                // TODO(andreionea): Remove check as soon as all apk-in-apex
+                // permission allowlists are migrated.
+                Slog.w(TAG, "Package " + pkg.getPackageName() + " is an APK in APEX,"
+                        + " but has permission allowlist on the system image. Please bundle the"
+                        + " allowlist in the " + containingApexPackageName + " APEX instead.");
+                if (apexPermissions != null) {
+                    permissions = new ArraySet<>(privAppPermissions);
+                    permissions.addAll(apexPermissions);
+                } else {
+                    permissions = privAppPermissions;
+                }
+            } else {
+                permissions = apexPermissions;
+            }
         } else {
             permissions = systemConfig.getPrivAppPermissions(pkg.getPackageName());
         }
@@ -3516,7 +3538,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private boolean isInSystemConfigPrivAppDenyPermissions(@NonNull AndroidPackage pkg,
-            @NonNull String permission) {
+            @NonNull String permission, String containingApexPackageName) {
         final SystemConfig systemConfig = SystemConfig.getInstance();
         final Set<String> permissions;
         if (pkg.isVendor()) {
@@ -3525,6 +3547,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             permissions = systemConfig.getProductPrivAppDenyPermissions(pkg.getPackageName());
         } else if (pkg.isSystemExt()) {
             permissions = systemConfig.getSystemExtPrivAppDenyPermissions(pkg.getPackageName());
+        } else if (containingApexPackageName != null) {
+            permissions = systemConfig.getApexPrivAppDenyPermissions(containingApexPackageName,
+                    pkg.getPackageName());
         } else {
             permissions = systemConfig.getPrivAppDenyPermissions(pkg.getPackageName());
         }
