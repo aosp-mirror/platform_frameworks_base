@@ -18,12 +18,10 @@ package com.android.systemui.biometrics;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
-import android.util.TypedValue;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 
@@ -80,23 +78,10 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
 
         mBackgroundPaint = new Paint();
         mBackgroundPaint.setStrokeWidth(mStrokeWidthPx);
-        mBackgroundPaint.setColor(context.getColor(R.color.white_disabled));
+        mBackgroundPaint.setColor(context.getColor(R.color.udfps_moving_target_fill));
         mBackgroundPaint.setAntiAlias(true);
         mBackgroundPaint.setStyle(Paint.Style.STROKE);
         mBackgroundPaint.setStrokeCap(Paint.Cap.ROUND);
-
-        // Set background paint color and alpha.
-        final int[] attrs = new int[] {android.R.attr.colorControlNormal};
-        final TypedArray typedArray = context.obtainStyledAttributes(attrs);
-        try {
-            @ColorInt final int tintColor = typedArray.getColor(0, mBackgroundPaint.getColor());
-            mBackgroundPaint.setColor(tintColor);
-        } finally {
-            typedArray.recycle();
-        }
-        TypedValue alpha = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.disabledAlpha, alpha, true);
-        mBackgroundPaint.setAlpha((int) (alpha.getFloat() * 255f));
 
         // Progress fill should *not* use the extracted system color.
         mFillPaint = new Paint();
