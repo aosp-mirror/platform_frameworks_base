@@ -52,6 +52,8 @@ import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -150,7 +152,9 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
     private ArrayMap<UserHandle, Context> mUserContexts;
     private PackageManager mPkgManager;
     private AppOpsManager mAppOpsManager;
-    private ArrayMap<Integer, ArrayList<AccessChainLink>> mAttributionChains = new ArrayMap<>();
+    @GuardedBy("mAttributionChains")
+    private final ArrayMap<Integer, ArrayList<AccessChainLink>> mAttributionChains =
+            new ArrayMap<>();
 
     /**
      * Constructor for PermissionUsageHelper
@@ -199,22 +203,24 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
         // if any link in the chain is finished, remove the chain. Then, find any other chains that
         // contain this op/package/uid/tag combination, and remove them, as well.
         // TODO ntmyren: be smarter about this
-        mAttributionChains.remove(attributionChainId);
-        int numChains = mAttributionChains.size();
-        ArrayList<Integer> toRemove = new ArrayList<>();
-        for (int i = 0; i < numChains; i++) {
-            int chainId = mAttributionChains.keyAt(i);
-            ArrayList<AccessChainLink> chain = mAttributionChains.valueAt(i);
-            int chainSize = chain.size();
-            for (int j = 0; j < chainSize; j++) {
-                AccessChainLink link = chain.get(j);
-                if (link.packageAndOpEquals(op, packageName, attributionTag, uid)) {
-                    toRemove.add(chainId);
-                    break;
+        synchronized (mAttributionChains) {
+            mAttributionChains.remove(attributionChainId);
+            int numChains = mAttributionChains.size();
+            ArrayList<Integer> toRemove = new ArrayList<>();
+            for (int i = 0; i < numChains; i++) {
+                int chainId = mAttributionChains.keyAt(i);
+                ArrayList<AccessChainLink> chain = mAttributionChains.valueAt(i);
+                int chainSize = chain.size();
+                for (int j = 0; j < chainSize; j++) {
+                    AccessChainLink link = chain.get(j);
+                    if (link.packageAndOpEquals(op, packageName, attributionTag, uid)) {
+                        toRemove.add(chainId);
+                        break;
+                    }
                 }
             }
+            mAttributionChains.removeAll(toRemove);
         }
-        mAttributionChains.removeAll(toRemove);
     }
 
     @Override
@@ -234,11 +240,13 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
             // If this is not a successful start, or it is not a chain, or it is untrusted, return
             return;
         }
-        addLinkToChainIfNotPresent(AppOpsManager.opToPublicName(op), packageName, uid,
-                attributionTag, attributionFlags, attributionChainId);
+        synchronized (mAttributionChains) {
+            addLinkToChainIfNotPresentLocked(AppOpsManager.opToPublicName(op), packageName, uid,
+                    attributionTag, attributionFlags, attributionChainId);
+        }
     }
 
-    private void addLinkToChainIfNotPresent(String op, String packageName, int uid,
+    private void addLinkToChainIfNotPresentLocked(String op, String packageName, int uid,
             String attributionTag, int attributionFlags, int attributionChainId) {
 
         ArrayList<AccessChainLink> currentChain = mAttributionChains.computeIfAbsent(
@@ -544,42 +552,44 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
             }
         }
 
-        for (int i = 0; i < mAttributionChains.size(); i++) {
-            List<AccessChainLink> usageList = mAttributionChains.valueAt(i);
-            int lastVisible = usageList.size() - 1;
-            // TODO ntmyren: remove this mic code once camera is converted to AttributionSource
-            // if the list is empty or incomplete, do not show it.
-            if (usageList.isEmpty() || !usageList.get(lastVisible).isEnd()
-                    || !usageList.get(0).isStart()
-                    || !usageList.get(lastVisible).usage.op.equals(OPSTR_RECORD_AUDIO)) {
-                continue;
-            }
-
-            //TODO ntmyren: remove once camera etc. etc.
-            for (AccessChainLink link: usageList) {
-                proxyPackages.add(link.usage.getPackageIdHash());
-            }
-
-            AccessChainLink start = usageList.get(0);
-            AccessChainLink lastVisibleLink = usageList.get(lastVisible);
-            while (lastVisible > 0 && !shouldShowPackage(lastVisibleLink.usage.packageName)) {
-                lastVisible--;
-                lastVisibleLink = usageList.get(lastVisible);
-            }
-            String proxyLabel = null;
-            if (!lastVisibleLink.usage.packageName.equals(start.usage.packageName)) {
-                try {
-                    PackageManager userPkgManager =
-                            getUserContext(lastVisibleLink.usage.getUser()).getPackageManager();
-                    ApplicationInfo appInfo = userPkgManager.getApplicationInfo(
-                            lastVisibleLink.usage.packageName, 0);
-                    proxyLabel = appInfo.loadLabel(userPkgManager).toString();
-                } catch (PackageManager.NameNotFoundException e) {
-                    // do nothing
+        synchronized (mAttributionChains) {
+            for (int i = 0; i < mAttributionChains.size(); i++) {
+                List<AccessChainLink> usageList = mAttributionChains.valueAt(i);
+                int lastVisible = usageList.size() - 1;
+                // TODO ntmyren: remove this mic code once camera is converted to AttributionSource
+                // if the list is empty or incomplete, do not show it.
+                if (usageList.isEmpty() || !usageList.get(lastVisible).isEnd()
+                        || !usageList.get(0).isStart()
+                        || !usageList.get(lastVisible).usage.op.equals(OPSTR_RECORD_AUDIO)) {
+                    continue;
                 }
 
+                //TODO ntmyren: remove once camera etc. etc.
+                for (AccessChainLink link : usageList) {
+                    proxyPackages.add(link.usage.getPackageIdHash());
+                }
+
+                AccessChainLink start = usageList.get(0);
+                AccessChainLink lastVisibleLink = usageList.get(lastVisible);
+                while (lastVisible > 0 && !shouldShowPackage(lastVisibleLink.usage.packageName)) {
+                    lastVisible--;
+                    lastVisibleLink = usageList.get(lastVisible);
+                }
+                String proxyLabel = null;
+                if (!lastVisibleLink.usage.packageName.equals(start.usage.packageName)) {
+                    try {
+                        PackageManager userPkgManager =
+                                getUserContext(lastVisibleLink.usage.getUser()).getPackageManager();
+                        ApplicationInfo appInfo = userPkgManager.getApplicationInfo(
+                                lastVisibleLink.usage.packageName, 0);
+                        proxyLabel = appInfo.loadLabel(userPkgManager).toString();
+                    } catch (PackageManager.NameNotFoundException e) {
+                        // do nothing
+                    }
+
+                }
+                usagesAndLabels.put(start.usage, proxyLabel);
             }
-            usagesAndLabels.put(start.usage, proxyLabel);
         }
 
         for (int packageHash : mostRecentUsages.keySet()) {
