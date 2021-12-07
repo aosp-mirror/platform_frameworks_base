@@ -51,8 +51,8 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
@@ -125,6 +125,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final SystemClock mSystemClock;
     @NonNull private final UnlockedScreenOffAnimationController
             mUnlockedScreenOffAnimationController;
+    @NonNull private final LatencyTracker mLatencyTracker;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
@@ -349,6 +350,7 @@ public class UdfpsController implements DozeReceiver {
                 boolean withinSensorArea =
                         isWithinSensorArea(udfpsView, event.getX(), event.getY(), fromUdfpsView);
                 if (withinSensorArea) {
+                    mLatencyTracker.onActionStart(LatencyTracker.ACTION_UDFPS_ILLUMINATE);
                     Trace.beginAsyncSection("UdfpsController.e2e.onPointerDown", 0);
                     Log.v(TAG, "onTouch | action down");
                     // The pointer that causes ACTION_DOWN is always at index 0.
@@ -484,7 +486,8 @@ public class UdfpsController implements DozeReceiver {
             @NonNull ConfigurationController configurationController,
             @NonNull SystemClock systemClock,
             @NonNull UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
-            @NonNull SystemUIDialogManager dialogManager) {
+            @NonNull SystemUIDialogManager dialogManager,
+            @NonNull LatencyTracker latencyTracker) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -512,6 +515,7 @@ public class UdfpsController implements DozeReceiver {
         mConfigurationController = configurationController;
         mSystemClock = systemClock;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mLatencyTracker = latencyTracker;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -751,6 +755,7 @@ public class UdfpsController implements DozeReceiver {
             Trace.beginAsyncSection("UdfpsController.e2e.startIllumination", 0);
             view.startIllumination(() -> {
                 mFingerprintManager.onUiReady(mSensorProps.sensorId);
+                mLatencyTracker.onActionEnd(LatencyTracker.ACTION_UDFPS_ILLUMINATE);
                 Trace.endAsyncSection("UdfpsController.e2e.startIllumination", 0);
             });
         }

@@ -15,7 +15,6 @@
  */
 package com.android.systemui.biometrics
 
-
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.SystemUIDialogManager

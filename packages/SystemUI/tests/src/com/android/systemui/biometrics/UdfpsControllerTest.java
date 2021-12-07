@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -53,6 +54,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -81,6 +83,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -154,7 +157,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private SystemClock mSystemClock;
     @Mock
     private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
-
+    @Mock
+    private LatencyTracker mLatencyTracker;
     private FakeExecutor mFgExecutor;
 
     // Stuff for configuring mocks
@@ -247,7 +251,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mConfigurationController,
                 mSystemClock,
                 mUnlockedScreenOffAnimationController,
-                mSystemUIDialogManager);
+                mSystemUIDialogManager,
+                mLatencyTracker);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
@@ -463,11 +468,15 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // THEN FingerprintManager is notified about onPointerDown
         verify(mFingerprintManager).onPointerDown(eq(mUdfpsController.mSensorProps.sensorId), eq(0),
                 eq(0), eq(0f), eq(0f));
+        verify(mLatencyTracker).onActionStart(eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));
         // AND illumination begins
         verify(mUdfpsView).startIllumination(mOnIlluminatedRunnableCaptor.capture());
+        verify(mLatencyTracker, never()).onActionEnd(eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));
         // AND onIlluminatedRunnable notifies FingerprintManager about onUiReady
         mOnIlluminatedRunnableCaptor.getValue().run();
-        verify(mFingerprintManager).onUiReady(eq(mUdfpsController.mSensorProps.sensorId));
+        InOrder inOrder = inOrder(mFingerprintManager, mLatencyTracker);
+        inOrder.verify(mFingerprintManager).onUiReady(eq(mUdfpsController.mSensorProps.sensorId));
+        inOrder.verify(mLatencyTracker).onActionEnd(eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));
     }
 
     @Test

@@ -127,6 +127,11 @@ public class LatencyTracker {
      */
     public static final int ACTION_SWITCH_DISPLAY_UNFOLD = 13;
 
+    /**
+     * Time it takes for a UDFPS sensor to appear ready after it is touched.
+     */
+    public static final int ACTION_UDFPS_ILLUMINATE = 14;
+
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -141,7 +146,8 @@ public class LatencyTracker {
         ACTION_ROTATE_SCREEN_CAMERA_CHECK,
         ACTION_LOCKSCREEN_UNLOCK,
         ACTION_USER_SWITCH,
-        ACTION_SWITCH_DISPLAY_UNFOLD
+        ACTION_SWITCH_DISPLAY_UNFOLD,
+        ACTION_UDFPS_ILLUMINATE
     };
 
     /** @hide */
@@ -159,7 +165,8 @@ public class LatencyTracker {
         ACTION_ROTATE_SCREEN_CAMERA_CHECK,
         ACTION_LOCKSCREEN_UNLOCK,
         ACTION_USER_SWITCH,
-        ACTION_SWITCH_DISPLAY_UNFOLD
+        ACTION_SWITCH_DISPLAY_UNFOLD,
+        ACTION_UDFPS_ILLUMINATE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -179,7 +186,8 @@ public class LatencyTracker {
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_CAMERA_CHECK,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_USER_SWITCH,
-            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SWITCH_DISPLAY_UNFOLD
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SWITCH_DISPLAY_UNFOLD,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_UDFPS_ILLUMINATE
     };
 
     private static LatencyTracker sLatencyTracker;
@@ -267,6 +275,8 @@ public class LatencyTracker {
                 return "ACTION_USER_SWITCH";
             case 14:
                 return "ACTION_SWITCH_DISPLAY_UNFOLD";
+            case 15:
+                return "ACTION_UDFPS_ILLUMINATE";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }
