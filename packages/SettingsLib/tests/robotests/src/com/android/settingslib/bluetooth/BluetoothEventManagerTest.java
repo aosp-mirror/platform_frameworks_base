@@ -109,7 +109,7 @@ public class BluetoothEventManagerTest {
                         /* handler= */ null, /* userHandle= */ null);
 
         verify(mockContext).registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class),
-                eq(null), eq(null));
+                eq(null), eq(null), eq(Context.RECEIVER_EXPORTED));
     }
 
     @Test
@@ -120,7 +120,7 @@ public class BluetoothEventManagerTest {
                         /* handler= */ null, UserHandle.ALL);
 
         verify(mockContext).registerReceiverAsUser(any(BroadcastReceiver.class), eq(UserHandle.ALL),
-                any(IntentFilter.class), eq(null), eq(null));
+                any(IntentFilter.class), eq(null), eq(null), eq(Context.RECEIVER_EXPORTED));
     }
 
     /**
@@ -129,6 +129,7 @@ public class BluetoothEventManagerTest {
     @Test
     public void intentWithExtraState_audioStateChangedShouldDispatchToRegisterCallback() {
         mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mBluetoothEventManager.registerIntentReceiver();
         mIntent = new Intent(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
 
         mContext.sendBroadcast(mIntent);
@@ -142,6 +143,7 @@ public class BluetoothEventManagerTest {
     @Test
     public void intentWithExtraState_phoneStateChangedShouldDispatchToRegisterCallback() {
         mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mBluetoothEventManager.registerIntentReceiver();
         mIntent = new Intent(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
 
         mContext.sendBroadcast(mIntent);
@@ -167,6 +169,7 @@ public class BluetoothEventManagerTest {
     @Test
     public void dispatchAclConnectionStateChanged_aclDisconnected_shouldDispatchCallback() {
         mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mBluetoothEventManager.registerIntentReceiver();
         mIntent = new Intent(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
 
@@ -179,6 +182,7 @@ public class BluetoothEventManagerTest {
     @Test
     public void dispatchAclConnectionStateChanged_aclConnected_shouldDispatchCallback() {
         mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mBluetoothEventManager.registerIntentReceiver();
         mIntent = new Intent(BluetoothDevice.ACTION_ACL_CONNECTED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
 
@@ -192,6 +196,7 @@ public class BluetoothEventManagerTest {
     public void dispatchAclConnectionStateChanged_aclDisconnected_shouldNotCallbackSubDevice() {
         when(mCachedDeviceManager.isSubDevice(mBluetoothDevice)).thenReturn(true);
         mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mBluetoothEventManager.registerIntentReceiver();
         mIntent = new Intent(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
 
@@ -205,6 +210,7 @@ public class BluetoothEventManagerTest {
     public void dispatchAclConnectionStateChanged_aclConnected_shouldNotCallbackSubDevice() {
         when(mCachedDeviceManager.isSubDevice(mBluetoothDevice)).thenReturn(true);
         mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mBluetoothEventManager.registerIntentReceiver();
         mIntent = new Intent(BluetoothDevice.ACTION_ACL_CONNECTED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
 
@@ -218,6 +224,7 @@ public class BluetoothEventManagerTest {
     public void dispatchAclConnectionStateChanged_findDeviceReturnNull_shouldNotDispatchCallback() {
         when(mCachedDeviceManager.findDevice(mBluetoothDevice)).thenReturn(null);
         mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mBluetoothEventManager.registerIntentReceiver();
         mIntent = new Intent(BluetoothDevice.ACTION_ACL_CONNECTED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
 
@@ -354,6 +361,7 @@ public class BluetoothEventManagerTest {
 
     @Test
     public void showUnbondMessage_reasonAuthTimeout_showCorrectedErrorCode() {
+        mBluetoothEventManager.registerIntentReceiver();
         mIntent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
         mIntent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
@@ -369,6 +377,7 @@ public class BluetoothEventManagerTest {
 
     @Test
     public void showUnbondMessage_reasonRemoteDeviceDown_showCorrectedErrorCode() {
+        mBluetoothEventManager.registerIntentReceiver();
         mIntent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
         mIntent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
@@ -385,6 +394,7 @@ public class BluetoothEventManagerTest {
 
     @Test
     public void showUnbondMessage_reasonAuthRejected_showCorrectedErrorCode() {
+        mBluetoothEventManager.registerIntentReceiver();
         mIntent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
         mIntent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
@@ -400,6 +410,7 @@ public class BluetoothEventManagerTest {
 
     @Test
     public void showUnbondMessage_reasonAuthFailed_showCorrectedErrorCode() {
+        mBluetoothEventManager.registerIntentReceiver();
         mIntent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
         mIntent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
