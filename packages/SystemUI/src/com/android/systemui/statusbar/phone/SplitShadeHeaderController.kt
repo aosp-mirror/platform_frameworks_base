@@ -19,12 +19,14 @@ package com.android.systemui.statusbar.phone
 import android.view.View
 import androidx.constraintlayout.motion.widget.MotionLayout
 import com.android.settingslib.Utils
+import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.qs.ChipVisibilityListener
 import com.android.systemui.qs.HeaderPrivacyIconsController
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent.StatusBarScope
@@ -97,6 +99,18 @@ class SplitShadeHeaderController @Inject constructor(
             }
         }
 
+    private val chipVisibilityListener: ChipVisibilityListener = object : ChipVisibilityListener {
+        override fun onChipVisibilityRefreshed(visible: Boolean) {
+            if (statusBar is MotionLayout) {
+                val state = statusBar.getConstraintSet(R.id.qqs_header_constraint).apply {
+                    setAlpha(R.id.statusIcons, if (visible) 0f else 1f)
+                    setAlpha(R.id.batteryRemainingIcon, if (visible) 0f else 1f)
+                }
+                statusBar.updateState(R.id.qqs_header_constraint, state)
+            }
+        }
+    }
+
     init {
         if (statusBar is MotionLayout) {
             val context = statusBar.context
@@ -107,6 +121,7 @@ class SplitShadeHeaderController @Inject constructor(
                     .load(context, resources.getXml(R.xml.qs_header))
             statusBar.getConstraintSet(R.id.split_header_constraint)
                     .load(context, resources.getXml(R.xml.split_header))
+            privacyIconsController.chipVisibilityListener = chipVisibilityListener
         }
     }
 
@@ -149,7 +164,7 @@ class SplitShadeHeaderController @Inject constructor(
     }
 
     private fun onSplitShadeModeChanged() {
-        if (splitShadeMode) {
+        if (splitShadeMode || combinedHeaders) {
             privacyIconsController.onParentVisible()
         } else {
             privacyIconsController.onParentInvisible()
