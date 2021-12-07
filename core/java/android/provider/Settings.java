@@ -953,6 +953,22 @@ public final class Settings {
     public static final String ACTION_LOCKSCREEN_SETTINGS = "android.settings.LOCK_SCREEN_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow pairing bluetooth devices.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_BLUETOOTH_PAIRING_SETTINGS =
+            "android.settings.BLUETOOTH_PAIRING_SETTINGS";
+
+    /**
      * Activity Action: Show settings to configure input methods, in particular
      * allowing the user to enable input methods.
      * <p>
