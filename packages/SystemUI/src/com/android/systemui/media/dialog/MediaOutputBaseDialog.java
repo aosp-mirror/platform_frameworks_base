@@ -63,12 +63,13 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     View mDialogView;
     private TextView mHeaderTitle;
     private TextView mHeaderSubtitle;
-    private ImageView mHeaderIcon;
     private RecyclerView mDevicesRecyclerView;
     private LinearLayout mDeviceListLayout;
     private Button mDoneButton;
     private Button mStopButton;
     private int mListMaxHeight;
+
+    protected ImageView mHeaderIcon;
 
     MediaOutputBaseAdapter mAdapter;
 
@@ -140,7 +141,6 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mMediaOutputController.stop();
     }
 
-    @VisibleForTesting
     void refresh() {
         // Update header icon
         final int iconRes = getHeaderIconRes();
@@ -153,12 +153,6 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             mHeaderIcon.setImageIcon(iconCompat.toIcon(mContext));
         } else {
             mHeaderIcon.setVisibility(View.GONE);
-        }
-        if (mHeaderIcon.getVisibility() == View.VISIBLE) {
-            final int size = getHeaderIconSize();
-            final int padding = mContext.getResources().getDimensionPixelSize(
-                    R.dimen.media_output_dialog_header_icon_padding);
-            mHeaderIcon.setLayoutParams(new LinearLayout.LayoutParams(size + padding, size));
         }
         // Update title and subtitle
         mHeaderTitle.setText(getHeaderText());
