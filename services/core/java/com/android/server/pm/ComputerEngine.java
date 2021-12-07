@@ -4629,9 +4629,9 @@ public class ComputerEngine implements Computer {
             }
         } else {
             list = new ArrayList<>(mPackages.size());
-            for (PackageStateInternal packageState : packageStates.values()) {
-                final AndroidPackage pkg = packageState.getPkg();
-                if (pkg == null) {
+            for (AndroidPackage p : mPackages.values()) {
+                final PackageStateInternal packageState = packageStates.get(p.getPackageName());
+                if (packageState == null) {
                     continue;
                 }
                 if (filterSharedLibPackage(packageState, Binder.getCallingUid(), userId, flags)) {
@@ -4640,10 +4640,10 @@ public class ComputerEngine implements Computer {
                 if (shouldFilterApplication(packageState, callingUid, userId)) {
                     continue;
                 }
-                ApplicationInfo ai = PackageInfoUtils.generateApplicationInfo(pkg, flags,
+                ApplicationInfo ai = PackageInfoUtils.generateApplicationInfo(p, flags,
                         packageState.getUserStateOrDefault(userId), userId, packageState);
                 if (ai != null) {
-                    ai.packageName = resolveExternalPackageName(pkg);
+                    ai.packageName = resolveExternalPackageName(p);
                     list.add(ai);
                 }
             }
