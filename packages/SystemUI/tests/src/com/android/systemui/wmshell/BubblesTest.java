@@ -99,8 +99,8 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowControllerImpl;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -243,7 +243,7 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
-    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock
     private AuthController mAuthController;
 
@@ -269,7 +269,7 @@ public class BubblesTest extends SysuiTestCase {
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager, mKeyguardStateController,
-                mUnlockedScreenOffAnimationController, mAuthController);
+                mScreenOffAnimationController, mAuthController);
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
         mNotificationShadeWindowController.attach();
 

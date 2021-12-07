@@ -375,6 +375,7 @@
         </receiver>
 
         <service android:name=".ImageWallpaper"
+                android:singleUser="true"
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
 

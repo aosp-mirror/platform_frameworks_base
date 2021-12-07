@@ -34,7 +34,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -71,7 +71,7 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
     private DozeParameters mDozeParameters;
 
     @Mock
-    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private ScreenOffAnimationController mScreenOffAnimationController;
 
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -93,7 +93,7 @@ public class CommunalHostViewControllerTest extends SysuiTestCase {
 
         mController = new CommunalHostViewController(mFakeExecutor, mCommunalStateController,
                 mKeyguardUpdateMonitor, mKeyguardStateController, mDozeParameters,
-                mUnlockedScreenOffAnimationController, mStatusBarStateController, mCommunalView);
+                mScreenOffAnimationController, mStatusBarStateController, mCommunalView);
         mController.init();
         mFakeExecutor.runAllReady();
 

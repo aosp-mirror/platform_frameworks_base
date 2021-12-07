@@ -26,7 +26,7 @@ import com.android.systemui.communal.CommunalStateController;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -63,7 +63,7 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     @Mock
     SmartspaceTransitionController mSmartSpaceTransitionController;
     @Mock
-    UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    ScreenOffAnimationController mScreenOffAnimationController;
     @Captor
     private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallbackCaptor;
 
@@ -84,7 +84,7 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
                 mDozeParameters,
                 mKeyguardUnlockAnimationController,
                 mSmartSpaceTransitionController,
-                mUnlockedScreenOffAnimationController);
+                mScreenOffAnimationController);
     }
 
     @Test

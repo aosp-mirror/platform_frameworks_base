@@ -117,8 +117,8 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -247,7 +247,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     private StatusBarManager mStatusBarManager;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final Executor mUiBgExecutor;
-    private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private final ScreenOffAnimationController mScreenOffAnimationController;
     private final Lazy<NotificationShadeDepthController> mNotificationShadeDepthController;
 
     private boolean mSystemReady;
@@ -846,7 +846,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             SysuiStatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
             Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationControllerLazy,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            ScreenOffAnimationController screenOffAnimationController,
             Lazy<NotificationShadeDepthController> notificationShadeDepthController,
             InteractionJankMonitor interactionJankMonitor) {
         super(context);
@@ -884,7 +884,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
         mKeyguardStateController = keyguardStateController;
         mKeyguardUnlockAnimationControllerLazy = keyguardUnlockAnimationControllerLazy;
-        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mScreenOffAnimationController = screenOffAnimationController;
         mInteractionJankMonitor = interactionJankMonitor;
     }
 
@@ -1112,7 +1112,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
      * {@link #onStartedWakingUp} if the animation is cancelled.
      */
     public void maybeHandlePendingLock() {
-        if (mPendingLock && !mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()) {
+        if (mPendingLock && !mScreenOffAnimationController.isKeyguardShowDelayed()) {
             doKeyguardLocked(null);
             mPendingLock = false;
         }

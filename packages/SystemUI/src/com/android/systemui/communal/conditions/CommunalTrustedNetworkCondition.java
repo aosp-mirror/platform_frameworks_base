@@ -31,6 +31,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.util.condition.Condition;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.Arrays;
@@ -42,7 +43,7 @@ import javax.inject.Inject;
  * Monitors Wi-Fi connections and triggers callback, if any, when the device is connected to and
  * disconnected from a trusted network.
  */
-public class CommunalTrustedNetworkCondition extends CommunalCondition {
+public class CommunalTrustedNetworkCondition extends Condition {
     private final String mTag = getClass().getSimpleName();
     private final ConnectivityManager mConnectivityManager;
     private final ContentObserver mTrustedNetworksObserver;

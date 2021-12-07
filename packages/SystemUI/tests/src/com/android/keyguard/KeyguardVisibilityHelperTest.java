@@ -26,7 +26,7 @@ import android.view.ViewPropertyAnimator;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.communal.CommunalStateController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
@@ -43,7 +43,7 @@ public class KeyguardVisibilityHelperTest extends SysuiTestCase {
     @Mock
     com.android.systemui.statusbar.phone.DozeParameters mDozeParameters;
     @Mock
-    UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    ScreenOffAnimationController mScreenOffAnimationController;
     @Mock
     ViewPropertyAnimator mViewPropertyAnimator;
     @Mock
@@ -56,7 +56,7 @@ public class KeyguardVisibilityHelperTest extends SysuiTestCase {
         when(mTargetView.animate()).thenReturn(mViewPropertyAnimator);
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mTargetView,
                 mCommunalStateController, mKeyguardStateController, mDozeParameters,
-                mUnlockedScreenOffAnimationController, false, false);
+                mScreenOffAnimationController, false, false);
     }
 
     @Test
@@ -84,7 +84,7 @@ public class KeyguardVisibilityHelperTest extends SysuiTestCase {
         // is present.
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mTargetView,
                 mCommunalStateController, mKeyguardStateController, mDozeParameters,
-                mUnlockedScreenOffAnimationController, false, true);
+                mScreenOffAnimationController, false, true);
         mKeyguardVisibilityHelper.setViewVisibility(StatusBarState.KEYGUARD, false,
                 false, StatusBarState.KEYGUARD);
         verify(mTargetView).setVisibility(View.VISIBLE);

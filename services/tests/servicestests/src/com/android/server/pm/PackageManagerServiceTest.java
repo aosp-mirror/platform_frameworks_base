@@ -629,17 +629,19 @@ public class PackageManagerServiceTest {
     public void testInstallReason_afterUpdate_keepUnchanged() throws Exception {
         final File testApk = new File(TEST_DATA_PATH, TEST_APP_APK);
         try {
-            // Try to install test APK with reason INSTALL_REASON_POLICY
-            runShellCommand("pm install --install-reason 1 " + testApk);
+            // Try to install test APK with reason INSTALL_REASON_DEVICE_SETUP
+            runShellCommand("pm install --install-reason 3 " + testApk);
             assertWithMessage("The install reason of test APK is incorrect.").that(
                     mIPackageManager.getInstallReason(TEST_PKG_NAME,
-                            UserHandle.myUserId())).isEqualTo(PackageManager.INSTALL_REASON_POLICY);
+                            UserHandle.myUserId())).isEqualTo(
+                    PackageManager.INSTALL_REASON_DEVICE_SETUP);
 
             // Try to update test APK with different reason INSTALL_REASON_USER
             runShellCommand("pm install --install-reason 4 " + testApk);
             assertWithMessage("The install reason should keep unchanged after update.").that(
                     mIPackageManager.getInstallReason(TEST_PKG_NAME,
-                            UserHandle.myUserId())).isEqualTo(PackageManager.INSTALL_REASON_POLICY);
+                            UserHandle.myUserId())).isEqualTo(
+                    PackageManager.INSTALL_REASON_DEVICE_SETUP);
         } finally {
             runShellCommand("pm uninstall " + TEST_PKG_NAME);
         }
@@ -653,11 +655,12 @@ public class PackageManagerServiceTest {
         final File testApk = new File(TEST_DATA_PATH, TEST_APP_APK);
         int userId = UserHandle.USER_NULL;
         try {
-            // Try to install test APK with reason INSTALL_REASON_POLICY
-            runShellCommand("pm install --install-reason 1 " + testApk);
+            // Try to install test APK with reason INSTALL_REASON_DEVICE_SETUP
+            runShellCommand("pm install --install-reason 3 " + testApk);
             assertWithMessage("The install reason of test APK is incorrect.").that(
                     mIPackageManager.getInstallReason(TEST_PKG_NAME,
-                            UserHandle.myUserId())).isEqualTo(PackageManager.INSTALL_REASON_POLICY);
+                            UserHandle.myUserId())).isEqualTo(
+                    PackageManager.INSTALL_REASON_DEVICE_SETUP);
 
             // Create and start the 2nd user.
             userId = um.createUser("Test User", 0 /* flags */).getUserHandle().getIdentifier();
@@ -692,8 +695,8 @@ public class PackageManagerServiceTest {
             userId = um.createUser("Test User", 0 /* flags */).getUserHandle().getIdentifier();
             runShellCommand("am start-user -w " + userId);
 
-            // Try to install test APK to all users with reason INSTALL_REASON_POLICY
-            runShellCommand("pm install --install-reason 1 " + testApk);
+            // Try to install test APK to all users with reason INSTALL_REASON_DEVICE_SETUP
+            runShellCommand("pm install --install-reason 3 " + testApk);
             assertWithMessage("The install reason is inconsistent across users.").that(
                     mIPackageManager.getInstallReason(TEST_PKG_NAME,
                             UserHandle.myUserId())).isEqualTo(
@@ -718,11 +721,12 @@ public class PackageManagerServiceTest {
             userId = um.createUser("Test User", 0 /* flags */).getUserHandle().getIdentifier();
             runShellCommand("am start-user -w " + userId);
 
-            // Try to install test APK on the current user with reason INSTALL_REASON_POLICY
-            runShellCommand("pm install --user cur --install-reason 1 " + testApk);
+            // Try to install test APK on the current user with reason INSTALL_REASON_DEVICE_SETUP
+            runShellCommand("pm install --user cur --install-reason 3 " + testApk);
             assertWithMessage("The install reason on the current user is incorrect.").that(
                     mIPackageManager.getInstallReason(TEST_PKG_NAME,
-                            UserHandle.myUserId())).isEqualTo(PackageManager.INSTALL_REASON_POLICY);
+                            UserHandle.myUserId())).isEqualTo(
+                    PackageManager.INSTALL_REASON_DEVICE_SETUP);
 
             // Try to install test APK on the 2nd user with reason INSTALL_REASON_USER
             runShellCommand("pm install --user " + userId + " --install-reason 4 " + testApk);

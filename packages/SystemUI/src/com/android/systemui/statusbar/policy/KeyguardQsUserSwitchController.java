@@ -50,7 +50,7 @@ import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.UserAvatarView;
 import com.android.systemui.util.ViewController;
 
@@ -131,7 +131,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
             SysuiStatusBarStateController statusBarStateController,
             DozeParameters dozeParameters,
             Provider<UserDetailView.Adapter> userDetailViewAdapterProvider,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            ScreenOffAnimationController screenOffAnimationController,
             FeatureFlags featureFlags,
             UserSwitchDialogController userSwitchDialogController) {
         super(view);
@@ -146,7 +146,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
         mStatusBarStateController = statusBarStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, communalStateController,
                 keyguardStateController, dozeParameters,
-                unlockedScreenOffAnimationController,  /* animateYPos= */ false,
+                screenOffAnimationController,  /* animateYPos= */ false,
                 /* visibleOnCommunal= */ false);
         mUserDetailAdapter = new KeyguardUserDetailAdapter(context, userDetailViewAdapterProvider);
         mFeatureFlags = featureFlags;

@@ -18,9 +18,9 @@ package com.android.internal.os;
 
 import android.annotation.Nullable;
 
-/** Wrapper around libdmabufinfo. */
-public final class DmabufInfoReader {
-    private DmabufInfoReader() {}
+/** JNI wrapper around libmeminfo for kernel memory allocation stats (dmabufs, gpu driver). */
+public final class KernelAllocationStats {
+    private KernelAllocationStats() {}
 
     /** Process dma-buf stats. */
     public static final class ProcessDmabuf {
@@ -47,5 +47,19 @@ public final class DmabufInfoReader {
      * stats could not be read.
      */
     @Nullable
-    public static native ProcessDmabuf getProcessStats(int pid);
+    public static native ProcessDmabuf getDmabufAllocations(int pid);
+
+    /** Pid to gpu memory size. */
+    public static final class ProcessGpuMem {
+        public final int pid;
+        public final int gpuMemoryKb;
+
+        ProcessGpuMem(int pid, int gpuMemoryKb) {
+            this.pid = pid;
+            this.gpuMemoryKb = gpuMemoryKb;
+        }
+    }
+
+    /** Return list of pid to gpu memory size. */
+    public static native ProcessGpuMem[] getGpuAllocations();
 }

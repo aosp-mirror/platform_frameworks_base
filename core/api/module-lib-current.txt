@@ -78,6 +78,10 @@ package android.content {
     method @NonNull public static android.net.Uri createContentUriForUser(@NonNull android.net.Uri, @NonNull android.os.UserHandle);
   }
 
+  public abstract class ContentResolver {
+    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public final void registerContentObserverAsUser(@NonNull android.net.Uri, boolean, @NonNull android.database.ContentObserver, @NonNull android.os.UserHandle);
+  }
+
   public abstract class Context {
     method @NonNull public android.os.UserHandle getUser();
     field public static final String PAC_PROXY_SERVICE = "pac_proxy";

@@ -588,9 +588,11 @@
     <string name="quick_settings_camera_label">Camera access</string>
     <!-- QuickSettings: Microphone [CHAR LIMIT=NONE] -->
     <string name="quick_settings_mic_label">Mic access</string>
-    <!-- QuickSettings: Camera or microphone access is allowed [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Camera or microphone access is allowed. If you update this string, please
+    update the string "available" in packages/modules/Permission/PermissionController[CHAR LIMIT=NONE] -->
     <string name="quick_settings_camera_mic_available">Available</string>
-    <!-- QuickSettings: Camera or microphone access is blocked [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Camera or microphone access is blocked. If you update this string, please
+    update the string "blocked" in packages/modules/Permission/PermissionController [CHAR LIMIT=NONE] -->
     <string name="quick_settings_camera_mic_blocked">Blocked</string>
     <!-- QuickSettings: Media device [CHAR LIMIT=NONE] -->
     <string name="quick_settings_media_device_label">Media device</string>

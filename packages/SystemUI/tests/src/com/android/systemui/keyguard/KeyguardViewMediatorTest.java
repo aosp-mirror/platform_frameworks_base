@@ -54,8 +54,8 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
@@ -102,7 +102,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock KeyguardStateController mKeyguardStateController;
     private @Mock NotificationShadeDepthController mNotificationShadeDepthController;
     private @Mock KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
-    private @Mock UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private @Mock ScreenOffAnimationController mScreenOffAnimationController;
     private @Mock IKeyguardDrawnCallback mKeyguardDrawnCallback;
     private @Mock InteractionJankMonitor mInteractionJankMonitor;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
@@ -147,7 +147,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mKeyguardStateController,
                 () -> mKeyguardUnlockAnimationController,
-                mUnlockedScreenOffAnimationController,
+                mScreenOffAnimationController,
                 () -> mNotificationShadeDepthController,
                 mInteractionJankMonitor);
         mViewMediator.start();

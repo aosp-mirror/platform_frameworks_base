@@ -64,7 +64,6 @@ public class StatusBarWindowController {
     private final WindowManager mWindowManager;
     private final IWindowManager mIWindowManager;
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
-    private final Resources mResources;
     private int mBarHeight = -1;
     private final State mCurrentState = new State();
 
@@ -91,7 +90,6 @@ public class StatusBarWindowController {
         mLaunchAnimationContainer = mStatusBarWindowView.findViewById(
                 R.id.status_bar_launch_animation_container);
         mLpChanged = new WindowManager.LayoutParams();
-        mResources = resources;
 
         if (mBarHeight < 0) {
             mBarHeight = SystemBarUtils.getStatusBarHeight(mContext);

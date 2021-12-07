@@ -19,11 +19,8 @@ package com.android.systemui.wmshell;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
-
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -85,8 +82,8 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowControllerImpl;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -219,7 +216,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
-    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private ScreenOffAnimationController mScreenOffAnimationController;
 
     private TestableBubblePositioner mPositioner;
 
@@ -242,7 +239,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager, mKeyguardStateController,
-                mUnlockedScreenOffAnimationController, mAuthController);
+                mScreenOffAnimationController, mAuthController);
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
         mNotificationShadeWindowController.attach();
 

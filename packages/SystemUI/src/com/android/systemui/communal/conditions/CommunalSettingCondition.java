@@ -23,6 +23,7 @@ import android.provider.Settings;
 
 import androidx.annotation.MainThread;
 
+import com.android.systemui.util.condition.Condition;
 import com.android.systemui.util.settings.SecureSettings;
 
 import javax.inject.Inject;
@@ -30,7 +31,7 @@ import javax.inject.Inject;
 /**
  * Monitors the communal setting, and informs any listeners with updates.
  */
-public class CommunalSettingCondition extends CommunalCondition {
+public class CommunalSettingCondition extends Condition {
     private final SecureSettings mSecureSettings;
     private final ContentObserver mCommunalSettingContentObserver;
 

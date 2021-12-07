@@ -23,13 +23,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import com.android.keyguard.LockIconViewController;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.statusbar.NotificationShelfController;
+import com.android.systemui.statusbar.core.StatusBarInitializer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController;
 import com.android.systemui.statusbar.phone.SplitShadeHeaderController;
 import com.android.systemui.statusbar.phone.StatusBarCommandQueueCallbacks;
-import com.android.systemui.statusbar.phone.StatusBarDemoMode;
 import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 
@@ -109,12 +109,6 @@ public interface StatusBarComponent {
     AuthRippleController getAuthRippleController();
 
     /**
-     * Creates a StatusBarDemoMode.
-     */
-    @StatusBarScope
-    StatusBarDemoMode getStatusBarDemoMode();
-
-    /**
      * Creates a StatusBarHeadsUpChangeListener.
      */
     @StatusBarScope
@@ -138,4 +132,10 @@ public interface StatusBarComponent {
      */
     @Named(STATUS_BAR_FRAGMENT)
     CollapsedStatusBarFragment createCollapsedStatusBarFragment();
+
+    /**
+     * Creates a StatusBarInitializer
+     */
+    @StatusBarScope
+    StatusBarInitializer getStatusBarInitializer();
 }

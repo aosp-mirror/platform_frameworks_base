@@ -109,7 +109,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             mCallbacks = new ArrayList<>();
 
     private final SysuiColorExtractor mColorExtractor;
-    private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private final ScreenOffAnimationController mScreenOffAnimationController;
     private float mFaceAuthDisplayBrightness = LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
 
     @Inject
@@ -122,7 +122,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             SysuiColorExtractor colorExtractor,
             DumpManager dumpManager,
             KeyguardStateController keyguardStateController,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            ScreenOffAnimationController screenOffAnimationController,
             AuthController authController) {
         mContext = context;
         mWindowManager = windowManager;
@@ -134,7 +134,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardBypassController = keyguardBypassController;
         mColorExtractor = colorExtractor;
-        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mScreenOffAnimationController = screenOffAnimationController;
         dumpManager.registerDumpable(getClass().getName(), this);
         mAuthController = authController;
 
@@ -344,7 +344,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 // Make the panel focusable if we're doing the screen off animation, since the light
                 // reveal scrim is drawing in the panel and should consume touch events so that they
                 // don't go to the app behind.
-                || mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()) {
+                || mScreenOffAnimationController.shouldIgnoreKeyguardTouches()) {
             mLpChanged.flags &= ~LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable) {

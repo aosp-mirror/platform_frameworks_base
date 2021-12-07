@@ -135,6 +135,8 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         LayoutTransition transition = new LayoutTransition();
         transition.setDuration(200);
 
+        // Animates appearing/disappearing of the battery percentage text using fade-in/fade-out
+        // and disables all other animation types
         ObjectAnimator appearAnimator = ObjectAnimator.ofFloat(null, "alpha", 0f, 1f);
         transition.setAnimator(LayoutTransition.APPEARING, appearAnimator);
         transition.setInterpolator(LayoutTransition.APPEARING, Interpolators.ALPHA_IN);
@@ -142,6 +144,10 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         ObjectAnimator disappearAnimator = ObjectAnimator.ofFloat(null, "alpha", 1f, 0f);
         transition.setInterpolator(LayoutTransition.DISAPPEARING, Interpolators.ALPHA_OUT);
         transition.setAnimator(LayoutTransition.DISAPPEARING, disappearAnimator);
+
+        transition.setAnimator(LayoutTransition.CHANGE_APPEARING, null);
+        transition.setAnimator(LayoutTransition.CHANGE_DISAPPEARING, null);
+        transition.setAnimator(LayoutTransition.CHANGING, null);
 
         setLayoutTransition(transition);
     }

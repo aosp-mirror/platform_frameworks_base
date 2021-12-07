@@ -18,6 +18,7 @@ package android.content;
 
 import static android.content.ContentProvider.maybeAddUserId;
 
+import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.annotation.AnyRes;
 import android.annotation.BroadcastBehavior;
@@ -2039,6 +2040,21 @@ public class Intent implements Parcelable, Cloneable {
     @RequiresPermission(android.Manifest.permission.START_VIEW_PERMISSION_USAGE)
     public static final String ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD =
             "android.intent.action.VIEW_PERMISSION_USAGE_FOR_PERIOD";
+
+    /**
+     * Activity action: Launch the Safety Hub UI.
+     *
+     * <p>
+     * Input: Nothing.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
+    public static final String ACTION_VIEW_SAFETY_HUB =
+            "android.intent.action.VIEW_SAFETY_HUB";
 
     /**
      * Activity action: Launch UI to manage a default app.

@@ -55,6 +55,7 @@ public final class ServerFlags {
      */
     @StringDef(prefix = "KEY_", value = {
             KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
+            KEY_LOCATION_TIME_ZONE_DETECTION_RUN_IN_BACKGROUND_ENABLED,
             KEY_PRIMARY_LTZP_MODE_OVERRIDE,
             KEY_SECONDARY_LTZP_MODE_OVERRIDE,
             KEY_LTZP_INITIALIZATION_TIMEOUT_FUZZ_MILLIS,
@@ -80,6 +81,15 @@ public final class ServerFlags {
      */
     public static final @DeviceConfigKey String KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED =
             "location_time_zone_detection_feature_supported";
+
+    /**
+     * Controls whether location time zone detection should run all the time on supported devices,
+     * even when the user has not enabled it explicitly in settings. Enabled for internal testing
+     * only.
+     */
+    public static final @DeviceConfigKey String
+            KEY_LOCATION_TIME_ZONE_DETECTION_RUN_IN_BACKGROUND_ENABLED =
+            "location_time_zone_detection_run_in_background_enabled";
 
     /**
      * The key for the server flag that can override the device config for whether the primary

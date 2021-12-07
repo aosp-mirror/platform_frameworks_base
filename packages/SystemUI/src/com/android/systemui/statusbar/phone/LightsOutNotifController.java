@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 
+import static com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentModule.LIGHTS_OUT_NOTIF_VIEW;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.Nullable;
@@ -31,13 +33,15 @@ import android.view.animation.AccelerateInterpolator;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.view.AppearanceRegion;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentScope;
+import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Apps can request a low profile mode {@link View.SYSTEM_UI_FLAG_LOW_PROFILE}
@@ -47,8 +51,8 @@ import javax.inject.Inject;
  * This controller shows and hides the notification dot in the status bar to indicate
  * whether there are notifications when the device is in {@link View.SYSTEM_UI_FLAG_LOW_PROFILE}.
  */
-@SysUISingleton
-public class LightsOutNotifController {
+@StatusBarFragmentScope
+public class LightsOutNotifController extends ViewController<View> {
     private final CommandQueue mCommandQueue;
     private final NotificationEntryManager mEntryManager;
     private final WindowManager mWindowManager;
@@ -57,40 +61,31 @@ public class LightsOutNotifController {
     @VisibleForTesting @Appearance int mAppearance;
 
     private int mDisplayId;
-    private View mLightsOutNotifView;
 
     @Inject
-    LightsOutNotifController(WindowManager windowManager,
+    LightsOutNotifController(
+            @Named(LIGHTS_OUT_NOTIF_VIEW) View lightsOutNotifView,
+            WindowManager windowManager,
             NotificationEntryManager entryManager,
             CommandQueue commandQueue) {
+        super(lightsOutNotifView);
         mWindowManager = windowManager;
         mEntryManager = entryManager;
         mCommandQueue = commandQueue;
+
     }
 
-    /**
-     * Sets the notification dot view after it is created in the StatusBar.
-     * This is the view this controller will show and hide depending on whether:
-     * 1. there are active notifications
-     * 2. an app has requested {@link View.SYSTEM_UI_FLAG_LOW_PROFILE}
-     */
-    void setLightsOutNotifView(View lightsOutNotifView) {
-        destroy();
-        mLightsOutNotifView = lightsOutNotifView;
-
-        if (mLightsOutNotifView != null) {
-            mLightsOutNotifView.setVisibility(View.GONE);
-            mLightsOutNotifView.setAlpha(0f);
-            init();
-        }
-    }
-
-    private void destroy() {
+    @Override
+    protected void onViewDetached() {
         mEntryManager.removeNotificationEntryListener(mEntryListener);
         mCommandQueue.removeCallback(mCallback);
     }
 
-    private void init() {
+    @Override
+    protected void onViewAttached() {
+        mView.setVisibility(View.GONE);
+        mView.setAlpha(0f);
+
         mDisplayId = mWindowManager.getDefaultDisplay().getDisplayId();
         mEntryManager.addNotificationEntryListener(mEntryListener);
         mCommandQueue.addCallback(mCallback);
@@ -104,29 +99,25 @@ public class LightsOutNotifController {
 
     @VisibleForTesting
     void updateLightsOutView() {
-        if (mLightsOutNotifView == null) {
-            return;
-        }
-
         final boolean showDot = shouldShowDot();
         if (showDot != isShowingDot()) {
             if (showDot) {
-                mLightsOutNotifView.setAlpha(0f);
-                mLightsOutNotifView.setVisibility(View.VISIBLE);
+                mView.setAlpha(0f);
+                mView.setVisibility(View.VISIBLE);
             }
 
-            mLightsOutNotifView.animate()
+            mView.animate()
                     .alpha(showDot ? 1 : 0)
                     .setDuration(showDot ? 750 : 250)
                     .setInterpolator(new AccelerateInterpolator(2.0f))
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator a) {
-                            mLightsOutNotifView.setAlpha(showDot ? 1 : 0);
-                            mLightsOutNotifView.setVisibility(showDot ? View.VISIBLE : View.GONE);
+                            mView.setAlpha(showDot ? 1 : 0);
+                            mView.setVisibility(showDot ? View.VISIBLE : View.GONE);
                             // Unset the listener, otherwise this may persist for
                             // another view property animation
-                            mLightsOutNotifView.animate().setListener(null);
+                            mView.animate().setListener(null);
                         }
                     })
                     .start();
@@ -135,8 +126,8 @@ public class LightsOutNotifController {
 
     @VisibleForTesting
     boolean isShowingDot() {
-        return mLightsOutNotifView.getVisibility() == View.VISIBLE
-                && mLightsOutNotifView.getAlpha() == 1.0f;
+        return mView.getVisibility() == View.VISIBLE
+                && mView.getAlpha() == 1.0f;
     }
 
     @VisibleForTesting

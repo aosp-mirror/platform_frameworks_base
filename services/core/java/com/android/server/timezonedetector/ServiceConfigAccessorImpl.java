@@ -62,6 +62,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     private static final Set<String> CONFIGURATION_INTERNAL_SERVER_FLAGS_KEYS_TO_WATCH =
             Collections.unmodifiableSet(new ArraySet<>(new String[] {
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
+                    ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_RUN_IN_BACKGROUND_ENABLED,
                     ServerFlags.KEY_ENHANCED_METRICS_COLLECTION_ENABLED,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
@@ -75,6 +76,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     private static final Set<String> LOCATION_TIME_ZONE_MANAGER_SERVER_FLAGS_KEYS_TO_WATCH =
             Collections.unmodifiableSet(new ArraySet<>(new String[] {
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
+                    ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_RUN_IN_BACKGROUND_ENABLED,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
                     ServerFlags.KEY_PRIMARY_LTZP_MODE_OVERRIDE,
@@ -297,6 +299,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
                         isTelephonyTimeZoneDetectionFeatureSupported())
                 .setGeoDetectionFeatureSupported(isGeoTimeZoneDetectionFeatureSupported())
                 .setTelephonyFallbackSupported(isTelephonyFallbackSupported())
+                .setGeoDetectionRunInBackgroundEnabled(getGeoDetectionRunInBackgroundEnabled())
                 .setEnhancedMetricsCollectionEnabled(isEnhancedMetricsCollectionEnabled())
                 .setAutoDetectionEnabledSetting(getAutoDetectionEnabledSetting())
                 .setUserConfigAllowed(isUserConfigAllowed(userId))
@@ -399,6 +402,18 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         final boolean defaultEnabled = true;
         return mServerFlags.getBoolean(
                 ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
+                defaultEnabled);
+    }
+
+    /**
+     * Returns {@code true} if location time zone detection should run all the time on supported
+     * devices, even when the user has not enabled it explicitly in settings. Enabled for internal
+     * testing only.
+     */
+    private boolean getGeoDetectionRunInBackgroundEnabled() {
+        final boolean defaultEnabled = false;
+        return mServerFlags.getBoolean(
+                ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_RUN_IN_BACKGROUND_ENABLED,
                 defaultEnabled);
     }
 

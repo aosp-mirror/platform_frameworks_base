@@ -51,7 +51,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private val keyguardStateController: KeyguardStateController,
     private val dozeParameters: dagger.Lazy<DozeParameters>,
     private val globalSettings: GlobalSettings
-) : WakefulnessLifecycle.Observer {
+) : WakefulnessLifecycle.Observer, ScreenOffAnimation {
     private val handler = Handler()
 
     private lateinit var statusBar: StatusBar
@@ -98,7 +98,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         }
     }
 
-    fun initialize(
+    override fun initialize(
         statusBar: StatusBar,
         lightRevealScrim: LightRevealScrim
     ) {
@@ -122,7 +122,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
      * Animates in the provided keyguard view, ending in the same position that it will be in on
      * AOD.
      */
-    fun animateInKeyguard(keyguardView: View, after: Runnable) {
+    override fun animateInKeyguard(keyguardView: View, after: Runnable) {
         shouldAnimateInKeyguard = false
         keyguardView.alpha = 0f
         keyguardView.visibility = View.VISIBLE
@@ -197,8 +197,8 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         }
     }
 
-    override fun onStartedGoingToSleep() {
-        if (dozeParameters.get().shouldControlUnlockedScreenOff()) {
+    override fun startAnimation(): Boolean {
+        if (shouldPlayUnlockedScreenOffAnimation()) {
             decidedToAnimateGoingToSleep = true
 
             shouldAnimateInKeyguard = true
@@ -210,8 +210,11 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 // Show AOD. That'll cause the KeyguardVisibilityHelper to call #animateInKeyguard.
                 statusBar.notificationPanelViewController.showAodUi()
             }, (ANIMATE_IN_KEYGUARD_DELAY * animatorDurationScale).toLong())
+
+            return true
         } else {
             decidedToAnimateGoingToSleep = false
+            return false
         }
     }
 
@@ -244,8 +247,12 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         // We currently draw both the light reveal scrim, and the AOD UI, in the shade. If it's
         // already expanded and showing notifications/QS, the animation looks really messy. For now,
         // disable it if the notification panel is not fully collapsed.
-        if (!this::statusBar.isInitialized ||
-                !statusBar.notificationPanelViewController.isFullyCollapsed) {
+        if ((!this::statusBar.isInitialized ||
+                !statusBar.notificationPanelViewController.isFullyCollapsed)
+                // Status bar might be expanded because we have started
+                // playing the animation already
+                && !isAnimationPlaying()
+        ) {
             return false
         }
 
@@ -269,23 +276,37 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         callbacks.remove(callback)
     }
 
-    fun sendUnlockedScreenOffProgressUpdate(linear: Float, eased: Float) {
+    private fun sendUnlockedScreenOffProgressUpdate(linear: Float, eased: Float) {
         callbacks.forEach {
             it.onUnlockedScreenOffProgressUpdate(linear, eased)
         }
     }
 
-/**
+    /**
      * Whether we're doing the light reveal animation or we're done with that and animating in the
      * AOD UI.
      */
-    fun isScreenOffAnimationPlaying(): Boolean {
+    override fun isAnimationPlaying(): Boolean {
         return lightRevealAnimationPlaying || aodUiAnimationPlaying
     }
 
-    fun shouldAnimateInKeyguard(): Boolean {
-        return shouldAnimateInKeyguard
-    }
+    override fun shouldAnimateInKeyguard(): Boolean =
+        shouldAnimateInKeyguard
+
+    override fun shouldHideScrimOnWakeUp(): Boolean =
+        isScreenOffLightRevealAnimationPlaying()
+
+    override fun overrideNotificationsDozeAmount(): Boolean =
+        shouldPlayUnlockedScreenOffAnimation() && isAnimationPlaying()
+
+    override fun shouldShowAodIconsWhenShade(): Boolean =
+        isAnimationPlaying()
+
+    override fun shouldAnimateAodIcons(): Boolean =
+        shouldPlayUnlockedScreenOffAnimation()
+
+    override fun shouldPlayAnimation(): Boolean =
+        shouldPlayUnlockedScreenOffAnimation()
 
     /**
      * Whether the light reveal animation is playing. The second part of the screen off animation,

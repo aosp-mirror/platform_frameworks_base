@@ -50,6 +50,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -646,7 +647,7 @@ public class AbstractAccessibilityServiceConnectionTest {
     }
 
     @Test
-    public void setMagnificationScaleAndCenter_cantControlMagnification_returnFalse() {
+    public void setMagnificationConfig_cantControlMagnification_returnFalse() {
         final int displayId = 1;
         final float scale = 1.8f;
         final float centerX = 50.5f;
@@ -659,13 +660,12 @@ public class AbstractAccessibilityServiceConnectionTest {
                 SERVICE_ID)).thenReturn(true);
         when(mMockSecurityPolicy.canControlMagnification(mServiceConnection)).thenReturn(false);
 
-        final boolean result = mServiceConnection.setMagnificationScaleAndCenter(
-                displayId, scale, centerX, centerY, true);
-        assertThat(result, is(false));
+        final boolean result = mServiceConnection.setMagnificationConfig(displayId, config, true);
+        assertFalse(result);
     }
 
     @Test
-    public void setMagnificationScaleAndCenter_serviceNotBelongCurrentUser_returnFalse() {
+    public void setMagnificationConfig_serviceNotBelongCurrentUser_returnFalse() {
         final int displayId = 1;
         final float scale = 1.8f;
         final float centerX = 50.5f;
@@ -678,9 +678,8 @@ public class AbstractAccessibilityServiceConnectionTest {
                 SERVICE_ID)).thenReturn(true);
         when(mMockSystemSupport.getCurrentUserIdLocked()).thenReturn(USER_ID2);
 
-        final boolean result = mServiceConnection.setMagnificationScaleAndCenter(
-                displayId, scale, centerX, centerY, true);
-        assertThat(result, is(false));
+        final boolean result = mServiceConnection.setMagnificationConfig(displayId, config, true);
+        assertFalse(result);
     }
 
     @Test (expected = SecurityException.class)

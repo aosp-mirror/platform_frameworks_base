@@ -174,7 +174,7 @@ class LockscreenShadeTransitionController @Inject constructor(
     internal fun canDragDown(): Boolean {
         return (statusBarStateController.state == StatusBarState.KEYGUARD ||
                 nsslController.isInLockedDownShade()) &&
-                qS.isFullyCollapsed
+                (qS.isFullyCollapsed || useSplitShade)
     }
 
     /**
@@ -285,7 +285,7 @@ class LockscreenShadeTransitionController @Inject constructor(
     internal val isDragDownAnywhereEnabled: Boolean
         get() = (statusBarStateController.getState() == StatusBarState.KEYGUARD &&
                 !keyguardBypassController.bypassEnabled &&
-                qS.isFullyCollapsed)
+                (qS.isFullyCollapsed || useSplitShade))
 
     /**
      * The amount in pixels that the user has dragged down.

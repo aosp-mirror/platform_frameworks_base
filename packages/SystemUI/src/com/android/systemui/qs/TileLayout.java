@@ -275,6 +275,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         return Math.max(mColumns * mRows, 1);
     }
 
+    @Override
     public int getTilesHeight() {
         return mLastTileBottom + getPaddingBottom();
     }

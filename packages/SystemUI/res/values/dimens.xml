@@ -287,6 +287,7 @@
     <dimen name="screenshot_action_chip_text_size">14sp</dimen>
     <dimen name="screenshot_dismissal_height_delta">80dp</dimen>
     <dimen name="screenshot_crop_handle_thickness">3dp</dimen>
+    <dimen name="long_screenshot_action_bar_top_margin">8dp</dimen>
 
 
     <!-- The width of the view containing navigation buttons -->
