@@ -45,14 +45,17 @@ import java.util.Objects;
 public final class MetricsTimeZoneDetectorState {
 
     @IntDef(prefix = "DETECTION_MODE_",
-            value = { DETECTION_MODE_MANUAL, DETECTION_MODE_GEO, DETECTION_MODE_TELEPHONY})
+            value = { DETECTION_MODE_UNKNOWN, DETECTION_MODE_MANUAL, DETECTION_MODE_GEO,
+                    DETECTION_MODE_TELEPHONY }
+    )
     @Retention(RetentionPolicy.SOURCE)
     @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
     public @interface DetectionMode {};
 
-    public static final @DetectionMode int DETECTION_MODE_MANUAL = 0;
-    public static final @DetectionMode int DETECTION_MODE_GEO = 1;
-    public static final @DetectionMode int DETECTION_MODE_TELEPHONY = 2;
+    public static final @DetectionMode int DETECTION_MODE_UNKNOWN = 0;
+    public static final @DetectionMode int DETECTION_MODE_MANUAL = 1;
+    public static final @DetectionMode int DETECTION_MODE_GEO = 2;
+    public static final @DetectionMode int DETECTION_MODE_TELEPHONY = 3;
 
     @NonNull private final ConfigurationInternal mConfigurationInternal;
     private final int mDeviceTimeZoneIdOrdinal;
@@ -123,6 +126,15 @@ public final class MetricsTimeZoneDetectorState {
         return mConfigurationInternal.isTelephonyFallbackSupported();
     }
 
+    /**
+     * Returns {@code true} if location time zone detection should run all the time on supported
+     * devices, even when the user has not enabled it explicitly in settings. Enabled for internal
+     * testing only.
+     */
+    public boolean getGeoDetectionRunInBackgroundEnabled() {
+        return mConfigurationInternal.getGeoDetectionRunInBackgroundEnabled();
+    }
+
     /** Returns true if enhanced metric collection is enabled. */
     public boolean isEnhancedMetricsCollectionEnabled() {
         return mConfigurationInternal.isEnhancedMetricsCollectionEnabled();
@@ -148,12 +160,15 @@ public final class MetricsTimeZoneDetectorState {
      * things besides the user's setting.
      */
     public @DetectionMode int getDetectionMode() {
-        if (!mConfigurationInternal.getAutoDetectionEnabledBehavior()) {
-            return DETECTION_MODE_MANUAL;
-        } else if (mConfigurationInternal.getGeoDetectionEnabledBehavior()) {
-            return DETECTION_MODE_GEO;
-        } else {
-            return DETECTION_MODE_TELEPHONY;
+        switch (mConfigurationInternal.getDetectionMode()) {
+            case ConfigurationInternal.DETECTION_MODE_MANUAL:
+                return DETECTION_MODE_MANUAL;
+            case ConfigurationInternal.DETECTION_MODE_GEO:
+                return DETECTION_MODE_GEO;
+            case ConfigurationInternal.DETECTION_MODE_TELEPHONY:
+                return DETECTION_MODE_TELEPHONY;
+            default:
+                return DETECTION_MODE_UNKNOWN;
         }
     }
 

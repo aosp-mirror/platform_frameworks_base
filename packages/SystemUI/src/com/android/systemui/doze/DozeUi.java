@@ -44,14 +44,12 @@ import java.util.Calendar;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
-
 /**
  * The policy controlling doze.
  */
 @DozeScope
 public class DozeUi implements DozeMachine.Part, TunerService.Tunable,
-        ConfigurationController.ConfigurationListener {
+        ConfigurationController.ConfigurationListener, StatusBarStateController.StateListener {
     // if enabled, calls dozeTimeTick() whenever the time changes:
     private static final boolean BURN_IN_TESTING_ENABLED = false;
     private static final long TIME_TICK_DEADLINE_MILLIS = 90 * 1000; // 1.5min
@@ -64,7 +62,7 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable,
     private final boolean mCanAnimateTransition;
     private final DozeParameters mDozeParameters;
     private final DozeLog mDozeLog;
-    private final Lazy<StatusBarStateController> mStatusBarStateController;
+    private final StatusBarStateController mStatusBarStateController;
     private final TunerService mTunerService;
     private final ConfigurationController mConfigurationController;
 
@@ -79,8 +77,7 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable,
 
                 @Override
                 public void onTimeChanged() {
-                    if (BURN_IN_TESTING_ENABLED && mStatusBarStateController != null
-                            && mStatusBarStateController.get().isDozing()) {
+                    if (BURN_IN_TESTING_ENABLED && mStatusBarStateController.isDozing()) {
                         // update whenever the time changes for manual burn in testing
                         mHost.dozeTimeTick();
 
@@ -102,7 +99,7 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable,
             WakeLock wakeLock, DozeHost host, @Main Handler handler,
             DozeParameters params, KeyguardUpdateMonitor keyguardUpdateMonitor,
             DozeLog dozeLog, TunerService tunerService,
-            Lazy<StatusBarStateController> statusBarStateController,
+            StatusBarStateController statusBarStateController,
             ConfigurationController configurationController) {
         mContext = context;
         mWakeLock = wakeLock;
@@ -115,6 +112,7 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable,
         mDozeLog = dozeLog;
         mTunerService = tunerService;
         mStatusBarStateController = statusBarStateController;
+        mStatusBarStateController.addCallback(this);
 
         mTunerService.addTunable(this, Settings.Secure.DOZE_ALWAYS_ON);
 
@@ -291,6 +289,14 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable,
 
     @Override
     public void onConfigChanged(Configuration newConfig) {
+        updateAnimateScreenOff();
+    }
+
+    /**
+     * Called when StatusBar state changed, could affect unlocked screen off animation state
+     */
+    @Override
+    public void onStatePostChange() {
         updateAnimateScreenOff();
     }
 }

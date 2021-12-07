@@ -112,7 +112,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Mock
     private ConfigurationController mConfigurationController;
     @Mock
-    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private ScreenOffAnimationController mScreenOffAnimationController;
     // TODO(b/204991468): Use a real PanelExpansionStateManager object once this bug is fixed. (The
     //   event-dispatch-on-registration pattern caused some of these unit tests to fail.)
     @Mock
@@ -229,7 +229,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mDozeParameters, mAlarmManager, mKeyguardStateController, mDelayedWakeLockBuilder,
                 new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor,
                 mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()),
-                mUnlockedScreenOffAnimationController,
+                mScreenOffAnimationController,
                 mPanelExpansionStateManager);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);

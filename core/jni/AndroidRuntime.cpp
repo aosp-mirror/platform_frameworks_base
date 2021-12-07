@@ -197,8 +197,8 @@ extern int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env
 extern int register_com_android_internal_content_om_OverlayConfig(JNIEnv *env);
 extern int register_com_android_internal_net_NetworkUtilsInternal(JNIEnv* env);
 extern int register_com_android_internal_os_ClassLoaderFactory(JNIEnv* env);
-extern int register_com_android_internal_os_DmabufInfoReader(JNIEnv* env);
 extern int register_com_android_internal_os_FuseAppLoop(JNIEnv* env);
+extern int register_com_android_internal_os_KernelAllocationStats(JNIEnv* env);
 extern int register_com_android_internal_os_KernelCpuBpfTracking(JNIEnv* env);
 extern int register_com_android_internal_os_KernelCpuTotalBpfMapReader(JNIEnv* env);
 extern int register_com_android_internal_os_KernelCpuUidBpfMapReader(JNIEnv *env);
@@ -1655,8 +1655,8 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_security_Scrypt),
         REG_JNI(register_com_android_internal_content_F2fsUtils),
         REG_JNI(register_com_android_internal_content_NativeLibraryHelper),
-        REG_JNI(register_com_android_internal_os_DmabufInfoReader),
         REG_JNI(register_com_android_internal_os_FuseAppLoop),
+        REG_JNI(register_com_android_internal_os_KernelAllocationStats),
         REG_JNI(register_com_android_internal_os_KernelCpuBpfTracking),
         REG_JNI(register_com_android_internal_os_KernelCpuTotalBpfMapReader),
         REG_JNI(register_com_android_internal_os_KernelCpuUidBpfMapReader),

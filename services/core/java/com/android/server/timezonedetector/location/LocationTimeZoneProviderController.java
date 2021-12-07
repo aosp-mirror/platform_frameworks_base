@@ -363,10 +363,11 @@ class LocationTimeZoneProviderController implements Dumpable {
 
         // Provider started / stopped states only need to be changed if geoDetectionEnabled has
         // changed.
-        boolean oldGeoDetectionEnabled = oldConfiguration != null
-                && oldConfiguration.getGeoDetectionEnabledBehavior();
-        boolean newGeoDetectionEnabled = newConfiguration.getGeoDetectionEnabledBehavior();
-        if (oldGeoDetectionEnabled == newGeoDetectionEnabled) {
+        boolean oldIsGeoDetectionExecutionEnabled = oldConfiguration != null
+                && oldConfiguration.isGeoDetectionExecutionEnabled();
+        boolean newIsGeoDetectionExecutionEnabled =
+                newConfiguration.isGeoDetectionExecutionEnabled();
+        if (oldIsGeoDetectionExecutionEnabled == newIsGeoDetectionExecutionEnabled) {
             return;
         }
 
@@ -379,7 +380,7 @@ class LocationTimeZoneProviderController implements Dumpable {
         // 2) If (1), and the secondary instantly enters the {perm failed} state, the uncertainty
         //    timeout started when the primary entered {started uncertain} should be cancelled.
 
-        if (newGeoDetectionEnabled) {
+        if (newIsGeoDetectionExecutionEnabled) {
             setState(STATE_INITIALIZING);
 
             // Try to start the primary provider.
@@ -566,9 +567,9 @@ class LocationTimeZoneProviderController implements Dumpable {
             return;
         }
 
-        if (!mCurrentUserConfiguration.getGeoDetectionEnabledBehavior()) {
-            // This should not happen: the provider should not be in an started state if the user
-            // does not have geodetection enabled.
+        if (!mCurrentUserConfiguration.isGeoDetectionExecutionEnabled()) {
+            // This should not happen: the provider should not be in a started state if
+            // geodetection is not enabled.
             warnLog("Provider=" + provider + " is started, but"
                     + " currentUserConfiguration=" + mCurrentUserConfiguration
                     + " suggests it shouldn't be.");

@@ -27,10 +27,6 @@ import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.UserHandle.USER_SYSTEM;
 
-import static com.android.server.notification.NotificationManagerService.ACTION_DISABLE_NAS;
-import static com.android.server.notification.NotificationManagerService.ACTION_ENABLE_NAS;
-import static com.android.server.notification.NotificationManagerService.ACTION_LEARNMORE_NAS;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
@@ -252,7 +248,6 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
     @Mock
     MultiRateLimiter mToastRateLimiter;
     BroadcastReceiver mPackageIntentReceiver;
-    BroadcastReceiver mNASIntentReceiver;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
             1 << 30);
@@ -407,14 +402,9 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
                     && filter.hasAction(Intent.ACTION_PACKAGES_UNSUSPENDED)
                     && filter.hasAction(Intent.ACTION_PACKAGES_SUSPENDED)) {
                 mPackageIntentReceiver = broadcastReceivers.get(i);
-            } else if (filter.hasAction(ACTION_ENABLE_NAS)
-                    && filter.hasAction(ACTION_DISABLE_NAS)
-                    && filter.hasAction(ACTION_LEARNMORE_NAS)) {
-                mNASIntentReceiver = broadcastReceivers.get(i);
             }
         }
         assertNotNull("package intent receiver should exist", mPackageIntentReceiver);
-        assertNotNull("nas intent receiver should exist", mNASIntentReceiver);
 
         // Pretend the shortcut exists
         List<ShortcutInfo> shortcutInfos = new ArrayList<>();

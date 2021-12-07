@@ -584,18 +584,19 @@ interface ITelephony {
     void setCellInfoListRate(int rateInMillis);
 
     /**
-     * Opens a logical channel to the ICC card using the physical slot index.
+     * Opens a logical channel to the ICC card using the physical slot index and port index.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
      * @param slotIndex The physical slot index of the target ICC card
+     * @param portIndex The unique index referring to a port belonging to the SIM slot
      * @param callingPackage the name of the package making the call.
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @param p2 P2 parameter (described in ISO 7816-4).
      * @return an IccOpenLogicalChannelResponse object.
      */
-    IccOpenLogicalChannelResponse iccOpenLogicalChannelBySlot(
-            int slotIndex, String callingPackage, String AID, int p2);
+    IccOpenLogicalChannelResponse iccOpenLogicalChannelByPort(
+            int slotIndex, int portIndex, String callingPackage, String AID, int p2);
 
     /**
      * Opens a logical channel to the ICC card.
@@ -612,16 +613,17 @@ interface ITelephony {
             int subId, String callingPackage, String AID, int p2);
 
     /**
-     * Closes a previously opened logical channel to the ICC card using the physical slot index.
+     * Closes a previously opened logical channel to the ICC card using the physical slot index and port index.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHC command.
      *
      * @param slotIndex The physical slot index of the target ICC card
+     * @param portIndex The unique index referring to a port belonging to the SIM slot
      * @param channel is the channel id to be closed as returned by a
      *            successful iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      */
-    boolean iccCloseLogicalChannelBySlot(int slotIndex, int channel);
+    boolean iccCloseLogicalChannelByPort(int slotIndex, int portIndex, int channel);
 
     /**
      * Closes a previously opened logical channel to the ICC card.
@@ -637,11 +639,12 @@ interface ITelephony {
     boolean iccCloseLogicalChannel(int subId, int channel);
 
     /**
-     * Transmit an APDU to the ICC card over a logical channel using the physical slot index.
+     * Transmit an APDU to the ICC card over a logical channel using the physical slot index and port index.
      *
      * Input parameters equivalent to TS 27.007 AT+CGLA command.
      *
      * @param slotIndex The physical slot index of the target ICC card
+     * @param portIndex The unique index referring to a port belonging to the SIM slot
      * @param channel is the channel id to be closed as returned by a
      *            successful iccOpenLogicalChannel.
      * @param cla Class of the APDU command.
@@ -654,7 +657,7 @@ interface ITelephony {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      */
-    String iccTransmitApduLogicalChannelBySlot(int slotIndex, int channel, int cla, int instruction,
+    String iccTransmitApduLogicalChannelByPort(int slotIndex, int portIndex, int channel, int cla, int instruction,
             int p1, int p2, int p3, String data);
 
     /**
@@ -680,11 +683,12 @@ interface ITelephony {
             int p1, int p2, int p3, String data);
 
     /**
-     * Transmit an APDU to the ICC card over the basic channel using the physical slot index.
+     * Transmit an APDU to the ICC card over the basic channel using the physical slot index and port index.
      *
      * Input parameters equivalent to TS 27.007 AT+CSIM command.
      *
      * @param slotIndex The physical slot index of the target ICC card
+     * @param portIndex The unique index referring to a port belonging to the SIM slot
      * @param callingPackage the name of the package making the call.
      * @param cla Class of the APDU command.
      * @param instruction Instruction of the APDU command.
@@ -696,7 +700,7 @@ interface ITelephony {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      */
-    String iccTransmitApduBasicChannelBySlot(int slotIndex, String callingPackage, int cla,
+    String iccTransmitApduBasicChannelByPort(int slotIndex, int portIndex, String callingPackage, int cla,
             int instruction, int p1, int p2, int p3, String data);
 
     /**

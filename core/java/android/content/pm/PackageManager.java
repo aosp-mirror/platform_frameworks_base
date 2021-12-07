@@ -3414,6 +3414,18 @@ public abstract class PackageManager {
      * @hide
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports
+     * {@link android.service.games.GameService}.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    @SystemApi
+    public static final String FEATURE_GAME_SERVICE = "android.software.game_service";
+
+    /**
+     * @hide
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports
      * {@link android.service.voice.VoiceInteractionService} and
      * {@link android.app.VoiceInteractor}.
      */

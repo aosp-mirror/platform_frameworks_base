@@ -17,6 +17,7 @@
 package android.accessibilityservice;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.MagnificationConfig;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Bitmap;
 import android.graphics.Region;
@@ -77,6 +78,8 @@ interface IAccessibilityServiceConnection {
 
     oneway void setOnKeyEventResult(boolean handled, int sequence);
 
+    MagnificationConfig getMagnificationConfig(int displayId);
+
     float getMagnificationScale(int displayId);
 
     float getMagnificationCenterX(int displayId);
@@ -87,8 +90,7 @@ interface IAccessibilityServiceConnection {
 
     boolean resetMagnification(int displayId, boolean animate);
 
-    boolean setMagnificationScaleAndCenter(int displayId, float scale, float centerX, float centerY,
-        boolean animate);
+    boolean setMagnificationConfig(int displayId, in MagnificationConfig config, boolean animate);
 
     void setMagnificationCallbackEnabled(int displayId, boolean enabled);
 

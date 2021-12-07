@@ -33,7 +33,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 
@@ -175,7 +175,7 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardStateController keyguardStateController,
             DozeParameters dozeParameters,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            ScreenOffAnimationController screenOffAnimationController,
             StatusBarStateController statusBarStateController, CommunalHostView view) {
         super(view);
         mCommunalStateController = communalStateController;
@@ -184,7 +184,7 @@ public class CommunalHostViewController extends ViewController<CommunalHostView>
         mKeyguardStateController = keyguardStateController;
         mStatusBarStateController = statusBarStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, communalStateController,
-                keyguardStateController, dozeParameters, unlockedScreenOffAnimationController,
+                keyguardStateController, dozeParameters, screenOffAnimationController,
                 /* animateYPos= */ false, /* visibleOnCommunal= */ true);
     }
 

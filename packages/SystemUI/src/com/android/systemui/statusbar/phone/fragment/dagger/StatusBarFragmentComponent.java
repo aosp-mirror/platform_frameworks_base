@@ -19,8 +19,10 @@ package com.android.systemui.statusbar.phone.fragment.dagger;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
+import com.android.systemui.statusbar.phone.LightsOutNotifController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
+import com.android.systemui.statusbar.phone.StatusBarDemoMode;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 
 import dagger.BindsInstance;
@@ -55,11 +57,13 @@ public interface StatusBarFragmentComponent {
      * Initialize anything extra for the component. Must be called after the component is created.
      */
     default void init() {
-        // No one accesses this controller, so we need to make sure we reference it here so it does
-        // get initialized.
+        // No one accesses these controllers, so we need to make sure we reference them here so they
+        // do get initialized.
         getBatteryMeterViewController().init();
         getHeadsUpAppearanceController().init();
         getPhoneStatusBarViewController().init();
+        getLightsOutNotifController().init();
+        getStatusBarDemoMode().init();
     }
 
     /** */
@@ -78,4 +82,12 @@ public interface StatusBarFragmentComponent {
     /** */
     @StatusBarFragmentScope
     HeadsUpAppearanceController getHeadsUpAppearanceController();
+
+    /** */
+    @StatusBarFragmentScope
+    LightsOutNotifController getLightsOutNotifController();
+
+    /** */
+    @StatusBarFragmentScope
+    StatusBarDemoMode getStatusBarDemoMode();
 }

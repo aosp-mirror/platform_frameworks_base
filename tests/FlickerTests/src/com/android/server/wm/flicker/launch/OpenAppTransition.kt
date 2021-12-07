@@ -166,7 +166,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
      * is replaced by [testApp], which remains visible until the end
      */
     open fun appLayerReplacesLauncher() {
-        testSpec.replacesLayer(LAUNCHER_COMPONENT, testApp.component)
+        testSpec.replacesLayer(LAUNCHER_COMPONENT, testApp.component, ignoreSnapshot = true)
     }
 
     /**

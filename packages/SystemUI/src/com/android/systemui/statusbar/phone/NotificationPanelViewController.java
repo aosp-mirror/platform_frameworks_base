@@ -351,7 +351,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private NotificationsQSContainerController mNotificationsQSContainerController;
     private boolean mAnimateNextPositionUpdate;
     private float mQuickQsOffsetHeight;
-    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private ScreenOffAnimationController mScreenOffAnimationController;
 
     private int mTrackingPointer;
     private VelocityTracker mQsVelocityTracker;
@@ -771,7 +771,7 @@ public class NotificationPanelViewController extends PanelViewController {
             @Main Executor uiExecutor,
             SecureSettings secureSettings,
             SplitShadeHeaderController splitShadeHeaderController,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            ScreenOffAnimationController screenOffAnimationController,
             LockscreenGestureLogger lockscreenGestureLogger,
             PanelExpansionStateManager panelExpansionStateManager,
             NotificationRemoteInputManager remoteInputManager,
@@ -881,7 +881,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mConversationNotificationManager = conversationNotificationManager;
         mAuthController = authController;
         mLockIconViewController = lockIconViewController;
-        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mScreenOffAnimationController = screenOffAnimationController;
         mRemoteInputManager = remoteInputManager;
 
         int currentMode = navigationModeController.addListener(
@@ -1408,7 +1408,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
 
         float expandedFraction =
-                mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
+                mScreenOffAnimationController.shouldExpandNotifications()
                         ? 1.0f : getExpandedFraction();
         mCommunalPositionAlgorithm.setup(expandedFraction, mCommunalView.getHeight());
         mCommunalPositionAlgorithm.run(mCommunalPositionResult);
@@ -1435,10 +1435,10 @@ public class NotificationPanelViewController extends PanelViewController {
         int userIconHeight = mKeyguardQsUserSwitchController != null
                 ? mKeyguardQsUserSwitchController.getUserIconHeight() : 0;
         float expandedFraction =
-                mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
+                mScreenOffAnimationController.shouldExpandNotifications()
                         ? 1.0f : getExpandedFraction();
         float darkamount =
-                mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
+                mScreenOffAnimationController.shouldExpandNotifications()
                         ? 1.0f : mInterpolatedDarkAmount;
 
         float udfpsAodTopLocation = -1f;
@@ -2392,11 +2392,14 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private void updateQsExpansion() {
         if (mQs == null) return;
-        float qsExpansionFraction = computeQsExpansionFraction();
-        float squishiness = mNotificationStackScrollLayoutController
-                .getNotificationSquishinessFraction();
-        mQs.setQsExpansion(qsExpansionFraction, getExpandedFraction(), getHeaderTranslation(),
-                mQsExpandImmediate || mQsExpanded ? 1f : squishiness);
+        final float squishiness =
+                mQsExpandImmediate || mQsExpanded ? 1f : mNotificationStackScrollLayoutController
+                        .getNotificationSquishinessFraction();
+        final float qsExpansionFraction = computeQsExpansionFraction();
+        final float adjustedExpansionFraction = mShouldUseSplitNotificationShade
+                ? 1f : computeQsExpansionFraction();
+        mQs.setQsExpansion(adjustedExpansionFraction, getExpandedFraction(), getHeaderTranslation(),
+                squishiness);
         mSplitShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
         mMediaHierarchyManager.setQsExpansion(qsExpansionFraction);
         int qsPanelBottomY = calculateQsBottomPosition(qsExpansionFraction);
@@ -4557,7 +4560,7 @@ public class NotificationPanelViewController extends PanelViewController {
             int oldState = mBarState;
             boolean keyguardShowing = statusBarState == KEYGUARD;
 
-            if (mDozeParameters.shouldControlUnlockedScreenOff()
+            if (mDozeParameters.shouldDelayKeyguardShow()
                     && oldState == StatusBarState.SHADE
                     && statusBarState == KEYGUARD) {
                 // This means we're doing the screen off animation - position the keyguard status
@@ -4619,7 +4622,7 @@ public class NotificationPanelViewController extends PanelViewController {
             } else {
                 final boolean animatingUnlockedShadeToKeyguard = oldState == SHADE
                         && statusBarState == KEYGUARD
-                        && mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying();
+                        && mScreenOffAnimationController.isKeyguardShowDelayed();
                 if (!animatingUnlockedShadeToKeyguard) {
                     // Only make the status bar visible if we're not animating the screen off, since
                     // we only want to be showing the clock/notifications during the animation.

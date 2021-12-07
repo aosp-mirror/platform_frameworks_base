@@ -15,6 +15,7 @@
  */
 package com.android.server.timezonedetector.location;
 
+import static com.android.server.timezonedetector.ConfigurationInternal.DETECTION_MODE_MANUAL;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
@@ -1331,6 +1332,53 @@ public class LocationTimeZoneProviderControllerTest {
         mTestSecondaryLocationTimeZoneProvider.assertStateChangesAndCommit(
                 PROVIDER_STATE_DESTROYED);
         assertFalse(controller.isUncertaintyTimeoutSet());
+    }
+
+    /**
+     * A controller-state-only test to prove that "run in background" configuration behaves as
+     * intended. Provider states are well covered by other "enabled" tests.
+     */
+    @Test
+    public void geoDetectionRunInBackground() {
+        LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
+
+        // A configuration where the user has geo-detection disabled.
+        ConfigurationInternal runInBackgroundDisabledConfig =
+                new ConfigurationInternal.Builder(USER1_CONFIG_GEO_DETECTION_DISABLED)
+                        .setLocationEnabledSetting(true)
+                        .setAutoDetectionEnabledSetting(false)
+                        .setGeoDetectionEnabledSetting(false)
+                        .setGeoDetectionRunInBackgroundEnabled(false)
+                        .build();
+        // A configuration where geo-detection is disabled by the user but can run in the
+        // background.
+        ConfigurationInternal runInBackgroundEnabledConfig =
+                new ConfigurationInternal.Builder(runInBackgroundDisabledConfig)
+                        .setGeoDetectionRunInBackgroundEnabled(true)
+                        .build();
+        assertEquals(DETECTION_MODE_MANUAL, runInBackgroundEnabledConfig.getDetectionMode());
+        assertTrue(runInBackgroundEnabledConfig.isGeoDetectionExecutionEnabled());
+
+        TestEnvironment testEnvironment = new TestEnvironment(
+                mTestThreadingDomain, controller, runInBackgroundDisabledConfig);
+
+        // Initialize and check initial state.
+        controller.initialize(testEnvironment, mTestCallback);
+
+        assertControllerState(controller, STATE_STOPPED);
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_PROVIDERS_INITIALIZING, STATE_STOPPED);
+
+        testEnvironment.simulateConfigChange(runInBackgroundEnabledConfig);
+
+        assertControllerState(controller, STATE_INITIALIZING);
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_INITIALIZING);
+
+        testEnvironment.simulateConfigChange(runInBackgroundDisabledConfig);
+
+        assertControllerState(controller, STATE_STOPPED);
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_STOPPED);
     }
 
     private static void assertUncertaintyTimeoutSet(

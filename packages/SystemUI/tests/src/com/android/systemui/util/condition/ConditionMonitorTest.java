@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal;
+package com.android.systemui.util.condition;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyBoolean;
@@ -30,8 +30,6 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.communal.conditions.CommunalCondition;
-import com.android.systemui.communal.conditions.CommunalConditionsMonitor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,97 +41,97 @@ import java.util.HashSet;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-public class CommunalConditionsMonitorTest extends SysuiTestCase {
-    private FakeCommunalCondition mCondition1;
-    private FakeCommunalCondition mCondition2;
-    private FakeCommunalCondition mCondition3;
-    private HashSet<CommunalCondition> mConditions;
+public class ConditionMonitorTest extends SysuiTestCase {
+    private FakeCondition mCondition1;
+    private FakeCondition mCondition2;
+    private FakeCondition mCondition3;
+    private HashSet<Condition> mConditions;
 
-    private CommunalConditionsMonitor mCommunalConditionsMonitor;
+    private Monitor mConditionMonitor;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mCondition1 = spy(new FakeCommunalCondition());
-        mCondition2 = spy(new FakeCommunalCondition());
-        mCondition3 = spy(new FakeCommunalCondition());
+        mCondition1 = spy(new FakeCondition());
+        mCondition2 = spy(new FakeCondition());
+        mCondition3 = spy(new FakeCondition());
         mConditions = new HashSet<>(Arrays.asList(mCondition1, mCondition2, mCondition3));
 
-        mCommunalConditionsMonitor = new CommunalConditionsMonitor(mConditions);
+        mConditionMonitor = new Monitor(mConditions);
     }
 
     @Test
     public void addCallback_addFirstCallback_addCallbackToAllConditions() {
-        final CommunalConditionsMonitor.Callback callback1 =
-                mock(CommunalConditionsMonitor.Callback.class);
-        mCommunalConditionsMonitor.addCallback(callback1);
+        final Monitor.Callback callback1 =
+                mock(Monitor.Callback.class);
+        mConditionMonitor.addCallback(callback1);
         mConditions.forEach(condition -> verify(condition).addCallback(any()));
 
-        final CommunalConditionsMonitor.Callback callback2 =
-                mock(CommunalConditionsMonitor.Callback.class);
-        mCommunalConditionsMonitor.addCallback(callback2);
+        final Monitor.Callback callback2 =
+                mock(Monitor.Callback.class);
+        mConditionMonitor.addCallback(callback2);
         mConditions.forEach(condition -> verify(condition, times(1)).addCallback(any()));
     }
 
     @Test
     public void addCallback_addFirstCallback_reportWithDefaultValue() {
-        final CommunalConditionsMonitor.Callback callback =
-                mock(CommunalConditionsMonitor.Callback.class);
-        mCommunalConditionsMonitor.addCallback(callback);
+        final Monitor.Callback callback =
+                mock(Monitor.Callback.class);
+        mConditionMonitor.addCallback(callback);
         verify(callback).onConditionsChanged(false);
     }
 
     @Test
     public void addCallback_addSecondCallback_reportWithExistingValue() {
-        final CommunalConditionsMonitor.Callback callback1 =
-                mock(CommunalConditionsMonitor.Callback.class);
-        mCommunalConditionsMonitor.addCallback(callback1);
+        final Monitor.Callback callback1 =
+                mock(Monitor.Callback.class);
+        mConditionMonitor.addCallback(callback1);
 
-        mCommunalConditionsMonitor.overrideAllConditionsMet(true);
+        mConditionMonitor.overrideAllConditionsMet(true);
 
-        final CommunalConditionsMonitor.Callback callback2 =
-                mock(CommunalConditionsMonitor.Callback.class);
-        mCommunalConditionsMonitor.addCallback(callback2);
+        final Monitor.Callback callback2 =
+                mock(Monitor.Callback.class);
+        mConditionMonitor.addCallback(callback2);
         verify(callback2).onConditionsChanged(true);
     }
 
     @Test
     public void removeCallback_shouldNoLongerReceiveUpdate() {
-        final CommunalConditionsMonitor.Callback callback =
-                mock(CommunalConditionsMonitor.Callback.class);
-        mCommunalConditionsMonitor.addCallback(callback);
+        final Monitor.Callback callback =
+                mock(Monitor.Callback.class);
+        mConditionMonitor.addCallback(callback);
         clearInvocations(callback);
-        mCommunalConditionsMonitor.removeCallback(callback);
+        mConditionMonitor.removeCallback(callback);
 
-        mCommunalConditionsMonitor.overrideAllConditionsMet(true);
+        mConditionMonitor.overrideAllConditionsMet(true);
         verify(callback, never()).onConditionsChanged(true);
 
-        mCommunalConditionsMonitor.overrideAllConditionsMet(false);
+        mConditionMonitor.overrideAllConditionsMet(false);
         verify(callback, never()).onConditionsChanged(false);
     }
 
     @Test
     public void removeCallback_removeLastCallback_removeCallbackFromAllConditions() {
-        final CommunalConditionsMonitor.Callback callback1 =
-                mock(CommunalConditionsMonitor.Callback.class);
-        final CommunalConditionsMonitor.Callback callback2 =
-                mock(CommunalConditionsMonitor.Callback.class);
-        mCommunalConditionsMonitor.addCallback(callback1);
-        mCommunalConditionsMonitor.addCallback(callback2);
+        final Monitor.Callback callback1 =
+                mock(Monitor.Callback.class);
+        final Monitor.Callback callback2 =
+                mock(Monitor.Callback.class);
+        mConditionMonitor.addCallback(callback1);
+        mConditionMonitor.addCallback(callback2);
 
-        mCommunalConditionsMonitor.removeCallback(callback1);
+        mConditionMonitor.removeCallback(callback1);
         mConditions.forEach(condition -> verify(condition, never()).removeCallback(any()));
 
-        mCommunalConditionsMonitor.removeCallback(callback2);
+        mConditionMonitor.removeCallback(callback2);
         mConditions.forEach(condition -> verify(condition).removeCallback(any()));
     }
 
     @Test
     public void updateCallbacks_allConditionsMet_reportTrue() {
-        final CommunalConditionsMonitor.Callback callback =
-                mock(CommunalConditionsMonitor.Callback.class);
-        mCommunalConditionsMonitor.addCallback(callback);
+        final Monitor.Callback callback =
+                mock(Monitor.Callback.class);
+        mConditionMonitor.addCallback(callback);
         clearInvocations(callback);
 
         mCondition1.fakeUpdateCondition(true);
@@ -145,9 +143,9 @@ public class CommunalConditionsMonitorTest extends SysuiTestCase {
 
     @Test
     public void updateCallbacks_oneConditionStoppedMeeting_reportFalse() {
-        final CommunalConditionsMonitor.Callback callback =
-                mock(CommunalConditionsMonitor.Callback.class);
-        mCommunalConditionsMonitor.addCallback(callback);
+        final Monitor.Callback callback =
+                mock(Monitor.Callback.class);
+        mConditionMonitor.addCallback(callback);
 
         mCondition1.fakeUpdateCondition(true);
         mCondition2.fakeUpdateCondition(true);
@@ -160,9 +158,9 @@ public class CommunalConditionsMonitorTest extends SysuiTestCase {
 
     @Test
     public void updateCallbacks_shouldOnlyUpdateWhenValueChanges() {
-        final CommunalConditionsMonitor.Callback callback =
-                mock(CommunalConditionsMonitor.Callback.class);
-        mCommunalConditionsMonitor.addCallback(callback);
+        final Monitor.Callback callback =
+                mock(Monitor.Callback.class);
+        mConditionMonitor.addCallback(callback);
         verify(callback).onConditionsChanged(false);
         clearInvocations(callback);
 

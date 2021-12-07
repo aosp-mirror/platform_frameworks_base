@@ -532,7 +532,7 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
             if (mStatusBar.getStatusBarView() != null
                     && !showing
                     && mStatusBarStateController.getState() == StatusBarState.SHADE) {
-                    mNotificationPanelViewController.collapsePanel(
+                mNotificationPanelViewController.collapsePanel(
                             false /* animate */, false /* delayed */, 1.0f /* speedUpFactor */);
             }
         }

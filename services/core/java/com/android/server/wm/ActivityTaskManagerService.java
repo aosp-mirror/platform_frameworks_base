@@ -667,14 +667,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
             POWER_MODE_REASON_START_ACTIVITY,
-            POWER_MODE_REASON_FREEZE_DISPLAY,
+            POWER_MODE_REASON_CHANGE_DISPLAY,
             POWER_MODE_REASON_UNKNOWN_VISIBILITY,
             POWER_MODE_REASON_ALL,
     })
     @interface PowerModeReason {}
 
     static final int POWER_MODE_REASON_START_ACTIVITY = 1 << 0;
-    static final int POWER_MODE_REASON_FREEZE_DISPLAY = 1 << 1;
+    static final int POWER_MODE_REASON_CHANGE_DISPLAY = 1 << 1;
     /** @see UnknownAppVisibilityController */
     static final int POWER_MODE_REASON_UNKNOWN_VISIBILITY = 1 << 2;
     /** This can only be used by {@link #endLaunchPowerMode(int)}.*/

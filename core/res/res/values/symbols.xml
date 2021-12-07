@@ -4624,4 +4624,6 @@
   <java-symbol type="array" name="config_gnssParameters" />
 
   <java-symbol type="integer" name="config_mashPressVibrateTimeOnPowerButton" />
+
+  <java-symbol type="string" name="config_systemGameService" />
 </resources>

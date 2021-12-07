@@ -108,7 +108,18 @@ public class FragmentHostManager {
         return p;
     }
 
-    public FragmentHostManager addTagListener(String tag, FragmentListener listener) {
+    /**
+     * Add a {@link FragmentListener} for a given tag
+     *
+     * @param tag string identifier for the fragment
+     * @param listener the listener to register
+     *
+     * @return this
+     */
+    public FragmentHostManager addTagListener(
+            @NonNull String tag,
+            @NonNull FragmentListener listener
+    ) {
         ArrayList<FragmentListener> listeners = mListeners.get(tag);
         if (listeners == null) {
             listeners = new ArrayList<>();

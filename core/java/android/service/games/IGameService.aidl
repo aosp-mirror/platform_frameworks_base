@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal;
-
-import com.android.systemui.communal.conditions.CommunalCondition;
+package android.service.games;
 
 /**
- * Fake implementation of {@link CommunalCondition}, and provides a way for tests to update
- * condition fulfillment.
+ * @hide
  */
-public class FakeCommunalCondition extends CommunalCondition {
-    @Override
-    public void start() {}
-
-    @Override
-    public void stop() {}
-
-    public void fakeUpdateCondition(boolean isConditionMet) {
-        updateCondition(isConditionMet);
-    }
+oneway interface IGameService {
+    void connected();
+    void disconnected();
 }

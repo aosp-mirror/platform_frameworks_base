@@ -73,7 +73,7 @@ public class NotificationIconAreaController implements
     private final DozeParameters mDozeParameters;
     private final Optional<Bubbles> mBubblesOptional;
     private final StatusBarWindowController mStatusBarWindowController;
-    private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private final ScreenOffAnimationController mScreenOffAnimationController;
 
     private int mIconSize;
     private int mIconHPadding;
@@ -123,7 +123,7 @@ public class NotificationIconAreaController implements
             DemoModeController demoModeController,
             DarkIconDispatcher darkIconDispatcher,
             StatusBarWindowController statusBarWindowController,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            ScreenOffAnimationController screenOffAnimationController) {
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
         mContext = context;
         mStatusBarStateController = statusBarStateController;
@@ -137,7 +137,7 @@ public class NotificationIconAreaController implements
         mDemoModeController = demoModeController;
         mDemoModeController.addCallback(this);
         mStatusBarWindowController = statusBarWindowController;
-        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mScreenOffAnimationController = screenOffAnimationController;
         notificationListener.addNotificationSettingsListener(mSettingsListener);
 
         initializeNotificationAreaViews(context);
@@ -617,7 +617,7 @@ public class NotificationIconAreaController implements
         if (mAodIcons == null) {
             return;
         }
-        if (mDozeParameters.shouldControlScreenOff()) {
+        if (mScreenOffAnimationController.shouldAnimateAodIcons()) {
             mAodIcons.setTranslationY(-mAodIconAppearTranslation);
             mAodIcons.setAlpha(0);
             animateInAodIconTranslation();
@@ -689,7 +689,7 @@ public class NotificationIconAreaController implements
         // playing, in which case we want them to be visible since we're animating in the AOD UI and
         // will be switching to KEYGUARD shortly.
         if (mStatusBarStateController.getState() != StatusBarState.KEYGUARD
-                && !mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()) {
+                && !mScreenOffAnimationController.shouldShowAodIconsWhenShade()) {
             visible = false;
         }
         if (visible && mWakeUpCoordinator.isPulseExpanding()

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal;
+package com.android.systemui.util.condition;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -29,7 +29,6 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.communal.conditions.CommunalCondition;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,26 +36,26 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-public class CommunalConditionTest extends SysuiTestCase {
-    private FakeCommunalCondition mCondition;
+public class ConditionTest extends SysuiTestCase {
+    private FakeCondition mCondition;
 
     @Before
     public void setup() {
-        mCondition = spy(new FakeCommunalCondition());
+        mCondition = spy(new FakeCondition());
     }
 
     @Test
     public void addCallback_addFirstCallback_triggerStart() {
-        final CommunalCondition.Callback callback = mock(CommunalCondition.Callback.class);
+        final Condition.Callback callback = mock(Condition.Callback.class);
         mCondition.addCallback(callback);
         verify(mCondition).start();
     }
 
     @Test
     public void addCallback_addMultipleCallbacks_triggerStartOnlyOnce() {
-        final CommunalCondition.Callback callback1 = mock(CommunalCondition.Callback.class);
-        final CommunalCondition.Callback callback2 = mock(CommunalCondition.Callback.class);
-        final CommunalCondition.Callback callback3 = mock(CommunalCondition.Callback.class);
+        final Condition.Callback callback1 = mock(Condition.Callback.class);
+        final Condition.Callback callback2 = mock(Condition.Callback.class);
+        final Condition.Callback callback3 = mock(Condition.Callback.class);
 
         mCondition.addCallback(callback1);
         mCondition.addCallback(callback2);
@@ -67,19 +66,19 @@ public class CommunalConditionTest extends SysuiTestCase {
 
     @Test
     public void addCallback_alreadyStarted_triggerUpdate() {
-        final CommunalCondition.Callback callback1 = mock(CommunalCondition.Callback.class);
+        final Condition.Callback callback1 = mock(Condition.Callback.class);
         mCondition.addCallback(callback1);
 
         mCondition.fakeUpdateCondition(true);
 
-        final CommunalCondition.Callback callback2 = mock(CommunalCondition.Callback.class);
+        final Condition.Callback callback2 = mock(Condition.Callback.class);
         mCondition.addCallback(callback2);
         verify(callback2).onConditionChanged(mCondition, true);
     }
 
     @Test
     public void removeCallback_removeLastCallback_triggerStop() {
-        final CommunalCondition.Callback callback = mock(CommunalCondition.Callback.class);
+        final Condition.Callback callback = mock(Condition.Callback.class);
         mCondition.addCallback(callback);
         verify(mCondition, never()).stop();
 
@@ -91,7 +90,7 @@ public class CommunalConditionTest extends SysuiTestCase {
     public void updateCondition_falseToTrue_reportTrue() {
         mCondition.fakeUpdateCondition(false);
 
-        final CommunalCondition.Callback callback = mock(CommunalCondition.Callback.class);
+        final Condition.Callback callback = mock(Condition.Callback.class);
         mCondition.addCallback(callback);
 
         mCondition.fakeUpdateCondition(true);
@@ -102,7 +101,7 @@ public class CommunalConditionTest extends SysuiTestCase {
     public void updateCondition_trueToFalse_reportFalse() {
         mCondition.fakeUpdateCondition(true);
 
-        final CommunalCondition.Callback callback = mock(CommunalCondition.Callback.class);
+        final Condition.Callback callback = mock(Condition.Callback.class);
         mCondition.addCallback(callback);
 
         mCondition.fakeUpdateCondition(false);
@@ -113,7 +112,7 @@ public class CommunalConditionTest extends SysuiTestCase {
     public void updateCondition_trueToTrue_reportNothing() {
         mCondition.fakeUpdateCondition(true);
 
-        final CommunalCondition.Callback callback = mock(CommunalCondition.Callback.class);
+        final Condition.Callback callback = mock(Condition.Callback.class);
         mCondition.addCallback(callback);
 
         mCondition.fakeUpdateCondition(true);
@@ -124,7 +123,7 @@ public class CommunalConditionTest extends SysuiTestCase {
     public void updateCondition_falseToFalse_reportNothing() {
         mCondition.fakeUpdateCondition(false);
 
-        final CommunalCondition.Callback callback = mock(CommunalCondition.Callback.class);
+        final Condition.Callback callback = mock(Condition.Callback.class);
         mCondition.addCallback(callback);
 
         mCondition.fakeUpdateCondition(false);

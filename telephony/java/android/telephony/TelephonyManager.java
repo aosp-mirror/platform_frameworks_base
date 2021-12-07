@@ -6774,8 +6774,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.iccOpenLogicalChannelBySlot(slotIndex, getOpPackageName(), aid,
-                        p2);
+                return telephony.iccOpenLogicalChannelByPort(slotIndex, DEFAULT_PORT_INDEX,
+                         getOpPackageName(), aid, p2);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
@@ -6873,7 +6873,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.iccCloseLogicalChannelBySlot(slotIndex, channel);
+                return telephony.iccCloseLogicalChannelByPort(slotIndex, DEFAULT_PORT_INDEX,
+                         channel);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
@@ -6957,8 +6958,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.iccTransmitApduLogicalChannelBySlot(slotIndex, channel, cla,
-                        instruction, p1, p2, p3, data);
+                return telephony.iccTransmitApduLogicalChannelByPort(slotIndex, DEFAULT_PORT_INDEX,
+                         channel, cla, instruction, p1, p2, p3, data);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
@@ -7060,8 +7061,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.iccTransmitApduBasicChannelBySlot(slotIndex, getOpPackageName(),
-                        cla, instruction, p1, p2, p3, data);
+                return telephony.iccTransmitApduBasicChannelByPort(slotIndex, DEFAULT_PORT_INDEX,
+                         getOpPackageName(), cla, instruction, p1, p2, p3, data);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {

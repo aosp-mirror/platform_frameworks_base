@@ -102,6 +102,7 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_C
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
 import static com.android.server.wm.DisplayContentProto.APP_TRANSITION;
 import static com.android.server.wm.DisplayContentProto.CLOSING_APPS;
 import static com.android.server.wm.DisplayContentProto.CURRENT_FOCUS;
@@ -3227,6 +3228,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         final Transition t = controller.requestTransitionIfNeeded(TRANSIT_CHANGE, this);
         if (t != null) {
+            mAtmService.startLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
             if (getRotation() != getWindowConfiguration().getRotation()) {
                 mWmService.mLatencyTracker.onActionStart(ACTION_ROTATE_SCREEN);
                 controller.mTransitionMetricsReporter.associate(t,

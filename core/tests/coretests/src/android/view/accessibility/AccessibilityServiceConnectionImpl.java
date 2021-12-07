@@ -18,6 +18,8 @@ package android.view.accessibility;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.accessibilityservice.MagnificationConfig;
+import android.annotation.NonNull;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Region;
 import android.os.Bundle;
@@ -97,6 +99,10 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public void setOnKeyEventResult(boolean handled, int sequence) {}
 
+    public MagnificationConfig getMagnificationConfig(int displayId) {
+        return null;
+    }
+
     public float getMagnificationScale(int displayId) {
         return 0.0f;
     }
@@ -117,8 +123,8 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
         return false;
     }
 
-    public boolean setMagnificationScaleAndCenter(int displayId, float scale, float centerX,
-            float centerY, boolean animate) {
+    public boolean setMagnificationConfig(int displayId,
+            @NonNull MagnificationConfig config, boolean animate) {
         return false;
     }
 
