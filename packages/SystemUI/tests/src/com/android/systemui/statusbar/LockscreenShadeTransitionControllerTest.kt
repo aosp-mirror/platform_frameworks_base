@@ -6,6 +6,7 @@ import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.util.DisplayMetrics
 import com.android.systemui.ExpandHelper
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.media.MediaHierarchyManager
@@ -81,6 +82,8 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 mDependency,
                 TestableLooper.get(this))
         row = helper.createRow()
+        context.getOrCreateTestableResources()
+                .addOverride(R.bool.config_use_split_notification_shade, false)
         transitionController = LockscreenShadeTransitionController(
             statusBarStateController = statusbarStateController,
             lockscreenGestureLogger = lockscreenGestureLogger,
