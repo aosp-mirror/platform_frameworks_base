@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -96,7 +95,7 @@ class SetRequestedOrientationWhilePinnedTest(
         super.statusBarLayerRotatesScales()
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipWindowInsideDisplay() {
         testSpec.assertWmStart {
@@ -112,7 +111,7 @@ class SetRequestedOrientationWhilePinnedTest(
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipLayerInsideDisplay() {
         testSpec.assertLayersStart {
@@ -126,7 +125,7 @@ class SetRequestedOrientationWhilePinnedTest(
         this.isAppWindowVisible(pipApp.component)
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipAppLayerCoversFullScreen() {
         testSpec.assertLayersEnd {
