@@ -274,6 +274,15 @@ public class StorageManager {
     public static final int FLAG_STORAGE_EXTERNAL = IInstalld.FLAG_STORAGE_EXTERNAL;
 
     /** {@hide} */
+    @IntDef(prefix = "FLAG_STORAGE_",  value = {
+            FLAG_STORAGE_DE,
+            FLAG_STORAGE_CE,
+            FLAG_STORAGE_EXTERNAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StorageFlags {}
+
+    /** {@hide} */
     public static final int FLAG_FOR_WRITE = 1 << 8;
     /** {@hide} */
     public static final int FLAG_REAL_STATE = 1 << 9;
