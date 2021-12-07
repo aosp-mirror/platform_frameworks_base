@@ -1440,11 +1440,11 @@ class Task extends TaskFragment {
     }
 
     /** Called when an {@link ActivityRecord} is added as a descendant */
-    void onDescendantActivityAdded(boolean hadChild, int activityType, ActivityRecord r) {
+    void onDescendantActivityAdded(boolean hadActivity, int activityType, ActivityRecord r) {
         warnForNonLeafTask("onDescendantActivityAdded");
 
         // Only set this based on the first activity
-        if (!hadChild) {
+        if (!hadActivity) {
             if (r.getActivityType() == ACTIVITY_TYPE_UNDEFINED) {
                 // Normally non-standard activity type for the activity record will be set when the
                 // object is created, however we delay setting the standard application type until
