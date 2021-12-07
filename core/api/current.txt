@@ -14376,11 +14376,21 @@ package android.database.sqlite {
     field public static final int CONFLICT_ROLLBACK = 1; // 0x1
     field public static final int CREATE_IF_NECESSARY = 268435456; // 0x10000000
     field public static final int ENABLE_WRITE_AHEAD_LOGGING = 536870912; // 0x20000000
+    field public static final String JOURNAL_MODE_DELETE = "DELETE";
+    field public static final String JOURNAL_MODE_MEMORY = "MEMORY";
+    field public static final String JOURNAL_MODE_OFF = "OFF";
+    field public static final String JOURNAL_MODE_PERSIST = "PERSIST";
+    field public static final String JOURNAL_MODE_TRUNCATE = "TRUNCATE";
+    field public static final String JOURNAL_MODE_WAL = "WAL";
     field public static final int MAX_SQL_CACHE_SIZE = 100; // 0x64
     field public static final int NO_LOCALIZED_COLLATORS = 16; // 0x10
     field public static final int OPEN_READONLY = 1; // 0x1
     field public static final int OPEN_READWRITE = 0; // 0x0
     field public static final int SQLITE_MAX_LIKE_PATTERN_LENGTH = 50000; // 0xc350
+    field public static final String SYNC_MODE_EXTRA = "EXTRA";
+    field public static final String SYNC_MODE_FULL = "FULL";
+    field public static final String SYNC_MODE_NORMAL = "NORMAL";
+    field public static final String SYNC_MODE_OFF = "OFF";
   }
 
   public static interface SQLiteDatabase.CursorFactory {
