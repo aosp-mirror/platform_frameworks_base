@@ -908,7 +908,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
                 final int count = source.readInt();
                 for (int i = 0; i < count; i++) {
                     List<AccessibilityWindowInfo> windows = new ArrayList<>();
-                    source.readParcelableList(windows, loader);
+                    source.readParcelableList(windows, loader, android.view.accessibility.AccessibilityWindowInfo.class);
                     array.put(source.readInt(), windows);
                 }
                 return array;

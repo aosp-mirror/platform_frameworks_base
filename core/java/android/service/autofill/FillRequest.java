@@ -384,7 +384,7 @@ public final class FillRequest implements Parcelable {
         byte flg = in.readByte();
         int id = in.readInt();
         List<FillContext> fillContexts = new ArrayList<>();
-        in.readParcelableList(fillContexts, FillContext.class.getClassLoader());
+        in.readParcelableList(fillContexts, FillContext.class.getClassLoader(), android.service.autofill.FillContext.class);
         Bundle clientState = (flg & 0x4) == 0 ? null : in.readBundle();
         int flags = in.readInt();
         InlineSuggestionsRequest inlineSuggestionsRequest = (flg & 0x10) == 0 ? null : (InlineSuggestionsRequest) in.readTypedObject(InlineSuggestionsRequest.CREATOR);

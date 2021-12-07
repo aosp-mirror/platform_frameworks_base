@@ -159,7 +159,7 @@ public final class TextClassificationContext implements Parcelable {
         mPackageName = in.readString();
         mWidgetType = in.readString();
         mWidgetVersion = in.readString();
-        mSystemTcMetadata = in.readParcelable(null);
+        mSystemTcMetadata = in.readParcelable(null, android.view.textclassifier.SystemTextClassifierMetadata.class);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<TextClassificationContext> CREATOR =

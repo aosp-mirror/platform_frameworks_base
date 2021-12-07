@@ -60,7 +60,7 @@ public final class UnderlyingNetworkInfo implements Parcelable {
         mOwnerUid = in.readInt();
         mIface = in.readString();
         List<String> underlyingIfaces = new ArrayList<>();
-        in.readList(underlyingIfaces, null /*classLoader*/);
+        in.readList(underlyingIfaces, null /*classLoader*/, java.lang.String.class);
         mUnderlyingIfaces = Collections.unmodifiableList(underlyingIfaces);
     }
 
