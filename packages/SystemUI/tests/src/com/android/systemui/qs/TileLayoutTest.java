@@ -58,10 +58,9 @@ public class TileLayoutTest extends SysuiTestCase {
     }
 
     private QSPanelControllerBase.TileRecord createTileRecord() {
-        QSPanelControllerBase.TileRecord tileRecord = new QSPanelControllerBase.TileRecord();
-        tileRecord.tile = mock(QSTile.class);
-        tileRecord.tileView = spy(new QSTileViewImpl(mContext, new QSIconViewImpl(mContext)));
-        return tileRecord;
+        return new QSPanelControllerBase.TileRecord(
+                mock(QSTile.class),
+                spy(new QSTileViewImpl(mContext, new QSIconViewImpl(mContext))));
     }
 
     @Test
