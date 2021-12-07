@@ -16,12 +16,9 @@
 
 package com.android.server;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.ContentObserver;
-import android.net.Uri;
 import android.net.nsd.INsdManager;
 import android.net.nsd.INsdManagerCallback;
 import android.net.nsd.INsdServiceConnector;
@@ -33,7 +30,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
@@ -66,7 +62,6 @@ public class NsdService extends INsdManager.Stub {
     private static final long CLEANUP_DELAY_MS = 10000;
 
     private final Context mContext;
-    private final NsdSettings mNsdSettings;
     private final NsdStateMachine mNsdStateMachine;
     private final DaemonConnection mDaemon;
     private final NativeCallbackReceiver mDaemonCallback;
@@ -121,30 +116,14 @@ public class NsdService extends INsdManager.Stub {
             this.removeMessages(NsdManager.DAEMON_CLEANUP);
         }
 
-        /**
-         * Observes the NSD on/off setting, and takes action when changed.
-         */
-        private void registerForNsdSetting() {
-            final ContentObserver contentObserver = new ContentObserver(this.getHandler()) {
-                @Override
-                public void onChange(boolean selfChange) {
-                    notifyEnabled(isNsdEnabled());
-                }
-            };
-
-            final Uri uri = Settings.Global.getUriFor(Settings.Global.NSD_ON);
-            mNsdSettings.registerContentObserver(uri, contentObserver);
-        }
-
         NsdStateMachine(String name, Handler handler) {
             super(name, handler);
             addState(mDefaultState);
                 addState(mDisabledState, mDefaultState);
                 addState(mEnabledState, mDefaultState);
-            State initialState = isNsdEnabled() ? mEnabledState : mDisabledState;
+            State initialState = mEnabledState;
             setInitialState(initialState);
             setLogRecSize(25);
-            registerForNsdSetting();
         }
 
         class DefaultState extends State {
@@ -580,11 +559,9 @@ public class NsdService extends INsdManager.Stub {
     }
 
     @VisibleForTesting
-    NsdService(Context ctx, NsdSettings settings, Handler handler,
-            DaemonConnectionSupplier fn, long cleanupDelayMs) {
+    NsdService(Context ctx, Handler handler, DaemonConnectionSupplier fn, long cleanupDelayMs) {
         mCleanupDelayMs = cleanupDelayMs;
         mContext = ctx;
-        mNsdSettings = settings;
         mNsdStateMachine = new NsdStateMachine(TAG, handler);
         mNsdStateMachine.start();
         mDaemonCallback = new NativeCallbackReceiver();
@@ -592,12 +569,11 @@ public class NsdService extends INsdManager.Stub {
     }
 
     public static NsdService create(Context context) throws InterruptedException {
-        NsdSettings settings = NsdSettings.makeDefault(context);
         HandlerThread thread = new HandlerThread(TAG);
         thread.start();
         Handler handler = new Handler(thread.getLooper());
-        NsdService service = new NsdService(context, settings, handler,
-                DaemonConnection::new, CLEANUP_DELAY_MS);
+        NsdService service =
+                new NsdService(context, handler, DaemonConnection::new, CLEANUP_DELAY_MS);
         service.mDaemonCallback.awaitConnection();
         return service;
     }
@@ -669,24 +645,12 @@ public class NsdService extends INsdManager.Stub {
         }
     }
 
-    private void notifyEnabled(boolean isEnabled) {
-        mNsdStateMachine.sendMessage(isEnabled ? NsdManager.ENABLE : NsdManager.DISABLE);
-    }
-
     private void sendNsdStateChangeBroadcast(boolean isEnabled) {
         final Intent intent = new Intent(NsdManager.ACTION_NSD_STATE_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         int nsdState = isEnabled ? NsdManager.NSD_STATE_ENABLED : NsdManager.NSD_STATE_DISABLED;
         intent.putExtra(NsdManager.EXTRA_NSD_STATE, nsdState);
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
-    }
-
-    private boolean isNsdEnabled() {
-        boolean ret = mNsdSettings.isEnabled();
-        if (DBG) {
-            Log.d(TAG, "Network service discovery is " + (ret ? "enabled" : "disabled"));
-        }
-        return ret;
     }
 
     private int getUniqueId() {
@@ -1073,37 +1037,6 @@ public class NsdService extends INsdManager.Stub {
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling onResolveServiceSucceeded", e);
             }
-        }
-    }
-
-    /**
-     * Interface which encapsulates dependencies of NsdService that are hard to mock, hard to
-     * override, or have side effects on global state in unit tests.
-     */
-    @VisibleForTesting
-    public interface NsdSettings {
-        boolean isEnabled();
-        void putEnabledStatus(boolean isEnabled);
-        void registerContentObserver(Uri uri, ContentObserver observer);
-
-        static NsdSettings makeDefault(Context context) {
-            final ContentResolver resolver = context.getContentResolver();
-            return new NsdSettings() {
-                @Override
-                public boolean isEnabled() {
-                    return Settings.Global.getInt(resolver, Settings.Global.NSD_ON, 1) == 1;
-                }
-
-                @Override
-                public void putEnabledStatus(boolean isEnabled) {
-                    Settings.Global.putInt(resolver, Settings.Global.NSD_ON, isEnabled ? 1 : 0);
-                }
-
-                @Override
-                public void registerContentObserver(Uri uri, ContentObserver observer) {
-                    resolver.registerContentObserver(uri, false, observer);
-                }
-            };
         }
     }
 }
