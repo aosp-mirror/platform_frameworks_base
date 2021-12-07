@@ -118,6 +118,8 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
     @Test
     public void testNullNetworkDoesNotTriggerDisconnect() throws Exception {
+        doReturn(false).when(mDeps).isAirplaneModeOn(any());
+
         mGatewayConnection
                 .getUnderlyingNetworkTrackerCallback()
                 .onSelectedUnderlyingNetworkChanged(null);
@@ -126,6 +128,19 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
         verify(mIkeSession, never()).close();
         verifyDisconnectRequestAlarmAndGetCallback(false /* expectCanceled */);
+    }
+
+    @Test
+    public void testNullNetworkAirplaneModeDisconnects() throws Exception {
+        doReturn(true).when(mDeps).isAirplaneModeOn(any());
+
+        mGatewayConnection
+                .getUnderlyingNetworkTrackerCallback()
+                .onSelectedUnderlyingNetworkChanged(null);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
+        verify(mIkeSession).kill();
     }
 
     @Test
