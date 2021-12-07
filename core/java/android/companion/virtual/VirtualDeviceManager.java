@@ -21,7 +21,9 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.companion.AssociationInfo;
 import android.content.Context;
+import android.os.Binder;
 import android.os.RemoteException;
 
 /**
@@ -49,14 +51,18 @@ public final class VirtualDeviceManager {
     /**
      * Creates a virtual device.
      *
+     * @param associationId The association ID as returned by {@link AssociationInfo#getId()} from
+     *   Companion Device Manager. Virtual devices must have a corresponding association with CDM in
+     *   order to be created.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Nullable
-    public VirtualDevice createVirtualDevice() {
-        // TODO(b/194949534): Add CDM association ID here and unhide this API
+    public VirtualDevice createVirtualDevice(int associationId) {
+        // TODO(b/194949534): Unhide this API
         try {
-            IVirtualDevice virtualDevice = mService.createVirtualDevice();
+            IVirtualDevice virtualDevice = mService.createVirtualDevice(
+                    new Binder(), mContext.getPackageName(), associationId);
             return new VirtualDevice(mContext, virtualDevice);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
