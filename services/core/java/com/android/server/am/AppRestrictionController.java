@@ -47,7 +47,9 @@ import static android.app.usage.UsageStatsManager.reasonToString;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
+import static android.os.Process.SYSTEM_UID;
 
+import static com.android.internal.notification.SystemNotificationChannels.ABUSIVE_BACKGROUND_APPS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -61,6 +63,9 @@ import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
@@ -68,9 +73,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -82,6 +89,7 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
+import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.util.Slog;
 import android.util.SparseArrayMap;
@@ -89,6 +97,7 @@ import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.TriConsumer;
 import com.android.server.AppStateTracker;
@@ -147,6 +156,7 @@ public final class AppRestrictionController {
 
     private final Object mLock = new Object();
     private final Injector mInjector;
+    private final NotificationHelper mNotificationHelper;
 
     /**
      * The restriction levels that each package is on, the levels here are defined in
@@ -164,6 +174,9 @@ public final class AppRestrictionController {
             private @RestrictionLevel int mLastRestrictionLevel;
             private @ElapsedRealtimeLong long mLevelChangeTimeElapsed;
             private int mReason;
+
+            @ElapsedRealtimeLong long mLastNotificationShownTimeElapsed;
+            int mNotificationId;
 
             PkgSettings(String packageName, int uid) {
                 mPackageName = packageName;
@@ -207,8 +220,12 @@ public final class AppRestrictionController {
                     pw.print('/');
                     pw.print(ActivityManager.restrictionLevelToName(mLastRestrictionLevel));
                 }
-                pw.print(' ');
+                pw.print(" levelChange=");
                 TimeUtils.formatDuration(mLevelChangeTimeElapsed - nowElapsed, pw);
+                if (mLastNotificationShownTimeElapsed > 0) {
+                    pw.print(" lastNoti=");
+                    TimeUtils.formatDuration(mLastNotificationShownTimeElapsed - nowElapsed, pw);
+                }
             }
 
             String getPackageName() {
@@ -240,7 +257,7 @@ public final class AppRestrictionController {
         @RestrictionLevel int update(String packageName, int uid, @RestrictionLevel int level,
                 int reason, int subReason) {
             synchronized (mLock) {
-                PkgSettings settings = mRestrictionLevels.get(uid, packageName);
+                PkgSettings settings = getRestrictionSettingsLocked(uid, packageName);
                 if (settings == null) {
                     settings = new PkgSettings(packageName, uid);
                     mRestrictionLevels.add(uid, packageName, settings);
@@ -284,7 +301,7 @@ public final class AppRestrictionController {
 
         @RestrictionLevel int getRestrictionLevel(int uid, String packageName) {
             synchronized (mLock) {
-                final PkgSettings settings = mRestrictionLevels.get(uid, packageName);
+                final PkgSettings settings = getRestrictionSettingsLocked(uid, packageName);
                 return settings == null
                         ? getRestrictionLevel(uid) : settings.getCurrentRestrictionLevel();
             }
@@ -323,6 +340,11 @@ public final class AppRestrictionController {
             for (int i = mRestrictionLevels.numMaps() - 1; i >= 0; i--) {
                 consumer.accept(mRestrictionLevels.keyAt(i));
             }
+        }
+
+        @GuardedBy("mLock")
+        PkgSettings getRestrictionSettingsLocked(int uid, String packageName) {
+            return mRestrictionLevels.get(uid, packageName);
         }
 
         void removeUser(@UserIdInt int userId) {
@@ -373,13 +395,23 @@ public final class AppRestrictionController {
          * when it's background-restricted.
          */
         static final String KEY_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION =
-                    DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "auto_restricted_bucket_on_bg_restricted";
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "auto_restricted_bucket_on_bg_restricted";
+
+        /**
+         * The minimal interval in ms before posting a notification again on abusive behaviors
+         * of a certain package.
+         */
+        static final String KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "abusive_notification_minimal_interval";
 
         static final boolean DEFAULT_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION = true;
+        static final long DEFAULT_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
         volatile boolean mBgAutoRestrictedBucket;
 
         volatile boolean mRestrictedBucketEnabled;
+
+        volatile long mBgNotificationMinIntervalMs;
 
         ConstantsObserver(Handler handler) {
             super(handler);
@@ -394,6 +426,9 @@ public final class AppRestrictionController {
                 switch (name) {
                     case KEY_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION:
                         updateBgAutoRestrictedBucketChanged();
+                        break;
+                    case KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL:
+                        updateBgAbusiveNotificationMinimalInterval();
                         break;
                 }
                 AppRestrictionController.this.onPropertiesChanged(name);
@@ -425,6 +460,7 @@ public final class AppRestrictionController {
 
         void updateDeviceConfig() {
             updateBgAutoRestrictedBucketChanged();
+            updateBgAbusiveNotificationMinimalInterval();
         }
 
         private void updateBgAutoRestrictedBucketChanged() {
@@ -436,6 +472,13 @@ public final class AppRestrictionController {
             if (oldValue != mBgAutoRestrictedBucket) {
                 dispatchAutoRestrictedBucketFeatureFlagChanged(mBgAutoRestrictedBucket);
             }
+        }
+
+        private void updateBgAbusiveNotificationMinimalInterval() {
+            mBgNotificationMinIntervalMs = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL,
+                    DEFAULT_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL_MS);
         }
     }
 
@@ -515,6 +558,7 @@ public final class AppRestrictionController {
         mBgHandlerThread.start();
         mBgHandler = new BgHandler(mBgHandlerThread.getLooper(), injector);
         mConstantsObserver = new ConstantsObserver(mBgHandler);
+        mNotificationHelper = new NotificationHelper(this);
         injector.initAppStateTrackers(this);
     }
 
@@ -793,6 +837,8 @@ public final class AppRestrictionController {
             applyRestrictionLevel(pkgName, uid, RESTRICTION_LEVEL_BACKGROUND_RESTRICTED,
                     curBucket, true, REASON_MAIN_FORCED_BY_USER,
                     REASON_SUB_FORCED_USER_FLAG_INTERACTION);
+            mBgHandler.obtainMessage(BgHandler.MSG_CANCEL_REQUEST_BG_RESTRICTED, uid, 0, pkgName)
+                    .sendToTarget();
         } else {
             // Moved out of the background-restricted state, we'd need to check if it should
             // stay in the restricted standby bucket.
@@ -857,7 +903,135 @@ public final class AppRestrictionController {
             Slog.i(TAG, "Requesting background restricted " + packageName + " "
                     + UserHandle.formatUid(uid));
         }
-        // TODO: b/200326767 - show the request notification.
+        mNotificationHelper.postRequestBgRestrictedIfNecessary(packageName, uid);
+    }
+
+    void handleCancelRequestBgRestricted(String packageName, int uid) {
+        if (DEBUG_BG_RESTRICTION_CONTROLLER) {
+            Slog.i(TAG, "Cancelling requesting background restricted " + packageName + " "
+                    + UserHandle.formatUid(uid));
+        }
+        mNotificationHelper.cancelRequestBgRestrictedIfNecessary(packageName, uid);
+    }
+
+    static class NotificationHelper {
+        static final String PACKAGE_SCHEME = "package";
+        static final String GROUP_KEY = "com.android.app.abusive_bg_apps";
+
+        static final int SUMMARY_NOTIFICATION_ID = SystemMessage.NOTE_ABUSIVE_BG_APPS_BASE;
+
+        private final AppRestrictionController mBgController;
+        private final NotificationManager mNotificationManager;
+        private final Injector mInjector;
+        private final Object mLock;
+        private final Context mContext;
+
+        @GuardedBy("mLock")
+        private int mNotificationIDStepper = SUMMARY_NOTIFICATION_ID + 1;
+
+        NotificationHelper(AppRestrictionController controller) {
+            mBgController = controller;
+            mInjector = controller.mInjector;
+            mNotificationManager = mInjector.getNotificationManager();
+            mLock = controller.mLock;
+            mContext = mInjector.getContext();
+        }
+
+        void postRequestBgRestrictedIfNecessary(String packageName, int uid) {
+            int notificationId;
+            synchronized (mLock) {
+                final RestrictionSettings.PkgSettings settings = mBgController.mRestrictionSettings
+                        .getRestrictionSettingsLocked(uid, packageName);
+
+                final long now = SystemClock.elapsedRealtime();
+                if (settings.mLastNotificationShownTimeElapsed != 0
+                        && (settings.mLastNotificationShownTimeElapsed
+                        + mBgController.mConstantsObserver.mBgNotificationMinIntervalMs > now)) {
+                    if (DEBUG_BG_RESTRICTION_CONTROLLER) {
+                        Slog.i(TAG, "Not showing notification as last notification was shown "
+                                + TimeUtils.formatDuration(
+                                        now - settings.mLastNotificationShownTimeElapsed)
+                                + " ago");
+                    }
+                    return;
+                }
+                if (DEBUG_BG_RESTRICTION_CONTROLLER) {
+                    Slog.i(TAG, "Showing notification for " + packageName
+                            + "/" + UserHandle.formatUid(uid)
+                            + ", now=" + now
+                            + ", lastShown=" + settings.mLastNotificationShownTimeElapsed);
+                }
+                settings.mLastNotificationShownTimeElapsed = now;
+                if (settings.mNotificationId == 0) {
+                    settings.mNotificationId = mNotificationIDStepper++;
+                }
+                notificationId = settings.mNotificationId;
+            }
+
+            final UserHandle targetUser = UserHandle.of(UserHandle.getUserId(uid));
+
+            postSummaryNotification(targetUser);
+
+            final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
+            final ApplicationInfo ai = pm.getApplicationInfo(packageName, STOCK_PM_FLAGS,
+                    SYSTEM_UID, UserHandle.getUserId(uid));
+            final String title = mContext.getString(
+                    com.android.internal.R.string.notification_title_abusive_bg_apps);
+            final String message = mContext.getString(
+                    com.android.internal.R.string.notification_content_abusive_bg_apps,
+                    ai != null ? mInjector.getPackageManager()
+                    .getText(packageName, ai.labelRes, ai) : packageName);
+
+            final Intent intent = new Intent(Settings.ACTION_VIEW_ADVANCED_POWER_USAGE_DETAIL);
+            intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
+            final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(mContext, 0,
+                    intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE, null,
+                    targetUser);
+
+            final Notification.Builder notificationBuilder = new Notification.Builder(mContext,
+                    ABUSIVE_BACKGROUND_APPS)
+                    .setAutoCancel(true)
+                    .setGroup(GROUP_KEY)
+                    .setWhen(System.currentTimeMillis())
+                    .setSmallIcon(com.android.internal.R.drawable.stat_sys_warning)
+                    .setColor(mContext.getColor(
+                            com.android.internal.R.color.system_notification_accent_color))
+                    .setContentTitle(title)
+                    .setContentText(message)
+                    .setContentIntent(pendingIntent);
+            if (ai != null) {
+                notificationBuilder.setLargeIcon(Icon.createWithResource(packageName, ai.icon));
+            }
+
+            final Notification notification = notificationBuilder.build();
+            // Remember the package name for testing.
+            notification.extras.putString(Intent.EXTRA_PACKAGE_NAME, packageName);
+
+            mNotificationManager.notifyAsUser(null, notificationId, notification, targetUser);
+        }
+
+        private void postSummaryNotification(@NonNull UserHandle targetUser) {
+            final Notification summary = new Notification.Builder(mContext,
+                    ABUSIVE_BACKGROUND_APPS)
+                    .setGroup(GROUP_KEY)
+                    .setGroupSummary(true)
+                    .setStyle(new Notification.BigTextStyle())
+                    .setSmallIcon(com.android.internal.R.drawable.stat_sys_warning)
+                    .setColor(mContext.getColor(
+                            com.android.internal.R.color.system_notification_accent_color))
+                    .build();
+            mNotificationManager.notifyAsUser(null, SUMMARY_NOTIFICATION_ID, summary, targetUser);
+        }
+
+        void cancelRequestBgRestrictedIfNecessary(String packageName, int uid) {
+            synchronized (mLock) {
+                final RestrictionSettings.PkgSettings settings = mBgController.mRestrictionSettings
+                        .getRestrictionSettingsLocked(uid, packageName);
+                if (settings.mNotificationId > 0) {
+                    mNotificationManager.cancel(settings.mNotificationId);
+                }
+            }
+        }
     }
 
     void handleUidInactive(int uid, boolean disabled) {
@@ -924,6 +1098,18 @@ public final class AppRestrictionController {
         mAppStateTrackers.add(tracker);
     }
 
+    /**
+     * @return The tracker instance of the given class.
+     */
+    <T extends BaseAppStateTracker> T getAppStateTracker(Class<T> trackerClass) {
+        for (BaseAppStateTracker tracker : mAppStateTrackers) {
+            if (trackerClass.isAssignableFrom(tracker.getClass())) {
+                return (T) tracker;
+            }
+        }
+        return null;
+    }
+
     static class BgHandler extends Handler {
         static final int MSG_BACKGROUND_RESTRICTION_CHANGED = 0;
         static final int MSG_APP_RESTRICTION_LEVEL_CHANGED = 1;
@@ -932,6 +1118,7 @@ public final class AppRestrictionController {
         static final int MSG_REQUEST_BG_RESTRICTED = 4;
         static final int MSG_UID_INACTIVE = 5;
         static final int MSG_UID_ACTIVE = 6;
+        static final int MSG_CANCEL_REQUEST_BG_RESTRICTED = 7;
 
         private final Injector mInjector;
 
@@ -966,6 +1153,9 @@ public final class AppRestrictionController {
                 case MSG_UID_ACTIVE: {
                     c.handleUidActive(msg.arg1);
                 } break;
+                case MSG_CANCEL_REQUEST_BG_RESTRICTED: {
+                    c.handleCancelRequestBgRestricted((String) msg.obj, msg.arg1);
+                } break;
             }
         }
     }
@@ -980,6 +1170,7 @@ public final class AppRestrictionController {
         private IActivityManager mIActivityManager;
         private UserManagerInternal mUserManagerInternal;
         private PackageManagerInternal mPackageManagerInternal;
+        private NotificationManager mNotificationManager;
 
         Injector(Context context) {
             mContext = context;
@@ -1047,6 +1238,13 @@ public final class AppRestrictionController {
 
         PackageManager getPackageManager() {
             return getContext().getPackageManager();
+        }
+
+        NotificationManager getNotificationManager() {
+            if (mNotificationManager == null) {
+                mNotificationManager = getContext().getSystemService(NotificationManager.class);
+            }
+            return mNotificationManager;
         }
     }
 

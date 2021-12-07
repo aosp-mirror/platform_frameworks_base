@@ -69,7 +69,7 @@ import java.util.List;
 final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
     static final String TAG = TAG_WITH_CLASS_NAME ? "AppBatteryTracker" : TAG_AM;
 
-    private static final boolean DEBUG_BACKGROUND_BATTERY_TRACKER = false;
+    static final boolean DEBUG_BACKGROUND_BATTERY_TRACKER = false;
 
     // As we don't support realtime per-UID battery usage stats yet, we're polling the stats
     // in a regular time basis.
@@ -103,6 +103,9 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
 
     private BatteryUsageStatsQuery mBatteryUsageStatsQuery;
 
+    // For debug only.
+    final SparseArray<Double> mDebugUidPercentages = new SparseArray<>();
+
     AppBatteryTracker(Context context, AppRestrictionController controller) {
         this(context, controller, null, null);
     }
@@ -112,7 +115,9 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
             Object outerContext) {
         super(context, controller, injector, outerContext);
         if (injector == null) {
-            mBatteryUsageStatsPollingIntervalMs = BATTERY_USAGE_STATS_POLLING_INTERVAL_MS_LONG;
+            mBatteryUsageStatsPollingIntervalMs = DEBUG_BACKGROUND_BATTERY_TRACKER
+                    ? BATTERY_USAGE_STATS_POLLING_INTERVAL_MS_DEBUG
+                    : BATTERY_USAGE_STATS_POLLING_INTERVAL_MS_LONG;
         } else {
             mBatteryUsageStatsPollingIntervalMs = BATTERY_USAGE_STATS_POLLING_INTERVAL_MS_DEBUG;
         }
@@ -185,6 +190,11 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
                             TimeUtils.formatDuration(bgPolicy.mBgCurrentDrainWindowMs)));
                 }
                 bgPolicy.handleUidBatteryConsumption(uid, percentage);
+            }
+            // For debugging only.
+            for (int i = 0, size = mDebugUidPercentages.size(); i < size; i++) {
+                bgPolicy.handleUidBatteryConsumption(mDebugUidPercentages.keyAt(i),
+                        mDebugUidPercentages.valueAt(i));
             }
         } finally {
             scheduleBatteryUsageStatsUpdateIfNecessary();
@@ -422,7 +432,8 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
             mBgCurrentDrainWindowMs = DeviceConfig.getLong(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_CURRENT_DRAIN_WINDOW,
-                    DEFAULT_BG_CURRENT_DRAIN_WINDOW_MS);
+                    mBgCurrentDrainWindowMs != DEFAULT_BG_CURRENT_DRAIN_WINDOW_MS
+                    ? mBgCurrentDrainWindowMs : DEFAULT_BG_CURRENT_DRAIN_WINDOW_MS);
         }
 
         @Override
@@ -490,16 +501,19 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy> {
                         // it's actually back to normal, but we don't untrack it until
                         // explicit user interactions.
                         notifyController = true;
-                    } else if (percentage >= mBgCurrentDrainBgRestrictedThreshold) {
-                        // If we're in the restricted standby bucket but still seeing high
-                        // current drains, tell the controller again.
-                        if (curLevel == RESTRICTION_LEVEL_RESTRICTED_BUCKET
-                                && ts[TIME_STAMP_INDEX_BG_RESTRICTED] == 0) {
-                            final long now = SystemClock.elapsedRealtime();
-                            if (now > ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET]
-                                    + mBgCurrentDrainWindowMs) {
-                                ts[TIME_STAMP_INDEX_BG_RESTRICTED] = now;
-                                notifyController = excessive = true;
+                    } else {
+                        excessive = true;
+                        if (percentage >= mBgCurrentDrainBgRestrictedThreshold) {
+                            // If we're in the restricted standby bucket but still seeing high
+                            // current drains, tell the controller again.
+                            if (curLevel == RESTRICTION_LEVEL_RESTRICTED_BUCKET
+                                    && ts[TIME_STAMP_INDEX_BG_RESTRICTED] == 0) {
+                                final long now = SystemClock.elapsedRealtime();
+                                if (now > ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET]
+                                        + mBgCurrentDrainWindowMs) {
+                                    ts[TIME_STAMP_INDEX_BG_RESTRICTED] = now;
+                                    notifyController = true;
+                                }
                             }
                         }
                     }

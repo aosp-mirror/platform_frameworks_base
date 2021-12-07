@@ -36,13 +36,16 @@ import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.internal.notification.SystemNotificationChannels.ABUSIVE_BACKGROUND_APPS;
 import static com.android.server.am.AppBatteryTracker.BATT_DIMEN_BG;
 import static com.android.server.am.AppBatteryTracker.BATT_DIMEN_FG;
 import static com.android.server.am.AppBatteryTracker.BATT_DIMEN_FGS;
 import static com.android.server.am.AppRestrictionController.STOCK_PM_FLAGS;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
@@ -64,8 +67,11 @@ import android.app.ActivityManagerInternal.AppBackgroundRestrictionListener;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.usage.AppStandbyInfo;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.BatteryManagerInternal;
@@ -85,6 +91,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.am.AppBatteryTracker.AppBatteryPolicy;
+import com.android.server.am.AppRestrictionController.NotificationHelper;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
@@ -168,6 +175,7 @@ public final class BackgroundRestrictionTest {
     @Mock private UserManagerInternal mUserManagerInternal;
     @Mock private PackageManager mPackageManager;
     @Mock private PackageManagerInternal mPackageManagerInternal;
+    @Mock private NotificationManager mNotificationManager;
 
     private long mCurrentTimeMillis;
 
@@ -619,6 +627,8 @@ public final class BackgroundRestrictionTest {
                         verify(mBgRestrictionController, times(1)).handleRequestBgRestricted(
                                 eq(testPkgName),
                                 eq(testUid));
+                        // Verify we have the notification posted.
+                        checkNotification(testPkgName);
                     });
 
             // Turn ON the FAS for real.
@@ -656,6 +666,21 @@ public final class BackgroundRestrictionTest {
             closeIfNotNull(bgCurrentDrainRestrictedBucketThreshold);
             closeIfNotNull(bgCurrentDrainBgRestrictedThreshold);
         }
+    }
+
+    private void checkNotification(String packageName) throws Exception {
+        final NotificationManager nm = mInjector.getNotificationManager();
+        final ArgumentCaptor<Integer> notificationIdCaptor =
+                ArgumentCaptor.forClass(Integer.class);
+        final ArgumentCaptor<Notification> notificationCaptor =
+                ArgumentCaptor.forClass(Notification.class);
+        verify(mInjector.getNotificationManager(), atLeast(1)).notifyAsUser(any(),
+                notificationIdCaptor.capture(), notificationCaptor.capture(), any());
+        final Notification n = notificationCaptor.getValue();
+        assertTrue(NotificationHelper.SUMMARY_NOTIFICATION_ID < notificationIdCaptor.getValue());
+        assertEquals(NotificationHelper.GROUP_KEY, n.getGroup());
+        assertEquals(ABUSIVE_BACKGROUND_APPS, n.getChannelId());
+        assertEquals(packageName, n.extras.getString(Intent.EXTRA_PACKAGE_NAME));
     }
 
     private void closeIfNotNull(DeviceConfigSession<?> config) throws Exception {
@@ -811,6 +836,11 @@ public final class BackgroundRestrictionTest {
         @Override
         PackageManager getPackageManager() {
             return mPackageManager;
+        }
+
+        @Override
+        NotificationManager getNotificationManager() {
+            return mNotificationManager;
         }
     }
 
