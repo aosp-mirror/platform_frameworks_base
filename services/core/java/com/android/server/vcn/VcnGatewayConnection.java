@@ -687,6 +687,7 @@ public class VcnGatewayConnection extends StateMachine {
         mUnderlyingNetworkController =
                 mDeps.newUnderlyingNetworkController(
                         mVcnContext,
+                        mConnectionConfig,
                         subscriptionGroup,
                         mLastSnapshot,
                         mUnderlyingNetworkControllerCallback);
@@ -2376,11 +2377,12 @@ public class VcnGatewayConnection extends StateMachine {
         /** Builds a new UnderlyingNetworkController. */
         public UnderlyingNetworkController newUnderlyingNetworkController(
                 VcnContext vcnContext,
+                VcnGatewayConnectionConfig connectionConfig,
                 ParcelUuid subscriptionGroup,
                 TelephonySubscriptionSnapshot snapshot,
                 UnderlyingNetworkControllerCallback callback) {
             return new UnderlyingNetworkController(
-                    vcnContext, subscriptionGroup, snapshot, callback);
+                    vcnContext, connectionConfig, subscriptionGroup, snapshot, callback);
         }
 
         /** Builds a new IkeSession. */

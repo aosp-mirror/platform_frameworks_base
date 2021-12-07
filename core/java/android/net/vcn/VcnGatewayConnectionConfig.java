@@ -160,7 +160,9 @@ public final class VcnGatewayConnectionConfig {
                 TimeUnit.MINUTES.toMillis(15)
             };
 
-    private static final LinkedHashSet<VcnUnderlyingNetworkPriority>
+    /** @hide */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static final LinkedHashSet<VcnUnderlyingNetworkPriority>
             DEFAULT_UNDERLYING_NETWORK_PRIORITIES = new LinkedHashSet<>();
 
     static {
