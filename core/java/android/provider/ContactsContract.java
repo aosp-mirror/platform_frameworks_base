@@ -2956,7 +2956,10 @@ public final class ContactsContract {
          */
         @Nullable
         public static String getLocalAccountName(@NonNull Context context) {
-            return null;
+            //  config_rawContactsLocalAccountName is defined in
+            //  platform/frameworks/base/core/res/res/values/config.xml
+            return TextUtils.nullIfEmpty(context.getString(
+                    com.android.internal.R.string.config_rawContactsLocalAccountName));
         }
 
         /**
@@ -2972,7 +2975,10 @@ public final class ContactsContract {
          */
         @Nullable
         public static String getLocalAccountType(@NonNull Context context) {
-            return null;
+            //  config_rawContactsLocalAccountType is defined in
+            //  platform/frameworks/base/core/res/res/values/config.xml
+            return TextUtils.nullIfEmpty(context.getString(
+                    com.android.internal.R.string.config_rawContactsLocalAccountType));
         }
 
         /**
