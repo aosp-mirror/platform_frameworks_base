@@ -42,6 +42,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.LatencyTracker;
 import com.android.server.infra.AbstractPerUserSystemService;
 
+import java.io.PrintWriter;
+
 /**
  * Manages the Rotation Resolver Service on a per-user basis.
  */
@@ -214,6 +216,13 @@ final class RotationResolverManagerPerUserService extends
         }
         mCurrentRequest.cancelInternal();
         mCurrentRequest = null;
+    }
+
+    @Override
+    @GuardedBy("mLock")
+    protected void dumpLocked(@NonNull String prefix, @NonNull PrintWriter pw) {
+        super.dumpLocked(prefix, pw);
+        dumpInternal(new IndentingPrintWriter(pw, "  "));
     }
 
     void dumpInternal(IndentingPrintWriter ipw) {
