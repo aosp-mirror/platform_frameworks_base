@@ -290,8 +290,8 @@ public class UserBackupManagerService {
     // Bookkeeping of in-flight operations. The operation token is the index of the entry in the
     // pending operations list.
     public static final int OP_PENDING = 0;
-    public static final int OP_ACKNOWLEDGED = 1;
-    public static final int OP_TIMEOUT = -1;
+    private static final int OP_ACKNOWLEDGED = 1;
+    private static final int OP_TIMEOUT = -1;
 
     // Waiting for backup agent to respond during backup operation.
     public static final int OP_TYPE_BACKUP_WAIT = 0;
