@@ -269,6 +269,21 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     }
 
     @Test
+    public void testDisableWiFiWithVcnWithUnderlyingWifi() {
+        String testSsid = "Test VCN SSID";
+        setWifiEnabled(true);
+        verifyLastWifiIcon(false, WifiIcons.WIFI_NO_NETWORK);
+
+        mNetworkController.setNoNetworksAvailable(false);
+        setWifiStateForVcn(true, testSsid);
+        setWifiLevelForVcn(1);
+        verifyLastMobileDataIndicatorsForVcn(true, 1, TelephonyIcons.ICON_CWF, false);
+
+        setWifiEnabled(false);
+        verifyLastMobileDataIndicatorsForVcn(false, 1, 0, false);
+    }
+
+    @Test
     public void testCallStrengh() {
         if (true) return;
         String testSsid = "Test SSID";
