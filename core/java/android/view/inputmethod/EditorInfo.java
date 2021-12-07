@@ -92,6 +92,7 @@ public class EditorInfo implements InputType, Parcelable {
      *                1                  TYPE_TEXT_FLAG_MULTI_LINE
      *               1                   TYPE_TEXT_FLAG_IME_MULTI_LINE
      *              1                    TYPE_TEXT_FLAG_NO_SUGGESTIONS
+     *             1                     TYPE_TEXT_FLAG_ENABLE_TEXT_CONVERSION_SUGGESTIONS
      * |-------|-------|-------|-------|
      *                                1  TYPE_CLASS_NUMBER
      *                             1     TYPE_NUMBER_VARIATION_PASSWORD
