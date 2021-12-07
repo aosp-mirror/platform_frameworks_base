@@ -2151,6 +2151,10 @@ public class PreferencesHelper implements RankingConfig {
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
                 event.writeInt(r.uid);
                 event.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
+
+                // collect whether this package's importance info was user-set for later, if needed
+                // before the migration is enabled, this will simply default to false in all cases.
+                boolean importanceIsUserSet = false;
                 if (mPermissionHelper.isMigrationEnabled()) {
                     // Even if this package's data is not present, we need to write something;
                     // so default to IMPORTANCE_NONE, since if PM doesn't know about the package
@@ -2158,8 +2162,12 @@ public class PreferencesHelper implements RankingConfig {
                     int importance = IMPORTANCE_NONE;
                     Pair<Integer, String> key = new Pair<>(r.uid, r.pkg);
                     if (pkgPermissions != null && pkgsWithPermissionsToHandle.contains(key)) {
-                        importance = pkgPermissions.get(key).first
+                        Pair<Boolean, Boolean> permissionPair = pkgPermissions.get(key);
+                        importance = permissionPair.first
                                 ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE;
+                        // cache the second value for writing later
+                        importanceIsUserSet = permissionPair.second;
+
                         pkgsWithPermissionsToHandle.remove(key);
                     }
                     event.writeInt(importance);
@@ -2168,6 +2176,7 @@ public class PreferencesHelper implements RankingConfig {
                 }
                 event.writeInt(r.visibility);
                 event.writeInt(r.lockedAppFields);
+                event.writeBoolean(importanceIsUserSet);  // optional bool user_set_importance = 5;
                 events.add(event.build());
             }
         }
@@ -2189,6 +2198,7 @@ public class PreferencesHelper implements RankingConfig {
                 // builder
                 event.writeInt(DEFAULT_VISIBILITY);
                 event.writeInt(DEFAULT_LOCKED_APP_FIELDS);
+                event.writeBoolean(pkgPermissions.get(p).second); // user_set_importance field
                 events.add(event.build());
             }
         }
