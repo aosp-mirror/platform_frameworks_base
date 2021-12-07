@@ -91,11 +91,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      */
     public void startActivityToSide(@NonNull Activity launchingActivity, @NonNull Intent intent,
             @Nullable Bundle options, @NonNull SplitRule sideRule,
-            @NonNull Consumer<Exception> failureCallback) {
+            @Nullable Consumer<Exception> failureCallback) {
         try {
             mPresenter.startActivityToSide(launchingActivity, intent, options, sideRule);
         } catch (Exception e) {
-            failureCallback.accept(e);
+            if (failureCallback != null) {
+                failureCallback.accept(e);
+            }
         }
     }
 
