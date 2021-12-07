@@ -120,6 +120,11 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
         mEnableDismissDragToEdge = res.getBoolean(R.bool.config_pipEnableDismissDragToEdge);
         mDismissAreaHeight = res.getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height);
 
+        if (mTargetViewContainer != null) {
+            // init can be called multiple times, remove the old one from view hierarchy first.
+            mWindowManager.removeViewImmediate(mTargetViewContainer);
+        }
+
         mTargetView = new DismissCircleView(mContext);
         mTargetViewContainer = new FrameLayout(mContext);
         mTargetViewContainer.setBackgroundDrawable(
