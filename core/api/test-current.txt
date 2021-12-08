@@ -2867,7 +2867,6 @@ package android.view.accessibility {
     method public void addChild(@NonNull android.os.IBinder);
     method public long getSourceNodeId();
     method public void setLeashedParent(@Nullable android.os.IBinder, int);
-    method public static void setNumInstancesInUseCounter(java.util.concurrent.atomic.AtomicInteger);
     method public void writeToParcelNoRecycle(android.os.Parcel, int);
   }
 

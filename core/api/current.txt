@@ -51272,9 +51272,9 @@ package android.view.accessibility {
     method public int getRecordCount();
     method public int getWindowChanges();
     method public void initFromParcel(android.os.Parcel);
-    method public static android.view.accessibility.AccessibilityEvent obtain(int);
-    method public static android.view.accessibility.AccessibilityEvent obtain(android.view.accessibility.AccessibilityEvent);
-    method public static android.view.accessibility.AccessibilityEvent obtain();
+    method @Deprecated public static android.view.accessibility.AccessibilityEvent obtain(int);
+    method @Deprecated public static android.view.accessibility.AccessibilityEvent obtain(android.view.accessibility.AccessibilityEvent);
+    method @Deprecated public static android.view.accessibility.AccessibilityEvent obtain();
     method public void setAction(int);
     method public void setContentChangeTypes(int);
     method public void setEventTime(long);
@@ -51462,13 +51462,13 @@ package android.view.accessibility {
     method public boolean isShowingHintText();
     method public boolean isTextEntryKey();
     method public boolean isVisibleToUser();
-    method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View);
-    method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View, int);
-    method public static android.view.accessibility.AccessibilityNodeInfo obtain();
-    method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.accessibility.AccessibilityNodeInfo);
+    method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View);
+    method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View, int);
+    method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo obtain();
+    method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.accessibility.AccessibilityNodeInfo);
     method public boolean performAction(int);
     method public boolean performAction(int, android.os.Bundle);
-    method public void recycle();
+    method @Deprecated public void recycle();
     method public boolean refresh();
     method public boolean refreshWithExtraData(String, android.os.Bundle);
     method @Deprecated public void removeAction(int);
@@ -51647,8 +51647,8 @@ package android.view.accessibility {
     method public int getRowCount();
     method public int getSelectionMode();
     method public boolean isHierarchical();
-    method public static android.view.accessibility.AccessibilityNodeInfo.CollectionInfo obtain(int, int, boolean);
-    method public static android.view.accessibility.AccessibilityNodeInfo.CollectionInfo obtain(int, int, boolean, int);
+    method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo.CollectionInfo obtain(int, int, boolean);
+    method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo.CollectionInfo obtain(int, int, boolean, int);
     field public static final int SELECTION_MODE_MULTIPLE = 2; // 0x2
     field public static final int SELECTION_MODE_NONE = 0; // 0x0
     field public static final int SELECTION_MODE_SINGLE = 1; // 0x1
@@ -51666,9 +51666,9 @@ package android.view.accessibility {
     method @Nullable public String getRowTitle();
     method @Deprecated public boolean isHeading();
     method public boolean isSelected();
-    method public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(int, int, int, int, boolean);
-    method public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(int, int, int, int, boolean, boolean);
-    method @NonNull public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(@Nullable String, int, int, @Nullable String, int, int, boolean, boolean);
+    method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(int, int, int, int, boolean);
+    method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(int, int, int, int, boolean, boolean);
+    method @Deprecated @NonNull public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(@Nullable String, int, int, @Nullable String, int, int, boolean, boolean);
   }
 
   public static final class AccessibilityNodeInfo.ExtraRenderingInfo {
@@ -51683,7 +51683,7 @@ package android.view.accessibility {
     method public float getMax();
     method public float getMin();
     method public int getType();
-    method public static android.view.accessibility.AccessibilityNodeInfo.RangeInfo obtain(int, float, float, float);
+    method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo.RangeInfo obtain(int, float, float, float);
     field public static final int RANGE_TYPE_FLOAT = 1; // 0x1
     field public static final int RANGE_TYPE_INT = 0; // 0x0
     field public static final int RANGE_TYPE_PERCENT = 2; // 0x2
@@ -51737,9 +51737,9 @@ package android.view.accessibility {
     method public boolean isFullScreen();
     method public boolean isPassword();
     method public boolean isScrollable();
-    method public static android.view.accessibility.AccessibilityRecord obtain(android.view.accessibility.AccessibilityRecord);
-    method public static android.view.accessibility.AccessibilityRecord obtain();
-    method public void recycle();
+    method @Deprecated public static android.view.accessibility.AccessibilityRecord obtain(android.view.accessibility.AccessibilityRecord);
+    method @Deprecated public static android.view.accessibility.AccessibilityRecord obtain();
+    method @Deprecated public void recycle();
     method public void setAddedCount(int);
     method public void setBeforeText(CharSequence);
     method public void setChecked(boolean);

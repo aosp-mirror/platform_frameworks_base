@@ -24,7 +24,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pools.SynchronizedPool;
 
 import com.android.internal.util.BitUtils;
 
@@ -806,10 +805,6 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      */
     public static final int TYPES_ALL_MASK = 0xFFFFFFFF;
 
-    private static final int MAX_POOL_SIZE = 10;
-    private static final SynchronizedPool<AccessibilityEvent> sPool =
-            new SynchronizedPool<>(MAX_POOL_SIZE);
-
     @UnsupportedAppUsage
     private @EventType int mEventType;
     private CharSequence mPackageName;
@@ -1170,7 +1165,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      */
     public static AccessibilityEvent obtainWindowsChangedEvent(
             int windowId, int windowChangeTypes) {
-        final AccessibilityEvent event = AccessibilityEvent.obtain(TYPE_WINDOWS_CHANGED);
+        final AccessibilityEvent event = new AccessibilityEvent(TYPE_WINDOWS_CHANGED);
         event.setWindowId(windowId);
         event.setWindowChanges(windowChangeTypes);
         event.setImportantForAccessibility(true);
@@ -1178,69 +1173,58 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     }
 
     /**
-     * Returns a cached instance if such is available or a new one is
-     * instantiated with its type property set.
+     * Instantiates a new AccessibilityEvent instance with its type property set.
      *
-     * <p>In most situations object pooling is not beneficial. Create a new instance using the
-     * constructor {@link #AccessibilityEvent(int)} instead.
-     *
+     * @deprecated Object pooling has been discontinued. Create a new instance using the
+     * constructor {@link #AccessibilityEvent()} instead.
      * @param eventType The event type.
      * @return An instance.
      */
+    @Deprecated
     public static AccessibilityEvent obtain(int eventType) {
-        AccessibilityEvent event = AccessibilityEvent.obtain();
+        AccessibilityEvent event = new AccessibilityEvent();
         event.setEventType(eventType);
         return event;
     }
 
     /**
-     * Returns a cached instance if such is available or a new one is
-     * created. The returned instance is initialized from the given
+     * Instantiates a new AccessibilityEvent instance.
+     * The returned instance is initialized from the given
      * <code>event</code>.
      *
-     * <p>In most situations object pooling is not beneficial. Create a new instance using the
-     * constructor {@link #AccessibilityEvent(AccessibilityEvent)} instead.
-     *
+     * @deprecated Object pooling has been discontinued. Create a new instance using the
+     * constructor {@link #AccessibilityEvent()} instead.
      * @param event The other event.
      * @return An instance.
      */
+    @Deprecated
     public static AccessibilityEvent obtain(AccessibilityEvent event) {
-        AccessibilityEvent eventClone = AccessibilityEvent.obtain();
+        AccessibilityEvent eventClone = new AccessibilityEvent();
         eventClone.init(event);
         return eventClone;
     }
 
     /**
-     * Returns a cached instance if such is available or a new one is
-     * instantiated.
+     * Instantiates a new AccessibilityEvent instance.
      *
-     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * @deprecated Object pooling has been discontinued. Create a new instance using the
      * constructor {@link #AccessibilityEvent()} instead.
-     *
      * @return An instance.
      */
+    @Deprecated
     public static AccessibilityEvent obtain() {
-        AccessibilityEvent event = sPool.acquire();
-        if (event == null) event = new AccessibilityEvent();
-        if (DEBUG_ORIGIN) event.originStackTrace = Thread.currentThread().getStackTrace();
-        return event;
+        return new AccessibilityEvent();
     }
 
     /**
-     * Recycles an instance back to be reused.
-     * <p>
-     *   <b>Note: You must not touch the object after calling this function.</b>
-     * </p>
+     * Previously would recycle an instance back to be reused.
      *
-     * <p>In most situations object pooling is not beneficial, and recycling is not necessary.
-     *
-     * @throws IllegalStateException If the event is already recycled.
+     * @deprecated Object pooling has been discontinued. Calling this function now will have
+     * no effect.
      */
     @Override
-    public void recycle() {
-        clear();
-        sPool.release(this);
-    }
+    @Deprecated
+    public void recycle() {}
 
     /**
      * Clears the state of this instance.
@@ -1260,7 +1244,6 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         if (mRecords != null) {
             while (!mRecords.isEmpty()) {
                 AccessibilityRecord record = mRecords.remove(0);
-                record.recycle();
             }
         }
         if (DEBUG_ORIGIN) originStackTrace = null;
@@ -1288,7 +1271,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         if (recordCount > 0) {
             mRecords = new ArrayList<>(recordCount);
             for (int i = 0; i < recordCount; i++) {
-                AccessibilityRecord record = AccessibilityRecord.obtain();
+                AccessibilityRecord record = new AccessibilityRecord();
                 readAccessibilityRecordFromParcel(record, parcel);
                 record.mConnectionId = mConnectionId;
                 mRecords.add(record);
@@ -1527,7 +1510,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final @android.annotation.NonNull Parcelable.Creator<AccessibilityEvent> CREATOR =
             new Parcelable.Creator<AccessibilityEvent>() {
         public AccessibilityEvent createFromParcel(Parcel parcel) {
-            AccessibilityEvent event = AccessibilityEvent.obtain();
+            AccessibilityEvent event = new AccessibilityEvent();
             event.initFromParcel(parcel);
             return event;
         }
