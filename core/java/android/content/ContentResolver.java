@@ -2684,7 +2684,8 @@ public abstract class ContentResolver implements ContentInterface {
      * @hide
      * @see #unregisterContentObserver
      */
-    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @RequiresPermission(value = android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            conditional = true)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public final void registerContentObserverAsUser(@NonNull Uri uri,
             boolean notifyForDescendants,

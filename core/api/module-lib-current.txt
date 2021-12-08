@@ -79,7 +79,7 @@ package android.content {
   }
 
   public abstract class ContentResolver {
-    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public final void registerContentObserverAsUser(@NonNull android.net.Uri, boolean, @NonNull android.database.ContentObserver, @NonNull android.os.UserHandle);
+    method @RequiresPermission(value=android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional=true) public final void registerContentObserverAsUser(@NonNull android.net.Uri, boolean, @NonNull android.database.ContentObserver, @NonNull android.os.UserHandle);
   }
 
   public abstract class Context {
