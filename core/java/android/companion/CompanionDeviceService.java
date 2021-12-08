@@ -21,6 +21,7 @@ import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.TestApi;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
@@ -122,11 +123,20 @@ public abstract class CompanionDeviceService extends Service {
     @Override
     public final IBinder onBind(@NonNull Intent intent) {
         if (Objects.equals(intent.getAction(), SERVICE_INTERFACE)) {
+            onBindCompanionDeviceService(intent);
             return mRemote;
         }
         Log.w(LOG_TAG,
                 "Tried to bind to wrong intent (should be " + SERVICE_INTERFACE + "): " + intent);
         return null;
+    }
+
+    /**
+     * Used to track the state of Binder connection in CTS tests.
+     * @hide
+     */
+    @TestApi
+    public void onBindCompanionDeviceService(@NonNull Intent intent) {
     }
 
     class Stub extends ICompanionDeviceService.Stub {
