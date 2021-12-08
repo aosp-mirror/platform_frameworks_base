@@ -517,6 +517,8 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_VOICE_KEYPHRASES" />
         <!-- Permission required for ATS test - CarDevicePolicyManagerTest -->
         <permission name="android.permission.LOCK_DEVICE" />
+        <!-- Permission required for CTS test - CtsSafetyCenterTestCases -->
+        <permission name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
