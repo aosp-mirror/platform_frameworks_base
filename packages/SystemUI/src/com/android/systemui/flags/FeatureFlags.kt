@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.systemui.flags;
+package com.android.systemui.flags
 
 /**
  * Class to manage simple DeviceConfig-based feature flags.
  *
- * See {@link Flags} for instructions on defining new flags.
+ * See [Flags] for instructions on defining new flags.
  */
-public interface FeatureFlags extends FlagReader {
+interface FeatureFlags : FlagListenable {
+    /** Returns a boolean value for the given flag.  */
+    fun isEnabled(flag: BooleanFlag): Boolean
+
+    /** Returns a boolean value for the given flag.  */
+    fun isEnabled(flag: ResourceBooleanFlag): Boolean
+
+    /** Returns a string value for the given flag.  */
+    fun getString(flag: StringFlag): String
+
+    /** Returns a string value for the given flag.  */
+    fun getString(flag: ResourceStringFlag): String
 }
