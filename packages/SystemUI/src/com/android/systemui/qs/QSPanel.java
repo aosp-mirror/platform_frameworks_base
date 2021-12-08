@@ -258,13 +258,8 @@ public class QSPanel extends LinearLayout implements Tunable {
     }
 
     private void updateViewPositions() {
-        if (!(mTileLayout instanceof TileLayout)) {
-            return;
-        }
-        TileLayout layout = (TileLayout) mTileLayout;
-
         // Adjust view positions based on tile squishing
-        int tileHeightOffset = layout.getTilesHeight() - layout.getHeight();
+        int tileHeightOffset = mTileLayout.getTilesHeight() - mTileLayout.getHeight();
 
         boolean move = false;
         for (int i = 0; i < getChildCount(); i++) {
@@ -786,6 +781,12 @@ public class QSPanel extends LinearLayout implements Tunable {
 
         /** */
         void setListening(boolean listening, UiEventLogger uiEventLogger);
+
+        /** */
+        int getHeight();
+
+        /** */
+        int getTilesHeight();
 
         /**
          * Sets a size modifier for the tile. Where 0 means collapsed, and 1 expanded.

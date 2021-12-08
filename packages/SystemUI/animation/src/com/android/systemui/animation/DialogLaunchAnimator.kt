@@ -20,7 +20,6 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.Dialog
-import android.content.Context
 import android.graphics.Color
 import android.graphics.Rect
 import android.os.Looper
@@ -28,10 +27,11 @@ import android.service.dreams.IDreamManager
 import android.util.Log
 import android.util.MathUtils
 import android.view.GhostView
+import android.view.SurfaceControl
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewTreeObserver.OnPreDrawListener
+import android.view.ViewRootImpl
 import android.view.WindowManager
 import android.widget.FrameLayout
 import kotlin.math.roundToInt
@@ -42,12 +42,20 @@ private const val TAG = "DialogLaunchAnimator"
  * A class that allows dialogs to be started in a seamless way from a view that is transforming
  * nicely into the starting dialog.
  */
-class DialogLaunchAnimator(
-    private val context: Context,
-    private val launchAnimator: LaunchAnimator,
-    private val dreamManager: IDreamManager
+class DialogLaunchAnimator @JvmOverloads constructor(
+    private val dreamManager: IDreamManager,
+    private val launchAnimator: LaunchAnimator = LaunchAnimator(TIMINGS, INTERPOLATORS),
+    private var isForTesting: Boolean = false
 ) {
     private companion object {
+        private val TIMINGS = ActivityLaunchAnimator.TIMINGS
+
+        // We use the same interpolator for X and Y axis to make sure the dialog does not move out
+        // of the screen bounds during the animation.
+        private val INTERPOLATORS = ActivityLaunchAnimator.INTERPOLATORS.copy(
+            positionXInterpolator = ActivityLaunchAnimator.INTERPOLATORS.positionInterpolator
+        )
+
         private val TAG_LAUNCH_ANIMATION_RUNNING = R.id.launch_animation_running
     }
 
@@ -96,14 +104,14 @@ class DialogLaunchAnimator(
         animateFrom.setTag(TAG_LAUNCH_ANIMATION_RUNNING, true)
 
         val animatedDialog = AnimatedDialog(
-                context,
                 launchAnimator,
                 dreamManager,
                 animateFrom,
                 onDialogDismissed = { openedDialogs.remove(it) },
                 dialog = dialog,
                 animateBackgroundBoundsChange,
-                animatedParent
+                animatedParent,
+                isForTesting
         )
 
         openedDialogs.add(animatedDialog)
@@ -157,7 +165,6 @@ class DialogLaunchAnimator(
 }
 
 private class AnimatedDialog(
-    private val context: Context,
     private val launchAnimator: LaunchAnimator,
     private val dreamManager: IDreamManager,
 
@@ -174,10 +181,16 @@ private class AnimatedDialog(
     val dialog: Dialog,
 
     /** Whether we should animate the dialog background when its bounds change. */
-    private val animateBackgroundBoundsChange: Boolean,
+    animateBackgroundBoundsChange: Boolean,
 
     /** Launch animation corresponding to the parent [AnimatedDialog]. */
-    private val parentAnimatedDialog: AnimatedDialog? = null
+    private val parentAnimatedDialog: AnimatedDialog? = null,
+
+    /**
+     * Whether we are currently running in a test, in which case we need to disable
+     * synchronization.
+     */
+    private val isForTesting: Boolean
 ) {
     /**
      * The DecorView of this dialog window.
@@ -266,14 +279,14 @@ private class AnimatedDialog(
             // and the view that we added so that we can dismiss the dialog when this view is
             // clicked. This is necessary because DecorView overrides onTouchEvent and therefore we
             // can't set the click listener directly on the (now fullscreen) DecorView.
-            val fullscreenTransparentBackground = FrameLayout(context)
+            val fullscreenTransparentBackground = FrameLayout(dialog.context)
             decorView.addView(
                 fullscreenTransparentBackground,
                 0 /* index */,
                 FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
             )
 
-            val dialogContentWithBackground = FrameLayout(context)
+            val dialogContentWithBackground = FrameLayout(dialog.context)
             dialogContentWithBackground.background = decorView.background
 
             // Make the window background transparent. Note that setting the window (or DecorView)
@@ -365,59 +378,77 @@ private class AnimatedDialog(
         // Show the dialog.
         dialog.show()
 
-        // Add a temporary touch surface ghost as soon as the window is ready to draw. This
-        // temporary ghost will be drawn together with the touch surface, but in the dialog
-        // window. Once it is drawn, we will make the touch surface invisible, and then start the
-        // animation. We do all this synchronization to avoid flicker that would occur if we made
-        // the touch surface invisible too early (before its ghost is drawn), leading to one or more
-        // frames with a hole instead of the touch surface (or its ghost).
-        decorView.viewTreeObserver.addOnPreDrawListener(object : OnPreDrawListener {
-            override fun onPreDraw(): Boolean {
-                decorView.viewTreeObserver.removeOnPreDrawListener(this)
-                addTemporaryTouchSurfaceGhost()
-                return true
-            }
-        })
-        decorView.invalidate()
+        addTouchSurfaceGhost()
     }
 
-    private fun addTemporaryTouchSurfaceGhost() {
+    private fun addTouchSurfaceGhost() {
+        if (decorView.viewRootImpl == null) {
+            // Make sure that we have access to the dialog view root to synchronize the creation of
+            // the ghost.
+            decorView.post(::addTouchSurfaceGhost)
+            return
+        }
+
         // Create a ghost of the touch surface (which will make the touch surface invisible) and add
-        // it to the dialog. We will wait for this ghost to be drawn before starting the animation.
-        val ghost = GhostView.addGhost(touchSurface, decorView)
-
-        // The ghost of the touch surface was just created, so the touch surface was made invisible.
-        // We make it visible again until the ghost is actually drawn.
-        touchSurface.visibility = View.VISIBLE
-
-        // Wait for the ghost to be drawn before continuing.
-        ghost.viewTreeObserver.addOnPreDrawListener(object : OnPreDrawListener {
-            override fun onPreDraw(): Boolean {
-                ghost.viewTreeObserver.removeOnPreDrawListener(this)
-                onTouchSurfaceGhostDrawn()
-                return true
-            }
+        // it to the host dialog. We trigger a one off synchronization to make sure that this is
+        // done in sync between the two different windows.
+        synchronizeNextDraw(then = {
+            isTouchSurfaceGhostDrawn = true
+            maybeStartLaunchAnimation()
         })
-        ghost.invalidate()
+        GhostView.addGhost(touchSurface, decorView)
+
+        // The ghost of the touch surface was just created, so the touch surface is currently
+        // invisible. We need to make sure that it stays invisible as long as the dialog is shown or
+        // animating.
+        (touchSurface as? LaunchableView)?.setShouldBlockVisibilityChanges(true)
     }
 
-    private fun onTouchSurfaceGhostDrawn() {
-        // Make the touch surface invisible and make sure that it stays invisible as long as the
-        // dialog is shown or animating.
-        touchSurface.visibility = View.INVISIBLE
-        (touchSurface as? LaunchableView)?.setShouldBlockVisibilityChanges(true)
+    /**
+     * Synchronize the next draw of the touch surface and dialog view roots so that they are
+     * performed at the same time, in the same transaction. This is necessary to make sure that the
+     * ghost of the touch surface is drawn at the same time as the touch surface is made invisible
+     * (or inversely, removed from the UI when the touch surface is made visible).
+     */
+    private fun synchronizeNextDraw(then: () -> Unit) {
+        if (isForTesting || !touchSurface.isAttachedToWindow || touchSurface.viewRootImpl == null ||
+            !decorView.isAttachedToWindow || decorView.viewRootImpl == null) {
+            // No need to synchronize if either the touch surface or dialog view is not attached
+            // to a window.
+            then()
+            return
+        }
 
-        // Add a pre draw listener to (maybe) start the animation once the touch surface is
-        // actually invisible.
-        touchSurface.viewTreeObserver.addOnPreDrawListener(object : OnPreDrawListener {
-            override fun onPreDraw(): Boolean {
-                touchSurface.viewTreeObserver.removeOnPreDrawListener(this)
-                isTouchSurfaceGhostDrawn = true
-                maybeStartLaunchAnimation()
-                return true
+        // Consume the next frames of both view roots to make sure the ghost view is drawn at
+        // exactly the same time as when the touch surface is made invisible.
+        var remainingTransactions = 0
+        val mergedTransactions = SurfaceControl.Transaction()
+
+        fun onTransaction(transaction: SurfaceControl.Transaction?) {
+            remainingTransactions--
+            transaction?.let { mergedTransactions.merge(it) }
+
+            if (remainingTransactions == 0) {
+                mergedTransactions.apply()
+                then()
             }
-        })
-        touchSurface.invalidate()
+        }
+
+        fun consumeNextDraw(viewRootImpl: ViewRootImpl) {
+            if (viewRootImpl.consumeNextDraw(::onTransaction)) {
+                remainingTransactions++
+
+                // Make sure we trigger a traversal.
+                viewRootImpl.view.invalidate()
+            }
+        }
+
+        consumeNextDraw(touchSurface.viewRootImpl)
+        consumeNextDraw(decorView.viewRootImpl)
+
+        if (remainingTransactions == 0) {
+            then()
+        }
     }
 
     private fun findFirstViewGroupWithBackground(view: View): ViewGroup? {
@@ -483,7 +514,7 @@ private class AnimatedDialog(
 
     private fun onDialogDismissed() {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            context.mainExecutor.execute { onDialogDismissed() }
+            dialog.context.mainExecutor.execute { onDialogDismissed() }
             return
         }
 
@@ -556,25 +587,12 @@ private class AnimatedDialog(
                         .removeOnLayoutChangeListener(backgroundLayoutListener)
                 }
 
-                // The animated ghost was just removed. We create a temporary ghost that will be
-                // removed only once we draw the touch surface, to avoid flickering that would
-                // happen when removing the ghost too early (before the touch surface is drawn).
-                GhostView.addGhost(touchSurface, decorView)
-
-                touchSurface.viewTreeObserver.addOnPreDrawListener(object : OnPreDrawListener {
-                    override fun onPreDraw(): Boolean {
-                        touchSurface.viewTreeObserver.removeOnPreDrawListener(this)
-
-                        // Now that the touch surface was drawn, we can remove the temporary ghost
-                        // and instantly dismiss the dialog.
-                        GhostView.removeGhost(touchSurface)
-                        onAnimationFinished(true /* instantDismiss */)
-                        onDialogDismissed(this@AnimatedDialog)
-
-                        return true
-                    }
+                // Make sure that the removal of the ghost and making the touch surface visible is
+                // done at the same time.
+                synchronizeNextDraw(then = {
+                    onAnimationFinished(true /* instantDismiss */)
+                    onDialogDismissed(this@AnimatedDialog)
                 })
-                touchSurface.invalidate()
             }
         )
     }

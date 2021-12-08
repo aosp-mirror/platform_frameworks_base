@@ -33,7 +33,7 @@ import org.mockito.junit.MockitoJUnit
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class DialogLaunchAnimatorTest : SysuiTestCase() {
-    private val launchAnimator = LaunchAnimator(context, isForTesting = true)
+    private val launchAnimator = LaunchAnimator(TEST_TIMINGS, TEST_INTERPOLATORS)
     private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
     private val attachedViews = mutableSetOf<View>()
 
@@ -42,7 +42,8 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        dialogLaunchAnimator = DialogLaunchAnimator(context, launchAnimator, dreamManager)
+        dialogLaunchAnimator = DialogLaunchAnimator(
+            dreamManager, launchAnimator, isForTesting = true)
     }
 
     @After

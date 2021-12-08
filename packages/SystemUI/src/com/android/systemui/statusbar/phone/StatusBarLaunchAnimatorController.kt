@@ -23,7 +23,8 @@ class StatusBarLaunchAnimatorController(
         delegate.onLaunchAnimationStart(isExpandingFullyAbove)
         statusBar.notificationPanelViewController.setIsLaunchAnimationRunning(true)
         if (!isExpandingFullyAbove) {
-            statusBar.collapsePanelWithDuration(LaunchAnimator.ANIMATION_DURATION.toInt())
+            statusBar.collapsePanelWithDuration(
+                ActivityLaunchAnimator.TIMINGS.totalDuration.toInt())
         }
     }
 
