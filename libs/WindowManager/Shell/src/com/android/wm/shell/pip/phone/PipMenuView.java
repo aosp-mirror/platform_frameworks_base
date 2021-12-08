@@ -189,7 +189,7 @@ public class PipMenuView extends FrameLayout {
         mEnterSplitButton = findViewById(R.id.enter_split);
         mEnterSplitButton.setAlpha(0);
         mEnterSplitButton.setOnClickListener(v -> {
-            if (mMenuContainer.getAlpha() != 0) {
+            if (mEnterSplitButton.getAlpha() != 0) {
                 enterSplit();
             }
         });
