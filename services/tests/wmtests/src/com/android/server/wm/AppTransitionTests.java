@@ -22,6 +22,9 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
+import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
@@ -92,6 +95,7 @@ public class AppTransitionTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityRecord(dc);
 
         mDc.prepareAppTransition(TRANSIT_OPEN);
+        mDc.prepareAppTransition(TRANSIT_KEYGUARD_OCCLUDE);
         mDc.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY);
         mDc.mOpeningApps.add(activity);
         assertEquals(TRANSIT_OLD_KEYGUARD_GOING_AWAY,
@@ -99,6 +103,22 @@ public class AppTransitionTests extends WindowTestsBase {
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
                         mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
                         null /* oldWallpaper */, false /*skipAppTransitionAnimation*/));
+    }
+
+    @Test
+    public void testKeyguardUnoccludeOcclude() {
+        final DisplayContent dc = createNewDisplay(Display.STATE_ON);
+        final ActivityRecord activity = createActivityRecord(dc);
+
+        mDc.prepareAppTransition(TRANSIT_KEYGUARD_UNOCCLUDE);
+        mDc.prepareAppTransition(TRANSIT_KEYGUARD_OCCLUDE);
+        mDc.mOpeningApps.add(activity);
+        assertEquals(TRANSIT_NONE,
+                AppTransitionController.getTransitCompatType(mDc.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null /* wallpaperTarget */,
+                        null /* oldWallpaper */, false /*skipAppTransitionAnimation*/));
+
     }
 
     @Test
