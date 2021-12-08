@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -26,13 +27,15 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.testing.AndroidTestingRunner;
 
-import androidx.concurrent.futures.CallbackToFutureAdapter;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.concurrency.FakeExecutor;;
+import com.android.systemui.util.ref.GcWeakReference;
 import com.android.systemui.util.time.FakeSystemClock;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,6 +55,35 @@ public class CommunalSourcePrimerTest extends SysuiTestCase {
     private static final int RETRY_DELAY_MS = 1000;
     private static final int CONNECTION_MIN_DURATION_MS = 5000;
 
+    // A simple implementation of {@link CommunalSource.Observer} to capture a callback value.
+    // Used to ensure the references to a {@link CommunalSource.Observer.Callback} can be fully
+    // removed.
+    private static class FakeObserver implements CommunalSource.Observer {
+        public GcWeakReference<Callback> mLastCallback;
+
+        @Override
+        public void addCallback(Callback callback) {
+            mLastCallback = new GcWeakReference<>(callback);
+        }
+
+        @Override
+        public void removeCallback(Callback callback) {
+            if (mLastCallback.get() == callback) {
+                mLastCallback = null;
+            }
+        }
+    }
+
+    // A simple implementation of {@link CommunalSource} to capture callback values. This
+    // implementation better emulates the {@link WeakReference} wrapping behavior of
+    // {@link CommunalSource} implementations than a mock.
+    private static class FakeSource implements CommunalSource {
+        @Override
+        public ListenableFuture<CommunalViewResult> requestCommunalView(Context context) {
+            return null;
+        }
+    }
+
     @Mock
     private Context mContext;
 
@@ -61,8 +93,7 @@ public class CommunalSourcePrimerTest extends SysuiTestCase {
     private FakeSystemClock mFakeClock = new FakeSystemClock();
     private FakeExecutor mFakeExecutor = new FakeExecutor(mFakeClock);
 
-    @Mock
-    private CommunalSource mSource;
+    private FakeSource mSource = new FakeSource();
 
     @Mock
     private CommunalSourceMonitor mCommunalSourceMonitor;
@@ -71,7 +102,9 @@ public class CommunalSourcePrimerTest extends SysuiTestCase {
     private CommunalSource.Connector mConnector;
 
     @Mock
-    private CommunalSource.Observer mObserver;
+    private CommunalSource.Connection mConnection;
+
+    private FakeObserver mObserver = new FakeObserver();
 
     private CommunalSourcePrimer mPrimer;
 
@@ -93,35 +126,35 @@ public class CommunalSourcePrimerTest extends SysuiTestCase {
                 mCommunalSourceMonitor, Optional.of(mConnector), Optional.of(mObserver));
     }
 
+    private CommunalSource.Connection.Callback captureCallbackAndSend(
+            CommunalSource.Connector connector, Optional<CommunalSource> source) {
+        ArgumentCaptor<CommunalSource.Connection.Callback> connectionCallback =
+                ArgumentCaptor.forClass(CommunalSource.Connection.Callback.class);
+
+        verify(connector).connect(connectionCallback.capture());
+        Mockito.clearInvocations(connector);
+
+        final CommunalSource.Connection.Callback callback = connectionCallback.getValue();
+        callback.onSourceEstablished(source);
+
+        return callback;
+    }
+
     @Test
     public void testConnect() {
-        when(mConnector.connect()).thenReturn(
-                CallbackToFutureAdapter.getFuture(completer -> {
-                    completer.set(Optional.of(mSource));
-                    return "test";
-                }));
-
         mPrimer.onBootCompleted();
-        mFakeExecutor.runAllReady();
+        captureCallbackAndSend(mConnector, Optional.of(mSource));
         verify(mCommunalSourceMonitor).setSource(mSource);
     }
 
     @Test
     public void testRetryOnBindFailure() throws Exception {
-        when(mConnector.connect()).thenReturn(
-                CallbackToFutureAdapter.getFuture(completer -> {
-                    completer.set(Optional.empty());
-                    return "test";
-                }));
-
         mPrimer.onBootCompleted();
-        mFakeExecutor.runAllReady();
 
         // Verify attempts happen. Note that we account for the retries plus initial attempt, which
         // is not scheduled.
         for (int attemptCount = 0; attemptCount < MAX_RETRIES + 1; attemptCount++) {
-            verify(mConnector, times(1)).connect();
-            clearInvocations(mConnector);
+            captureCallbackAndSend(mConnector, Optional.empty());
             mFakeExecutor.advanceClockToNext();
             mFakeExecutor.runAllReady();
         }
@@ -131,76 +164,42 @@ public class CommunalSourcePrimerTest extends SysuiTestCase {
 
     @Test
     public void testRetryOnDisconnectFailure() throws Exception {
-        when(mConnector.connect()).thenReturn(
-                CallbackToFutureAdapter.getFuture(completer -> {
-                    completer.set(Optional.of(mSource));
-                    return "test";
-                }));
-
         mPrimer.onBootCompleted();
-        mFakeExecutor.runAllReady();
-
         // Verify attempts happen. Note that we account for the retries plus initial attempt, which
         // is not scheduled.
         for (int attemptCount = 0; attemptCount < MAX_RETRIES + 1; attemptCount++) {
-            verify(mConnector, times(1)).connect();
-            clearInvocations(mConnector);
-            ArgumentCaptor<CommunalSource.Callback> callbackCaptor =
-                    ArgumentCaptor.forClass(CommunalSource.Callback.class);
-            verify(mSource).addCallback(callbackCaptor.capture());
-            clearInvocations(mSource);
+            final CommunalSource.Connection.Callback callback =
+                    captureCallbackAndSend(mConnector, Optional.of(mSource));
             verify(mCommunalSourceMonitor).setSource(Mockito.notNull());
             clearInvocations(mCommunalSourceMonitor);
-            callbackCaptor.getValue().onDisconnected();
+            callback.onDisconnected();
             mFakeExecutor.advanceClockToNext();
             mFakeExecutor.runAllReady();
         }
 
-        verify(mConnector, never()).connect();
+        verify(mConnector, never()).connect(any());
     }
 
     @Test
     public void testAttemptOnPackageChange() {
-        when(mConnector.connect()).thenReturn(
-                CallbackToFutureAdapter.getFuture(completer -> {
-                    completer.set(Optional.empty());
-                    return "test";
-                }));
-
         mPrimer.onBootCompleted();
-        mFakeExecutor.runAllReady();
+        captureCallbackAndSend(mConnector, Optional.empty());
 
-        final ArgumentCaptor<CommunalSource.Observer.Callback> callbackCaptor =
-                ArgumentCaptor.forClass(CommunalSource.Observer.Callback.class);
-        verify(mObserver).addCallback(callbackCaptor.capture());
+        mObserver.mLastCallback.get().onSourceChanged();
 
-        clearInvocations(mConnector);
-        callbackCaptor.getValue().onSourceChanged();
-
-        verify(mConnector, times(1)).connect();
+        verify(mConnector, times(1)).connect(any());
     }
 
     @Test
     public void testDisconnect() {
-        final ArgumentCaptor<CommunalSource.Callback> callbackCaptor =
-                ArgumentCaptor.forClass(CommunalSource.Callback.class);
-
-        when(mConnector.connect()).thenReturn(
-                CallbackToFutureAdapter.getFuture(completer -> {
-                    completer.set(Optional.of(mSource));
-                    return "test";
-                }));
-
         mPrimer.onBootCompleted();
-        mFakeExecutor.runAllReady();
+        final CommunalSource.Connection.Callback callback =
+                captureCallbackAndSend(mConnector, Optional.of(mSource));
         verify(mCommunalSourceMonitor).setSource(mSource);
-        verify(mSource).addCallback(callbackCaptor.capture());
 
-        clearInvocations(mConnector);
         mFakeClock.advanceTime(CONNECTION_MIN_DURATION_MS + 1);
-        callbackCaptor.getValue().onDisconnected();
-        mFakeExecutor.runAllReady();
+        callback.onDisconnected();
 
-        verify(mConnector).connect();
+        verify(mConnector).connect(any());
     }
 }

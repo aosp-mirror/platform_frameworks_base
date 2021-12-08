@@ -27,8 +27,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -53,10 +51,11 @@ public class CommunalSourcePrimer extends CoreStartable {
 
     private int mReconnectAttempts = 0;
     private Runnable mCurrentReconnectCancelable;
-    private ListenableFuture<Optional<CommunalSource>> mGetSourceFuture;
 
-    private final Optional<CommunalSource.Connector> mConnector;
     private final Optional<CommunalSource.Observer> mObserver;
+    private final Optional<CommunalSource.Connector> mConnector;
+
+    private CommunalSource.Connection mCurrentConnection;
 
     private final Runnable mConnectRunnable = new Runnable() {
         @Override
@@ -64,6 +63,10 @@ public class CommunalSourcePrimer extends CoreStartable {
             mCurrentReconnectCancelable = null;
             connect();
         }
+    };
+
+    private final CommunalSource.Observer.Callback mObserverCallback = () -> {
+        initiateConnectionAttempt();
     };
 
     @Inject
@@ -132,7 +135,7 @@ public class CommunalSourcePrimer extends CoreStartable {
     @Override
     protected void onBootCompleted() {
         if (mObserver.isPresent()) {
-            mObserver.get().addCallback(() -> initiateConnectionAttempt());
+            mObserver.get().addCallback(mObserverCallback);
         }
         initiateConnectionAttempt();
     }
@@ -142,34 +145,36 @@ public class CommunalSourcePrimer extends CoreStartable {
             Log.d(TAG, "attempting to communal to communal source");
         }
 
-        if (mGetSourceFuture != null) {
+        if (mCurrentConnection != null) {
             if (DEBUG) {
                 Log.d(TAG, "canceling in-flight connection");
             }
-            mGetSourceFuture.cancel(true);
+            mCurrentConnection.disconnect();
         }
 
-        mGetSourceFuture = mConnector.get().connect();
-        mGetSourceFuture.addListener(() -> {
-            try {
-                final long startTime = mSystemClock.currentTimeMillis();
-                Optional<CommunalSource> result = mGetSourceFuture.get();
-                if (result.isPresent()) {
-                    final CommunalSource source = result.get();
-                    source.addCallback(() -> {
-                        if (mSystemClock.currentTimeMillis() - startTime > mMinConnectionDuration) {
-                            initiateConnectionAttempt();
-                        } else {
-                            scheduleConnectionAttempt();
-                        }
-                    });
+        mCurrentConnection = mConnector.get().connect(new CommunalSource.Connection.Callback() {
+            private long mStartTime;
+
+            @Override
+            public void onSourceEstablished(Optional<CommunalSource> optionalSource) {
+                mStartTime = mSystemClock.currentTimeMillis();
+
+                if (optionalSource.isPresent()) {
+                    final CommunalSource source = optionalSource.get();
                     mMonitor.setSource(source);
                 } else {
                     scheduleConnectionAttempt();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
-        }, mMainExecutor);
+
+            @Override
+            public void onDisconnected() {
+                if (mSystemClock.currentTimeMillis() - mStartTime > mMinConnectionDuration) {
+                    initiateConnectionAttempt();
+                } else {
+                    scheduleConnectionAttempt();
+                }
+            }
+        });
     }
 }

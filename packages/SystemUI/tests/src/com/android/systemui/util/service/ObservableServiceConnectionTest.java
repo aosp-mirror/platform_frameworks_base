@@ -99,7 +99,7 @@ public class ObservableServiceConnectionTest extends SysuiTestCase {
     @Test
     public void testConnect() {
         ObservableServiceConnection<Foo> connection = new ObservableServiceConnection<>(mContext,
-                mIntent, 0, mExecutor, mTransformer);
+                mIntent, mExecutor, mTransformer);
         // Register twice to ensure only one callback occurs.
         connection.addCallback(mCallback);
         connection.addCallback(mCallback);
@@ -119,7 +119,7 @@ public class ObservableServiceConnectionTest extends SysuiTestCase {
     @Test
     public void testDisconnect() {
         ObservableServiceConnection<Foo> connection = new ObservableServiceConnection<>(mContext,
-                mIntent, 0, mExecutor, mTransformer);
+                mIntent, mExecutor, mTransformer);
         connection.addCallback(mCallback);
         connection.onServiceDisconnected(mComponentName);
 
