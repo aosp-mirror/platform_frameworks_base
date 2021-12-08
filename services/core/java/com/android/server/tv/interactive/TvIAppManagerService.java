@@ -42,6 +42,7 @@ import android.media.tv.interactive.TvIAppInfo;
 import android.media.tv.interactive.TvIAppService;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -1427,6 +1428,25 @@ public class TvIAppManagerService extends SystemService {
                     mSessionState.mClient.onBroadcastInfoRequest(request, mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onBroadcastInfoRequest", e);
+                }
+            }
+        }
+
+        @Override
+        public void onCommandRequest(@TvIAppService.IAppServiceCommandType String cmdType,
+                Bundle parameters) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onCommandRequest (cmdType=" + cmdType + ", parameters="
+                            + parameters.toString() + ")");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onCommandRequest(cmdType, parameters, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onCommandRequest", e);
                 }
             }
         }
