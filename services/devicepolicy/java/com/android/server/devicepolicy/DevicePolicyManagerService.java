@@ -9008,42 +9008,48 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
 
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+
         final CallerIdentity caller = getCallerIdentity();
-        if (userHandle != mOwners.getDeviceOwnerUserId() && !mOwners.hasProfileOwner(userHandle)
-                && getManagedUserId(userHandle) == -1
-                && newState != STATE_USER_UNMANAGED) {
-            // No managed device, user or profile, so setting provisioning state makes no sense.
-            throw new IllegalStateException("Not allowed to change provisioning state unless a "
-                      + "device or profile owner is set.");
-        }
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            if (userHandle != mOwners.getDeviceOwnerUserId() && !mOwners.hasProfileOwner(userHandle)
+                    && getManagedUserId(userHandle) == -1
+                    && newState != STATE_USER_UNMANAGED) {
+                // No managed device, user or profile, so setting provisioning state makes no sense.
+                throw new IllegalStateException("Not allowed to change provisioning state unless a "
+                        + "device or profile owner is set.");
+            }
 
-        synchronized (getLockObject()) {
-            boolean transitionCheckNeeded = true;
+            synchronized (getLockObject()) {
+                boolean transitionCheckNeeded = true;
 
-            // Calling identity/permission checks.
-            if (isAdb(caller)) {
-                // ADB shell can only move directly from un-managed to finalized as part of directly
-                // setting profile-owner or device-owner.
-                if (getUserProvisioningState(userHandle) !=
-                        DevicePolicyManager.STATE_USER_UNMANAGED
-                        || newState != DevicePolicyManager.STATE_USER_SETUP_FINALIZED) {
-                    throw new IllegalStateException("Not allowed to change provisioning state "
-                            + "unless current provisioning state is unmanaged, and new state is "
-                            + "finalized.");
+                // Calling identity/permission checks.
+                if (isAdb(caller)) {
+                    // ADB shell can only move directly from un-managed to finalized as part of
+                    // directly setting profile-owner or device-owner.
+                    if (getUserProvisioningState(userHandle)
+                            != DevicePolicyManager.STATE_USER_UNMANAGED
+                            || newState != DevicePolicyManager.STATE_USER_SETUP_FINALIZED) {
+                        throw new IllegalStateException("Not allowed to change provisioning state "
+                                + "unless current provisioning state is unmanaged, and new state"
+                                + "is finalized.");
+                    }
+                    transitionCheckNeeded = false;
                 }
-                transitionCheckNeeded = false;
-            } else {
-                Preconditions.checkCallAuthorization(
-                        hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
-            }
 
-            final DevicePolicyData policyData = getUserData(userHandle);
-            if (transitionCheckNeeded) {
-                // Optional state transition check for non-ADB case.
-                checkUserProvisioningStateTransition(policyData.mUserProvisioningState, newState);
+                final DevicePolicyData policyData = getUserData(userHandle);
+                if (transitionCheckNeeded) {
+                    // Optional state transition check for non-ADB case.
+                    checkUserProvisioningStateTransition(policyData.mUserProvisioningState,
+                            newState);
+                }
+                policyData.mUserProvisioningState = newState;
+                saveSettingsLocked(userHandle);
             }
-            policyData.mUserProvisioningState = newState;
-            saveSettingsLocked(userHandle);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
         }
     }
 
