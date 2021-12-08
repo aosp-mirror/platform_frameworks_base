@@ -273,8 +273,8 @@ public final class AccessibilityManager {
     private final ArrayMap<AccessibilityServicesStateChangeListener, Executor>
             mServicesStateChangeListeners = new ArrayMap<>();
 
-    private final ArrayMap<AudioDescriptionByDefaultStateChangeListener, Executor>
-            mAudioDescriptionByDefaultStateChangeListeners = new ArrayMap<>();
+    private final ArrayMap<AudioDescriptionRequestedChangeListener, Executor>
+            mAudioDescriptionRequestedChangeListeners = new ArrayMap<>();
 
     /**
      * Map from a view's accessibility id to the list of request preparers set for that view
@@ -359,15 +359,15 @@ public final class AccessibilityManager {
      * Listener for the audio description by default state. To listen for
      * changes to the audio description by default state on the device,
      * implement this interface and register it with the system by calling
-     * {@link #addAudioDescriptionByDefaultStateChangeListener}.
+     * {@link #addAudioDescriptionRequestedChangeListener}.
      */
-    public interface AudioDescriptionByDefaultStateChangeListener {
+    public interface AudioDescriptionRequestedChangeListener {
         /**
          * Called when the audio description enabled state changes.
          *
          * @param enabled Whether audio description by default is enabled.
          */
-        void onAudioDescriptionByDefaultStateChanged(boolean enabled);
+        void onAudioDescriptionRequestedChanged(boolean enabled);
     }
 
     /**
@@ -1177,31 +1177,31 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Registers a {@link AudioDescriptionByDefaultStateChangeListener}
+     * Registers a {@link AudioDescriptionRequestedChangeListener}
      * for changes in the audio description by default state of the system.
      * The value could be read via {@link #isAudioDescriptionRequested}.
      *
      * @param executor The executor on which the listener should be called back.
      * @param listener The listener.
      */
-    public void addAudioDescriptionByDefaultStateChangeListener(
+    public void addAudioDescriptionRequestedChangeListener(
             @NonNull Executor executor,
-            @NonNull AudioDescriptionByDefaultStateChangeListener listener) {
+            @NonNull AudioDescriptionRequestedChangeListener listener) {
         synchronized (mLock) {
-            mAudioDescriptionByDefaultStateChangeListeners.put(listener, executor);
+            mAudioDescriptionRequestedChangeListeners.put(listener, executor);
         }
     }
 
     /**
-     * Unregisters a {@link AudioDescriptionByDefaultStateChangeListener}.
+     * Unregisters a {@link AudioDescriptionRequestedChangeListener}.
      *
      * @param listener The listener.
      * @return True if listener was previously registered.
      */
-    public boolean removeAudioDescriptionByDefaultStateChangeListener(
-            @NonNull AudioDescriptionByDefaultStateChangeListener listener) {
+    public boolean removeAudioDescriptionRequestedChangeListener(
+            @NonNull AudioDescriptionRequestedChangeListener listener) {
         synchronized (mLock) {
-            return (mAudioDescriptionByDefaultStateChangeListeners.remove(listener) != null);
+            return (mAudioDescriptionRequestedChangeListeners.remove(listener) != null);
         }
     }
 
@@ -1752,7 +1752,7 @@ public final class AccessibilityManager {
      * </p>
      * <p>
      * Add listener to detect the state change via
-     * {@link #addAudioDescriptionByDefaultStateChangeListener}
+     * {@link #addAudioDescriptionRequestedChangeListener}
      * </p>
      * @return {@code true} if the audio description is enabled, {@code false} otherwise.
      */
@@ -1865,20 +1865,20 @@ public final class AccessibilityManager {
      */
     private void notifyAudioDescriptionbyDefaultStateChanged() {
         final boolean isAudioDescriptionByDefaultRequested;
-        final ArrayMap<AudioDescriptionByDefaultStateChangeListener, Executor> listeners;
+        final ArrayMap<AudioDescriptionRequestedChangeListener, Executor> listeners;
         synchronized (mLock) {
-            if (mAudioDescriptionByDefaultStateChangeListeners.isEmpty()) {
+            if (mAudioDescriptionRequestedChangeListeners.isEmpty()) {
                 return;
             }
             isAudioDescriptionByDefaultRequested = mIsAudioDescriptionByDefaultRequested;
-            listeners = new ArrayMap<>(mAudioDescriptionByDefaultStateChangeListeners);
+            listeners = new ArrayMap<>(mAudioDescriptionRequestedChangeListeners);
         }
 
         final int numListeners = listeners.size();
         for (int i = 0; i < numListeners; i++) {
-            final AudioDescriptionByDefaultStateChangeListener listener = listeners.keyAt(i);
+            final AudioDescriptionRequestedChangeListener listener = listeners.keyAt(i);
             listeners.valueAt(i).execute(() ->
-                    listener.onAudioDescriptionByDefaultStateChanged(
+                    listener.onAudioDescriptionRequestedChanged(
                         isAudioDescriptionByDefaultRequested));
         }
     }
