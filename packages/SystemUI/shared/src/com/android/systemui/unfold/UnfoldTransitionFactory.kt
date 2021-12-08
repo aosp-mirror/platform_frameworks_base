@@ -60,14 +60,12 @@ fun createUnfoldTransitionProgressProvider(
         hingeAngleProvider,
         screenStatusProvider,
         deviceStateManager,
-        mainExecutor
+        mainExecutor,
+        mainHandler
     )
 
     val unfoldTransitionProgressProvider = if (config.isHingeAngleEnabled) {
-        PhysicsBasedUnfoldTransitionProgressProvider(
-            mainHandler,
-            foldStateProvider
-        )
+        PhysicsBasedUnfoldTransitionProgressProvider(foldStateProvider)
     } else {
         FixedTimingTransitionProgressProvider(foldStateProvider)
     }

@@ -15,7 +15,6 @@
  */
 package com.android.systemui.unfold.progress
 
-import android.os.Handler
 import android.util.Log
 import android.util.MathUtils.saturate
 import androidx.dynamicanimation.animation.DynamicAnimation
@@ -24,9 +23,10 @@ import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import com.android.systemui.unfold.updates.FOLD_UPDATE_ABORTED
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
-import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
+import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE
 import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
@@ -39,7 +39,6 @@ import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
  *  - doesn't handle postures
  */
 internal class PhysicsBasedUnfoldTransitionProgressProvider(
-    private val handler: Handler,
     private val foldStateProvider: FoldStateProvider
 ) :
     UnfoldTransitionProgressProvider,
@@ -50,8 +49,6 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
         .apply {
             addEndListener(this@PhysicsBasedUnfoldTransitionProgressProvider)
         }
-
-    private val timeoutRunnable = TimeoutRunnable()
 
     private var isTransitionRunning = false
     private var isAnimatedCancelRunning = false
@@ -92,7 +89,7 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
                     cancelTransition(endValue = 1f, animate = true)
                 }
             }
-            FOLD_UPDATE_FINISH_FULL_OPEN -> {
+            FOLD_UPDATE_FINISH_FULL_OPEN, FOLD_UPDATE_ABORTED -> {
                 // Do not cancel if we haven't started the transition yet.
                 // This could happen when we fully unfolded the device before the screen
                 // became available. In this case we start and immediately cancel the animation
@@ -106,7 +103,11 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
                 cancelTransition(endValue = 0f, animate = false)
             }
             FOLD_UPDATE_START_CLOSING -> {
-                startTransition(startValue = 1f)
+                // The transition might be already running as the device might start closing several
+                // times before reaching an end state.
+                if (!isTransitionRunning) {
+                    startTransition(startValue = 1f)
+                }
             }
         }
 
@@ -116,8 +117,6 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
     }
 
     private fun cancelTransition(endValue: Float, animate: Boolean) {
-        handler.removeCallbacks(timeoutRunnable)
-
         if (isTransitionRunning && animate) {
             isAnimatedCancelRunning = true
             springAnimation.animateToFinalPosition(endValue)
@@ -175,8 +174,6 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
         }
 
         springAnimation.start()
-
-        handler.postDelayed(timeoutRunnable, TRANSITION_TIMEOUT_MILLIS)
     }
 
     override fun addCallback(listener: TransitionProgressListener) {
@@ -185,13 +182,6 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
 
     override fun removeCallback(listener: TransitionProgressListener) {
         listeners.remove(listener)
-    }
-
-    private inner class TimeoutRunnable : Runnable {
-
-        override fun run() {
-            cancelTransition(endValue = 1f, animate = true)
-        }
     }
 
     private object AnimationProgressProperty :
@@ -212,7 +202,6 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
 private const val TAG = "PhysicsBasedUnfoldTransitionProgressProvider"
 private const val DEBUG = true
 
-private const val TRANSITION_TIMEOUT_MILLIS = 2000L
 private const val SPRING_STIFFNESS = 200.0f
 private const val MINIMAL_VISIBLE_CHANGE = 0.001f
 private const val FINAL_HINGE_ANGLE_POSITION = 165f
