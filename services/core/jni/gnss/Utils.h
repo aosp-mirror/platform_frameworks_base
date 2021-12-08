@@ -196,6 +196,30 @@ private:
     JNIEnv* mEnv = nullptr;
 };
 
+struct ScopedJniString {
+    ScopedJniString(JNIEnv* env, jstring javaString) : mEnv(env), mJavaString(javaString) {
+        mNativeString = mEnv->GetStringUTFChars(mJavaString, nullptr);
+    }
+
+    ~ScopedJniString() {
+        if (mNativeString != nullptr) {
+            mEnv->ReleaseStringUTFChars(mJavaString, mNativeString);
+        }
+    }
+
+    const char* c_str() const { return mNativeString; }
+
+    operator hardware::hidl_string() const { return hardware::hidl_string(mNativeString); }
+
+private:
+    ScopedJniString(const ScopedJniString&) = delete;
+    ScopedJniString& operator=(const ScopedJniString&) = delete;
+
+    JNIEnv* mEnv;
+    jstring mJavaString;
+    const char* mNativeString;
+};
+
 JNIEnv* getJniEnv();
 
 template <class T>

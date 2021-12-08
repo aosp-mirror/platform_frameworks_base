@@ -75,6 +75,7 @@ package android {
     field public static final String BROADCAST_CLOSE_SYSTEM_DIALOGS = "android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS";
     field @Deprecated public static final String BROADCAST_NETWORK_PRIVILEGED = "android.permission.BROADCAST_NETWORK_PRIVILEGED";
     field public static final String BYPASS_ROLE_QUALIFICATION = "android.permission.BYPASS_ROLE_QUALIFICATION";
+    field public static final String CALL_AUDIO_INTERCEPTION = "android.permission.CALL_AUDIO_INTERCEPTION";
     field public static final String CAMERA_DISABLE_TRANSMIT_LED = "android.permission.CAMERA_DISABLE_TRANSMIT_LED";
     field public static final String CAMERA_OPEN_CLOSE_LISTENER = "android.permission.CAMERA_OPEN_CLOSE_LISTENER";
     field public static final String CAPTURE_AUDIO_HOTWORD = "android.permission.CAPTURE_AUDIO_HOTWORD";
@@ -5408,6 +5409,8 @@ package android.media {
     method @IntRange(from=0) public long getAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioProductStrategy> getAudioProductStrategies();
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioVolumeGroup> getAudioVolumeGroups();
+    method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioRecord getCallDownlinkExtractionAudioRecord(@NonNull android.media.AudioFormat);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioTrack getCallUplinkInjectionAudioTrack(@NonNull android.media.AudioFormat);
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, "android.permission.QUERY_AUDIO_STATE"}) public int getDeviceVolumeBehavior(@NonNull android.media.AudioDeviceAttributes);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, "android.permission.QUERY_AUDIO_STATE"}) public java.util.List<android.media.AudioDeviceAttributes> getDevicesForAttributes(@NonNull android.media.AudioAttributes);
     method @IntRange(from=0) public long getMaxAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
@@ -5420,6 +5423,7 @@ package android.media {
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method public boolean isAudioServerRunning();
     method public boolean isHdmiSystemAudioSupported();
+    method @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public boolean isPstnCallAudioInterceptable();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int registerAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
     method public void registerVolumeGroupCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.VolumeGroupCallback);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void removeOnPreferredDeviceForStrategyChangedListener(@NonNull android.media.AudioManager.OnPreferredDeviceForStrategyChangedListener);
@@ -7585,7 +7589,7 @@ package android.media.tv.tuner.frontend {
     method @NonNull public static android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder builder();
     method public int getCodeRate();
     method public int getModulation();
-    method @IntRange(from=0, to=255) public int getNumberOfSegment();
+    method @IntRange(from=0, to=255) public int getNumberOfSegments();
     method public int getTimeInterleaveMode();
   }
 
@@ -7593,7 +7597,7 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings build();
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder setCodeRate(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder setModulation(int);
-    method @IntRange(from=0, to=255) @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder setNumberOfSegment(int);
+    method @IntRange(from=0, to=255) @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder setNumberOfSegments(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.IsdbtLayerSettings.Builder setTimeInterleaveMode(int);
   }
 

@@ -22,5 +22,16 @@ package android.companion.virtual;
  * @hide
  */
 interface IVirtualDevice {
+
+    /**
+     * Returns the association ID for this virtual device.
+     *
+     * @see AssociationInfo#getId()
+     */
+    int getAssociationId();
+
+    /**
+     * Closes the virtual device and frees all associated resources.
+     */
     void close();
 }

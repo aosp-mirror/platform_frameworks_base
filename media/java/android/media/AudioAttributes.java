@@ -481,13 +481,20 @@ public final class AudioAttributes implements Parcelable {
      */
     public static final int FLAG_NEVER_SPATIALIZE = 0x1 << 15;
 
+    /**
+     * @hide
+     * Flag indicating the audio is part of a call redirection.
+     * Valid for playback and capture.
+     */
+    public static final int FLAG_CALL_REDIRECTION = 0x1 << 16;
+
     // Note that even though FLAG_MUTE_HAPTIC is stored as a flag bit, it is not here since
     // it is known as a boolean value outside of AudioAttributes.
     private static final int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO
             | FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY
             | FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY | FLAG_DEEP_BUFFER | FLAG_NO_MEDIA_PROJECTION
             | FLAG_NO_SYSTEM_CAPTURE | FLAG_CAPTURE_PRIVATE | FLAG_CONTENT_SPATIALIZED
-            | FLAG_NEVER_SPATIALIZE;
+            | FLAG_NEVER_SPATIALIZE | FLAG_CALL_REDIRECTION;
     private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED |
             FLAG_HW_AV_SYNC | FLAG_LOW_LATENCY;
     /* mask of flags that can be set by SDK and System APIs through the Builder */
@@ -707,6 +714,14 @@ public final class AudioAttributes implements Parcelable {
         return ALLOW_CAPTURE_BY_ALL;
     }
 
+    /**
+     * @hide
+     * Indicates if the audio is used for call redirection
+     * @return true if used for call redirection, false otherwise.
+     */
+    public boolean isForCallRedirection() {
+        return (mFlags & FLAG_CALL_REDIRECTION) == FLAG_CALL_REDIRECTION;
+    }
 
     /**
      * Builder class for {@link AudioAttributes} objects.
@@ -763,11 +778,15 @@ public final class AudioAttributes implements Parcelable {
         public Builder(AudioAttributes aa) {
             mUsage = aa.mUsage;
             mContentType = aa.mContentType;
+            mSource = aa.mSource;
             mFlags = aa.getAllFlags();
             mTags = (HashSet<String>) aa.mTags.clone();
             mMuteHapticChannels = aa.areHapticChannelsMuted();
             mIsContentSpatialized = aa.isContentSpatialized();
             mSpatializationBehavior = aa.getSpatializationBehavior();
+            if ((mFlags & FLAG_CAPTURE_PRIVATE) != 0) {
+                mPrivacySensitive = PRIVACY_SENSITIVE_ENABLED;
+            }
         }
 
         /**
@@ -1071,6 +1090,17 @@ public final class AudioAttributes implements Parcelable {
         }
 
         /**
+         * @hide
+         * Replace all custom tags
+         * @param tags
+         * @return the same Builder instance.
+         */
+        public Builder replaceTags(HashSet<String> tags) {
+            mTags = (HashSet<String>) tags.clone();
+            return this;
+        }
+
+        /**
          * Sets attributes as inferred from the legacy stream types.
          * Warning: do not use this method in combination with setting any other attributes such as
          * usage, content type, flags or haptic control, as this method will overwrite (the more
@@ -1243,6 +1273,16 @@ public final class AudioAttributes implements Parcelable {
         public @NonNull Builder setPrivacySensitive(boolean privacySensitive) {
             mPrivacySensitive =
                 privacySensitive ? PRIVACY_SENSITIVE_ENABLED : PRIVACY_SENSITIVE_DISABLED;
+            return this;
+        }
+
+        /**
+         * @hide
+         * Designates the audio to be used for call redirection
+         * @return the same Builder instance.
+         */
+        public Builder setForCallRedirection() {
+            mFlags |= FLAG_CALL_REDIRECTION;
             return this;
         }
     };

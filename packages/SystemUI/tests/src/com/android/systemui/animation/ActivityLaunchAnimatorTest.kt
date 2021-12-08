@@ -46,7 +46,7 @@ import org.mockito.junit.MockitoJUnit
 @RunWithLooper
 class ActivityLaunchAnimatorTest : SysuiTestCase() {
     private val launchContainer = LinearLayout(mContext)
-    private val launchAnimator = LaunchAnimator(mContext, isForTesting = true)
+    private val launchAnimator = LaunchAnimator(TEST_TIMINGS, TEST_INTERPOLATORS)
     @Mock lateinit var callback: ActivityLaunchAnimator.Callback
     @Spy private val controller = TestLaunchAnimatorController(launchContainer)
     @Mock lateinit var iCallback: IRemoteAnimationFinishedCallback

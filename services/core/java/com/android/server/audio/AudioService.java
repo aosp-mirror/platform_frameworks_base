@@ -1241,6 +1241,10 @@ public class AudioService extends IAudioService.Stub
         initMinStreamVolumeWithoutModifyAudioSettings();
 
         updateVibratorInfos();
+
+        synchronized (mSupportedSystemUsagesLock) {
+            AudioSystem.setSupportedSystemUsages(mSupportedSystemUsages);
+        }
     }
 
     //-----------------------------------------------------------------
@@ -3224,6 +3228,15 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    private void enforceCallAudioInterceptionPermission() {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.CALL_AUDIO_INTERCEPTION)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Missing CALL_AUDIO_INTERCEPTION permission");
+        }
+    }
+
+
     /** @see AudioManager#setVolumeIndexForAttributes(attr, int, int) */
     public void setVolumeIndexForAttributes(@NonNull AudioAttributes attr, int index, int flags,
             String callingPackage, String attributionTag) {
@@ -4941,6 +4954,26 @@ public class AudioService extends IAudioService.Stub
     public void unregisterModeDispatcher(
             @NonNull IAudioModeDispatcher dispatcher) {
         mModeDispatchers.unregister(dispatcher);
+    }
+
+    /** @see AudioManager#isPstnCallAudioInterceptable() */
+    public boolean isPstnCallAudioInterceptable() {
+        enforceCallAudioInterceptionPermission();
+
+        boolean uplinkDeviceFound = false;
+        boolean downlinkDeviceFound = false;
+        AudioDeviceInfo[] devices = AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_ALL);
+        for (AudioDeviceInfo device : devices) {
+            if (device.getInternalType() == AudioSystem.DEVICE_OUT_TELEPHONY_TX) {
+                uplinkDeviceFound = true;
+            } else if (device.getInternalType() == AudioSystem.DEVICE_IN_TELEPHONY_RX) {
+                downlinkDeviceFound = true;
+            }
+            if (uplinkDeviceFound && downlinkDeviceFound) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** @see AudioManager#setRttEnabled() */
@@ -8169,7 +8202,10 @@ public class AudioService extends IAudioService.Stub
     private void validateAudioAttributesUsage(@NonNull AudioAttributes audioAttributes) {
         @AudioAttributes.AttributeUsage int usage = audioAttributes.getSystemUsage();
         if (AudioAttributes.isSystemUsage(usage)) {
-            if (callerHasPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)) {
+            if ((usage == AudioAttributes.USAGE_CALL_ASSISTANT
+                    && (audioAttributes.getAllFlags() & AudioAttributes.FLAG_CALL_REDIRECTION) != 0
+                    && callerHasPermission(Manifest.permission.CALL_AUDIO_INTERCEPTION))
+                    || callerHasPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)) {
                 if (!isSupportedSystemUsage(usage)) {
                     throw new IllegalArgumentException(
                             "Unsupported usage " + AudioAttributes.usageToString(usage));
@@ -8183,8 +8219,12 @@ public class AudioService extends IAudioService.Stub
     private boolean isValidAudioAttributesUsage(@NonNull AudioAttributes audioAttributes) {
         @AudioAttributes.AttributeUsage int usage = audioAttributes.getSystemUsage();
         if (AudioAttributes.isSystemUsage(usage)) {
-            return callerHasPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
-                    && isSupportedSystemUsage(usage);
+            return isSupportedSystemUsage(usage)
+                    && ((usage == AudioAttributes.USAGE_CALL_ASSISTANT
+                        && (audioAttributes.getAllFlags()
+                            & AudioAttributes.FLAG_CALL_REDIRECTION) != 0
+                        && callerHasPermission(Manifest.permission.CALL_AUDIO_INTERCEPTION))
+                        || callerHasPermission(Manifest.permission.MODIFY_AUDIO_ROUTING));
         }
         return true;
     }
@@ -9578,6 +9618,7 @@ public class AudioService extends IAudioService.Stub
         boolean requireValidProjection = false;
         boolean requireCaptureAudioOrMediaOutputPerm = false;
         boolean requireModifyRouting = false;
+        boolean requireCallAudioInterception = false;
         ArrayList<AudioMix> voiceCommunicationCaptureMixes = null;
 
 
@@ -9618,7 +9659,10 @@ public class AudioService extends IAudioService.Stub
             // otherwise MODIFY_AUDIO_ROUTING permission is required
             if (mix.getRouteFlags() == mix.ROUTE_FLAG_LOOP_BACK_RENDER && projection != null) {
                 requireValidProjection |= true;
-            } else {
+            } else if (mix.isForCallRedirection()) {
+                requireCallAudioInterception |= true;
+            } else if (mix.containsMatchAttributeRuleForUsage(
+                            AudioAttributes.USAGE_VOICE_COMMUNICATION)) {
                 requireModifyRouting |= true;
             }
         }
@@ -9652,6 +9696,12 @@ public class AudioService extends IAudioService.Stub
         if (requireModifyRouting
                 && !callerHasPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)) {
             Log.e(TAG, "Can not capture audio without MODIFY_AUDIO_ROUTING");
+            return false;
+        }
+
+        if (requireCallAudioInterception
+                && !callerHasPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION)) {
+            Log.e(TAG, "Can not capture audio without CALL_AUDIO_INTERCEPTION");
             return false;
         }
 

@@ -965,9 +965,15 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void updateUnfoldBounds() {
         if (mMainUnfoldController != null && mSideUnfoldController != null) {
-            mMainUnfoldController.onLayoutChanged(getMainStageBounds());
-            mSideUnfoldController.onLayoutChanged(getSideStageBounds());
+            mMainUnfoldController.onLayoutChanged(getMainStageBounds(), getMainStagePosition(),
+                    isLandscape());
+            mSideUnfoldController.onLayoutChanged(getSideStageBounds(), getSideStagePosition(),
+                    isLandscape());
         }
+    }
+
+    private boolean isLandscape() {
+        return mSplitLayout.isLandscape();
     }
 
     /**

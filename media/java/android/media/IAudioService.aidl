@@ -445,4 +445,6 @@ interface IAudioService {
     void unregisterSpatializerOutputCallback(in ISpatializerOutputCallback cb);
 
     boolean isVolumeFixed();
+
+    boolean isPstnCallAudioInterceptable();
 }

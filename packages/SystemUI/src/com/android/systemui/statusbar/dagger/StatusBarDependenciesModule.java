@@ -25,7 +25,6 @@ import android.service.dreams.IDreamManager;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
-import com.android.systemui.animation.LaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
@@ -316,24 +315,15 @@ public interface StatusBarDependenciesModule {
      */
     @Provides
     @SysUISingleton
-    static LaunchAnimator provideLaunchAnimator(Context context) {
-        return new LaunchAnimator(context);
+    static ActivityLaunchAnimator provideActivityLaunchAnimator() {
+        return new ActivityLaunchAnimator();
     }
 
     /**
      */
     @Provides
     @SysUISingleton
-    static ActivityLaunchAnimator provideActivityLaunchAnimator(LaunchAnimator launchAnimator) {
-        return new ActivityLaunchAnimator(launchAnimator);
-    }
-
-    /**
-     */
-    @Provides
-    @SysUISingleton
-    static DialogLaunchAnimator provideDialogLaunchAnimator(Context context,
-            LaunchAnimator launchAnimator, IDreamManager dreamManager) {
-        return new DialogLaunchAnimator(context, launchAnimator, dreamManager);
+    static DialogLaunchAnimator provideDialogLaunchAnimator(IDreamManager dreamManager) {
+        return new DialogLaunchAnimator(dreamManager);
     }
 }

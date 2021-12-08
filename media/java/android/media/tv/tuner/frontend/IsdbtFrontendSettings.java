@@ -546,14 +546,14 @@ public class IsdbtFrontendSettings extends FrontendSettings {
         private final int mModulation;
         private final int mTimeInterleaveMode;
         private final int mCodeRate;
-        private final int mNumOfSegment;
+        private final int mNumOfSegments;
 
         private IsdbtLayerSettings(
-                int modulation, int timeInterleaveMode, int codeRate, int numOfSegment) {
+                int modulation, int timeInterleaveMode, int codeRate, int numOfSegments) {
             mModulation = modulation;
             mTimeInterleaveMode = timeInterleaveMode;
             mCodeRate = codeRate;
-            mNumOfSegment = numOfSegment;
+            mNumOfSegments = numOfSegments;
         }
 
         /**
@@ -578,11 +578,11 @@ public class IsdbtFrontendSettings extends FrontendSettings {
             return mCodeRate;
         }
         /**
-         * Gets Number of Segment.
+         * Gets Number of Segments.
          */
         @IntRange(from = 0, to = 0xff)
-        public int getNumberOfSegment() {
-            return mNumOfSegment;
+        public int getNumberOfSegments() {
+            return mNumOfSegments;
         }
 
         /**
@@ -600,7 +600,7 @@ public class IsdbtFrontendSettings extends FrontendSettings {
             private int mModulation = MODULATION_UNDEFINED;
             private int mTimeInterleaveMode = TIME_INTERLEAVE_MODE_UNDEFINED;
             private int mCodeRate = DvbtFrontendSettings.CODERATE_UNDEFINED;
-            private int mNumOfSegment = 0;
+            private int mNumOfSegments = 0;
 
             private Builder() {}
 
@@ -633,14 +633,14 @@ public class IsdbtFrontendSettings extends FrontendSettings {
                 return this;
             }
             /**
-             * Sets number of segment.
+             * Sets number of segments.
              *
              * <p>Default value is 0.
              */
             @NonNull
             @IntRange(from = 0, to = 0xff)
-            public Builder setNumberOfSegment(int numOfSegment) {
-                mNumOfSegment = numOfSegment;
+            public Builder setNumberOfSegments(int numOfSegments) {
+                mNumOfSegments = numOfSegments;
                 return this;
             }
 
@@ -650,7 +650,7 @@ public class IsdbtFrontendSettings extends FrontendSettings {
             @NonNull
             public IsdbtLayerSettings build() {
                 return new IsdbtLayerSettings(
-                        mModulation, mTimeInterleaveMode, mCodeRate, mNumOfSegment);
+                        mModulation, mTimeInterleaveMode, mCodeRate, mNumOfSegments);
             }
         }
     }

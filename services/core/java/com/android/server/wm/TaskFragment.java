@@ -101,6 +101,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -1666,8 +1667,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         boolean isAddingActivity = child.asActivityRecord() != null;
         final Task task = isAddingActivity ? getTask() : null;
 
-        // If this task had any child before we added this one.
-        boolean taskHadChild = task != null && task.hasChild();
+        // If this task had any activity before we added this one.
+        boolean taskHadActivity = task != null && task.getActivity(Objects::nonNull) != null;
         // getActivityType() looks at the top child, so we need to read the type before adding
         // a new child in case the new child is on top and UNDEFINED.
         final int activityType = task != null ? task.getActivityType() : ACTIVITY_TYPE_UNDEFINED;
@@ -1676,7 +1677,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
         if (isAddingActivity && task != null) {
             child.asActivityRecord().inHistory = true;
-            task.onDescendantActivityAdded(taskHadChild, activityType, child.asActivityRecord());
+            task.onDescendantActivityAdded(taskHadActivity, activityType, child.asActivityRecord());
         }
     }
 

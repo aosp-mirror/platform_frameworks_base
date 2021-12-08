@@ -588,6 +588,10 @@ public class AudioPolicy {
         boolean canModifyAudioRouting = PackageManager.PERMISSION_GRANTED
                 == checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING);
 
+        boolean canInterceptCallAudio = PackageManager.PERMISSION_GRANTED
+                == checkCallingOrSelfPermission(
+                        android.Manifest.permission.CALL_AUDIO_INTERCEPTION);
+
         boolean canProjectAudio;
         try {
             canProjectAudio = mProjection != null && mProjection.getProjection().canProjectAudio();
@@ -596,7 +600,9 @@ public class AudioPolicy {
             throw e.rethrowFromSystemServer();
         }
 
-        if (!((isLoopbackRenderPolicy() && canProjectAudio) || canModifyAudioRouting)) {
+        if (!((isLoopbackRenderPolicy() && canProjectAudio)
+                || (isCallRedirectionPolicy() && canInterceptCallAudio)
+                || canModifyAudioRouting)) {
             Slog.w(TAG, "Cannot use AudioPolicy for pid " + Binder.getCallingPid() + " / uid "
                     + Binder.getCallingUid() + ", needs MODIFY_AUDIO_ROUTING or "
                     + "MediaProjection that can project audio.");
@@ -609,6 +615,17 @@ public class AudioPolicy {
         synchronized (mLock) {
             return mConfig.mMixes.stream().allMatch(mix -> mix.getRouteFlags()
                     == (mix.ROUTE_FLAG_RENDER | mix.ROUTE_FLAG_LOOP_BACK));
+        }
+    }
+
+    private boolean isCallRedirectionPolicy() {
+        synchronized (mLock) {
+            for (AudioMix mix : mConfig.mMixes) {
+                if (mix.isForCallRedirection()) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -728,13 +745,16 @@ public class AudioPolicy {
                 .setChannelMask(AudioFormat.inChannelMaskFromOutChannelMask(
                         mix.getFormat().getChannelMask()))
                 .build();
+
+        AudioAttributes.Builder ab = new AudioAttributes.Builder()
+                .setInternalCapturePreset(MediaRecorder.AudioSource.REMOTE_SUBMIX)
+                .addTag(addressForTag(mix))
+                .addTag(AudioRecord.SUBMIX_FIXED_VOLUME);
+        if (mix.isForCallRedirection()) {
+            ab.setForCallRedirection();
+        }
         // create the AudioRecord, configured for loop back, using the same format as the mix
-        AudioRecord ar = new AudioRecord(
-                new AudioAttributes.Builder()
-                        .setInternalCapturePreset(MediaRecorder.AudioSource.REMOTE_SUBMIX)
-                        .addTag(addressForTag(mix))
-                        .addTag(AudioRecord.SUBMIX_FIXED_VOLUME)
-                        .build(),
+        AudioRecord ar = new AudioRecord(ab.build(),
                 mixFormat,
                 AudioRecord.getMinBufferSize(mix.getFormat().getSampleRate(),
                         // using stereo for buffer size to avoid the current poor support for masks
@@ -768,11 +788,13 @@ public class AudioPolicy {
         }
         checkMixReadyToUse(mix, true/*for an AudioTrack*/);
         // create the AudioTrack, configured for loop back, using the same format as the mix
-        AudioTrack at = new AudioTrack(
-                new AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_VIRTUAL_SOURCE)
-                        .addTag(addressForTag(mix))
-                        .build(),
+        AudioAttributes.Builder ab = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_VIRTUAL_SOURCE)
+                .addTag(addressForTag(mix));
+        if (mix.isForCallRedirection()) {
+            ab.setForCallRedirection();
+        }
+        AudioTrack at = new AudioTrack(ab.build(),
                 mix.getFormat(),
                 AudioTrack.getMinBufferSize(mix.getFormat().getSampleRate(),
                         mix.getFormat().getChannelMask(), mix.getFormat().getEncoding()),

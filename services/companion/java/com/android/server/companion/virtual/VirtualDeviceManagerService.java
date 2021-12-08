@@ -19,13 +19,18 @@ package com.android.server.companion.virtual;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.companion.AssociationInfo;
+import android.companion.CompanionDeviceManager;
+import android.companion.CompanionDeviceManager.OnAssociationsChangedListener;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceManager;
 import android.content.Context;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.ExceptionUtils;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
@@ -33,7 +38,8 @@ import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /** @hide */
@@ -42,9 +48,30 @@ public class VirtualDeviceManagerService extends SystemService {
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "VirtualDeviceManagerService";
+    private final Object mVirtualDeviceManagerLock = new Object();
     private final VirtualDeviceManagerImpl mImpl;
-    @GuardedBy("mVirtualDevices")
-    private final ArrayList<VirtualDeviceImpl> mVirtualDevices = new ArrayList<>();
+
+    /**
+     * Mapping from CDM association IDs to virtual devices. Only one virtual device is allowed for
+     * each CDM associated device.
+     */
+    @GuardedBy("mVirtualDeviceManagerLock")
+    private final SparseArray<VirtualDeviceImpl> mVirtualDevices = new SparseArray<>();
+
+    /**
+     * Mapping from user ID to CDM associations. The associations come from
+     * {@link CompanionDeviceManager#getAllAssociations()}, which contains associations across all
+     * packages.
+     */
+    private final ConcurrentHashMap<Integer, List<AssociationInfo>> mAllAssociations =
+            new ConcurrentHashMap<>();
+
+    /**
+     * Mapping from user ID to its change listener. The listeners are added when the user is
+     * started and removed when the user stops.
+     */
+    private final SparseArray<OnAssociationsChangedListener> mOnAssociationsChangedListeners =
+            new SparseArray<>();
 
     public VirtualDeviceManagerService(Context context) {
         super(context);
@@ -56,30 +83,116 @@ public class VirtualDeviceManagerService extends SystemService {
         publishBinderService(Context.VIRTUAL_DEVICE_SERVICE, mImpl);
     }
 
-    private class VirtualDeviceImpl extends IVirtualDevice.Stub {
+    @Override
+    public void onUserStarting(@NonNull TargetUser user) {
+        super.onUserStarting(user);
+        synchronized (mVirtualDeviceManagerLock) {
+            final CompanionDeviceManager cdm = getContext()
+                    .createContextAsUser(user.getUserHandle(), 0)
+                    .getSystemService(CompanionDeviceManager.class);
+            final int userId = user.getUserIdentifier();
+            mAllAssociations.put(userId, cdm.getAllAssociations());
+            OnAssociationsChangedListener listener =
+                    associations -> mAllAssociations.put(userId, associations);
+            mOnAssociationsChangedListeners.put(userId, listener);
+            cdm.addOnAssociationsChangedListener(Runnable::run, listener);
+        }
+    }
 
-        private VirtualDeviceImpl() {}
+    @Override
+    public void onUserStopping(@NonNull TargetUser user) {
+        super.onUserStopping(user);
+        synchronized (mVirtualDeviceManagerLock) {
+            int userId = user.getUserIdentifier();
+            mAllAssociations.remove(userId);
+            final CompanionDeviceManager cdm = getContext().createContextAsUser(
+                    user.getUserHandle(), 0)
+                    .getSystemService(CompanionDeviceManager.class);
+            OnAssociationsChangedListener listener = mOnAssociationsChangedListeners.get(userId);
+            if (listener != null) {
+                cdm.removeOnAssociationsChangedListener(listener);
+                mOnAssociationsChangedListeners.remove(userId);
+            }
+        }
+    }
+
+    private class VirtualDeviceImpl extends IVirtualDevice.Stub implements IBinder.DeathRecipient {
+
+        private final AssociationInfo mAssociationInfo;
+
+        private VirtualDeviceImpl(IBinder token, AssociationInfo associationInfo) {
+            mAssociationInfo = associationInfo;
+            try {
+                token.linkToDeath(this, 0);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mVirtualDevices.put(associationInfo.getId(), this);
+        }
+
+        @Override
+        public int getAssociationId() {
+            return mAssociationInfo.getId();
+        }
 
         @Override
         public void close() {
-            synchronized (mVirtualDevices) {
-                mVirtualDevices.remove(this);
+            synchronized (mVirtualDeviceManagerLock) {
+                mVirtualDevices.remove(mAssociationInfo.getId());
             }
+        }
+
+        @Override
+        public void binderDied() {
+            close();
         }
     }
 
     class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub {
 
         @Override
-        public IVirtualDevice createVirtualDevice() {
+        public IVirtualDevice createVirtualDevice(
+                IBinder token, String packageName, int associationId) {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
                     "createVirtualDevice");
-            VirtualDeviceImpl virtualDevice = new VirtualDeviceImpl();
-            synchronized (mVirtualDevices) {
-                mVirtualDevices.add(virtualDevice);
+            if (!PermissionUtils.validatePackageName(getContext(), packageName, getCallingUid())) {
+                throw new SecurityException(
+                        "Package name " + packageName + " does not belong to calling uid "
+                                + getCallingUid());
             }
-            return virtualDevice;
+            AssociationInfo associationInfo = getAssociationInfo(packageName, associationId);
+            if (associationInfo == null) {
+                throw new IllegalArgumentException("No association with ID " + associationId);
+            }
+            synchronized (mVirtualDeviceManagerLock) {
+                if (mVirtualDevices.contains(associationId)) {
+                    throw new IllegalStateException(
+                            "Virtual device for association ID " + associationId
+                                    + " already exists");
+                }
+                return new VirtualDeviceImpl(token, associationInfo);
+            }
+        }
+
+        @Nullable
+        private AssociationInfo getAssociationInfo(String packageName, int associationId) {
+            final int callingUserId = getCallingUserHandle().getIdentifier();
+            final List<AssociationInfo> associations =
+                    mAllAssociations.get(callingUserId);
+            if (associations != null) {
+                final int associationSize = associations.size();
+                for (int i = 0; i < associationSize; i++) {
+                    AssociationInfo associationInfo = associations.get(i);
+                    if (associationInfo.belongsToPackage(callingUserId, packageName)
+                            && associationId == associationInfo.getId()) {
+                        return associationInfo;
+                    }
+                }
+            } else {
+                Slog.w(LOG_TAG, "No associations for user " + callingUserId);
+            }
+            return null;
         }
 
         @Override
@@ -101,9 +214,10 @@ public class VirtualDeviceManagerService extends SystemService {
                 return;
             }
             fout.println("Created virtual devices: ");
-            synchronized (mVirtualDevices) {
-                for (VirtualDeviceImpl virtualDevice : mVirtualDevices) {
-                    fout.println(virtualDevice.toString());
+            synchronized (mVirtualDeviceManagerLock) {
+                for (int i = 0; i < mVirtualDevices.size(); i++) {
+                    VirtualDeviceImpl virtualDevice = mVirtualDevices.valueAt(i);
+                    fout.printf("%d: %s\n", mVirtualDevices.keyAt(i), virtualDevice);
                 }
             }
         }

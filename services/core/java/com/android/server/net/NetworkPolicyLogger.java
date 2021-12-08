@@ -574,7 +574,13 @@ public class NetworkPolicyLogger {
         }
     }
 
-    private static final class Data {
+    /**
+     * Container class for all networkpolicy events data.
+     *
+     * Note: This class needs to be public for RingBuffer class to be able to create
+     * new instances of this.
+     */
+    public static final class Data {
         public int type;
         public long timeStamp;
 
