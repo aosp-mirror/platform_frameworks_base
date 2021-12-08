@@ -410,7 +410,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
 
-        verify(mInternetDialogCallback, never()).onAccessPointsChanged(any(), any());
+        verify(mInternetDialogCallback, never()).onAccessPointsChanged(any(), any(), anyBoolean());
     }
 
     @Test
@@ -419,8 +419,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
 
-        verify(mInternetDialogCallback)
-                .onAccessPointsChanged(null /* wifiEntries */, null /* connectedEntry */);
+        verify(mInternetDialogCallback).onAccessPointsChanged(null /* wifiEntries */,
+                null /* connectedEntry */, false /* hasMoreEntry */);
     }
 
     @Test
@@ -433,7 +433,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mInternetDialogController.onAccessPointsChanged(mAccessPoints);
 
         mWifiEntries.clear();
-        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry,
+                false /* hasMoreEntry */);
     }
 
     @Test
@@ -447,8 +448,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         mWifiEntries.clear();
         mWifiEntries.add(mWifiEntry1);
-        verify(mInternetDialogCallback)
-                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries,
+                null /* connectedEntry */, false /* hasMoreEntry */);
     }
 
     @Test
@@ -463,7 +464,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         mWifiEntries.clear();
         mWifiEntries.add(mWifiEntry1);
-        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry,
+                false /* hasMoreEntry */);
     }
 
     @Test
@@ -480,7 +482,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mWifiEntries.clear();
         mWifiEntries.add(mWifiEntry1);
         mWifiEntries.add(mWifiEntry2);
-        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry,
+                false /* hasMoreEntry */);
     }
 
     @Test
@@ -499,7 +502,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mWifiEntries.add(mWifiEntry1);
         mWifiEntries.add(mWifiEntry2);
         mWifiEntries.add(mWifiEntry3);
-        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry,
+                false /* hasMoreEntry */);
 
         // Turn off airplane mode to has carrier network, then Wi-Fi entries will cut last one.
         reset(mInternetDialogCallback);
@@ -508,7 +512,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mInternetDialogController.onAccessPointsChanged(mAccessPoints);
 
         mWifiEntries.remove(mWifiEntry3);
-        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry,
+                true /* hasMoreEntry */);
     }
 
     @Test
@@ -528,7 +533,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mWifiEntries.add(mWifiEntry1);
         mWifiEntries.add(mWifiEntry2);
         mWifiEntries.add(mWifiEntry3);
-        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry,
+                true /* hasMoreEntry */);
 
         // Turn off airplane mode to has carrier network, then Wi-Fi entries will cut last one.
         reset(mInternetDialogCallback);
@@ -537,7 +543,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mInternetDialogController.onAccessPointsChanged(mAccessPoints);
 
         mWifiEntries.remove(mWifiEntry3);
-        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry,
+                true /* hasMoreEntry */);
     }
 
     @Test
@@ -587,8 +594,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mWifiEntries.add(mWifiEntry2);
         mWifiEntries.add(mWifiEntry3);
         mWifiEntries.add(mWifiEntry4);
-        verify(mInternetDialogCallback)
-                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries,
+                null /* connectedEntry */, false /* hasMoreEntry */);
 
         // If the Ethernet exists, then Wi-Fi entries will cut last one.
         reset(mInternetDialogCallback);
@@ -597,8 +604,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mInternetDialogController.onAccessPointsChanged(mAccessPoints);
 
         mWifiEntries.remove(mWifiEntry4);
-        verify(mInternetDialogCallback)
-                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries,
+                null /* connectedEntry */, true /* hasMoreEntry */);
 
         // Turn off airplane mode to has carrier network, then Wi-Fi entries will cut last one.
         reset(mInternetDialogCallback);
@@ -607,8 +614,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mInternetDialogController.onAccessPointsChanged(mAccessPoints);
 
         mWifiEntries.remove(mWifiEntry3);
-        verify(mInternetDialogCallback)
-                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries,
+                null /* connectedEntry */, true /* hasMoreEntry */);
     }
 
     @Test
@@ -624,8 +631,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         mWifiEntries.clear();
         mWifiEntries.add(mWifiEntry1);
-        verify(mInternetDialogCallback)
-                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries,
+                null /* connectedEntry */, false /* hasMoreEntry */);
     }
 
     @Test
