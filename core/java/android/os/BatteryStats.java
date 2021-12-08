@@ -634,7 +634,7 @@ public abstract class BatteryStats implements Parcelable {
      */
     public static int mapToInternalProcessState(int procState) {
         if (procState == ActivityManager.PROCESS_STATE_NONEXISTENT) {
-            return ActivityManager.PROCESS_STATE_NONEXISTENT;
+            return Uid.PROCESS_STATE_NONEXISTENT;
         } else if (procState == ActivityManager.PROCESS_STATE_TOP) {
             return Uid.PROCESS_STATE_TOP;
         } else if (ActivityManager.isForegroundService(procState)) {
@@ -911,6 +911,11 @@ public abstract class BatteryStats implements Parcelable {
          * Total number of process states we track.
          */
         public static final int NUM_PROCESS_STATE = 7;
+        /**
+         * State of the UID when it has no running processes.  It is intentionally out of
+         * bounds 0..NUM_PROCESS_STATE.
+         */
+        public static final int PROCESS_STATE_NONEXISTENT = NUM_PROCESS_STATE;
 
         // Used in dump
         static final String[] PROCESS_STATE_NAMES = {
@@ -928,16 +933,6 @@ public abstract class BatteryStats implements Parcelable {
                 "TS", // TOP_SLEEPING
                 "HW",  // HEAVY_WEIGHT
                 "C"   // CACHED
-        };
-
-        /**
-         * When the process exits one of these states, we need to make sure cpu time in this state
-         * is not attributed to any non-critical process states.
-         */
-        public static final int[] CRITICAL_PROC_STATES = {
-                Uid.PROCESS_STATE_TOP,
-                Uid.PROCESS_STATE_FOREGROUND_SERVICE,
-                Uid.PROCESS_STATE_FOREGROUND
         };
 
         public abstract long getProcessStateTime(int state, long elapsedRealtimeUs, int which);

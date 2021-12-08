@@ -620,6 +620,10 @@ public abstract class KernelCpuUidTimeReader<T> {
             }
             return numClusterFreqs;
         }
+
+        public boolean isFastCpuTimesReader() {
+            return mBpfTimesAvailable;
+        }
     }
 
     /**

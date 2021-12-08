@@ -45,7 +45,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.power.MeasuredEnergyStats;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 
 import libcore.util.EmptyArray;
@@ -260,43 +259,6 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     }
 
     @Override
-    public Future<?> scheduleReadProcStateCpuTimes(
-            boolean onBattery, boolean onBatteryScreenOff, long delayMillis) {
-        synchronized (mStats) {
-            if (!mStats.trackPerProcStateCpuTimes()) {
-                return null;
-            }
-        }
-        synchronized (BatteryExternalStatsWorker.this) {
-            if (!mExecutorService.isShutdown()) {
-                return mExecutorService.schedule(PooledLambda.obtainRunnable(
-                        BatteryStatsImpl::updateProcStateCpuTimes,
-                        mStats, onBattery, onBatteryScreenOff).recycleOnUse(),
-                        delayMillis, TimeUnit.MILLISECONDS);
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public Future<?> scheduleCopyFromAllUidsCpuTimes(
-            boolean onBattery, boolean onBatteryScreenOff) {
-        synchronized (mStats) {
-            if (!mStats.trackPerProcStateCpuTimes()) {
-                return null;
-            }
-        }
-        synchronized (BatteryExternalStatsWorker.this) {
-            if (!mExecutorService.isShutdown()) {
-                return mExecutorService.submit(PooledLambda.obtainRunnable(
-                        BatteryStatsImpl::copyFromAllUidsCpuTimes,
-                        mStats, onBattery, onBatteryScreenOff).recycleOnUse());
-            }
-        }
-        return null;
-    }
-
-    @Override
     public Future<?> scheduleSyncDueToScreenStateChange(int flags, boolean onBattery,
             boolean onBatteryScreenOff, int screenState, int[] perDisplayScreenStates) {
         synchronized (BatteryExternalStatsWorker.this) {
@@ -491,7 +453,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 }
 
                 if ((updateFlags & UPDATE_CPU) != 0) {
-                    mStats.copyFromAllUidsCpuTimes();
+                    mStats.updateCpuTimesForAllUids();
                 }
 
                 // Clean up any UIDs if necessary.
