@@ -1159,11 +1159,11 @@ public class ResolverActivity extends Activity implements
         if (doPostProcessing) {
             maybeCreateHeader(listAdapter);
             resetButtonBar();
-            onListRebuilt(listAdapter);
+            onListRebuilt(listAdapter, rebuildCompleted);
         }
     }
 
-    protected void onListRebuilt(ResolverListAdapter listAdapter) {
+    protected void onListRebuilt(ResolverListAdapter listAdapter, boolean rebuildCompleted) {
         final ItemClickListener listener = new ItemClickListener();
         setupAdapterListView((ListView) mMultiProfilePagerAdapter.getActiveAdapterView(), listener);
         if (shouldShowTabs() && isIntentPicker()) {
