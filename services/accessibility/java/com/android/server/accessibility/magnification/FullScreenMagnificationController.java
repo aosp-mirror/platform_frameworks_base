@@ -63,7 +63,8 @@ import java.util.Locale;
  * magnification region. If a value is out of bounds, it will be adjusted to guarantee these
  * constraints.
  */
-public class FullScreenMagnificationController {
+public class FullScreenMagnificationController implements
+        WindowManagerInternal.AccessibilityControllerInternal.UiChangesForAccessibilityCallbacks {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "FullScreenMagnificationController";
 
@@ -84,6 +85,8 @@ public class FullScreenMagnificationController {
     /** List of display Magnification, mapping from displayId -> DisplayMagnification. */
     @GuardedBy("mLock")
     private final SparseArray<DisplayMagnification> mDisplays = new SparseArray<>(0);
+
+    private final Rect mTempRect = new Rect();
 
     /**
      * This class implements {@link WindowManagerInternal.MagnificationCallbacks} and holds
@@ -724,6 +727,26 @@ public class FullScreenMagnificationController {
             for (int i = 0; i < displays.size(); i++) {
                 unregisterLocked(displays.keyAt(i), false);
             }
+        }
+    }
+
+    @Override
+    public void onRectangleOnScreenRequested(int displayId, int left, int top, int right,
+            int bottom) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null) {
+                return;
+            }
+            if (!display.isMagnifying()) {
+                return;
+            }
+            final Rect magnifiedRegionBounds = mTempRect;
+            display.getMagnifiedFrameInContentCoordsLocked(magnifiedRegionBounds);
+            if (magnifiedRegionBounds.contains(left, top, right, bottom)) {
+                return;
+            }
+            display.onRectangleOnScreenRequested(left, top, right, bottom);
         }
     }
 
