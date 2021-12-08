@@ -37,10 +37,7 @@
 #include <android/hardware/gnss/measurement_corrections/1.0/IMeasurementCorrections.h>
 #include <android/hardware/gnss/measurement_corrections/1.1/IMeasurementCorrections.h>
 #include <android/hardware/gnss/visibility_control/1.0/IGnssVisibilityControl.h>
-#include <arpa/inet.h>
 #include <binder/IServiceManager.h>
-#include <linux/in.h>
-#include <linux/in6.h>
 #include <nativehelper/JNIHelp.h>
 #include <pthread.h>
 #include <string.h>
@@ -52,6 +49,7 @@
 
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
+#include "gnss/AGnss.h"
 #include "gnss/GnssAntennaInfoCallback.h"
 #include "gnss/GnssBatching.h"
 #include "gnss/GnssConfiguration.h"
@@ -69,7 +67,6 @@ static jclass class_gnssPowerStats;
 static jmethodID method_reportLocation;
 static jmethodID method_reportStatus;
 static jmethodID method_reportSvStatus;
-static jmethodID method_reportAGpsStatus;
 static jmethodID method_reportNmea;
 static jmethodID method_setTopHalCapabilities;
 static jmethodID method_setGnssYearOfHardware;
@@ -163,10 +160,6 @@ using IGnssDebug_V2_0 = android::hardware::gnss::V2_0::IGnssDebug;
 using IGnssAntennaInfo = android::hardware::gnss::V2_1::IGnssAntennaInfo;
 using IAGnssRil_V1_0 = android::hardware::gnss::V1_0::IAGnssRil;
 using IAGnssRil_V2_0 = android::hardware::gnss::V2_0::IAGnssRil;
-using IAGnss_V1_0 = android::hardware::gnss::V1_0::IAGnss;
-using IAGnss_V2_0 = android::hardware::gnss::V2_0::IAGnss;
-using IAGnssCallback_V1_0 = android::hardware::gnss::V1_0::IAGnssCallback;
-using IAGnssCallback_V2_0 = android::hardware::gnss::V2_0::IAGnssCallback;
 
 using IMeasurementCorrections_V1_0 = android::hardware::gnss::measurement_corrections::V1_0::IMeasurementCorrections;
 using IMeasurementCorrections_V1_1 = android::hardware::gnss::measurement_corrections::V1_1::IMeasurementCorrections;
@@ -182,6 +175,7 @@ using android::hardware::gnss::GnssPowerStats;
 using android::hardware::gnss::IGnssPowerIndication;
 using android::hardware::gnss::IGnssPowerIndicationCallback;
 using android::hardware::gnss::PsdsType;
+using IAGnssAidl = android::hardware::gnss::IAGnss;
 using IGnssAidl = android::hardware::gnss::IGnss;
 using IGnssCallbackAidl = android::hardware::gnss::IGnssCallback;
 using IGnssBatchingAidl = android::hardware::gnss::IGnssBatching;
@@ -215,8 +209,6 @@ sp<IGnssPsdsAidl> gnssPsdsAidlIface = nullptr;
 sp<IGnssXtra> gnssXtraIface = nullptr;
 sp<IAGnssRil_V1_0> agnssRilIface = nullptr;
 sp<IAGnssRil_V2_0> agnssRilIface_V2_0 = nullptr;
-sp<IAGnss_V1_0> agnssIface = nullptr;
-sp<IAGnss_V2_0> agnssIface_V2_0 = nullptr;
 sp<IGnssDebug_V1_0> gnssDebugIface = nullptr;
 sp<IGnssDebug_V2_0> gnssDebugIface_V2_0 = nullptr;
 sp<IGnssNi> gnssNiIface = nullptr;
@@ -231,6 +223,7 @@ std::unique_ptr<android::gnss::GnssMeasurementInterface> gnssMeasurementIface = 
 std::unique_ptr<android::gnss::GnssNavigationMessageInterface> gnssNavigationMessageIface = nullptr;
 std::unique_ptr<android::gnss::GnssBatchingInterface> gnssBatchingIface = nullptr;
 std::unique_ptr<android::gnss::GnssGeofenceInterface> gnssGeofencingIface = nullptr;
+std::unique_ptr<android::gnss::AGnssInterface> agnssIface = nullptr;
 
 #define WAKE_LOCK_NAME  "GPS"
 
@@ -254,34 +247,6 @@ bool hasLatLong(const GnssLocation_V2_0& location) {
 static inline jboolean boolToJbool(bool value) {
     return value ? JNI_TRUE : JNI_FALSE;
 }
-
-struct ScopedJniString {
-    ScopedJniString(JNIEnv* env, jstring javaString) : mEnv(env), mJavaString(javaString) {
-        mNativeString = mEnv->GetStringUTFChars(mJavaString, nullptr);
-    }
-
-    ~ScopedJniString() {
-        if (mNativeString != nullptr) {
-            mEnv->ReleaseStringUTFChars(mJavaString, mNativeString);
-        }
-    }
-
-    const char* c_str() const {
-        return mNativeString;
-    }
-
-    operator hidl_string() const {
-        return hidl_string(mNativeString);
-    }
-
-private:
-    ScopedJniString(const ScopedJniString&) = delete;
-    ScopedJniString& operator=(const ScopedJniString&) = delete;
-
-    JNIEnv* mEnv;
-    jstring mJavaString;
-    const char* mNativeString;
-};
 
 static GnssLocation_V1_0 createGnssLocation_V1_0(
         jint gnssLocationFlags, jdouble latitudeDegrees, jdouble longitudeDegrees,
@@ -806,122 +771,6 @@ Return<bool> GnssVisibilityControlCallback::isInEmergencySession() {
 }
 
 /*
- * AGnssCallback_V1_0 implements callback methods required by the IAGnssCallback 1.0 interface.
- */
-struct AGnssCallback_V1_0 : public IAGnssCallback_V1_0 {
-    // Methods from ::android::hardware::gps::V1_0::IAGnssCallback follow.
-    Return<void> agnssStatusIpV6Cb(
-      const IAGnssCallback_V1_0::AGnssStatusIpV6& agps_status) override;
-
-    Return<void> agnssStatusIpV4Cb(
-      const IAGnssCallback_V1_0::AGnssStatusIpV4& agps_status) override;
- private:
-    jbyteArray convertToIpV4(uint32_t ip);
-};
-
-Return<void> AGnssCallback_V1_0::agnssStatusIpV6Cb(
-        const IAGnssCallback_V1_0::AGnssStatusIpV6& agps_status) {
-    JNIEnv* env = getJniEnv();
-    jbyteArray byteArray = nullptr;
-
-    byteArray = env->NewByteArray(16);
-    if (byteArray != nullptr) {
-        env->SetByteArrayRegion(byteArray, 0, 16,
-                                (const jbyte*)(agps_status.ipV6Addr.data()));
-    } else {
-        ALOGE("Unable to allocate byte array for IPv6 address.");
-    }
-
-    IF_ALOGD() {
-        // log the IP for reference in case there is a bogus value pushed by HAL
-        char str[INET6_ADDRSTRLEN];
-        inet_ntop(AF_INET6, agps_status.ipV6Addr.data(), str, INET6_ADDRSTRLEN);
-        ALOGD("AGPS IP is v6: %s", str);
-    }
-
-    jsize byteArrayLength = byteArray != nullptr ? env->GetArrayLength(byteArray) : 0;
-    ALOGV("Passing AGPS IP addr: size %d", byteArrayLength);
-    env->CallVoidMethod(mCallbacksObj, method_reportAGpsStatus,
-                        agps_status.type, agps_status.status, byteArray);
-
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-
-    if (byteArray) {
-        env->DeleteLocalRef(byteArray);
-    }
-
-    return Void();
-}
-
-Return<void> AGnssCallback_V1_0::agnssStatusIpV4Cb(
-        const IAGnssCallback_V1_0::AGnssStatusIpV4& agps_status) {
-    JNIEnv* env = getJniEnv();
-    jbyteArray byteArray = nullptr;
-
-    uint32_t ipAddr = agps_status.ipV4Addr;
-    byteArray = convertToIpV4(ipAddr);
-
-    IF_ALOGD() {
-        /*
-         * log the IP for reference in case there is a bogus value pushed by
-         * HAL.
-         */
-        char str[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET, &ipAddr, str, INET_ADDRSTRLEN);
-        ALOGD("AGPS IP is v4: %s", str);
-    }
-
-    jsize byteArrayLength =
-      byteArray != nullptr ? env->GetArrayLength(byteArray) : 0;
-    ALOGV("Passing AGPS IP addr: size %d", byteArrayLength);
-    env->CallVoidMethod(mCallbacksObj, method_reportAGpsStatus,
-                      agps_status.type, agps_status.status, byteArray);
-
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-
-    if (byteArray) {
-        env->DeleteLocalRef(byteArray);
-    }
-    return Void();
-}
-
-jbyteArray AGnssCallback_V1_0::convertToIpV4(uint32_t ip) {
-    if (INADDR_NONE == ip) {
-        return nullptr;
-    }
-
-    JNIEnv* env = getJniEnv();
-    jbyteArray byteArray = env->NewByteArray(4);
-    if (byteArray == nullptr) {
-        ALOGE("Unable to allocate byte array for IPv4 address");
-        return nullptr;
-    }
-
-    jbyte ipv4[4];
-    ALOGV("Converting IPv4 address byte array (net_order) %x", ip);
-    memcpy(ipv4, &ip, sizeof(ipv4));
-    env->SetByteArrayRegion(byteArray, 0, 4, (const jbyte*)ipv4);
-    return byteArray;
-}
-
-/*
- * AGnssCallback_V2_0 implements callback methods required by the IAGnssCallback 2.0 interface.
- */
-struct AGnssCallback_V2_0 : public IAGnssCallback_V2_0 {
-    // Methods from ::android::hardware::gps::V2_0::IAGnssCallback follow.
-    Return<void> agnssStatusCb(IAGnssCallback_V2_0::AGnssType type,
-        IAGnssCallback_V2_0::AGnssStatusValue status) override;
-};
-
-Return<void> AGnssCallback_V2_0::agnssStatusCb(IAGnssCallback_V2_0::AGnssType type,
-        IAGnssCallback_V2_0::AGnssStatusValue status) {
-    JNIEnv* env = getJniEnv();
-    env->CallVoidMethod(mCallbacksObj, method_reportAGpsStatus, type, status, nullptr);
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-    return Void();
-}
-
-/*
  * AGnssRilCallback implements the callback methods required by the AGnssRil
  * interface.
  */
@@ -990,7 +839,6 @@ static void android_location_gnss_hal_GnssNative_class_init_once(JNIEnv* env, jc
             "(ZLandroid/location/Location;)V");
     method_reportStatus = env->GetMethodID(clazz, "reportStatus", "(I)V");
     method_reportSvStatus = env->GetMethodID(clazz, "reportSvStatus", "(I[I[F[F[F[F[F)V");
-    method_reportAGpsStatus = env->GetMethodID(clazz, "reportAGpsStatus", "(II[B)V");
     method_reportNmea = env->GetMethodID(clazz, "reportNmea", "(J)V");
     method_setTopHalCapabilities = env->GetMethodID(clazz, "setTopHalCapabilities", "(I)V");
     method_setGnssYearOfHardware = env->GetMethodID(clazz, "setGnssYearOfHardware", "(I)V");
@@ -1077,6 +925,7 @@ static void android_location_gnss_hal_GnssNative_class_init_once(JNIEnv* env, jc
     gnss::GnssConfiguration_class_init_once(env);
     gnss::GnssMeasurement_class_init_once(env, clazz);
     gnss::GnssNavigationMessage_class_init_once(env, clazz);
+    gnss::AGnss_class_init_once(env, clazz);
     gnss::Utils_class_init_once(env);
 }
 
@@ -1147,19 +996,21 @@ static void android_location_gnss_hal_GnssNative_init_once(JNIEnv* env, jobject 
         }
     }
 
-    if (gnssHal_V2_0 != nullptr) {
+    if (gnssHalAidl != nullptr) {
+        sp<IAGnssAidl> agnssAidl;
+        auto status = gnssHalAidl->getExtensionAGnss(&agnssAidl);
+        if (checkAidlStatus(status, "Unable to get a handle to AGnss interface.")) {
+            agnssIface = std::make_unique<gnss::AGnss>(agnssAidl);
+        }
+    } else if (gnssHal_V2_0 != nullptr) {
         auto agnss_V2_0 = gnssHal_V2_0->getExtensionAGnss_2_0();
-        if (!agnss_V2_0.isOk()) {
-            ALOGD("Unable to get a handle to AGnss_V2_0");
-        } else {
-            agnssIface_V2_0 = agnss_V2_0;
+        if (checkHidlReturn(agnss_V2_0, "Unable to get a handle to AGnss_V2_0")) {
+            agnssIface = std::make_unique<gnss::AGnss_V2_0>(agnss_V2_0);
         }
     } else if (gnssHal != nullptr) {
         auto agnss_V1_0 = gnssHal->getExtensionAGnss();
-        if (!agnss_V1_0.isOk()) {
-            ALOGD("Unable to get a handle to AGnss");
-        } else {
-            agnssIface = agnss_V1_0;
+        if (checkHidlReturn(agnss_V1_0, "Unable to get a handle to AGnss_V1_0")) {
+            agnssIface = std::make_unique<gnss::AGnss_V1_0>(agnss_V1_0);
         }
     }
 
@@ -1452,16 +1303,9 @@ static jboolean android_location_gnss_hal_GnssNative_init(JNIEnv* /* env */, jcl
         }
     }
 
-    // Set IAGnss.hal callback.
-    if (agnssIface_V2_0 != nullptr) {
-        sp<IAGnssCallback_V2_0> aGnssCbIface = new AGnssCallback_V2_0();
-        auto agnssStatus = agnssIface_V2_0->setCallback(aGnssCbIface);
-        checkHidlReturn(agnssStatus, "IAGnss 2.0 setCallback() failed.");
-    } else if (agnssIface != nullptr) {
-        sp<IAGnssCallback_V1_0> aGnssCbIface = new AGnssCallback_V1_0();
-        auto agnssStatus = agnssIface->setCallback(aGnssCbIface);
-        checkHidlReturn(agnssStatus, "IAGnss setCallback() failed.");
-    } else {
+    // Set IAGnss callback.
+    if (agnssIface == nullptr ||
+        !agnssIface->setCallback(std::make_unique<gnss::AGnssCallback>())) {
         ALOGI("Unable to initialize IAGnss interface.");
     }
 
@@ -1737,61 +1581,6 @@ static void android_location_gnss_hal_GnssNative_inject_psds_data(JNIEnv* env, j
     env->ReleasePrimitiveArrayCritical(data, bytes, JNI_ABORT);
 }
 
-struct AGnssDispatcher {
-    static void dataConnOpen(sp<IAGnss_V1_0> agnssIface, JNIEnv* env, jstring apn, jint apnIpType);
-    static void dataConnOpen(sp<IAGnss_V2_0> agnssIface_V2_0, JNIEnv* env, jlong networkHandle,
-            jstring apn, jint apnIpType);
-
-    template <class T>
-    static void dataConnClosed(sp<T> agnssIface);
-
-    template <class T>
-    static void dataConnFailed(sp<T> agnssIface);
-
-    template <class T, class U>
-    static void setServer(sp<T> agnssIface, JNIEnv* env, jint type, jstring hostname, jint port);
-
-private:
-    AGnssDispatcher() = delete;
-};
-
-void AGnssDispatcher::dataConnOpen(sp<IAGnss_V1_0> agnssIface, JNIEnv* env, jstring apn,
-        jint apnIpType) {
-    ScopedJniString jniApn{env, apn};
-    auto result = agnssIface->dataConnOpen(jniApn,
-            static_cast<IAGnss_V1_0::ApnIpType>(apnIpType));
-    checkHidlReturn(result, "IAGnss dataConnOpen() failed. APN and its IP type not set.");
-}
-
-void AGnssDispatcher::dataConnOpen(sp<IAGnss_V2_0> agnssIface_V2_0, JNIEnv* env,
-        jlong networkHandle, jstring apn, jint apnIpType) {
-    ScopedJniString jniApn{env, apn};
-    auto result = agnssIface_V2_0->dataConnOpen(static_cast<uint64_t>(networkHandle), jniApn,
-            static_cast<IAGnss_V2_0::ApnIpType>(apnIpType));
-    checkHidlReturn(result, "IAGnss 2.0 dataConnOpen() failed. APN and its IP type not set.");
-}
-
-template<class T>
-void AGnssDispatcher::dataConnClosed(sp<T> agnssIface) {
-    auto result = agnssIface->dataConnClosed();
-    checkHidlReturn(result, "IAGnss dataConnClosed() failed.");
-}
-
-template<class T>
-void AGnssDispatcher::dataConnFailed(sp<T> agnssIface) {
-    auto result = agnssIface->dataConnFailed();
-    checkHidlReturn(result, "IAGnss dataConnFailed() failed.");
-}
-
-template <class T, class U>
-void AGnssDispatcher::setServer(sp<T> agnssIface, JNIEnv* env, jint type, jstring hostname,
-        jint port) {
-    ScopedJniString jniHostName{env, hostname};
-    auto result = agnssIface->setServer(static_cast<typename U::AGnssType>(type),
-            jniHostName, port);
-    checkHidlReturn(result, "IAGnss setServer() failed. Host name and port not set.");
-}
-
 static void android_location_GnssNetworkConnectivityHandler_agps_data_conn_open(
         JNIEnv* env, jobject /* obj */, jlong networkHandle, jstring apn, jint apnIpType) {
     if (apn == nullptr) {
@@ -1799,10 +1588,8 @@ static void android_location_GnssNetworkConnectivityHandler_agps_data_conn_open(
         return;
     }
 
-    if (agnssIface_V2_0 != nullptr) {
-        AGnssDispatcher::dataConnOpen(agnssIface_V2_0, env, networkHandle, apn, apnIpType);
-    } else if (agnssIface != nullptr) {
-        AGnssDispatcher::dataConnOpen(agnssIface, env, apn, apnIpType);
+    if (agnssIface != nullptr) {
+        agnssIface->dataConnOpen(env, networkHandle, apn, apnIpType);
     } else {
         ALOGE("%s: IAGnss interface not available.", __func__);
         return;
@@ -1811,10 +1598,8 @@ static void android_location_GnssNetworkConnectivityHandler_agps_data_conn_open(
 
 static void android_location_GnssNetworkConnectivityHandler_agps_data_conn_closed(JNIEnv* /* env */,
                                                                        jobject /* obj */) {
-    if (agnssIface_V2_0 != nullptr) {
-        AGnssDispatcher::dataConnClosed(agnssIface_V2_0);
-    } else if (agnssIface != nullptr) {
-        AGnssDispatcher::dataConnClosed(agnssIface);
+    if (agnssIface != nullptr) {
+        agnssIface->dataConnClosed();
     } else {
         ALOGE("%s: IAGnss interface not available.", __func__);
         return;
@@ -1823,10 +1608,8 @@ static void android_location_GnssNetworkConnectivityHandler_agps_data_conn_close
 
 static void android_location_GnssNetworkConnectivityHandler_agps_data_conn_failed(JNIEnv* /* env */,
                                                                        jobject /* obj */) {
-    if (agnssIface_V2_0 != nullptr) {
-        AGnssDispatcher::dataConnFailed(agnssIface_V2_0);
-    } else if (agnssIface != nullptr) {
-        AGnssDispatcher::dataConnFailed(agnssIface);
+    if (agnssIface != nullptr) {
+        agnssIface->dataConnFailed();
     } else {
         ALOGE("%s: IAGnss interface not available.", __func__);
         return;
@@ -1835,12 +1618,8 @@ static void android_location_GnssNetworkConnectivityHandler_agps_data_conn_faile
 
 static void android_location_gnss_hal_GnssNative_set_agps_server(JNIEnv* env, jclass, jint type,
                                                                  jstring hostname, jint port) {
-    if (agnssIface_V2_0 != nullptr) {
-        AGnssDispatcher::setServer<IAGnss_V2_0, IAGnssCallback_V2_0>(agnssIface_V2_0, env, type,
-                hostname, port);
-    } else if (agnssIface != nullptr) {
-        AGnssDispatcher::setServer<IAGnss_V1_0, IAGnssCallback_V1_0>(agnssIface, env, type,
-                hostname, port);
+    if (agnssIface != nullptr) {
+        agnssIface->setServer(env, type, hostname, port);
     } else {
         ALOGE("%s: IAGnss interface not available.", __func__);
         return;

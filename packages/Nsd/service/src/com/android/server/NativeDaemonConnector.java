@@ -20,16 +20,15 @@ import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.util.LocalLog;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.power.ShutdownThread;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -83,13 +82,6 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback {
 
     NativeDaemonConnector(INativeDaemonConnectorCallbacks callbacks, String socket,
             int responseQueueSize, String logTag, int maxLogSize, PowerManager.WakeLock wl) {
-        this(callbacks, socket, responseQueueSize, logTag, maxLogSize, wl,
-                FgThread.get().getLooper());
-    }
-
-    NativeDaemonConnector(INativeDaemonConnectorCallbacks callbacks, String socket,
-            int responseQueueSize, String logTag, int maxLogSize, PowerManager.WakeLock wl,
-            Looper looper) {
         mCallbacks = callbacks;
         mSocket = socket;
         mResponseQueue = new ResponseQueue(responseQueueSize);
@@ -97,10 +89,12 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback {
         if (mWakeLock != null) {
             mWakeLock.setReferenceCounted(true);
         }
-        mLooper = looper;
         mSequenceNumber = new AtomicInteger(0);
         TAG = logTag != null ? logTag : "NativeDaemonConnector";
         mLocalLog = new LocalLog(maxLogSize);
+        final HandlerThread thread = new HandlerThread(TAG);
+        thread.start();
+        mLooper = thread.getLooper();
     }
 
     /**
@@ -135,21 +129,13 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback {
         mCallbackHandler = new Handler(mLooper, this);
 
         while (true) {
-            if (isShuttingDown()) break;
             try {
                 listenToSocket();
             } catch (Exception e) {
                 loge("Error in NativeDaemonConnector: " + e);
-                if (isShuttingDown()) break;
                 SystemClock.sleep(5000);
             }
         }
-    }
-
-    private static boolean isShuttingDown() {
-        String shutdownAct = SystemProperties.get(
-            ShutdownThread.SHUTDOWN_ACTION_PROPERTY, "");
-        return shutdownAct != null && shutdownAct.length() > 0;
     }
 
     @Override

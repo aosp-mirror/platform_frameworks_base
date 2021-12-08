@@ -1923,6 +1923,25 @@ public class Resources {
                 }
             }
         }
+
+        @Override
+        public int hashCode() {
+            return getKey().hashCode();
+        }
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (o == null || getClass() != o.getClass() || hashCode() != o.hashCode()) {
+                return false;
+            }
+
+            final Theme other = (Theme) o;
+            return getKey().equals(other.getKey());
+        }
     }
 
     static class ThemeKey implements Cloneable {

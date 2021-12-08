@@ -33,10 +33,15 @@ import android.media.audio.common.Int;
 @VintfStability
 parcelable AudioPortConfig {
     /**
-     * Port unique ID. This field is set to a non-zero value when it is needed
-     * to select a previously reported port and apply new configuration to it.
+     * Port config unique ID. This field is set to a non-zero value when it is
+     * needed to select a previously reported port config and apply new
+     * configuration to it.
      */
     int id;
+    /**
+     * The ID of the AudioPort instance this configuration applies to.
+     */
+    int portId;
     /** Sample rate in Hz. Can be left unspecified. */
     @nullable Int sampleRate;
     /** Channel mask. Can be left unspecified. */

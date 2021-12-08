@@ -241,6 +241,11 @@ public class AudioMix {
     }
 
     /** @hide */
+    public boolean isForCallRedirection() {
+        return mRule.isForCallRedirection();
+    }
+
+    /** @hide */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

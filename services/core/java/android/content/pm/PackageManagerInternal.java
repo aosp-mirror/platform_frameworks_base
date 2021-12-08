@@ -42,6 +42,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.PersistableBundle;
 import android.os.Process;
+import android.os.storage.StorageManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
@@ -872,8 +873,8 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      *
      * @throws IOException if the request was unable to be fulfilled.
      */
-    public abstract void freeStorage(String volumeUuid, long bytes, int storageFlags)
-            throws IOException;
+    public abstract void freeStorage(String volumeUuid, long bytes,
+            @StorageManager.AllocateFlags int flags) throws IOException;
 
     /** Returns {@code true} if the specified component is enabled and matches the given flags. */
     public abstract boolean isEnabledAndMatches(@NonNull ParsedMainComponent component,
@@ -1261,5 +1262,6 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
     /**
      * Reconcile all app data for the given user.
      */
-    public abstract void reconcileAppsData(int userId, int storageFlags, boolean migrateAppsData);
+    public abstract void reconcileAppsData(int userId, @StorageManager.StorageFlags int flags,
+            boolean migrateAppsData);
 }

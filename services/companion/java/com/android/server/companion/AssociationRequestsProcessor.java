@@ -20,7 +20,7 @@ import static com.android.internal.util.CollectionUtils.filter;
 import static com.android.internal.util.FunctionalUtils.uncheckExceptions;
 import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
 import static com.android.server.companion.CompanionDeviceManagerService.LOG_TAG;
-import static com.android.server.companion.PermissionsUtils.enforceCallerPermissionsToRequest;
+import static com.android.server.companion.PermissionsUtils.enforcePermissionsForAssociation;
 import static com.android.server.companion.RolesUtils.isRoleHolder;
 
 import static java.util.Objects.requireNonNull;
@@ -110,7 +110,7 @@ class AssociationRequestsProcessor {
         }
 
         // 1. Enforce permissions and other requirements.
-        enforceCallerPermissionsToRequest(mContext, request, packageName, userId);
+        enforcePermissionsForAssociation(mContext, request, packageName, userId);
         mService.checkUsesFeature(packageName, userId);
 
         // 2. Check if association can be created without launching UI (i.e. CDM needs NEITHER

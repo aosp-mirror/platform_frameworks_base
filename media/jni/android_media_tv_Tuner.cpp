@@ -2961,7 +2961,7 @@ static FrontendSettings getIsdbtFrontendSettings(JNIEnv *env, const jobject& set
         frontendIsdbtSettings.layerSettings[i].coderate = static_cast<FrontendIsdbtCoderate>(
                 env->GetIntField(layer, env->GetFieldID(layerClazz, "mCodeRate", "I")));
         frontendIsdbtSettings.layerSettings[i].numOfSegment =
-                env->GetIntField(layer, env->GetFieldID(layerClazz, "mNumOfSegment", "I"));
+                env->GetIntField(layer, env->GetFieldID(layerClazz, "mNumOfSegments", "I"));
     }
 
     frontendSettings.set<FrontendSettings::Tag::isdbt>(frontendIsdbtSettings);

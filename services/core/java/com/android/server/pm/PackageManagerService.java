@@ -2741,13 +2741,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void freeStorageAndNotify(final String volumeUuid, final long freeStorageSize,
-            final int storageFlags, final IPackageDataObserver observer) {
+            final @StorageManager.AllocateFlags int flags, final IPackageDataObserver observer) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CLEAR_APP_CACHE, null);
         mHandler.post(() -> {
             boolean success = false;
             try {
-                freeStorage(volumeUuid, freeStorageSize, storageFlags);
+                freeStorage(volumeUuid, freeStorageSize, flags);
                 success = true;
             } catch (IOException e) {
                 Slog.w(TAG, e);
@@ -2764,13 +2764,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void freeStorage(final String volumeUuid, final long freeStorageSize,
-            final int storageFlags, final IntentSender pi) {
+            final @StorageManager.AllocateFlags int flags, final IntentSender pi) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CLEAR_APP_CACHE, TAG);
         mHandler.post(() -> {
             boolean success = false;
             try {
-                freeStorage(volumeUuid, freeStorageSize, storageFlags);
+                freeStorage(volumeUuid, freeStorageSize, flags);
                 success = true;
             } catch (IOException e) {
                 Slog.w(TAG, e);
@@ -2789,7 +2789,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * Blocking call to clear various types of cached data across the system
      * until the requested bytes are available.
      */
-    public void freeStorage(String volumeUuid, long bytes, int storageFlags) throws IOException {
+    public void freeStorage(String volumeUuid, long bytes,
+            @StorageManager.AllocateFlags int flags) throws IOException {
         final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         final File file = storage.findPathForUuid(volumeUuid);
         if (file.getUsableSpace() >= bytes) return;
@@ -2797,8 +2798,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (mEnableFreeCacheV2) {
             final boolean internalVolume = Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL,
                     volumeUuid);
-            final boolean aggressive = (storageFlags
-                    & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0;
+            final boolean aggressive = (flags & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0;
 
             // 1. Pre-flight to determine if we have any chance to succeed
             // 2. Consider preloaded data (after 1w honeymoon, unless aggressive)
@@ -8311,9 +8311,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void freeStorage(String volumeUuid, long bytes, int storageFlags)
-                throws IOException {
-            PackageManagerService.this.freeStorage(volumeUuid, bytes, storageFlags);
+        public void freeStorage(String volumeUuid, long bytes,
+                @StorageManager.AllocateFlags int flags) throws IOException {
+            PackageManagerService.this.freeStorage(volumeUuid, bytes, flags);
         }
 
         @Override
@@ -8695,7 +8695,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void reconcileAppsData(int userId, int flags, boolean migrateAppsData) {
+        public void reconcileAppsData(int userId, @StorageManager.StorageFlags int flags,
+                boolean migrateAppsData) {
             PackageManagerService.this.mAppDataHelper.reconcileAppsData(userId, flags,
                     migrateAppsData);
         }

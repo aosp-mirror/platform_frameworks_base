@@ -36,6 +36,7 @@ package android.media.audio.common;
 @JavaDerive(equals=true, toString=true) @VintfStability
 parcelable AudioPortConfig {
   int id;
+  int portId;
   @nullable android.media.audio.common.Int sampleRate;
   @nullable android.media.audio.common.AudioChannelLayout channelMask;
   @nullable android.media.audio.common.AudioFormatDescription format;

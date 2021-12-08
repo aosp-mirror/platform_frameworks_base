@@ -14376,11 +14376,21 @@ package android.database.sqlite {
     field public static final int CONFLICT_ROLLBACK = 1; // 0x1
     field public static final int CREATE_IF_NECESSARY = 268435456; // 0x10000000
     field public static final int ENABLE_WRITE_AHEAD_LOGGING = 536870912; // 0x20000000
+    field public static final String JOURNAL_MODE_DELETE = "DELETE";
+    field public static final String JOURNAL_MODE_MEMORY = "MEMORY";
+    field public static final String JOURNAL_MODE_OFF = "OFF";
+    field public static final String JOURNAL_MODE_PERSIST = "PERSIST";
+    field public static final String JOURNAL_MODE_TRUNCATE = "TRUNCATE";
+    field public static final String JOURNAL_MODE_WAL = "WAL";
     field public static final int MAX_SQL_CACHE_SIZE = 100; // 0x64
     field public static final int NO_LOCALIZED_COLLATORS = 16; // 0x10
     field public static final int OPEN_READONLY = 1; // 0x1
     field public static final int OPEN_READWRITE = 0; // 0x0
     field public static final int SQLITE_MAX_LIKE_PATTERN_LENGTH = 50000; // 0xc350
+    field public static final String SYNC_MODE_EXTRA = "EXTRA";
+    field public static final String SYNC_MODE_FULL = "FULL";
+    field public static final String SYNC_MODE_NORMAL = "NORMAL";
+    field public static final String SYNC_MODE_OFF = "OFF";
   }
 
   public static interface SQLiteDatabase.CursorFactory {
@@ -42980,8 +42990,8 @@ package android.telephony {
     method @NonNull public java.util.List<android.net.Uri> getDeviceToDeviceStatusSharingContacts(int);
     method public int getDeviceToDeviceStatusSharingPreference(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telephony.SubscriptionInfo> getOpportunisticSubscriptions();
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public String getPhoneNumber(int, int);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public String getPhoneNumber(int);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE", "carrier privileges"}) public String getPhoneNumber(int, int);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE", "carrier privileges"}) public String getPhoneNumber(int);
     method public static int getSlotIndex(int);
     method @Nullable public int[] getSubscriptionIds(int);
     method @NonNull public java.util.List<android.telephony.SubscriptionPlan> getSubscriptionPlans(int);
@@ -42993,7 +43003,7 @@ package android.telephony {
     method public void removeOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener);
     method public void removeOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void removeSubscriptionsFromGroup(@NonNull java.util.List<java.lang.Integer>, @NonNull android.os.ParcelUuid);
-    method public void setCarrierPhoneNumber(int, @NonNull String);
+    method @RequiresPermission("carrier privileges") public void setCarrierPhoneNumber(int, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDeviceToDeviceStatusSharingContacts(int, @NonNull java.util.List<android.net.Uri>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDeviceToDeviceStatusSharingPreference(int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunistic(boolean, int);
@@ -44678,6 +44688,7 @@ package android.text {
     field public static final int TYPE_TEXT_FLAG_CAP_CHARACTERS = 4096; // 0x1000
     field public static final int TYPE_TEXT_FLAG_CAP_SENTENCES = 16384; // 0x4000
     field public static final int TYPE_TEXT_FLAG_CAP_WORDS = 8192; // 0x2000
+    field public static final int TYPE_TEXT_FLAG_ENABLE_TEXT_CONVERSION_SUGGESTIONS = 1048576; // 0x100000
     field public static final int TYPE_TEXT_FLAG_IME_MULTI_LINE = 262144; // 0x40000
     field public static final int TYPE_TEXT_FLAG_MULTI_LINE = 131072; // 0x20000
     field public static final int TYPE_TEXT_FLAG_NO_SUGGESTIONS = 524288; // 0x80000
@@ -45807,8 +45818,10 @@ package android.text.style {
 
   public class StyleSpan extends android.text.style.MetricAffectingSpan implements android.text.ParcelableSpan {
     ctor public StyleSpan(int);
+    ctor public StyleSpan(int, int);
     ctor public StyleSpan(@NonNull android.os.Parcel);
     method public int describeContents();
+    method public int getFontWeightAdjustment();
     method public int getSpanTypeId();
     method public int getStyle();
     method public void updateDrawState(android.text.TextPaint);
@@ -45824,6 +45837,17 @@ package android.text.style {
     method public void updateDrawState(@NonNull android.text.TextPaint);
     method public void updateMeasureState(@NonNull android.text.TextPaint);
     method public void writeToParcel(android.os.Parcel, int);
+  }
+
+  public final class SuggestionRangeSpan extends android.text.style.CharacterStyle implements android.text.ParcelableSpan {
+    ctor public SuggestionRangeSpan();
+    method public int describeContents();
+    method public int getBackgroundColor();
+    method public int getSpanTypeId();
+    method public void setBackgroundColor(int);
+    method public void updateDrawState(@NonNull android.text.TextPaint);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.text.style.SuggestionRangeSpan> CREATOR;
   }
 
   public class SuggestionSpan extends android.text.style.CharacterStyle implements android.text.ParcelableSpan {
@@ -51320,6 +51344,7 @@ package android.view.accessibility {
     method public void addAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener);
     method public boolean addAccessibilityStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener);
     method public void addAccessibilityStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener, @Nullable android.os.Handler);
+    method public void addAudioDescriptionByDefaultStateChangeListener(@NonNull java.util.concurrent.Executor, @NonNull android.view.accessibility.AccessibilityManager.AudioDescriptionByDefaultStateChangeListener);
     method public boolean addTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener);
     method public void addTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener, @Nullable android.os.Handler);
     method @ColorInt public int getAccessibilityFocusColor();
@@ -51336,6 +51361,7 @@ package android.view.accessibility {
     method public void removeAccessibilityRequestPreparer(android.view.accessibility.AccessibilityRequestPreparer);
     method public boolean removeAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener);
     method public boolean removeAccessibilityStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener);
+    method public boolean removeAudioDescriptionByDefaultStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AudioDescriptionByDefaultStateChangeListener);
     method public boolean removeTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener);
     method public void sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     field public static final int FLAG_CONTENT_CONTROLS = 4; // 0x4
@@ -51349,6 +51375,10 @@ package android.view.accessibility {
 
   public static interface AccessibilityManager.AccessibilityStateChangeListener {
     method public void onAccessibilityStateChanged(boolean);
+  }
+
+  public static interface AccessibilityManager.AudioDescriptionByDefaultStateChangeListener {
+    method public void onAudioDescriptionByDefaultStateChanged(boolean);
   }
 
   public static interface AccessibilityManager.TouchExplorationStateChangeListener {

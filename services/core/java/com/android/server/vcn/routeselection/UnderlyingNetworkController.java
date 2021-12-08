@@ -32,6 +32,8 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.TelephonyNetworkSpecifier;
+import android.net.vcn.VcnGatewayConnectionConfig;
+import android.net.vcn.VcnUnderlyingNetworkPriority;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.ParcelUuid;
@@ -68,6 +70,7 @@ public class UnderlyingNetworkController {
     @NonNull private static final String TAG = UnderlyingNetworkController.class.getSimpleName();
 
     @NonNull private final VcnContext mVcnContext;
+    @NonNull private final VcnGatewayConnectionConfig mConnectionConfig;
     @NonNull private final ParcelUuid mSubscriptionGroup;
     @NonNull private final UnderlyingNetworkControllerCallback mCb;
     @NonNull private final Dependencies mDeps;
@@ -91,24 +94,22 @@ public class UnderlyingNetworkController {
 
     public UnderlyingNetworkController(
             @NonNull VcnContext vcnContext,
+            @NonNull VcnGatewayConnectionConfig connectionConfig,
             @NonNull ParcelUuid subscriptionGroup,
             @NonNull TelephonySubscriptionSnapshot snapshot,
             @NonNull UnderlyingNetworkControllerCallback cb) {
-        this(
-                vcnContext,
-                subscriptionGroup,
-                snapshot,
-                cb,
-                new Dependencies());
+        this(vcnContext, connectionConfig, subscriptionGroup, snapshot, cb, new Dependencies());
     }
 
     private UnderlyingNetworkController(
             @NonNull VcnContext vcnContext,
+            @NonNull VcnGatewayConnectionConfig connectionConfig,
             @NonNull ParcelUuid subscriptionGroup,
             @NonNull TelephonySubscriptionSnapshot snapshot,
             @NonNull UnderlyingNetworkControllerCallback cb,
             @NonNull Dependencies deps) {
         mVcnContext = Objects.requireNonNull(vcnContext, "Missing vcnContext");
+        mConnectionConfig = Objects.requireNonNull(connectionConfig, "Missing connectionConfig");
         mSubscriptionGroup = Objects.requireNonNull(subscriptionGroup, "Missing subscriptionGroup");
         mLastSnapshot = Objects.requireNonNull(snapshot, "Missing snapshot");
         mCb = Objects.requireNonNull(cb, "Missing cb");
@@ -399,6 +400,8 @@ public class UnderlyingNetworkController {
             TreeSet<UnderlyingNetworkRecord> sorted =
                     new TreeSet<>(
                             UnderlyingNetworkRecord.getComparator(
+                                    mVcnContext,
+                                    mConnectionConfig.getVcnUnderlyingNetworkPriorities(),
                                     mSubscriptionGroup,
                                     mLastSnapshot,
                                     mCurrentRecord,
@@ -495,12 +498,31 @@ public class UnderlyingNetworkController {
         pw.println(
                 "Currently selected: " + (mCurrentRecord == null ? null : mCurrentRecord.network));
 
+        pw.println("VcnUnderlyingNetworkPriority list:");
+        pw.increaseIndent();
+        int index = 0;
+        for (VcnUnderlyingNetworkPriority priority :
+                mConnectionConfig.getVcnUnderlyingNetworkPriorities()) {
+            pw.println("Priority index: " + index);
+            priority.dump(pw);
+            index++;
+        }
+        pw.decreaseIndent();
+        pw.println();
+
         pw.println("Underlying networks:");
         pw.increaseIndent();
         if (mRouteSelectionCallback != null) {
             for (UnderlyingNetworkRecord record :
                     mRouteSelectionCallback.getSortedUnderlyingNetworks()) {
-                record.dump(pw, mSubscriptionGroup, mLastSnapshot, mCurrentRecord, mCarrierConfig);
+                record.dump(
+                        mVcnContext,
+                        pw,
+                        mConnectionConfig.getVcnUnderlyingNetworkPriorities(),
+                        mSubscriptionGroup,
+                        mLastSnapshot,
+                        mCurrentRecord,
+                        mCarrierConfig);
             }
         }
         pw.decreaseIndent();

@@ -162,7 +162,8 @@ final class AppDataHelper {
      * </ul>
      */
     private @NonNull CompletableFuture<?> prepareAppData(@NonNull Installer.Batch batch,
-            @Nullable AndroidPackage pkg, int previousAppId, int userId, int flags) {
+            @Nullable AndroidPackage pkg, int previousAppId, int userId,
+            @StorageManager.StorageFlags int flags) {
         if (pkg == null) {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return CompletableFuture.completedFuture(null);
@@ -171,7 +172,8 @@ final class AppDataHelper {
     }
 
     private void prepareAppDataAndMigrate(@NonNull Installer.Batch batch,
-            @NonNull AndroidPackage pkg, int userId, int flags, boolean maybeMigrateAppData) {
+            @NonNull AndroidPackage pkg, int userId, @StorageManager.StorageFlags int flags,
+            boolean maybeMigrateAppData) {
         prepareAppData(batch, pkg, Process.INVALID_UID, userId, flags).thenRun(() -> {
             // Note: this code block is executed with the Installer lock
             // already held, since it's invoked as a side-effect of
@@ -331,7 +333,8 @@ final class AppDataHelper {
      * correct for all installed apps on all mounted volumes.
      */
     @NonNull
-    public void reconcileAppsData(int userId, int flags, boolean migrateAppsData) {
+    public void reconcileAppsData(int userId, @StorageManager.StorageFlags int flags,
+            boolean migrateAppsData) {
         final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
             final String volumeUuid = vol.getFsUuid();
@@ -342,7 +345,7 @@ final class AppDataHelper {
     }
 
     @GuardedBy("mPm.mInstallLock")
-    void reconcileAppsDataLI(String volumeUuid, int userId, int flags,
+    void reconcileAppsDataLI(String volumeUuid, int userId, @StorageManager.StorageFlags int flags,
             boolean migrateAppData) {
         reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppData, false /* onlyCoreApps */);
     }
@@ -359,8 +362,8 @@ final class AppDataHelper {
      * @return list of skipped non-core packages (if {@code onlyCoreApps} is true)
      */
     @GuardedBy("mPm.mInstallLock")
-    private List<String> reconcileAppsDataLI(String volumeUuid, int userId, int flags,
-            boolean migrateAppData, boolean onlyCoreApps) {
+    private List<String> reconcileAppsDataLI(String volumeUuid, int userId,
+            @StorageManager.StorageFlags int flags, boolean migrateAppData, boolean onlyCoreApps) {
         Slog.v(TAG, "reconcileAppsData for " + volumeUuid + " u" + userId + " 0x"
                 + Integer.toHexString(flags) + " migrateAppData=" + migrateAppData);
         List<String> result = onlyCoreApps ? new ArrayList<>() : null;
@@ -479,7 +482,7 @@ final class AppDataHelper {
      * can't wait for user to start
      */
     public Future<?> fixAppsDataOnBoot() {
-        final int storageFlags;
+        final @StorageManager.StorageFlags int storageFlags;
         if (StorageManager.isFileEncryptedNativeOrEmulated()) {
             storageFlags = StorageManager.FLAG_STORAGE_DE;
         } else {

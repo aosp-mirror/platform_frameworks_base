@@ -53,6 +53,8 @@ import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -212,6 +214,7 @@ public abstract class PanelViewController {
 
     public PanelViewController(
             PanelView view,
+            FeatureFlags featureFlags,
             FalsingManager falsingManager,
             DozeLog dozeLog,
             KeyguardStateController keyguardStateController,
@@ -270,8 +273,7 @@ public abstract class PanelViewController {
         mBounceInterpolator = new BounceInterpolator();
         mFalsingManager = falsingManager;
         mDozeLog = dozeLog;
-        mNotificationsDragEnabled = mResources.getBoolean(
-                R.bool.config_enableNotificationShadeDrag);
+        mNotificationsDragEnabled = featureFlags.isEnabled(Flags.NOTIFICATION_SHADE_DRAG);
         mVibratorHelper = vibratorHelper;
         mVibrateOnOpening = mResources.getBoolean(R.bool.config_vibrateOnIconAnimation);
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;

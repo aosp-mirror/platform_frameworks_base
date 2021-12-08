@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.media.AudioAttributes;
+import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Parcel;
 import android.util.Log;
@@ -259,6 +260,22 @@ public class AudioMixingRule {
     /** @hide */
     public void setVoiceCommunicationCaptureAllowed(boolean allowed) {
         mVoiceCommunicationCaptureAllowed = allowed;
+    }
+
+    /** @hide */
+    public boolean isForCallRedirection() {
+        for (AudioMixMatchCriterion criterion : mCriteria) {
+            if (criterion.mAttr != null
+                    && (criterion.mRule == RULE_MATCH_ATTRIBUTE_USAGE
+                        && criterion.mAttr.getUsage() == AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                    || (criterion.mRule == RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET
+                        && criterion.mAttr.getCapturePreset()
+                            == MediaRecorder.AudioSource.VOICE_COMMUNICATION)
+                    && criterion.mAttr.isForCallRedirection()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** @hide */

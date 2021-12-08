@@ -219,9 +219,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     private void addTile(final QSTile tile, boolean collapsedView) {
-        final TileRecord r = new TileRecord();
-        r.tile = tile;
-        r.tileView = mHost.createTileView(getContext(), tile, collapsedView);
+        final TileRecord r =
+                new TileRecord(tile, mHost.createTileView(getContext(), tile, collapsedView));
         mView.addTile(r);
         mRecords.add(r);
         mCachedSpecs = getTilesSpecs();
@@ -418,6 +417,11 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     /** */
     public static final class TileRecord extends QSPanel.Record {
+        public TileRecord(QSTile tile, com.android.systemui.plugins.qs.QSTileView tileView) {
+            this.tile = tile;
+            this.tileView = tileView;
+        }
+
         public QSTile tile;
         public com.android.systemui.plugins.qs.QSTileView tileView;
         public boolean scanState;

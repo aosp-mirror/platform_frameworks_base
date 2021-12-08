@@ -19,9 +19,5 @@ java_library_static {
     defaults: ["platform_service_defaults"],
     srcs: [":services.backup-sources"],
     libs: ["services.core"],
-    static_libs: [
-        "backuplib",
-        "app-compat-annotations",
-        "guava",
-    ],
+    static_libs: ["backuplib", "app-compat-annotations"],
 }

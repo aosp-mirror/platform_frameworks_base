@@ -69,6 +69,7 @@ import android.text.SpanWatcher;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.SpannedString;
 import android.text.StaticLayout;
 import android.text.TextUtils;
 import android.text.method.KeyListener;
@@ -4120,8 +4121,15 @@ public class Editor {
                 mSuggestionRangeSpan.setBackgroundColor(
                         (underlineColor & 0x00FFFFFF) + (newAlpha << 24));
             }
+            boolean sendAccessibilityEvent = mTextView.isVisibleToAccessibility();
+            CharSequence beforeText = sendAccessibilityEvent
+                    ? new SpannedString(spannable, true) : null;
             spannable.setSpan(mSuggestionRangeSpan, spanUnionStart, spanUnionEnd,
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (sendAccessibilityEvent) {
+                mTextView.sendAccessibilityEventTypeViewTextChanged(
+                        beforeText, spanUnionStart, spanUnionEnd);
+            }
 
             mSuggestionsAdapter.notifyDataSetChanged();
             return true;

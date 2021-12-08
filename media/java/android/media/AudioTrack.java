@@ -26,6 +26,9 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioMixingRule;
+import android.media.audiopolicy.AudioPolicy;
 import android.media.metrics.LogSessionId;
 import android.os.Binder;
 import android.os.Build;
@@ -574,6 +577,8 @@ public class AudioTrack extends PlayerBase
      */
     @NonNull private LogSessionId mLogSessionId = LogSessionId.LOG_SESSION_ID_NONE;
 
+    private AudioPolicy mAudioPolicy;
+
     //--------------------------------
     // Used exclusively by native code
     //--------------------
@@ -1032,6 +1037,7 @@ public class AudioTrack extends PlayerBase
         private int mPerformanceMode = PERFORMANCE_MODE_NONE;
         private boolean mOffload = false;
         private TunerConfiguration mTunerConfiguration;
+        private int mCallRedirectionMode = AudioManager.CALL_REDIRECT_NONE;
 
         /**
          * Constructs a new Builder with the default values as described above.
@@ -1227,6 +1233,74 @@ public class AudioTrack extends PlayerBase
         }
 
         /**
+         * Sets the tuner configuration for the {@code AudioTrack}.
+         *
+         * The {@link AudioTrack.TunerConfiguration} consists of parameters obtained from
+         * the Android TV tuner API which indicate the audio content stream id and the
+         * synchronization id for the {@code AudioTrack}.
+         *
+         * @param tunerConfiguration obtained by {@link AudioTrack.TunerConfiguration.Builder}.
+         * @return the same Builder instance.
+         * @hide
+         */
+
+        /**
+         * @hide
+         * Sets the {@link AudioTrack} call redirection mode.
+         * Used when creating an AudioTrack to inject audio to call uplink path. The mode
+         * indicates if the call is a PSTN call or a VoIP call in which case a dynamic audio
+         * policy is created to use this track as the source for all capture with voice
+         * communication preset.
+         *
+         * @param callRedirectionMode one of
+         * {@link AudioManager#CALL_REDIRECT_NONE},
+         * {@link AudioManager#CALL_REDIRECT_PSTN},
+         * or {@link AAudioManager#CALL_REDIRECT_VOIP}.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException if {@code callRedirectionMode} is not valid.
+         */
+        public @NonNull Builder setCallRedirectionMode(
+                @AudioManager.CallRedirectionMode int callRedirectionMode) {
+            switch (callRedirectionMode) {
+                case AudioManager.CALL_REDIRECT_NONE:
+                case AudioManager.CALL_REDIRECT_PSTN:
+                case AudioManager.CALL_REDIRECT_VOIP:
+                    mCallRedirectionMode = callRedirectionMode;
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Invalid call redirection mode " + callRedirectionMode);
+            }
+            return this;
+        }
+
+        private @NonNull AudioTrack buildCallInjectionTrack() {
+            AudioMixingRule audioMixingRule = new AudioMixingRule.Builder()
+                    .addMixRule(AudioMixingRule.RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET,
+                            new AudioAttributes.Builder()
+                                   .setCapturePreset(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
+                                   .setForCallRedirection()
+                                   .build())
+                    .setTargetMixRole(AudioMixingRule.MIX_ROLE_INJECTOR)
+                    .build();
+            AudioMix audioMix = new AudioMix.Builder(audioMixingRule)
+                    .setFormat(mFormat)
+                    .setRouteFlags(AudioMix.ROUTE_FLAG_LOOP_BACK)
+                    .build();
+            AudioPolicy audioPolicy =
+                    new AudioPolicy.Builder(/*context=*/ null).addMix(audioMix).build();
+            if (AudioManager.registerAudioPolicyStatic(audioPolicy) != 0) {
+                throw new UnsupportedOperationException("Error: could not register audio policy");
+            }
+            AudioTrack track = audioPolicy.createAudioTrackSource(audioMix);
+            if (track == null) {
+                throw new UnsupportedOperationException("Cannot create injection AudioTrack");
+            }
+            track.unregisterAudioPolicyOnRelease(audioPolicy);
+            return track;
+        }
+
+        /**
          * Builds an {@link AudioTrack} instance initialized with all the parameters set
          * on this <code>Builder</code>.
          * @return a new successfully initialized {@link AudioTrack} instance.
@@ -1267,6 +1341,14 @@ public class AudioTrack extends PlayerBase
                         .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
                         //.setSampleRate(AudioFormat.SAMPLE_RATE_UNSPECIFIED)
                         .setEncoding(AudioFormat.ENCODING_DEFAULT)
+                        .build();
+            }
+
+            if (mCallRedirectionMode == AudioManager.CALL_REDIRECT_VOIP) {
+                return buildCallInjectionTrack();
+            } else if (mCallRedirectionMode == AudioManager.CALL_REDIRECT_PSTN) {
+                mAttributes = new AudioAttributes.Builder(mAttributes)
+                        .setForCallRedirection()
                         .build();
             }
 
@@ -1312,6 +1394,16 @@ public class AudioTrack extends PlayerBase
                 throw new UnsupportedOperationException(e.getMessage());
             }
         }
+    }
+
+    /**
+     * Sets an {@link AudioPolicy} to automatically unregister when the track is released.
+     *
+     * <p>This is to prevent users of the call audio injection API from having to manually
+     * unregister the policy that was used to create the track.
+     */
+    private void unregisterAudioPolicyOnRelease(AudioPolicy audioPolicy) {
+        mAudioPolicy = audioPolicy;
     }
 
     /**
@@ -1879,6 +1971,11 @@ public class AudioTrack extends PlayerBase
         } catch(IllegalStateException ise) {
             // don't raise an exception, we're releasing the resources.
         }
+        if (mAudioPolicy != null) {
+            AudioManager.unregisterAudioPolicyAsyncStatic(mAudioPolicy);
+            mAudioPolicy = null;
+        }
+
         baseRelease();
         native_release();
         synchronized (mPlayStateLock) {

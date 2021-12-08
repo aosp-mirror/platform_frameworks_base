@@ -21,8 +21,10 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.PersistableBundle;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -37,10 +39,17 @@ public abstract class VcnUnderlyingNetworkPriority {
     /** @hide */
     protected static final int NETWORK_PRIORITY_TYPE_CELL = 2;
 
-    /** Denotes that network quality needs to be OK */
-    public static final int NETWORK_QUALITY_OK = 10000;
     /** Denotes that any network quality is acceptable */
-    public static final int NETWORK_QUALITY_ANY = Integer.MAX_VALUE;
+    public static final int NETWORK_QUALITY_ANY = 0;
+    /** Denotes that network quality needs to be OK */
+    public static final int NETWORK_QUALITY_OK = 100000;
+
+    private static final SparseArray<String> NETWORK_QUALITY_TO_STRING_MAP = new SparseArray<>();
+
+    static {
+        NETWORK_QUALITY_TO_STRING_MAP.put(NETWORK_QUALITY_ANY, "NETWORK_QUALITY_ANY");
+        NETWORK_QUALITY_TO_STRING_MAP.put(NETWORK_QUALITY_OK, "NETWORK_QUALITY_OK");
+    }
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -123,6 +132,28 @@ public abstract class VcnUnderlyingNetworkPriority {
         return mNetworkPriorityType == rhs.mNetworkPriorityType
                 && mNetworkQuality == rhs.mNetworkQuality
                 && mAllowMetered == rhs.mAllowMetered;
+    }
+
+    /** @hide */
+    abstract void dumpTransportSpecificFields(IndentingPrintWriter pw);
+
+    /**
+     * Dumps the state of this record for logging and debugging purposes.
+     *
+     * @hide
+     */
+    public void dump(IndentingPrintWriter pw) {
+        pw.println(this.getClass().getSimpleName() + ":");
+        pw.increaseIndent();
+
+        pw.println(
+                "mNetworkQuality: "
+                        + NETWORK_QUALITY_TO_STRING_MAP.get(
+                                mNetworkQuality, "Invalid value " + mNetworkQuality));
+        pw.println("mAllowMetered: " + mAllowMetered);
+        dumpTransportSpecificFields(pw);
+
+        pw.decreaseIndent();
     }
 
     /** Retrieve the required network quality. */

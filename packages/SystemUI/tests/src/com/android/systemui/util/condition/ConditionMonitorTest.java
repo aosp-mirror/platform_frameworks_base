@@ -97,6 +97,16 @@ public class ConditionMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void addCallback_noConditions_reportAllConditionsMet() {
+        final Monitor monitor = new Monitor(new HashSet<>());
+        final Monitor.Callback callback = mock(Monitor.Callback.class);
+
+        monitor.addCallback(callback);
+
+        verify(callback).onConditionsChanged(true);
+    }
+
+    @Test
     public void removeCallback_shouldNoLongerReceiveUpdate() {
         final Monitor.Callback callback =
                 mock(Monitor.Callback.class);

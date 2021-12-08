@@ -88,7 +88,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-
+import java.util.concurrent.Executors;
 
 /**
  * AudioManager provides access to volume and ringer mode control.
@@ -7570,7 +7570,7 @@ public class AudioManager {
         return getDeviceInfoFromTypeAndAddress(deviceType, null);
     }
 
-        /**
+    /**
      * @hide
      * Returns an {@link AudioDeviceInfo} corresponding to a connected device of the type and
      * address provided.
@@ -7689,6 +7689,281 @@ public class AudioManager {
             AudioDeviceInfo device = getDeviceForPortId(portId, GET_DEVICES_OUTPUTS);
             CallbackUtil.callListeners(mCommDevListeners, mCommDevListenerLock,
                     (listener) -> listener.onCommunicationDeviceChanged(device));
+        }
+    }
+
+
+    /**
+     * @hide
+     * Indicates if the platform allows accessing the uplink and downlink audio of an ongoing
+     * PSTN call.
+     * When true, {@link getCallUplinkInjectionAudioTrack(AudioFormat)} can be used to obtain
+     * an AudioTrack for call uplink audio injection and
+     * {@link getCallDownlinkExtractionAudioRecord(AudioFormat)} can be used to obtain
+     * an AudioRecord for call downlink audio extraction.
+     * @return true if PSTN call audio is accessible, false otherwise.
+     */
+    @TestApi
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION)
+    public boolean isPstnCallAudioInterceptable() {
+        final IAudioService service = getService();
+        try {
+            return service.isPstnCallAudioInterceptable();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    @IntDef(flag = false, prefix = "CALL_REDIRECT_", value = {
+            CALL_REDIRECT_NONE,
+            CALL_REDIRECT_PSTN,
+            CALL_REDIRECT_VOIP }
+            )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallRedirectionMode {}
+
+    /**
+     * Not used for call redirection
+     * @hide
+     */
+    public static final int CALL_REDIRECT_NONE = 0;
+    /**
+     * Used to redirect  PSTN call
+     * @hide
+     */
+    public static final int CALL_REDIRECT_PSTN = 1;
+    /**
+     * Used to redirect  VoIP call
+     * @hide
+     */
+    public static final int CALL_REDIRECT_VOIP = 2;
+
+
+    private @CallRedirectionMode int getCallRedirectMode() {
+        int mode = getMode();
+        if (mode == MODE_IN_CALL || mode == MODE_CALL_SCREENING
+                || mode == MODE_CALL_REDIRECT) {
+            return CALL_REDIRECT_PSTN;
+        } else if (mode == MODE_IN_COMMUNICATION || mode == MODE_COMMUNICATION_REDIRECT) {
+            return CALL_REDIRECT_VOIP;
+        }
+        return CALL_REDIRECT_NONE;
+    }
+
+    private void checkCallRedirectionFormat(AudioFormat format, boolean isOutput) {
+        if (format.getEncoding() != AudioFormat.ENCODING_PCM_16BIT
+                && format.getEncoding() != AudioFormat.ENCODING_PCM_FLOAT) {
+            throw new UnsupportedOperationException(" Unsupported encoding ");
+        }
+        if (format.getSampleRate() < 8000
+                || format.getSampleRate() > 48000) {
+            throw new UnsupportedOperationException(" Unsupported sample rate ");
+        }
+        if (isOutput && format.getChannelMask() != AudioFormat.CHANNEL_OUT_MONO
+                && format.getChannelMask() != AudioFormat.CHANNEL_OUT_STEREO) {
+            throw new UnsupportedOperationException(" Unsupported output channel mask ");
+        }
+        if (!isOutput && format.getChannelMask() != AudioFormat.CHANNEL_IN_MONO
+                && format.getChannelMask() != AudioFormat.CHANNEL_IN_STEREO) {
+            throw new UnsupportedOperationException(" Unsupported input channel mask ");
+        }
+    }
+
+    class CallIRedirectionClientInfo {
+        public WeakReference trackOrRecord;
+        public int redirectMode;
+    }
+
+    private Object mCallRedirectionLock = new Object();
+    @GuardedBy("mCallRedirectionLock")
+    private CallInjectionModeChangedListener mCallRedirectionModeListener;
+    @GuardedBy("mCallRedirectionLock")
+    private ArrayList<CallIRedirectionClientInfo> mCallIRedirectionClients;
+
+    /**
+     * @hide
+     * Returns an AudioTrack that can be used to inject audio to an active call uplink.
+     * This can be used for functions like call screening or call audio redirection and is reserved
+     * to system apps with privileged permission.
+     * @param format the desired audio format for audio playback.
+     * p>Formats accepted are:
+     * <ul>
+     *   <li><em>Sampling rate</em> - 8kHz to 48kHz. </li>
+     *   <li><em>Channel mask</em> - Mono or Stereo </li>
+     *   <li><em>Sample format</em> - PCM 16 bit or FLOAT 32 bit </li>
+     * </ul>
+     *
+     * @return The AudioTrack used for audio injection
+     * @throws NullPointerException if AudioFormat argument is null.
+     * @throws UnsupportedOperationException if on unsupported AudioFormat is specified.
+     * @throws IllegalArgumentException if an invalid AudioFormat is specified.
+     * @throws SecurityException if permission CALL_AUDIO_INTERCEPTION  is missing .
+     * @throws IllegalStateException if current audio mode is not MODE_IN_CALL,
+     *         MODE_IN_COMMUNICATION, MODE_CALL_SCREENING, MODE_CALL_REDIRECT
+     *         or MODE_COMMUNICATION_REDIRECT.
+     */
+    @TestApi
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION)
+    public @NonNull AudioTrack getCallUplinkInjectionAudioTrack(@NonNull AudioFormat format) {
+        Objects.requireNonNull(format);
+        checkCallRedirectionFormat(format, true /* isOutput */);
+
+        AudioTrack track = null;
+        int redirectMode = getCallRedirectMode();
+        if (redirectMode == CALL_REDIRECT_NONE) {
+            throw new IllegalStateException(
+                    " not available in mode " + AudioSystem.modeToString(getMode()));
+        } else if (redirectMode == CALL_REDIRECT_PSTN && !isPstnCallAudioInterceptable()) {
+            throw new UnsupportedOperationException(" PSTN Call audio not accessible ");
+        }
+
+        track = new AudioTrack.Builder()
+                .setAudioAttributes(new AudioAttributes.Builder()
+                        .setSystemUsage(AudioAttributes.USAGE_CALL_ASSISTANT)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .build())
+                .setAudioFormat(format)
+                .setCallRedirectionMode(redirectMode)
+                .build();
+
+        if (track != null && track.getState() != AudioTrack.STATE_UNINITIALIZED) {
+            synchronized (mCallRedirectionLock) {
+                if (mCallRedirectionModeListener == null) {
+                    mCallRedirectionModeListener = new CallInjectionModeChangedListener();
+                    try {
+                        addOnModeChangedListener(
+                                Executors.newSingleThreadExecutor(), mCallRedirectionModeListener);
+                    } catch (Exception e) {
+                        Log.e(TAG, "addOnModeChangedListener failed with exception: " + e);
+                        mCallRedirectionModeListener = null;
+                        throw new UnsupportedOperationException(" Cannot register mode listener ");
+                    }
+                    mCallIRedirectionClients = new ArrayList<CallIRedirectionClientInfo>();
+                }
+                CallIRedirectionClientInfo info = new CallIRedirectionClientInfo();
+                info.redirectMode = redirectMode;
+                info.trackOrRecord = new WeakReference<AudioTrack>(track);
+                mCallIRedirectionClients.add(info);
+            }
+        } else {
+            throw new UnsupportedOperationException(" Cannot create the AudioTrack");
+        }
+        return track;
+    }
+
+    /**
+     * @hide
+     * Returns an AudioRecord that can be used to extract audio from an active call downlink.
+     * This can be used for functions like call screening or call audio redirection and is reserved
+     * to system apps with privileged permission.
+     * @param format the desired audio format for audio capture.
+     *<p>Formats accepted are:
+     * <ul>
+     *   <li><em>Sampling rate</em> - 8kHz to 48kHz. </li>
+     *   <li><em>Channel mask</em> - Mono or Stereo </li>
+     *   <li><em>Sample format</em> - PCM 16 bit or FLOAT 32 bit </li>
+     * </ul>
+     *
+     * @return The AudioRecord used for audio extraction
+     * @throws UnsupportedOperationException if on unsupported AudioFormat is specified.
+     * @throws IllegalArgumentException if an invalid AudioFormat is specified.
+     * @throws NullPointerException if AudioFormat argument is null.
+     * @throws SecurityException if permission CALL_AUDIO_INTERCEPTION  is missing .
+     * @throws IllegalStateException if current audio mode is not MODE_IN_CALL,
+     *         MODE_IN_COMMUNICATION, MODE_CALL_SCREENING, MODE_CALL_REDIRECT
+     *         or MODE_COMMUNICATION_REDIRECT.
+     */
+    @TestApi
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION)
+    public @NonNull AudioRecord getCallDownlinkExtractionAudioRecord(@NonNull AudioFormat format) {
+        Objects.requireNonNull(format);
+        checkCallRedirectionFormat(format, false /* isOutput */);
+
+        AudioRecord record = null;
+        int redirectMode = getCallRedirectMode();
+        if (redirectMode == CALL_REDIRECT_NONE) {
+            throw new IllegalStateException(
+                    " not available in mode " + AudioSystem.modeToString(getMode()));
+        } else if (redirectMode == CALL_REDIRECT_PSTN && !isPstnCallAudioInterceptable()) {
+            throw new UnsupportedOperationException(" PSTN Call audio not accessible ");
+        }
+
+        record = new AudioRecord.Builder()
+                .setAudioAttributes(new AudioAttributes.Builder()
+                        .setInternalCapturePreset(MediaRecorder.AudioSource.VOICE_DOWNLINK)
+                        .build())
+                .setAudioFormat(format)
+                .setCallRedirectionMode(redirectMode)
+                .build();
+
+        if (record != null && record.getState() != AudioRecord.STATE_UNINITIALIZED) {
+            synchronized (mCallRedirectionLock) {
+                if (mCallRedirectionModeListener == null) {
+                    mCallRedirectionModeListener = new CallInjectionModeChangedListener();
+                    try {
+                        addOnModeChangedListener(
+                                Executors.newSingleThreadExecutor(), mCallRedirectionModeListener);
+                    } catch (Exception e) {
+                        Log.e(TAG, "addOnModeChangedListener failed with exception: " + e);
+                        mCallRedirectionModeListener = null;
+                        throw new UnsupportedOperationException(" Cannot register mode listener ");
+                    }
+                    mCallIRedirectionClients = new ArrayList<CallIRedirectionClientInfo>();
+                }
+                CallIRedirectionClientInfo info = new CallIRedirectionClientInfo();
+                info.redirectMode = redirectMode;
+                info.trackOrRecord = new WeakReference<AudioRecord>(record);
+                mCallIRedirectionClients.add(info);
+            }
+        } else {
+            throw new UnsupportedOperationException(" Cannot create the AudioRecord");
+        }
+        return record;
+    }
+
+    class CallInjectionModeChangedListener implements OnModeChangedListener {
+        @Override
+        public void onModeChanged(@AudioMode int mode) {
+            synchronized (mCallRedirectionLock) {
+                final ArrayList<CallIRedirectionClientInfo> clientInfos =
+                        (ArrayList<CallIRedirectionClientInfo>) mCallIRedirectionClients.clone();
+                for (CallIRedirectionClientInfo info : clientInfos) {
+                    Object trackOrRecord = info.trackOrRecord.get();
+                    if (trackOrRecord != null) {
+                        if ((info.redirectMode ==  CALL_REDIRECT_PSTN
+                                && mode != MODE_IN_CALL && mode != MODE_CALL_SCREENING
+                                && mode != MODE_CALL_REDIRECT)
+                                || (info.redirectMode == CALL_REDIRECT_VOIP
+                                    && mode != MODE_IN_COMMUNICATION
+                                    && mode != MODE_COMMUNICATION_REDIRECT)) {
+                            if (trackOrRecord instanceof AudioTrack) {
+                                AudioTrack track = (AudioTrack) trackOrRecord;
+                                track.release();
+                            } else {
+                                AudioRecord record = (AudioRecord) trackOrRecord;
+                                record.release();
+                            }
+                            mCallIRedirectionClients.remove(info);
+                        }
+                    }
+                }
+                if (mCallIRedirectionClients.isEmpty()) {
+                    try {
+                        if (mCallRedirectionModeListener != null) {
+                            removeOnModeChangedListener(mCallRedirectionModeListener);
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "removeOnModeChangedListener failed with exception: " + e);
+                    } finally {
+                        mCallRedirectionModeListener = null;
+                        mCallIRedirectionClients = null;
+                    }
+                }
+            }
         }
     }
 
