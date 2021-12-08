@@ -642,12 +642,12 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
         moveEvent.recycle();
 
-        // THEN low-tick haptic is played
+        // THEN click haptic is played
         verify(mVibrator).vibrate(
                 anyInt(),
                 anyString(),
                 any(),
-                eq("udfps-onStart-tick"),
+                eq("udfps-onStart-click"),
                 eq(UdfpsController.VIBRATION_SONIFICATION_ATTRIBUTES));
 
         // THEN make sure vibration attributes has so that it always will play the haptic,
