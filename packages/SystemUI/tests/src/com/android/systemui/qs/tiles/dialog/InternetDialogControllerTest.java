@@ -159,7 +159,6 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mAccessPoints.add(mWifiEntry1);
         when(mAccessPointController.getMergedCarrierEntry()).thenReturn(mMergedCarrierEntry);
         when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{SUB_ID});
-        when(mAccessPointController.getMergedCarrierEntry()).thenReturn(mMergedCarrierEntry);
         when(mToastFactory.createToast(any(), anyString(), anyString(), anyInt(), anyInt()))
             .thenReturn(mSystemUIToast);
         when(mSystemUIToast.getView()).thenReturn(mToastView);
@@ -332,6 +331,17 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         assertThat(mInternetDialogController.getSubtitleText(false))
                 .isNotEqualTo(getResourcesString("non_carrier_network_unavailable"));
+    }
+
+    @Test
+    public void getSubtitleText_withCarrierNetworkActiveOnly_returnNoOtherAvailable() {
+        fakeAirplaneModeEnabled(false);
+        when(mWifiManager.isWifiEnabled()).thenReturn(true);
+        mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
+        when(mMergedCarrierEntry.isDefaultNetwork()).thenReturn(true);
+
+        assertThat(mInternetDialogController.getSubtitleText(false))
+                .isEqualTo(getResourcesString("non_carrier_network_unavailable"));
     }
 
     @Test
