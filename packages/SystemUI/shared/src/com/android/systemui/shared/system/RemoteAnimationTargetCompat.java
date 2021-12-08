@@ -65,6 +65,7 @@ public class RemoteAnimationTargetCompat {
     public final Rect localBounds;
     public final Rect sourceContainerBounds;
     public final Rect screenSpaceBounds;
+    public final Rect startScreenSpaceBounds;
     public final boolean isNotInRecents;
     public final Rect contentInsets;
     public final ActivityManager.RunningTaskInfo taskInfo;
@@ -88,6 +89,7 @@ public class RemoteAnimationTargetCompat {
         localBounds = app.localBounds;
         sourceContainerBounds = app.sourceContainerBounds;
         screenSpaceBounds = app.screenSpaceBounds;
+        startScreenSpaceBounds = screenSpaceBounds;
         prefixOrderIndex = app.prefixOrderIndex;
         isNotInRecents = app.isNotInRecents;
         contentInsets = app.contentInsets;
@@ -219,6 +221,8 @@ public class RemoteAnimationTargetCompat {
         localBounds.offsetTo(change.getEndRelOffset().x, change.getEndRelOffset().y);
         sourceContainerBounds = null;
         screenSpaceBounds = new Rect(change.getEndAbsBounds());
+        startScreenSpaceBounds = new Rect(change.getStartAbsBounds());
+
         prefixOrderIndex = order;
         // TODO(shell-transitions): I guess we need to send content insets? evaluate how its used.
         contentInsets = new Rect(0, 0, 0, 0);
