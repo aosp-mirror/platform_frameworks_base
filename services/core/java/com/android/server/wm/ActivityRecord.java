@@ -160,6 +160,7 @@ import static com.android.server.wm.ActivityRecordProto.NUM_DRAWN_WINDOWS;
 import static com.android.server.wm.ActivityRecordProto.NUM_INTERESTING_WINDOWS;
 import static com.android.server.wm.ActivityRecordProto.PIP_AUTO_ENTER_ENABLED;
 import static com.android.server.wm.ActivityRecordProto.PROC_ID;
+import static com.android.server.wm.ActivityRecordProto.PROVIDES_MAX_BOUNDS;
 import static com.android.server.wm.ActivityRecordProto.REPORTED_DRAWN;
 import static com.android.server.wm.ActivityRecordProto.REPORTED_VISIBLE;
 import static com.android.server.wm.ActivityRecordProto.STARTING_DISPLAYED;
@@ -261,6 +262,7 @@ import android.content.Intent;
 import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ConstrainDisplayApisConfig;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -595,6 +597,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * {@link #shouldCreateCompatDisplayInsets} returns {@code true}.
      */
     private CompatDisplayInsets mCompatDisplayInsets;
+
+    private static ConstrainDisplayApisConfig sConstrainDisplayApisConfig;
 
     boolean pendingVoiceInteractionStart;   // Waiting for activity-invoked voice session
     IVoiceInteractionSession voiceSession;  // Voice interaction session for this activity
@@ -1162,8 +1166,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (info.configChanges != 0) {
                 pw.println(prefix + "configChanges=0x" + Integer.toHexString(info.configChanges));
             }
-            pw.println(prefix + "neverSandboxDisplayApis=" + info.neverSandboxDisplayApis());
-            pw.println(prefix + "alwaysSandboxDisplayApis=" + info.alwaysSandboxDisplayApis());
+            pw.println(prefix + "neverSandboxDisplayApis=" + info.neverSandboxDisplayApis(
+                    sConstrainDisplayApisConfig));
+            pw.println(prefix + "alwaysSandboxDisplayApis=" + info.alwaysSandboxDisplayApis(
+                    sConstrainDisplayApisConfig));
         }
         if (mLastParentBeforePip != null) {
             pw.println(prefix + "lastParentTaskIdBeforePip=" + mLastParentBeforePip.mTaskId);
@@ -1768,6 +1774,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 && !info.windowLayout.windowLayoutAffinity.startsWith(uid)) {
             info.windowLayout.windowLayoutAffinity =
                     uid + ":" + info.windowLayout.windowLayoutAffinity;
+        }
+        // Initialize once, when we know all system services are available.
+        if (sConstrainDisplayApisConfig == null) {
+            sConstrainDisplayApisConfig = new ConstrainDisplayApisConfig();
         }
         stateNotNeeded = (aInfo.flags & FLAG_STATE_NOT_NEEDED) != 0;
         nonLocalizedLabel = aInfo.nonLocalizedLabel;
@@ -7465,8 +7475,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                                 + "should create compatDisplayInsets = %s",
                         getUid(),
                         mTmpBounds,
-                        info.neverSandboxDisplayApis(),
-                        info.alwaysSandboxDisplayApis(),
+                        info.neverSandboxDisplayApis(sConstrainDisplayApisConfig),
+                        info.alwaysSandboxDisplayApis(sConstrainDisplayApisConfig),
                         !matchParentBounds(),
                         mCompatDisplayInsets != null,
                         shouldCreateCompatDisplayInsets());
@@ -8027,11 +8037,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         // Never apply sandboxing to an app that should be explicitly excluded from the config.
-        if (info != null && info.neverSandboxDisplayApis()) {
+        if (info.neverSandboxDisplayApis(sConstrainDisplayApisConfig)) {
             return false;
         }
         // Always apply sandboxing to an app that should be explicitly included from the config.
-        if (info != null && info.alwaysSandboxDisplayApis()) {
+        if (info.alwaysSandboxDisplayApis(sConstrainDisplayApisConfig)) {
             return true;
         }
         // Max bounds should be sandboxed when an activity should have compatDisplayInsets, and it
@@ -9047,6 +9057,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(PIP_AUTO_ENTER_ENABLED, pictureInPictureArgs.isAutoEnterEnabled());
         proto.write(IN_SIZE_COMPAT_MODE, inSizeCompatMode());
         proto.write(MIN_ASPECT_RATIO, getMinAspectRatio());
+        // Only record if max bounds sandboxing is applied, if the caller has the necessary
+        // permission to access the device configs.
+        proto.write(PROVIDES_MAX_BOUNDS, providesMaxBounds());
     }
 
     @Override
