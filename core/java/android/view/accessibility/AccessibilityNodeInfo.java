@@ -4101,10 +4101,12 @@ public class AccessibilityNodeInfo implements Parcelable {
                 : new CollectionInfo(ci.mRowCount, ci.mColumnCount,
                                      ci.mHierarchical, ci.mSelectionMode);
         CollectionItemInfo cii = other.mCollectionItemInfo;
+        CollectionItemInfo.Builder builder = new CollectionItemInfo.Builder();
         mCollectionItemInfo = (cii == null)  ? null
-                : new CollectionItemInfo(cii.mRowTitle, cii.mRowIndex, cii.mRowSpan,
-                        cii.mColumnTitle, cii.mColumnIndex, cii.mColumnSpan,
-                        cii.mHeading, cii.mSelected);
+                : builder.setRowTitle(cii.mRowTitle).setRowIndex(cii.mRowIndex).setRowSpan(
+                        cii.mRowSpan).setColumnTitle(cii.mColumnTitle).setColumnIndex(
+                                cii.mColumnIndex).setColumnSpan(cii.mColumnSpan).setHeading(
+                                        cii.mHeading).setSelected(cii.mSelected).build();
         ExtraRenderingInfo ti = other.mExtraRenderingInfo;
         mExtraRenderingInfo = (ti == null) ? null
                 : new ExtraRenderingInfo(ti);
@@ -5676,6 +5678,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         private String mRowTitle;
         private String mColumnTitle;
 
+        private CollectionItemInfo() {
+            /* do nothing */
+        }
+
         /**
          * Creates a new instance.
          *
@@ -5717,6 +5723,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param columnSpan The number of columns the item spans.
          * @param heading Whether the item is a heading.
          * @param selected Whether the item is selected.
+         * @hide
          */
         public CollectionItemInfo(@Nullable String rowTitle, int rowIndex, int rowSpan,
                 @Nullable String columnTitle, int columnIndex, int columnSpan, boolean heading,
@@ -5826,6 +5833,140 @@ public class AccessibilityNodeInfo implements Parcelable {
             mSelected = false;
             mRowTitle = null;
             mColumnTitle = null;
+        }
+
+        /**
+         * Builder for creating {@link CollectionItemInfo} objects.
+         */
+        public static final class Builder {
+            private boolean mHeading;
+            private int mColumnIndex;
+            private int mRowIndex;
+            private int mColumnSpan;
+            private int mRowSpan;
+            private boolean mSelected;
+            private String mRowTitle;
+            private String mColumnTitle;
+
+            /**
+             * Creates a new Builder.
+             */
+            public Builder() {
+            }
+
+            /**
+             * Sets the collection item is a heading.
+             *
+             * @param heading The heading state
+             * @return This builder
+             */
+            @NonNull
+            public CollectionItemInfo.Builder setHeading(boolean heading) {
+                mHeading = heading;
+                return this;
+            }
+
+            /**
+             * Sets the column index at which the item is located.
+             *
+             * @param columnIndex The column index
+             * @return This builder
+             */
+            @NonNull
+            public CollectionItemInfo.Builder setColumnIndex(int columnIndex) {
+                mColumnIndex = columnIndex;
+                return this;
+            }
+
+            /**
+             * Sets the row index at which the item is located.
+             *
+             * @param rowIndex The row index
+             * @return This builder
+             */
+            @NonNull
+            public CollectionItemInfo.Builder setRowIndex(int rowIndex) {
+                mRowIndex = rowIndex;
+                return this;
+            }
+
+            /**
+             * Sets the number of columns the item spans.
+             *
+             * @param columnSpan The number of columns spans
+             * @return This builder
+             */
+            @NonNull
+            public CollectionItemInfo.Builder setColumnSpan(int columnSpan) {
+                mColumnSpan = columnSpan;
+                return this;
+            }
+
+            /**
+             * Sets the number of rows the item spans.
+             *
+             * @param rowSpan The number of rows spans
+             * @return This builder
+             */
+            @NonNull
+            public CollectionItemInfo.Builder setRowSpan(int rowSpan) {
+                mRowSpan = rowSpan;
+                return this;
+            }
+
+            /**
+             * Sets the collection item is selected.
+             *
+             * @param selected The number of rows spans
+             * @return This builder
+             */
+            @NonNull
+            public CollectionItemInfo.Builder setSelected(boolean selected) {
+                mSelected = selected;
+                return this;
+            }
+
+            /**
+             * Sets the row title at which the item is located.
+             *
+             * @param rowTitle The row title
+             * @return This builder
+             */
+            @NonNull
+            public CollectionItemInfo.Builder setRowTitle(@Nullable String rowTitle) {
+                mRowTitle = rowTitle;
+                return this;
+            }
+
+            /**
+             * Sets the column title at which the item is located.
+             *
+             * @param columnTitle The column title
+             * @return This builder
+             */
+            @NonNull
+            public CollectionItemInfo.Builder setColumnTitle(@Nullable String columnTitle) {
+                mColumnTitle = columnTitle;
+                return this;
+            }
+
+            /**
+             * Builds and returns a {@link CollectionItemInfo}.
+             */
+            @NonNull
+            public CollectionItemInfo build() {
+                CollectionItemInfo collectionItemInfo = new CollectionItemInfo();
+                collectionItemInfo.mHeading = mHeading;
+                collectionItemInfo.mColumnIndex = mColumnIndex;
+                collectionItemInfo.mRowIndex = mRowIndex;
+                collectionItemInfo.mColumnSpan = mColumnSpan;
+                collectionItemInfo.mRowSpan = mRowSpan;
+                collectionItemInfo.mSelected = mSelected;
+                collectionItemInfo.mRowTitle = mRowTitle;
+                collectionItemInfo.mColumnTitle = mColumnTitle;
+
+                return collectionItemInfo;
+            }
         }
     }
 
