@@ -20,55 +20,55 @@ import static android.net.vcn.VcnUnderlyingNetworkPriority.NETWORK_QUALITY_OK;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-public class VcnWifiUnderlyingNetworkPriorityTest {
-    private static final String SSID = "TestWifi";
-    private static final int INVALID_NETWORK_QUALITY = -1;
+import java.util.HashSet;
+import java.util.Set;
+
+public class VcnCellUnderlyingNetworkPriorityTest {
+    private static final Set<String> ALLOWED_PLMN_IDS = new HashSet<>();
+    private static final Set<Integer> ALLOWED_CARRIER_IDS = new HashSet<>();
 
     // Package private for use in VcnGatewayConnectionConfigTest
-    static VcnWifiUnderlyingNetworkPriority getTestNetworkPriority() {
-        return new VcnWifiUnderlyingNetworkPriority.Builder()
+    static VcnCellUnderlyingNetworkPriority getTestNetworkPriority() {
+        return new VcnCellUnderlyingNetworkPriority.Builder()
                 .setNetworkQuality(NETWORK_QUALITY_OK)
                 .setAllowMetered(true /* allowMetered */)
-                .setSsid(SSID)
+                .setAllowedPlmnIds(ALLOWED_PLMN_IDS)
+                .setAllowedSpecificCarrierIds(ALLOWED_CARRIER_IDS)
+                .setAllowRoaming(true /* allowRoaming */)
+                .setRequireOpportunistic(true /* requireOpportunistic */)
                 .build();
     }
 
     @Test
     public void testBuilderAndGetters() {
-        final VcnWifiUnderlyingNetworkPriority networkPriority = getTestNetworkPriority();
+        final VcnCellUnderlyingNetworkPriority networkPriority = getTestNetworkPriority();
         assertEquals(NETWORK_QUALITY_OK, networkPriority.getNetworkQuality());
         assertTrue(networkPriority.allowMetered());
-        assertEquals(SSID, networkPriority.getSsid());
+        assertEquals(ALLOWED_PLMN_IDS, networkPriority.getAllowedPlmnIds());
+        assertEquals(ALLOWED_CARRIER_IDS, networkPriority.getAllowedSpecificCarrierIds());
+        assertTrue(networkPriority.allowRoaming());
+        assertTrue(networkPriority.requireOpportunistic());
     }
 
     @Test
     public void testBuilderAndGettersForDefaultValues() {
-        final VcnWifiUnderlyingNetworkPriority networkPriority =
-                new VcnWifiUnderlyingNetworkPriority.Builder().build();
+        final VcnCellUnderlyingNetworkPriority networkPriority =
+                new VcnCellUnderlyingNetworkPriority.Builder().build();
         assertEquals(NETWORK_QUALITY_ANY, networkPriority.getNetworkQuality());
         assertFalse(networkPriority.allowMetered());
-        assertNull(SSID, networkPriority.getSsid());
-    }
-
-    @Test
-    public void testBuildWithInvalidNetworkQuality() {
-        try {
-            new VcnWifiUnderlyingNetworkPriority.Builder()
-                    .setNetworkQuality(INVALID_NETWORK_QUALITY);
-            fail("Expected to fail due to the invalid network quality");
-        } catch (Exception expected) {
-        }
+        assertEquals(new HashSet<String>(), networkPriority.getAllowedPlmnIds());
+        assertEquals(new HashSet<Integer>(), networkPriority.getAllowedSpecificCarrierIds());
+        assertFalse(networkPriority.allowRoaming());
+        assertFalse(networkPriority.requireOpportunistic());
     }
 
     @Test
     public void testPersistableBundle() {
-        final VcnWifiUnderlyingNetworkPriority networkPriority = getTestNetworkPriority();
+        final VcnCellUnderlyingNetworkPriority networkPriority = getTestNetworkPriority();
         assertEquals(
                 networkPriority,
                 VcnUnderlyingNetworkPriority.fromPersistableBundle(

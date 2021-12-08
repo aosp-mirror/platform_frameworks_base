@@ -846,6 +846,19 @@ public final class Parcel {
     }
 
     /**
+     * Verify there are no bytes left to be read on the Parcel.
+     *
+     * @throws BadParcelableException If the current position hasn't reached the end of the Parcel.
+     * When used over binder, this exception should propagate to the caller.
+     */
+    public void enforceNoDataAvail() {
+        final int n = dataAvail();
+        if (n > 0) {
+            throw new BadParcelableException("Parcel data not fully consumed, unread size: " + n);
+        }
+    }
+
+    /**
      * Writes the work source uid to the request headers.
      *
      * <p>It requires the headers to have been written/read already to replace the work source.
@@ -3646,7 +3659,14 @@ public final class Parcel {
      * list was {@code null}, {@code list} is cleared.
      *
      * @see #writeParcelableList(List, int)
+     *
+     * @deprecated Use the type-safer version {@link #readParcelableList(List, ClassLoader, Class)}
+     *      starting from Android {@link Build.VERSION_CODES#TIRAMISU}. Also consider changing the
+     *      format to use {@link #readTypedList(List, Parcelable.Creator)} if possible (eg. if the
+     *      items' class is final) since this is also more performant. Note that changing to the
+     *      latter also requires changing the writes.
      */
+    @Deprecated
     @NonNull
     public final <T extends Parcelable> List<T> readParcelableList(@NonNull List<T> list,
             @Nullable ClassLoader cl) {
@@ -4410,6 +4430,9 @@ public final class Parcel {
      * @return the Serializable object, or null if the Serializable name
      * wasn't found in the parcel.
      *
+     * Unlike {@link #readSerializable(ClassLoader, Class)}, it uses the nearest valid class loader
+     * up the execution stack to instantiate the Serializable object.
+     *
      * @deprecated Use the type-safer version {@link #readSerializable(ClassLoader, Class)} starting
      *       from Android {@link Build.VERSION_CODES#TIRAMISU}.
      */
@@ -4420,9 +4443,11 @@ public final class Parcel {
     }
 
     /**
-     * Same as {@link #readSerializable()} but accepts {@code loader} parameter
-     * as the primary classLoader for resolving the Serializable class; and {@code clazz} parameter
-     * as the required type.
+     * Same as {@link #readSerializable()} but accepts {@code loader} and {@code clazz} parameters.
+     *
+     * @param loader A ClassLoader from which to instantiate the Serializable object,
+     * or null for the default class loader.
+     * @param clazz The type of the object expected.
      *
      * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
      * is not an instance of that class or any of its children class or there there was an error
@@ -4432,7 +4457,8 @@ public final class Parcel {
     public <T extends Serializable> T readSerializable(@Nullable ClassLoader loader,
             @NonNull Class<T> clazz) {
         Objects.requireNonNull(clazz);
-        return readSerializableInternal(loader, clazz);
+        return readSerializableInternal(
+                loader == null ? getClass().getClassLoader() : loader, clazz);
     }
 
     /**

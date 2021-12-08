@@ -107,6 +107,26 @@ public final class TelephonyPermissions {
         }
     }
 
+
+    /**
+     * Check whether the caller (or self, if not processing an IPC) has non dangerous
+     * read phone state permission.
+     * @param context app context
+     * @param message detail message
+     * @return true if permission is granted, else false
+     */
+    public static boolean checkCallingOrSelfReadNonDangerousPhoneStateNoThrow(
+            Context context, String message) {
+        try {
+            context.enforcePermission(
+                    Manifest.permission.READ_BASIC_PHONE_STATE,
+                    Binder.getCallingPid(), Binder.getCallingUid(), message);
+            return true;
+        } catch (SecurityException se) {
+            return false;
+        }
+    }
+
     /**
      * Check whether the app with the given pid/uid can read phone state.
      *
@@ -542,6 +562,17 @@ public final class TelephonyPermissions {
 
         if (DBG) Log.d(LOG_TAG, "No modify permission, check carrier privilege next.");
         enforceCallingOrSelfCarrierPrivilege(context, subId, message);
+    }
+
+    /**
+     * Check if the caller (or self, if not processing an IPC) has ACCESS_LAST_KNOWN_CELL_ID
+     * permission
+     *
+     * @return true if caller has ACCESS_LAST_KNOWN_CELL_ID permission else false.
+     */
+    public static boolean checkLastKnownCellIdAccessPermission(Context context) {
+        return context.checkCallingOrSelfPermission("android.permission.ACCESS_LAST_KNOWN_CELL_ID")
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
