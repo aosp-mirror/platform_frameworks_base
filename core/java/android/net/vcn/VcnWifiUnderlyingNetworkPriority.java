@@ -79,7 +79,7 @@ public final class VcnWifiUnderlyingNetworkPriority extends VcnUnderlyingNetwork
         }
 
         final VcnWifiUnderlyingNetworkPriority rhs = (VcnWifiUnderlyingNetworkPriority) other;
-        return mSsid == rhs.mSsid;
+        return mSsid.equals(rhs.mSsid);
     }
 
     /** @hide */
