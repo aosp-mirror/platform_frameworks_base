@@ -33,7 +33,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout.LayoutParams;
-import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -94,7 +93,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private float mLastPanelFraction;
     private float mSquishinessFraction = 1;
     private boolean mQsDisabled;
-    private ImageView mQsDragHandler;
 
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final CommandQueue mCommandQueue;
@@ -205,7 +203,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mHeader = view.findViewById(R.id.header);
         mQSPanelController.setHeaderContainer(view.findViewById(R.id.header_text_container));
         mFooter = qsFragmentComponent.getQSFooter();
-        mQsDragHandler = view.findViewById(R.id.qs_drag_handle);
 
         mQsDetailDisplayer.setQsPanelController(mQSPanelController);
 
@@ -249,11 +246,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                     mQSPanelController.getMediaHost().getHostView().setAlpha(1.0f);
                     mQSAnimator.requestAnimatorUpdate();
                 });
-
-        mQsDragHandler.setOnClickListener(v -> {
-            Log.d(TAG, "drag handler clicked");
-            mCommandQueue.animateExpandSettingsPanel(null);
-        });
     }
 
     @Override
@@ -385,30 +377,26 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     private void updateQsState() {
-        final boolean expandVisually = mQsExpanded || mStackScrollerOverscrolling
+        final boolean expanded = mQsExpanded || mInSplitShade;
+        final boolean expandVisually = expanded || mStackScrollerOverscrolling
                 || mHeaderAnimating;
-        mQSPanelController.setExpanded(mQsExpanded);
-        mQSDetail.setExpanded(mQsExpanded);
+        mQSPanelController.setExpanded(expanded);
+        mQSDetail.setExpanded(expanded);
         boolean keyguardShowing = isKeyguardState();
-        mHeader.setVisibility((mQsExpanded || !keyguardShowing || mHeaderAnimating
+        mHeader.setVisibility((expanded || !keyguardShowing || mHeaderAnimating
                 || mShowCollapsedOnKeyguard)
                 ? View.VISIBLE
                 : View.INVISIBLE);
         mHeader.setExpanded((keyguardShowing && !mHeaderAnimating && !mShowCollapsedOnKeyguard)
-                || (mQsExpanded && !mStackScrollerOverscrolling), mQuickQSPanelController);
-        mFooter.setVisibility(!mQsDisabled && (mQsExpanded || !keyguardShowing || mHeaderAnimating
+                || (expanded && !mStackScrollerOverscrolling), mQuickQSPanelController);
+        mFooter.setVisibility(!mQsDisabled && (expanded || !keyguardShowing || mHeaderAnimating
                 || mShowCollapsedOnKeyguard)
                 ? View.VISIBLE
                 : View.INVISIBLE);
         mFooter.setExpanded((keyguardShowing && !mHeaderAnimating && !mShowCollapsedOnKeyguard)
-                || (mQsExpanded && !mStackScrollerOverscrolling));
+                || (expanded && !mStackScrollerOverscrolling));
         mQSPanelController.setVisibility(
                 !mQsDisabled && expandVisually ? View.VISIBLE : View.INVISIBLE);
-        mQsDragHandler.setVisibility((mQsExpanded || !keyguardShowing || mHeaderAnimating
-                || mShowCollapsedOnKeyguard)
-                && Utils.shouldUseSplitNotificationShade(getResources())
-                ? View.VISIBLE
-                : View.GONE);
     }
 
     private boolean isKeyguardState() {
@@ -418,7 +406,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     private void updateShowCollapsedOnKeyguard() {
-        boolean showCollapsed = mBypassController.getBypassEnabled() || mTransitioningToFullShade;
+        boolean showCollapsed = mBypassController.getBypassEnabled()
+                || (mTransitioningToFullShade && !mInSplitShade);
         if (showCollapsed != mShowCollapsedOnKeyguard) {
             mShowCollapsedOnKeyguard = showCollapsed;
             updateQsState();
@@ -498,6 +487,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void setInSplitShade(boolean inSplitShade) {
         mInSplitShade = inSplitShade;
         mQSAnimator.setTranslateWhileExpanding(inSplitShade);
+        updateShowCollapsedOnKeyguard();
+        updateQsState();
     }
 
     @Override
@@ -516,7 +507,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void setQsExpansion(float expansion, float panelExpansionFraction,
             float proposedTranslation, float squishinessFraction) {
         float headerTranslation = mTransitioningToFullShade ? 0 : proposedTranslation;
-        float progress = mTransitioningToFullShade ? mFullShadeProgress : panelExpansionFraction;
+        float progress = mTransitioningToFullShade || mState == StatusBarState.KEYGUARD
+                ? mFullShadeProgress : panelExpansionFraction;
         setAlphaAnimationProgress(mInSplitShade ? progress : 1);
         mContainer.setExpansion(expansion);
         final float translationScaleY = (mInSplitShade
