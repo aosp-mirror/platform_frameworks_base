@@ -394,10 +394,11 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                 int count = 0;
                 for (CachedBluetoothDevice device : devices) {
                     if (mController.getBondState(device) == BluetoothDevice.BOND_NONE) continue;
-                    final Item item = new Item();
-                    item.iconResId = com.android.internal.R.drawable.ic_qs_bluetooth;
-                    item.line1 = device.getName();
-                    item.tag = device;
+                    final Item item =
+                            new Item(
+                                    com.android.internal.R.drawable.ic_qs_bluetooth,
+                                    device.getName(),
+                                    device);
                     int state = device.getMaxConnectionState();
                     if (state == BluetoothProfile.STATE_CONNECTED) {
                         item.iconResId = R.drawable.ic_bluetooth_connected;

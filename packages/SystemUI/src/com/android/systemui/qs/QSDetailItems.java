@@ -259,6 +259,12 @@ public class QSDetailItems extends FrameLayout {
     }
 
     public static class Item {
+        public Item(int iconResId, CharSequence line1, Object tag) {
+            this.iconResId = iconResId;
+            this.line1 = line1;
+            this.tag = tag;
+        }
+
         public int iconResId;
         public QSTile.Icon icon;
         public Drawable overlay;
