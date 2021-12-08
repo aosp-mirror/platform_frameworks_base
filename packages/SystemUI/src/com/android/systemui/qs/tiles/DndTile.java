@@ -190,7 +190,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
                 case Settings.Secure.ZEN_DURATION_PROMPT:
                     mUiHandler.post(() -> {
                         Dialog dialog = makeZenModeDialog();
-                        SystemUIDialog.registerDismissListener(dialog);
                         if (view != null) {
                             mDialogLaunchAnimator.showFromView(dialog, view, false);
                         } else {
@@ -211,10 +210,12 @@ public class DndTile extends QSTileImpl<BooleanState> {
     }
 
     private Dialog makeZenModeDialog() {
-        AlertDialog dialog = new EnableZenModeDialog(mContext, R.style.Theme_SystemUI_Dialog)
-                .createDialog();
+        AlertDialog dialog = new EnableZenModeDialog(mContext, R.style.Theme_SystemUI_Dialog,
+                true /* cancelIsNeutral */).createDialog();
         SystemUIDialog.applyFlags(dialog);
         SystemUIDialog.setShowForAllUsers(dialog, true);
+        SystemUIDialog.registerDismissListener(dialog);
+        SystemUIDialog.setDialogSize(dialog);
         return dialog;
     }
 

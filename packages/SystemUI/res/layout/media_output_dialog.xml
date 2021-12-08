@@ -41,7 +41,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingStart="12dp"
-            android:background="@color/media_dialog_background"
             android:orientation="vertical">
             <ImageView
                 android:id="@+id/app_source_icon"
@@ -76,7 +75,6 @@
         android:id="@+id/device_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/media_dialog_background"
         android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView
@@ -91,18 +89,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginBottom="24dp"
-        android:layout_marginEnd="16dp"
-        android:background="@color/media_dialog_background"
+        android:layout_marginStart="@dimen/dialog_side_padding"
+        android:layout_marginEnd="@dimen/dialog_side_padding"
+        android:layout_marginBottom="@dimen/dialog_bottom_padding"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/stop"
-            style="@style/MediaOutputRoundedOutlinedButton"
+            style="@style/Widget.Dialog.Button.BorderButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="0dp"
             android:text="@string/keyboard_key_media_stop"
             android:visibility="gone"/>
 
@@ -113,10 +109,9 @@
 
         <Button
             android:id="@+id/done"
-            style="@style/MediaOutputRoundedButton"
+            style="@style/Widget.Dialog.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="0dp"
             android:text="@string/inline_done_button"/>
     </LinearLayout>
 </LinearLayout>

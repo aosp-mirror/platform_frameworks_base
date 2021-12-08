@@ -466,20 +466,6 @@
         <item name="android:colorBackground">@color/media_dialog_background</item>
     </style>
 
-    <style name="MediaOutputRoundedOutlinedButton" parent="@android:style/Widget.Material.Button">
-        <item name="android:background">@drawable/media_output_dialog_button_background</item>
-        <item name="android:textColor">@color/media_dialog_outlined_button_text</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
-    </style>
-
-    <style name="MediaOutputRoundedButton" parent="@android:style/Widget.Material.Button">
-        <item name="android:background">@drawable/media_output_dialog_solid_button_background</item>
-        <item name="android:textColor">@color/media_dialog_solid_button_text</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
-    </style>
-
     <style name="MediaOutputItemInactiveTitle">
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">@color/media_dialog_inactive_item_main_content</item>
@@ -912,13 +898,18 @@
         <item name="android:textAlignment">center</item>
     </style>
 
-    <style name="Widget.Dialog.Button" parent = "Theme.SystemUI.Dialog">
+
+    <style name="Widget" />
+    <style name="Widget.Dialog" />
+    <style name="Widget.Dialog.Button">
+        <item name="android:buttonCornerRadius">28dp</item>
         <item name="android:background">@drawable/qs_dialog_btn_filled</item>
         <item name="android:textColor">?androidprv:attr/textColorOnAccent</item>
         <item name="android:textSize">14sp</item>
         <item name="android:lineHeight">20sp</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
         <item name="android:stateListAnimator">@null</item>
+        <item name="android:minWidth">0dp</item>
     </style>
 
     <style name="Widget.Dialog.Button.BorderButton">

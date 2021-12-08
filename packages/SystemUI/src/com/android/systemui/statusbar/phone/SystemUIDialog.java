@@ -126,30 +126,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
      * the device configuration changes, and the result will be used to resize this dialog window.
      */
     protected int getWidth() {
-        boolean isOnTablet =
-                mContext.getResources().getConfiguration().smallestScreenWidthDp >= 600;
-        if (!isOnTablet) {
-            return ViewGroup.LayoutParams.MATCH_PARENT;
-        }
-
-        int flagValue = SystemProperties.getInt(FLAG_TABLET_DIALOG_WIDTH, 0);
-        if (flagValue == -1) {
-            // The width of bottom sheets (624dp).
-            return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 624,
-                    mContext.getResources().getDisplayMetrics()));
-        } else if (flagValue == -2) {
-            // The suggested small width for all dialogs (348dp)
-            return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 348,
-                    mContext.getResources().getDisplayMetrics()));
-        } else if (flagValue > 0) {
-            // Any given width.
-            return Math.round(
-                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, flagValue,
-                            mContext.getResources().getDisplayMetrics()));
-        } else {
-            // By default we use the same width as the notification shade in portrait mode (504dp).
-            return mContext.getResources().getDimensionPixelSize(R.dimen.large_dialog_width);
-        }
+        return getDefaultDialogWidth(mContext);
     }
 
     /**
@@ -157,7 +134,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
      * the device configuration changes, and the result will be used to resize this dialog window.
      */
     protected int getHeight() {
-        return ViewGroup.LayoutParams.WRAP_CONTENT;
+        return getDefaultDialogHeight();
     }
 
     @Override
@@ -265,6 +242,45 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             if (dismissAction != null) dismissAction.run();
         });
         dismissReceiver.register();
+    }
+
+    /** Set an appropriate size to {@code dialog} depending on the current configuration. */
+    public static void setDialogSize(Dialog dialog) {
+        // We need to create the dialog first, otherwise the size will be overridden when it is
+        // created.
+        dialog.create();
+        dialog.getWindow().setLayout(getDefaultDialogWidth(dialog.getContext()),
+                getDefaultDialogHeight());
+    }
+
+    private static int getDefaultDialogWidth(Context context) {
+        boolean isOnTablet = context.getResources().getConfiguration().smallestScreenWidthDp >= 600;
+        if (!isOnTablet) {
+            return ViewGroup.LayoutParams.MATCH_PARENT;
+        }
+
+        int flagValue = SystemProperties.getInt(FLAG_TABLET_DIALOG_WIDTH, 0);
+        if (flagValue == -1) {
+            // The width of bottom sheets (624dp).
+            return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 624,
+                    context.getResources().getDisplayMetrics()));
+        } else if (flagValue == -2) {
+            // The suggested small width for all dialogs (348dp)
+            return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 348,
+                    context.getResources().getDisplayMetrics()));
+        } else if (flagValue > 0) {
+            // Any given width.
+            return Math.round(
+                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, flagValue,
+                            context.getResources().getDisplayMetrics()));
+        } else {
+            // By default we use the same width as the notification shade in portrait mode (504dp).
+            return context.getResources().getDimensionPixelSize(R.dimen.large_dialog_width);
+        }
+    }
+
+    private static int getDefaultDialogHeight() {
+        return ViewGroup.LayoutParams.WRAP_CONTENT;
     }
 
     private static class DismissReceiver extends BroadcastReceiver {
