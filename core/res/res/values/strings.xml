@@ -1762,6 +1762,8 @@
     <string name="face_setup_notification_title">Set up Face Unlock</string>
     <!-- Contents of a notification that directs the user to set up face unlock by enrolling their face. [CHAR LIMIT=NONE] -->
     <string name="face_setup_notification_content">Unlock your phone by looking at it</string>
+    <!-- Error message indicating that the camera privacy sensor has been turned on [CHAR LIMIT=NONE] -->
+    <string name="face_sensor_privacy_enabled">To use Face Unlock, turn on <b>Camera access</b> in Settings > Privacy</string>
     <!-- Title of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
     <string name="fingerprint_setup_notification_title">Set up more ways to unlock</string>
     <!-- Contents of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
