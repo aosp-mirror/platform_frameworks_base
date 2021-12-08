@@ -204,4 +204,6 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public void logTrace(long timestamp, String where, long loggingTypes, String callingParams,
             int processId, long threadId, int callingUid, Bundle serializedCallingStackInBundle) {}
+
+    public void setAnimationScale(float scale) {}
 }

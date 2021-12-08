@@ -144,4 +144,6 @@ interface IAccessibilityServiceConnection {
     void onDoubleTap(int displayId);
 
     void onDoubleTapAndHold(int displayId);
+
+    void setAnimationScale(float scale);
 }

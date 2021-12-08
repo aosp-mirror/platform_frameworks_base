@@ -3074,6 +3074,7 @@ package android.accessibilityservice {
     method public void onSystemActionsChanged();
     method public final boolean performGlobalAction(int);
     method public void setAccessibilityFocusAppearance(int, @ColorInt int);
+    method public void setAnimationScale(float);
     method public boolean setCacheEnabled(boolean);
     method public void setGestureDetectionPassthroughRegion(int, @NonNull android.graphics.Region);
     method public final void setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo);
@@ -6949,6 +6950,7 @@ package android.app {
     method public boolean performGlobalAction(int);
     method public void revokeRuntimePermission(String, String);
     method public void revokeRuntimePermissionAsUser(String, String, android.os.UserHandle);
+    method public void setAnimationScale(float);
     method public void setOnAccessibilityEventListener(android.app.UiAutomation.OnAccessibilityEventListener);
     method public boolean setRotation(int);
     method public void setRunAsMonkey(boolean);
