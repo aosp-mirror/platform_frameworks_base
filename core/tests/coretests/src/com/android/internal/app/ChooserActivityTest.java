@@ -132,6 +132,8 @@ public class ChooserActivityTest {
         });
     }
 
+    private static final String TEST_MIME_TYPE = "application/TestType";
+
     private static final int CONTENT_PREVIEW_IMAGE = 1;
     private static final int CONTENT_PREVIEW_FILE = 2;
     private static final int CONTENT_PREVIEW_TEXT = 3;
@@ -778,7 +780,7 @@ public class ChooserActivityTest {
     @Test
     public void testOnCreateLogging() {
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
 
         MetricsLogger mockLogger = sOverrides.metricsLogger;
         ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
@@ -794,7 +796,7 @@ public class ChooserActivityTest {
         assertThat(logMakerCaptor
                 .getAllValues().get(0)
                 .getTaggedData(MetricsEvent.FIELD_SHARESHEET_MIMETYPE),
-                is("TestType"));
+                is(TEST_MIME_TYPE));
         assertThat(logMakerCaptor
                         .getAllValues().get(0)
                         .getSubtype(),
@@ -804,7 +806,7 @@ public class ChooserActivityTest {
     @Test
     public void testOnCreateLoggingFromWorkProfile() {
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
         sOverrides.alternateProfileSetting = MetricsEvent.MANAGED_PROFILE;
         MetricsLogger mockLogger = sOverrides.metricsLogger;
         ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
@@ -820,7 +822,7 @@ public class ChooserActivityTest {
         assertThat(logMakerCaptor
                         .getAllValues().get(0)
                         .getTaggedData(MetricsEvent.FIELD_SHARESHEET_MIMETYPE),
-                is("TestType"));
+                is(TEST_MIME_TYPE));
         assertThat(logMakerCaptor
                         .getAllValues().get(0)
                         .getSubtype(),
@@ -1476,7 +1478,7 @@ public class ChooserActivityTest {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
         markWorkProfileUserAvailable();
 
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
@@ -1490,7 +1492,7 @@ public class ChooserActivityTest {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
 
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
         waitForIdle();
@@ -1512,7 +1514,7 @@ public class ChooserActivityTest {
                 workProfileTargets);
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
         markWorkProfileUserAvailable();
 
         final ChooserWrapperActivity activity =
@@ -1538,7 +1540,7 @@ public class ChooserActivityTest {
                 createResolvedComponentsForTest(workProfileTargets);
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
 
         final ChooserWrapperActivity activity =
                 mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
@@ -1561,7 +1563,7 @@ public class ChooserActivityTest {
                 createResolvedComponentsForTest(workProfileTargets);
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
         ResolveInfo[] chosen = new ResolveInfo[1];
         sOverrides.onSafelyStartCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
@@ -1597,7 +1599,7 @@ public class ChooserActivityTest {
         sOverrides.hasCrossProfileIntents = false;
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
 
         final ChooserWrapperActivity activity =
                 mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
@@ -1623,7 +1625,7 @@ public class ChooserActivityTest {
         sOverrides.isQuietModeEnabled = true;
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
 
         ResolverActivity.ENABLE_TABBED_VIEW = true;
         final ChooserWrapperActivity activity =
@@ -1649,7 +1651,7 @@ public class ChooserActivityTest {
                 createResolvedComponentsForTest(0);
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
 
         final ChooserWrapperActivity activity =
                 mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
@@ -1676,7 +1678,7 @@ public class ChooserActivityTest {
         sOverrides.isQuietModeEnabled = true;
         sOverrides.hasCrossProfileIntents = false;
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
 
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
         waitForIdle();
@@ -1701,7 +1703,7 @@ public class ChooserActivityTest {
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         sOverrides.isQuietModeEnabled = true;
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
 
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
         waitForIdle();
@@ -1959,7 +1961,7 @@ public class ChooserActivityTest {
                 createResolvedComponentsForTest(workProfileTargets);
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
 
         final ChooserWrapperActivity activity =
                 mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
@@ -1979,7 +1981,7 @@ public class ChooserActivityTest {
         // second one should be SHARESHEET_STARTED event
         assertThat(logger.get(1).atomId, is(FrameworkStatsLog.SHARESHEET_STARTED));
         assertThat(logger.get(1).intent, is(Intent.ACTION_SEND));
-        assertThat(logger.get(1).mimeType, is("TestType"));
+        assertThat(logger.get(1).mimeType, is(TEST_MIME_TYPE));
         assertThat(logger.get(1).packageName, is("com.android.frameworks.coretests"));
         assertThat(logger.get(1).appProvidedApp, is(0));
         assertThat(logger.get(1).appProvidedDirect, is(0));
@@ -2019,7 +2021,7 @@ public class ChooserActivityTest {
                 Mockito.isA(List.class)))
                 .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
         ResolveInfo[] chosen = new ResolveInfo[1];
         sOverrides.onSafelyStartCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
@@ -2043,7 +2045,7 @@ public class ChooserActivityTest {
                 Mockito.isA(List.class)))
                 .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
         ResolveInfo[] chosen = new ResolveInfo[1];
         sOverrides.onSafelyStartCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
@@ -2244,7 +2246,7 @@ public class ChooserActivityTest {
             return null;
         };
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
 
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
         waitForIdle();
@@ -2275,7 +2277,7 @@ public class ChooserActivityTest {
             return null;
         };
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
 
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
         waitForIdle();
@@ -2299,7 +2301,7 @@ public class ChooserActivityTest {
                 createResolvedComponentsForTest(3);
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
         sOverrides.isWorkProfileUserRunning = false;
 
         final ChooserWrapperActivity activity =
@@ -2331,7 +2333,7 @@ public class ChooserActivityTest {
             return null;
         };
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
 
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
         waitForIdle();
@@ -2355,7 +2357,7 @@ public class ChooserActivityTest {
                 createResolvedComponentsForTest(3);
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendTextIntent();
-        sendIntent.setType("TestType");
+        sendIntent.setType(TEST_MIME_TYPE);
         sOverrides.isWorkProfileUserUnlocked = false;
 
         final ChooserWrapperActivity activity =
