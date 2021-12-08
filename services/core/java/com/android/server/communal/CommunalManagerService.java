@@ -84,6 +84,10 @@ public final class CommunalManagerService extends SystemService {
                 @Override
                 public Intent intercept(ActivityInterceptorInfo info) {
                     if (!shouldIntercept(info.aInfo)) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "Activity allowed, not intercepting: "
+                                    + info.aInfo.getComponentName());
+                        }
                         return null;
                     }
 
@@ -188,8 +192,17 @@ public final class CommunalManagerService extends SystemService {
             return true;
         }
 
-        return isChangeEnabled(ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT, appInfo)
-                && getUserEnabledApps().contains(appInfo.packageName);
+        if (!isChangeEnabled(ALLOW_COMMUNAL_MODE_WITH_USER_CONSENT, appInfo)) {
+            if (DEBUG) Slog.d(TAG, "App is not allowlisted: " + appInfo.packageName);
+            return false;
+        }
+
+        if (!getUserEnabledApps().contains(appInfo.packageName)) {
+            if (DEBUG) Slog.d(TAG, "App does not have user consent: " + appInfo.packageName);
+            return false;
+        }
+
+        return true;
     }
 
     private boolean isActiveDream(ApplicationInfo appInfo) {
@@ -219,6 +232,10 @@ public final class CommunalManagerService extends SystemService {
         final boolean showWhenLocked =
                 (activityInfo.flags & ActivityInfo.FLAG_SHOW_WHEN_LOCKED) != 0;
         if (!showWhenLocked) {
+            if (DEBUG) {
+                Slog.d(TAG, "Activity does not contain showWhenLocked attribute: "
+                        + activityInfo.getComponentName());
+            }
             return true;
         }
 
