@@ -67,7 +67,6 @@
 
         <ProgressBar
             android:id="@+id/wifi_searching_progress"
-            android:indeterminate="true"
             android:layout_width="340dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"

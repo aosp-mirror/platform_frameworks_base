@@ -78,7 +78,7 @@ public class InternetDialog extends SystemUIDialog implements
     private static final String TAG = "InternetDialog";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    static final long PROGRESS_DELAY_MS = 2000L;
+    static final long PROGRESS_DELAY_MS = 1500L;
 
     private final Handler mHandler;
     private final Executor mBackgroundExecutor;
@@ -549,9 +549,13 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     private void setProgressBarVisible(boolean visible) {
+        if (mIsProgressBarVisible == visible) {
+            return;
+        }
         mIsProgressBarVisible = visible;
-        mProgressBar.setVisibility(mIsProgressBarVisible ? View.VISIBLE : View.GONE);
-        mDivider.setVisibility(mIsProgressBarVisible ? View.GONE : View.VISIBLE);
+        mProgressBar.setVisibility(visible ? View.VISIBLE : View.GONE);
+        mProgressBar.setIndeterminate(visible);
+        mDivider.setVisibility(visible ? View.GONE : View.VISIBLE);
         mInternetDialogSubTitle.setText(getSubtitleText());
     }
 
