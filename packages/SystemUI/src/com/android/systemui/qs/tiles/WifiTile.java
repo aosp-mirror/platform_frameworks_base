@@ -454,10 +454,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
                 items = new Item[mAccessPoints.length];
                 for (int i = 0; i < mAccessPoints.length; i++) {
                     final WifiEntry ap = mAccessPoints[i];
-                    final Item item = new Item();
-                    item.tag = ap;
-                    item.iconResId = mWifiController.getIcon(ap);
-                    item.line1 = ap.getSsid();
+                    final Item item = new Item(mWifiController.getIcon(ap), ap.getSsid(), ap);
                     item.line2 = ap.getSummary();
                     item.icon2 = ap.getSecurity() != AccessPoint.SECURITY_NONE
                             ? R.drawable.qs_ic_wifi_lock
