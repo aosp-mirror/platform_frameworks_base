@@ -18,49 +18,51 @@ package android.media.tv;
 
 import android.annotation.NonNull;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 
 /** @hide */
-public class TsRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.TS;
+public class DsmccResponse extends BroadcastInfoResponse implements Parcelable {
+    public static final int responseType = BroadcastInfoType.DSMCC;
 
-    public static final @NonNull Parcelable.Creator<TsRequest> CREATOR =
-            new Parcelable.Creator<TsRequest>() {
+    public static final @NonNull Parcelable.Creator<DsmccResponse> CREATOR =
+            new Parcelable.Creator<DsmccResponse>() {
                 @Override
-                public TsRequest createFromParcel(Parcel source) {
+                public DsmccResponse createFromParcel(Parcel source) {
                     source.readInt();
                     return createFromParcelBody(source);
                 }
 
                 @Override
-                public TsRequest[] newArray(int size) {
-                    return new TsRequest[size];
+                public DsmccResponse[] newArray(int size) {
+                    return new DsmccResponse[size];
                 }
             };
 
-    private final int mTsPid;
+    private final ParcelFileDescriptor mFile;
 
-    public static TsRequest createFromParcelBody(Parcel in) {
-        return new TsRequest(in);
+    public static DsmccResponse createFromParcelBody(Parcel in) {
+        return new DsmccResponse(in);
     }
 
-    public TsRequest(int requestId, int option, int tsPid) {
-        super(requestType, requestId, option);
-        mTsPid = tsPid;
+    public DsmccResponse(int requestId, int sequence, int responseResult,
+            ParcelFileDescriptor file) {
+        super(responseType, requestId, sequence, responseResult);
+        mFile = file;
     }
 
-    protected TsRequest(Parcel source) {
-        super(requestType, source);
-        mTsPid = source.readInt();
+    protected DsmccResponse(Parcel source) {
+        super(responseType, source);
+        mFile = source.readFileDescriptor();
     }
 
-    public int getTsPid() {
-        return mTsPid;
+    public ParcelFileDescriptor getFile() {
+        return mFile;
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeInt(mTsPid);
+        mFile.writeToParcel(dest, flags);
     }
 }

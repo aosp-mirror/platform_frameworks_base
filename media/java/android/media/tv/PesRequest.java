@@ -21,46 +21,54 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /** @hide */
-public class TsRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.TS;
+public class PesRequest extends BroadcastInfoRequest implements Parcelable {
+    public static final int requestType = BroadcastInfoType.PES;
 
-    public static final @NonNull Parcelable.Creator<TsRequest> CREATOR =
-            new Parcelable.Creator<TsRequest>() {
+    public static final @NonNull Parcelable.Creator<PesRequest> CREATOR =
+            new Parcelable.Creator<PesRequest>() {
                 @Override
-                public TsRequest createFromParcel(Parcel source) {
+                public PesRequest createFromParcel(Parcel source) {
                     source.readInt();
                     return createFromParcelBody(source);
                 }
 
                 @Override
-                public TsRequest[] newArray(int size) {
-                    return new TsRequest[size];
+                public PesRequest[] newArray(int size) {
+                    return new PesRequest[size];
                 }
             };
 
     private final int mTsPid;
+    private final int mStreamId;
 
-    public static TsRequest createFromParcelBody(Parcel in) {
-        return new TsRequest(in);
+    public static PesRequest createFromParcelBody(Parcel in) {
+        return new PesRequest(in);
     }
 
-    public TsRequest(int requestId, int option, int tsPid) {
+    public PesRequest(int requestId, int option, int tsPid, int streamId) {
         super(requestType, requestId, option);
         mTsPid = tsPid;
+        mStreamId = streamId;
     }
 
-    protected TsRequest(Parcel source) {
+    protected PesRequest(Parcel source) {
         super(requestType, source);
         mTsPid = source.readInt();
+        mStreamId = source.readInt();
     }
 
     public int getTsPid() {
         return mTsPid;
     }
 
+    public int getStreamId() {
+        return mStreamId;
+    }
+
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(mTsPid);
+        dest.writeInt(mStreamId);
     }
 }

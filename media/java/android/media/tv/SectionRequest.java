@@ -21,46 +21,62 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /** @hide */
-public class TsRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.TS;
+public class SectionRequest extends BroadcastInfoRequest implements Parcelable {
+    public static final int requestType = BroadcastInfoType.SECTION;
 
-    public static final @NonNull Parcelable.Creator<TsRequest> CREATOR =
-            new Parcelable.Creator<TsRequest>() {
+    public static final @NonNull Parcelable.Creator<SectionRequest> CREATOR =
+            new Parcelable.Creator<SectionRequest>() {
                 @Override
-                public TsRequest createFromParcel(Parcel source) {
+                public SectionRequest createFromParcel(Parcel source) {
                     source.readInt();
                     return createFromParcelBody(source);
                 }
 
                 @Override
-                public TsRequest[] newArray(int size) {
-                    return new TsRequest[size];
+                public SectionRequest[] newArray(int size) {
+                    return new SectionRequest[size];
                 }
             };
 
     private final int mTsPid;
+    private final int mTableId;
+    private final int mVersion;
 
-    public static TsRequest createFromParcelBody(Parcel in) {
-        return new TsRequest(in);
+    public static SectionRequest createFromParcelBody(Parcel in) {
+        return new SectionRequest(in);
     }
 
-    public TsRequest(int requestId, int option, int tsPid) {
+    public SectionRequest(int requestId, int option, int tsPid, int tableId, int version) {
         super(requestType, requestId, option);
         mTsPid = tsPid;
+        mTableId = tableId;
+        mVersion = version;
     }
 
-    protected TsRequest(Parcel source) {
+    protected SectionRequest(Parcel source) {
         super(requestType, source);
         mTsPid = source.readInt();
+        mTableId = source.readInt();
+        mVersion = source.readInt();
     }
 
     public int getTsPid() {
         return mTsPid;
     }
 
+    public int getTableId() {
+        return mTableId;
+    }
+
+    public int getVersion() {
+        return mVersion;
+    }
+
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(mTsPid);
+        dest.writeInt(mTableId);
+        dest.writeInt(mVersion);
     }
 }

@@ -21,46 +21,46 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /** @hide */
-public class TsRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.TS;
+public class PesResponse extends BroadcastInfoResponse implements Parcelable {
+    public static final int responseType = BroadcastInfoType.PES;
 
-    public static final @NonNull Parcelable.Creator<TsRequest> CREATOR =
-            new Parcelable.Creator<TsRequest>() {
+    public static final @NonNull Parcelable.Creator<PesResponse> CREATOR =
+            new Parcelable.Creator<PesResponse>() {
                 @Override
-                public TsRequest createFromParcel(Parcel source) {
+                public PesResponse createFromParcel(Parcel source) {
                     source.readInt();
                     return createFromParcelBody(source);
                 }
 
                 @Override
-                public TsRequest[] newArray(int size) {
-                    return new TsRequest[size];
+                public PesResponse[] newArray(int size) {
+                    return new PesResponse[size];
                 }
             };
 
-    private final int mTsPid;
+    private final String mSharedFilterToken;
 
-    public static TsRequest createFromParcelBody(Parcel in) {
-        return new TsRequest(in);
+    public static PesResponse createFromParcelBody(Parcel in) {
+        return new PesResponse(in);
     }
 
-    public TsRequest(int requestId, int option, int tsPid) {
-        super(requestType, requestId, option);
-        mTsPid = tsPid;
+    public PesResponse(int requestId, int sequence, int responseResult, String sharedFilterToken) {
+        super(responseType, requestId, sequence, responseResult);
+        mSharedFilterToken = sharedFilterToken;
     }
 
-    protected TsRequest(Parcel source) {
-        super(requestType, source);
-        mTsPid = source.readInt();
+    protected PesResponse(Parcel source) {
+        super(responseType, source);
+        mSharedFilterToken = source.readString();
     }
 
-    public int getTsPid() {
-        return mTsPid;
+    public String getSharedFilterToken() {
+        return mSharedFilterToken;
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeInt(mTsPid);
+        dest.writeString(mSharedFilterToken);
     }
 }

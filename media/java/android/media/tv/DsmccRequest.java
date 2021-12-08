@@ -17,50 +17,53 @@
 package android.media.tv;
 
 import android.annotation.NonNull;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /** @hide */
-public class TsRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.TS;
+public class DsmccRequest extends BroadcastInfoRequest implements Parcelable {
+    public static final int requestType = BroadcastInfoType.DSMCC;
 
-    public static final @NonNull Parcelable.Creator<TsRequest> CREATOR =
-            new Parcelable.Creator<TsRequest>() {
+    public static final @NonNull Parcelable.Creator<DsmccRequest> CREATOR =
+            new Parcelable.Creator<DsmccRequest>() {
                 @Override
-                public TsRequest createFromParcel(Parcel source) {
+                public DsmccRequest createFromParcel(Parcel source) {
                     source.readInt();
                     return createFromParcelBody(source);
                 }
 
                 @Override
-                public TsRequest[] newArray(int size) {
-                    return new TsRequest[size];
+                public DsmccRequest[] newArray(int size) {
+                    return new DsmccRequest[size];
                 }
             };
 
-    private final int mTsPid;
+    private final Uri mUri;
 
-    public static TsRequest createFromParcelBody(Parcel in) {
-        return new TsRequest(in);
+    public static DsmccRequest createFromParcelBody(Parcel in) {
+        return new DsmccRequest(in);
     }
 
-    public TsRequest(int requestId, int option, int tsPid) {
+    public DsmccRequest(int requestId, int option, Uri uri) {
         super(requestType, requestId, option);
-        mTsPid = tsPid;
+        mUri = uri;
     }
 
-    protected TsRequest(Parcel source) {
+    protected DsmccRequest(Parcel source) {
         super(requestType, source);
-        mTsPid = source.readInt();
+        String uriString = source.readString();
+        mUri = uriString == null ? null : Uri.parse(uriString);
     }
 
-    public int getTsPid() {
-        return mTsPid;
+    public Uri getUri() {
+        return mUri;
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeInt(mTsPid);
+        String uriString = mUri == null ? null : mUri.toString();
+        dest.writeString(uriString);
     }
 }
