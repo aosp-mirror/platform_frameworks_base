@@ -447,12 +447,17 @@ public class NavigationBarView extends FrameLayout implements
         mRegionSamplingHelper.setWindowHasBlurs(hasBlurs);
     }
 
-    void onTransientStateChanged(boolean isTransient) {
+    void onTransientStateChanged(boolean isTransient, boolean isGestureOnSystemBar) {
         mEdgeBackGestureHandler.onNavBarTransientStateChanged(isTransient);
 
         // The visibility of the navigation bar buttons is dependent on the transient state of
         // the navigation bar.
         if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
+            // Always allow the overlay if in non-gestural nav mode, otherwise, only allow showing
+            // the overlay if the user is swiping directly over a system bar
+            boolean allowNavBarOverlay = !QuickStepContract.isGesturalMode(mNavBarMode)
+                    || isGestureOnSystemBar;
+            isTransient = isTransient && allowNavBarOverlay;
             mNavBarOverlayController.setButtonState(isTransient, /* force */ false);
         }
     }
