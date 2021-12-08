@@ -141,6 +141,10 @@ fun FlickerTestParameter.statusBarLayerRotatesScales() {
  *
  * @param originalLayer Layer that should be visible at the start
  * @param newLayer Layer that should be visible at the end
+ * @param ignoreEntriesWithRotationLayer If entries with a visible rotation layer should be ignored
+ *      when checking the transition. If true we will not fail the assertion if a rotation layer is
+ *      visible to fill the gap between the [originalLayer] being visible and the [newLayer] being
+ *      visible.
  * @param ignoreSnapshot If the snapshot layer should be ignored during the transition
  *     (useful mostly for app launch)
  * @param ignoreSplashscreen If the splashscreen layer should be ignored during the transition.
@@ -150,20 +154,23 @@ fun FlickerTestParameter.statusBarLayerRotatesScales() {
 fun FlickerTestParameter.replacesLayer(
     originalLayer: FlickerComponentName,
     newLayer: FlickerComponentName,
+    ignoreEntriesWithRotationLayer: Boolean = false,
     ignoreSnapshot: Boolean = false,
     ignoreSplashscreen: Boolean = true
 ) {
     assertLayers {
         val assertion = this.isVisible(originalLayer)
-        if (ignoreSnapshot || ignoreSplashscreen) {
-            assertion.then()
+
+        if (ignoreEntriesWithRotationLayer) {
+            assertion.then().isVisible(FlickerComponentName.ROTATION, isOptional = true)
         }
         if (ignoreSnapshot) {
-            assertion.isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
+            assertion.then().isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
         }
         if (ignoreSplashscreen) {
-            assertion.isSplashScreenVisibleFor(newLayer, isOptional = true)
+            assertion.then().isSplashScreenVisibleFor(newLayer, isOptional = true)
         }
+
         assertion.then().isVisible(newLayer)
     }
 
