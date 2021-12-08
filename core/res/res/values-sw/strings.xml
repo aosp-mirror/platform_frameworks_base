@@ -1413,6 +1413,7 @@
     <string name="deny" msgid="6632259981847676572">"Kataza"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Idhini imeitishwa"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Idhini imeombwa\nya akaunti<xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> imeombwa ruhusa\nkwenye akaunti ya <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Unatumia programu hii nje ya wasifu wako wa kazini"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Unatumia programu hii kwenye wasifu wako wa kazini"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Mbinu ya uingizaji"</string>
