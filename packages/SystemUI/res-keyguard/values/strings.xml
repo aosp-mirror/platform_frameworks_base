@@ -219,6 +219,9 @@
     <!-- Face hint message when finger was not recognized. [CHAR LIMIT=20] -->
     <string name="kg_face_not_recognized">Not recognized</string>
 
+     <!-- Error message indicating that the camera privacy sensor has been turned on [CHAR LIMIT=NONE] -->
+    <string name="kg_face_sensor_privacy_enabled">To use Face Unlock, turn on <b>Camera access</b> in Settings > Privacy</string>
+
     <!-- Instructions telling the user remaining times when enter SIM PIN view.  -->
     <plurals name="kg_password_default_pin_message">
         <item quantity="one">Enter SIM PIN. You have <xliff:g id="number">%d</xliff:g> remaining
