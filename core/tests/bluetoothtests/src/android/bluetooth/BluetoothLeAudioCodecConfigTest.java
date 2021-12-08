@@ -45,7 +45,6 @@ public class BluetoothLeAudioCodecConfigTest extends TestCase {
                 assertEquals("INVALID CODEC", leAudioCodecConfig.getCodecName());
             }
 
-            assertEquals(1, leAudioCodecConfig.getMaxCodecType());
             assertEquals(codecType, leAudioCodecConfig.getCodecType());
         }
     }
