@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.vcn.VcnUnderlyingNetworkPriority;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
 
@@ -28,8 +29,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
+import com.android.server.vcn.VcnContext;
 
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 
 /**
@@ -73,22 +76,64 @@ public class UnderlyingNetworkRecord {
     }
 
     static Comparator<UnderlyingNetworkRecord> getComparator(
+            VcnContext vcnContext,
+            LinkedHashSet<VcnUnderlyingNetworkPriority> underlyingNetworkPriorities,
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
             PersistableBundle carrierConfig) {
         return (left, right) -> {
-            return Integer.compare(
+            final int leftIndex =
                     NetworkPriorityClassifier.calculatePriorityClass(
-                            left, subscriptionGroup, snapshot, currentlySelected, carrierConfig),
+                            vcnContext,
+                            left,
+                            underlyingNetworkPriorities,
+                            subscriptionGroup,
+                            snapshot,
+                            currentlySelected,
+                            carrierConfig);
+            final int rightIndex =
                     NetworkPriorityClassifier.calculatePriorityClass(
-                            right, subscriptionGroup, snapshot, currentlySelected, carrierConfig));
+                            vcnContext,
+                            right,
+                            underlyingNetworkPriorities,
+                            subscriptionGroup,
+                            snapshot,
+                            currentlySelected,
+                            carrierConfig);
+
+            // In the case of networks in the same priority class, prioritize based on other
+            // criteria (eg. actively selected network, link metrics, etc)
+            if (leftIndex == rightIndex) {
+                // TODO: Improve the strategy of network selection when both UnderlyingNetworkRecord
+                // fall into the same priority class.
+                if (isSelected(left, currentlySelected)) {
+                    return -1;
+                }
+                if (isSelected(left, currentlySelected)) {
+                    return 1;
+                }
+            }
+            return Integer.compare(leftIndex, rightIndex);
         };
+    }
+
+    private static boolean isSelected(
+            UnderlyingNetworkRecord recordToCheck, UnderlyingNetworkRecord currentlySelected) {
+        if (currentlySelected == null) {
+            return false;
+        }
+        if (currentlySelected.network == recordToCheck.network) {
+            return true;
+        }
+        return false;
     }
 
     /** Dumps the state of this record for logging and debugging purposes. */
     void dump(
+            VcnContext vcnContext,
             IndentingPrintWriter pw,
+            LinkedHashSet<VcnUnderlyingNetworkPriority> underlyingNetworkPriorities,
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
@@ -96,15 +141,17 @@ public class UnderlyingNetworkRecord {
         pw.println("UnderlyingNetworkRecord:");
         pw.increaseIndent();
 
-        final int priorityClass =
+        final int priorityIndex =
                 NetworkPriorityClassifier.calculatePriorityClass(
-                        this, subscriptionGroup, snapshot, currentlySelected, carrierConfig);
-        pw.println(
-                "Priority class: "
-                        + NetworkPriorityClassifier.priorityClassToString(priorityClass)
-                        + " ("
-                        + priorityClass
-                        + ")");
+                        vcnContext,
+                        this,
+                        underlyingNetworkPriorities,
+                        subscriptionGroup,
+                        snapshot,
+                        currentlySelected,
+                        carrierConfig);
+
+        pw.println("Priority index:" + priorityIndex);
         pw.println("mNetwork: " + network);
         pw.println("mNetworkCapabilities: " + networkCapabilities);
         pw.println("mLinkProperties: " + linkProperties);
