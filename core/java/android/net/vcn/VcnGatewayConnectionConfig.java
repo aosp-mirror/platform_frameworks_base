@@ -420,6 +420,7 @@ public final class VcnGatewayConnectionConfig {
                 mGatewayConnectionName,
                 mTunnelConnectionParams,
                 mExposedCapabilities,
+                mUnderlyingNetworkPriorities,
                 Arrays.hashCode(mRetryIntervalsMs),
                 mMaxMtu);
     }
@@ -434,6 +435,7 @@ public final class VcnGatewayConnectionConfig {
         return mGatewayConnectionName.equals(rhs.mGatewayConnectionName)
                 && mTunnelConnectionParams.equals(rhs.mTunnelConnectionParams)
                 && mExposedCapabilities.equals(rhs.mExposedCapabilities)
+                && mUnderlyingNetworkPriorities.equals(rhs.mUnderlyingNetworkPriorities)
                 && Arrays.equals(mRetryIntervalsMs, rhs.mRetryIntervalsMs)
                 && mMaxMtu == rhs.mMaxMtu;
     }

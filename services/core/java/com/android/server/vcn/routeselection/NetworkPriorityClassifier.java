@@ -226,9 +226,9 @@ class NetworkPriorityClassifier {
                         .getSystemService(TelephonyManager.class)
                         .createForSubscriptionId(subId);
 
-        if (!networkPriority.getAllowedPlmnIds().isEmpty()) {
+        if (!networkPriority.getAllowedOperatorPlmnIds().isEmpty()) {
             final String plmnId = subIdSpecificTelephonyMgr.getNetworkOperator();
-            if (!networkPriority.getAllowedPlmnIds().contains(plmnId)) {
+            if (!networkPriority.getAllowedOperatorPlmnIds().contains(plmnId)) {
                 return false;
             }
         }
