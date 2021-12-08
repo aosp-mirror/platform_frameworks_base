@@ -431,7 +431,7 @@ public class ActivityOptions {
     private boolean mOverrideTaskTransition;
     private String mSplashScreenThemeResName;
     @SplashScreen.SplashScreenStyle
-    private int mSplashScreenStyle;
+    private int mSplashScreenStyle = SplashScreen.SPLASH_SCREEN_STYLE_UNDEFINED;
     private boolean mRemoveWithTaskOrganizer;
     private boolean mLaunchedFromBubble;
     private boolean mTransientLaunch;
