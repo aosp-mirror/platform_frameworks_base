@@ -883,11 +883,13 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             mConnectedEntry = null;
             mWifiEntriesCount = 0;
             if (mCallback != null) {
-                mCallback.onAccessPointsChanged(null /* wifiEntries */, null /* connectedEntry */);
+                mCallback.onAccessPointsChanged(null /* wifiEntries */, null /* connectedEntry */,
+                        false /* hasMoreEntry */);
             }
             return;
         }
 
+        boolean hasMoreEntry = false;
         int count = MAX_WIFI_ENTRY_COUNT;
         if (mHasEthernet) {
             count -= 1;
@@ -895,8 +897,11 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         if (hasActiveSubId() || isCarrierNetworkActive()) {
             count -= 1;
         }
-        if (count > accessPoints.size()) {
-            count = accessPoints.size();
+        final int wifiTotalCount = accessPoints.size();
+        if (count > wifiTotalCount) {
+            count = wifiTotalCount;
+        } else if (count < wifiTotalCount) {
+            hasMoreEntry = true;
         }
 
         WifiEntry connectedEntry = null;
@@ -913,7 +918,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mWifiEntriesCount = wifiEntries.size();
 
         if (mCallback != null) {
-            mCallback.onAccessPointsChanged(wifiEntries, mConnectedEntry);
+            mCallback.onAccessPointsChanged(wifiEntries, mConnectedEntry, hasMoreEntry);
         }
     }
 
@@ -1064,7 +1069,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         void dismissDialog();
 
         void onAccessPointsChanged(@Nullable List<WifiEntry> wifiEntries,
-                @Nullable WifiEntry connectedEntry);
+                @Nullable WifiEntry connectedEntry, boolean hasMoreEntry);
     }
 
     void makeOverlayToast(int stringId) {
