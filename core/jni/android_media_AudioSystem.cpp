@@ -2282,10 +2282,8 @@ android_media_AudioSystem_getMicrophones(JNIEnv *env, jobject thiz, jobject jMic
     return jStatus;
 }
 
-static jint
-android_media_AudioSystem_getHwOffloadEncodingFormatsSupportedForA2DP(
-                        JNIEnv *env, jobject thiz, jobject jEncodingFormatList)
-{
+static jint android_media_AudioSystem_getHwOffloadFormatsSupportedForBluetoothMedia(
+        JNIEnv *env, jobject thiz, jint deviceType, jobject jEncodingFormatList) {
     ALOGV("%s", __FUNCTION__);
     jint jStatus = AUDIO_JAVA_SUCCESS;
     if (!env->IsInstanceOf(jEncodingFormatList, gArrayListClass)) {
@@ -2293,8 +2291,10 @@ android_media_AudioSystem_getHwOffloadEncodingFormatsSupportedForA2DP(
         return (jint)AUDIO_JAVA_BAD_VALUE;
     }
     std::vector<audio_format_t> encodingFormats;
-    status_t status = AudioSystem::getHwOffloadEncodingFormatsSupportedForA2DP(
-                          &encodingFormats);
+    status_t status =
+            AudioSystem::getHwOffloadFormatsSupportedForBluetoothMedia(static_cast<audio_devices_t>(
+                                                                               deviceType),
+                                                                       &encodingFormats);
     if (status != NO_ERROR) {
         ALOGE("%s: error %d", __FUNCTION__, status);
         jStatus = nativeToJavaStatus(status);
@@ -2873,8 +2873,8 @@ static const JNINativeMethod gMethods[] =
          {"setA11yServicesUids", "([I)I", (void *)android_media_AudioSystem_setA11yServicesUids},
          {"isHapticPlaybackSupported", "()Z",
           (void *)android_media_AudioSystem_isHapticPlaybackSupported},
-         {"getHwOffloadEncodingFormatsSupportedForA2DP", "(Ljava/util/ArrayList;)I",
-          (void *)android_media_AudioSystem_getHwOffloadEncodingFormatsSupportedForA2DP},
+         {"getHwOffloadFormatsSupportedForBluetoothMedia", "(ILjava/util/ArrayList;)I",
+          (void *)android_media_AudioSystem_getHwOffloadFormatsSupportedForBluetoothMedia},
          {"setSupportedSystemUsages", "([I)I",
           (void *)android_media_AudioSystem_setSupportedSystemUsages},
          {"setAllowedCapturePolicy", "(II)I",
